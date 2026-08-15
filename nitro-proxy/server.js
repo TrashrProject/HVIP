@@ -6,11 +6,23 @@ const WS_PORT = Number(process.env.NITRO_WS_PORT || 2097);
 const TCP_HOST = process.env.EMU_HOST || '127.0.0.1';
 const TCP_PORT = Number(process.env.EMU_PORT || 2021);
 const MAX_PACKET = 8 * 1024 * 1024;
+const TRACE = process.env.NITRO_TRACE !== '0';
 
 const wss = new WebSocketServer({ host: WS_HOST, port: WS_PORT, perMessageDeflate: false });
 
 console.log(`[NitroProxy] Listening on ws://${WS_HOST}:${WS_PORT}/`);
 console.log(`[NitroProxy] Forwarding to tcp://${TCP_HOST}:${TCP_PORT}`);
+console.log(`[NitroProxy] Packet trace ${TRACE ? 'enabled' : 'disabled'}`);
+
+function describePacket(direction, buffer) {
+  if (!TRACE || !buffer || buffer.length < 6) return;
+  try {
+    const declared = buffer.readUInt32BE(0);
+    const header = buffer.readUInt16BE(4);
+    const preview = buffer.subarray(0, Math.min(buffer.length, 24)).toString('hex').match(/.{1,2}/g).join(' ');
+    console.log(`[TRACE ${direction}] header=${header} payload=${declared} bytes=${buffer.length} hex=${preview}`);
+  } catch (_) {}
+}
 
 wss.on('connection', (ws, req) => {
   const remote = req.socket.remoteAddress || 'unknown';
@@ -31,6 +43,7 @@ wss.on('connection', (ws, req) => {
     try {
       const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
       if (!buffer.length) return;
+      describePacket('C->S', buffer);
       if (tcpReady) tcp.write(buffer);
       else pending.push(buffer);
     } catch (err) {
@@ -61,6 +74,7 @@ wss.on('connection', (ws, req) => {
 
       const packet = incoming.subarray(0, frameLength);
       incoming = incoming.subarray(frameLength);
+      describePacket('S->C', packet);
 
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(packet, { binary: true });
