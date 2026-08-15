@@ -63,6 +63,9 @@ try {
     <div class="street-tree tree-right"></div>
     <div class="sidewalk"></div>
     <div class="road"></div>
+    <div class="street-light-sweep"></div>
+    <div class="street-puddle puddle-a"></div>
+    <div class="street-puddle puddle-b"></div>
 
     <div class="street-avatar avatar-left">
         <img src="<?php echo IMG; ?>/male.gif" alt="">
@@ -79,10 +82,13 @@ try {
             <span><strong>VELORA</strong><small>ROLEPLAY</small></span>
         </a>
 
-        <div class="server-pill">
-            <span class="server-dot"></span>
-            <strong><?php echo htmlspecialchars($onlineUsers, ENT_QUOTES, 'UTF-8'); ?></strong>
-            <span>en ligne</span>
+        <div class="topbar-right">
+            <span class="season-pill"><i class="fas fa-circle"></i> SAISON 01</span>
+            <div class="server-pill">
+                <span class="server-dot"></span>
+                <strong><?php echo htmlspecialchars($onlineUsers, ENT_QUOTES, 'UTF-8'); ?></strong>
+                <span>en ligne</span>
+            </div>
         </div>
     </header>
 
@@ -149,6 +155,11 @@ try {
                     <p class="brand-pitch">
                         Fais ta vie. Trouve un métier. Monte ton business. Rejoins la police ou impose ton nom dans la rue.
                     </p>
+
+                    <div class="city-pulse" aria-live="polite">
+                        <span class="city-pulse-label"><i class="fas fa-circle"></i> VELORA LIVE</span>
+                        <strong id="city-pulse-text">La ville évolue avec les joueurs.</strong>
+                    </div>
                 </div>
 
                 <div class="auth-zone">
@@ -193,6 +204,14 @@ try {
                             <i class="fas fa-lock"></i>
                             <input id="pz-login-pass" type="password" placeholder="Ton mot de passe" autocomplete="current-password">
                             <button type="button" class="password-toggle" data-toggle-password="pz-login-pass" aria-label="Afficher ou masquer le mot de passe"><i class="fas fa-eye"></i></button>
+                        </div>
+
+                        <div class="login-options">
+                            <label class="remember-line">
+                                <input id="remember-username" type="checkbox" value="1">
+                                <span>Se souvenir de mon pseudo</span>
+                            </label>
+                            <span id="caps-lock-hint" class="caps-hint"><i class="fas fa-arrow-up"></i> Verr. Maj activée</span>
                         </div>
 
                         <button id="subrmit-login" type="button" class="auth-primary">
@@ -251,6 +270,7 @@ try {
 
                         <div class="password-strength" aria-hidden="true"><span id="password-strength-fill"></span></div>
                         <small id="password-strength-label" class="password-strength-label">Sécurité du mot de passe</small>
+                        <small id="password-match-label" class="password-match-label"></small>
 
                         <label class="rules-line">
                             <input id="rp-rules" type="checkbox" value="1">
