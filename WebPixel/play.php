@@ -43,7 +43,6 @@ ob_start();
 require CLIENT . 'client.php';
 $html = ob_get_clean();
 
-// Flash must never boot on the Nitro client. Remove the legacy call at source-output level.
 $html = preg_replace(
     '/\s*swfobject\.embedSWF\([^;]*\);/is',
     "\n        // Legacy Flash bootstrap disabled for local Nitro.",
@@ -51,7 +50,6 @@ $html = preg_replace(
     1
 );
 
-// Build one exact local Nitro URL. Do not rely on the historical HabboVIP URL.
 $nitroParams = array('sso' => $ClientAUTH);
 if ($autoRoomId > 0) {
     $nitroParams = array('room' => $autoRoomId, 'sso' => $ClientAUTH);
@@ -60,7 +58,6 @@ $nitroSrc = '/WebPixel/nitro-last/index.html?' . http_build_query($nitroParams, 
 $nitroSrcHtml = htmlspecialchars($nitroSrc, ENT_QUOTES, 'UTF-8');
 $forcedIframe = '<iframe id="RdpNitroFrame" src="' . $nitroSrcHtml . '" class="Nitro" allow="camera none; microphone *"></iframe>';
 
-// Replace the complete old Nitro iframe regardless of its remote URL.
 $iframeCount = 0;
 $html = preg_replace(
     '/<iframe\b[^>]*class=["\'][^"\']*\bNitro\b[^"\']*["\'][^>]*>\s*<\/iframe>/is',
@@ -70,12 +67,10 @@ $html = preg_replace(
     $iframeCount
 );
 
-// Fallback: if the legacy iframe markup changed, inject Nitro immediately after <body>.
 if ($iframeCount === 0) {
     $html = preg_replace('/<body\b([^>]*)>/i', '<body$1>' . $forcedIframe, $html, 1);
 }
 
-// Absolute cleanup: the dead Nitro hosts must never reach the browser.
 $html = str_ireplace(
     array(
         'https://nitro.habbovip.us',
@@ -89,6 +84,8 @@ $html = str_ireplace(
 
 $localhostShim = <<<'HTML'
 <link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?v=12">
+<link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/phone-presence-toast.css?v=1">
+<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-presence-toast.js?v=1" defer></script>
 <script>
 window.swfobject = window.swfobject || { embedSWF: function () {} };
 console.info('[RDP] RP shell + local Nitro boot active');
@@ -135,7 +132,6 @@ iframe.Nitro, #RdpNitroFrame { position:fixed!important; inset:0!important; widt
 </style>
 HTML;
 
-// Inject before every legacy inline script. This does not depend on the old swfobject line working.
 $html = preg_replace('/<head\b([^>]*)>/i', '<head$1>' . $localhostShim, $html, 1);
 
 echo $html;
