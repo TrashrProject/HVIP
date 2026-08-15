@@ -14,6 +14,73 @@
     <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#000000">
     <link rel="stylesheet" href="./src/assets/index.css">
     <script>
+      (function () {
+        const rewriteLegacyUrl = (value) => {
+          let url = String(value || '');
+          url = url.replace(/^https?:\/\/swfs?\.habbovip\.us\/V5-0-2\/?/i, 'http://localhost/swf_pz/V5-0-2/');
+          url = url.replace(/^https?:\/\/swfs?\.habbo\.vip\/V5-0-2\/?/i, 'http://localhost/swf_pz/V5-0-2/');
+          url = url.replace(/^https?:\/\/images\.habbovip\.us\/V5-0-2\/?/i, 'http://localhost/swf_pz/V5-0-2/');
+          url = url.replace(/^https?:\/\/habbovip\.us\/?/i, 'http://localhost/WebPixel/');
+          return url;
+        };
+
+        window.__rewriteLegacyNitroUrl = rewriteLegacyUrl;
+
+        if (window.fetch) {
+          const nativeFetch = window.fetch.bind(window);
+          window.fetch = function(input, init) {
+            try {
+              const raw = (input && input.url) ? input.url : input;
+              const next = rewriteLegacyUrl(raw);
+              if (typeof input === 'string' || input instanceof URL) return nativeFetch(next, init);
+              if (input instanceof Request && next !== raw) return nativeFetch(new Request(next, input), init);
+            } catch (_) {}
+            return nativeFetch(input, init);
+          };
+        }
+
+        const nativeOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url) {
+          arguments[1] = rewriteLegacyUrl(url);
+          return nativeOpen.apply(this, arguments);
+        };
+
+        const imgSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+        if (imgSrc && imgSrc.set) {
+          Object.defineProperty(HTMLImageElement.prototype, 'src', {
+            get: imgSrc.get,
+            set(value) { return imgSrc.set.call(this, rewriteLegacyUrl(value)); },
+            configurable: true,
+            enumerable: imgSrc.enumerable
+          });
+        }
+
+        const sourceSrc = Object.getOwnPropertyDescriptor(HTMLSourceElement.prototype, 'src');
+        if (sourceSrc && sourceSrc.set) {
+          Object.defineProperty(HTMLSourceElement.prototype, 'src', {
+            get: sourceSrc.get,
+            set(value) { return sourceSrc.set.call(this, rewriteLegacyUrl(value)); },
+            configurable: true,
+            enumerable: sourceSrc.enumerable
+          });
+        }
+
+        new MutationObserver((mutations) => {
+          for (const mutation of mutations) {
+            for (const node of mutation.addedNodes) {
+              if (!(node instanceof Element)) continue;
+              const elements = [node, ...node.querySelectorAll('[src]')];
+              for (const el of elements) {
+                const src = el.getAttribute && el.getAttribute('src');
+                if (!src) continue;
+                const next = rewriteLegacyUrl(src);
+                if (next !== src) el.setAttribute('src', next);
+              }
+            }
+          }
+        }).observe(document.documentElement, { childList: true, subtree: true });
+      })();
+
       const query = new URLSearchParams(window.location.search);
       window.NitroConfig = {
         "config.urls": [ "./local-config.json", "./renderer-config.json", "./ui-config.json" ],
