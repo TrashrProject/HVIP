@@ -1,12 +1,8 @@
-/* Velora RP - modern login / registration interactions */
-
-console.log('[Velora RP] Interface d’authentification chargée.');
-
+/* Velora RP - landing authentication */
 (function ($) {
     'use strict';
 
     var baseUrl = window.location.pathname;
-
     if (!baseUrl.endsWith('/')) {
         baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
     }
@@ -14,130 +10,73 @@ console.log('[Velora RP] Interface d’authentification chargée.');
     var endpoint = baseUrl;
 
     function parseResponse(data) {
-        if (typeof data === 'object') {
-            return data;
-        }
-
+        if (typeof data === 'object') return data;
         try {
             return JSON.parse(data);
         } catch (e) {
-            console.error('[Velora RP] Réponse PHP invalide :', data);
-            return {
-                result: false,
-                msg: 'Le serveur a renvoyé une réponse invalide.'
-            };
+            console.error('[Velora RP] Réponse invalide :', data);
+            return { result: false, msg: 'Le serveur a renvoyé une réponse invalide.' };
         }
     }
 
-    function showError(box, msgBox, message) {
-        $(msgBox).text(message);
-        $(box).stop(true, true).fadeIn(140);
-    }
-
-    function hideAuthMessages() {
-        $('#e-login-message, #login-message, #e-register-message, #register-message').hide();
-    }
-
-    function setButtonLoading(selector, loading, idleText) {
+    function setLoading(selector, loading) {
         var $button = $(selector);
 
         if (loading) {
-            if (!$button.data('idle-html')) {
-                $button.data('idle-html', $button.html());
+            if (!$button.data('original-html')) {
+                $button.data('original-html', $button.html());
             }
-
             $button.addClass('loading').prop('disabled', true);
-            $button.html('<span>Patientez...</span><i class="fas fa-circle-notch fa-spin"></i>');
-        } else {
-            $button.removeClass('loading').prop('disabled', false);
+            $button.html('<span>Patiente...</span><i class="fas fa-circle-notch fa-spin"></i>');
+            return;
+        }
 
-            if ($button.data('idle-html')) {
-                $button.html($button.data('idle-html'));
-            } else if (idleText) {
-                $button.find('span').text(idleText);
-            }
+        $button.removeClass('loading').prop('disabled', false);
+        if ($button.data('original-html')) {
+            $button.html($button.data('original-html'));
         }
     }
 
-    function openAuth(view) {
-        var normalized = view === 'register' ? 'register' : 'login';
+    function hideMessages() {
+        $('#e-login-message, #login-message, #e-register-message, #register-message').hide();
+    }
 
-        hideAuthMessages();
+    function showError(box, target, message) {
+        $(target).text(message);
+        $(box).stop(true, true).fadeIn(120);
+    }
 
+    function openAuth(view, scroll) {
+        var mode = view === 'register' ? 'register' : 'login';
+
+        hideMessages();
         $('.auth-tab').removeClass('active');
-        $('.auth-tab[data-auth-tab="' + normalized + '"]').addClass('active');
+        $('.auth-tab[data-auth-tab="' + mode + '"]').addClass('active');
 
         $('.auth-form').removeClass('active').hide();
-        $('[data-auth-view="' + normalized + '"]').addClass('active').fadeIn(150);
+        $('[data-auth-view="' + mode + '"]').addClass('active').fadeIn(120);
+        $('#auth-title').text(mode === 'register' ? 'Inscription' : 'Connexion');
 
-        $('#auth-title').text(normalized === 'register' ? 'Inscription' : 'Connexion');
-
-        if (window.innerWidth <= 900) {
+        if (scroll !== false) {
             var panel = document.getElementById('auth-panel');
             if (panel) {
-                panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
     }
 
-    function passwordScore(password) {
-        var score = 0;
-
-        if (password.length >= 6) score++;
-        if (password.length >= 10) score++;
-        if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
-        if (/\d/.test(password)) score++;
-        if (/[^A-Za-z0-9]/.test(password)) score++;
-
-        return score;
-    }
-
-    function updatePasswordStrength() {
-        var password = $('#register-password').val() || '';
-        var score = passwordScore(password);
-        var width = 0;
-        var label = 'Sécurité du mot de passe';
-        var color = '#ff6b7a';
-
-        if (password.length > 0) {
-            width = Math.max(20, score * 20);
-        }
-
-        if (score <= 1) {
-            label = password.length ? 'Mot de passe faible' : 'Sécurité du mot de passe';
-            color = '#ff6b7a';
-        } else if (score <= 3) {
-            label = 'Mot de passe correct';
-            color = '#f2c66d';
-        } else {
-            label = 'Mot de passe solide';
-            color = '#5fe0a2';
-        }
-
-        $('#password-strength-bar').css({
-            width: width + '%',
-            background: color
-        });
-
-        $('#password-strength-copy').text(label);
-    }
-
-    function Login() {
+    function login() {
         var username = $('#pz-login-uname').val().trim();
         var password = $('#pz-login-pass').val();
 
         $('#e-login-message, #login-message').hide();
 
         if (!username || !password) {
-            showError(
-                '#e-login-message',
-                '#e-login-msg',
-                'Remplis ton pseudo et ton mot de passe.'
-            );
+            showError('#e-login-message', '#e-login-msg', 'Renseigne ton pseudo et ton mot de passe.');
             return;
         }
 
-        setButtonLoading('#subrmit-login', true);
+        setLoading('#subrmit-login', true);
 
         $.ajax({
             url: endpoint,
@@ -147,90 +86,65 @@ console.log('[Velora RP] Interface d’authentification chargée.');
                 login_password: password
             }
         }).done(function (data) {
-            var res = parseResponse(data);
+            var response = parseResponse(data);
 
-            if (res.result === true) {
-                $('#login-msg').text(res.msg || 'Connexion réussie.');
-                $('#login-message').fadeIn(140);
-
+            if (response.result === true) {
+                $('#login-msg').text(response.msg || 'Connexion réussie.');
+                $('#login-message').fadeIn(120);
                 setTimeout(function () {
                     window.location.href = baseUrl + 'me.php';
                 }, 350);
             } else {
-                showError(
-                    '#e-login-message',
-                    '#e-login-msg',
-                    res.msg || 'Connexion impossible.'
-                );
+                showError('#e-login-message', '#e-login-msg', response.msg || 'Pseudo ou mot de passe incorrect.');
             }
         }).fail(function (xhr) {
-            console.error('[Velora RP] Login HTTP error', xhr.status, xhr.responseText);
-
-            showError(
-                '#e-login-message',
-                '#e-login-msg',
-                'Erreur HTTP ' + xhr.status + ' pendant la connexion.'
-            );
+            console.error('[Velora RP] Erreur connexion', xhr.status, xhr.responseText);
+            showError('#e-login-message', '#e-login-msg', 'Impossible de contacter le serveur. Erreur HTTP ' + xhr.status + '.');
         }).always(function () {
-            setButtonLoading('#subrmit-login', false);
+            setLoading('#subrmit-login', false);
         });
     }
 
-    function Register() {
+    function register() {
         var username = $('#register-username').val().trim();
+        var email = $('#email').val().trim();
         var password = $('#register-password').val();
         var confirm = $('#register-password-confirm').val();
-        var email = $('#email').val().trim();
-        var acceptedRules = $('#rp-rules').is(':checked');
+        var rulesAccepted = $('#rp-rules').is(':checked');
 
         $('#e-register-message, #register-message').hide();
 
-        if (!username || !password || !confirm || !email) {
-            showError(
-                '#e-register-message',
-                '#e-register-msg',
-                'Tous les champs sont obligatoires.'
-            );
+        if (!username || !email || !password || !confirm) {
+            showError('#e-register-message', '#e-register-msg', 'Tous les champs sont obligatoires.');
             return;
         }
 
         if (!/^[A-Za-z0-9]{3,18}$/.test(username)) {
-            showError(
-                '#e-register-message',
-                '#e-register-msg',
-                'Le pseudo doit contenir 3 à 18 lettres ou chiffres, sans espace.'
-            );
+            showError('#e-register-message', '#e-register-msg', 'Le pseudo doit contenir 3 à 18 lettres ou chiffres, sans espace.');
+            return;
+        }
+
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            showError('#e-register-message', '#e-register-msg', 'Entre une adresse e-mail valide.');
             return;
         }
 
         if (password.length < 6) {
-            showError(
-                '#e-register-message',
-                '#e-register-msg',
-                'Le mot de passe doit contenir au moins 6 caractères.'
-            );
+            showError('#e-register-message', '#e-register-msg', 'Le mot de passe doit contenir au moins 6 caractères.');
             return;
         }
 
         if (password !== confirm) {
-            showError(
-                '#e-register-message',
-                '#e-register-msg',
-                'Les deux mots de passe ne correspondent pas.'
-            );
+            showError('#e-register-message', '#e-register-msg', 'Les deux mots de passe ne correspondent pas.');
             return;
         }
 
-        if (!acceptedRules) {
-            showError(
-                '#e-register-message',
-                '#e-register-msg',
-                'Tu dois t’engager à respecter le roleplay avant de créer ton compte.'
-            );
+        if (!rulesAccepted) {
+            showError('#e-register-message', '#e-register-msg', 'Tu dois accepter les règles RP avant de créer ton compte.');
             return;
         }
 
-        setButtonLoading('#subrmit-register', true);
+        setLoading('#subrmit-register', true);
 
         $.ajax({
             url: endpoint,
@@ -241,70 +155,56 @@ console.log('[Velora RP] Interface d’authentification chargée.');
                 reg_mail: email
             }
         }).done(function (data) {
-            var res = parseResponse(data);
+            var response = parseResponse(data);
 
-            if (res.result === true) {
-                $('#register-msg').text(res.msg || 'Compte créé. Bienvenue à Velora.');
-                $('#register-message').fadeIn(140);
-
+            if (response.result === true) {
+                $('#register-msg').text(response.msg || 'Ton personnage a été créé.');
+                $('#register-message').fadeIn(120);
                 setTimeout(function () {
                     window.location.href = baseUrl + 'me.php?newuser=true';
-                }, 700);
+                }, 650);
             } else {
-                showError(
-                    '#e-register-message',
-                    '#e-register-msg',
-                    res.msg || 'Inscription impossible.'
-                );
+                showError('#e-register-message', '#e-register-msg', response.msg || 'Impossible de créer le compte.');
             }
         }).fail(function (xhr) {
-            console.error('[Velora RP] Register HTTP error', xhr.status, xhr.responseText);
-
-            showError(
-                '#e-register-message',
-                '#e-register-msg',
-                'Erreur HTTP ' + xhr.status + ' pendant l’inscription.'
-            );
+            console.error('[Velora RP] Erreur inscription', xhr.status, xhr.responseText);
+            showError('#e-register-message', '#e-register-msg', 'Impossible de contacter le serveur. Erreur HTTP ' + xhr.status + '.');
         }).always(function () {
-            setButtonLoading('#subrmit-register', false);
+            setLoading('#subrmit-register', false);
         });
     }
 
     $(document).ready(function () {
-        $('[data-open-auth], [data-auth-tab]').on('click', function () {
-            var view = $(this).data('open-auth') || $(this).data('auth-tab');
-            openAuth(view);
+        $('[data-open-auth]').on('click', function () {
+            openAuth($(this).data('open-auth'), true);
         });
 
-        $('#subrmit-login').on('click', Login);
-        $('#subrmit-register').on('click', Register);
-
-        $('#pz-login-uname, #pz-login-pass').on('keypress', function (e) {
-            if (e.which === 13) Login();
+        $('[data-auth-tab]').on('click', function () {
+            openAuth($(this).data('auth-tab'), false);
         });
 
-        $('#register-username, #register-password, #register-password-confirm, #email').on('keypress', function (e) {
-            if (e.which === 13) Register();
+        $('#subrmit-login').on('click', login);
+        $('#subrmit-register').on('click', register);
+
+        $('#pz-login-uname, #pz-login-pass').on('keypress', function (event) {
+            if (event.which === 13) login();
+        });
+
+        $('#register-username, #email, #register-password, #register-password-confirm').on('keypress', function (event) {
+            if (event.which === 13) register();
         });
 
         $('[data-toggle-password]').on('click', function () {
-            var targetId = $(this).data('toggle-password');
-            var $input = $('#' + targetId);
+            var id = $(this).data('toggle-password');
+            var $input = $('#' + id);
             var $icon = $(this).find('i');
-
             if (!$input.length) return;
 
-            var makeVisible = $input.attr('type') === 'password';
-            $input.attr('type', makeVisible ? 'text' : 'password');
-            $icon.toggleClass('fa-eye', !makeVisible).toggleClass('fa-eye-slash', makeVisible);
+            var show = $input.attr('type') === 'password';
+            $input.attr('type', show ? 'text' : 'password');
+            $icon.toggleClass('fa-eye', !show).toggleClass('fa-eye-slash', show);
         });
 
-        $('#register-password').on('input', updatePasswordStrength);
-
-        if (window.location.hash === '#register') {
-            openAuth('register');
-        } else {
-            openAuth('login');
-        }
+        openAuth(window.location.hash === '#register' ? 'register' : 'login', false);
     });
 })(jQuery);
