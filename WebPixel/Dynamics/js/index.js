@@ -48,6 +48,48 @@
         $(box).stop(true, true).fadeIn(120);
     }
 
+    function updateClock() {
+        var now = new Date();
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        $('#device-clock').text(hours + ':' + minutes);
+    }
+
+    function updatePasswordStrength() {
+        var password = $('#register-password').val() || '';
+        var score = 0;
+        var label = 'Sécurité du mot de passe';
+        var width = 0;
+        var tone = 'weak';
+
+        if (password.length >= 6) score++;
+        if (password.length >= 10) score++;
+        if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+        if (/\d/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+
+        if (password.length) {
+            width = Math.max(18, Math.min(100, score * 20));
+        }
+
+        if (score <= 1) {
+            label = password.length ? 'Mot de passe faible' : 'Sécurité du mot de passe';
+            tone = 'weak';
+        } else if (score <= 3) {
+            label = 'Mot de passe correct';
+            tone = 'medium';
+        } else {
+            label = 'Mot de passe solide';
+            tone = 'strong';
+        }
+
+        $('#password-strength-fill')
+            .removeClass('weak medium strong')
+            .addClass(tone)
+            .css('width', width + '%');
+        $('#password-strength-label').text(label);
+    }
+
     function applyAuthMode(mode) {
         hideMessages();
 
@@ -59,6 +101,10 @@
 
         $('#auth-title').text(mode === 'register' ? 'Inscription' : 'Connexion');
         $('.device-shell').toggleClass('auth-register', mode === 'register');
+    }
+
+    function clearFlipClasses($device) {
+        $device.removeClass('flip-90 flip-180 flip-270 flip-reset');
     }
 
     function openAuth(view, animate) {
@@ -81,28 +127,38 @@
         }
 
         pivotLocked = true;
-        $device.removeClass('flip-in').addClass('flip-out');
+        clearFlipClasses($device);
+
+        // Full 360° pivot. The back of the phone is really visible in the middle
+        // of the rotation, then the next form returns on the front face.
+        $device.addClass('flip-90');
+
+        window.setTimeout(function () {
+            $device.removeClass('flip-90').addClass('flip-180');
+        }, 165);
+
+        window.setTimeout(function () {
+            $device.removeClass('flip-180').addClass('flip-270');
+        }, 335);
 
         window.setTimeout(function () {
             applyAuthMode(mode);
             currentMode = mode;
 
-            // At 90 degrees the face is almost invisible. We place the new face
-            // on the opposite side, then let it finish the rotation naturally.
-            $device.removeClass('flip-out').addClass('flip-in');
+            $device.removeClass('flip-270').addClass('flip-reset');
 
             if ($device[0]) {
                 void $device[0].offsetWidth;
             }
 
             window.requestAnimationFrame(function () {
-                $device.removeClass('flip-in');
+                $device.removeClass('flip-reset');
             });
 
             window.setTimeout(function () {
                 pivotLocked = false;
-            }, 320);
-        }, 255);
+            }, 290);
+        }, 505);
     }
 
     function login() {
@@ -240,6 +296,12 @@
             $input.attr('type', show ? 'text' : 'password');
             $icon.toggleClass('fa-eye', !show).toggleClass('fa-eye-slash', show);
         });
+
+        $('#register-password').on('input', updatePasswordStrength);
+
+        updateClock();
+        window.setInterval(updateClock, 30000);
+        updatePasswordStrength();
 
         openAuth(window.location.hash === '#register' ? 'register' : 'login', false);
     });
