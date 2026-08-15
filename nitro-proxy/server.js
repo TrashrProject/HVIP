@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const net = require('net');
 const { WebSocketServer, WebSocket } = require('ws');
 
@@ -7,35 +9,59 @@ const TCP_HOST = process.env.EMU_HOST || '127.0.0.1';
 const TCP_PORT = Number(process.env.EMU_PORT || 2021);
 const MAX_PACKET = 8 * 1024 * 1024;
 const TRACE = process.env.NITRO_TRACE !== '0';
+const TRACE_FILE = path.join(__dirname, 'trace.log');
+
+try { fs.writeFileSync(TRACE_FILE, '', 'utf8'); } catch (_) {}
+
+function log(line) {
+  console.log(line);
+  try { fs.appendFileSync(TRACE_FILE, `${new Date().toISOString()} ${line}\n`, 'utf8'); } catch (_) {}
+}
 
 const wss = new WebSocketServer({ host: WS_HOST, port: WS_PORT, perMessageDeflate: false });
+let activeSession = null;
+let sessionCounter = 0;
 
-console.log(`[NitroProxy] Listening on ws://${WS_HOST}:${WS_PORT}/`);
-console.log(`[NitroProxy] Forwarding to tcp://${TCP_HOST}:${TCP_PORT}`);
-console.log(`[NitroProxy] Packet trace ${TRACE ? 'enabled' : 'disabled'}`);
+log(`[NitroProxy] Listening on ws://${WS_HOST}:${WS_PORT}/`);
+log(`[NitroProxy] Forwarding to tcp://${TCP_HOST}:${TCP_PORT}`);
+log(`[NitroProxy] Packet trace ${TRACE ? 'enabled' : 'disabled'}`);
+log(`[NitroProxy] Trace file: ${TRACE_FILE}`);
 
-function describePacket(direction, buffer) {
+function describePacket(direction, buffer, sessionId) {
   if (!TRACE || !buffer || buffer.length < 6) return;
   try {
     const declared = buffer.readUInt32BE(0);
     const header = buffer.readUInt16BE(4);
-    const preview = buffer.subarray(0, Math.min(buffer.length, 24)).toString('hex').match(/.{1,2}/g).join(' ');
-    console.log(`[TRACE ${direction}] header=${header} payload=${declared} bytes=${buffer.length} hex=${preview}`);
+    const preview = buffer.subarray(0, Math.min(buffer.length, 32)).toString('hex').match(/.{1,2}/g).join(' ');
+    log(`[TRACE ${direction}] session=${sessionId} header=${header} payload=${declared} bytes=${buffer.length} hex=${preview}`);
   } catch (_) {}
 }
 
 wss.on('connection', (ws, req) => {
   const remote = req.socket.remoteAddress || 'unknown';
-  console.log(`[NitroProxy] WebSocket connected from ${remote}`);
+  const sessionId = ++sessionCounter;
+
+  // Nitro can reconnect while the previous localhost socket is still alive.
+  // Keep only one game session so the emulator does not count duplicate users.
+  if (activeSession) {
+    log(`[NitroProxy] Replacing previous session ${activeSession.id} with ${sessionId}`);
+    try { activeSession.ws.terminate(); } catch (_) {}
+    try { activeSession.tcp.destroy(); } catch (_) {}
+    activeSession = null;
+  }
+
+  log(`[NitroProxy] Session ${sessionId}: WebSocket connected from ${remote}`);
 
   const tcp = net.createConnection({ host: TCP_HOST, port: TCP_PORT, noDelay: true });
+  activeSession = { id: sessionId, ws, tcp };
+
   let tcpReady = false;
   const pending = [];
   let incoming = Buffer.alloc(0);
 
   tcp.on('connect', () => {
     tcpReady = true;
-    console.log(`[NitroProxy] TCP connected to emulator ${TCP_HOST}:${TCP_PORT}`);
+    log(`[NitroProxy] Session ${sessionId}: TCP connected to emulator ${TCP_HOST}:${TCP_PORT}`);
     while (pending.length) tcp.write(pending.shift());
   });
 
@@ -43,26 +69,22 @@ wss.on('connection', (ws, req) => {
     try {
       const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
       if (!buffer.length) return;
-      describePacket('C->S', buffer);
+      describePacket('C->S', buffer, sessionId);
       if (tcpReady) tcp.write(buffer);
       else pending.push(buffer);
     } catch (err) {
-      console.error('[NitroProxy] WS -> TCP error:', err.message);
+      log(`[NitroProxy] Session ${sessionId}: WS -> TCP error: ${err.message}`);
     }
   });
 
-  // The emulator is a TCP stream while Nitro expects complete Habbo packets
-  // per WebSocket message. TCP may split one packet across several chunks or
-  // merge several packets into one chunk, so rebuild frames using the 4-byte
-  // big-endian Habbo length prefix before forwarding them to Nitro.
   tcp.on('data', (chunk) => {
-    incoming = incoming.length ? Buffer.concat([incoming, chunk]) : chunk;
+    incoming = incoming.length ? Buffer.concat([incoming, chunk]) : Buffer.from(chunk);
 
     while (incoming.length >= 4) {
       const payloadLength = incoming.readUInt32BE(0);
 
       if (payloadLength <= 0 || payloadLength > MAX_PACKET) {
-        console.error(`[NitroProxy] Invalid packet length ${payloadLength}; closing connection to avoid corrupting Nitro.`);
+        log(`[NitroProxy] Session ${sessionId}: invalid packet length ${payloadLength}`);
         incoming = Buffer.alloc(0);
         try { tcp.destroy(); } catch (_) {}
         try { ws.close(1002, 'Invalid emulator packet framing'); } catch (_) {}
@@ -72,38 +94,49 @@ wss.on('connection', (ws, req) => {
       const frameLength = payloadLength + 4;
       if (incoming.length < frameLength) break;
 
-      const packet = incoming.subarray(0, frameLength);
-      incoming = incoming.subarray(frameLength);
-      describePacket('S->C', packet);
+      // Copy the frame before slicing the accumulator. This prevents a later TCP
+      // chunk from sharing/mutating the same underlying view passed to ws.send.
+      const packet = Buffer.from(incoming.subarray(0, frameLength));
+      incoming = Buffer.from(incoming.subarray(frameLength));
+      describePacket('S->C', packet, sessionId);
 
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send(packet, { binary: true });
+        ws.send(packet, { binary: true }, (err) => {
+          if (err) log(`[NitroProxy] Session ${sessionId}: send error: ${err.message}`);
+        });
       }
     }
   });
 
   tcp.on('error', (err) => {
-    console.error('[NitroProxy] TCP error:', err.message);
+    log(`[NitroProxy] Session ${sessionId}: TCP error: ${err.message}`);
     try { ws.close(1011, 'Emulator connection failed'); } catch (_) {}
   });
 
   ws.on('error', (err) => {
-    console.error('[NitroProxy] WebSocket error:', err.message);
+    log(`[NitroProxy] Session ${sessionId}: WebSocket error: ${err.message}`);
   });
 
-  ws.on('close', () => {
-    console.log('[NitroProxy] WebSocket closed');
+  const cleanup = () => {
+    if (activeSession && activeSession.id === sessionId) activeSession = null;
     try { tcp.destroy(); } catch (_) {}
+  };
+
+  ws.on('close', () => {
+    log(`[NitroProxy] Session ${sessionId}: WebSocket closed`);
+    cleanup();
   });
 
   tcp.on('close', () => {
+    log(`[NitroProxy] Session ${sessionId}: TCP closed`);
     if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
       try { ws.close(); } catch (_) {}
     }
+    if (activeSession && activeSession.id === sessionId) activeSession = null;
   });
 });
 
 wss.on('error', (err) => {
-  console.error('[NitroProxy] Server error:', err.message);
+  log(`[NitroProxy] Server error: ${err.message}`);
   process.exitCode = 1;
 });
