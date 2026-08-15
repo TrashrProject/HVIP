@@ -1,85 +1,87 @@
-/* RDP RP phone v5 — strict centered layout, no overflow, app logic untouched */
-#phone,
-#phone *{box-sizing:border-box!important}
+/* RDP RP phone v6 — strict screen clipping + perfectly centered app grid */
+#phone,#phone *{box-sizing:border-box!important}
 
 #phone{
-  width:292px!important;
-  height:570px!important;
+  width:300px!important;
+  height:590px!important;
   left:50%!important;
   top:-1000px;
   transform:translateX(-50%);
   font-family:Inter,'Segoe UI',Arial,sans-serif!important;
   color:#fff!important;
-  filter:drop-shadow(0 22px 40px rgba(0,0,0,.5));
+  filter:drop-shadow(0 24px 42px rgba(0,0,0,.55));
 }
 
-/* Device shell */
+/* Black device shell */
 #phone .header-phone-extends{
   position:absolute!important;
   inset:0!important;
-  width:292px!important;
-  height:570px!important;
-  border-radius:42px!important;
-  background:linear-gradient(145deg,#313842 0%,#12161d 20%,#05070b 72%,#222934 100%)!important;
-  border:1px solid #6f7987!important;
-  box-shadow:inset 0 0 0 2px #05070a,inset 0 0 0 4px #1a2029,0 18px 38px rgba(0,0,0,.55)!important;
+  width:300px!important;
+  height:590px!important;
+  border-radius:46px!important;
+  background:linear-gradient(145deg,#242932 0%,#0d1016 28%,#020305 78%,#1b2028 100%)!important;
+  border:2px solid #707986!important;
+  box-shadow:inset 0 0 0 2px #020305,inset 0 0 0 5px #171c23,0 16px 34px rgba(0,0,0,.5)!important;
 }
 #phone .header-phone-extends:before{
   content:"";
   position:absolute;
-  z-index:20;
+  z-index:40;
   top:12px;
-  left:101px;
-  width:90px;
-  height:23px;
-  border-radius:16px;
-  background:#020304;
-  box-shadow:inset 0 -1px 0 rgba(255,255,255,.07);
+  left:102px;
+  width:96px;
+  height:25px;
+  border-radius:18px;
+  background:#010203;
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.06);
 }
 #phone .header-phone-extends:after{
   content:"";
   position:absolute;
-  z-index:21;
+  z-index:41;
   top:20px;
-  left:116px;
+  left:117px;
   width:7px;
   height:7px;
   border-radius:50%;
-  background:radial-gradient(circle,#38a7ff 0 20%,#0d426e 23% 46%,#020407 50%);
-  box-shadow:0 0 7px rgba(56,167,255,.45);
+  background:radial-gradient(circle,#38a8ff 0 22%,#0f466f 24% 46%,#010204 50%);
+  box-shadow:0 0 7px rgba(56,168,255,.5);
 }
 
-/* Screen */
+/* Screen = single clipped safe area. Nothing may draw outside this rectangle. */
 #phone_content{
   position:absolute!important;
-  left:15px!important;
-  top:42px!important;
+  left:17px!important;
+  top:48px!important;
   margin:0!important;
-  width:262px!important;
-  height:494px!important;
+  width:266px!important;
+  height:492px!important;
   overflow:hidden!important;
   border-radius:31px!important;
-  background:#08111d!important;
-  box-shadow:0 0 0 1px rgba(255,255,255,.07),0 0 0 2px #000!important;
+  background:#07111d!important;
+  isolation:isolate!important;
+  clip-path:inset(0 round 31px)!important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.06),0 0 0 2px #000!important;
 }
 #phone_bg{
-  position:relative!important;
-  width:262px!important;
-  height:494px!important;
+  position:absolute!important;
+  inset:0!important;
+  width:266px!important;
+  height:492px!important;
   overflow:hidden!important;
+  border-radius:31px!important;
   background:
-    radial-gradient(circle at 82% 7%,rgba(82,103,255,.30),transparent 31%),
-    radial-gradient(circle at 10% 60%,rgba(31,195,181,.14),transparent 34%),
-    radial-gradient(circle at 82% 92%,rgba(105,61,206,.17),transparent 34%),
-    linear-gradient(165deg,#0c1b30 0%,#09131f 48%,#090c16 100%)!important;
+    radial-gradient(circle at 82% 8%,rgba(77,89,255,.28),transparent 31%),
+    radial-gradient(circle at 12% 60%,rgba(26,177,171,.12),transparent 35%),
+    radial-gradient(circle at 82% 94%,rgba(116,62,209,.17),transparent 35%),
+    linear-gradient(165deg,#0b1a2e 0%,#08131f 48%,#080b15 100%)!important;
 }
 #phone_bg:before{
   content:"";
   position:absolute;
   inset:0;
   pointer-events:none;
-  z-index:0;
-  background:linear-gradient(120deg,transparent 0 47%,rgba(255,255,255,.018) 48% 50%,transparent 51% 100%);
+  background:linear-gradient(120deg,transparent 0 48%,rgba(255,255,255,.015) 49% 50%,transparent 51% 100%);
 }
 
 /* Status bar */
@@ -87,78 +89,93 @@
   position:absolute!important;
   left:0!important;
   top:0!important;
-  width:262px!important;
+  width:266px!important;
   height:28px!important;
-  padding:6px 9px 0!important;
-  background:rgba(2,7,13,.46)!important;
+  padding:6px 10px 0!important;
+  background:rgba(2,7,13,.48)!important;
   backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(255,255,255,.045)!important;
+  border-bottom:1px solid rgba(255,255,255,.05)!important;
   font-size:9px!important;
   z-index:9500!important;
 }
-#panel{width:262px!important;height:494px!important;border-radius:31px!important;overflow:hidden!important;background:#08111d!important}
+#panel{
+  width:266px!important;
+  height:492px!important;
+  border-radius:31px!important;
+  overflow:hidden!important;
+  background:#07111d!important;
+}
 .notify_net,.notify_hour,.notify_porcent{font-weight:800!important;text-shadow:0 1px 2px #000!important}
-.notify_net{margin-left:17px!important}.notify_porcent{margin-right:17px!important}
-.signal_icon{left:7px!important;top:6px!important}.wifi_icon{left:56px!important;top:6px!important}.battery_icon{right:7px!important;top:6px!important}
+.notify_net{margin-left:18px!important}.notify_porcent{margin-right:18px!important}
+.signal_icon{left:8px!important;top:6px!important}.wifi_icon{left:57px!important;top:6px!important}.battery_icon{right:8px!important;top:6px!important}
 
-/* Home safe area */
+/* Content zone */
 #screens_phone{
   position:absolute!important;
   left:0!important;
   top:28px!important;
-  width:262px!important;
-  height:466px!important;
-  padding:80px 11px 14px!important;
+  width:266px!important;
+  height:464px!important;
+  padding:0!important;
   overflow:hidden!important;
 }
+
+/* Compact modern RP card */
 #screens_phone:before{
   content:"RDP MOBILE";
   position:absolute;
-  left:12px;
-  right:12px;
-  top:11px;
-  height:55px;
-  padding:11px 13px 0;
-  border-radius:17px;
-  color:#eef3ff;
+  left:16px;
+  top:14px;
+  width:234px;
+  height:58px;
+  padding:12px 14px 0;
+  border-radius:18px;
+  color:#f4f7ff;
   font-size:10px;
   font-weight:900;
-  letter-spacing:1.35px;
-  background:linear-gradient(135deg,rgba(72,105,231,.92),rgba(84,55,164,.78));
-  border:1px solid rgba(255,255,255,.18);
-  box-shadow:0 10px 24px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.16);
+  letter-spacing:1.25px;
+  background:linear-gradient(135deg,rgba(63,91,210,.96),rgba(81,54,164,.86));
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 10px 22px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.15);
 }
 #screens_phone:after{
   content:"Ville connectée  •  Services RP";
   position:absolute;
-  left:26px;
-  top:42px;
-  color:rgba(255,255,255,.75);
+  left:30px;
+  top:47px;
+  color:rgba(255,255,255,.74);
   font-size:8px;
   font-weight:600;
 }
 
 #screen_apps,
 #screen_apps .swiper-slide{
-  width:100%!important;
-  height:100%!important;
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  width:266px!important;
+  height:464px!important;
   overflow:hidden!important;
 }
 
-/* EXACT grid: 4 centered columns, last row centered */
+/* The old HTML uses #columns-full. Turn it into one strict centered grid. */
 #screens_phone #columns-full{
-  width:236px!important;
-  margin:0 auto!important;
+  position:absolute!important;
+  left:50%!important;
+  top:92px!important;
+  transform:translateX(-50%)!important;
+  width:224px!important;
+  margin:0!important;
   padding:0!important;
   display:grid!important;
   grid-template-columns:repeat(4,50px)!important;
-  grid-auto-rows:70px!important;
-  column-gap:12px!important;
-  row-gap:5px!important;
+  grid-auto-rows:69px!important;
+  column-gap:8px!important;
+  row-gap:6px!important;
   justify-content:center!important;
   align-content:start!important;
-  overflow:visible!important;
 }
+
 #screens_phone .column{
   float:none!important;
   position:relative!important;
@@ -166,36 +183,44 @@
   height:66px!important;
   margin:0!important;
   padding:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
   background:transparent!important;
   border:0!important;
   border-radius:14px!important;
-  cursor:pointer!important;
   overflow:visible!important;
+  cursor:pointer!important;
   transition:transform .14s ease,filter .14s ease!important;
 }
 #screens_phone .column:hover{transform:translateY(-2px) scale(1.04);filter:brightness(1.06)}
 #screens_phone .column:active{transform:scale(.95)}
+
+/* Center the final two applications as a pair */
 #screens_phone .column:nth-child(13){grid-column:2!important}
 #screens_phone .column:nth-child(14){grid-column:3!important}
 
-/* Icons */
+/* App tiles */
 .appicon{
-  position:absolute!important;
-  left:3px!important;
-  top:0!important;
-  width:44px!important;
-  height:44px!important;
-  margin:0!important;
-  border-radius:13px!important;
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  min-height:46px!important;
+  margin:0 auto!important;
+  border-radius:14px!important;
   background-image:none!important;
   background:#172131!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
   overflow:hidden!important;
-  box-shadow:0 6px 13px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.22),inset 0 0 0 1px rgba(255,255,255,.08)!important;
+  box-shadow:0 6px 13px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.20),inset 0 0 0 1px rgba(255,255,255,.08)!important;
 }
-.appicon:before{font-size:19px!important;line-height:1!important;filter:drop-shadow(0 2px 2px rgba(0,0,0,.20))}
+.appicon:before{font-size:19px!important;line-height:1!important;filter:drop-shadow(0 2px 2px rgba(0,0,0,.2))}
 
 #screens_phone .column:nth-child(1) .appicon{background:linear-gradient(145deg,#4b9dff,#2166e9)!important}#screens_phone .column:nth-child(1) .appicon:before{content:"✉"}
 #screens_phone .column:nth-child(2) .appicon{background:linear-gradient(145deg,#fff,#dfe8f2)!important;color:#111821!important}#screens_phone .column:nth-child(2) .appicon:before{content:"7";font-size:22px!important;font-weight:900}
@@ -212,25 +237,26 @@
 #screens_phone .column:nth-child(13) .appicon{background:linear-gradient(145deg,#ff627b,#e63a59)!important}#screens_phone .column:nth-child(13) .appicon:before{content:"♥"}
 #screens_phone .column:nth-child(14) .appicon{background:linear-gradient(145deg,#aa72ff,#7447dd)!important}#screens_phone .column:nth-child(14) .appicon:before{content:"✚"}
 
-/* Labels always centered under icons */
+/* Labels are normal flex items now: no negative offsets, no overflow. */
 .app_name{
-  position:absolute!important;
-  left:50%!important;
-  top:48px!important;
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
   bottom:auto!important;
-  transform:translateX(-50%)!important;
-  width:60px!important;
-  margin:0!important;
+  transform:none!important;
+  width:58px!important;
+  height:14px!important;
+  margin:4px 0 0!important;
   padding:0!important;
   font-size:0!important;
-  line-height:9px!important;
+  line-height:10px!important;
   text-align:center!important;
   white-space:nowrap!important;
-  overflow:visible!important;
+  overflow:hidden!important;
   color:#fff!important;
   text-shadow:0 1px 3px rgba(0,0,0,.95)!important;
 }
-.app_name:after{display:block!important;font-size:7px!important;font-weight:700!important;color:rgba(255,255,255,.92)}
+.app_name:after{display:block!important;font-size:7px!important;font-weight:700!important;line-height:10px!important;color:rgba(255,255,255,.92)}
 #screens_phone .column:nth-child(1) .app_name:after{content:"Mail"}
 #screens_phone .column:nth-child(2) .app_name:after{content:"Calendrier"}
 #screens_phone .column:nth-child(3) .app_name:after{content:"Photos"}
@@ -247,15 +273,14 @@
 #screens_phone .column:nth-child(14) .app_name:after{content:"Services"}
 .app_special-first,.app_special-second{display:none!important}
 
-/* No empty legacy dock */
-#dock_apps{display:none!important}
-.swiper-pagination{display:none!important}
+/* Hide old empty dock and pagination */
+#dock_apps,.swiper-pagination{display:none!important}
 
-/* Gesture bar — always inside shell */
+/* Bottom gesture bar remains entirely on the black bezel */
 #phone_home{
   position:absolute!important;
-  left:103px!important;
-  top:548px!important;
+  left:107px!important;
+  top:566px!important;
   width:86px!important;
   height:5px!important;
   margin:0!important;
@@ -267,9 +292,17 @@
   opacity:.86!important;
 }
 #phone_home:after{display:none!important}
-#phone_close{position:absolute!important;width:22px!important;height:4px!important;left:135px!important;top:6px!important;margin:0!important;border-radius:5px!important;background:#4d5866!important;opacity:.35!important}
+#phone_close{position:absolute!important;width:22px!important;height:4px!important;left:139px!important;top:6px!important;margin:0!important;border-radius:5px!important;background:#4d5866!important;opacity:.32!important}
 
-#phone_error,#app_bg,#app_bg_v2{width:262px!important;height:494px!important;border-radius:31px!important;overflow:hidden!important}
+/* Apps opened inside the exact same clipped screen */
+#phone_error,#app_bg,#app_bg_v2{
+  position:absolute!important;
+  inset:0!important;
+  width:266px!important;
+  height:492px!important;
+  border-radius:31px!important;
+  overflow:hidden!important;
+}
 #phone_msg_box{margin:145px auto 0!important;max-width:200px!important;border-radius:15px!important;box-shadow:0 18px 40px rgba(0,0,0,.38)!important}
 #PhoneButton{filter:drop-shadow(0 5px 8px rgba(0,0,0,.35));transition:transform .16s ease}#PhoneButton:hover{transform:scale(1.08)}
 
