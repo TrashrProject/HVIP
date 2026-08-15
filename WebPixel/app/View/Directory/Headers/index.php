@@ -20,4 +20,5 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0uJzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
     <link rel="stylesheet" href="<?php echo CSS; ?>/index/index.css?<?php echo time(); ?>">
     <link rel="stylesheet" href="<?php echo CSS; ?>/index/index-enhancements.css?<?php echo time(); ?>">
+    <link rel="stylesheet" href="<?php echo CSS; ?>/index/index-polish-v2.css?<?php echo time(); ?>">
 </head>
