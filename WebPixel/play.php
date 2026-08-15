@@ -55,7 +55,7 @@ $html = str_replace(
 );
 
 $localhostShim = <<<'HTML'
-<link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?v=3">
+<link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?v=5">
 <script>
 (function () {
     window.swfobject = window.swfobject || { embedSWF: function () {} };
