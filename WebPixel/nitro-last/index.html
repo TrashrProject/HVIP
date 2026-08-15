@@ -79,6 +79,62 @@
             }
           }
         }).observe(document.documentElement, { childList: true, subtree: true });
+
+        // The old pack contains tens of thousands of images, but many legacy
+        // references use a wrong subdirectory. A service worker retries a 404
+        // by basename through WebPixel/asset-resolver.php.
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('./asset-sw.js', { scope: './' })
+            .then(() => navigator.serviceWorker.ready)
+            .then(() => {
+              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded')) {
+                sessionStorage.setItem('hvip-sw-reloaded', '1');
+                location.reload();
+              }
+            })
+            .catch(err => console.warn('[HVIP] Asset fallback worker unavailable:', err));
+        }
+
+        // Passive packet diagnostics: do not modify packets. This records the
+        // exact server header that Nitro saw immediately before a DataView
+        // parser exception, so the incompatible emulator composer can be fixed.
+        const NativeWebSocket = window.WebSocket;
+        window.__nitroPacketDiag = { last: null, recent: [] };
+        window.WebSocket = new Proxy(NativeWebSocket, {
+          construct(Target, args) {
+            const ws = Reflect.construct(Target, args);
+            ws.addEventListener('message', async (event) => {
+              try {
+                let buffer = null;
+                if (event.data instanceof ArrayBuffer) buffer = event.data;
+                else if (event.data instanceof Blob) buffer = await event.data.arrayBuffer();
+                else if (ArrayBuffer.isView(event.data)) buffer = event.data.buffer.slice(event.data.byteOffset, event.data.byteOffset + event.data.byteLength);
+                if (!buffer || buffer.byteLength < 6) return;
+
+                const view = new DataView(buffer);
+                const declaredLength = view.getUint32(0, false);
+                const header = view.getUint16(4, false);
+                const item = { header, declaredLength, bytes: buffer.byteLength, at: Date.now() };
+                window.__nitroPacketDiag.last = item;
+                window.__nitroPacketDiag.recent.push(item);
+                if (window.__nitroPacketDiag.recent.length > 20) window.__nitroPacketDiag.recent.shift();
+
+                if (declaredLength + 4 !== buffer.byteLength) {
+                  console.warn('[NitroDiag] Frame length mismatch', JSON.stringify(item));
+                }
+              } catch (_) {}
+            });
+            return ws;
+          }
+        });
+
+        const reportParserError = (message) => {
+          if (!/DataView|outside the bounds|Offset is outside/i.test(String(message || ''))) return;
+          console.error('[NitroDiag] PARSER_FAILURE_LAST_PACKET=' + JSON.stringify(window.__nitroPacketDiag.last));
+          console.error('[NitroDiag] RECENT_PACKETS=' + JSON.stringify(window.__nitroPacketDiag.recent));
+        };
+        window.addEventListener('error', event => reportParserError(event.message));
+        window.addEventListener('unhandledrejection', event => reportParserError(event.reason && (event.reason.stack || event.reason.message || event.reason)));
       })();
 
       const query = new URLSearchParams(window.location.search);
