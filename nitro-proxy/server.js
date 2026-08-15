@@ -10,6 +10,15 @@ const TCP_PORT = Number(process.env.EMU_PORT || 2021);
 const MAX_PACKET = 8 * 1024 * 1024;
 const TRACE = process.env.NITRO_TRACE !== '0';
 const TRACE_FILE = path.join(__dirname, 'trace.log');
+// Temporary compatibility quarantine. The current emulator sends header 687
+// immediately before Nitro throws a DataView bounds error. Keep it configurable
+// so it can be removed as soon as the composer is corrected server-side.
+const DROP_HEADERS = new Set(
+  String(process.env.NITRO_DROP_HEADERS || '687')
+    .split(',')
+    .map(v => Number(v.trim()))
+    .filter(Number.isInteger)
+);
 
 try { fs.writeFileSync(TRACE_FILE, '', 'utf8'); } catch (_) {}
 
@@ -26,6 +35,19 @@ log(`[NitroProxy] Listening on ws://${WS_HOST}:${WS_PORT}/`);
 log(`[NitroProxy] Forwarding to tcp://${TCP_HOST}:${TCP_PORT}`);
 log(`[NitroProxy] Packet trace ${TRACE ? 'enabled' : 'disabled'}`);
 log(`[NitroProxy] Trace file: ${TRACE_FILE}`);
+log(`[NitroProxy] Compatibility drop headers: ${[...DROP_HEADERS].join(', ') || 'none'}`);
+
+function packetInfo(buffer) {
+  if (!buffer || buffer.length < 6) return null;
+  try {
+    return {
+      declared: buffer.readUInt32BE(0),
+      header: buffer.readUInt16BE(4)
+    };
+  } catch (_) {
+    return null;
+  }
+}
 
 function describePacket(direction, buffer, sessionId) {
   if (!TRACE || !buffer || buffer.length < 6) return;
@@ -41,8 +63,6 @@ wss.on('connection', (ws, req) => {
   const remote = req.socket.remoteAddress || 'unknown';
   const sessionId = ++sessionCounter;
 
-  // Nitro can reconnect while the previous localhost socket is still alive.
-  // Keep only one game session so the emulator does not count duplicate users.
   if (activeSession) {
     log(`[NitroProxy] Replacing previous session ${activeSession.id} with ${sessionId}`);
     try { activeSession.ws.terminate(); } catch (_) {}
@@ -94,11 +114,15 @@ wss.on('connection', (ws, req) => {
       const frameLength = payloadLength + 4;
       if (incoming.length < frameLength) break;
 
-      // Copy the frame before slicing the accumulator. This prevents a later TCP
-      // chunk from sharing/mutating the same underlying view passed to ws.send.
       const packet = Buffer.from(incoming.subarray(0, frameLength));
       incoming = Buffer.from(incoming.subarray(frameLength));
       describePacket('S->C', packet, sessionId);
+
+      const info = packetInfo(packet);
+      if (info && DROP_HEADERS.has(info.header)) {
+        log(`[COMPAT] Session ${sessionId}: dropped S->C header=${info.header} payload=${info.declared} to protect Nitro parser`);
+        continue;
+      }
 
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(packet, { binary: true }, (err) => {
