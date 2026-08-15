@@ -12,7 +12,7 @@
       const view = new DataView(buffer);
       const payload = view.getUint32(0, false);
       const header = view.getUint16(4, false);
-      const bytes = new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 32));
+      const bytes = new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 64));
       const hex = Array.from(bytes).map(v => v.toString(16).padStart(2, '0')).join(' ');
       return { header, payload, bytes: buffer.byteLength, hex, at: Math.round(performance.now()) };
     } catch (_) {
@@ -60,8 +60,13 @@
     if (!/(Error parsing message|DataView|Offset is outside the bounds|reading ['\"]slice['\"])/i.test(text)) return;
 
     reporting = true;
-    native.error('[NitroDebug] PARSER ERROR - LAST PACKET =', window.__lastNitroPacket || null);
-    native.error('[NitroDebug] LAST 12 PACKETS =', history.slice(-12));
+    const last = window.__lastNitroPacket || null;
+    const last12 = history.slice(-12);
+    native.error('[NitroDebug] PARSER_ERROR_LAST_PACKET_JSON=' + JSON.stringify(last));
+    native.error('[NitroDebug] LAST_12_PACKETS_JSON=' + JSON.stringify(last12));
+    if (last) {
+      native.error('[NitroDebug] SUSPECT_HEADER=' + last.header + ' PAYLOAD=' + last.payload + ' BYTES=' + last.bytes);
+    }
     reporting = false;
   }
 
