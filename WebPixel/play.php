@@ -13,6 +13,31 @@ endif;
 
 $PageName = "Play";
 
+// Pick an apartment automatically for localhost testing.
+// Priority: explicit ?room=ID -> first apartment owned by the logged user ->
+// first existing apartment in the RP database.
+$autoRoomId = 0;
+if (isset($_GET['room']) && is_numeric($_GET['room'])) {
+    $autoRoomId = max(0, (int) $_GET['room']);
+}
+
+if ($autoRoomId <= 0 && isset($UData['id'])) {
+    $uid = (int) $UData['id'];
+    $roomResult = $DB->Query("SELECT room_id FROM `play_apartments_owned` WHERE owner = '" . $uid . "' AND room_id > 0 ORDER BY id ASC LIMIT 1");
+    if ($roomResult && mysqli_num_rows($roomResult) > 0) {
+        $roomRow = mysqli_fetch_assoc($roomResult);
+        $autoRoomId = (int) $roomRow['room_id'];
+    }
+}
+
+if ($autoRoomId <= 0) {
+    $roomResult = $DB->Query("SELECT room_id FROM `play_apartments_owned` WHERE room_id > 0 ORDER BY id ASC LIMIT 1");
+    if ($roomResult && mysqli_num_rows($roomResult) > 0) {
+        $roomRow = mysqli_fetch_assoc($roomResult);
+        $autoRoomId = (int) $roomRow['room_id'];
+    }
+}
+
 // The original client template contains the complete RDP RP UI (HUD, phone,
 // commands, stats, jobs, taxi, gangs, etc.). Capture it so localhost-only
 // substitutions can be applied without destroying that integration.
@@ -20,7 +45,12 @@ ob_start();
 require_once CLIENT . 'client.php';
 $html = ob_get_clean();
 
-$localNitro = Config::$URL . '/nitro-last/index.html?sso=';
+$localNitro = Config::$URL . '/nitro-last/index.html?';
+if ($autoRoomId > 0) {
+    $localNitro .= 'room=' . $autoRoomId . '&';
+}
+$localNitro .= 'sso=';
+
 $html = str_replace(
     array(
         'https://nitro.habbovip.us/index.html?sso=',
