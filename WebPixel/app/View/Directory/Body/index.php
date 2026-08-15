@@ -1,6 +1,6 @@
 <?php
 /**
- * Velora RP - modern Habbo RP landing / login / registration.
+ * Velora RP - landing, login and registration.
  */
 
 $registeredUsers = '0';
@@ -12,143 +12,211 @@ try {
         $onlineUsers = $UserMG->GetStatData('users_online');
     }
 } catch (Throwable $e) {
-    // La page reste accessible même si les statistiques sont indisponibles.
+    // La page reste disponible même si les statistiques sont indisponibles.
 }
 ?>
-<body class="velora-home">
-<div class="ambient-bg" aria-hidden="true">
-    <div class="ambient-glow glow-one"></div>
-    <div class="ambient-glow glow-two"></div>
-    <div class="ambient-grid"></div>
-</div>
+<body class="velora-landing">
+<div class="page-noise" aria-hidden="true"></div>
 
-<div class="page-shell">
-    <header class="main-header">
+<div class="site-shell">
+    <header class="site-header">
         <a class="brand" href="<?php echo URL; ?>/" aria-label="Velora RP">
-            <span class="brand-symbol">V</span>
-            <span class="brand-text"><strong>VELORA</strong><small>ROLEPLAY</small></span>
+            <span class="brand-dot"></span>
+            <span class="brand-name">VELORA</span>
+            <span class="brand-rp">RP</span>
         </a>
 
-        <nav class="main-nav" aria-label="Navigation principale">
-            <a href="#universe">Univers</a>
-            <a href="#life">Vie RP</a>
-            <a href="#districts">Quartiers</a>
+        <nav class="nav-links" aria-label="Navigation principale">
+            <a href="#experience">Expérience</a>
+            <a href="#careers">Métiers</a>
+            <a href="#districts">Ville</a>
         </nav>
 
-        <div class="header-actions">
-            <div class="live-status"><span></span><?php echo htmlspecialchars($onlineUsers, ENT_QUOTES, 'UTF-8'); ?> en ligne</div>
-            <button type="button" class="header-login" data-open-auth="login">Connexion</button>
+        <div class="header-right">
+            <div class="online-chip">
+                <span class="online-dot"></span>
+                <strong><?php echo htmlspecialchars($onlineUsers, ENT_QUOTES, 'UTF-8'); ?></strong>
+                <span>en ligne</span>
+            </div>
+            <button type="button" class="small-login" data-open-auth="login">Connexion</button>
         </div>
     </header>
 
     <main>
-        <section class="hero" id="universe">
+        <section class="hero-section" id="experience">
             <div class="hero-copy">
-                <div class="hero-label"><span></span> HABBO ROLEPLAY • SAISON 01</div>
-                <h1>Ta vie virtuelle.<br><em>À ta façon.</em></h1>
-                <p>
-                    Velora est une ville RP où chaque joueur construit sa propre histoire.
-                    Travaille, gagne de l'argent, achète ton logement, crée ton business,
-                    rejoins la police ou impose ton nom dans la rue.
+                <span class="eyebrow">UNIVERS SOCIAL ROLEPLAY</span>
+                <h1>Une ville vivante.<br><span>Une histoire à toi.</span></h1>
+                <p class="hero-lead">
+                    Velora mélange le charme d'un univers social à la profondeur d'un vrai RP.
+                    Travaille, rencontre du monde, gagne de l'argent, achète ton logement, crée ton business
+                    ou choisis une vie plus risquée.
                 </p>
 
-                <div class="hero-buttons">
-                    <button type="button" class="btn-main" data-open-auth="register">Créer mon personnage <i class="fas fa-arrow-right"></i></button>
-                    <button type="button" class="btn-secondary" data-open-auth="login">J'ai déjà un compte</button>
+                <div class="hero-actions">
+                    <button type="button" class="primary-btn" data-open-auth="register">
+                        Créer mon personnage
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <a class="text-link" href="#careers">Découvrir la ville <i class="fas fa-chevron-down"></i></a>
                 </div>
 
                 <div class="hero-stats">
-                    <div><strong><?php echo htmlspecialchars($registeredUsers, ENT_QUOTES, 'UTF-8'); ?></strong><span>joueurs inscrits</span></div>
+                    <div><strong><?php echo htmlspecialchars($registeredUsers, ENT_QUOTES, 'UTF-8'); ?></strong><span>citoyens inscrits</span></div>
                     <div><strong>30+</strong><span>métiers & activités</span></div>
-                    <div><strong>3</strong><span>quartiers majeurs</span></div>
+                    <div><strong>3</strong><span>quartiers principaux</span></div>
                 </div>
             </div>
 
-            <div class="hero-visual">
-                <div class="city-card">
-                    <div class="city-card-top">
-                        <span class="city-pill"><i class="fas fa-map-marker-alt"></i> Downtown Velora</span>
-                        <span class="city-time">RP ONLINE</span>
-                    </div>
+            <div class="hero-scene" aria-label="Aperçu de l'univers Velora">
+                <div class="scene-card scene-police">
+                    <span class="scene-icon blue"><i class="fas fa-shield-alt"></i></span>
+                    <div><strong>Police</strong><small>Protéger ou enquêter</small></div>
+                </div>
+                <div class="scene-card scene-business">
+                    <span class="scene-icon gold"><i class="fas fa-store"></i></span>
+                    <div><strong>Business</strong><small>Créer et recruter</small></div>
+                </div>
+                <div class="scene-card scene-home">
+                    <span class="scene-icon green"><i class="fas fa-home"></i></span>
+                    <div><strong>Chez toi</strong><small>Studio, appart, villa</small></div>
+                </div>
 
-                    <div class="character-scene">
-                        <div class="scene-panel police"><i class="fas fa-shield-alt"></i><span>Police</span></div>
-                        <div class="scene-panel bank"><i class="fas fa-university"></i><span>Banque</span></div>
-                        <div class="scene-panel business"><i class="fas fa-store"></i><span>Business</span></div>
+                <div class="scene-city-name">
+                    <span class="live-pill"><i class="fas fa-circle"></i> LIVE</span>
+                    <div><strong>DOWNTOWN</strong><small>VELORA CITY</small></div>
+                </div>
 
-                        <div class="character-floor"></div>
-                        <div class="character-card character-one">
-                            <img src="<?php echo IMG; ?>/male.gif" alt="Citoyen Velora">
-                            <span class="character-name">Citoyen</span>
-                        </div>
-                        <div class="character-card character-two">
-                            <img src="<?php echo IMG; ?>/female.gif" alt="Citoyenne Velora">
-                            <span class="character-name">Citoyenne</span>
-                        </div>
-                    </div>
+                <div class="avatar-stage">
+                    <div class="avatar-shadow shadow-one"></div>
+                    <div class="avatar-shadow shadow-two"></div>
+                    <img class="avatar avatar-one" src="<?php echo IMG; ?>/male.gif" alt="Avatar homme">
+                    <img class="avatar avatar-two" src="<?php echo IMG; ?>/female.gif" alt="Avatar femme">
+                </div>
 
-                    <div class="city-card-footer">
-                        <div><i class="fas fa-briefcase"></i><span><strong>Choisis ton métier</strong><small>Progresse à ton rythme</small></span></div>
-                        <div><i class="fas fa-wallet"></i><span><strong>Construis ta richesse</strong><small>Cash, banque, biens</small></span></div>
-                    </div>
+                <div class="scene-floor"></div>
+                <div class="scene-building building-a"></div>
+                <div class="scene-building building-b"></div>
+                <div class="scene-building building-c"></div>
+            </div>
+        </section>
+
+        <section class="careers-section" id="careers">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">CHOISIS TA VOIE</span>
+                    <h2>Tu peux devenir qui tu veux.</h2>
+                </div>
+                <p>Pas de classe imposée. Ton métier, tes fréquentations et tes choix construisent ton personnage.</p>
+            </div>
+
+            <div class="career-grid">
+                <article class="career-card">
+                    <span class="career-number">01</span>
+                    <div class="career-icon blue"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Service public</h3>
+                    <p>Police, hôpital, justice, mairie. Fais carrière et gagne en responsabilités.</p>
+                    <div class="career-tags"><span>Police</span><span>Médecin</span><span>Avocat</span></div>
+                </article>
+
+                <article class="career-card">
+                    <span class="career-number">02</span>
+                    <div class="career-icon orange"><i class="fas fa-tools"></i></div>
+                    <h3>Métiers civils</h3>
+                    <p>Taxi, mécanique, livraison, pêche, mine et de nombreuses activités quotidiennes.</p>
+                    <div class="career-tags"><span>Taxi</span><span>Mécano</span><span>Livreur</span></div>
+                </article>
+
+                <article class="career-card">
+                    <span class="career-number">03</span>
+                    <div class="career-icon gold"><i class="fas fa-briefcase"></i></div>
+                    <h3>Entrepreneur</h3>
+                    <p>Monte ton commerce, recrute des joueurs et transforme ton activité en empire.</p>
+                    <div class="career-tags"><span>Restaurant</span><span>Garage</span><span>Club</span></div>
+                </article>
+
+                <article class="career-card dark-career">
+                    <span class="career-number">04</span>
+                    <div class="career-icon red"><i class="fas fa-user-secret"></i></div>
+                    <h3>Vie criminelle</h3>
+                    <p>Gangs, territoires, marché noir et braquages. Plus de gains, mais plus de risques.</p>
+                    <div class="career-tags"><span>Gang</span><span>Crime</span><span>Réseau</span></div>
+                </article>
+            </div>
+        </section>
+
+        <section class="districts-section" id="districts">
+            <div class="section-heading compact">
+                <div>
+                    <span class="eyebrow">VELORA CITY</span>
+                    <h2>Trois quartiers, trois façons de vivre.</h2>
                 </div>
             </div>
+
+            <div class="districts-grid">
+                <article class="district-card southbay-card">
+                    <div class="district-art">
+                        <span class="district-index">01</span>
+                        <i class="fas fa-industry"></i>
+                    </div>
+                    <div class="district-copy">
+                        <span class="district-type">QUARTIER POPULAIRE</span>
+                        <h3>Southbay</h3>
+                        <p>Garages, petits boulots, logements accessibles et une activité de rue permanente.</p>
+                    </div>
+                </article>
+
+                <article class="district-card downtown-card">
+                    <div class="district-art">
+                        <span class="district-index">02</span>
+                        <i class="fas fa-city"></i>
+                    </div>
+                    <div class="district-copy">
+                        <span class="district-type">CENTRE DE LA VILLE</span>
+                        <h3>Downtown</h3>
+                        <p>Mairie, banque, hôpital, commerces et entreprises. Le cœur vivant de Velora.</p>
+                    </div>
+                </article>
+
+                <article class="district-card celestia-card">
+                    <div class="district-art">
+                        <span class="district-index">03</span>
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <div class="district-copy">
+                        <span class="district-type">QUARTIER PREMIUM</span>
+                        <h3>Célestia</h3>
+                        <p>Villas, luxe, grands patrons et influence politique. L'objectif des plus ambitieux.</p>
+                    </div>
+                </article>
+            </div>
         </section>
 
-        <section class="rp-life" id="life">
-            <div class="section-head">
-                <div><span class="section-kicker">UNE VRAIE VIE RP</span><h2>Tout est connecté.</h2></div>
-                <p>Pas de niveaux inutiles : tes actions, ton métier, ton argent et ta réputation construisent ton personnage.</p>
-            </div>
+        <section class="join-section" id="auth-panel">
+            <div class="join-copy">
+                <span class="eyebrow">PREMIÈRE ARRIVÉE</span>
+                <h2>Commence avec presque rien.<br><span>Construis tout le reste.</span></h2>
+                <p>
+                    Ton personnage reçoit une identité, un logement de départ et de quoi commencer sa vie.
+                    Ensuite, tout dépend de toi.
+                </p>
 
-            <div class="feature-grid">
-                <article class="feature-card accent-blue"><div class="feature-icon"><i class="fas fa-briefcase"></i></div><strong>Métiers</strong><p>Taxi, mécanicien, médecin, livreur, pêcheur, avocat, policier et bien plus.</p><span>Travailler & évoluer</span></article>
-                <article class="feature-card accent-gold"><div class="feature-icon"><i class="fas fa-store"></i></div><strong>Entreprises</strong><p>Crée ton commerce, recrute des joueurs et bâtis une vraie économie locale.</p><span>Créer ton empire</span></article>
-                <article class="feature-card accent-red"><div class="feature-icon"><i class="fas fa-user-secret"></i></div><strong>Crime & gangs</strong><p>Territoires, marché noir, braquages et réputation. Chaque choix a ses risques.</p><span>Prendre le contrôle</span></article>
-                <article class="feature-card accent-green"><div class="feature-icon"><i class="fas fa-home"></i></div><strong>Vie quotidienne</strong><p>Appartement, véhicules, nourriture, banque, téléphone, loisirs et rencontres RP.</p><span>Construire ta vie</span></article>
-            </div>
-        </section>
-
-        <section class="district-section" id="districts">
-            <div class="section-head compact">
-                <div><span class="section-kicker">VELORA CITY</span><h2>Trois quartiers. Trois ambiances.</h2></div>
-            </div>
-
-            <div class="district-grid">
-                <article class="district-card">
-                    <div class="district-top"><span>01</span><i class="fas fa-industry"></i></div>
-                    <h3>Southbay</h3><p>Quartier populaire, garages, petits boulots, gangs et marché noir.</p>
-                    <div class="district-tags"><span>Populaire</span><span>Crime</span></div>
-                </article>
-                <article class="district-card featured">
-                    <div class="district-top"><span>02</span><i class="fas fa-city"></i></div>
-                    <h3>Downtown</h3><p>Le cœur de Velora : mairie, banque, hôpital, commerces et services publics.</p>
-                    <div class="district-tags"><span>Centre-ville</span><span>Business</span></div>
-                </article>
-                <article class="district-card">
-                    <div class="district-top"><span>03</span><i class="fas fa-gem"></i></div>
-                    <h3>Célestia</h3><p>Villas, luxe, clubs privés, grands patrons et réseaux d'influence.</p>
-                    <div class="district-tags"><span>Luxe</span><span>Influence</span></div>
-                </article>
-            </div>
-        </section>
-
-        <section class="auth-section" id="auth-panel">
-            <div class="auth-side-copy">
-                <span class="section-kicker">REJOINS VELORA</span>
-                <h2>Ton histoire commence ici.</h2>
-                <p>Crée ton personnage gratuitement et entre dans une ville où les autres joueurs font réellement partie de ton quotidien.</p>
-                <div class="starter-pack">
-                    <div><i class="fas fa-id-card"></i><span><strong>Identité citoyenne</strong><small>Ton personnage RP</small></span></div>
-                    <div><i class="fas fa-home"></i><span><strong>Logement de départ</strong><small>Ton premier chez-toi</small></span></div>
-                    <div><i class="fas fa-coins"></i><span><strong>Capital de départ</strong><small>Pour commencer ta vie</small></span></div>
+                <div class="starter-list">
+                    <div><span><i class="fas fa-id-card"></i></span><div><strong>Identité RP</strong><small>Ton pseudo devient ton personnage.</small></div></div>
+                    <div><span><i class="fas fa-home"></i></span><div><strong>Premier logement</strong><small>Un point de départ avant de viser plus haut.</small></div></div>
+                    <div><span><i class="fas fa-coins"></i></span><div><strong>Économie réelle</strong><small>Ton argent sert réellement à progresser.</small></div></div>
                 </div>
             </div>
 
             <div class="auth-card">
-                <div class="auth-header">
-                    <div><span>ESPACE JOUEUR</span><h2 id="auth-title">Connexion</h2></div>
-                    <div class="auth-avatar"><img src="<?php echo IMG; ?>/male.gif" alt="Avatar"></div>
+                <div class="auth-heading">
+                    <div>
+                        <span class="auth-kicker">ESPACE CITOYEN</span>
+                        <h2 id="auth-title">Connexion</h2>
+                    </div>
+                    <div class="auth-avatar-wrap">
+                        <img src="<?php echo IMG; ?>/male.gif" alt="Avatar Velora">
+                    </div>
                 </div>
 
                 <div class="auth-tabs" role="tablist" aria-label="Connexion ou inscription">
@@ -164,59 +232,57 @@ try {
                         <div class="auth-alert success"><i class="fas fa-check-circle"></i><span>Tu es bien déconnecté.</span></div>
                     <?php endif; ?>
 
-                    <label class="field-label" for="pz-login-uname">Pseudo</label>
-                    <div class="field-shell"><i class="fas fa-user"></i><input id="pz-login-uname" type="text" placeholder="Ton pseudo" required autocomplete="username" maxlength="18"></div>
+                    <label for="pz-login-uname">Pseudo</label>
+                    <div class="input-wrap"><i class="fas fa-user"></i><input id="pz-login-uname" type="text" placeholder="Ton pseudo" autocomplete="username" maxlength="18"></div>
 
-                    <label class="field-label" for="pz-login-pass">Mot de passe</label>
-                    <div class="field-shell"><i class="fas fa-lock"></i><input id="pz-login-pass" type="password" placeholder="Ton mot de passe" required autocomplete="current-password"><button class="password-toggle" type="button" data-toggle-password="pz-login-pass" aria-label="Afficher ou masquer le mot de passe"><i class="fas fa-eye"></i></button></div>
+                    <label for="pz-login-pass">Mot de passe</label>
+                    <div class="input-wrap"><i class="fas fa-lock"></i><input id="pz-login-pass" type="password" placeholder="Ton mot de passe" autocomplete="current-password"><button type="button" class="show-password" data-toggle-password="pz-login-pass" aria-label="Afficher ou masquer"><i class="fas fa-eye"></i></button></div>
 
-                    <label class="check-line"><input type="checkbox" name="pz_remember" value="1"><span>Rester connecté</span></label>
-                    <button id="subrmit-login" type="button" class="auth-submit"><span>Se connecter</span><i class="fas fa-arrow-right"></i></button>
-                    <p class="auth-switch-copy">Nouveau sur Velora ? <button type="button" id="show-register" data-open-auth="register">Créer un compte</button></p>
+                    <label class="remember-row"><input type="checkbox" name="pz_remember" value="1"><span>Rester connecté</span></label>
+
+                    <button id="subrmit-login" type="button" class="auth-submit"><span>Entrer à Velora</span><i class="fas fa-arrow-right"></i></button>
+                    <p class="switch-copy">Pas encore de personnage ? <button type="button" id="show-register" data-open-auth="register">Créer un compte</button></p>
                 </div>
 
                 <div id="register-box" class="auth-form" data-auth-view="register">
                     <div id="e-register-message" class="auth-alert error" style="display:none;"><i class="fas fa-exclamation-circle"></i><span id="e-register-msg"></span></div>
                     <div id="register-message" class="auth-alert success" style="display:none;"><i class="fas fa-check-circle"></i><span id="register-msg"></span></div>
 
-                    <label class="field-label" for="register-username">Pseudo RP</label>
-                    <div class="field-shell"><i class="fas fa-id-card"></i><input id="register-username" type="text" placeholder="3 à 18 caractères" required autocomplete="username" maxlength="18"></div>
-                    <small class="field-hint">Lettres et chiffres, sans espace.</small>
+                    <label for="register-username">Pseudo RP</label>
+                    <div class="input-wrap"><i class="fas fa-id-card"></i><input id="register-username" type="text" placeholder="3 à 18 caractères" autocomplete="username" maxlength="18"></div>
+                    <small class="input-hint">Lettres et chiffres uniquement, sans espace.</small>
 
-                    <label class="field-label" for="email">Adresse e-mail</label>
-                    <div class="field-shell"><i class="fas fa-envelope"></i><input id="email" type="email" placeholder="ton@email.fr" required autocomplete="email"></div>
+                    <label for="email">Adresse e-mail</label>
+                    <div class="input-wrap"><i class="fas fa-envelope"></i><input id="email" type="email" placeholder="ton@email.fr" autocomplete="email"></div>
 
-                    <label class="field-label" for="register-password">Mot de passe</label>
-                    <div class="field-shell"><i class="fas fa-key"></i><input id="register-password" type="password" placeholder="6 caractères minimum" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="register-password" aria-label="Afficher ou masquer le mot de passe"><i class="fas fa-eye"></i></button></div>
-                    <div class="password-meter" aria-hidden="true"><span id="password-strength-bar"></span></div>
-                    <small id="password-strength-copy" class="field-hint">Sécurité du mot de passe</small>
+                    <label for="register-password">Mot de passe</label>
+                    <div class="input-wrap"><i class="fas fa-key"></i><input id="register-password" type="password" placeholder="6 caractères minimum" autocomplete="new-password"><button type="button" class="show-password" data-toggle-password="register-password" aria-label="Afficher ou masquer"><i class="fas fa-eye"></i></button></div>
 
-                    <label class="field-label" for="register-password-confirm">Confirmation</label>
-                    <div class="field-shell"><i class="fas fa-check"></i><input id="register-password-confirm" type="password" placeholder="Retape ton mot de passe" autocomplete="new-password" required></div>
+                    <label for="register-password-confirm">Confirmer</label>
+                    <div class="input-wrap"><i class="fas fa-check"></i><input id="register-password-confirm" type="password" placeholder="Retape ton mot de passe" autocomplete="new-password"></div>
 
-                    <div class="gender-picker" aria-label="Genre du personnage">
-                        <label class="gender-option"><input id="genre-m" type="radio" name="gender" value="M" checked><span><img src="<?php echo IMG; ?>/male.gif" alt=""> Homme</span></label>
-                        <label class="gender-option"><input id="genre-f" type="radio" name="gender" value="F"><span><img src="<?php echo IMG; ?>/female.gif" alt=""> Femme</span></label>
+                    <div class="gender-row">
+                        <label class="gender-choice"><input id="genre-m" type="radio" name="gender" value="M" checked><span><img src="<?php echo IMG; ?>/male.gif" alt=""> Homme</span></label>
+                        <label class="gender-choice"><input id="genre-f" type="radio" name="gender" value="F"><span><img src="<?php echo IMG; ?>/female.gif" alt=""> Femme</span></label>
                     </div>
 
-                    <label class="check-line rules-check"><input id="rp-rules" type="checkbox" value="1"><span>J'accepte les règles RP et le respect des autres joueurs.</span></label>
-                    <button id="subrmit-register" type="button" class="auth-submit accent"><span>Créer mon personnage</span><i class="fas fa-user-plus"></i></button>
-                    <p class="auth-switch-copy">Déjà inscrit ? <button type="button" id="show-login" data-open-auth="login">Se connecter</button></p>
+                    <label class="rules-row"><input id="rp-rules" type="checkbox" value="1"><span>J'accepte les règles de roleplay et le respect des autres joueurs.</span></label>
+
+                    <button id="subrmit-register" type="button" class="auth-submit register-submit"><span>Créer mon personnage</span><i class="fas fa-user-plus"></i></button>
+                    <p class="switch-copy">Déjà inscrit ? <button type="button" id="show-login" data-open-auth="login">Se connecter</button></p>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="footer">
-        <a class="brand footer-brand" href="<?php echo URL; ?>/"><span class="brand-symbol">V</span><span class="brand-text"><strong>VELORA</strong><small>ROLEPLAY</small></span></a>
-        <p>Une ville virtuelle, des choix réels en RP.</p>
+    <footer class="site-footer">
+        <div class="footer-brand"><span class="brand-dot"></span><strong>VELORA RP</strong></div>
+        <p>Une ville sociale. Une vraie vie RP. Ton histoire.</p>
         <span>© <?php echo date('Y'); ?> Velora RP</span>
     </footer>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
 <script src="<?php echo DY; ?>/js/index.js?<?php echo time(); ?>" type="text/javascript"></script>
 </body>
 </html>
