@@ -40,7 +40,6 @@
                 </div>
             </div>
 
-            <!-- Functional applications already present in the pack -->
             <?php
                 require 'resources/apps/Calendar.html';
                 require 'resources/apps/Gallery.html';
@@ -68,51 +67,23 @@
                 <div id="screen_apps" class="swiper-wrapper">
                     <div class="swiper-slide">
                         <div id="columns-full" class="rdp-app-grid">
-                            <div class="column swiper-no-swiping">
-                                <div class="appicon count rp-calendar" data-app="_Calendar" data-col-moves="0"><span class="rp-app-glyph">15</span></div>
-                                <div class="app_name" data-name-app="Calendrier">Calendrier</div>
-                            </div>
-                            <div class="column swiper-no-swiping">
-                                <div class="appicon count rp-gallery" data-app="_Gallery" data-col-moves="0"><span class="rp-app-glyph">◆</span></div>
-                                <div class="app_name" data-name-app="Photos">Photos</div>
-                            </div>
-                            <div class="column swiper-no-swiping">
-                                <div class="appicon count rp-map" data-app="_Maps" data-col-moves="0"><span class="rp-app-glyph">⌖</span></div>
-                                <div class="app_name" data-name-app="Carte">Carte</div>
-                            </div>
-                            <div class="column swiper-no-swiping">
-                                <div class="appicon count rp-calc" data-app="_Calculator" data-col-moves="0"><span class="rp-app-glyph">±</span></div>
-                                <div class="app_name" data-name-app="Calculatrice">Calculatrice</div>
-                            </div>
-                            <div class="column swiper-no-swiping">
-                                <div class="appicon count rp-settings" data-app="_Settings" data-col-moves="0"><span class="rp-app-glyph">⚙</span></div>
-                                <div class="app_name" data-name-app="Réglages">Réglages</div>
-                            </div>
-                            <div class="column swiper-no-swiping">
-                                <div class="appicon count rp-health" data-app="_Health" data-col-moves="0"><span class="rp-app-glyph">♥</span></div>
-                                <div class="app_name" data-name-app="Santé">Santé</div>
-                            </div>
-                            <div class="column swiper-no-swiping rdp-last-app">
-                                <div class="appicon count rp-services" data-app="_Services" data-col-moves="0"><span class="rp-app-glyph">+</span></div>
-                                <div class="app_name" data-name-app="Services">Services</div>
-                            </div>
+                            <div class="column swiper-no-swiping"><div class="appicon count rp-calendar" data-app="_Calendar" data-col-moves="0"><span class="rp-app-glyph">15</span></div><div class="app_name" data-name-app="Calendrier">Calendrier</div></div>
+                            <div class="column swiper-no-swiping"><div class="appicon count rp-gallery" data-app="_Gallery" data-col-moves="0"><span class="rp-app-glyph">◆</span></div><div class="app_name" data-name-app="Photos">Photos</div></div>
+                            <div class="column swiper-no-swiping"><div class="appicon count rp-map" data-app="_Maps" data-col-moves="0"><span class="rp-app-glyph">⌖</span></div><div class="app_name" data-name-app="Carte">Carte</div></div>
+                            <div class="column swiper-no-swiping"><div class="appicon count rp-calc" data-app="_Calculator" data-col-moves="0"><span class="rp-app-glyph">±</span></div><div class="app_name" data-name-app="Calculatrice">Calculatrice</div></div>
+                            <div class="column swiper-no-swiping"><div class="appicon count rp-settings" data-app="_Settings" data-col-moves="0"><span class="rp-app-glyph">⚙</span></div><div class="app_name" data-name-app="Réglages">Réglages</div></div>
+                            <div class="column swiper-no-swiping"><div class="appicon count rp-health" data-app="_Health" data-col-moves="0"><span class="rp-app-glyph">♥</span></div><div class="app_name" data-name-app="Santé">Santé</div></div>
+                            <div class="column swiper-no-swiping rdp-last-app"><div class="appicon count rp-services" data-app="_Services" data-col-moves="0"><span class="rp-app-glyph">+</span></div><div class="app_name" data-name-app="Services">Services</div></div>
                         </div>
                     </div>
                 </div>
 
+                <div class="swiper-pagination" aria-hidden="true"></div>
+
                 <div id="dock_apps" class="rdp-dock">
-                    <div class="rdp-dock-app">
-                        <div class="appicon count rp-messages" data-app="_Messages" data-col-moves="0"><span class="rp-app-glyph">•••</span></div>
-                        <span>Messages</span>
-                    </div>
-                    <div class="rdp-dock-app">
-                        <div class="appicon count rp-whatsapp" data-app="_WhatsApp" data-col-moves="0"><span class="rp-app-glyph">☎</span></div>
-                        <span>WhatsApp</span>
-                    </div>
-                    <div class="rdp-dock-app">
-                        <div class="appicon count rp-contacts" data-app="_Contacts" data-col-moves="0"><span class="rp-app-glyph">●</span></div>
-                        <span>Contacts</span>
-                    </div>
+                    <div class="rdp-dock-app"><div class="appicon count rp-messages" data-app="_Messages" data-col-moves="0"><span class="rp-app-glyph">•••</span></div><span>Messages</span></div>
+                    <div class="rdp-dock-app"><div class="appicon count rp-whatsapp" data-app="_WhatsApp" data-col-moves="0"><span class="rp-app-glyph">☎</span></div><span>WhatsApp</span></div>
+                    <div class="rdp-dock-app"><div class="appicon count rp-contacts" data-app="_Contacts" data-col-moves="0"><span class="rp-app-glyph">●</span></div><span>Contacts</span></div>
                 </div>
             </div>
         </div>
@@ -128,7 +99,7 @@
     function lockPhoneGrid(){
         document.querySelectorAll('#phone .column').forEach(function(el){
             el.setAttribute('draggable','false');
-            el.addEventListener('dragstart', function(e){ e.preventDefault(); });
+            el.addEventListener('dragstart', function(e){ e.preventDefault(); }, { once:false });
         });
     }
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lockPhoneGrid);
