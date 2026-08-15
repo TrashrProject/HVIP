@@ -1,0 +1,46 @@
+# Build / compilations
+bin/
+obj/
+build/
+dist/
+Debug/
+Release/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# Logs / caches
+logs/
+log/
+cache/
+temp/
+tmp/
+*.log
+
+# Dépendances
+node_modules/
+vendor/
+
+# Fichiers système
+Thumbs.db
+.DS_Store
+
+# Secrets / configuration locale
+.env
+.env.*
+config.local.*
+secrets.*
+*.key
+
+# Archives / sauvegardes
+*.zip
+*.rar
+*.7z
+*.bak
+*.dump
+packages/
+*.nupkg
+
+packages/

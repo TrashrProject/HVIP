@@ -1,46 +1,35 @@
-# Build / compilations
-bin/
-obj/
-build/
-dist/
-Debug/
-Release/
-
+@'
 # IDE
-.vs/
-.vscode/
-.idea/
+**/.vs/
+**/.idea/
+**/.vscode/
 
-# Logs / caches
-logs/
-log/
-cache/
-temp/
-tmp/
+# Builds
+**/bin/
+**/obj/
+**/Debug/
+**/Release/
+
+# Dépendances lourdes régénérables
+**/node_modules/
+**/packages/
+
+# Cache / temporaire
+**/cache/
+**/temp/
+**/tmp/
+**/logs/
+**/log/
 *.log
 
-# Dépendances
-node_modules/
-vendor/
-
-# Fichiers système
+# Windows / macOS
 Thumbs.db
 .DS_Store
 
-# Secrets / configuration locale
+# Secrets
 .env
 .env.*
-config.local.*
+!.env.example
 secrets.*
 *.key
-
-# Archives / sauvegardes
-*.zip
-*.rar
-*.7z
-*.bak
-*.dump
-packages/
-*.nupkg
-
-packages/
+'@ | Set-Content -Path ".gitignore" -Encoding UTF8
