@@ -1,112 +1,101 @@
 <?php
 /**
- * This API Back-end system was design and developed for RDP Services.
- * Developed by P3x & Jeihden.
- * All rights reserved PZ API Copyright (c) 2020.
- *
+ * PZ API database manager.
+ * Local XAMPP defaults: 127.0.0.1:3306, root, no password, database hv_rp.
  */
 
 class DBConManager
 {
-    protected $host = 'localhost:3306';    // DB Host
-    protected $user = 'root';         // DB User
-    protected $pass = 'Hv_oLa.323.';             // DB Pass
-    protected $db = 'hv_rp';        // DB Name
+    protected $host = '127.0.0.1';
+    protected $port = 3306;
+    protected $user = 'root';
+    protected $pass = '';
+    protected $db = 'hv_rp';
     protected $pz_conn = null;
 
-    function connect() {
-        $con = mysqli_connect($this->host, $this->user, $this->pass, $this->db);
-        if (!$con):
-            die('Could not connect to database!');
-        else:
-            $this->pz_conn = $con;
-        endif;
+    public function connect()
+    {
+        if ($this->pz_conn instanceof mysqli) {
+            return $this->pz_conn;
+        }
+
+        $con = mysqli_connect($this->host, $this->user, $this->pass, $this->db, $this->port);
+        if (!$con) {
+            throw new RuntimeException('Database connection failed: ' . mysqli_connect_error());
+        }
+
+        mysqli_set_charset($con, 'utf8mb4');
+        $this->pz_conn = $con;
         return $this->pz_conn;
     }
 
-    function close() {
-        mysqli_close($this->pz_conn);
-        echo 'Connection closed!';
+    public function close()
+    {
+        if ($this->pz_conn instanceof mysqli) {
+            mysqli_close($this->pz_conn);
+            $this->pz_conn = null;
+        }
     }
 }
 
-class DBManager extends DBConManager {
-
-    public function Con(){
-        $Con = new DBConManager();
-        return $Con->connect();
+class DBManager extends DBConManager
+{
+    public function Con()
+    {
+        return $this->connect();
     }
 
-   // Select Function
-   public function Select($T, $C = '*', $W = null, $E = null) {
-       // Query String
-       $Q = 'SELECT '. $C .' FROM  '. $T;
+    public function Select($T, $C = '*', $W = null, $E = null)
+    {
+        $Q = 'SELECT ' . $C . ' FROM ' . $T;
+        if ($W !== null && $W !== '') {
+            $Q .= ' WHERE ' . $W;
+        }
+        if ($E !== null && $E !== '') {
+            $Q .= ' ' . $E;
+        }
 
-       // Where Params
-       if($W != null):
-           $Q .= ' WHERE '. $W;
-       endif;
-
-       // Extras Params
-       if($E != null):
-           $Q .= ' '. $E;
-       endif;
-
-       // Execute Query
-       $R = mysqli_query($this->Con(), $Q);
-
-       // Verify result
-       if(mysqli_num_rows($R) > 0):
-           // Return Result
-           return mysqli_fetch_assoc($R);
-       else:
-           // Return null
-           return null;
-       endif;
-   }
-
-    // Count Function
-    public function Count($T, $C = '*', $W = null, $E = null) {
-        // Query String
-        $Q = 'SELECT '. $C .' FROM  '. $T;
-
-        // Where Params
-        if($W != null):
-            $Q .= ' WHERE '. $W;
-        endif;
-
-        // Extras Params
-        if($E != null):
-            $Q .= ' '. $E;
-        endif;
-
-        // Execute Query
         $R = mysqli_query($this->Con(), $Q);
+        if ($R === false) {
+            throw new RuntimeException('Database query failed: ' . mysqli_error($this->Con()));
+        }
 
-        // Return result
+        return mysqli_num_rows($R) > 0 ? mysqli_fetch_assoc($R) : null;
+    }
+
+    public function Count($T, $C = '*', $W = null, $E = null)
+    {
+        $Q = 'SELECT ' . $C . ' FROM ' . $T;
+        if ($W !== null && $W !== '') {
+            $Q .= ' WHERE ' . $W;
+        }
+        if ($E !== null && $E !== '') {
+            $Q .= ' ' . $E;
+        }
+
+        $R = mysqli_query($this->Con(), $Q);
+        if ($R === false) {
+            throw new RuntimeException('Database query failed: ' . mysqli_error($this->Con()));
+        }
+
         return mysqli_num_rows($R);
     }
 
-    // Count Function
-    public function Update($T, $P, $W = null, $E = null) {
-        // Query String
-        $Q = 'UPDATE '. $T .' SET '. $P;
+    public function Update($T, $P, $W = null, $E = null)
+    {
+        $Q = 'UPDATE ' . $T . ' SET ' . $P;
+        if ($W !== null && $W !== '') {
+            $Q .= ' WHERE ' . $W;
+        }
+        if ($E !== null && $E !== '') {
+            $Q .= ' ' . $E;
+        }
 
-        // Where Params
-        if($W != null):
-            $Q .= ' WHERE '. $W;
-        endif;
-
-        // Extras Params
-        if($E != null):
-            $Q .= ' '. $E;
-        endif;
-
-        // Execute Query
         $R = mysqli_query($this->Con(), $Q);
+        if ($R === false) {
+            throw new RuntimeException('Database update failed: ' . mysqli_error($this->Con()));
+        }
 
-        // Return result
         return true;
     }
-
 }
