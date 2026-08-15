@@ -1,0 +1,27 @@
+<div id="app_Calculator" class="AppLayout">
+	<div id="app_bg" class="app_Calculator" style="background-color: #999a9c;">
+		<form name="calculator">
+			<div class="block"></div>
+		    <input type="textfield" name="ans" value="" autocomplete="off" readonly>
+		    <input type="button" value="7" onClick="document.calculator.ans.value+='7'" style="background-color:#c7ccd6;color:black;">
+		    <input type="button" value="8" onClick="document.calculator.ans.value+='8'" style="background-color:#c7ccd6;color:black;">
+		    <input type="button" value="9" onClick="document.calculator.ans.value+='9'" style="background-color:#c7ccd6;color:black;">
+		    <input type="button" value="+" onClick="document.calculator.ans.value+='+'">
+		    <br>
+		    <input type="button" value="4" onClick="document.calculator.ans.value+='4'" style="background-color:#c7ccd6;color:black;">
+		    <input type="button" value="5" onClick="document.calculator.ans.value+='5'" style="background-color:#c7ccd6;color:black;">
+		    <input type="button" value="6" onClick="document.calculator.ans.value+='6'" style="background-color:#c7ccd6;color:black;">
+		    <input type="button" value="-" onClick="document.calculator.ans.value+='-'">
+		    <br>
+		    <input type="button" value="1" onClick="document.calculator.ans.value+='1'" style="background-color:#c7ccd6;color:black;">
+		    <input type="button" value="2" onClick="document.calculator.ans.value+='2'" style="background-color:#c7ccd6;color:black;">
+		    <input type="button" value="3" onClick="document.calculator.ans.value+='3'" style="background-color:#c7ccd6;color:black;">
+		    <input type="button" value="X" onClick="document.calculator.ans.value+='*'">
+		    <br>
+		    <input type="button" value="0" onClick="document.calculator.ans.value+='0'" style="background-color:#c7ccd6;color:black;">
+		    <input type="reset" value="C">
+		    <input type="button" value="=" onClick="document.calculator.ans.value=eval(document.calculator.ans.value)">
+		    <input type="button" value="/" onClick="document.calculator.ans.value+='/'">
+		    </form>
+	</div>
+</div>

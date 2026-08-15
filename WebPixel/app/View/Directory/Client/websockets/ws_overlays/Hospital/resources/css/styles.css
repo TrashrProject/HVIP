@@ -1,0 +1,23 @@
+#HospBotiq
+{
+    display:none;
+    width: 356px;
+    height: auto;
+    z-index: 2115;
+    position: absolute;
+    left: 500px;
+    top: 100px;
+}
+#HospBotiqMsg{
+    font-size: 12px;
+    background-color: #3d3d3d;
+    margin-top: -10px;
+}
+#HospBotiq td {
+    width: 155px;
+    padding: 5px;
+}
+#HospBotiqMsg {
+    color:red;
+    font-weight: bold;
+}

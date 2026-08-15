@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/resources/assets/css/bootstrap.min.css" type="text/css">
+        <link href="/resources/assets/css/login.css" rel="stylesheet">
+        <title>AnxRP || Registration</title>
+    </head>
+    <body>
+        <div class="landing"></div>
+        <div class="login">
+            <img src="/resources/assets/img/logo.png">
+                        <form method="post">
+                <input type="text" name="username" placeholder="User-Name">
+                <input type="mail" name="mail" placeholder="Email">
+                <input type="password" name="password" placeholder="Password">
+                <input type="password" name="password_confirmation" placeholder="Password Again">
+                <input type="hidden" name="_token" value="QMYWoFk7eJKi6jxgGy6qXYRIPhSuCsbGfCd5Rbza">
+                <p>Already a member?  <a href="/index">Click here</a></p>
+                <input type="submit" value="Register">
+            </form>
+            <div class="notify">
+                <b>Attention all users</b>
+                We are still in development, therefore the website as well as the client is undergoing changes actively.  Be wary of bugs you may encounter.
+            </div>
+        </div>
+        <footer>
+            Designed by <a>Francis Joseph</a>
+        </footer>
+    </body>
+</main> <footer>
+    <div id="content" style="width: 960px;" class="container_12">
+        <div class="grid_7" id="left">
+            Powered by <font color="#dcdcdc">Retaliation 2</font> by <font color="#dcdcdc">Leader (Chris)</font>
+        </div>
+        <div class="grid_5" id="right">
+          Designed by <font color="#dcdcdc">Habbo.so</font>
+        </div>
+    </div>
+    </div>
+</footer>
+</body>

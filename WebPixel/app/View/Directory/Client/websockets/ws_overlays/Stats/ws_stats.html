@@ -1,0 +1,331 @@
+﻿<!-- Styles -->
+<link href="<?php echo WS_DY;?>/ws_overlays/Stats/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+
+<div class="_3lzqa 1" style="top: 15px; left: 100px; float: left; width: 168px;">
+  <table width="100%">
+    <tbody>
+      <tr>
+        <td width="2%">
+          <div class="_1H8A-" style="background-image: url(&quot;https://nitro-imager.kubbo.ch/?figure=&amp;gesture=sml&quot;);">
+            <div class="C6EXx">1</div>
+          </div>
+        </td>
+        <td>
+          <div class="_1KZQE">{Username}</div>
+          <div class="KoOS1">
+            <div class="_3XMvP">
+              <div class="_1OxAA _1TDMMG">
+                <div class="_28X2E">100/100</div>
+              </div>
+            </div>
+            <div class="_3XMvP">
+              <div class="_1OxAA _1ft4Z">
+                <div class="_28X2E">100/100</div>
+              </div>
+            </div>
+            <div class="_3XMvP _2pHv3">
+              <div class="_1OxAA _2pHv3 _1pu34" style="max-width: -webkit-fill-available;"></div>
+            </div>
+            <div class="money">$ 000,000,000</div>
+            <div class="platinos">0 <img src="https://dynamics.habbovip.us/img/extras/platinos_icon_s.png"></div>
+            <div class="stars"></div>
+          </div>
+        </td>
+      </tr>
+      
+      <tr>
+        <td>
+          <!-- Menu -->
+          <div class="_2Gc5C" style="display: none;">
+            <div class="yyMue" data-id="macros">
+              <div class="_3Hm0I _2gtfF" data-balloon="Macros" data-balloon-pos="left"></div>
+            </div>
+            <div class="yyMue" data-id="inventory">
+              <div class="_3Hm0I VvAg4" data-balloon="Inventory" data-balloon-pos="left"></div>
+            </div>
+            <div class="yyMue" data-id="settings">
+              <div class="_3Hm0I _38au-" data-balloon="Socket Settings" data-balloon-pos="right"></div>
+            </div>
+          </div>
+          <!-- Inventario -->
+          <div class="_2oQsm" style="display: none;"></div>
+          <!-- Socket Settings -->
+          <div class="_3dJ5E" style="display: none;">
+            <div class="_3y0hx">Socket Settings</div>
+            <div class="_11pBq">
+              <input type="checkbox" id="macros-toggle" value="on"> Macros enabled
+            </div>
+            <div class="_11pBq">
+              <input type="checkbox" id="gta-screens-toggle" value="on"> GTA busted/wasted screen enabled
+            </div>
+            <div class="_11pBq">
+              <input type="checkbox" id="livefeed-toggle" value="on"> Livefeed enabled
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="_3lzqa 2" style="top: 15px; left: 335px; width: 220px;display: none;">
+  <table width="100%">
+    <tbody>
+      <tr>
+        <td width="2%">
+          <div class="_1KZQE _3scA7"></div>
+          <div class="KoOS1 _6FKVr">
+            <div class="_3XMvP">
+              <div class="_1OxAA _1TDMMG">
+                <div class="_28X2E _3pWbT"></div>
+              </div>
+            </div>
+            <div class="_3XMvP">
+              <div class="_1OxAA _1ft4Z">
+                <div class="_28X2E _3pWbT"></div>
+              </div>
+            </div>
+            <div class="_3XMvP _2pHv3">
+              <div class="_1OxAA _2pHv3 _1pu34" style="max-width: -webkit-fill-available;"></div>
+            </div>
+          </div>
+        </td>
+
+        <td>
+          <div class="_1H8A- _3scA7">
+            <div class="C6EXx"></div><!-- lvl -->
+            <div class="_2WRhy"></div><!-- X -->
+            <div class="_3olRi" data-balloon="Fijar Target" data-balloon-pos="right"></div><!-- SAYNL -->
+          </div>
+        </td>
+
+        <td>
+          <div class="_1H8A- _GangStat" style="display: none">
+            <center class="data-gang" data-gang="0" data-balloon="asd" data-balloon-pos="right">
+              <img src="https://www.habbo.es/habbo-imaging/badge/b10134s36234s26104s78011d90590db71f0e393bddc35ac68413630.gif" draggable="false" ondragstart="return false;" data-balloon="asd" data-balloon-pos="right">
+            </center>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="TargetCommands" style="display: block;">
+
+    <div id="HospCommandBtn" style="display: none;">
+      <button id="HospActionBtn" type="button" data-action="" class="btn btn-secondary w-100 ng-star-inserted cursor-pointer" style="width:auto !important;">
+        <img src="<?php echo WS_DY;?>/ws_overlays/Hospital/resources/img/icon.png" style="height: 16px;cursor:pointer;margin-right: 5px;" />
+        <div id="HospActionBtnTxt" style="cursor: pointer;">{Action}</div>
+      </button>
+    </div>
+
+    <div id="GuardCommandBtn" style="display: none;">
+      <div style="display: flex;">
+        <button id="GuardToggleBtn" type="button" class="btn btn-secondary w-100 ng-star-inserted cursor-pointer" style="width:auto !important;">
+          <img src="<?php echo WS_DY;?>/ws_overlays/BodyGuard/resources/img/vest.png" style="height:24px;cursor:pointer;margin-right: 5px;" />
+        </button>
+        <div id="GuardSellPanel" class="flex" style="display: none;">
+          <input id="GuardVestPrice" type="number" data-lpignore="true" class="input-text flex-1 mr-1" value="" maxlength="6" autocomplete="off" placeholder="Precio" style="max-width: 74px;">
+          <button id="GuardSellBtn" type="button" class="btn btn-secondary w-100 ng-star-inserted cursor-pointer" style="width:auto !important;">
+            Vender
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- -->
+<div class="topBar-16t9O_0">
+  <div class="barSection-2Ks5F_0 left-QEIRv_0">
+    <div class="menu-1sOe3_0 menuButtons-3aqL-_0">
+      <div id="CombatMode" class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Modo combate" data-balloon-pos="right" data-overlay="CombatMode">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/combat-icon.png">
+      </div>
+
+      <div id="PSVMode" class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Modo pasivo" data-balloon-pos="right" data-overlay="PSVMode">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/psv-icon.png">
+      </div>
+      <!--
+      <div class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Inventario" data-balloon-pos="right">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/inventory.png">
+      </div>
+      <div class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Empresa" data-balloon-pos="right">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/job-icon.gif">
+      </div>
+      -->
+      <div class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Bandas" data-balloon-pos="right" data-overlay="GangsWindow">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/gang-icon.png">
+      </div>
+      <div class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Lista de Buscados" data-balloon-pos="right" data-overlay="WantedList">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/wanted-star.png">
+      </div>
+      <!--
+      <div class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Llamadas 911" data-balloon-pos="right">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/police-calls.png">
+      </div>
+      <div class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Macros" data-balloon-pos="right">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/macros.png">
+      </div>
+      <div class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Hablar en: Sala" data-balloon-pos="right">
+        S
+      </div>
+      <div class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Reportar" data-balloon-pos="right">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/callforhelp.png">
+      </div>
+      <div class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Reportes" data-balloon-pos="right">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/tickets.png">
+      </div>
+      <div class="menuButton-yNbz6_0 button-3IzmP_0" data-balloon="Ajustes" data-balloon-pos="right">
+        <img src="<?php echo WS_DY; ?>/ws_overlays/Stats/resources/images/bar-icons/settings.png">
+      </div>
+      -->
+    </div>
+  </div>
+</div>
+<?php if($UPData['passive_mode'] == '1'): ?>
+  <script type="text/javascript">
+    $('#PSVMode').css("background-color", "rgba(42, 148, 4, 0.69)");
+  </script>
+<?php endif; ?>
+<!-- -->
+
+<div id="live-feed" class="new-feed LiveFeed_liveFeed_iZ0Pg">
+  <!--<div></div>
+  <div class="new-feed-entry LiveFeed_item_37908"><span><span class="green bold">Jeihden</span> heisted the Corner Shop</span></div>-->
+</div>
+
+<div id="live-sounds"></div>
+
+<div class="container-3YsDW_0" id="WantedList" style="display:none;">
+    <div class="handle header-Oc1Kh_0 body-32Vs4_0">
+      <div id="CloseWantedList" class="close-1YQdp_0 close-3RMRU_0"></div>
+      <br>
+      <div id="WS_WantedList">
+        <div class="WantedTitle">✪ BUSCADOS ✪</div>
+
+        <div id="WS_WList">
+
+          <!-- User box - ->
+          <div class="flex flex-wrap -m-1 justify-center">
+            <! -- User info - ->
+            <div class="bg-dark-4 rounded m-1 group cursor-pointer-r" style="width: 17%;">
+              <div class="m-px relative">
+                <div class="overflow-hidden bg-light-05 rounded-t">
+                  <center><div class="figure-H_RWF_0" style="background-image: url(&quot;https://nitro-imager.kubbo.ch/?figure=hd-180-1.ch-210-66.lg-270-82.sh-290-91.hr-100&quot;); width: 64px; height: 110px; margin-top: -20px;"></div></center>
+                </div>
+              </div>
+            </div>
+            <div class="bg-dark-4 rounded m-1 group" style="width: 69%;padding: 5px;">
+              <div style="max-height: 108px;overflow: auto;">
+                <b>Nombre:</b> 
+                <div class="bsn_s_country" style="display: inline-block;">{Username}</div>
+                <br>
+                <b>Nivel de b&uacute;squeda:</b>  
+                <div class="bsn_s_hours" style="display: inline-block;">✪✪✪✪✪</div>
+                <br>
+                <b>Buscad@ por:</b>
+                <div class="bsn_s_info" style="display: inline-block;">{Reason}</div>
+                <br>
+                <b>&Uacute;lt. vez visto:</b>
+                <div class="bsn_s_info" style="display: inline-block;">{RoomName}</div>
+              </div>
+            </div>
+            < !-- End User info - ->
+          </div>
+          < !-- End User box -->
+
+        </div>
+
+      </div>
+    </div>
+</div>
+
+<div id="RulesInfo" class="container-3YsDW_0" style="display: none;left: 250px;top: 100px;min-width:875px;">
+  <div class="handle header-Oc1Kh_0">
+    <div class="title-RLCLd_0">Reglas</div>
+    <div id="CloseRulesInfo" class="close-1YQdp_0 close-3RMRU_0"></div>
+  </div>
+  <div class="body-32Vs4_0">
+    <div class="profile-21h7__0" style="width:auto;">
+      <div class="tabbed-1H9Df_0 vertical-H0Fhb_0 tabbed-1lE8v_0">
+        <div class="tabs-38iVv_0">
+          <div class="tab-2ddeR_0 RULES_Generales selected-3s9hj_0">Generales</div>
+          <div class="tab-2ddeR_0 RULES_Rol">Conceptos Roleplay</div>
+          <div class="tab-2ddeR_0 RULES_PolRobSec">Policiales/Robos/Secuestros</div>
+          <div class="tab-2ddeR_0 RULES_Jobs">Trabajos y Empresas</div>
+          <div class="tab-2ddeR_0 RULES_VehViv">Vehículos y Propiedades</div>
+          <div class="tab-2ddeR_0 RULES_Gangs">Bandas y Barrios</div>
+        </div>
+        <div class="body-1skWP_0" style="max-height: 312px;">
+
+          <div id="RULES_Generales" class="flex items-center">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <p>➢ Se debe respetar a las personas dentro y fuera del juego. Términos derogatorios dirigidos a el género, raza, religión, orientación sexual o discapacidades no serán toleradas. Cualquier forma de acoso puede y va a ser sancionada.</p>
+                    <p>➢ Si un problema necesita ser resuelto, siempre usa la cadena de mando al contactar al staff. Habla con un moderador antes de hablarle a un administrador o a un desarrollador.</p>
+                    <p>➢ La publicidad a otros holos está prohibida al menos que sean holos asociados a HabboVIP, como Kubbo,..... (otros de Elmayor etc).</p>
+                    <p>➢ Está prohibido el uso de programas externos: El uso de programas tales como autoclick, autotask, macro y tales para acciones como farmear o incluso combate pvp será considerado como uso de hacks/trampas al tener una ventaja sobre los demás usuarios y además modificar el juego.</p>
+                    <p>➢ Si ves a alguien romper las reglas la mejor manera de contactar a un miembro del Staff es por discord. Menciona tu nombre de usuario, lo que sucedió y las pruebas respectivas en el canal correspondiente o abre un ticket.</p>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="RULES_Rol" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <p>➢ <b>Recordar siempre los canales de rol:</b> :y Para acciones, :p Para entorno, :b Para fuera de rol/personaje.</p>
+                    <p>➢ No cometas RDM/VDM. <b>RDM (Random Deathmatch):</b> matar sin razón y sin un rol previo. <b>VDM (Vehicle DeathMatch):</b> utilizar un vehículo para matar/intentar matar sin rol previo.</p>
+                    <p>➢ Ser consciente que esto es un juego de <b>ROLEPLAY</b>. Las acciones, en especial las mortales, deben ser roleadas.</p>
+                    <p>➢ El Metagaming no está permitido. <b>MG(Metagaming):</b> Usar información fuera de personaje o fuera del rol para situaciones on-rol.</p>
+                    <p>➢ <b>El Power-gaming no está permitido.</b> Power-gaming: usar mecánicas de rol que no existen.</p>
+                    <p>➢ <b>ForceRP: Tal y como dice es forzar un rol.</b> Si durante una escena decides obligar a uno o más jugadores con los que estás negociando a seguir tu camino, es Force RP. Nadie debería obligar a otra persona a hacer algo que no quiere. Habbovip sigue siendo sobre todo un videojuego y jugarlo debe ser divertido</p>
+                    <p>➢ <b>Desconectarse durante un combate o arresto será motivo de sanción inmediata</b> (Si lo haz hecho de una manera excedida será motivo de ban). También desconectarse al morir para poder ser revivido por un médico. (No aplica si se ha sido víctima de un antirol).</p>
+                    <p>➢ No se permiten los abusos y hacks. Esto incluye abusar de bugs del juego. <b>Esto resulta en un IPban inmediato.</b></p>
+                    <p>➢ <b>Lore y Continuidad: Recordar los roles previos.</b> Si matas a una persona por una razón, solo es válido ese rol una sola vez. No puedes seguir matando a la misma persona por la misma razón para siempre.</p>
+                    <p>➢ Sigue la Regla NLR. <b>NLR (New Life Rule/Regla de Nueva Vida):</b> Si tu personaje muere y respawnea en el hospital, no tienes recuerdos de cómo moriste ni quién te mató. Si eres revivido por los servicios de emergencia, no hay Regla NLR, igual pierdes la consciencia y sólo puedes recordar lo sucedido si algún testigo del hecho te decide mencionar lo que pasó.</p>
+                    <p>➢ <b>No RK (Revenge Kill):</b> Está prohibido que después de ser agredido y colapsar si una persona no te cuenta lo sucedido previo a tu pérdida de consciencia tomes venganza en contra del usuario que te agredió.</p>
+                    <p>➢ <b>Recuerda el FearRP.</b> FearRP: temer por tu vida. Por ejemplo, si estás solo en un callejón y 4 miembros de una pandilla te detienen apuntando con un arma ya sea para robarte, secuestrarte etc. y ves que no hay forma de escapar sin morir debes dar uso de FearRP. Una persona normal temería por su vida en esa situación en la que ve que no hay ayuda, simplemente no te irías sin más.</p>
+                    <p>➢ <b>Pain RP:</b> Este término corresponde a la simulación del dolor, ya sea físico o moral. Respetarlo significa aceptar los efectos de un pelotazo, un batazo o una caída que pueda recibir tu personaje, o el efecto que pueda tener en tu mente presenciar una muerte.</p>
+                    <p>➢ <b>No hagas FailRP.</b> Todas las acciones que hagas en tu rol deben ser realistas, piensalo 2 veces antes de hacerlo, tus acciones deben ser pensadas antes de actuar. Acciones y respuestas realistas. (EJM: No puedes volar, no tienes super velocidad ni volverte invisible).</p>
+                    <p>➢ <b>Perma-death o CK (Character Kill) debe ser consensuado.</b> Tu controlas la muerte de tu personaje, pero si se decide matar al personaje, no se puede crear un personaje nuevo para vengarse, esto es para evitar el <b>MG</b>.</p>
+                    <p>➢ <b>Se debe rolear para desenfundar sus armas en ciertas situaciones</b>, como estar siendo apuntado o estar secuestrado. En la vida real no te tomará 2 segundos sacar un rifle de asalto de tu mochila.</p>
+                    <br>
+                    <p><center><b>
+                      Fallar en seguir estas reglas resultará en sanciones comenzando desde los 10 minutos hasta 1 hora. Si el usuario insiste en no seguir las reglas luego de eso, resultará en baneos temporales iniciando desde 12 horas.<br>Si luego de 5 baneos temporales insiste, esto resultará en IPban.
+                    </b></center></p>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="RULES_PolRobSec" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <p>➢ </p>
+                    <p>➢ </p>
+                    <p>➢ </p>
+                    <p>➢ </p>
+                    <p>➢ </p>
+                    <p>➢ </p>
+                    <p>➢ </p>
+
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

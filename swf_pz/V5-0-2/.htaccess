@@ -1,0 +1,43 @@
+Options -Indexes
+
+RewriteEngine On
+
+RewriteRule ^habbo-imaging/badge/none.gif habbo-imaging/corp/none.gif
+RewriteRule ^habbo-imaging/badge/hospital.gif habbo-imaging/corp/hospital.gif
+RewriteRule ^habbo-imaging/badge/police.gif habbo-imaging/corp/police.gif
+RewriteRule ^habbo-imaging/badge/peartech.gif habbo-imaging/corp/peartech.gif
+RewriteRule ^habbo-imaging/badge/ammunation.gif habbo-imaging/corp/ammunation.gif
+RewriteRule ^habbo-imaging/badge/subway.gif habbo-imaging/corp/subway.gif
+RewriteRule ^habbo-imaging/badge/clothing.gif habbo-imaging/corp/clothing.gif
+RewriteRule ^habbo-imaging/badge/bank.gif habbo-imaging/corp/bank.gif
+RewriteRule ^habbo-imaging/badge/mcdonalds.gif habbo-imaging/corp/mcdonalds.gif
+RewriteRule ^habbo-imaging/badge/car.gif habbo-imaging/corp/car.gif
+
+RewriteRule ^habbo-imaging/badge/([^/]+) /habbo-imaging/badge.php?badge=$1
+
+RewriteRule ^habbo-imaging/avatar/([^/]+) habbo-imaging/avatarimage.php?figure=$1
+RewriteRule ^habbo-imaging/avatarimage/([^/]+) habbo-imaging/avatarimage.php?username=$1
+RewriteRule ^habbo-imaging/head/([^/]+) habbo-imaging/head.php?figure=$1
+
+RewriteRule ^gamedata/habbopages/chat/commands gamedata/habbopages/chat/commands.txt
+RewriteRule ^gamedata/habbopages/chat/options gamedata/habbopages/chat/options.txt
+RewriteRule ^gamedata/habbopages/forums gamedata/habbopages/forums.txt
+RewriteRule ^gamedata/habbopages/([0-9a-zA-Z]+)(|/)$ gamedata/habbopages/$1.txt
+
+RewriteRule ^gamedata/supersecret gamedata/supersecret.php
+
+RewriteRule ^gamedata/external_variables gamedata/external_variables.txt
+RewriteRule ^gamedata/external_flash_texts gamedata/external_flash_texts.txt
+RewriteRule ^gamedata/override/external_flash_override_texts gamedata/override/external_flash_override_texts.txt
+RewriteRule ^gamedata/override/external_override_variables gamedata/override/external_override_variables.txt
+RewriteRule ^gamedata/figuredata gamedata/figuredata.xml
+RewriteRule ^gamedata/productdata gamedata/productdata.txt
+RewriteRule ^gamedata/furnidata_xml gamedata/furnidata.xml
+
+RewriteRule ^api/([a-zA-Z0-9_-]+)(|/)$ api.php?request=$1
+RewriteRule ^api/room/([0-9_-]+)(|/)$ api.php?request=room&room_id=$1
+RewriteRule ^api/group/([0-9_-]+)(|/)$ api.php?request=group&group_id=$1
+RewriteRule ^api/user/([a-zA-Z]+)/([a-zA-Z0-9_-]+)(|/)$ api.php?request=user&search_type=$1&value=$2
+RewriteRule ^api/users/([0-9]+)(|/)$ api.php?request=users&amount=$1
+
+RewriteRule ^c_images/notifications/avatarimage_([a-zA-Z0-9_-]+).png(|/)$ c_images/notifications/imager.php?username=$1

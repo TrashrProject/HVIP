@@ -1,0 +1,74 @@
+#GroupPanelInfo{
+    width: auto;
+    height: auto;
+    z-index: 2115;
+    position: absolute;
+    left: 460px;
+    top: 100px;
+    color: #fff;
+    display: none;
+}
+.name-MbJ9L_0{
+    margin-bottom: 5px;
+}
+#ImgBadge{
+    cursor: pointer;
+}
+#GroupAction{
+margin-left: 45px;
+}
+#GroupInfo{
+    right: 77px;
+    top: 0px;
+    height: 59px;
+    width: 189px;
+    background-color: #404036b5;
+    padding: 5px;
+    border: 2px solid #a2a2a29e;
+    border-top: 0px;
+    border-radius: 0px 0px 3px 3px;
+    display: none;
+}
+#Caption{
+    margin-left: 50px;
+    position: absolute;
+    margin-top: -45px;
+    font-size: 13px;
+    font-weight: bold;
+    text-shadow: 1px 0px 17px rgba(150, 150, 150, 1);
+}
+#Badge{
+    margin-top: 4px;
+}
+#Badge_Soli{
+    background-color: #40403652;
+    text-align: center;
+    border-radius: 3px;
+    border:2px solid #5f5d58ad;
+    padding: 20px;
+}
+#GroupsInputBox{
+    padding:5px;
+    border-radius: 3px;
+    border: 1px solid #ccc!important;
+    min-width: 290px;
+    max-width: 290px;
+}
+#SendRequest{
+    text-align: center;
+}
+.basicInfo-1gmko_0{
+    width: 200%;
+}
+.lastSeen-1_N4N_0{
+    margin-top: 10px;
+    margin-bottom: -10px;
+}
+#GroupMsg{
+    color:#ec3423;
+    font-style: italic;
+}
+#Badge img{
+    width: 40px;
+    height: 40px;
+}

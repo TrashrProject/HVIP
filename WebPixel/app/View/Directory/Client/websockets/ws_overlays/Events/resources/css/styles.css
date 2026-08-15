@@ -1,0 +1,56 @@
+.WorldEvent_worldEvent_3Oxpk {
+    position: absolute;
+    top: 300px;
+    right: 3px;
+    width: 250px;
+    background-color: rgba(0,0,0,.2);
+    color: #fff;
+    text-shadow: 1px 1px 1px rgba(0,0,0,.3);
+    border-radius: 5px;
+    overflow: hidden;
+    pointer-events: none;
+}
+.WorldEvent_worldEvent_3Oxpk .WorldEvent_name_2gJ1M {
+    font-size: 18px;
+    padding: 6px;
+    background-color: rgba(0,0,0,.1);
+    text-align: center;
+}
+.WorldEvent_worldEvent_3Oxpk .WorldEvent_description_6iynM {
+    padding: 4px 10px 6px 10px;
+    font-size: 14px;
+    text-align: center;
+}
+.text-center {
+    text-align: center;
+}
+.text-lg {
+    font-size: 1.125rem;
+}
+.z-10 {
+    z-index: 10;
+}
+.relative {
+    position: relative;
+}
+.cursor-pointer-r, .cursor-pointer-r * {
+    cursor: pointer;
+}
+.z-0 {
+    z-index: 0;
+}
+.w-full {
+    width: 100%;
+}
+.left-0 {
+    left: 0;
+}
+.right-0 {
+    right: 0;
+}
+.top-0 {
+    top: 0;
+}
+.absolute {
+    position: absolute;
+}

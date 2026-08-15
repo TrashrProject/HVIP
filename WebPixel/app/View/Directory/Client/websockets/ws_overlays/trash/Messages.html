@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Mensajes</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.0/css/mdb.min.css" rel="stylesheet">
+
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://habbovip.us/kernel/includes/pages/client/websockets//ws_overlays/Phones/iPhone/resources/emojis/lib/css/emoji.css?v=1592176545" rel="stylesheet">
+
+    <link href="https://habbovip.us/kernel/includes/pages/developer_build/websockets/ws_overlays/Phones/iPhone/resources/css/styles.css?p=4" rel="stylesheet">
+
+    <style>
+        html, body{
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .wrapper{
+            width: 244px;
+            height: 368px;
+            margin: 0;
+            overflow: auto;
+            overflow-x: hidden;
+        }
+        /* MESSAGES */
+        .app_Messages {
+            width: 100%;
+            font-size: 12px;
+        }
+        .app_title_options{
+          color:#5088cf;
+          cursor: pointer;
+          font-size: 12px;
+          display: inline-block;
+          top:4px;
+          margin-left: 75px;
+        }
+        .app_title_options i{
+          cursor: pointer;
+        }
+        .SendButtonMsg_V2{
+            background-color: #c3c3c3;
+            border: 1px solid #e6e6e6;
+            border-radius: 3px;
+            padding: 3px;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            margin-left: -15px;
+            float: left;
+        }
+        
+        .SendButtonMsg_V2:hover{
+          background-color: #d6d6d6;
+          cursor: pointer;
+        }
+
+        .app_Messages_Chatting .ChatBar{
+          position: absolute;
+        }
+
+        .TextTo {
+          padding: 1px !important;
+          max-height: 24px !important;
+          display: inline-block;
+          width: 198px !important;
+          height: 35px;
+        }
+
+        .emoji-picker-icon  {
+          position: sticky !important;
+          bottom: 6px;
+        }
+        .emoji-menu { 
+          left: 0 !important;
+        }
+
+        .app_Messages_Chatting{
+          /*height: 335px; /*368*/
+          width: 244px;
+          background-color: white;
+          height: 366px;
+          padding-bottom: 35px;
+        }
+        .emoji-picker-icon {
+          right: 50px !important;
+        }
+        .emoji-picker-icon.parent-has-scroll {
+          right: 55px !important;
+        }
+        ::-webkit-scrollbar{width:10px;}
+        ::-webkit-scrollbar-track{-webkit-box-shadow:inset 0 0 6px rgba(0,0,0,.3);border-radius:10px}
+        ::-webkit-scrollbar-thumb{border-radius:10px;-webkit-box-shadow:inset 0 0 6px rgba(0,0,0,.5)}
+        /* END MESSAGES */
+    </style>
+</head>
+<body>
+    <div id="MobileAPP" class="wrapper">
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="app_Messages">
+
+                <div id="app_title" class="Messages_Title">
+                  <b>Mensajes</b>
+                  <div class="app_title_options" style="height:18px;width:18px;background-image: url('https://habbovip.us/kernel/includes/pages/client/websockets/ws_overlays/Phones/iPhone/resources/images/icons/write.png');background-repeat:no-repeat;background-size: 18px 17px;" title="Nuevo Mensaje"
+                    onclick="
+                      $('.Messages_Title').hide();
+                      $('#MUS_Messages').hide();
+                      $('#app_Messages_New').show();">
+                  </div>
+                </div>
+
+                <!-- CHATS -->
+                <div id="MUS_Messages">
+
+                </div>
+                <!-- END CHATS -->
+
+                <!-- Escribir Mensaje -->
+                <div id="app_Messages_New" style="display: none;">
+                  <div class="app_Messages_New">
+                    <div id="app_title">
+                      <div class="app_title_options" style="margin-left: -75px;" onclick="
+                        $('.Messages_Title').show();
+                        $('#MUS_Messages').show();
+                        $('#app_Messages_New').hide();
+                        LoadMessages();">< Mensajes</div>
+                      <b>Nuevo Mensaje</b>
+                    </div>
+                    <input class="number" type="text" placeholder="N&uacute;mero o Nombre de Contacto" maxlength="35" style="width: 232px;margin-top: 2px;margin-left: 5px;" />
+                    <br><br>
+                    <textarea class="mensaje" placeholder="Mensaje (Max. 250 Caracteres)." maxlength="250" style="min-width: 232px;max-width: 232px;min-height: 250px;max-height: 250px;margin-left: 5px;"></textarea>
+                    <br><br>
+                    <div class="SendButtonMsg_V2" style="margin-left: 5px;width:232px;text-align: center;font-weight: bold;margin-top: -11px;">Enviar</div>
+                  </div>
+                </div>
+                <!-- END Escribir Mensaje -->
+
+                <!-- MSGS -->
+                <div id="MUS_Messages_Chatting" style="display: none;">
+                  <div class="app_Messages_Chatting">
+                    <div id="app_title">
+                      <div class="app_title_options" style="left: 6px;margin-left: 0 !important;" onclick="
+                        $('.Messages_Title').show();
+                        $('#MUS_Messages').show();
+                        $('#MUS_Messages_Chatting').hide();
+                        LoadMessages();">< Mensajes</div>
+                      <b class="app_messages_name"></b>
+                    </div>
+
+                    <div id="app_whats_messages" class="app_messages_chats">
+                      <!-- WS Sended 
+                      <div class="Msg_Container">
+                        <div class="Msg_From" title="22:10">Hola</div>
+                      </div>
+                      <div class="Msg_Container">
+                        <div class="Msg_To" title="22:10">Hola 2</div>
+                      </div>
+                      -->
+                    </div>
+
+                    <!-- Chat Bar -->
+                    <div class="ChatBar">
+                      <input id="mensaje" type="text" class="TextTo" data-emojiable="true">
+                      <div id="TextTo" class="SendButtonMsg_V2" style="display: inline-block;float: right;margin-right: 10px;">Enviar</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- END MSGS -->
+
+            </div>
+
+        </div>
+    </div>
+</div>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/easyXDM/2.4.20/easyXDM.debug.js"></script>
+
+    <script type="text/javascript">
+      var socket = new easyXDM.Socket({
+          remote: "https://habbovip.us/kernel/includes/pages/developer_build/websockets/modules/rdp.c.js",
+          onMessage: function(message, origin){
+              alert("Received '" + message + "' from '" + origin + "'");
+          },
+          onReady: function() {
+              socket.postMessage("Yay, it works!");
+          }
+      });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+    <script src="https://habbovip.us/kernel/includes/pages/client/websockets//ws_overlays/Phones/iPhone/resources/emojis/lib/js/config.js"></script>
+    <script src="https://habbovip.us/kernel/includes/pages/client/websockets//ws_overlays/Phones/iPhone/resources/emojis/lib/js/util.js"></script>
+    <script src="https://habbovip.us/kernel/includes/pages/client/websockets//ws_overlays/Phones/iPhone/resources/emojis/lib/js/jquery.emojiarea.js"></script>
+    <script src="https://habbovip.us/kernel/includes/pages/client/websockets//ws_overlays/Phones/iPhone/resources/emojis/lib/js/emoji-picker.js"></script>
+
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.0/js/mdb.min.js"></script>
+
+    <script>
+      $(function() {
+        // Initializes and creates emoji set from sprite sheet
+        window.emojiPicker = new EmojiPicker({
+          emojiable_selector: '[data-emojiable=true]',
+          assetsPath: 'https://habbovip.us/kernel/includes/pages/client/websockets/ws_overlays/Phones/iPhone/resources/emojis/lib/img/',
+          popupButtonClasses: 'fa fa-smile-o'
+        });
+        // Finds all elements with `emojiable_selector` and converts them to rich emoji input fields
+        // You may want to delay this step if you have dynamically created input fields that appear later in the loading process
+        // It can be called as many times as necessary; previously converted input fields will not be converted again
+        window.emojiPicker.discover();
+      });
+    </script>
+
+    <script type="text/javascript">
+      var UserId = getUrlParameter('user_id');
+
+      $( document ).ready(function() {
+
+        LoadMessages();
+
+        // Click en botón Enviar Mensaje Nuevo
+        $("#app_Messages_New").on('click', '.SendButtonMsg_V2', function(){
+          var To = $('#app_Messages_New input[class=number]').val();
+          var Msg = $('textarea[class=mensaje]').val();
+
+          SendMessage(To, Msg);
+        });
+
+        // Click en un chat específico
+        $("#MUS_Messages").on('click', '.app_msg_content', function(){
+            var data =  $(this)[0].getAttribute("data-chatname");
+            OpenChat(data);
+        });
+
+        // Click en el botón enviar dentro de un chat
+        $("#MUS_Messages_Chatting").on('click', '.SendButtonMsg_V2', function(){
+            var To = $('.app_messages_name')[0].innerHTML;
+            var FilterMSG = $('#MUS_Messages_Chatting .TextTo')[1].innerHTML;
+            // Saltos de línea.
+            FilterMSG = FilterMSG.replace(new RegExp('<div>', 'g'),'::br::');
+            FilterMSG = FilterMSG.replace(new RegExp('</div>', 'g'),'');
+            FilterMSG = FilterMSG.replace(new RegExp('<br>', 'g'),'::br::');
+            var Msg = FilterMSG;
+            var ws = Msg + '|' + To;
+
+            SendMessage(To, Msg);
+        });
+      });
+
+      function SendMessage($To, $Msg) {
+        $.getJSON('https://api.habbovip.us/?tkn=2D9I7SFP9Z0KAJ9KA3FK&return=SendMessage&user_id='+UserId+'&target=' + $To + '&msg=' + $Msg, function(data) {
+            data.forEach(element => {
+              if(element.Status == "TRUE"){
+                OpenChat(element.TargetName);
+              }
+            });
+        });
+      }
+
+      function OpenChat($CN) {
+        // Basic Viewer
+        $('.Messages_Title').hide();
+        $('#MUS_Messages').hide();
+        $('#MUS_Messages_Chatting').show();
+        $('#app_Messages_New').hide();
+        $('#app_Messages_New .number').val('');
+        $('#app_Messages_New .mensaje').val('');
+        $('#MUS_Messages_Chatting .TextTo')[1].innerHTML = "";
+
+        $.getJSON('https://api.habbovip.us/?tkn=2D9I7SFP9Z0KAJ9KA3FK&return=OpenChat&user_id='+UserId+'&chatname=' + $CN, function(data) {
+            data.forEach(element => {
+              $(".app_messages_name").html(element.DisplayName);
+               $(".app_messages_chats").html(element.Bubbles);
+            });
+        });
+      }
+
+      function LoadMessages() {
+        var SendData = "";
+        $.getJSON('https://api.habbovip.us/?tkn=2D9I7SFP9Z0KAJ9KA3FK&return=GetMessages&user_id='+UserId+'', function(data) {
+            data.forEach(element => {
+              SendData += "<div data-chatname=\"" + element.ChatName + "\" class=\"app_msg_content\" onclick=\"";
+              SendData += "$('.Messages_Title').hide();";
+              SendData += "$('#WS_Messages').hide();";
+              SendData += "$('#WS_Messages_Chatting').show();";
+              SendData += "\">";
+              SendData += "<div class=\"app_msg_indicator\"></div>";
+              SendData += "<div class=\"app_msg_dest\">" + element.DisplayName + "</div>";
+              SendData += "<div class=\"app_msg_time\">" + element.Time + " ></div>";
+              SendData += "<div class=\"app_msg_lastmsg\">" + element.Msg + "</div>";
+              SendData += "</div>";
+            });
+            $("#MUS_Messages").html(SendData);
+        });
+      }
+
+      function getUrlParameter(sParam) {
+        var sPageURL = window.location.search.substring(1),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            }
+        }
+      };
+    </script>
+</body>
+</html>

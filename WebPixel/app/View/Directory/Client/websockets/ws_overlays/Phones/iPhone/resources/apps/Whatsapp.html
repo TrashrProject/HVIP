@@ -1,0 +1,124 @@
+<!-- EMOJI RESOURCES -->
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/css/emoji.css?v=<?php echo time(); ?>" rel="stylesheet">
+<script src="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/js/config.js"></script>
+<script src="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/js/util.js"></script>
+<script src="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/js/jquery.emojiarea.js"></script>
+<script src="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/js/emoji-picker.js"></script>
+<!-- END EMOJI RESOURCES -->
+
+<div id="app_WhatsApp" class="AppLayout">
+	<div id="app_bg" class="app_WhatsApp">
+		<div id="app_title" class="Whats_Title">WhatsApp</div>
+		<!-- MENU -->
+		<div id="What_Menu" class="Whats_Menu_Content">
+			<div id="WhatsChats" class="Whats_Menu selected"
+			onclick="
+				$('#WhatsChats').addClass('selected'); 
+				$('#WS_WhatsApp').show(); 
+				$('#WhatsContacts').removeClass('selected'); 
+				$('#WS_WhatsApp_Contacts').hide();
+			">Chats</div>
+			<div id="WhatsContacts" class="Whats_Menu"
+			onclick="
+				$('#WhatsChats').removeClass('selected');
+				$('#WS_WhatsApp').hide();
+				$('#WhatsContacts').addClass('selected');
+				$('#WS_WhatsApp_Contacts').show();
+			">Contactos</div>
+		</div>
+		<!-- END MENU -->
+
+		<!-- CHATS -->
+		<div id="WS_WhatsApp">
+			<!-- WS Sended
+			<div data-whatsname="Nombre" class="app_msg_content" onclick="
+				$('.Whats_Title').hide();
+				$('#What_Menu').hide();
+				$('#WS_WhatsApp').hide();
+				$('#WS_WhatsApp_Contacts').hide();
+				$('#WS_WhatsApp_Chatting').show();
+			">
+				<div class="app_whats_profile_photo">
+					<div class="app_contacts_avatar" style="background-image: url(https://nitro-imager.kubbo.ch/?figure=&headonly=1);"></div>
+				</div>
+				<div class="app_whats_chat_info">
+					<div class="app_msg_dest">{Nombre}</div>
+					<div class="app_msg_time">9:29 AM</div>
+					<div class="app_msg_lastmsg">este es el ultimo mensaje enviado</div>
+				</div>
+			</div>
+			-->
+		</div>
+		<!-- END CHATS -->
+
+		<!-- CONTACTS -->
+		<div id="WS_WhatsApp_Contacts" style="display: none;">
+			<!-- WS Sended
+			<div data-whatsname="Nombre" class="app_msg_content" onclick="
+				$('.Whats_Title').hide();
+				$('#What_Menu').hide();
+				$('#WS_WhatsApp').hide();
+				$('#WS_WhatsApp_Contacts').hide();
+				$('#WS_WhatsApp_Chatting').show();
+			">
+				<div class="app_whats_profile_photo">
+					<div class="app_contacts_avatar" style="background-image: url(https://nitro-imager.kubbo.ch/?figure=&headonly=1);"></div>
+				</div>
+				<div class="app_whats_chat_info">
+					<div class="app_msg_dest">{Nombre}</div>
+					<div class="app_msg_lastmsg">Hey there, I'm using WhatsApp!</div>
+				</div>
+			</div>
+			-->
+		</div>
+		<!-- END CONTACTS -->
+
+		<!-- CHATTING -->
+		<div id="WS_WhatsApp_Chatting" style="display: none;">
+			<div class="app_WhatsApp_Chatting">
+				<div id="app_title" class="Whats_Title_Chatting">
+					<div class="app_title_options" onclick="
+						$('.Whats_Title').show();
+						$('#What_Menu').show();
+						$('#WS_WhatsApp').show();
+						$('#WS_WhatsApp_Contacts').hide();
+						$('#WS_WhatsApp_Chatting').hide();
+						$('#WhatsChats').addClass('selected');
+						$('#WhatsContacts').removeClass('selected'); 
+					" style="color:white;">
+						<i class="fas fa-arrow-left"></i>
+					</div>
+					<div class="app_whats_profile_photo app_whats_photo">
+						<!-- WS Sended
+						<div class="app_contacts_avatar" style="background-image: url(https://nitro-imager.kubbo.ch/?figure=&headonly=1);"></div>
+						-->
+					</div>
+					<div class="app_whats_chat_info">
+						<b class="app_whats_name">{Nombre}</b>
+						<div class="app_whats_lastonline">en l&iacute;nea</div>
+					</div>
+				</div>
+				<!-- Chat Bar -->
+				<div class="ChatBar" style="margin-top: 335px;">
+					<input id="mensaje" type="text" class="TextTo" placeholder="" data-emojiable="true">
+					<div id="TextTo" class="SendButtonMsg">Enviar</div>
+				</div>
+				<!-- END Chat Bar -->
+				<!-- MENSAJES -->
+				<div id="app_whats_messages" class="app_whats_messages">
+					<!-- WS Sended
+					<div class="Msg_Container">
+						<div class="Msg_From_Whats" title="22:10">Hola</div>
+					</div>
+					<div class="Msg_Container">
+						<div class="Msg_To_Whats" title="22:10">Hola 2</div>
+					</div>
+					-->
+				</div>
+				<!-- END MENSAJES -->
+			</div>
+		</div>
+		<!-- END CHATTING -->
+	</div>
+</div>

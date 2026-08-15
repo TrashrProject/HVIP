@@ -1,0 +1,1078 @@
+﻿<!-- Styles -->
+<link href="<?php echo WS_DY;?>/ws_overlays/Tutorial/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+
+<div id="TutorialCanvas">
+  <div class="ChatBubbleT">
+    <p class="ChatBubbleTxt"></p>
+    <div style="display: flex;">
+      <div class="tutoButton" onclick="NextStep();">Continuar</div>
+      <div class="tutoButton_No" onclick="FinishTuto();">No gracias, ya sé jugar</div>
+      <div class="tutoButton_Yes" onclick="NextStep();">¡Sí, vamos!</div>
+      <div class="tutoButton_End" onclick="CloseTuto();">Hecho</div>
+    </div>
+  </div>
+  <div id="FrankTuto"></div>
+</div>
+<div class="hand_down"></div>
+<div class="hand_right"></div>
+<div id="TutoSFX" style="display: none;"></div>
+
+<script type="text/javascript">
+  var TutoStep = 0;
+  //NextStep();
+
+  function CloseTuto() {
+    // ReSets
+    $('#TutorialCanvas').css({
+      right: -35
+    });
+
+    // Button
+    $('.tutoButton').hide();
+    $('.tutoButton_No').hide();
+    $('.tutoButton_Yes').hide();
+    $('.tutoButton_End').hide();
+    // Bubble
+    $('.ChatBubbleTxt').removeClass("animated zoomInRight");
+    $('.ChatBubbleTxt').addClass("animated zoomOutRight");
+    // Frank Image
+    $('#FrankTuto').removeClass("animated zoomInRight");
+    $('#FrankTuto').addClass("animated slideOutRight");
+
+    // Anim
+    $(".hand_down").removeClass("animated bounceIn faster");
+    $(".hand_down").addClass("animated bounceOut faster");
+    $(".hand_right").removeClass("animated bounceIn faster");
+    $(".hand_right").addClass("animated bounceOut faster");
+
+    // Sounds
+    TutoSound("frank_huhoy");
+  }
+
+  function FinishTuto() {
+    // ReSets
+    $('#TutorialCanvas').css({
+      right: -35
+    });
+
+    // Button
+    $('.tutoButton').hide();
+    $('.tutoButton_No').hide();
+    $('.tutoButton_Yes').hide();
+    $('.tutoButton_End').hide();
+    // Bubble
+    $('.ChatBubbleTxt').removeClass("animated zoomInRight");
+    $('.ChatBubbleTxt').addClass("animated zoomOutRight");
+    // Frank Image
+    $('#FrankTuto').removeClass("animated zoomInRight");
+    $('#FrankTuto').addClass("animated slideOutRight");
+
+    // Anim
+    $(".hand_down").removeClass("animated bounceIn faster");
+    $(".hand_down").addClass("animated bounceOut faster");
+    $(".hand_right").removeClass("animated bounceIn faster");
+    $(".hand_right").addClass("animated bounceOut faster");
+
+    LastStep();
+  }
+
+  function NextStep(S = TutoStep) {
+    TutoStep = S;
+    TutoStep++;
+
+    if(TutoStep >= 36) {
+      FinishTuto();
+    }
+    else {
+      // ReSets
+      $('#TutorialCanvas').css({
+        right: -35
+      });
+
+      // Button
+      $('.tutoButton').hide();
+      $('.tutoButton_No').hide();
+      $('.tutoButton_Yes').hide();
+      $('.tutoButton_End').hide();
+      // Bubble
+      $('.ChatBubbleTxt').removeClass("animated zoomInRight");
+      $('.ChatBubbleTxt').addClass("animated zoomOutRight");
+      // Frank Image
+      if(TutoStep != 3 && TutoStep != 6 && TutoStep != 7 && TutoStep != 13 && TutoStep != 14 && TutoStep != 22 && TutoStep != 26 && TutoStep != 34) { // Exceptions
+        $('#FrankTuto').removeClass("animated zoomInRight");
+        $('#FrankTuto').addClass("animated slideOutRight");
+      }
+
+      // Anim
+      $(".hand_down").removeClass("animated bounceIn faster");
+      $(".hand_down").addClass("animated bounceOut faster");
+      $(".hand_right").removeClass("animated bounceIn faster");
+      $(".hand_right").addClass("animated bounceOut faster");
+
+      var nexSTime = setInterval(function() {
+        var fnName = "TutoStep" + TutoStep;
+        window[fnName]();
+        clearInterval(nexSTime);
+      }, 500);
+    }
+  }
+
+  function TutoStep1() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 4000);
+    // Bubble
+    $('.ChatBubbleTxt').html("¡Bienvenid@ a HabboVIP " + habboName + "! Mi nombre es Frank y voy a explicarte un poco de qué va esto.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+    
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hi");
+      clearInterval(TutoSFX);
+    }, 3500);
+  }
+
+  function TutoStep2() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 8000);
+    // Bubble
+    $('.ChatBubbleTxt').html("HabboVIP es un mundo Roleplay, lo que quiere decir, es que se trata de actuar o simular la vida real; ¡donde tu personaje puede tener el rol que tú decidas!");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_search_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep3() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 5000);
+    // Bubble
+    $('.ChatBubbleTxt').html("Como doctor(a), camioner@, criminal, empresari@, mafios@ o hasta un(a) rar@ ancian@ limosner@...");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_search_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+  }
+
+  function TutoStep4() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 5000);
+    // Bubble
+    $('.ChatBubbleTxt').html("Puedes comunicarte con los demás escribiendo en la barra al inferior de la pantalla.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $("#FrankTuto").find('.frank_welcome_r').css("margin-right", "50px");
+    $(".hand_down").removeClass("animated bounceOut faster");
+    $(".hand_down").show().addClass("animated bounceIn faster");
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hahaha");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep5() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 6000);
+    // Bubble
+    $('.ChatBubbleTxt').html("La mayoría de acciones en HabboVIP se realizan por medio de <b>comandos</b>. Para ejecutarlos, basta con anteponer dos puntos a lo que escribas (<i>:comando</i>)...");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome4_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_haha!");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep6() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 5000);
+    // Bubble
+    $('.ChatBubbleTxt').html("Por ejemplo, el comando <b>:ayuda</b>, el cual te mostrará un listado con todos los comandos del juego.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome4_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+  }
+
+  function TutoStep7() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 6000);
+    // Bubble
+    $('.ChatBubbleTxt').html("También puedes hacer uso del Canal de Dudas escribiendo el comando: <br><center><b>:n [pregunta]</b></center> Tu duda será mostrada a todos los jugadores y te podrán asistir.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome4_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+  }
+
+  function TutoStep8() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 6000);
+    // Bubble
+    $('.ChatBubbleTxt').html("Recuerda que el Canal de Dudas, como su nombre lo indica, es exclusivamente para dudas del modo de juego. <u>Evita ser sancionad@ o banead@.</u>");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_stop"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_angry1");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep9() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {      
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 3000);
+    // Bubble
+    $('.ChatBubbleTxt').html("Para ubicarte fácilmente por la ciudad, usa el comando <b>:mapa</b>.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_search_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep10() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton_No').show().addClass("animated bounceIn faster");
+      $('.tutoButton_Yes').show().addClass("animated bounceIn faster tuto11");
+      clearInterval(tutoBtnTime);
+    }, 8000);
+    // Bubble
+    $('.ChatBubbleTxt').html("¡Bien! Eso es lo básico que necesitas saber para comenzar tu aventura. Ahora, si gustas, puedo ayudarte a comenzar guiándote con tus primeros pasos y comenzar con el pie derecho.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome4_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hi");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep11() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 7000);
+    // Bubble
+    $('.ChatBubbleTxt').html("¡Buena elección! La lista de pasos que haremos es la siguiente:<br><b style='font-size:18px'>» 1. Comprar ropa<br>» 2. Comprar teléfono<br>» 3. Tu primer vehículo<br>» 4. Traba para tu auto<br>» 5. Tu primer trabajo</b><br><br>¡Comencemos!");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $("#FrankTuto").find('.frank_welcome_r').css("margin-right", "50px");
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_yahoo");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep12() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster tuto13");
+      clearInterval(tutoBtnTime);
+    }, 4000);
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 1. Comprar ropa</b><br>Dirígete a la tienda de ropa pisando las flechas blancas para cambiar de calle y las flechas negras para entrar a interiores.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep13() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 1. Comprar ropa</b><br>La tienda de ropa está en Calle La Moda. Si es necesario, usa el <b>:mapa</b> o toma un taxi. ¡Ve allí!");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+  }
+
+  function TutoStep14() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 4000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 1. Comprar ropa</b><br>¡Has llegado a la tienda de ropa! Ahora entra al probador de ropa.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep15() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 4000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 1. Comprar ropa</b><br>Cuando estés dentro, da clic en tu personaje y luego en <b>Mi Ropa</b>.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome4_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hahaha");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep16() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 1. Comprar ropa</b><br>Aquí puedes cambiar tu atuendo. Toma en cuenta que cada cambio tiene un costo de <b>$5</b>. Para comprarlo solo da clic en <b>Salvar cambios</b>.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep17() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster tuto18");
+      clearInterval(tutoBtnTime);
+    }, 4000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("¡Te ves genial! El siguiente paso en la lista es <b>» 2. Comprar teléfono</b>");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_thumb"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_huhoy");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep18() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 2. Comprar teléfono</b><br>Dirígete a la tienda de teléfonos en Calle La Moda.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep19() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 2. Comprar teléfono</b><br>¡Has llegado a la tienda de teléfonos! Ahora camina hacia el <b>Action Point</b> <center><div class='tuto_ap'></div></center> para comprarlo.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome4_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_haha!");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep20() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 2. Comprar teléfono</b><br>Compra un teléfono de la lista para continuar.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep21() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 4000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("¡Muy bien! Ahora te aparecerá el icono del teléfono abajo a la derecha de la pantalla.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_thumb"></div>');
+
+    // Animation
+    $(".hand_right").removeClass("animated bounceOut faster");
+    $(".hand_right").show().addClass("animated bounceIn faster");
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_yahoo");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep22() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 9000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("Con el teléfono puedes hacer muchas cosas. Desde llamar a una ambulancia, hasta enviar Whatsapps a tus contactos. Para agregar contactos solo basta con dar clic a una persona y luego en <b>Añadir contacto</b> para enviarle una petición.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_thumb"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+  }
+
+  function TutoStep23() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster tuto23");
+      clearInterval(tutoBtnTime);
+    }, 3000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("El siguiente paso en la lista es <b>» 3. Tu primer vehículo</b>");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome4_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hi");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep24() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 3. Tu primer vehículo</b><br>Dirígete al Concesionario de vehículos en Calle Volkswagen.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep25() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 3. Tu primer vehículo</b><br>¡Has llegado al Concesionario! Ahora toma asiento frente a los escritorios para ver la lista de vehículos disponibles.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep26() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 3. Tu primer vehículo</b><br>¡Compra un vehículo! <center><div class='tuto_buycar'></div></center> Si te falta dinero, tienes <b>$3,000</b> en tu cuenta bancaria que puedes retirar usando el cajero (doble clic en él).");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+  }
+
+  function TutoStep27() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 9000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("¡Muy bien! El siguiente paso en la lista es <b>» 4. Traba para tu auto</b>. Ya que con ella podrás <b>:cerrar</b> y <b>:abrir</b> las puertas de tu vehículo y evitar que alguien más lo tome sin tu permiso.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_thumb"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hurra");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep28() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 4. Traba para tu auto</b><br>Dirígete a la Tienda 24/7 en Calle Morralla. Cuando llegues usa <b>:detener</b> para aparcar tu vehículo y entrar a la tienda.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep29() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 4. Traba para tu auto</b><br>¡Has llegado a la Tienda 24/7! Ahora camina <b>justo enfrente</b> de las cajas registradoras para comprar productos.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome4_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hi");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep30() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 4. Traba para tu auto</b><br>En la ventana que apareció, dirígete a <b>Traba de seguridad</b> y comprala.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome_r"></div>');
+
+    // Animation
+    $({deg: -30}).animate({deg: -35}, {
+      duration: 200,
+      step: function(now) {
+        // in the step-callback (that is fired each step of the animation),
+        // you can use the `now` paramter which contains the current
+        // animation-position (`0` up to `angle`)
+        $("#FrankTuto").find('.frank_welcome_r').css({
+            transform: 'rotate(' + now + 'deg)'
+        });
+      }
+    });
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep31() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 9000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("¡Bien hecho! Ahora sal de la tienda, dirígete a tu auto y procede a <b>:cerrar</b> sus puertas estando sobre de él o conduciéndolo. Recuerda que también puedes <b>:abrir</b>, pero no te recomiendo que lo olvides abierto.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_thumb"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_muajaja");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep32() {
+    // Sets
+    // Button by WS
+
+    // Bubble
+    $('.ChatBubbleTxt').html("Para conducir tu vehículo, usa <b>:arrancar</b> sobre él. Lo único que nos queda por hacer es <b>» 5. Tu primer trabajo</b>. Y para ello solo basta que escribas el comando <b>:ayuda trabajos</b>. ¡Escríbelo!");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_search_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hehe");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep33() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 7000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("<b>» 5. Tu primer trabajo</b><br>En esa ventana están listados todos los trabajos disponibles junto con una explicación a detalle de sus comandos y formas de ganar dinero.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome4_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hi");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoStep34() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 7000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("Solo sigue las instrucciones del trabajo de tu interés para poder conseguirlo. Te recomiendo leer la <b>Información General</b> para saber más a detalle cómo funcionan.");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome4_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+  }
+
+  function TutoStep35() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton').show().addClass("animated bounceIn faster");
+      clearInterval(tutoBtnTime);
+    }, 6000);
+
+    // Bubble
+    $('.ChatBubbleTxt').html("¡Y es todo! ¡Has iniciado tu historia en HabboVIP con todos los conocimientos básicos para disfrutar de la mejor experiencia Roleplay!");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_thumb"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_hurra");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function LastStep() {
+    // Sets
+    // Button
+    var tutoBtnTime = setInterval(function() {
+      $('.tutoButton_End').show().addClass("animated bounceIn faster tuto36");
+      clearInterval(tutoBtnTime);
+    }, 9000);
+    // Bubble
+    $('.ChatBubbleTxt').html("Bueno, por mi parte ha sido todo. No olvides nunca el comando <b>:ayuda</b> para ver todos los comandos y <b>:n [pregunta]</b> para resolver tus dudas.<br>¡Bienvenid@ a HabboVIP y que comience tu histora!");
+    $('.ChatBubbleTxt').removeClass("animated zoomOutRight");
+    $('.ChatBubbleTxt').show().addClass("animated zoomInRight");
+    // Frank Image
+    $('#FrankTuto').html('<div class="frank_welcome5_r"></div>');
+
+    $("#FrankTuto").removeClass("animated slideOutRight");
+    $("#FrankTuto").addClass("animated zoomInRight");
+
+    // Sounds
+    var TutoSFX = setInterval(function() {
+      TutoSound("frank_happy");
+      clearInterval(TutoSFX);
+    }, 500);
+  }
+
+  function TutoSound(audioname) {
+    var html = "<audio controls autoplay><source src=\""+habboSWFUrl+"/habbosounds/tutorial/"+audioname+".ogg\" type=\"audio/ogg\"><source src=\""+habboSWFUrl+"/habbosounds/tutorial/"+audioname+".mp3\" type=\"audio/mpeg\"></audio>";
+    $('#TutoSFX').append(html);
+  }
+</script>

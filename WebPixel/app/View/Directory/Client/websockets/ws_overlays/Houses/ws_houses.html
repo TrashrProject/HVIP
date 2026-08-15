@@ -1,0 +1,51 @@
+﻿<!-- Styles -->
+<link href="<?php echo WS_DY;?>/ws_overlays/Houses/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+
+<div class="container-3YsDW_0" id="HouseInfo">
+  <div class="handle header-Oc1Kh_0">
+    <div class="title-RLCLd_0">Informaci&oacute;n de la Propiedad</div>
+    <div id="CloseHouseWindow" class="close-1YQdp_0 close-3RMRU_0"></div>
+  </div> 
+
+  <div class="body-32Vs4_0" style="height: 185px;">
+    <div id="HouseMsg"></div>
+
+    <div class="left-column">
+      <div class="basicInfo-1gmko_0" style="width: 100% !important;">
+        <div class="name-MbJ9L_0"><center>Propiedad</center></div> 
+        <div style="width:100px;height:100px;background-color:#dedede;border:1px solid gray;background-image: url(<?php echo WS_DY;?>/ws_overlays/Houses/resources/images/logo.png);background-size:99px 60px;background-repeat: no-repeat;background-position: 0px 15px;"></div>
+      </div>
+    </div>  
+
+    <div class="right-column">
+      <div style="margin-left: 20px;">
+        <b style="font-size: 15px;text-align: center;">Informaci&oacute;n</b> <br><br>
+        <div class="stats-3zBis_0">
+
+          <div class="column-3Q5g2_0">
+
+            <div class="stat-24DnL_0">
+              <div class="name-3kEsz_0" style="font-weight: 700;">Propietario:</div> 
+              <div id="owner" class="value-3X1Zu_0" style="font-weight: 100;">{OWNER}</div>
+            </div> 
+
+            <div id="HouseAction">
+              <div class="stat-24DnL_0">
+                <div class="name-3kEsz_0" style="font-weight: 700;">En Venta por:</div> 
+                <div id="price" class="value-3X1Zu_0" style="font-weight: 100;">{PRICE}</div>
+              </div> 
+
+              <div class="stat-24DnL_0">
+                <div class="name-3kEsz_0" style="font-weight: 700;">Nivel Necesario:</div> 
+                <div id="level" class="value-3X1Zu_0" style="font-weight: 100;">{LEVEL}</div>
+              </div> 
+            </div>
+
+          </div> 
+
+        </div>
+      </div>
+      <div id="BuyHouse" class="box p-2 mt-2 hover:bg-dark-3 cursor-pointer" style="width: 290px;">{Action House}</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Contactos</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.0/css/mdb.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+    <link href="https://habbovip.us/kernel/includes/pages/developer_build/websockets/ws_overlays/Phones/iPhone/resources/css/styles.css?p=1" rel="stylesheet">
+    <style>
+        html, body{
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .wrapper{
+            width: 244px;
+            height: 368px;
+            margin: 0;
+            overflow: auto;
+            overflow-x: hidden;
+        }
+        /* CONTACTS */
+        .app_Contacts {
+            width: 100%;
+        }
+        .search_friend{
+            font-size: 12px;
+        }
+        .app_contacts_content{
+          border-bottom: 1px solid #c7c7c7;
+        }
+        .app_contacts_content:hover{
+          background-color: #f3f3f3;
+        }
+        .app_contacts_avatar{
+          background-position:-6px -10px;
+          height: 43px;
+          width: 43px;
+          background-color: gray;
+          border-radius: 21px;
+          cursor: pointer;
+          margin-right: 10px;
+        }
+        .app_contacts_name{
+          font-weight: bold;
+          font-size: 12px;
+        }
+        .app_contacts_num{
+          font-size: 12px;
+        }
+        .app_contacts_indicator{
+          font-weight: bold;
+          font-size: 12px;
+          padding-left: 20px;
+          border-bottom: 1px solid #c7c7c7;
+        }
+        .app_contatcs_info{
+            display: inline-block;
+            width: 165px;
+        }
+        .app_contacts_buttons{
+            width: 67px;
+            display: inline-block;
+        }
+        .app_contacts_msg{
+          height: 20px;
+          width: 20px;
+          background-image: url('https://habbovip.us/kernel/includes/pages/client/websockets/ws_overlays/Phones/iPhone/resources/images/icons/msg.png');
+          background-size: 20px 20px;
+          display: inline-block;
+          margin-top: 10px;
+        }
+        .app_contacts_call{
+          height: 20px;
+          width: 20px;
+          background-image: url('https://habbovip.us/kernel/includes/pages/client/websockets/ws_overlays/Phones/iPhone/resources/images/icons/call.png');
+          background-size: 20px 20px;
+          display: inline-block;
+          margin-top: 10px;
+        }
+        .app_contacts_del{
+          height: 20px;
+          width: 20px;
+          background-image: url('https://habbovip.us/kernel/includes/pages/client/websockets/ws_overlays/Phones/iPhone/resources/images/icons/delete.png');
+          background-size: 20px 20px;
+          display: inline-block;
+          margin-top: 10px;
+        }
+        .app_contacts_add{
+          height: 20px;
+          width: 20px;
+          background-image: url('https://habbovip.us/kernel/includes/pages/client/websockets/ws_overlays/Phones/iPhone/resources/images/icons/add.png');
+          background-size: 20px 20px;
+          display: inline-block;
+          float:right;
+          margin-top: 10px;
+        }
+        .app_contacts_msg:hover, .app_contacts_call:hover, .app_contacts_del:hover, .app_contacts_add:hover{
+          cursor: pointer;
+        }
+        .SendButtonMsg_V2{
+            background-color: #c3c3c3;
+            border: 1px solid #e6e6e6;
+            border-radius: 3px;
+            padding: 3px;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            margin-left: -15px;
+            float: left;
+        }
+        .SendButtonMsg_V2:hover{
+          background-color: #d6d6d6;
+          cursor: pointer;
+        }
+        .ChatBar{
+          height: 33px;
+          width: 244px;
+          background-color: gray;
+          position: fixed;
+          margin-top: 335px;
+        }
+
+        #search_friend {
+            width: 100%;
+            height: 27px;
+            border-radius: 4px;
+        }
+        /* END CONTACTS */
+    </style>
+</head>
+<body>
+    <div id="MobileAPP" class="wrapper">
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="app_Contacts">
+                <div id="app_title"><b>Contactos</b></div>
+
+                <div id="Searching_Friends" class="row">
+                    <div class="col-10">
+                        <input id="search_friend" class="search_friend" type="text" name="search_friend" placeholder="Buscar Contactos">
+                    </div>
+                    <div class="col-2" style="margin: 0;padding: 0;">
+                        <div class="SendButtonMsg_V2">Buscar</div>
+                    </div>
+                </div>
+
+                <div id="My_Contacts">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+    <!-- JQuery -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.0/js/mdb.min.js"></script>
+
+    <script type="text/javascript">
+      $( document ).ready(function() {
+        var html = "";
+        $.getJSON('https://api.habbovip.us/?tkn=2D9I7SFP9Z0KAJ9KA3FK&return=GetUserContacts&user_id=1', function(data) {
+          data.forEach(element => {
+            html += "<div class=\"row app_contacts_content\" style=\"margin-left: 0px;width: 100%;padding: 5px;\">";
+            html += "<div col=\"col-4\">";
+            html += "<div class=\"app_contacts_avatar\" style=\"background-image: url(https://nitro-imager.kubbo.ch/?figure="+element.Look+"&headonly=1);\"></div>";
+            html += "</div>";
+            html += "<div col=\"col-4\" style=\"padding: 5px;width: 113px;\">";
+            html += "<div class=\"app_contacts_name\">"+element.Username+"</div>";
+            html += "<div class=\"app_contacts_num\">"+element.PhoneNumber+"</div>";
+            html += "</div>";
+            html += "<div col=\"col-4\">";
+            html += "<div data-contact=\""+element.Username+"\" class=\"app_contacts_msg\" title=\"Enviar Mensaje\"></div>";
+            html += "<div data-contact=\""+element.Username+"\" class=\"app_contacts_call\" title=\"Llamar Contacto\"></div>";
+            html += "<div data-contact=\""+element.Username+"\" class=\"app_contacts_del\" title=\"Eliminar Contacto\"></div>";
+            html += "</div>";
+            html += "</div>";
+          });
+          $("#My_Contacts").html(html);
+        });
+      });
+    </script>
+</body>
+</html>

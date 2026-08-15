@@ -1,0 +1,211 @@
+﻿<!-- Styles -->
+<link href="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+<link href="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/css/swiper/swiper.min.css?p=<?php echo time(); ?>" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900" rel="stylesheet">	
+<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+<!-- Scripts -->
+<script type="text/javascript" src="<?php echo WS_DY; ?>/ws_overlays/Phones/iPhone/resources/js/scripts.js"></script>
+
+<!-- Button -->
+<div id="PhoneButton" data-balloon="Tel&eacute;fono" data-balloon-pos="left"></div>
+<!-- End Button -->
+
+<div id="phone" class="container-3YsDW_0">
+  <!-- Phone Case -->
+  <div class="handle header-Oc1Kh_0 header-phone-extends"></div>
+
+  <!-- Phone Close Button -->
+  <div id="phone_close"></div>
+
+  <!-- Phone Content -->
+  <div id="phone_content">
+      <div id="phone_bg">
+      	<!-- Notify Bar -->
+		<div id="panel">
+			<div id="panel_content">
+				<div id="panel_content_text">
+					<div style="font-size:55px;font-weight: 300;">2:45</div>
+					<div style="font-size: 15px;">Viernes, 22 de junio</div>
+					<div id="panel_content_notify">
+						Sin notificaciones previas
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="flip">
+			<div class="notify_icon signal_icon"></div>
+			<div class="notify_icon wifi_icon"></div>
+			<div class="notify_icon battery_icon"></div>
+			<div id="flip_content">
+				<center>
+					<div class="notify_net">RDP 4G</div>
+					<div class="notify_hour">2:45 p. m.</div>
+					<div class="notify_porcent">100 %</div>
+				</center>
+			</div>
+		</div>
+		<!-- END Notify Bar -->
+
+		<!-- App Error -->
+		<div id="phone_error">
+			<div id="phone_msg_box">
+				<div id="phone_error_msg">
+					<!--<b>No se ha podido abrir la aplicaci&oacute;n</b><br>
+					No se ha obtenido informaci&oacute;n de esta Aplicaci&oacute;n.-->
+				</div>
+				<div id="phone_error_button">OK</div>
+			</div>
+		</div>
+		<!-- END App Error -->
+
+		<!-- All Apps -->
+		<?php
+			require 'resources/apps/Contacts.html';
+			require 'resources/apps/Whatsapp.html';
+			require 'resources/apps/Messages.html';
+			require 'resources/apps/Health.html';
+			require 'resources/apps/Services.html';
+		?>
+		<div id="AppViewer" class="AppLayout">
+			<div id="app_bg_v2"></div>
+		</div>
+		<!-- END All Apps -->
+
+		<!-- Screens -->
+		<div id="screens_phone" class="swiper-container">
+	    	<div id="screen_apps" class="swiper-wrapper">
+	    		<!-- Screen 1 - ->
+		    	<div class="swiper-slide">
+		    		<div id="columns-full">
+		    			< !-- Mail Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Mail.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Mail.png');" onclick="Unavailable()">
+						    </div>
+						    <div class="app_name" data-name-app="Mail">Mail</div>
+					    </div>
+					    < !-- Calendar Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="_Calendar" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Calendar.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Calendar.png');">
+					    		<div class="app_special-first">Sábado</div>
+							    <div class="app_special-second">7</div>
+						    </div>
+						    <div class="app_name" data-name-app="Calendario">Calendario</div>
+					    </div>
+					    < !-- Photos Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="_Gallery" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Photos.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Photos.png');">
+						    </div>
+						    <div class="app_name" data-name-app="Fotos">Fotos</div>
+					    </div>
+					    < !-- Maps Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="_Maps" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Maps.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Maps.png');">
+						    </div>
+						    <div class="app_name" data-name-app="Mapas">Mapas</div>
+					    </div>
+					    < !-- Clock Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Clock.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Clock.png');" onclick="Unavailable()">
+						    </div>
+						    <div class="app_name" data-name-app="Reloj">Reloj</div>
+					    </div>
+					    < !-- Weather Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Weather.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Weather.png');" onclick="Unavailable()">
+						    </div>
+						    <div class="app_name" data-name-app="Tiempo">Tiempo</div>
+					    </div>
+					    < !-- Notes Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Notes.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Notes.png');" onclick="Unavailable()">
+						    </div>
+						    <div class="app_name" data-name-app="Notas">Notas</div>
+					    </div>
+					    < !-- Calculator Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="_Calculator" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Calculator.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Calculator.png');">
+						    </div>
+						    <div class="app_name" data-name-app="Calculadora">Calculadora</div>
+					    </div>
+					    < !-- Settings Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="_Settings" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Settings.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Settings.png');">
+						    </div>
+						    <div class="app_name" data-name-app="Configuración">Configuración</div>
+					    </div>
+					    < !-- Contacts Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="_Contacts" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Contacts.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Contacts.png');">
+						    </div>
+						    <div class="app_name" data-name-app="Contactos">Contactos</div>
+					    </div>
+					    < !-- Whatsapp Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="_WhatsApp" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/WhatsApp.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/WhatsApp.png');">
+						    </div>
+						    <div class="app_name" data-name-app="Contactos">WhatsApp</div>
+					    </div>
+					    < !-- Appstore Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/AppStore.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/AppStore.png');" onclick="Unavailable()">
+						    </div>
+						    <div class="app_name" data-name-app="App Store">App Store</div>
+					    </div>
+					    < !-- Health Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="_Health" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Health.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Health.png');">
+						    </div>
+						    <div class="app_name" data-name-app="Salud">Salud</div>
+					    </div>
+					    < !-- Services Icon - ->
+					    <div class="column swiper-no-swiping">
+					    	<div class="appicon count" data-app="_Services" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Services.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Services.png');">
+						    </div>
+						    <div class="app_name" data-name-app="Servicios">Servicios</div>
+					    </div>			    
+					</div>
+		    	</div>
+		    	< !-- END Screen 1 -->
+		    </div>
+		    <!-- Add Pagination -->
+		    <div class="swiper-pagination"></div>
+		</div>
+		<!-- Dock Apps -->
+		<div id="dock_apps">
+			<div id="columns-full" class="dock_apps">
+				<!--
+			    <div class="column">
+			    	<div class="appicon count" data-app="_Phone" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Phone.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Phone.png');">
+				    </div>
+				    <div class="app_name" data-name-app="Tel&eacute;fono">Tel&eacute;fono</div>
+			    </div>
+			    <div class="column">
+			    	<div class="appicon count" data-app="" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Safari.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Safari.png');" onclick="Unavailable()">
+				    </div>
+				    <div class="app_name" data-name-app="Safari">Safari</div>
+			    </div>
+			    <div class="column">
+			    	<div class="appicon count" data-app="_Messages" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Messages.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Messages.png');">
+				    </div>
+				    <div class="app_name" data-name-app="Mensajes">Mensajes</div>
+			    </div>
+			    <div class="column">
+			    	<div class="appicon count" data-app="" data-col-moves="0" data-icon="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Music.png" style="background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/apps/Music.png');" onclick="Unavailable()">
+				    </div>
+				    <div class="app_name" data-name-app="M&uacute;sica">M&uacute;sica</div>
+			    </div>
+			    -->
+			</div>
+		</div>
+		<!-- END Dock Apps -->
+		<!-- END Screens -->
+      </div>
+  </div>
+
+  <!-- Phone Home Button -->
+  <div id="phone_home"></div>
+</div>
+
+<!-- Bottom Scripts -->
+<script type="text/javascript" src="<?php echo WS_DY; ?>/ws_overlays/Phones/iPhone/resources/js/swiper/swiper.min.js?p=<?php echo time(); ?>"></script>
+<script type="text/javascript" src="<?php echo WS_DY; ?>/ws_overlays/Phones/iPhone/resources/js/scripts_bottom.js?p=<?php echo time(); ?>"></script>

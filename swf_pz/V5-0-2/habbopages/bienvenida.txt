@@ -1,0 +1,9 @@
+¡Bienvenido a Habbo!
+<span class="padding-top"><br></span><img src="http://localhost/templates/brain/style/images/logo/logo.png"/></h1><span class="padding-top"><br></span>
+<span class="padding-top"><br></span><h1>Bienvenido a Habbo:</h1><span class="padding-top"><br><br><br><br></span>
+<span class="padding-top"><br></span><p>Esperamos que disfrutes de tu estancia, no olvides revisar el catálogo de precios para mantenerte a la última en la economía.</p><span class="padding-bottom"><br></span>
+<span class="padding-top"></span><p>Recuerda que como en toda comunidad existen reglas, y Habbo no es la excepción, lee las reglas de convivencia y evita problemas.</p><span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span><h2>¿Cómo consigo monedas?</h2><span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span><p>En Habbo recibes créditos, duckets y diamantes de forma gratuita, basta con estar conectad@ durante 15 minutos y recibirás gratuitamente una recarga.</p><span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span><p>Recuerda que también debes participar en eventos para ganar premios mayores como los puntos de honor, que te permitirán comprar <a href="event:catalog/open/premios">rares</a> en el <a href="event:catalog/open/inicio">catálogo</a>.</p><span class="padding-bottom"><br></span>
+<span class="padding-top"><br> </span><span class="padding-top"><br> </span><span class="padding-top"><br> </span><span class="padding-top"><br> </span><span class="padding-top"><br> </span><span class="padding-top"><br> </span><span class="padding-top"><br> </span>

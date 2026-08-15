@@ -1,0 +1,103 @@
+/* Adsense */
+
+
+
+.top_responsive_3 {  display: inline-block; min-width: 300px; max-width: 350px; min-height: 200px; max-height: 250px;}
+.top_responsive_2 {  display: inline-block; min-width: 301px; max-width: 336px; min-height: 250px; max-height: 280px;}
+.top_responsive_1 { display: inline-block; min-width: 500px; max-width: 900px; min-height: 90px; max-height: 120px;}
+
+#AdBox2{
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: rgba(226, 0, 0, 0.37);
+    border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border: 6px solid rgba(174,174,174,0.4);
+	z-index: 9997;
+}
+
+@media screen and (max-width: 980px){
+	#AdBox2{
+		visibility: hidden;
+		display: none;
+	}
+}
+
+.avoid_class{
+	background-color: rgba(0, 0, 0, 0);
+	z-index: 9998;
+	width: 40px;
+	height: 16px;
+	position: absolute;
+	left: 88%;
+}
+
+.avoid_class2 {
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0);
+    box-sizing: border-box;
+    z-index: 9999999999999999999999999999999999;
+    height: 30px;
+    flex: 1;
+}
+
+.avoid_class2b {
+    width: 100%;
+    position: absolute;
+    top: 90%;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0);
+    box-sizing: border-box;
+    z-index: 9999999999999999999999999999999999;
+    height: 30px;
+}
+
+.exit_class{
+	position: absolute;
+	left: 80%;
+	top: 15%;
+	height: 31px;
+	width: 31px;
+	color: #FFFFFF;
+	text-align: center;
+	cursor: pointer;
+	background: url(https://habbovip.us/close.gif) no-repeat;
+	border: 0;
+	z-index: 9999;
+}
+
+.advertisement.leaderboard-md {
+    max-width: 312px;
+	max-height: 262px;
+ }
+
+.advertisement > .head {
+	padding: 4px 8px 2px;
+	display: inline-block;
+	border: 1px solid #e1e8ed;
+	background-color: #e1e8ed;
+	border-radius: 3px 3px 0 0;
+	opacity: 0.9;
+}
+
+.advertisement > .head > span {
+	color: black;
+	font-size: 12px;
+	text-shadow: 1px 1px rgb(255, 255, 255);
+}
+
+.advertisement > .head > span > span { margin-right: 6px; }
+
+.advertisement > .body {
+	border: 2px solid #e1e8ed;
+	background: #f5f8fa;
+	opacity: 0.9;
+	position: absolute;
+}

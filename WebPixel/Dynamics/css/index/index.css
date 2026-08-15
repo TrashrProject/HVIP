@@ -1,0 +1,188 @@
+/*
+ * PixelZone by RDP Services, Emulated by Retro Development Server.
+ * The use of this program is restricted to clients and owners of RDP Services.
+ * Any unauthorized use of this code it'll end up on deletion of the program.
+ * Developers P3x & Jeihden.
+ * Copyrights © 2020
+ * Last Modified: $file.lastModefied
+ */
+
+#bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0.3;
+    background-color: #000;
+
+    /* Preserve aspet ratio */
+    min-width: 100%;
+    min-height: 100%;
+}
+
+.login {
+    min-width: 350px;
+    padding: 28px 28px;
+    background-color: #fff;
+    -webkit-box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.32);
+    -moz-box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.32);
+    box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.32);
+}
+
+/* Buttons */
+.button {
+    display: block;
+    color: #ffffff !important;
+    margin: 0.4rem 0;
+    padding: 0.4rem 1rem;
+    box-shadow: 0 3px 0 1px rgba(0,0,0,.3);
+    border: 0.15rem solid;
+    border-radius: 0.4rem;
+    cursor: pointer;
+}
+
+.button:hover {
+    text-decoration: none;
+}
+.button:focus {
+    outline: 0;
+}
+
+.button.green {
+    background-color: #00813e;
+    border-color: #8eda55;
+}
+
+.button.green:hover {
+    background-color: #00ab54;
+    border-color: #b9f373;
+}
+
+.button.blue {
+    background-color: #0f7dbc;
+    border-color: #5dc4ff;
+}
+
+.button.blue:hover {
+    background-color: #2a9cde;
+    border-color: #56cfff;
+}
+
+.button.turq {
+    background-color: #0ba395;
+    border-color: #53fcec;
+}
+
+.button.turq:hover {
+    background-color: #1eb3a5;
+    border-color: #40f7e6;
+}
+
+.button.teal {
+    background-color: #1b6382;
+    border-color: #5ab1d6;
+}
+
+.button.teal:hover {
+    background-color: #296b87;
+    border-color: #56cfff;
+}
+.form-control {
+    text-align: center;
+}
+.online {
+    text-shadow: 2px 0px 3px #000;
+    font-size: 115%;
+}
+#main-logo:hover {
+    opacity: 0.85
+}
+
+
+#main-logo {
+    -webkit-animation-name: pulse;
+    -webkit-animation-duration: 2s;
+    -webkit-animation-iteration-count: infinite;
+    animation-name: pulse;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+}
+
+#main-logo:hover {
+    /* Start the shake animation and make the animation last for 0.5 seconds */
+    animation: shake 0.5s;
+
+    /* When the animation is finished, start again */
+    animation-iteration-count: infinite;
+}
+
+#subrmit-login:hover {
+    /* Start the shake animation and make the animation last for 0.5 seconds */
+    animation: shake 0.5s;
+
+    /* When the animation is finished, start again */
+    animation-iteration-count: 1;
+}
+#show-register:hover {
+     /* Start the shake animation and make the animation last for 0.5 seconds */
+     animation: shake 0.6s;
+
+     /* When the animation is finished, start again */
+     animation-iteration-count: 2;
+ }
+
+#fb-login {
+    background-image: url(https://dynamics.habbovip.us/img/fb/fb-icon.gif);
+    background-repeat: no-repeat;
+    background-size: 41px;background-color: #4268b3;
+}
+#fb-login:hover {
+    /* Start the shake animation and make the animation last for 0.5 seconds */
+    animation: shake 0.6s;
+
+    /* When the animation is finished, start again */
+    animation-iteration-count: 2;
+}
+
+@keyframes pulse {
+    0% {
+        -webkit-transform: scaleX(1);
+        transform: scaleX(1)
+    }
+    50% {
+        -webkit-transform: scale3d(1.10, 1.10, 1.10);
+        transform: scale3d(1.10, 1.10, 1.10)
+    }
+    100% {
+        -webkit-transform: scaleX(1);
+        transform: scaleX(1)
+    }
+}
+
+* {
+    -webkit-transition-property: background, color, opacity, filter, -webkit-filter;
+    -o-transition-property: background, color, opacity, filter, -webkit-filter;
+    transition-property: background, color, opacity, filter, -webkit-filter;
+    -webkit-transition-duration: 0.2s;
+    -o-transition-duration: 0.2s;
+    transition-duration: 0.2s;
+    -webkit-transition-timing-function: ease;
+    -o-transition-timing-function: ease;
+    transition-timing-function: ease
+}
+
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+

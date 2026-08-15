@@ -1,0 +1,135 @@
+#GangsWindow{
+    z-index: 2115;
+    position: absolute;
+    left: 280px;
+    top: 10px;
+    display: none;
+    width: 810px;
+}
+
+#GangsMsg{
+    font-size: 12px;
+    background-color: #3d3d3d;
+    margin-top: -10px;
+    display: none;
+}
+
+.gang_inf_box {
+    text-align: center;
+    margin-right:5px;
+}
+
+.Turf_turf_3Ic15 {
+    position: absolute;
+    top: 3px;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    width: 250px;
+    pointer-events: none;
+    text-align: center;
+    background-color: rgba(0,0,0,.1);
+    padding: 10px;
+    border-radius: 12px;
+}
+.Turf_turf_3Ic15 .Turf_title_aupur {
+    font-size: 20px;
+}
+.Turf_turf_3Ic15 .Turf_info_Y6LIm, .Turf_turf_3Ic15 .Turf_title_aupur {
+    color: #fff;
+    text-shadow: 0 0 0 rgba(0,0,0,.5);
+}
+.Turf_turf_3Ic15 .Turf_info_Y6LIm {
+    margin-top: 5px;
+}
+.pointer-events-auto {
+    pointer-events: auto;
+}
+.font-bold {
+    font-weight: 700;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+.mt-2 {
+    margin-top: .5rem;
+}
+.Turf_turf_3Ic15 .Turf_progressBar_25282 {
+    margin-top: 10px;
+}
+.h-6 {
+    height: 1.5rem;
+}
+.h-full {
+    height: 100%;
+}
+.ProgressBar_progressBarWrapper_3AwhQ {
+    position: relative;
+    font-size: 13px;
+}
+.ProgressBar_progressBarWrapper_3AwhQ .ProgressBar_progressBar_BCnpR {
+    height: 100%;
+    border-radius: 13px;
+    position: relative;
+    background-color: #fff;
+    overflow: hidden;
+}
+.ProgressBar_progressBarWrapper_3AwhQ .ProgressBar_progressBar_BCnpR .ProgressBar_progress_tfs6y {
+    position: absolute;
+    -webkit-transition: width .2s;
+    transition: width .2s;
+}
+.ProgressBar_progressBarWrapper_3AwhQ .ProgressBar_progressBar_BCnpR .ProgressBar_text_1Dzge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    text-align: center;
+    color: #000;
+}
+.ProgressBar_progressBarWrapper_3AwhQ .ProgressBar_progressBar_BCnpR .ProgressBar_highlight_1Qc1n {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 4px solid hsla(0,0%,100%,.3);
+    border-radius: 10px;
+}
+.ProgressBar_progressBarWrapper_3AwhQ .ProgressBar_border_2lyP- {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    border: 1px solid #000;
+    display: block;
+    border-radius: 10px;
+    z-index: 1500;
+}
+.Turf_turf_3Ic15 .Turf_claimButton_3SG4J {
+    margin-top: 10px;
+    pointer-events: auto;
+}
+.HabboButton_button_CVKEB {
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+    padding: 6px 12px;
+    border: 1px solid #000;
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+    color: #000;
+}

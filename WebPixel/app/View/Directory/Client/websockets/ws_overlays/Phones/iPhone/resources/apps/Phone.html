@@ -1,0 +1,71 @@
+<div id="app_Phone" class="AppLayout">
+
+	<div class="app_Phone" id="app_bg" style="background-color: #f9f9f9;">
+		<form name="dialer">
+			<div class="block"></div>
+		    <input type="textfield" name="ans" value="" autocomplete="off">
+		    <input type="button" value="7" onClick="document.dialer.ans.value+='7'">
+		    <input type="button" value="8" onClick="document.dialer.ans.value+='8'">
+		    <input type="button" value="9" onClick="document.dialer.ans.value+='9'">
+		    <br>
+		    <input type="button" value="4" onClick="document.dialer.ans.value+='4'">
+		    <input type="button" value="5" onClick="document.dialer.ans.value+='5'">
+		    <input type="button" value="6" onClick="document.dialer.ans.value+='6'">
+		    <br>
+		    <input type="button" value="1" onClick="document.dialer.ans.value+='1'">
+		    <input type="button" value="2" onClick="document.dialer.ans.value+='2'">
+		    <input type="button" value="3" onClick="document.dialer.ans.value+='3'">
+		    <br>					    
+		    <input type="reset" value="C">
+		    <input type="button" value="0" onClick="document.dialer.ans.value+='0'">
+		    <input type="button" value="#">
+		</form>
+		<center><div class="dialer_call"></div></center>
+	</div>
+
+	<div id="app_bg" class="app_Phone_Calling" style="background-color: #f9f9f9;background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/iphone_bgglow.jpg');background-size: cover;">
+		<br>
+		<div style="font-size: 28px;color: white;font-weight: 100;text-align: center;">Nombre</div>
+		<div style="font-size: 15px;color: #afafaf;font-weight: 100;text-align: center;">llamando...</div>
+
+		<div style="display: inline-block;">
+
+			<div class="dialer_tg dialer_mute_off">
+				<div class="dialer_tg_text">mute</div>
+			</div>
+
+			<div class="dialer_tg" style="
+				background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/icons/dial_toggles1.png');
+				background-position: -121px -4px;background-size: 295px 165px;opacity: 0.5;">
+				<div class="dialer_tg_text">keypad</div>
+			</div>
+
+			<div class="dialer_tg dialer_speaker_off">
+				<div class="dialer_tg_text">speaker</div>
+			</div>
+
+			<div class="dialer_tg" style="
+				background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/icons/dial_toggles1.png');
+				background-position: -48px -94px;background-size: 295px 165px;opacity: 0.5;">
+				<div class="dialer_tg_text">add call</div>
+			</div>
+			<div class="dialer_tg" style="
+				background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/icons/dial_toggles1.png');
+				background-position: -121px -94px;background-size: 295px 165px;opacity: 0.5;">
+				<div class="dialer_tg_text">FaceTime</div>
+			</div>
+			<div class="dialer_tg" style="
+				background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/icons/dial_toggles1.png');
+				background-position: -195px -94px;background-size: 295px 165px;opacity: 0.5;">
+				<div class="dialer_tg_text">contacts</div>
+			</div>
+		</div>
+		<br><br><br><br>
+		<center>
+			<div style="display: inline-block;">
+				<div class="dialer_uncall" style="display: inline-block;"></div>
+				<div class="dialer_call" style="display: none;margin-left: 92px;"></div><!-- inline-block -->
+			</div>
+		</center>
+	</div>
+</div>

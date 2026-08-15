@@ -1,0 +1,60 @@
+﻿<!-- Styles -->
+<link href="<?php echo WS_DY;?>/ws_overlays/Internet/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+
+<div id="InternetOverlay" style="display: none;">
+  <div id="InternetSearchBar" style="position: relative;">
+    <button class="inter_btn_left"><i class="fa fa-arrow-left"></i></button>
+    <button class="inter_btn_right"><i class="fa fa-arrow-right"></i></button>
+    <button class="inter_btn_home" onclick="return HomePage();"><i class="fa fa-home"></i></button>
+    <button class="inter_btn_clock"><i class="fa fa-clock-o"></i></button>
+    <input id="InternetInputSearch" type="text" placeholder="Buscar o escribir direcci&oacute;n web">
+    <button id="IntBtnTimes"><i class="fa fa-times"></i></button>
+    <?php if ($UData["rank"] >= 5 || $UPData["is_news_reporter"] == '1'):
+            $btnTxt = $UData["rank"] >= 5 ? "Staff Tools" : "Panel Reporteros";  ?>
+      <div id="goToStaffTool" onclick="return ToggleStaffTool();"><?php echo $btnTxt; ?></div>
+    <?php endif; ?>
+    <div id="CloseInternet">Salir</div>
+  </div>
+
+  <!--<div id="InternetWebPage"></div>-->
+
+  <iframe id="webFrame" title="web" src="<?php echo WS_DY;?>/ws_overlays/Internet/pages/EyeFind.php?p=<?php echo time(); ?>" style="width: 100%;height: 93%;border: 0;display: block;"></iframe>
+
+  <?php if ($UData["rank"] >= 5 || $UPData["is_news_reporter"] == '1'): ?>
+  <iframe id="staffToolFrame" title="stafftool" src="<?php echo WS_DY;?>/ws_overlays/Internet/pages/stafftool/Dashboard.php?p=<?php echo time(); ?>" style="width: 100%;height: 93%;border: 0;display: none;"></iframe>
+  <?php endif; ?>
+</div>
+
+<script>
+var curPage = "HomePage";
+var curButtonText = $("#goToStaffTool").text();
+
+function HomePage(){
+  var iframe = document.getElementById('webFrame');
+  iframe.src = iframe.src;
+
+  $("#staffToolFrame").hide();
+  $("#webFrame").show();
+}
+
+function StaffTool(){
+  var iframe = document.getElementById('staffToolFrame');
+  iframe.src = iframe.src;
+
+  $("#webFrame").hide();
+  $("#staffToolFrame").show();
+}
+
+function ToggleStaffTool() {
+  if (curPage == "HomePage") {
+    StaffTool();
+    curPage = "StaffTool";
+    $("#goToStaffTool").html("<< Volver");
+  }
+  else {
+    HomePage();
+    curPage = "HomePage";
+    $("#goToStaffTool").html(curButtonText);
+  }
+}
+</script>

@@ -1,0 +1,13 @@
+#PhoneShopInfo{
+    z-index: 2115;
+    position: absolute;
+    left: 460px;
+    top: 100px;
+    width: auto;
+    height: auto;
+}
+#PhoneShopMsg{
+    font-size: 12px;
+    background-color: #3d3d3d;
+    margin-top: -10px;
+}

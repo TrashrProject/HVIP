@@ -1,0 +1,30 @@
+#PurgeWindow{
+  z-index: 2115;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  top: 130px;
+  width: auto;
+  height: auto;
+}
+
+#PurgeWindow {
+	width: 432px;
+	height: 307px;
+}
+#PurgeWindow video {
+    margin-top: 22px;
+}
+#PurgeTV {
+    background-image: url(../images/jukebox-tv-black.png);
+    width: 432px;
+    height: 307px;
+    position: absolute;
+}
+
+#ClosePurgeTV {
+    top: 4px;
+    position: absolute;
+    z-index: 1;
+    right: 4px;
+}

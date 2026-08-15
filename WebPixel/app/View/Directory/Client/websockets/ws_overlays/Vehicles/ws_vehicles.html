@@ -1,0 +1,92 @@
+﻿<!-- Styles -->
+<link href="<?php echo WS_DY;?>/ws_overlays/Vehicles/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+
+<div id='FuelInfo' style="display: none;">
+	<div id="Vh_Cap">Combustible</div>
+  	<div id="my-vh" class="info-card Vh_Bar">
+  		<div class="stats">
+            <div class="stat energy" style="width: 192px;background-color: #034f9ed4;border-radius: 5px;">
+                <div id="FuelState" class="value">90/90</div> 
+                <div class="bar" style="width: calc(0px + 100%);border-radius: 5px;"></div>
+            </div>           
+    	</div>
+	</div>
+	<div id="CamCargaInfo" style="display: none;">
+		<div id="Cam_Cap">Cargamento: Ropa</div>
+		<div id="CamCargaChofer" class="stats" style="font-size: 11px;">
+			Chofer:
+		</div>
+		<div id="CamCargaDestino" class="stats" style="font-size: 11px;">
+			Dirígete a:
+		</div>
+		<center><div id="ActionCam" data-action="depositar" class="box p-2 mt-2 hover:bg-dark-3 cursor-pointer" style="width: 90%;margin-bottom:3px">Depositar carga</div></center>
+		<center><small><a id="AbandonarCam" href="#" style="cursor: pointer;color:white">Abandonar carga</a></small></center>
+	</div>
+	<div id="BasuInfo" style="display: none;">
+		<div id="BasuCount">Basura: 0/15</div>
+		<div id="BasuChofer" class="stats" style="font-size: 11px;">
+			Chofer: {username}
+		</div>
+		<div id="BasuRecolector" class="stats" style="font-size: 11px;">
+			Recolector: {username}
+		</div>
+		<center><div id="ActionBasu" class="box p-2 mt-2 hover:bg-dark-3 cursor-pointer" style="width: 90%;margin-bottom:3px;display:none;">Descargar camión</div></center>
+		<center><small><a id="AbandonarBasu" href="#" style="cursor: pointer;color:white;display:none;">Abandonar carga</a></small></center>
+	</div>
+</div>
+
+<!-- Baules -->
+<div class="container-3YsDW_0" id="BaulInfo" style="display: none;">
+    <div class="handle header-Oc1Kh_0">
+      <div class="title-RLCLd_0">Interior de Maletero</div>
+      <div id="CloseBaulWindow" class="close-1YQdp_0 close-3RMRU_0"></div>
+    </div> 
+
+    <div class="body-32Vs4_0" style="color:black;">
+		<div style="color:red;font-size: 15px;width: 250px;">Evita tener 2 cosas iguales con las mismas cantidades o cuando saques 1 se sacaran ambas! </br></div>
+    	<div style="width: 250px;font-size: 15px;"><div id="BaulInt"></div></div>
+    </div>
+  </div>
+<!-- End Baules -->
+
+<!-- CarShop -->
+<div class="container-3YsDW_0" id="CarShopInfo" style="display:none;">
+    <div class="handle header-Oc1Kh_0">
+      <div class="title-RLCLd_0">Listado de Vehículos</div>
+      <div id="CloseShopWindow" class="close-1YQdp_0 close-3RMRU_0"></div>
+    </div> 
+
+    <div class="body-32Vs4_0" style="color:black;">
+    	<center><div id="CarShopMsg"></div></center>
+    	<div id="CarsList" class="scroll" style="width: auto;max-width:560px;max-height:260px;overflow-y:auto;font-size: 13px;">
+
+        <!--
+    		< ?php
+    			$query = MYSQL_::Bits('SELECT * FROM play_vehicles WHERE jobid = "0" ORDER BY effect_id ASC');
+				  if(mysqli_num_rows($query) > 0):
+					 while($Row = mysqli_fetch_assoc($query)):
+			  ?>
+	    		<div class="ft1"> 
+	    			<div style="background-image:url('< ?php echo WS_DY; ?>/ws_resources/images/Vehicles/< ?php echo $Row['effect_id']; ?>.png');height: 150px;width: 250px;"></div>
+							<div class="datos2">Nombre: <span>< ?php echo utf8_encode($Row["model"]); ?></span>
+								<div class="hr2"></div>
+								Capacidad de combustible: <span>< ?php echo $Row["max_fuel"]; ?> Litros</span>
+								<div class="hr2"></div>
+								Espacio en el baúl: <span>< ?php echo $Row["max_trunks"]; ?> lugares</span>
+								<div class="hr2"></div>
+								Pasajeros Límite: <span>< ?php echo $Row["max_passengers"]; ?> espacio(s)</span>
+								<div class="hr2"></div>
+								Precio: <span style="color:#339900"><font color="orange">
+									< ?php if($Row["price"] > 1000){ echo "$ " . number_format($Row["price"]); }else{ echo $Row["price"] . " PL"; } ?></font> - <div id="< ?php echo $Row['effect_id']; ?>,< ?php echo $Row['model']; ?>" class="shopcar"></div></span>
+							</div>
+					</div>
+			  < ?php
+  					endwhile;
+  				endif;
+			  ?>
+        -->
+        
+    	</div>
+    </div>
+  </div>
+<!-- End CarShop -->

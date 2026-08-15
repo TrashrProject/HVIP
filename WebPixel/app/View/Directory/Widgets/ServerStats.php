@@ -1,0 +1,106 @@
+<?php
+/**
+ * PixelZone by RDP Services, Emulated by Retro Development Server.
+ * The use of this program is restricted to clients and owners of RDP Services.
+ * Any unauthorized use of this code it'll end up on deletion of the program.
+ * Developers P3x & Jeihden.
+ * Copyrights © 2020
+ * Last Modified: $file.lastModefied
+ */
+
+
+?>
+
+<div class="content-box">
+    <div class="title">
+        <i class="fa fa-bar-chart text-secondary"></i> Estadísticas de <?php echo Config::$WName; ?>
+    </div>
+    <div class="box-content">
+        <div class="user-info-pz">
+            <div class="server-pz-stats">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="author-avatar text-center">
+                        <div><div class="stats-pz-onlines"></div></div>
+                    </div>
+                    <div class="post-info mr-auto ml-2">
+                        <b>Usuarios conectados:</b> <?php echo $UserMG->GetStatData("users_online"); ?>
+                    </div>
+                    <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
+                </div>
+            </div>
+
+            <div class="server-pz-stats">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="author-avatar text-center">
+                        <div><div class="stats-pz-users"></div></div>
+                    </div>
+                    <div class="post-info mr-auto ml-2">
+                        <b>Usuarios registrados:</b> <?php echo $UserMG->GetStatData("users_registered"); ?>
+                    </div>
+                    <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
+                </div>
+            </div>
+
+            <div class="server-pz-stats">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="author-avatar text-center">
+                        <div><div class="stats-pz-money"></div></div>
+                    </div>
+                    <div class="post-info mr-auto ml-2">
+                        <b>Dinero total:</b> $<?php echo $UserMG->GetStatData(); ?>
+                    </div>
+                    <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
+                </div>
+            </div>
+
+            <div class="server-pz-stats">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="author-avatar text-center">
+                        <div><div class="stats-pz-apts"></div></div>
+                    </div>
+                    <div class="post-info mr-auto ml-2">
+                        <b>Apartamentos:</b> <?php echo $UserMG->GetStatData("apts_total"); ?>
+                    </div>
+                    <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
+                </div>
+            </div>
+
+            <div class="server-pz-stats">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="author-avatar text-center">
+                        <div><div class="stats-pz-business"></div></div>
+                    </div>
+                    <div class="post-info mr-auto ml-2">
+                        <b>Empresas:</b> <?php echo $UserMG->GetStatData("business_count"); ?>
+                    </div>
+                    <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
+                </div>
+            </div>
+
+            <div class="server-pz-stats">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="author-avatar text-center">
+                        <div><div class="stats-pz-gangs"></div></div>
+                    </div>
+                    <div class="post-info mr-auto ml-2">
+                        <b>Bandas:</b> <?php echo $UserMG->GetStatData("gangs_total"); ?>
+                    </div>
+                    <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
+                </div>
+            </div>
+
+            <div class="server-pz-stats">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="author-avatar text-center">
+                        <div><div class="stats-pz-build"></div></div>
+                    </div>
+                    <div class="post-info mr-auto ml-2">
+                        <b>Version Actual:</b> <?php echo $UserMG->GetStatData("edit_version"); ?>
+                    </div>
+                    <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

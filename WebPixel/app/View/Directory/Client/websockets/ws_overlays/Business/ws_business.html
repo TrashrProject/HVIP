@@ -1,0 +1,492 @@
+﻿<!-- Styles -->
+<link href="<?php echo WS_DY;?>/ws_overlays/Business/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+<link href="<?php echo WS_DY;?>/ws_resources/avatargenerate/app/css/avatargenerate.css?p=<?php echo time(); ?>" rel="stylesheet" />
+
+<div class="container-3YsDW_0" id="BusinessTool" style="display: none;top:30px !important;">
+	
+	<div class="handle header-Oc1Kh_0">
+		<div id="Tool_Title" class="title-RLCLd_0">{Nombre Empresa}</div>
+		<div id="CloseBusinessTool" class="close-1YQdp_0 close-3RMRU_0"></div>
+	</div>
+
+	<div class="body-32Vs4_0">
+		<div style="width: 580px;">
+			<center><div id="BusinessToolMsg" style="height: 20px;display: none;"></div></center>
+
+			<div class="flex mb-2 items-center justify-center">
+				<div id="Tool_Colours" class="mr-3 colours-3DCMW_0">
+					<img src="https://www.habbo.es/habbo-imaging/badge/b10134s36234s26104s78011d90590db71f0e393bddc35ac68413630.gif" draggable="false" ondragstart="return false;">
+				</div> 
+				<div id="Tool_Text" class="text-3xl font-bold uppercase text-white border-b-4 border-dark-3">
+					{Nombre Empresa}
+				</div>
+			</div>
+
+			<div class="tabbed-1H9Df_0 vertical-H0Fhb_0" style="max-height: 440px;">
+				<!-- Tabs -->
+				<div id="Tool_Tabs" class="tabs-38iVv_0">
+					<div class="tab-2ddeR_0 Stats_Tab selected-3s9hj_0">Estad&iacute;sticas</div>
+					<div class="tab-2ddeR_0 Employees_Tab">Empleados</div>
+					<div class="tab-2ddeR_0 Request_Tab">Solicitudes</div>
+					<div class="tab-2ddeR_0 Manage_Tab">Gestionar</div>
+					<div class="tab-2ddeR_0 Finan_Tab">Financiamiento</div>
+				</div>
+
+				<div id="Stats" class="body-1skWP_0" style="display: none;">
+
+					<div>
+						<div class="mb-2">
+							<div class="heading">Propietario</div>
+							<div class="-m-1 flex flex-wrap justify-around" style="margin-bottom: 5px;">
+								<div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 100%;">
+									<div class="mr-2 Founder" style="padding: 3px;">Gobierno</div>
+								</div>
+							</div>
+
+							<div class="heading heading_stock">
+								Stock <div class="Bus_Supply">Abastecer ($ 1 c/u) <i class="fas fa-cart-plus"></i></div>
+							</div>
+							<div class="progressBarWrapper-1c6K5_0 progressBarWrapper_stock">
+								<div class="progressBar-360C0_0">
+									<div class="progress-xqabV_0" style="width: 0%; background-color: rgb(0, 166, 16);"></div>
+									<div class="text-3_n3-_0">0/100</div> 
+									<div class="highlight-dEY5o_0"></div>
+								</div>
+								<div class="border-3Ikds_0"></div>
+							</div>
+						</div>
+
+						<div>
+							<div class="heading">Estad&iacute;sticas</div>
+							<div class="-m-1 flex flex-wrap justify-around">
+								<div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 45%;">
+									<div class="mr-2">Empleados</div>
+									<div class="Employees bg-dark-2 px-2 py-1 rounded-lg ml-auto">0</div>
+								</div>
+								<div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 45%;">
+									<div class="mr-2">Turnos</div>
+									<div class="Shifts bg-dark-2 px-2 py-1 rounded-lg ml-auto">0</div>
+								</div>
+								<div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 45%;">
+									<div class="mr-2">Puestos</div>
+									<div class="Ranks bg-dark-2 px-2 py-1 rounded-lg ml-auto">0</div>
+								</div>
+								<div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 45%;">
+									<div class="mr-2">Solicitudes</div>
+									<div class="Request bg-dark-2 px-2 py-1 rounded-lg ml-auto">0</div>
+								</div>
+								<div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 45%;">
+									<div class="mr-2 mr-2_sells">Ventas</div>
+									<div class="Sells bg-dark-2 px-2 py-1 rounded-lg ml-auto">0</div>
+								</div>
+								<div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 45%;">
+									<div class="mr-2">Gastos</div>
+									<div class="Spend bg-dark-2 px-2 py-1 rounded-lg ml-auto">0</div>
+								</div>
+								<div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 100%;">
+									<div class="mr-2">Ganancias</div>
+									<div class="Profits bg-dark-2 px-2 py-1 rounded-lg ml-auto">0</div>
+								</div>
+								<div class="Bank flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 100%;">
+									<div class="mr-2">Banco</div>
+									<div class="bg-dark-2 px-2 py-1 rounded-lg ml-auto">$ 50, 000</div>
+								</div>
+								<div id="BuyCorp" class="box p-2 mt-2 hover:bg-dark-3 cursor-pointer" style="width: 290px;text-align: center;">{Action Corp}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div id="Employees" class="body-1skWP_0" style="display: none;">
+					<div>
+						<div class="-m-2">
+
+							<!-- Rank box -->
+							<div class="m-2">
+
+								<!-- Rank Header -->
+								<div class="heading relative group">
+									<div>{RankName}</div>
+									<div class="absolute pin-t pin-r mr-1 h-full hidden group-hover:block">
+										<div class="flex items-center h-full">
+											<div data-rank="1" data-action="settings" class="cursor-pointer-r px-1">
+												<img src="<?php echo WS_DY; ?>/ws_resources/images/up-arrow.png">
+											</div>
+											<div data-rank="1" data-action="up" class="cursor-pointer-r px-1">
+												<img src="<?php echo WS_DY; ?>/ws_resources/images/up-arrow.png">
+											</div>
+											<div data-rank="1" data-action="down" class="cursor-pointer-r px-1">
+												<img src="<?php echo WS_DY; ?>/ws_resources/images/down-arrow.png">
+											</div>
+											<div data-rank="1" data-action="cross" class="cursor-pointer-r px-1">
+												<img src="<?php echo WS_DY; ?>/ws_resources/images/cross.png">
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- User box -->
+								<div class="flex flex-wrap -m-1 justify-center">
+									<!-- User info -->
+									<div class="bg-dark-4 rounded m-1 group cursor-pointer-r">
+										<div class="m-px relative">
+											<div class="overflow-hidden bg-light-05 rounded-t" style="height: 55px;">
+												<center><div class="figure-H_RWF_0" style="background-image: url(&quot;https://nitro-imager.kubbo.ch/?figure=hd-180-1.ch-210-66.lg-270-82.sh-290-91.hr-100&quot;); width: 64px; height: 110px; margin-top: -20px;"></div></center>
+											</div>
+											<div class="absolute pin-b bg-dark-5 w-full hidden group-hover:block" style="padding-top: 4px;padding-bottom: 4px;">
+												<div class="flex justify-around">
+													<div data-user="1" data-action="up" class="cursor-pointer-r px-1">
+														<img src="<?php echo WS_DY; ?>/ws_resources/images/up-arrow.png">
+													</div> 
+													<div data-user="1" data-action="down" class="cursor-pointer-r px-1">
+														<img src="<?php echo WS_DY; ?>/ws_resources/images/down-arrow.png">
+													</div>
+													<div data-user="1" data-action="cross" class="cursor-pointer-r px-1">
+														<img src="<?php echo WS_DY; ?>/ws_resources/images/cross.png">
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="text-center py-1">{Username}</div>
+									</div>
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+				<div id="Request" class="body-1skWP_0" style="display: none;">
+					<div>
+						<div class="-m-2">
+
+							<!-- General box -->
+							<div class="m-2">
+
+								<!-- Header -->
+								<div class="heading relative group">
+									<div>Solicitudes</div>
+								</div>
+
+								<!-- User box -->
+								<div class="flex flex-wrap -m-1 justify-center">
+									<!-- User info -->
+									<div class="bg-dark-4 rounded m-1 group cursor-pointer-r" style="width: 23%;">
+										<div class="m-px relative">
+											<div class="overflow-hidden bg-light-05 rounded-t">
+												<center><div class="figure-H_RWF_0" style="background-image: url(&quot;https://nitro-imager.kubbo.ch/?figure=hd-180-1.ch-210-66.lg-270-82.sh-290-91.hr-100&quot;); width: 64px; height: 110px; margin-top: -20px;"></div></center>
+											</div>
+											<div class="absolute pin-b bg-dark-5 w-full group-hover:block" style="padding-top: 4px;padding-bottom: 4px;">
+												<div class="flex justify-around">
+													<div data-user="1" data-action="accept" class="cursor-pointer-r px-1">
+														<img src="<?php echo WS_DY; ?>/ws_resources/images/up-arrow.png">
+													</div>
+													<div data-user="1" data-action="decline" class="cursor-pointer-r px-1">
+														<img src="<?php echo WS_DY; ?>/ws_resources/images/cross.png">
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="text-center py-1">{Username}</div>
+									</div>
+
+									<div class="bg-dark-4 rounded m-1 group" style="width: 69%;padding: 5px;">
+										<div style="max-height: 108px;overflow: auto;">
+											<b>Pa&iacute;s:</b>	
+											<div class="bsn_s_country" style="display: inline-block;">{Country}</div>
+											<br>
+											<b>Horas Libres:</b>	
+											<div class="bsn_s_hours" style="display: inline-block;">{Hours}</div> Hr(s)
+											<br>
+											<b>M&aacute;s Informaci&oacute;n:</b><br>	
+											<div class="bsn_s_info" style="display: inline-block;">
+												{More information}
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- End User box -->
+
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+				<div id="Manage" class="body-1skWP_0" style="display: none;">
+					<div>
+						<div class="heading">Agregar Puesto</div>
+						<div class="flex">
+							<input id="InputRank" type="text" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" maxlength="50" autocomplete="off">
+							<button id="AddRank" class="dark-button">Agregar</button>
+						</div>
+						<br>
+						<div class="heading">URL Logo (40px x 40px)</div>
+						<div class="flex">
+							<input id="InputLogo" type="text" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" autocomplete="off">
+							<button id="SaveLogo" class="dark-button">Guardar</button>
+						</div>
+					</div>
+				</div>
+
+				<div id="EditRank" class="body-1skWP_0" style="display: none;">
+					<div>
+						<div id="RankSettingContent">
+							<div class="heading">Nombre del Puesto</div>						
+							<div class="flex">
+								<input id="RankNewName" type="text" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="">
+							</div>
+							<br>
+
+							<div class="heading" style="width: 34%;float: left;">Paga del Puesto</div>
+							<div class="heading" style="width: 45%;float: right;">Jornada de Tiempo (Minutos)</div>	
+
+							<div class="flex" style="width: 45%;float:left;">
+								<input id="RankPay" type="number" data-lpignore="true" class="dark-input-text flex-1 mr-1" min="0" value="0">
+							</div>
+							<div class="flex" style="width: 55%;">
+								<input id="RankTimer" type="number" data-lpignore="true" class="dark-input-text flex-1 mr-1" min="5" value="5">
+							</div>
+
+							<br>
+							<div class="flex">
+								<button data-rank="1" data-action="SaveRank" class="dark-button" style="width: 100%;">Guardar Cambios</button>
+							</div>
+
+							<br>
+							<div class="heading">Permisos</div>
+							<div class="flex">
+								<table class="dark">
+								  <tr class="dark2">
+								    <th class="dark2">Ascender/Descender</th>
+								    <th class="dark2">Contratar</th>
+								    <th class="dark2">Despedir</th>
+								    <th class="dark2">Abastecer</th>
+								  </tr>
+								  <tr class="dark2">
+								    <td class="dark2">
+								    	<div data-rank="1" data-action="ascdesc" class="cursor-pointer-r px-1">
+								    		<img src="<?php echo WS_DY; ?>/ws_resources/images/cross.png">
+								    	</div>
+								    </td>
+								    <td class="dark2">
+								    	<div data-rank="1" data-action="hire" class="cursor-pointer-r px-1">
+								    		<img src="<?php echo WS_DY; ?>/ws_resources/images/cross.png">
+								    	</div>
+								    </td>
+								    <td class="dark2">
+								    	<div data-rank="1" data-action="fire" class="cursor-pointer-r px-1">
+								    		<img src="<?php echo WS_DY; ?>/ws_resources/images/cross.png">
+								    	</div>
+								    </td>
+								    <td class="dark2">
+								    	<div data-rank="1" data-action="supply" class="cursor-pointer-r px-1">
+								    		<img src="<?php echo WS_DY; ?>/ws_resources/images/cross.png">
+								    	</div>
+								    </td>
+								  </tr>
+								</table>
+							</div>
+							<br>
+						</div>
+
+						<div class="heading">Uniformes</div>
+						<div class="flex">
+						    <div id="avatarSelector" class="builder-viewport">
+						        <!-- Main Navigation -->
+						        <div class="main-navigation">
+						            <ul>
+						                <li class="active">
+						                    <a href="#" data-navigate="hd" data-subnav="gender"><img src="<?php echo WS_DY;?>/ws_resources/avatargenerate/app/img/body.png" /></a>
+						                </li>
+						                <li>
+						                    <a href="#" data-navigate="hr" data-subnav="hair"><img src="<?php echo WS_DY;?>/ws_resources/avatargenerate/app/img/hair.png" /></a>
+						                </li>
+						                <li>
+						                    <a href="#" data-navigate="ch" data-subnav="tops"><img src="<?php echo WS_DY;?>/ws_resources/avatargenerate/app/img/tops.png" /></a>
+						                </li>
+						                <li>
+						                    <a href="#" data-navigate="lg" data-subnav="bottoms"><img src="<?php echo WS_DY;?>/ws_resources/avatargenerate/app/img/bottoms.png" /></a>
+						                </li>
+						            </ul>
+						        </div>
+						        <!-- End Main Navigation -->
+
+						        <!-- Sub Navigation -->
+						        <div class="sub-navigation">
+						            <ul id="gender" class="display">
+						                <li>
+						                    <a href="#" class="male nav-selected" data-gender="M"></a>
+						                </li>
+						                <li>
+						                    <a href="#" class="female" data-gender="F"></a>
+						                </li>
+						            </ul>
+						            <ul id="hair" class="hidden">
+						                <li>
+						                    <a href="#" class="hair nav-selected" data-navigate="hr"></a>
+						                </li>
+						                <li>
+						                    <a href="#" class="hats" data-navigate="ha"></a>
+						                </li>
+						                <li>
+						                    <a href="#" class="hair-accessories" data-navigate="he"></a>
+						                </li>
+						                <li>
+						                    <a href="#" class="glasses" data-navigate="ea"></a>
+						                </li>
+						                <li>
+						                    <a href="#" class="moustaches" data-navigate="fa"></a>
+						                </li>
+						            </ul>
+						            <ul id="tops" class="hidden">
+						                <li>
+						                    <a href="#" class="tops nav-selected" data-navigate="ch"></a>
+						                </li>
+						                <li>
+						                    <a href="#" class="chest" data-navigate="cp"></a>
+						                </li>
+						                <li>
+						                    <a href="#" class="jackets" data-navigate="cc"></a>
+						                </li>
+						                <li>
+						                    <a href="#" class="accessories" data-navigate="ca"></a>
+						                </li>
+						            </ul>
+						            <ul id="bottoms" class="hidden">
+						                <li>
+						                    <a href="#" class="bottoms nav-selected" data-navigate="lg"></a>
+						                </li>
+						                <li>
+						                    <a href="#" class="shoes" data-navigate="sh"></a>
+						                </li>
+						                <li>
+						                    <a href="#" class="belts" data-navigate="wa"></a>
+						                </li>
+						            </ul>
+						        </div>
+						        <!-- End Sub Navigation -->
+
+						        <div id="clothes-colors">
+						            <div id="clothes"></div>
+						            <div id="colors"></div>
+						        </div>
+
+						        <div id="avatar">
+						            <img id="myHabbo" src="" alt="My Habbo" title="My Habbo" />
+					                <input type="hidden" name="habbo-avatar" id="avatar-code">
+					                <br>
+					                <button id="ButtonLook" data-rank="0" data-action="SaveLook" class="dark-button">Guardar</button>
+						        </div>
+						    </div>
+						</div>
+					</div>
+				</div>
+
+				<div id="Finan" class="body-1skWP_0" style="display: none;">
+					<!--<div>
+						<div class="mb-2">
+							<div class="heading">Donar a la Empresa</div>
+							<div class="-m-1 flex flex-wrap justify-around" style="margin-bottom: 5px;display:flex;">
+								<input id="Bus_Input_Donation" type="number" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" autocomplete="off" placeholder="Cantidad de dinero a donar">
+								<button id="Bus_Btn_Donation" class="dark-button">Donar</button>
+							</div>
+
+							<div class="heading">Retirar de la Empresa (Solo Fundador)</div>
+							<div class="-m-1 flex flex-wrap justify-around" style="margin-bottom: 5px;display:flex;">
+								<input id="Bus_Input_Withdraw" type="number" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" autocomplete="off" placeholder="Cantidad de dinero a retirar">
+								<button id="Bus_Btn_Withdraw" class="dark-button">Retirar</button>
+							</div>
+
+							<div class="heading">Historial financiero</div>
+							<div class="-m-1 flex flex-wrap justify-around" style="margin-bottom: 5px;">
+								<table id="financelist">                        
+			                        <tr>
+			                          <td>
+			                          	<img src="https://nitro-imager.kubbo.ch/?figure=sh-290-64.ch-3032-85-62.lg-285-110.hr-125-37.hd-180-1&size=s&headonly=1">
+			                          	Jeihden ha donado $ 0 el 00/00/00
+			                          </td>
+			                        </tr>
+			                        <tr>
+			                          <td>
+			                          	<img src="https://nitro-imager.kubbo.ch/?figure=sh-290-64.ch-3032-85-62.lg-285-110.hr-125-37.hd-180-1&size=s&headonly=1">
+			                          	Jeihden ha retirado $ 0 el 00/00/00
+			                          </td>
+			                        </tr>
+			                    </table>
+							</div>
+						</div>
+					</div>-->
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="container-3YsDW_0" id="BusinessCreate" style="display: none;">
+	
+	<div class="handle header-Oc1Kh_0">
+		<div class="title-RLCLd_0">Crear Empresa</div>
+		<div id="CloseBusinessCreate" class="close-1YQdp_0 close-3RMRU_0"></div>
+	</div>
+
+	<div class="body-32Vs4_0">
+		<div style="width: 500px;">
+
+			<div class="flex mb-2 items-center justify-center">
+				<div class="mr-3 colours-3DCMW_0">
+					<img src="<?php echo WS_DY;?>/ws_overlays/Business/resources/images/new.gif" draggable="false" ondragstart="return false;">
+				</div> 
+				<div class="text-3xl font-bold uppercase text-white border-b-4 border-dark-3">
+					Nueva Empresa/Negocio
+				</div>
+			</div>
+
+			<div class="tabbed-1H9Df_0 vertical-H0Fhb_0" style="max-height: 400px;">
+				<!-- Tabs -->
+				<div class="tabs-38iVv_0">
+					<div class="tab-2ddeR_0 Create_Tab selected-3s9hj_0">Crear</div>
+				</div>
+
+				<div class="body-1skWP_0">
+					<div>
+						El costo de una Empresa privada es de: $ 20, 000
+						<br><br>
+						<div class="heading">Nombre</div>
+						<div class="flex">
+							<input id="InputGName" type="text" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" maxlength="50" autocomplete="off">
+						</div>
+						<br>
+						<div class="heading">Giro de la Empresa *</div>
+						<div class="flex">
+							<select id="SelectGActivity">
+									<option value="Restaurant">Restaurant</option>
+									<option value="Concesionario">Concesionario</option>
+									<option value="Tecnologia">Tecnolog&iacute;a</option>
+									<option value="Ropa">Ropa</option>
+									<option value="Spa">Spa</option>
+									<option value="24/7">Tienda 24/7</option>
+								</select>
+							</div>
+						</div>
+						<br>
+						<i>* El giro no podr&aacute; cambiarse depu&eacute;s. Si quieres cambiarlo deber&aacute;s cerrar tu empresa y crear una nueva.</i>
+
+						<br><br>
+
+						<div class="flex">
+							<button id="CreateBusiness" class="dark-button" style="width: 100%;">Crear</button>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+<script src="<?php echo WS_DY;?>/ws_resources/avatargenerate/app/js/jquery.avatargenerate.js?p=<?php echo time(); ?>" type="text/javascript"></script>

@@ -1,0 +1,80 @@
+<div id="app_Messages" class="AppLayout">
+	<div id="app_bg" class="app_Messages">
+		<div id="app_title" class="Messages_Title">
+			<b>Mensajes</b>
+			<div class="app_title_options" style="margin-left:90%;text-align:right;height:18px;width:18px;background-image: url('<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/images/icons/write.png');background-repeat:no-repeat;background-size: 18px 17px;" title="Nuevo Mensaje"
+				onclick="
+					$('.Messages_Title').hide();
+					$('#WS_Messages').hide();
+					$('#app_Messages_New').show();">
+			</div>
+		</div>
+
+		<!-- CHATS -->
+		<div id="WS_Messages">
+			<!-- WS Sended 
+			<div data-chatname="Nombre" class="app_msg_content" onclick="
+				$('.Messages_Title').hide();
+				$('#WS_Messages').hide();
+				$('#WS_Messages_Chatting').show();
+			">
+				<div class="app_msg_indicator"></div>						
+				<div class="app_msg_dest">Nombre</div>
+				<div class="app_msg_time">9:29 AM ></div>
+				<div class="app_msg_lastmsg">este es el &uacute;ltimo mensaje enviado</div>		
+			</div>
+			-->
+		</div>
+		<!-- END CHATS -->
+		
+		<!-- Escribir Mensaje -->
+		<div id="app_Messages_New" style="display: none;">
+			<div class="app_Messages_New">
+				<div id="app_title">
+					<b>Nuevo Mensaje</b>
+					<div class="app_title_options" onclick="
+					$('.Messages_Title').show();
+					$('#WS_Messages').show();
+					$('#app_Messages_New').hide();">< Mensajes</div>
+				</div>
+				<input class="number" type="text" placeholder="N&uacute;mero o Nombre de Contacto" maxlength="35" style="width: 222px;margin-top: 2px;margin-left: 5px;" />
+				<br><br>
+				<textarea class="mensaje" placeholder="Mensaje (Max. 250 Caracteres)." maxlength="250" style="min-width: 232px;max-width: 232px;min-height: 250px;max-height: 250px;margin-left: 5px;"></textarea>
+				<br><br>
+				<div class="SendButtonMsg" style="margin-left: 5px;padding:8px;width:215px;text-align: center;font-weight: bold;margin-top: -11px;">Enviar</div>
+			</div>
+		</div>
+		<!-- END Escribir Mensaje -->
+
+		<!-- MSGS -->
+		<div id="WS_Messages_Chatting" style="display: none;">
+			<div class="app_Messages_Chatting" class="app_bg">
+				<div id="app_title">
+					<b class="app_messages_name">{Nombre}</b>
+					<div class="app_title_options" onclick="
+					$('.Messages_Title').show();
+					$('#WS_Messages').show();
+					$('#WS_Messages_Chatting').hide();">< Mensajes</div>
+				</div>
+
+				<!-- Chat Bar -->
+				<div class="ChatBar">
+					<input id="mensaje" type="text" class="TextTo" data-emojiable="true">
+					<div id="TextTo" class="SendButtonMsg">Enviar</div>
+				</div>
+
+				<div id="app_whats_messages" class="app_messages_chats">
+					<!-- WS Sended
+					<div class="Msg_Container">
+						<div class="Msg_From" title="22:10">Hola</div>
+					</div>
+					<div class="Msg_Container">
+						<div class="Msg_To" title="22:10">Hola 2</div>
+					</div>
+					-->
+				</div>
+			</div>
+		</div>
+		<!-- END MSGS -->
+	</div>
+</div>

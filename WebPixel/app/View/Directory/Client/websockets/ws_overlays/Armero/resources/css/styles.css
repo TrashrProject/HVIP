@@ -1,0 +1,48 @@
+#ArmPiecesInfo, #ArmCreateInfo
+{
+    display:none;
+    width: 356px;
+    height: auto;
+    z-index: 2115;
+    position: absolute;
+    left: 500px;
+    top: 100px;
+}
+#ArmCreateInfo table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#ArmCreateInfo td, th {
+    border: 1px solid #dddddd;
+    text-align: center;
+    padding: 8px;
+}
+
+#ArmCreateInfo td {
+    width: 155px;
+    padding: 5px;
+    font-size: 14px;
+}
+#ArmCreateInfo th {
+    text-align: center;
+}
+.ArmPiecesMsg{
+    font-size: 12px;
+    background-color: #3d3d3d;
+    margin-top: -10px;
+    color:red;
+    font-weight: bold;
+}
+.CounterArmero{
+    background-color: #0000004a;
+    border-radius: 10px;
+    padding: 4px;
+    position: absolute;
+    top: 20%;
+}
+.FurniDesc {
+    top: 60%;
+    position: absolute;
+}

@@ -1,0 +1,141 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+
+input{
+	color: inherit;
+	font: inherit;
+}
+
+body{
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	line-height: 1.8;
+}
+
+#container{
+	width: 875px;
+	height: 420px;
+	max-width: 875px;
+	max-height: 420px;
+	cursor: default;
+	overflow: hidden;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+#content{	
+	-webkit-transform-origin: left top;
+	-webkit-transform: translateZ(0);
+	-moz-transform-origin: left top;
+	-moz-transform: translateZ(0);
+	-ms-transform-origin: left top;
+	-ms-transform: translateZ(0);
+	-o-transform-origin: left top;
+	-o-transform: translateZ(0);
+	transform-origin: left top;
+	transform: translateZ(0);
+}
+
+#settings{
+	position: absolute;
+    top: 2px;
+    height: 365px;
+    width: 115px;
+}
+
+#settings > div{
+	vertical-align: middle;
+}
+
+#settings > div > *{
+	display: inline-block;
+	vertical-align: middle;
+}
+
+#settings label{
+	width: 100px;
+}
+
+button {
+    -webkit-appearance: button;
+    -webkit-writing-mode: horizontal-tb !important;
+    text-rendering: auto;
+    color: -internal-light-dark-color(buttontext, rgb(170, 170, 170));
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: center;
+    align-items: flex-start;
+    cursor: default;
+    background-color: -internal-light-dark-color(rgb(239, 239, 239), rgb(74, 74, 74));
+    box-sizing: border-box;
+    margin: 0em;
+    font: 400 13.3333px Arial;
+    padding: 1px 6px;
+    border-width: 2px;
+    border-style: outset;
+    border-color: -internal-light-dark-color(rgb(118, 118, 118), rgb(195, 195, 195));
+    border-image: initial;
+    border-radius: 2px;
+}
+.widget-zoom-button.widget-zoom-in {
+    bottom: 27px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+.widget-zoom-button.widget-zoom-out {
+    bottom: 0px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+.widget-zoom-button {
+    background-color: rgba(255,255,255,1);
+    border-radius: 8px;
+    display: block;
+    height: 29px;
+    left: 0px;
+    overflow: hidden;
+    position: absolute;
+    cursor: pointer;
+    width: 29px;
+    z-index: 2;
+    box-sizing: border-box;
+    transition: background-color 0.16s ease-out;
+}
+.widget-zoom-button .widget-zoom-icon {
+    background: transparent url(//maps.gstatic.com/tactile/zoom/icon-sprite-1x.png) 0 0 no-repeat;
+    background-size: 120px 30px;
+    display: block;
+    height: 15px;
+    left: 7px;
+    position: absolute;
+    top: 7px;
+    width: 15px;
+}
+.widget-zoom-button.widget-zoom-out .widget-zoom-icon {
+    background-position: 0 -15px;
+}
+.MoveControls {
+	position: absolute;
+	left:30px;
+	bottom: 29px;
+}
+
+.map-button {
+    padding: 5px;
+    background-color: white;
+    border: 1px solid #767676;
+    border-radius: 5px;
+    position: absolute;
+    top:0;
+    cursor: pointer;
+}

@@ -1,0 +1,514 @@
+﻿<!-- Styles -->
+<link href="<?php echo WS_DY;?>/ws_overlays/Gangs/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+<script type="text/javascript" src="<?php echo Config::$SWF; ?>/habbogrupos/js/general.js?p=<?php echo time(); ?>"></script>
+<link rel="stylesheet" href="<?php echo Config::$SWF; ?>/habbogrupos/css/style.css?p=<?php echo time(); ?>"/>
+
+<!-- GangsWindow -->
+<div class="container-3YsDW_0" id="GangsWindow" style="display:none;">
+    <div class="handle header-Oc1Kh_0">
+      <div class="title-RLCLd_0">Bandas</div>
+      <div id="CloseGangsWindow" class="close-1YQdp_0 close-3RMRU_0"></div>
+    </div> 
+
+    <div class="body-32Vs4_0" style="color:white;">
+
+    	<center><div id="GangsMsg" style="height: 20px;"></div></center>
+
+    	<div class="tabbed-1H9Df_0 vertical-H0Fhb_0" style="max-height: 490px;">
+        <!-- Tabs -->
+        <div id="Tool_Tabs" class="tabs-38iVv_0">
+          <div class="tab-2ddeR_0 GA_Bandas_Tab selected-3s9hj_0">Bandas</div>
+          <div class="tab-2ddeR_0 GA_Invitations_Tab">Invitaciones</div>
+          <div class="tab-2ddeR_0 GA_MyNew_Tab">Crear Banda</div>
+        </div>
+
+        <div id="GA_Bandas_Tab" class="body-1skWP_0" style="display: block;">
+
+          <div class="heading">Lista de Bandas</div>
+
+          <input id="GA_Search" type="text" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" maxlength="50" autocomplete="off" placeholder="Buscar bandas por nombre" style="width: 628px">
+          <br><br>
+
+          <!--<div class="-m-1 flex flex-wrap">            
+            <div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 47.5%;">
+              <div class="mr-2">
+                <p>{GangName}</p>
+                <p>{GangMembers}</p>
+              </div>
+              <div class="bg-dark-2 px-2 py-1 rounded-lg ml-auto" data-balloon="Ver info" data-balloon-pos="left" data-gang="1"><img src="https://www.habbo.es/habbo-imaging/badge/b10134s36234s26104s78011d90590db71f0e393bddc35ac68413630.gif" draggable="false" ondragstart="return false;" style="cursor: pointer;"></div>
+            </div>
+          </div>-->
+
+        </div>
+
+        <div id="GA_Invitations_Tab" class="body-1skWP_0" style="display: none;">
+
+          <div class="Tabbed_tabbed_2-zU0" style="max-height: 500px;">
+              <div class="Tabbed_tabs_1-zM_ Tabbed_center_gqgV8">
+                <div id="GA_Inv_Received" class="Tabbed_tab_1apzZ GA_Inv_Received Tabbed_selected_3aJyT" style="min-width: 75px;">
+                  Recibidas
+                </div>
+                <div id="GA_Inv_Sended" class="Tabbed_tab_1apzZ GA_Inv_Sended" style="min-width: 75px;">
+                  Enviadas
+                </div>
+              </div>
+
+              <div id="GA_Inv_Tabbed_body" class="Tabbed_body_2tS0C">
+                <!-- INV RECEIV -->
+                <div style="display: none">
+                  <!-- General box -->
+                  <div class="m-2">
+
+                    <!-- Header -->
+                    <div class="heading relative group">
+                      <div>Estas bandas te han invitado a un&iacute;rteles</div>
+                    </div>
+
+                    <!-- Gang box -->
+                    <div class="flex flex-wrap -m-1 justify-center">
+                      <!-- Gang info -->
+                      <div class="bg-dark-4 rounded m-1 group cursor-pointer-r" style="width: 23%;">
+                        <div class="m-px relative">
+                          <div class="overflow-hidden bg-light-05 rounded-t">
+                            <center><div class="figure-H_RWF_0" style="background-image: url(https://habbovip.us/SWF/habbogrupos/sistemas/badge.php?placa=b0215Xs04064); width: 64px; height: 110px; margin-top: -20px;"></div></center>
+                          </div>
+                          <div class="absolute pin-b bg-dark-5 w-full group-hover:block" style="padding-top: 4px;padding-bottom: 4px;">
+                            <div class="flex justify-around">
+                              <div data-user="1" data-action="accept" class="cursor-pointer-r px-1">
+                                <img src="<?php echo WS_DY; ?>/ws_resources/images/up-arrow.png">
+                              </div>
+                              <div data-user="1" data-action="decline" class="cursor-pointer-r px-1">
+                                <img src="<?php echo WS_DY; ?>/ws_resources/images/cross.png">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="text-center py-1">{GangName}</div>
+                      </div>
+
+                      <div class="bg-dark-4 rounded m-1 group" style="width: 69%;padding: 5px;">
+                        <p>Estad&iacute;sticas principales de la banda:</p>
+                        <br>
+                        <div style="max-height: 108px;overflow: auto;display: inline-flex;">
+                          <div class="gang_inf_box">
+                            <div><b>Asesinatos</b></div>
+                            <div>0</div>
+                          </div>
+                          <div class="gang_inf_box">
+                            <div><b>Barrios capturados</b></div>
+                            <div>0</div>
+                          </div>
+                          <div class="gang_inf_box">
+                            <div><b>Barrios defendidos</b></div>
+                            <div>0</div>
+                          </div>
+                          <div class="gang_inf_box">
+                            <div><b>Riqueza</b></div>
+                            <div>0</div>
+                          </div>
+                        </div>
+                        <br><br>
+                        <i>M&aacute;s info. en el Perfil de la banda.</i>
+                      </div>
+                    </div>
+                    <!-- End Gang box -->
+
+                  </div>
+                </div>
+
+                <!-- INV SENDED -->
+                <div style="display: none">
+                  <!-- General box -->
+                  <div class="m-2">
+
+                    <!-- Header -->
+                    <div class="heading relative group">
+                      <div>Invitar miembros a tu banda</div>
+                    </div>
+                    <div class="flex">
+                      <input id="Input_G_UName" type="text" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" maxlength="50" autocomplete="off" placeholder="Escribe aquí el nombre de la persona que deseas invitar">
+                      <button id="GA_Send_Inv" class="dark-button">Invitar</button>
+                    </div>
+
+                    <br>
+                    <div class="heading relative group">
+                      <div>Invitaciones pendientes</div>
+                    </div>
+                    <table id="financelist">
+                      <tr>
+                        <td>
+                          <img src="https://nitro-imager.kubbo.ch/?figure=sh-290-64.ch-3032-85-62.lg-285-110.hr-125-37.hd-180-1&size=s&headonly=1">
+                          Pedro fue invitad@ a la banda por Jeihden el 00/00/00
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <img src="https://nitro-imager.kubbo.ch/?figure=sh-290-64.ch-3032-85-62.lg-285-110.hr-125-37.hd-180-1&size=s&headonly=1">
+                          Klousmonk fue invitad@ a la banda por Jeihden el 00/00/00
+                        </td>
+                      </tr>
+                  </table>
+                  </div>
+                </div>
+              </div>
+
+          </div>
+        </div>
+
+        <div id="GA_MyNew_Tab" class="body-1skWP_0" style="display: none;">
+
+          <div id="GA_My" style="display: none;">
+            <div class="Tabbed_tabbed_2-zU0">
+              <div id="GA_My_Tabbeds" class="Tabbed_tabs_1-zM_ Tabbed_center_gqgV8">
+                <div id="GA_My_Members" class="Tabbed_tab_1apzZ GA_My_Members Tabbed_selected_3aJyT" style="min-width: 75px;">
+                  Miembros
+                </div>
+                <div id="GA_My_Ranks" class="Tabbed_tab_1apzZ GA_My_Ranks" style="min-width: 75px;">
+                  Rangos
+                </div>
+                <div id="GA_My_Requests" class="Tabbed_tab_1apzZ GA_My_Requests" style="min-width: 75px;">
+                  Solicitudes
+                </div>
+                <div id="GA_My_Stats" class="Tabbed_tab_1apzZ GA_My_Stats" style="min-width: 75px;">
+                  Estad&iacute;sticas
+                </div>
+                <div id="GA_My_Edit" class="Tabbed_tab_1apzZ GA_My_Edit" style="min-width: 75px;">
+                  Editar
+                </div>
+              </div>
+
+              <div id="GA_My_Tabbed_body" class="Tabbed_body_2tS0C" style="display: block">
+
+              </div>
+
+            </div>
+          </div>
+
+          <div id="GA_New" style="display: none">
+            <div class="mb-2">
+              <div class="heading">Crear Banda</div>
+              <i>Completa el formulario y crea un emblema para tu banda.</i><br>
+              
+              <br>
+              <div class="heading">Nombre para Banda</div>
+              <div class="flex">
+                <input id="GA_New_Name" type="text" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" maxlength="11" autocomplete="off" pattern="[a-zA-Z0-9-]+" placeholder="Escribe aqu&iacute; un nombre para tu banda">
+              </div>
+
+              <br>
+              <div class="heading">Tipo de acceso</div>
+              <div class="flex">
+                <select id="GA_New_Type" class="dark-button" style="width: 100%">
+                  <option value="1" style="color:black">Por invitaci&oacute;n</option>
+                  <option value="0" style="color:black">Abierto (Cualquiera puede unirse)</option>
+                </select>
+              </div>
+              
+              <br>
+              <div class="heading">Emblema</div>
+              <div class="flex">                
+                <div id="cont_placagrupo">
+                  <div class="cont_btx setcolors">
+                    <div id="contg" style="display: inline-flex;text-align: center;">
+                      <div>
+                        <center>
+                          <p style="margin-bottom: 0;">Color primario</p>
+                          <div id="ColorPrim" class="boxcolor2" style="background-Color:#FFD500;float:none;"></div>
+                        </center>
+                      </div>
+                      <div style="margin-left: 48px;">
+                        <center>
+                          <p style="margin-bottom: 0;">Color secundario</p>
+                          <div id="ColorSec" class="boxcolor2" style="background-Color:#FFD500;float:none;"></div>
+                        </center>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="cont_btx setcolors">
+                    <div id="contg">
+                      <div class="prevplaca_box">
+                        Vista previa
+                        <!--<img id="placafinal">-->
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="cont_btx colors">
+                    <div id="contg">
+                      <div id="contgrupocolores" style="margin-right: 23px;">
+                        <div id="primcolor-01" class="boxcolor" onClick="colorPrim('01')" style="background-Color:#FFD500;"></div>
+                        <div id="primcolor-02" class="boxcolor" onClick="colorPrim('02')" style="background-Color:#EB7500;"></div>
+                        <div id="primcolor-03" class="boxcolor" onClick="colorPrim('03')" style="background-Color:#83DD00;"></div>
+                        <div id="primcolor-04" class="boxcolor" onClick="colorPrim('04')" style="background-Color:#579900;"></div>
+                        <div id="primcolor-05" class="boxcolor" onClick="colorPrim('05')" style="background-Color:#4FC0FA;"></div>
+                        <div id="primcolor-06" class="boxcolor" onClick="colorPrim('06')" style="background-Color:#006ECE;"></div>
+                        <div id="primcolor-07" class="boxcolor" onClick="colorPrim('07')" style="background-Color:#FF97E2;"></div>
+                        <div id="primcolor-08" class="boxcolor" onClick="colorPrim('08')" style="background-Color:#F233BE;"></div>
+                        <div id="primcolor-09" class="boxcolor" onClick="colorPrim('09')" style="background-Color:#FF2C2C;"></div>
+                        <div id="primcolor-10" class="boxcolor" onClick="colorPrim('10')" style="background-Color:#AE0909;"></div>
+                        <div id="primcolor-11" class="boxcolor" onClick="colorPrim('11')" style="background-Color:#FFFFFF;"></div>
+                        <div id="primcolor-12" class="boxcolor" onClick="colorPrim('12')" style="background-Color:#BFBFBF;"></div>
+                        <div id="primcolor-13" class="boxcolor" onClick="colorPrim('13')" style="background-Color:#363636;"></div>
+                        <div id="primcolor-14" class="boxcolor" onClick="colorPrim('14')" style="background-Color:#FAE6AB;"></div>
+                        <div id="primcolor-15" class="boxcolor" onClick="colorPrim('15')" style="background-Color:#967540;"></div>
+                        <div id="primcolor-16" class="boxcolor" onClick="colorPrim('16')" style="background-Color:#C1E9FF;"></div>
+                        <div id="primcolor-17" class="boxcolor" onClick="colorPrim('17')" style="background-Color:#FFF064;"></div>
+                        <div id="primcolor-18" class="boxcolor" onClick="colorPrim('18')" style="background-Color:#A9FF7C;"></div>
+                      </div>
+                      <div id="contgrupocolores">
+                        <div id="seccolor-01" class="boxcolor" onClick="colorSec('01')" style="background-Color:#FFD500;"></div>
+                        <div id="seccolor-02" class="boxcolor" onClick="colorSec('02')" style="background-Color:#EB7500;"></div>
+                        <div id="seccolor-03" class="boxcolor" onClick="colorSec('03')" style="background-Color:#83DD00;"></div>
+                        <div id="seccolor-04" class="boxcolor" onClick="colorSec('04')" style="background-Color:#579900;"></div>
+                        <div id="seccolor-05" class="boxcolor" onClick="colorSec('05')" style="background-Color:#4FC0FA;"></div>
+                        <div id="seccolor-06" class="boxcolor" onClick="colorSec('06')" style="background-Color:#006ECE;"></div>
+                        <div id="seccolor-07" class="boxcolor" onClick="colorSec('07')" style="background-Color:#FF97E2;"></div>
+                        <div id="seccolor-08" class="boxcolor" onClick="colorSec('08')" style="background-Color:#F233BE;"></div>
+                        <div id="seccolor-09" class="boxcolor" onClick="colorSec('09')" style="background-Color:#FF2C2C;"></div>
+                        <div id="seccolor-10" class="boxcolor" onClick="colorSec('10')" style="background-Color:#AE0909;"></div>
+                        <div id="seccolor-11" class="boxcolor" onClick="colorSec('11')" style="background-Color:#FFFFFF;"></div>
+                        <div id="seccolor-12" class="boxcolor" onClick="colorSec('12')" style="background-Color:#BFBFBF;"></div>
+                        <div id="seccolor-13" class="boxcolor" onClick="colorSec('13')" style="background-Color:#363636;"></div>
+                        <div id="seccolor-14" class="boxcolor" onClick="colorSec('14')" style="background-Color:#FAE6AB;"></div>
+                        <div id="seccolor-15" class="boxcolor" onClick="colorSec('15')" style="background-Color:#967540;"></div>
+                        <div id="seccolor-16" class="boxcolor" onClick="colorSec('16')" style="background-Color:#C1E9FF;"></div>
+                        <div id="seccolor-17" class="boxcolor" onClick="colorSec('17')" style="background-Color:#FFF064;"></div>
+                        <div id="seccolor-18" class="boxcolor" onClick="colorSec('18')" style="background-Color:#A9FF7C;"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="cont_btx base">
+                    <div id="contg">
+                      <div id="pgrupo">
+                        <div class="flecha izq" onClick="cambiarBase(0)"></div>
+                        <div class="flecha der" onClick="cambiarBase(1)"></div>
+                        <div id="baseimg" class="imgprev"></div>
+                      </div>
+                      <div id="contgrupocolores">
+                        <div id="bascolor-01" class="boxcolor" onClick="colorBase('01')" style="background-Color:#FFD500;"></div>
+                        <div id="bascolor-02" class="boxcolor" onClick="colorBase('02')" style="background-Color:#EB7500;"></div>
+                        <div id="bascolor-03" class="boxcolor" onClick="colorBase('03')" style="background-Color:#83DD00;"></div>
+                        <div id="bascolor-04" class="boxcolor" onClick="colorBase('04')" style="background-Color:#579900;"></div>
+                        <div id="bascolor-05" class="boxcolor" onClick="colorBase('05')" style="background-Color:#4FC0FA;"></div>
+                        <div id="bascolor-06" class="boxcolor" onClick="colorBase('06')" style="background-Color:#006ECE;"></div>
+                        <div id="bascolor-07" class="boxcolor" onClick="colorBase('07')" style="background-Color:#FF97E2;"></div>
+                        <div id="bascolor-08" class="boxcolor" onClick="colorBase('08')" style="background-Color:#F233BE;"></div>
+                        <div id="bascolor-09" class="boxcolor" onClick="colorBase('09')" style="background-Color:#FF2C2C;"></div>
+                        <div id="bascolor-10" class="boxcolor" onClick="colorBase('10')" style="background-Color:#AE0909;"></div>
+                        <div id="bascolor-11" class="boxcolor" onClick="colorBase('11')" style="background-Color:#FFFFFF;"></div>
+                        <div id="bascolor-12" class="boxcolor" onClick="colorBase('12')" style="background-Color:#BFBFBF;"></div>
+                        <div id="bascolor-13" class="boxcolor" onClick="colorBase('13')" style="background-Color:#363636;"></div>
+                        <div id="bascolor-14" class="boxcolor" onClick="colorBase('14')" style="background-Color:#FAE6AB;"></div>
+                        <div id="bascolor-15" class="boxcolor" onClick="colorBase('15')" style="background-Color:#967540;"></div>
+                        <div id="bascolor-16" class="boxcolor" onClick="colorBase('16')" style="background-Color:#C1E9FF;"></div>
+                        <div id="bascolor-17" class="boxcolor" onClick="colorBase('17')" style="background-Color:#FFF064;"></div>
+                        <div id="bascolor-18" class="boxcolor" onClick="colorBase('18')" style="background-Color:#A9FF7C;"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="cont_btx comp">
+                    <div id="contg">
+                      <div id="pgrupo">
+                        <div class="flecha izq" onClick="cambiarObjeto(0,0)"></div>
+                        <div class="flecha der" onClick="cambiarObjeto(1,0)"></div>
+                        <div id="accimg-0" class="imgprev obj" obj="0"></div>
+                      </div>
+                      <div id="contgrupopos">
+                        <div id="pos-0-0" class="boxpos deselect" onClick="cambiarPos(0, 0)"></div>
+                        <div id="pos-0-1" class="boxpos deselect" onClick="cambiarPos(0, 1)"></div>
+                        <div id="pos-0-2" class="boxpos deselect" onClick="cambiarPos(0, 2)"></div>
+                        <div id="pos-0-3" class="boxpos deselect" onClick="cambiarPos(0, 3)"></div>
+                        <div id="pos-0-4" class="boxpos deselect" onClick="cambiarPos(0, 4)"></div>
+                        <div id="pos-0-5" class="boxpos deselect" onClick="cambiarPos(0, 5)"></div>
+                        <div id="pos-0-6" class="boxpos deselect" onClick="cambiarPos(0, 6)"></div>
+                        <div id="pos-0-7" class="boxpos deselect" onClick="cambiarPos(0, 7)"></div>
+                        <div id="pos-0-8" class="boxpos deselect" onClick="cambiarPos(0, 8)"></div>
+                      </div>
+                      <div id="contgrupocolores">
+                        <div id="bcolor-0-01" class="boxcolor" onClick="cambiarColor(0, '01')" style="background-Color:#FFD500;"></div>
+                        <div id="bcolor-0-02" class="boxcolor" onClick="cambiarColor(0, '02')" style="background-Color:#EB7500;"></div>
+                        <div id="bcolor-0-03" class="boxcolor" onClick="cambiarColor(0, '03')" style="background-Color:#83DD00;"></div>
+                        <div id="bcolor-0-04" class="boxcolor" onClick="cambiarColor(0, '04')" style="background-Color:#579900;"></div>
+                        <div id="bcolor-0-05" class="boxcolor" onClick="cambiarColor(0, '05')" style="background-Color:#4FC0FA;"></div>
+                        <div id="bcolor-0-06" class="boxcolor" onClick="cambiarColor(0, '06')" style="background-Color:#006ECE;"></div>
+                        <div id="bcolor-0-07" class="boxcolor" onClick="cambiarColor(0, '07')" style="background-Color:#FF97E2;"></div>
+                        <div id="bcolor-0-08" class="boxcolor" onClick="cambiarColor(0, '08')" style="background-Color:#F233BE;"></div>
+                        <div id="bcolor-0-09" class="boxcolor" onClick="cambiarColor(0, '09')" style="background-Color:#FF2C2C;"></div>
+                        <div id="bcolor-0-10" class="boxcolor" onClick="cambiarColor(0, '10')" style="background-Color:#AE0909;"></div>
+                        <div id="bcolor-0-11" class="boxcolor" onClick="cambiarColor(0, '11')" style="background-Color:#FFFFFF;"></div>
+                        <div id="bcolor-0-12" class="boxcolor" onClick="cambiarColor(0, '12')" style="background-Color:#BFBFBF;"></div>
+                        <div id="bcolor-0-13" class="boxcolor" onClick="cambiarColor(0, '13')" style="background-Color:#363636;"></div>
+                        <div id="bcolor-0-14" class="boxcolor" onClick="cambiarColor(0, '14')" style="background-Color:#FAE6AB;"></div>
+                        <div id="bcolor-0-15" class="boxcolor" onClick="cambiarColor(0, '15')" style="background-Color:#967540;"></div>
+                        <div id="bcolor-0-16" class="boxcolor" onClick="cambiarColor(0, '16')" style="background-Color:#C1E9FF;"></div>
+                        <div id="bcolor-0-17" class="boxcolor" onClick="cambiarColor(0, '17')" style="background-Color:#FFF064;"></div>
+                        <div id="bcolor-0-18" class="boxcolor" onClick="cambiarColor(0, '18')" style="background-Color:#A9FF7C;"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="cont_btx comp">
+                    <div id="contg">
+                      <div id="pgrupo">
+                        <div class="flecha izq" onClick="cambiarObjeto(0,1)"></div>
+                        <div class="flecha der" onClick="cambiarObjeto(1,1)"></div>
+                        <div id="accimg-1" class="imgprev obj" obj="1"></div>
+                      </div>
+                      <div id="contgrupopos">
+                        <div id="pos-1-0" class="boxpos deselect" onClick="cambiarPos(1, 0)"></div>
+                        <div id="pos-1-1" class="boxpos deselect" onClick="cambiarPos(1, 1)"></div>
+                        <div id="pos-1-2" class="boxpos deselect" onClick="cambiarPos(1, 2)"></div>
+                        <div id="pos-1-3" class="boxpos deselect" onClick="cambiarPos(1, 3)"></div>
+                        <div id="pos-1-4" class="boxpos deselect" onClick="cambiarPos(1, 4)"></div>
+                        <div id="pos-1-5" class="boxpos deselect" onClick="cambiarPos(1, 5)"></div>
+                        <div id="pos-1-6" class="boxpos deselect" onClick="cambiarPos(1, 6)"></div>
+                        <div id="pos-1-7" class="boxpos deselect" onClick="cambiarPos(1, 7)"></div>
+                        <div id="pos-1-8" class="boxpos deselect" onClick="cambiarPos(1, 8)"></div>
+                      </div>
+                      <div id="contgrupocolores">
+                        <div id="bcolor-1-01" class="boxcolor" onClick="cambiarColor(1, '01')" style="background-Color:#FFD500;"></div>
+                        <div id="bcolor-1-02" class="boxcolor" onClick="cambiarColor(1, '02')" style="background-Color:#EB7500;"></div>
+                        <div id="bcolor-1-03" class="boxcolor" onClick="cambiarColor(1, '03')" style="background-Color:#83DD00;"></div>
+                        <div id="bcolor-1-04" class="boxcolor" onClick="cambiarColor(1, '04')" style="background-Color:#579900;"></div>
+                        <div id="bcolor-1-05" class="boxcolor" onClick="cambiarColor(1, '05')" style="background-Color:#4FC0FA;"></div>
+                        <div id="bcolor-1-06" class="boxcolor" onClick="cambiarColor(1, '06')" style="background-Color:#006ECE;"></div>
+                        <div id="bcolor-1-07" class="boxcolor" onClick="cambiarColor(1, '07')" style="background-Color:#FF97E2;"></div>
+                        <div id="bcolor-1-08" class="boxcolor" onClick="cambiarColor(1, '08')" style="background-Color:#F233BE;"></div>
+                        <div id="bcolor-1-09" class="boxcolor" onClick="cambiarColor(1, '09')" style="background-Color:#FF2C2C;"></div>
+                        <div id="bcolor-1-10" class="boxcolor" onClick="cambiarColor(1, '10')" style="background-Color:#AE0909;"></div>
+                        <div id="bcolor-1-11" class="boxcolor" onClick="cambiarColor(1, '11')" style="background-Color:#FFFFFF;"></div>
+                        <div id="bcolor-1-12" class="boxcolor" onClick="cambiarColor(1, '12')" style="background-Color:#BFBFBF;"></div>
+                        <div id="bcolor-1-13" class="boxcolor" onClick="cambiarColor(1, '13')" style="background-Color:#363636;"></div>
+                        <div id="bcolor-1-14" class="boxcolor" onClick="cambiarColor(1, '14')" style="background-Color:#FAE6AB;"></div>
+                        <div id="bcolor-1-15" class="boxcolor" onClick="cambiarColor(1, '15')" style="background-Color:#967540;"></div>
+                        <div id="bcolor-1-16" class="boxcolor" onClick="cambiarColor(1, '16')" style="background-Color:#C1E9FF;"></div>
+                        <div id="bcolor-1-17" class="boxcolor" onClick="cambiarColor(1, '17')" style="background-Color:#FFF064;"></div>
+                        <div id="bcolor-1-18" class="boxcolor" onClick="cambiarColor(1, '18')" style="background-Color:#A9FF7C;"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="cont_btx comp">
+                    <div id="contg">
+                      <div id="pgrupo">
+                        <div class="flecha izq" onClick="cambiarObjeto(0,2)"></div>
+                        <div class="flecha der" onClick="cambiarObjeto(1,2)"></div>
+                        <div id="accimg-2" class="imgprev obj" obj="2"></div>
+                      </div>
+                      <div id="contgrupopos">
+                        <div id="pos-2-0" class="boxpos deselect" onClick="cambiarPos(2, 0)"></div>
+                        <div id="pos-2-1" class="boxpos deselect" onClick="cambiarPos(2, 1)"></div>
+                        <div id="pos-2-2" class="boxpos deselect" onClick="cambiarPos(2, 2)"></div>
+                        <div id="pos-2-3" class="boxpos deselect" onClick="cambiarPos(2, 3)"></div>
+                        <div id="pos-2-4" class="boxpos deselect" onClick="cambiarPos(2, 4)"></div>
+                        <div id="pos-2-5" class="boxpos deselect" onClick="cambiarPos(2, 5)"></div>
+                        <div id="pos-2-6" class="boxpos deselect" onClick="cambiarPos(2, 6)"></div>
+                        <div id="pos-2-7" class="boxpos deselect" onClick="cambiarPos(2, 7)"></div>
+                        <div id="pos-2-8" class="boxpos deselect" onClick="cambiarPos(2, 8)"></div>
+                      </div>
+                      <div id="contgrupocolores">
+                        <div id="bcolor-2-01" class="boxcolor" onClick="cambiarColor(2, '01')" style="background-Color:#FFD500;"></div>
+                        <div id="bcolor-2-02" class="boxcolor" onClick="cambiarColor(2, '02')" style="background-Color:#EB7500;"></div>
+                        <div id="bcolor-2-03" class="boxcolor" onClick="cambiarColor(2, '03')" style="background-Color:#83DD00;"></div>
+                        <div id="bcolor-2-04" class="boxcolor" onClick="cambiarColor(2, '04')" style="background-Color:#579900;"></div>
+                        <div id="bcolor-2-05" class="boxcolor" onClick="cambiarColor(2, '05')" style="background-Color:#4FC0FA;"></div>
+                        <div id="bcolor-2-06" class="boxcolor" onClick="cambiarColor(2, '06')" style="background-Color:#006ECE;"></div>
+                        <div id="bcolor-2-07" class="boxcolor" onClick="cambiarColor(2, '07')" style="background-Color:#FF97E2;"></div>
+                        <div id="bcolor-2-08" class="boxcolor" onClick="cambiarColor(2, '08')" style="background-Color:#F233BE;"></div>
+                        <div id="bcolor-2-09" class="boxcolor" onClick="cambiarColor(2, '09')" style="background-Color:#FF2C2C;"></div>
+                        <div id="bcolor-2-10" class="boxcolor" onClick="cambiarColor(2, '10')" style="background-Color:#AE0909;"></div>
+                        <div id="bcolor-2-11" class="boxcolor" onClick="cambiarColor(2, '11')" style="background-Color:#FFFFFF;"></div>
+                        <div id="bcolor-2-12" class="boxcolor" onClick="cambiarColor(2, '12')" style="background-Color:#BFBFBF;"></div>
+                        <div id="bcolor-2-13" class="boxcolor" onClick="cambiarColor(2, '13')" style="background-Color:#363636;"></div>
+                        <div id="bcolor-2-14" class="boxcolor" onClick="cambiarColor(2, '14')" style="background-Color:#FAE6AB;"></div>
+                        <div id="bcolor-2-15" class="boxcolor" onClick="cambiarColor(2, '15')" style="background-Color:#967540;"></div>
+                        <div id="bcolor-2-16" class="boxcolor" onClick="cambiarColor(2, '16')" style="background-Color:#C1E9FF;"></div>
+                        <div id="bcolor-2-17" class="boxcolor" onClick="cambiarColor(2, '17')" style="background-Color:#FFF064;"></div>
+                        <div id="bcolor-2-18" class="boxcolor" onClick="cambiarColor(2, '18')" style="background-Color:#A9FF7C;"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="cont_btx comp">
+                    <div id="contg">
+                      <div id="pgrupo">
+                        <div class="flecha izq" onClick="cambiarObjeto(0,3)"></div>
+                        <div class="flecha der" onClick="cambiarObjeto(1,3)"></div>
+                        <div id="accimg-3" class="imgprev obj" obj="3"></div>
+                      </div>
+                      <div id="contgrupopos">
+                        <div id="pos-3-0" class="boxpos deselect" onClick="cambiarPos(3, 0)"></div>
+                        <div id="pos-3-1" class="boxpos deselect" onClick="cambiarPos(3, 1)"></div>
+                        <div id="pos-3-2" class="boxpos deselect" onClick="cambiarPos(3, 2)"></div>
+                        <div id="pos-3-3" class="boxpos deselect" onClick="cambiarPos(3, 3)"></div>
+                        <div id="pos-3-4" class="boxpos deselect" onClick="cambiarPos(3, 4)"></div>
+                        <div id="pos-3-5" class="boxpos deselect" onClick="cambiarPos(3, 5)"></div>
+                        <div id="pos-3-6" class="boxpos deselect" onClick="cambiarPos(3, 6)"></div>
+                        <div id="pos-3-7" class="boxpos deselect" onClick="cambiarPos(3, 7)"></div>
+                        <div id="pos-3-8" class="boxpos deselect" onClick="cambiarPos(3, 8)"></div>
+                      </div>
+                      <div id="contgrupocolores">
+                        <div id="bcolor-3-01" class="boxcolor" onClick="cambiarColor(3, '01')" style="background-Color:#FFD500;"></div>
+                        <div id="bcolor-3-02" class="boxcolor" onClick="cambiarColor(3, '02')" style="background-Color:#EB7500;"></div>
+                        <div id="bcolor-3-03" class="boxcolor" onClick="cambiarColor(3, '03')" style="background-Color:#83DD00;"></div>
+                        <div id="bcolor-3-04" class="boxcolor" onClick="cambiarColor(3, '04')" style="background-Color:#579900;"></div>
+                        <div id="bcolor-3-05" class="boxcolor" onClick="cambiarColor(3, '05')" style="background-Color:#4FC0FA;"></div>
+                        <div id="bcolor-3-06" class="boxcolor" onClick="cambiarColor(3, '06')" style="background-Color:#006ECE;"></div>
+                        <div id="bcolor-3-07" class="boxcolor" onClick="cambiarColor(3, '07')" style="background-Color:#FF97E2;"></div>
+                        <div id="bcolor-3-08" class="boxcolor" onClick="cambiarColor(3, '08')" style="background-Color:#F233BE;"></div>
+                        <div id="bcolor-3-09" class="boxcolor" onClick="cambiarColor(3, '09')" style="background-Color:#FF2C2C;"></div>
+                        <div id="bcolor-3-10" class="boxcolor" onClick="cambiarColor(3, '10')" style="background-Color:#AE0909;"></div>
+                        <div id="bcolor-3-11" class="boxcolor" onClick="cambiarColor(3, '11')" style="background-Color:#FFFFFF;"></div>
+                        <div id="bcolor-3-12" class="boxcolor" onClick="cambiarColor(3, '12')" style="background-Color:#BFBFBF;"></div>
+                        <div id="bcolor-3-13" class="boxcolor" onClick="cambiarColor(3, '13')" style="background-Color:#363636;"></div>
+                        <div id="bcolor-3-14" class="boxcolor" onClick="cambiarColor(3, '14')" style="background-Color:#FAE6AB;"></div>
+                        <div id="bcolor-3-15" class="boxcolor" onClick="cambiarColor(3, '15')" style="background-Color:#967540;"></div>
+                        <div id="bcolor-3-16" class="boxcolor" onClick="cambiarColor(3, '16')" style="background-Color:#C1E9FF;"></div>
+                        <div id="bcolor-3-17" class="boxcolor" onClick="cambiarColor(3, '17')" style="background-Color:#FFF064;"></div>
+                        <div id="bcolor-3-18" class="boxcolor" onClick="cambiarColor(3, '18')" style="background-Color:#A9FF7C;"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <br>
+              <div class="flex">
+                <button id="GA_New_Btn" class="dark-button" style="width: 100%">Crear banda ($ 1, 000, 000)</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+</div>
+<!-- End GangsWindow -->
+
+<!-- Capturing Turf -->
+<div class="Turf_turf_3Ic15" style="display: none;">
+  <div class="Turf_title_aupur">Some Turf</div>
+  <div class="Turf_info_Y6LIm">
+    <div> Controlled by <span class="font-bold pointer-events-auto cursor-pointer hover:underline">Oxton</span> for <br>
+    </div>
+    <div class="mt-2"> Assaulted by <span class="font-bold pointer-events-auto cursor-pointer hover:underline">APD</span>
+    </div>
+  </div>
+  <div class="h-6 Turf_progressBar_25282" style="">
+    <div class="h-full ProgressBar_progressBarWrapper_3AwhQ">
+      <div class="ProgressBar_progressBar_BCnpR">
+        <div class="ProgressBar_progress_tfs6y" style="height: 100%; width: 0%; background-color: rgb(39, 212, 255);"></div>
+        <div class="ProgressBar_text_1Dzge"> Claiming 0% </div>
+        <div class="ProgressBar_highlight_1Qc1n"></div>
+      </div>
+      <div class="ProgressBar_border_2lyP-"></div>
+    </div>
+  </div>
+</div>
+<!-- End Capturing Turf -->

@@ -1,0 +1,324 @@
+﻿<!-- Styles -->
+<link href="<?php echo WS_DY;?>/ws_overlays/Apartments/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+
+<!-- ApartShop -->
+<div class="container-3YsDW_0" id="ApartShop" style="display:none;">
+    <div class="handle header-Oc1Kh_0">
+      <div class="title-RLCLd_0">Apartamentos</div>
+      <div id="CloseApartShopWindow" class="close-1YQdp_0 close-3RMRU_0"></div>
+    </div> 
+
+    <div class="body-32Vs4_0" style="color:white;">
+
+    	<center><div id="AprtShopMsg" style="height: 20px;"></div></center>
+
+    	<div class="tabbed-1H9Df_0 vertical-H0Fhb_0" style="max-height: 405px;">
+        <!-- Tabs -->
+        <div id="Tool_Tabs" class="tabs-38iVv_0">
+          <div class="tab-2ddeR_0 AP_Welcome_Tab selected-3s9hj_0">Bienvenid@</div>
+          <div class="tab-2ddeR_0 AP_New_Tab">Nuevo Apartamento</div>
+          <div class="tab-2ddeR_0 AP_Buy_Tab">Apartamentos en Venta</div>
+          <div class="tab-2ddeR_0 AP_Sell_Tab">Vender Apartamento</div>
+        </div>
+
+        <div id="AP_Welcome_Tab" class="body-1skWP_0" style="display: block;">
+
+          <div>
+            <div class="mb-2">
+              <div id="AP_Welcome_Title" class="heading">Bienvenid@ a los Apartamentos</div>
+              <div class="-m-1 flex flex-wrap justify-around" style="margin-bottom: 5px;">
+                <div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 100%;">
+                  <div class="mr-2" style="padding: 3px;">
+                    ¡Deja las calles! ¡Aqu&iacute; podr&aacute;s econtrar tu lugar ideal para vivir! Un lugar adecuado y a tus medidas te est&aacute; esperando.
+                    <br><br>
+                    Aqu&iacute; podr&aacute;s colocar todos los furnis que hayas comprado e incluso permitir a tus amigos colocar los suyos. Podr&aacute;n compartir un mismo espacio si lo desean.
+                    <br><br>
+                    Para hacerte con uno, solo da clic a la pestaña <b>"Nuevo Apartamento"</b> o en su defecto, podr&aacute;s comprar apartamentos usados por otros usuarios en la pestaña <b>"Apartamentos en venta"</b>.
+                    <br>
+                    Si ya cuentas con alg&uacute;n apartamento comprado en este mismo edificio, podr&aacute;s colocarlo en venta en la pestaña <b>"Vender Apartamento"</b>.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div id="AP_New_Tab" class="body-1skWP_0" style="display: none;">
+
+          <div>
+            <div class="mb-2">
+              <div class="heading">Comprar apartamento nuevo</div>
+              <i>Completa el formulario y selecciona un modelo</i><br>
+              <br>
+              <div class="heading">Nombre para tu apartamento</div>
+              <div class="flex">
+                <input id="AP_New_Name" type="text" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" maxlength="50" autocomplete="off" placeholder="Escribe aqu&iacute; un nombre para tu apartamento">
+              </div>
+              <br>
+              <div class="heading">Edición de apartamento (Floor Editor) <b>+ 5 PL</b></div>
+              <div class="flex">
+                <select id="AP_New_FloorEditor" class="dark-button" style="width: 439px">
+                  <option value="false" style="color:black">No</option>
+                  <option value="true" style="color:black">S&iacute;</option>
+                </select>
+              </div>
+              <br>
+              <div class="heading">Modelo de apartamento</div>
+              <div id="AP_New_RoomModels" class="flex">
+
+                <!--
+                <div class="ft1" style="padding: 2px;"> 
+                  <div style="background-image:url('<?php //echo SWF; ?>/c_images/newroom/model_a.png');background-position:center;background-repeat:no-repeat;height: 80px;width: 210px;border: solid 1px #161f26;"></div>
+                    <div class="datos2" style="width: 200px;background-color: #1a242c;border-left: solid 1px #161f26;border-right: solid 1px #161f26;border-bottom: #161f26;">
+                      Nombre: <span>{name}</span>
+                      <div class="hr2"></div>
+                      Baldosas: <span>{0}</span>
+                      <div class="hr2"></div>
+                      Precio: <span style="color:#339900"><font color="green">$ {0}</font></span>
+                      <div class="hr2"></div>
+                      <button id="New_Apart" class="dark-button buyapart" style="width: 100%">Comprar</button>
+                    </div>
+                </div>
+                -->
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div id="AP_Buy_Tab" class="body-1skWP_0" style="display: none;">
+
+          <div>
+            <div class="mb-2">
+              <div class="heading">Apartamentos en venta</div>
+              <div id="AP_Offers">
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div id="AP_Sell_Tab" class="body-1skWP_0" style="display: none;">
+
+          <div>
+            <div class="mb-2">
+              <div class="heading">Mis apartamentos</div>
+              <i>
+                Notas: <br>
+                <li>• Recuerda que toda venta tiene un 15% de comisión.</li>
+                <li>• Si quieres deshacerte de un apartamento instantáneamente, vende al Gobierno.</li>
+                <li>• Al vender al gobierno, se te pegará solo el 75% de su costo original.</li>
+              </i>
+              <div id="AP_My_Offers">
+
+                <!--<div class="ft1" style="padding: 2px;"> 
+                  <div style="background-image:url('<?php //echo SWF; ?>/c_images/newroom/model_a.png');background-position:center;background-repeat:no-repeat;height: 80px;width: 210px;border: solid 1px #161f26;"></div>
+                    <div class="datos2" style="width: 200px;background-color: #1a242c;border-left: solid 1px #161f26;border-right: solid 1px #161f26;border-bottom: #161f26;">
+                      Nombre: <span>{name}</span>
+                      <div class="hr2"></div>
+                      Baldosas: <span>{0}</span>
+                      <div class="hr2"></div>
+                      Precio: <input type="number" class="dark-button" value="0" autocomplete="false" style="width: 134px;text-align: right;" onkeyup="ModifPrice($(this))">
+                      <div class="hr2"></div>
+                      Moneda:
+                      <select class="dark-button" style="width: 132px;" onchange="ModifMoneda($(this))">
+                        <option value="Dinero" style="color:black">Dinero</option>
+                        <option value="Platinos" style="color:black">Platinos</option>
+                      </select>
+                      <div class="hr2"></div>
+                      <button value="id,price,moneda" class="dark-button btn_my_offer_apart" style="width: 100%">Vender</button>
+                    </div>
+                </div>-->
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+</div>
+<!-- End ApartShop -->
+
+<!-- ApartElevator -->
+<div class="container-3YsDW_0" id="ApartElevator" style="display:none;">
+    <div class="handle header-Oc1Kh_0">
+      <div class="title-RLCLd_0">Elevador</div>
+      <div id="CloseApartElevatorWindow" class="close-1YQdp_0 close-3RMRU_0"></div>
+    </div> 
+
+    <div class="body-32Vs4_0" style="color:white;">
+
+      <center><div id="AprtEleMsg" style="height: 20px;"></div></center>
+
+      <div class="tabbed-1H9Df_0 vertical-H0Fhb_0" style="max-height: 405px;">
+        <!-- Tabs -->
+        <div id="Tool_Tabs" class="tabs-38iVv_0">
+          <div class="tab-2ddeR_0 AP_Elevator_Tab selected-3s9hj_0">Elevador</div>
+          <div class="tab-2ddeR_0 AP_MyAparts_Tab">Mis Apartamentos</div>
+        </div>
+
+        <div id="AP_Elevator_Tab" class="body-1skWP_0" style="display: block;">
+
+          <div>
+            <div class="mb-2">
+              <div class="-m-1 flex flex-wrap justify-around" style="margin-bottom: 5px;">
+                <div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 52%;">
+                  <div class="mr-2" style="padding: 3px;">
+                    <input id="AP_Elevator_Search" type="text" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" maxlength="50" autocomplete="off" placeholder="Buscar apartamentos por dueño" style="width: 295px">
+
+                    <div id="AP_Elevator_SearchResult">
+                      <table id="apartlist">
+                        
+                        <!--<tr data-room-id="123">
+                          <td><i class="fa fa-users" aria-hidden="true"></i> 0</td>
+                          <td>roomname</td>
+                          <td style="text-align: right;">roomowner</td>
+                          <td style="text-align: right;"><center><div class="ap_elev_bell"></div></center></td>
+                        </tr>
+                        <tr>
+                          <td><i class="fa fa-users" aria-hidden="true"></i> 0</td>
+                          <td>roomname</td>
+                          <td style="text-align: right;">roomowner</td>
+                          <td style="text-align: right;"><center><div class="ap_elev_lock"></div></center></td>
+                        </tr>
+                        <tr>
+                          <td><i class="fa fa-users" aria-hidden="true"></i> 0</td>
+                          <td>roomname</td>
+                          <td style="text-align: right;">roomowner</td>
+                          <td style="text-align: right;"><center><div class="ap_elev_open"></div></center></td>
+                        </tr>-->
+
+                      </table>
+                    </div>
+
+                  </div>
+                </div>
+                <div class="flex bg-dark-1 m-1 rounded-lg p-1 pl-2 items-center" style="width: 40%;">
+                  <div class="mr-2" style="padding: 3px;">
+                    <input id="AP_Elevator_Display" type="number" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" maxlength="11" autocomplete="off" style="width: 224px;font-size: 35px;text-align: center;font-family: consolas" disabled>
+
+                     <div class="AP_Elevator_Numbers" style="text-align: center;">
+                      <div>
+                        <input type="button" value="1" onClick="$('#AP_Elevator_Display').val($('#AP_Elevator_Display').val()+'1');">
+                        <input type="button" value="2" onClick="$('#AP_Elevator_Display').val($('#AP_Elevator_Display').val()+'2');">
+                        <input type="button" value="3" onClick="$('#AP_Elevator_Display').val($('#AP_Elevator_Display').val()+'3');">
+                      </div>
+                      <div>
+                        <input type="button" value="4" onClick="$('#AP_Elevator_Display').val($('#AP_Elevator_Display').val()+'4');">
+                        <input type="button" value="5" onClick="$('#AP_Elevator_Display').val($('#AP_Elevator_Display').val()+'5');">
+                        <input type="button" value="6" onClick="$('#AP_Elevator_Display').val($('#AP_Elevator_Display').val()+'6');">
+                      </div>
+                      <div>
+                        <input type="button" value="7" onClick="$('#AP_Elevator_Display').val($('#AP_Elevator_Display').val()+'7');">
+                        <input type="button" value="8" onClick="$('#AP_Elevator_Display').val($('#AP_Elevator_Display').val()+'8');">
+                        <input type="button" value="9" onClick="$('#AP_Elevator_Display').val($('#AP_Elevator_Display').val()+'9');">
+                      </div>
+                      <div>
+                        <input type="button" value="🆑" onClick="$('#AP_Elevator_Display').val('');" style="border-radius:10px !important;padding: 15px 21px;font-size: 21px;">
+                        <input type="button" value="0" onClick="$('#AP_Elevator_Display').val($('#AP_Elevator_Display').val()+'0');">
+                        <input id="AP_Elevator_Enter" type="button" value="🚪" style="border-radius:10px !important;padding: 15px 21px;font-size: 21px;">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div id="AP_MyAparts_Tab" class="body-1skWP_0" style="display: none;">
+
+          <div>
+            <div class="mb-2">
+              <div class="heading">Comprar apartamento nuevo</div>
+              <i>Completa el formulario y selecciona un modelo</i><br>
+              <br>
+              <div class="heading">Nombre para tu apartamento</div>
+              <div class="flex">
+                <input id="AP_New_Name" type="text" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" maxlength="50" autocomplete="off" placeholder="Escribe aqu&iacute; un nombre para tu apartamento">
+              </div>
+              <br>
+              <div class="heading">Modelo de apartamento</div>
+              <div id="AP_New_RoomModels" class="flex">
+
+                <!--
+                <div class="ft1" style="padding: 2px;"> 
+                  <div style="background-image:url('<?php //echo SWF; ?>/c_images/newroom/model_a.png');background-position:center;background-repeat:no-repeat;height: 80px;width: 210px;border: solid 1px #161f26;"></div>
+                    <div class="datos2" style="width: 200px;background-color: #1a242c;border-left: solid 1px #161f26;border-right: solid 1px #161f26;border-bottom: #161f26;">
+                      Nombre: <span>{name}</span>
+                      <div class="hr2"></div>
+                      Baldosas: <span>{0}</span>
+                      <div class="hr2"></div>
+                      Precio: <span style="color:#339900"><font color="green">$ {0}</font></span>
+                      <div class="hr2"></div>
+                      <button id="New_Apart" class="dark-button buyapart" style="width: 100%">Comprar</button>
+                    </div>
+                </div>
+                -->
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+</div>
+<!-- End ApartElevator -->
+
+<!-- ApartLock -->
+<div class="container-3YsDW_0" id="ApartLock" style="display:none;">
+    <div class="handle header-Oc1Kh_0">
+      <div class="title-RLCLd_0">Contrase&ntilde;a</div>
+      <div id="CloseApartLockWindow" class="close-1YQdp_0 close-3RMRU_0"></div>
+    </div> 
+
+    <div class="body-32Vs4_0" style="color:white;">
+
+      <div id="AprtLocksMsg">
+        <b>RoomName</b><br>
+        Esta Sala está cerrada con clave. Escribe una para intentar entrar.
+        <input type="hidden" id="AP_Elevator_Pass_Roomid" value="0">
+      </div>
+
+      <div class="tabbed-1H9Df_0 vertical-H0Fhb_0" style="display: inline-block;">
+        <div>
+          <input id="AP_Elevator_Pass" type="password" data-lpignore="true" class="dark-input-text flex-1 mr-1" value="" maxlength="50" autocomplete="off" placeholder="Escribe aquí la clave" style="margin-top: 10px;margin-bottom: 5px;">
+        </div>
+        <div>
+          <button id="AP_Elevator_Pass_Try" class="dark-button" style="width: 221px">Probar clave</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<!-- End ApartLock -->
+
+<script type="text/javascript">
+  function ModifPrice(i){
+    var g = i.nextAll("button").first().val();
+    var s = g.split(',');
+    var newval = s[0] + "," + i.val() + "," + s[2] + "," + s[3];
+    i.nextAll("button").first().val(newval);
+  }
+  function ModifMoneda(i){
+    var g = i.nextAll("button").first().val();
+    var s = g.split(',');
+    var newval = s[0] + "," + s[1] + "," + i.val() + "," + s[3];
+    i.nextAll("button").first().val(newval);
+  }
+  function ModifMerca(i){
+    var g = i.nextAll("button").first().val();
+    var s = g.split(',');
+    var newval = s[0] + "," + s[1] + "," + s[2] + "," + i.val();
+    i.nextAll("button").first().val(newval);
+  }
+</script>

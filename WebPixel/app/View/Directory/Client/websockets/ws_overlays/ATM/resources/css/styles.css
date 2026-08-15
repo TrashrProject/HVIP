@@ -1,0 +1,181 @@
+#AtmMachine, #oAtmMachine{
+    width: 450px !important;
+    height: 450px !important;
+    background:url(../images/atm.jpg);  
+    background-size: 450px 450px;   
+    display:none;
+    z-index: 2115;
+    position: absolute;
+    left: 460px;
+    top: 100px;
+}
+.deposit_acc, .deposit_submit, .deposit_amount, .withdraw_acc, .withdraw_submit, .withdraw_amount{
+    position:absolute;
+}
+.AtmDepositScreen{
+    display:none;
+}
+.atmback{
+    cursor: pointer;
+    position: absolute;
+    top: 88.5%;
+    color: #333;
+    width: 53px;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    padding: 3px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background: rgba(0,0,0,0.3);
+    left: 72%;
+}
+.atmback:hover{
+    color:red;
+}
+.AtmWithdrawScreen{
+    display:none;
+}
+.AtmTransactionsScreen{
+    display:none;
+    margin-top:20px;
+    max-height:100px;
+    overflow: scroll;
+}
+.AtmTransactionsScreen ::-webkit-scrollbar
+{
+    display: none;
+}
+.AtmStaticMsg{
+    position: absolute;
+    color: #389827;
+    font-size: 12px;
+    padding: 3px;
+    border-radius: 3px;
+    text-shadow: 0px 1px 1px #3ba73e;
+}
+
+#AtmHomeScreen{
+    
+}
+#AtmInnerBody{
+    position: absolute;
+    background-color: #fbfbfb;
+    top: 27.5%;
+    left: 20.5%;
+    display: inline-block;
+    height: 140px;
+    width: 199px;
+    color:black;
+    
+}
+#AtmInputBox{
+    padding: 6px;
+    border-radius: 3px;
+    width: 92%;
+    border: 1px solid black;
+    margin-top: 5px;
+    font-size: 11px;
+}
+#AtmError{
+    position:absolute;
+    font-size: 10px;
+    color: white;
+    width: 195px;
+    top: 110%;
+    left: -0.1%;
+    background: #aa0800;
+    height: 10px;
+    font-weight: bold;
+    text-align: center;
+    border: 2px solid #f71111;
+    line-height: 10px;
+    border-radius: 2px;
+}
+.close_button-red {
+    -moz-box-shadow:inset 0px 1px 0px 0px #f29c93;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #f29c93;
+    box-shadow:inset 0px 1px 0px 0px #f29c93;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #fe1a00), color-stop(1, #ce0100));
+    background:-moz-linear-gradient(top, #fe1a00 5%, #ce0100 100%);
+    background:-webkit-linear-gradient(top, #fe1a00 5%, #ce0100 100%);
+    background:-o-linear-gradient(top, #fe1a00 5%, #ce0100 100%);
+    background:-ms-linear-gradient(top, #fe1a00 5%, #ce0100 100%);
+    background:linear-gradient(to bottom, #fe1a00 5%, #ce0100 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fe1a00', endColorstr='#ce0100',GradientType=0);
+    background-color:#fe1a00;
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    border-radius:6px;
+    border:1px solid #d83526;
+    display:inline-block;
+    cursor:pointer;
+    color:#ffffff;
+    font-size:14px;
+    font-weight:bold;
+    padding:6px 11px;
+    text-decoration:none;
+    text-shadow:0px 1px 0px #b23e35;
+    margin-top: 300px;
+    margin-left: 347px;
+}
+.close_button-red:hover {
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ce0100), color-stop(1, #fe1a00));
+    background:-moz-linear-gradient(top, #ce0100 5%, #fe1a00 100%);
+    background:-webkit-linear-gradient(top, #ce0100 5%, #fe1a00 100%);
+    background:-o-linear-gradient(top, #ce0100 5%, #fe1a00 100%);
+    background:-ms-linear-gradient(top, #ce0100 5%, #fe1a00 100%);
+    background:linear-gradient(to bottom, #ce0100 5%, #fe1a00 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ce0100', endColorstr='#fe1a00',GradientType=0);
+    background-color:#ce0100;
+}
+.close_button-red:active {
+    position:relative;
+    top:1px;
+}
+#atm_button-red {
+    -moz-box-shadow:inset 0px 1px 0px 0px #f5978e;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #f5978e;
+    box-shadow:inset 0px 1px 0px 0px #f5978e;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #f24537), color-stop(1, #c62d1f));
+    background:-moz-linear-gradient(top, #f24537 5%, #c62d1f 100%);
+    background:-webkit-linear-gradient(top, #f24537 5%, #c62d1f 100%);
+    background:-o-linear-gradient(top, #f24537 5%, #c62d1f 100%);
+    background:-ms-linear-gradient(top, #f24537 5%, #c62d1f 100%);
+    background:linear-gradient(to bottom, #f24537 5%, #c62d1f 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f24537', endColorstr='#c62d1f',GradientType=0);
+    background-color:#f24537;
+    -moz-border-radius:3px;
+    -webkit-border-radius:3px;
+    border-radius:3px;
+    border:1px solid #d02718;
+    display:inline-block;
+    cursor:pointer;
+    color:#ffffff;
+    font-size:13px;
+    font-weight:bold;
+    padding:6px;
+    text-decoration:none;
+    text-shadow:0px 1px 0px #810e05;
+    width: 92%;
+    text-align: center;
+    margin-top: 5px;
+    top: 60%;
+}
+#atm_button-red:hover {
+    -moz-box-shadow:inset 0px 1px 0px 0px #276873;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #276873;
+    box-shadow:inset 0px 1px 0px 0px #276873;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #599bb3), color-stop(1, #408c99));
+    background:-moz-linear-gradient(top, #599bb3 5%, #408c99 100%);
+    background:-webkit-linear-gradient(top, #599bb3 5%, #408c99 100%);
+    background:-o-linear-gradient(top, #599bb3 5%, #408c99 100%);
+    background:-ms-linear-gradient(top, #599bb3 5%, #408c99 100%);
+    background:linear-gradient(to bottom, #599bb3 5%, #408c99 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#599bb3', endColorstr='#408c99',GradientType=0);
+    background-color:#599bb3;
+    -moz-border-radius:3px;
+    -webkit-border-radius:3px;
+    border-radius:3px;
+    border:1px solid #29668f;
+}

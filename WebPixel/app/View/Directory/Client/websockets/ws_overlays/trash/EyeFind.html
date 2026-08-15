@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Eyefind</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.0/css/mdb.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Emoji Picker -->
+    <link href="http://onesignal.github.io/emoji-picker/lib/css/emoji.css" rel="stylesheet">
+    <!-- MDBootstrap Datatables  -->
+    <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css" rel="stylesheet">
+
+    <style type="text/css">
+        .container {
+            width: 75% !important;
+        }
+        .row {
+            width: 100% !important;
+        }
+
+        .EF_Header {
+            background-color: #4a8bbf;
+            padding: 10px;
+            width: 100%;
+            border-bottom: 10px solid #fbbf0c;
+        }
+
+        .EF_Logo{
+            background-image: url("https://habbovip.us/kernel/includes/pages/developer_build/websockets/ws_overlays/Internet/resources/images/eyefind-logo.png");
+            background-size: 200px;
+            background-repeat: no-repeat;
+            height: 90px;
+            width: 200px;
+        }
+
+        .EF_Time {
+            color: white;
+            text-align: right;
+            right: 0;
+        }
+
+        .EF_Time .icon {
+            color: #f6c00a;
+            font-size: 40px;
+        }
+
+        .vertical-center {
+          margin: 0;
+          position: absolute;
+          top: 50%;
+          -ms-transform: translateY(-50%);
+          transform: translateY(-50%);
+        }
+
+        .EF_SearchBar i { 
+            position: absolute; 
+        } 
+          
+        .EF_SearchBar{ 
+            padding-left: 40px;
+        } 
+          
+        .EF_SearchBar .icon { 
+            padding: 4px 4px 4px 10px;
+            /* min-width: 40px; */
+            font-size: 30px;
+            color: #638ab6; 
+        } 
+          
+        .EF_SearchBar .input-field {
+            padding: 7px 7px 7px 45px;
+            width: 100%;
+            border: 1px solid grey;
+        }
+
+        .EF_Btn_Random {
+            padding: 5px;
+            width: 100%;
+            font-size: 20px;
+            color: white;
+            background-color: #05728d;
+            border: 0;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .EF_Btn_Random:hover {
+            background-color: #0683a2;
+        }
+
+        .EF_Btn_Random:active {
+            background-color: #04657d;
+        }
+
+        .EF_Nav {
+            background-color: #f0f0f0;
+            padding:0;
+            padding-left:27px;
+            border-top:1px solid #b7b7b7;
+            border-bottom:1px solid #b7b7b7;
+        }
+        .EF_Nav .container {
+            width: 69.2% !important;
+            padding: 0;
+        }
+        .EF_Nav .nav-item{
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        .EF_Nav .nav-item:hover {
+            background-color: #eaeaea;
+        }
+        .EF_Nav .container .icon {
+            font-size: 30px;
+            color: #638ab6;
+            margin-left: 10px;
+        }
+
+        .EF_Body {
+            padding-left:27px;
+        }
+
+        .EF_Body .container {
+            width: 69.2% !important;
+            padding: 0;
+            padding-top: 20px;
+        }
+
+        .EF_Body .container .row {
+            padding:0;
+            margin: 0;
+        }
+
+        .ef-content-box {
+            background-color: #f3f3f3;
+            text-align: left;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .ef-ad-blue {
+            background-color: #4f91c2;
+            font-size: 14px;
+            color:white;
+            text-align: center;
+        }
+
+        .EF_title_box {
+            font-size: 18px;
+        }
+
+        .EF_footer_box {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <nav class="navbar EF_Header justify-content-between">
+        <div class="container">
+            <div class="row">
+                <div class="col-9">
+                    <div class="EF_Logo"></div>
+                </div>
+                <div class="col-3">
+                    <div class="EF_Time vertical-center">
+                        <table>
+                            <tr>
+                                <td style="border-right: 1px solid white;padding-right: 10px;">Jeihden</td>
+                                <td rowspan="2" style="padding-left: 20px;"><i class="fa fa-sun-o icon"></i></td>
+                            </tr>
+                            <tr>
+                                <td style="padding-right: 10px;">Sat</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-10">
+                    <div class="EF_SearchBar">
+                        <i class="fa fa-search icon"></i> 
+                        <input class="input-field" type="text" placeholder="Buscar en Eyefind">
+                    </div>
+                </div>
+                <div class="col-2" style="padding: 0 !important;">
+                    <button class="EF_Btn_Random">ALEATORIO</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- END HEADER -->
+
+    <!-- NAV -->
+    <nav class="navbar EF_Nav navbar-expand-lg">
+        <div class="container">
+            <ul class="navbar-nav mr-auto mt-lg-0 border-right">
+                <li class="nav-item nav-link waves-effect waves-light">
+                    <table style="border-collapse: inherit !important;">
+                        <tr>
+                            <td><i class="fa fa-tablet icon" style="font-size: 39px;"></i></td>
+                            <td class="text-center">MEDIOS Y ENTRETENIMIENTO</td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+            <ul class="navbar-nav mr-auto mt-lg-0 border-right">
+                <li class="nav-item nav-link waves-effect waves-light">
+                    <table style="border-collapse: inherit !important;">
+                        <tr>
+                            <td><i class="fa fa-cutlery icon"></i></i></td>
+                            <td class="text-center">COMIDA Y BEBIDA</td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+            <ul class="navbar-nav mr-auto mt-lg-0 border-right">
+                <li class="nav-item nav-link waves-effect waves-light">
+                    <table style="border-collapse: inherit !important;">
+                        <tr>
+                            <td><i class="fa fa-money icon" style="font-size: 36px;"></i></td>
+                            <td class="text-center">DINERO Y SERVICIOS</td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+            <ul class="navbar-nav mr-auto mt-lg-0 border-right">
+                <li class="nav-item nav-link waves-effect waves-light">
+                    <table style="border-collapse: inherit !important;">
+                        <tr>
+                            <td><i class="fa fa-plane icon" style="font-size: 39px;"></i></td>
+                            <td class="text-center">VIAJES Y TRANSPORTE</td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+            <ul class="navbar-nav mr-auto mt-lg-0">
+                <li class="nav-item nav-link waves-effect waves-light">
+                    <table style="border-collapse: inherit !important;">
+                        <tr>
+                            <td><i class="fa fa-shopping-bag icon"></i></td>
+                            <td class="text-center">MODA Y SALUD</td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- END NAV -->
+
+    <div class="EF_Body">
+        <div class="container">
+            <div class="row">
+                
+                <div class="col-8" style="padding-left:0;">
+                    <div class="ef-content-box">
+                        <div class="EF_title_box">NOTICIA DEL D&Iacute;A</div>
+                        <br>
+                        <label style="font-weight: bold">HabboVIP se encuentra en una crisis de seguridad policial</label>
+                        <br>
+                        <br>
+                        <p style="font-size: 14px;">
+                            Tras los eventos ocurridos por corrupci&oacute;n en el gabinite policial de la ciudad de HabboVIP, se han retirado todos los cargos. Lo cual, ha causado disturbios criminales en toda la ciudad y signifca poca seguridad para la integridad de sus ciudadanos.
+                        </p>
+                        <br>
+                        <div class="EF_footer_box">LEER EL ART&Iacute;CULO COMPLETO</div>
+                    </div>
+
+                    <div class="ef-content-box">
+                        <div class="EF_title_box">SITIO WEB DEL MINUTO</div>
+                        <br>
+                        {web_site}
+                    </div>
+                </div>
+
+                <div class="col-4" style="padding-left:0;padding-right: 0;">
+                    <div class="ef-content-box ef-ad-blue">
+                        <label>ANUNCIO PATROCINADO</label>
+                        <div style="height: 96px;"></div>
+                    </div>
+
+                    <div class="ef-content-box">
+                        <div class="EF_title_box">BLEETS RECIENTES</div>
+                        <br>
+                        {GET_BLEETS}
+                        <br><br><br>
+                    </div>
+                </div>
+
+                <div class="col-12" style="padding-left:0;padding-right: 0;">
+                    <div class="ef-content-box">
+                        <div class="EF_title_box">SITIOS WEB DESTACADOS POR EYEFIND</div>
+                        <br>
+                        {web_sites}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JQuery -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.0/js/mdb.min.js"></script>
+</body>
+</html>

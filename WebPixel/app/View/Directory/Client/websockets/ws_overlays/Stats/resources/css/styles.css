@@ -1,0 +1,65 @@
+@font-face {
+  font-family: DustWest;
+  src: url(../fonts/Dust_West.woff);
+}
+
+#WantedList{
+    z-index: 2115;
+    position: absolute;
+    left: 486px;
+    top: 55px;
+    display: none;
+    width: 406px;
+}
+#WantedList .body-32Vs4_0 {
+    height: 496px;
+    max-height: 496px;
+    background-image: url('../images/wanted_bg.jpg');
+}
+
+#WS_WantedList {
+    overflow: auto;
+}
+
+.WantedTitle {
+    text-align: center;
+    font-family: DustWest;
+    color: #854f25;
+    font-size: 65px;
+}
+
+#WS_WList {
+    padding: 0px;
+    margin:0;
+    height: 382px;
+    max-height: 382px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    color: #854f25;
+}
+
+#WS_WList .bg-dark-4 {
+    background-color: rgba(250, 227, 182, 0.41);
+    color: #854f25;
+}
+
+._GangStat {
+    background-image: url("") !important;
+    box-shadow: none;
+    background-position: center center;
+    background-repeat: no-repeat;
+    width: 39px;
+    position: relative;
+    z-index: 2;
+    margin-left:5px;
+    border:0px !important;
+    text-align: center;
+    height: auto !important;
+    background-color: transparent;
+}
+
+.TargetCommands {
+    pointer-events: auto;
+    margin-top: 5px;
+    margin-left: 5px;
+}

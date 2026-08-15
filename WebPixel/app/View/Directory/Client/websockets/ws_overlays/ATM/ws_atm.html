@@ -1,0 +1,67 @@
+﻿<!-- Styles -->
+<link href="<?php echo WS_DY;?>/ws_overlays/ATM/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+
+<div id='AtmMachine' class="container-3YsDW_0" style="display: none;">  
+  <div id='AtmInnerBody'>
+    <div class='AtmStaticMsg'>
+      Saldo Actual: <span class='c_amt'>0</span> <br/>
+      <div id="AtmMsg"></div>
+    </div>
+    
+    <div class='AtmHomeScreen'>
+      <br>
+      <b><center>Elige un servicio</center></b>
+      <div class='deposit'  id="atm_button-red">Depositar</div>
+      <div class='withdraw'  id="atm_button-red">Retirar</div>
+      <div class='transactions'  id="atm_button-red">&Uacute;ltimos movimientos</div>
+    </div>
+    
+    <div class='AtmDepositScreen'>
+      <input class='deposit_amount' style='top: 29%;' id="AtmInputBox" placeholder='Cantidad' type="text"><br/>
+      <br><br><br><br><br><br>
+      <div class='deposit_submit' id="atm_button-red">Depositar</div>       
+      <br/>
+      <div class='atmback'>Atr&aacute;s</div>
+    </div>
+    
+    <div class='AtmWithdrawScreen'>
+      <input class='withdraw_amount' style='top: 29%;' id="AtmInputBox" placeholder='Cantidad' type="text"><br/>
+      <br><br><br><br><br><br>
+      <div class='withdraw_submit' id="atm_button-red">Retirar</div>       
+      <br/>
+      <div class='atmback'>Atr&aacute;s</div>
+    </div>
+
+    <div class='AtmTransactionsScreen'>
+      <table>
+        <tr>
+          <th>Fecha</th>
+          <th>Descripci&oacute;n</th>
+          <th>Monto</th>
+        </tr>
+        <tr>
+          <td>Peter</td>
+          <td>Griffin</td>
+          <td>$100</td>
+        </tr>
+        <tr>
+          <td>Lois</td>
+          <td>Griffin</td>
+          <td>$150</td>
+        </tr>
+        <tr>
+          <td>Joe</td>
+          <td>Swanson</td>
+          <td>$300</td>
+        </tr>
+        <tr>
+          <td>Cleveland</td>
+          <td>Brown</td>
+          <td>$250</td>
+      </tr>
+      </table>
+      <div class='atmback'>Atr&aacute;s</div>
+    </div>
+  </div>
+  <div class='close_button-red' id='AtmCloseBtn'>Salir</div>
+</div>

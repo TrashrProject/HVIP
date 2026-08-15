@@ -1,0 +1,189 @@
+#TutorialCanvas {
+  top:25%;
+  right: -100%;
+  transform-origin: bottom;
+  display: flex;
+}
+.speech-bubble {
+  position: relative;
+  background: #f3f3f3;
+  border-radius: .4em;
+  padding: 10px;
+  border: 2px solid black;
+  color:black;
+}
+
+.speech-bubble:after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border: 25px solid transparent;
+  border-left-color: #f3f3f3;
+  border-right: 0;
+  border-bottom: 0;
+  margin-top: -12.5px;
+  margin-right: -25px;
+  box-shadow: 10px 5px 5px black;
+}
+
+#TutorialCanvas p {
+  position: relative;
+  max-width: 10em;
+  color:black;
+  background-color: #fff;
+  padding: 0.5em 0.7em;
+  font-size: 1.25em;
+  border-radius: 1rem;
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, .3), 0 0.0625rem 0.125rem rgba(0, 0, 0, .2);
+}
+
+#TutorialCanvas p::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  bottom: 37%;
+  right: -0.850em;
+  border: .75rem solid transparent;
+  border-top: none;
+
+  border-bottom-color: #fff;
+  filter: drop-shadow(0 -0.0625rem 0.0625rem rgba(0, 0, 0, .1));
+  
+  transform: rotateZ(90deg);
+}
+
+.tutoButton, .tutoButton_No, .tutoButton_Yes, .tutoButton_End {
+  display: none;
+  box-shadow: 0px 1px 0px 0px #1c1b18;
+  background:linear-gradient(to bottom, #eae0c2 5%, #ccc2a6 100%);
+  background-color:#eae0c2;
+  border-radius:5px;
+  border:2px solid #333029;
+  cursor:pointer;
+  color:#505739;
+  font-family:Arial;
+  font-size:14px;
+  font-weight:bold;
+  padding:8px 16px;
+  text-decoration:none;
+  text-shadow:0px 1px 0px #ffffff;
+  margin-top: 5px;
+  width: 76px;
+  text-align: center;
+  margin: 0.11rem;
+}
+.tutoButton:hover, .tutoButton_No:hover, .tutoButton_Yes:hover, .tutoButton_End:hover {
+  background:linear-gradient(to bottom, #ccc2a6 5%, #eae0c2 100%);
+  background-color:#ccc2a6;
+}
+.tutoButton:active, .tutoButton_No:active, .tutoButton_Yes:active, .tutoButton_End:active {
+  position:relative;
+  top:1px;
+}
+
+.frank_welcome_r{
+  background-image: url('../img/frank_welcome_r.gif');
+  width: 108px;
+  height: 173px;
+  margin-left: 20px;
+  margin-top: 30px;
+  -webkit-filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+  filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+}
+
+.frank_search_r{
+  background-image: url('../img/frank_search_r.gif');
+  width: 127px;
+  height: 180px;
+  margin-left: 20px;
+  margin-top: 30px;
+  margin-right: 40px;
+  -webkit-filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+  filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+}
+
+.hand_down {
+  display: none;
+  background-image: url('../img/hand_down.gif');
+  width: 90px;
+  height: 150px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  bottom: 8%;
+  -webkit-filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+  filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+}
+
+.hand_right {
+  display: none;
+  background-image: url('../img/hand_right.gif');
+  width: 150px;
+  height: 90px;
+  position: absolute;
+  right: 30px;
+  transform: translate(-25%, 0%);
+  bottom: -5%;
+  -webkit-filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+  filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+}
+
+.frank_welcome4_r{
+  background-image: url('../img/frank_welcome4_r.gif');
+  width: 153px;
+  height: 179px;
+  margin-left: 20px;
+  margin-top: 30px;
+  margin-right: 40px;
+  -webkit-filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+  filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+}
+
+.frank_stop{
+  background-image: url('../img/frank_stop.gif');
+  width: 95px;
+  height: 174px;
+  margin-left: 20px;
+  margin-top: 30px;
+  margin-right: 40px;
+  -webkit-filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+  filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+}
+
+.frank_welcome5_r{
+  background-image: url('../img/frank_welcome5_r.png');
+  width: 159px;
+  height: 168px;
+  margin-left: 20px;
+  margin-top: 30px;
+  margin-right: 40px;
+  -webkit-filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+  filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+}
+
+.frank_thumb{
+  background-image: url('../img/frank_thumb.gif');
+  width: 141px;
+  height: 191px;
+  margin-left: 20px;
+  margin-top: 30px;
+  margin-right: 40px;
+  -webkit-filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+  filter: drop-shadow(2px 2px 0 white) drop-shadow(-2px 2px 0 white) drop-shadow(2px -2px 0 white) drop-shadow(-2px -2px 0 white);
+}
+
+.tuto_ap {
+  background-image: url('../img/actionpoint.png');
+  width: 30px;
+  height: 16px;
+}
+
+.tuto_buycar {
+  background-image: url(../../../Vehicles/resources/img/carrito.png);
+  height: 16px;
+  width: 16px;
+}

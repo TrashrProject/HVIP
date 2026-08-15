@@ -1,0 +1,42 @@
+#HouseInfo{
+    width: auto;
+    height: auto;
+    z-index: 2115;
+    position: absolute;
+    left: 460px;
+    top: 100px;
+    color: #fff;
+    display: none;
+}
+#HouseMsg{
+    color:#ec3423;
+    font-style: italic;
+}
+#BuyHouse{
+    text-align: center;
+}
+.myButton {
+    -moz-box-shadow:inset 0px 39px 0px -24px #fafafa;
+    -webkit-box-shadow:inset 0px 39px 0px -24px #fafafa;
+    box-shadow:inset 0px 39px 0px -24px #fafafa;
+    background-color:#e6e6e6;
+    -moz-border-radius:4px;
+    -webkit-border-radius:4px;
+    border-radius:4px;
+    border:1px solid #565656;
+    display:inline-block;
+    cursor:pointer;
+    color:#252525;
+    font-size:14px;
+    padding:6px 15px;
+    text-decoration:none;
+    text-shadow:0px 1px 0px #ffffff;
+    text-align: center;
+  }
+.myButton:hover {
+background-color:#e0e0e0;
+}
+.myButton:active {
+position:relative;
+top:1px;
+}

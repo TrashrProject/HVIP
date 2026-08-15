@@ -1,0 +1,6 @@
+Lista de Emoji
+<span class="padding-top"><br></span><h2>Emoji!</h2><span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span><p>Puedes usar estos emojis usando el comando :emoji %numero%</p><span class="padding-bottom"><br></span>
+<img src="../../c_images/emoji/emoji_final.png" height="732" width="376" hspace="5" vspace="2"/><font size="12px"><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p></font><p><font size="-1"> </font></p><img src="http://images-eussl.habbo.com/c_images/reception/3b505e.png" width="1000" height="1"/><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<span class="padding-top"><br></span><p>Tambien debes leer: <a href="event:habbopages/chat/emoji.txt">Lista de Emoji</a></p><span class="padding-bottom"><br></span>

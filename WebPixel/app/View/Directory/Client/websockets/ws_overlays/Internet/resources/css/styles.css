@@ -1,0 +1,303 @@
+#InternetOverlay {
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    z-index: 9999;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#InternetSearchBar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #3d3d31;
+    width: 100%;
+    padding: 5px;
+    text-align: center;
+}
+
+#InternetSearchBar button{
+    border: 0;
+    padding: 5px;
+    color:white;
+    outline: none;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+#InternetSearchBar button i {
+    cursor: pointer;
+    color: grey;
+}
+
+#InternetSearchBar button i:hover {
+    color:white;
+}
+
+#InternetSearchBar button:disabled, #InternetSearchBar button:disabled i,
+#InternetSearchBar button[disabled], #InternetSearchBar button[disabled] i{
+  cursor: default;
+  color: #212121;
+}
+
+#InternetSearchBar input[type=text] {
+    width: 50%;
+}
+
+#CloseInternet {
+    background-color: red;
+    position: absolute;
+    top: 8px;
+    right: 20px;
+    padding: 2px;
+    border:1px solid black;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#CloseInternet:hover{
+    background-color: #ff4242;
+}
+
+#CloseInternet:active {
+    background-color: #e21a1a;
+}
+
+#goToStaffTool {
+    background-color: purple;
+    position: absolute;
+    top: 8px;
+    right: 100px;
+    padding: 2px;
+    border:1px solid black;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#goToStaffTool:hover{
+    background-color: #b710b7;
+}
+
+#goToStaffTool:active {
+    background-color: #5e085e;
+}
+
+#InternetWebPage {
+    margin-top:41px;
+    overflow: auto;
+    color: black;
+}
+
+#InternetWebPage iframe {
+    top:0;
+    bottom:10px;
+    margin-top:41px;
+    position:absolute;
+}
+
+.WebPage {
+    top:0;
+    margin-top:41px;
+    position:absolute;
+    width: 100%;
+    height: calc(100% - 41px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* EyeFind Page */
+.force_center {
+    text-align: center;
+    vertical-align: middle;
+    /* fallback for non-Flexbox browsers */
+    display: inline-block;
+    /* Flexbox browsers */
+    display: -webkit-inline-box;
+    display: -moz-inline-box;
+    display: -ms-inline-flexbox;
+    display: -webkit-inline-flex;
+    display: inline-flex;
+    /* vertical centering for legacy, horizontal centering for modern */
+    -webkit-box-pack: center;
+    -moz-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    /* modern Flexbox only */
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    /* legacy Flexbox only */
+    -webkit-box-orient: vertical;
+    -moz-box-orient: vertical;
+}
+.EF_Header {
+    background-color: #4a8bbf;
+    padding: 10px;
+    width: 100%;
+    border-bottom: 10px solid #fbbf0c;
+}
+
+.EF_Logo{
+    background-image: url("../images/eyefind-logo.png");
+    background-size: 200px;
+    background-repeat: no-repeat;
+    height: 90px;
+    width: 200px;
+}
+
+.EF_Nav {
+    width: 100%;
+    background-color: #f0f0f0;
+    border-top:1px solid #b7b7b7;
+    border-bottom:1px solid #b7b7b7;
+}
+
+.EF_Body {
+    width: 100%;
+    padding-top: 20px;
+}
+
+.EF_Header .container{
+    width: 70%;
+}
+
+.EF_Nav .container {
+    width: 62%;
+}
+
+.EF_Body .container {
+    width: 62%;
+}
+
+.EF_Body .container table {
+    width: 100%;
+}
+
+.EF_Body .container .left {
+    width: 60%;
+    padding-right: 5px;
+}
+
+.EF_Body .container .right {
+    width: 40%;
+    padding-left: 5px;
+}
+
+.ef-content-box {
+    background-color: #f3f3f3;
+    text-align: left;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.ef-ad-blue {
+    background-color: #4f91c2;
+    font-size: 14px;
+    color:white;
+    text-align: center;
+}
+
+.EF_Nav .container .icon {
+    font-size: 30px;
+    color: #638ab6; 
+}
+
+.EF_Nav .container .div {
+    border-right: 1px solid #b7b7b7;
+}
+
+.EF_Nav .container .navbtn {
+    padding-left: 15px;
+    cursor: pointer;
+}
+
+.EF_Nav .container .navbtn table tr td {
+    cursor: pointer;
+}
+
+.EF_Nav .container .navbtn i {
+    cursor: pointer;
+}
+
+#EF_Nav_01:hover, #EF_Nav_02:hover, #EF_Nav_03:hover, #EF_Nav_04:hover, #EF_Nav_05:hover {
+    background-color: #eaeaea;
+}
+#EF_Nav_01:active, #EF_Nav_02:active, #EF_Nav_03:active, #EF_Nav_04:active, #EF_Nav_05:active {
+    background-color: #e6e6e6;
+}
+
+.EF_Header tr:nth-child(even), .EF_Body tr:nth-child(even) {
+  background-color: transparent;
+}
+
+.EF_SearchBar i { 
+    position: absolute; 
+} 
+  
+.EF_SearchBar{ 
+    width: 100%;
+} 
+  
+.EF_SearchBar .icon { 
+    padding: 4px 4px 4px 10px;
+    /* min-width: 40px; */
+    font-size: 30px;
+    color: #638ab6; 
+} 
+  
+.EF_SearchBar .input-field {
+    padding: 10px 10px 10px 45px;
+    width: 80%;
+    border: 1px solid grey;
+}
+
+.EF_Btn_Random {
+    padding: 9px;
+    width: 70%;
+    font-size: 20px;
+    color: white;
+    background-color: #05728d;
+    border: 0;
+    border-radius: 5px;
+    outline: none;
+    margin-right: 60px;
+}
+
+.EF_Btn_Random:hover {
+    background-color: #0683a2;
+}
+
+.EF_Btn_Random:active {
+    background-color: #04657d;
+}
+
+.EF_Time {
+    margin-right: 30px;
+}
+
+.EF_Time .icon {
+    color: #f6c00a;
+    font-size: 40px;
+}
+
+.vl {
+    width: 2px;
+    height: 33px;
+    display: inline-block;
+    background-color: white;
+    border: 0;
+    margin-left: 5px;
+    margin-right: 20px;
+}
+
+.EF_title_box {
+    font-size: 18px;
+}
+
+.EF_footer_box {
+    font-size: 16px;
+}
+/* END EyeFind Page */

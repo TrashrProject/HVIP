@@ -1,0 +1,10 @@
+UPDATE items SET `base_item` = 5942, `extra_data` = "0" WHERE user_id = 0 AND `base_item` = 1522;
+UPDATE items SET `base_item` = 500017 WHERE user_id = 0 AND `base_item` = 20016;
+UPDATE items SET `base_item` = 65005000, `extra_data` = "2" WHERE user_id = 0 AND `base_item` = 88805112;
+UPDATE items SET `base_item` = 65005007 WHERE user_id = 0 AND `base_item` = 8104;
+UPDATE items SET `base_item` = 65005005 WHERE user_id = 0 AND `base_item` = 8113;
+UPDATE items SET `base_item` = 65005004 WHERE user_id = 0 AND `base_item` = 8949;
+UPDATE items SET `base_item` = 505011 WHERE user_id = 0 AND `base_item` = 1515;
+UPDATE items SET `base_item` = 505013 WHERE user_id = 0 AND `base_item` = 99037;
+UPDATE items SET `base_item` = 65005003 WHERE user_id = 0 AND `base_item` = 1514;
+UPDATE items SET `base_item` = 65005005 WHERE user_id = 0 AND `base_item` = 11140;

@@ -1,0 +1,2 @@
+game.center.enabled=true
+toolbar.stories.enabled=false

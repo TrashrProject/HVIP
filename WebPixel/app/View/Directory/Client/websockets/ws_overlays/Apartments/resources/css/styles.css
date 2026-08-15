@@ -1,0 +1,106 @@
+#ApartShop{
+    z-index: 2115;
+    position: absolute;
+    left: 330px;
+    top: 75px;
+    display: none;
+    width: 700px;
+}
+
+#AprtShopMsg{
+    font-size: 12px;
+    background-color: #3d3d3d;
+    margin-top: -10px;
+}
+
+#AP_New_RoomModels{
+	max-width: 435px;
+    display: table;
+}
+
+#ApartElevator{
+    z-index: 2115;
+    position: absolute;
+    left: 240px;
+    top: 75px;
+    display: none;
+    width: 810px;
+}
+
+#ApartLock{
+    z-index: 2115;
+    position: absolute;
+    left: 85px;
+    top: 118px;
+    display: none;
+    width: 244px;
+}
+
+#AP_Elevator_SearchResult {
+    padding:3px;
+    margin-top: 5px;
+    height: 283px;
+    max-height: 283px;
+    overflow: auto;
+}
+
+#apartlist {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#apartlist td, #apartlist th {
+  border: 0px solid #11161b;
+  cursor: pointer;
+}
+
+#apartlist tr:nth-child(even){background-color: #182027;}
+
+#apartlist tr:hover {background-color: #777777;}
+
+#apartlist i{
+    cursor: pointer;
+}
+
+.AP_Elevator_Numbers {
+    height: 264px;
+    margin-top: 10px;
+}
+
+.AP_Elevator_Numbers input[type=button]{
+    padding: 15px 25px;
+    border-radius: 100%;
+    outline: none;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+#AP_Elevator_Display {
+    cursor: default;
+}
+
+.ap_elev_bell {
+    background-image: url("../../../../ws_resources/images/icons.png");
+    background-size: auto;
+    height: 22px;
+    width: 24px;
+    background-position: 97px 76px;
+    cursor: pointer;
+}
+
+.ap_elev_lock {
+    background-image: url("../../../../ws_resources/images/icons.png");
+    background-size: auto;
+    height: 22px;
+    width: 24px;
+    background-position: 97px 264px;
+    cursor: pointer;
+}
+.ap_elev_open {
+    background-image: url("../../../../ws_resources/images/icons.png");
+    background-size: auto;
+    height: 22px;
+    width: 24px;
+    background-position: 97px 367px;
+    cursor: pointer;
+}

@@ -1,0 +1,47 @@
+#paypal-button-container-1:hover {
+    animation: shake 0.5s;
+    animation-iteration-count: infinite;
+}
+
+.store_item_img_1:hover {
+    content: url('https://dynamics.habbovip.us/img/store/platino_x9hover.png');
+    transform: scale(1.2);
+}
+
+#paypal-button-container-2:hover {
+    animation: shake 0.5s;
+    animation-iteration-count: infinite;
+}
+
+.store_item_img_2:hover {
+    content: url('https://dynamics.habbovip.us/img/store/platino_x15hover.png');
+    transform: scale(1.2);
+}
+
+#paypal-button-container-3:hover {
+    animation: shake 0.5s;
+    animation-iteration-count: infinite;
+}
+
+.store_item_img_3:hover {
+    content: url('https://dynamics.habbovip.us/img/store/platino_x22hover.png');
+    transform: scale(1.2);
+}
+
+#paypal-button-container-4:hover {
+    animation: shake 0.5s;
+    animation-iteration-count: infinite;
+}
+
+.store_item_img_4:hover {
+    content: url('https://dynamics.habbovip.us/img/store/platino_x29hover.png');
+    transform: scale(1.2);
+}
+
+#paypal-button-container-5:hover {
+    animation: shake 0.5s;
+    animation-iteration-count: infinite;
+}
+
+.store_item_img_5:hover {
+    content: url('https://dynamics.habbovip.us/img/store/platino_x35hover.png'); transform: scale(1.2);}#paypal-button-container-6:hover { animation: shake 0.5s; animation-iteration-count: infinite; }.store_item_img_6:hover {content: url('https: //dynamics.habbovip.us/img/store/platino_x70hover.png'); transform: scale(1.2);}.store_item_img_1, .store_item_img_2, .store_item_img_3, .store_item_img_4, .store_item_img_5, .store_item_img_6 { transition: transform .5s ease; }

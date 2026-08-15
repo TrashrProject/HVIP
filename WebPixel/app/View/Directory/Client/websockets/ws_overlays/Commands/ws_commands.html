@@ -1,0 +1,751 @@
+﻿<div id="CommandsInfo" class="container-3YsDW_0" style="display: none;left: 425px;top: 100px;">
+  <div class="handle header-Oc1Kh_0">
+    <div class="title-RLCLd_0">Comandos</div>
+    <div id="CloseCommandsInfo" class="close-1YQdp_0 close-3RMRU_0"></div>
+  </div>
+  <div class="body-32Vs4_0">
+    <div class="profile-21h7__0">
+      <div class="tabbed-1H9Df_0 vertical-H0Fhb_0 tabbed-1lE8v_0">
+        <div class="tabs-38iVv_0">
+          <div class="tab-2ddeR_0 CMDS_Normales selected-3s9hj_0">Normales</div>
+          <div class="tab-2ddeR_0 CMDS_VIP">VIP</div>
+          <div class="tab-2ddeR_0 CMDS_Roleplay">Roleplay</div>
+          <div class="tab-2ddeR_0 CMDS_Vehiculos">Veh&iacute;culos</div>
+          <div class="tab-2ddeR_0 CMDS_Viviendas">Viviendas</div>
+          <div class="tab-2ddeR_0 CMDS_Bandas">Bandas</div>
+          <div class="tab-2ddeR_0 CMDS_Trabajos">Trabajos</div>
+          <div class="tab-2ddeR_0 CMDS_Empresas">Empresas</div>
+          <div class="tab-2ddeR_0 CMDS_Terrenos">Terrenos</div>
+          <?php if($UData['rank'] >= 3){ ?>
+            <div class="tab-2ddeR_0 CMDS_Staff">Staff</div>
+          <?php } ?>
+        </div>
+        <div class="body-1skWP_0" style="max-height: 312px;">
+
+          <div id="CMDS_Normales" class="flex items-center">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <label><b>:ayuda [tipo]</b></label> <small>- (trabajos/casas/veh&iacute;culos,etc) Recibe ayuda espec&iacute;fica sobre los comandos.</small><br>
+                    <label><b>:about</b></label> <small>- Mira informaci&oacute;n del Servidor.</small><br>
+                    <label><b>:convertcredits</b></label> <small>- Canjea tus monedas de furnis f&iacute;sicos.</small><br>  
+                    <label><b>:ejectall</b></label> <small>- Elimina todos los furnis de tu casa.</small><br>
+                    <label><b>:emoji list</b></label> <small>- Mira la lista de emojis disponibles.</small><br>
+                    <label><b>:emoji [ID]</b></label> <small>- (1-189) Escribe un emoji.</small><br>
+                    <label><b>:empty</b></label> <small>- Vac&iacute;a tu inventario.</small><br>
+                    <label><b>:ons</b></label> <small>- Ver los usuarios conectados.</small><br>
+                    <label><b>:togglefriends</b></label> <small>- Activa o desactiva las solicitudes de contacto.</small><br>
+                    <label><b>:togglewhispers</b></label> <small>- Activa o desactiva la habilidad de recibir susurros.</small><br>
+                    <label><b>:mutepets</b></label> <small>- Activa o desactiva los dialogos de las mascotas.</small><br>
+                    <label><b>:mutebots</b></label> <small>- Activa o desactiva los dialogos de los bots.</small><br>
+                    <label><b>:pickall</b></label> <small>- Recoge todos los furnis de tu casa.</small><br>
+                    <label><b>:stats</b></label> <small>- Ver tus estad&iacute;sticas.</small><br>
+                    <label><b>:verzonas</b></label> <small>- Ver las zonas activas.</small><br>
+                    <label><b>:togglegifts</b></label> <small>- Activa o desactiva la habilidad de recibir regalos.</small><br>
+                    <label><b>:closedice</b></label> <small>- Cierra los 5 dados cerca de tu personaje acomodados de la forma tradicional.</small><br>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="CMDS_VIP" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    Existen dos tipos de cuentas VIP. (VIP1 y VIP2).
+                    Cada uno tienen distintas bonificaciones y permisos en el entorno Roleplay. Algunos de ellos son:<br><br>
+                    <p>·&nbsp; Poder tener m&aacute;s de 2 veh&iacute;culos.</p>
+                    <p>·&nbsp; Mayor intereses de beneficio bancario.</p>
+                    <p>·&nbsp; M&aacute;s de una propiedad a su nombre.</p>
+                    <p>·&nbsp; Mayor l&iacute;mite de plantas de marihuana.</p>
+                    <p>·&nbsp; Aumento de ganancia de Habilidad en trabajos secundarios.</p>
+                    <p>·&nbsp; Tener dos trabajos simult&aacute;neamente.</p>
+                    <p>·&nbsp; Espacios extra en el ba&uacute;l/maletero de veh&iacute;culos.</p>
+                    <p>·&nbsp; Reducci&oacute;n de condena en prisi&oacute;n.</p>
+                    <p>·&nbsp; Camiones adicionales para el trabajo de Camionero.</p>
+                    <p>·&nbsp; Trabajar de basurero sin el uniforme requerido.</p>
+                    <p>·&nbsp; Trabajo de ladr&oacute;n sin requisitos previos.</p>
+                    <p>·&nbsp; Servicio de gr&uacute;a gratis para todos los veh&iacute;culos.</p>
+                    <p>·&nbsp; Reducci&oacute;n de hambre y sed.</p>
+                    <br>
+                    Adem&aacute;s cuentan con comandos de uso exclusivo como los siguientes:<br><br>
+                    <label><b>:faceless</b></label> <small>- Quitar el rostro a tu personaje.</small><br>
+                    <label><b>:mimic</b></label> <small>- Copia el atuendo de otro personaje.</small><br>
+                    <label><b>:togglemimic</b></label> <small>- Activa o desactiva la habilidad para dejar que te copien tu atuendo.</small><br>
+                    <label><b>:moonwalk</b></label> <small>- Camina hacia atr&aacute;s al estilo Michael Jackson.</small><br>
+                    <label><b>:push [usuario]</b></label> <small>- Empuja a una persona lejos de ti.</small><br>
+                    <label><b>:pull [usuario]</b></label> <small>- Jala a una persona hacia ti.</small><br>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="CMDS_Roleplay" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <button class="accordion">Acciones</button>
+                    <div class="panel">
+                      <label><b>:abrazar [usuario]</b></label> <small>- Abraza a otra persona.</small><br>
+                      <label><b>:besar [usuario]</b></label> <small>- Besa a otra persona.</small><br>
+                      <label><b>:bofetada [usuario]</b></label> <small>- Bofetea a otra persona.</small><br>
+                      <label><b>:violar [usuario]</b></label> <small>- Viola a otra persona.</small><br>
+                      <label><b>:escupir [usuario]</b></label> <small>- Escupe a otra persona.</small><br>
+                      <label><b>:oral [usuario]</b></label> <small>- Hazle un oral a otra persona.</small><br>
+                      <label><b>:dance [ID]</b></label> <small>- (0-4) Haz que tu personaje baile.</small><br>
+                      <label><b>:lay</b></label> <small>- Acuesta a tu personaje.</small><br>
+                      <label><b>:sit</b></label> <small>- Haz que tu personaje se siente.</small><br>
+                      <label><b>:stand</b></label> <small>- Haz que tu personaje se ponga de pie.</small><br>
+                    </div>
+                    <button class="accordion">Canales de Chat (Comunicarse)</button>
+                    <div class="panel">
+                      <b>Canales DP (Dentro del Personaje)</b><br>
+                      <label><b>:y [mensaje]</b></label> <small>- Rolear acciones.</small><br>
+                      <label><b>:p [mensaje]</b></label> <small>- Rolear acciones del entorno.</small><br>
+                      <br>
+                      <b>Canales FP (Fuera del Personaje)</b><br>
+                      <label><b>:b [mensaje]</b></label> <small>- Para referirte a cosas del mundo real.</small><br>
+                      <label><b>:n [duda]</b></label> <small>- Canal para dudas del juego. (Mal uso sancionable).</small><br>
+                    </div>
+                    <button class="accordion">Generales</button>
+                    <div class="panel">
+                      <label><b>:inventario</b></label> <small>- Abre tu inventario.</small><br>
+                      <label><b>:aceptarmuerte</b></label> <small>- Reaparecer en el hospital cuando tu personaje est&eacute; inconsciente en el suelo.</small><br>
+                      <label><b>:buscados</b></label> <small>- Mirar la lista de buscados por la polic&iacute;a.</small><br>
+                      <label><b>:fianza [usuario]</b></label> <small>- Paga la fianza de un preso.</small><br>
+                      <label><b>:911</b></label> <small>- Llama a la polic&iacute;a.</small><br>
+                      <label><b>:mapa</b></label> <small>- Abre el mapa de la ciudad.</small><br>
+                      <label><b>:servicio [tipo]</b></label> <small>- (grua/medico/mecanico/armero/taxi) Solicita alg&uacute;n servicio especial o de emergencia.</small><br>
+                      <label><b>:chn</b></label> <small>- Activa o desactiva el Canal :n.</small><br>
+                      <label><b>:comprar nivel</b></label> <small>- Para subir de nivel.</small><br>
+                      <label><b>:tirar [item]</b></label> <small>- Tira algo de tu inventario.</small><br>
+                      <label><b>:consumir [crack/medicamentos]</b></label> <small>- Consume alguna droga para incrementar tus stats.</small><br>
+                    </div>
+                    <button class="accordion">Interacciones con Items</button>
+                    <div class="panel">
+                      <label><b>:comer</b></label> <small>- Come un alimento que se encuentre frente a ti.</small><br>
+                      <label><b>:beber</b></label> <small>- Toma una bebida que se cuentre frente a ti.</small><br>
+                      <label><b>:ordenar [batido/carne/espagueti/huevos/pancakes/papas]/</b></label> <small>- Ordena comida frente a una mesa.</small><br>
+                      <label><b>:ejercitarse</b></label> <small>- Ejercitarse en el Gimnasio sobre una m&aacute;quina.</small><br>
+                    </div>
+                    <button class="accordion">Combate</button>
+                    <div class="panel">
+                      <label><b>:golpear [usuario]</b></label> <small>- Golpea a una persona.</small><br>
+                      <label><b>:equipar [arma]</b></label> <small>- Equipa un arma de tu inventario.</small><br>
+                      <label><b>:desequipar</b></label> <small>- Guarda un arma equipada a tu inventario.</small><br>
+                      <label><b>:disparar [usuario]</b></label> <small>- Dispara a una persona.</small><br>
+                      <label><b>:recargar</b></label> <small>- Recarga de balas tu arma.</small><br>
+                    </div>
+                    <button class="accordion">Ofertas, Ventas & Compras</button>
+                    <div class="panel">
+                      <label><b>:dar [usuario] [cantidad]</b></label> <small>- Da dinero a una persona.</small><br>
+                      <label><b>:ofertas</b></label> <small>- Muestra la lista de ofertas activas que te han hecho.</small><br>
+                      <label><b>:ofrecer/vender [usuario] [objeto] [precio]</b></label> <small>- Vende objetos de tu inventario a otra persona.</small><br>
+                      <label><b>:ofrecer/vender [usuario] [objeto] [cantidad] [precio]</b></label> <small>- Vende objetos consumibles (crack/marihuana/medicamentos,etc) a otra persona.</small><br>
+                      <label><b>:aceptar [tipo]</b></label> <small>- (arma/reparacion,etc) Acepta el tipo de oferta activa que tengas.</small><br>
+                      <label><b>:rechazar [tipo]</b></label> <small>- (arma/reparacion,etc) Rechaza el tipo de oferta activa que tengas.</small><br>
+                      <label><b>:comprar [objeto]</b></label> <small>- (bidon/vehiculo/productos/herramientas/telefono) Compra un objeto.</small><br>
+                      <label><b>:comprar [objeto] [cantidad]</b></label> <small>- (repuestos,etc) Compra un objeto por cantidades.</small><br>
+                    </div>
+                    <button class="accordion">Tel&eacute;fonos</button>
+                    <div class="panel">
+                      <label><b>:minumero</b></label> <small>- Mira tu n&uacute;mero telef&oacute;nico.</small><br>
+                      <label><b>:sms [usuario]</b></label> <small>- Env&iacute;a un mensaje de texto a cualquier persona.</small><br>
+                      <label><b>:whats [contacto]</b></label> <small>- Env&iacute;a un mensaje de Whatsapp a alg&uacute;n contacto.</small><br>
+                    </div>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="CMDS_Vehiculos" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <button class="accordion">¿C&oacute;mo funcionan?</button>
+                    <div class="panel">
+                      <small>
+                        <p>Existe una gran variedad de veh&iacute;culos a la venta en el concesionario de la ciudad.</p>
+                        <p>Puedes comenzar con un veh&iacute;culo econ&oacute;mico.</p>
+                        <p>Cuando quieras cambiar de veh&iacute;culo, puedes vender el usado; solamente tienes que ir al Edificio Minucipal General de la ciudad e iniciar el tr&aacute;mite.</p>
+                        <br>
+                        <p>Para que no usen tu veh&iacute;culo te recomendamos adquirir un sistema de traba en cualquier 24/7.</p>
+                        <p>Si tienes el sistema de traba, usa <b>:cerrar</b> para trabar las puertas del veh&iacute;culo.</p>
+                        <p>Para abrirlo <b>:abrir</b>, tienes que estar dentro del veh&iacute;culo.</p>
+                        <p>Si no encuentras tu veh&iacute;culo usa <b>:localizar</b>.</p>
+                        <p>Para ver una lista con infromaci&oacute;n detallada de tus veh&iacute;culos usa <b>:misautos</b>.</p>
+                        <p>Si tu veh&iacute;culo fue robado, llama a la polic&iacute;a, ellos te van a pedir la patente para poder localizarlo.</p>
+                        <br>
+                        <p>Para encender o apagar las luces, usa <b>:luces</b>.</p>
+                        <p>Para encender el motor, usa <b>:arrancar</b>.</p>
+                        <p>Para detener el motor, usa <b>:detener</b>.</p>
+                        <p>Para activar o desactivar la alarma usa <b>:alarma</b>.</p>
+                        <br>
+                        <p>Para guardar o sacar cosas del maletero de tu veh&iacute;culo necesitas abrirlo, sobre de &eacute;l usa <b>:maletero abrir</b>.</p>
+                        <p>Despu&eacute;s de abrirlo, tienes que mirar el interior usando <b>:maletero</b> o en caso de que no sea tu veh&iacute;culo usa <b>:maletero [nombre del dueño]</b>.</p>
+                        <p>Para sacar algo del maletero usa <b>:maletero sacar [n&uacute;mero de lugar]</b>, para sacar crack o medicamentos usa <b>:maletero sacar [crack/medicamentos] [cantidad]</b>.</p>
+                        <p>Para guardar armas usa <b>:maletero guardar [nombdre-de-arma]</b>, para guardar crack o medicamentos usa <b>:maletero guardar [crack/medicamentos] [cantidad]</b>.</p>
+                        <p>Recuerda siempre <b>:maletero cerrar</b> para evitar robos</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Combustible / Gasolina</button>
+                    <div class="panel">
+                      <small>
+                        <p>Cuando a tu veh&iacute;culo est&eacute; por terminarse el combustible, dir&iacute;gete a una gasolinera.</p>
+                        <p>Cerca de alguna bomba despachadora usa <b>:combustible [litros]</b> para comprar alguna cantidad espec&iacute;fica de gasolina. O bien, puedes usar <b>:llenartanque</b> para comprar los litros exactos para llenar el tanque de tu veh&iacute;culo.</p>
+                        <br>
+                        <p>Si no alcanzaste a llegar a la gasolinera, puedes comprar bidones de 5 litros cada uno. Cerca de alguna bomba despachadora usa <b>:comprar bidon</b>.</p>
+                        <p>Para usar el bidon, col&oacute;cate sobre tu veh&iacute;culo y usa <b>:usarbidon</b>.</p>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="CMDS_Viviendas" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <button class="accordion">B&aacute;sicos</button>
+                    <div class="panel">
+                      <small>
+                        <p>Siendo propietario de una casa/apartamento, cuentas con algunos comandos b&aacute;sicos para el mejor control dentro de ella.</p>
+                        <br>
+                        <b>:unlodad</b> - Recarga la casa.<br>
+                        <b>:fixroom</b> - Si tu casa est&aacute; bugueada, cuadros bloqueados, etc. Usa este comando.<br>
+                        <b>:setmax</b> - Establece el n&uacute;mero m&aacute;ximo de visitantes en tu casa.<br>
+                        <b>:setspeed</b> - Establece la velocidad de los rollers en tu casa.<br>
+                        <b>:kickpets</b> - Echa a todas las mascotas de tu casa.<br>
+                        <b>:kickbots</b> - Echa a todos los bots de tu casa.<br>
+                        <b>:roomext list</b> - Muestra una lista de permisos extra de tu casa.<br>
+                        <b>:roomext [tipo]</b> - Activa o desactiva un permiso extra.<br>
+                        <b>:hidewired</b> - Oculta todos los wireds de la zona.<br>
+                      </small>
+                    </div>
+                    <button class="accordion">Casas Habitables</button>
+                    <div class="panel">
+                      <small>
+                        <p>Para comprar una casa es simple, acercarse al letrero de casa en venta, disponer el dinero para comprarla y cumplir el requisito de nivel que tenga la casa a comprar.</p>
+                        <p>Para comprarla, haz doble clic en el letrero de casa en venta, y clic en el bot&oacute;n <i>Comprar casa</i>.</p>
+                        <p>Luego, dentro de la casa, puedes comprar alg&uacute;n ropero, el cual se abre y se cierra con <b>:ropero abrir</b> y <b>:ropero cerrar</b>.</p>
+                        <p>Dentro de ropero hay una estanter&iacute;a, donde se pueden guardar objetos.</p>
+                        <p>Para ver la estanter&iacute;a se usa <b>:ropero</b>.</p>
+                        <p>Para guardar y sacar armas se usa <b>:ropero guardar [nombre-de-arma]</b> y <b>:ropero sacar [n&uacute;mero de lugar]</b>. (Siempre usando guiones en lugar de espacios).</p>
+                        <p>Para guardar Crack y/o Medicamentos se tiene que usar el comando <b>:ropero guardar [crack/medicamentos] [cantidad]</b></p>
+                        <p>Para sacarlos se usa <b>:ropero sacar [crack/medicamentos] [cantidad]</b></p>
+                        <p>De igual manera puedes comprar alg&uacute;n probador de ropa para cambiar tu atuendo sin costo las veces que quieras.</p>
+                        <p>Las casas tambi&eacute;n se pueden cerrar para que nadie pueda ingresar.</p>
+                        <p>Para cerrarlas <b>:cerrar casa</b> y para volverla a abrir <b>:abrir casa</b>. (Estando dentro o frente a la puerta de esta).</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Casas de Robo</button>
+                    <div class="panel">
+                      <small>
+                        <p>Las casas de robo, como su nombre se lo indica, son casas en las que se pueden robar objetos dentro, mediante el uso de comandos explicados en la secci&oacute;n Trabajos => Ladr&oacute;n.</p>
+                        <p>Estas casas no pueden ser compradas para habitar en ellas.</p>
+                        <p>Dependiendo de tu nivel de Ladr&oacute;n robar&aacute;s m&aacute;s r&aacute;pido antes de que la polic&iacute;a llegue.</p>
+                        <p>Si no puedes forzar alguna cerradura, quiere decir que los vecinos est&aacute;n alertados y deber&aacute;s regresar despu&eacute;s.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Apartamentos</button>
+                    <div class="panel">
+                      <small>
+                        <p>Los apartamentos est&aacute;n disponibles en los edificios de arrendamiento. En Calle Marieta se encuentra uno.</p>
+                        <p>En ellos podr&aacute;s tener tu propia sala, decorarla a tu gusto y gestionarla a tu manera. Tu techo, tus reglas.</p>
+                        <p>Podr&aacute;s compartirla con quien quieras, solo basta darle permisos a esa persona.</p>
+                        <br>
+                        <p>Para adquirir uno solo basta acercarte a la recepci&oacute;n, y en el panel que aparece, seleccionar <b>Nuevo apartamento</b>, el cual te mostrar&aacute; un breve formulario para seleccionar el nombre y modelo de tu apartamento.</p>
+                        <br>
+                        <p>El modelo de tu apartamento no puede ser modificado a menos que selecciones la opci&oacute;n de <b>Floor Editor</b>, el cual tiene un costo extra de 5 Platinos.</p>
+                        <br>
+                        <p>Los comandos especiales que puedes ejecutar dentro de tu apartamento, son los mismos que en una Casa. Para verlos ve a la secci&oacute;n <b>b&aacute;sicos</b> de este mismo panel.</p>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="CMDS_Bandas" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <button class="accordion">Informaci&oacute;n General</button>
+                    <div class="panel">
+                      <small>
+                        Las bandas son una "buena" forma de generar ingresos r&aacute;pidamente... si no te atrapan.<br>
+                        Puedes unirte a una banda o bien crear la tuya propia. En los botones de a la izquierda de la pantalla, busca el que dice "Bandas". Se abrir&aacute; un panel donde tendr&aacute;s todas las herramientas necesarias para gestionar tu banda o crear alguna.
+                        <br>
+                        <br>
+                        Podr&aacute;s ver tambi&eacute;n una lista de las bandas existentes, ver sus estad&iacute;sticas y miembros que la conforman.<br>
+                        Para unirte a una, debes ir a alg&uacute;n territorio que la banda controle y enviar una solicitud de ingreso; si la banda no cuenta con nig&uacute;n territorio, p&iacute;dele a alg&uacute;n miembro que te env&iacute;e una invitaci&oacute;n.<br><br>
+                        Una vez dentro de una banda tendr&aacute;s mayores beneficios econ&oacute;micos por las acciones ilegales que realices, como matar a miembros de otras bandas, polic&iacute;as, conseguir drogas, capturar territorios, etc.<br><br>
+                        Toma en cuenta que solo es posible pertenecer a una sola banda a la vez.<br>
+                        Tambi&eacute;n no puedes ser parte del equipo de polic&iacute;a si perteneces a una banda.<br><br>
+                        Si eres el l&iacute;der de una banda y deseas dejarla, podr&aacute;s ceder el mandato a un miembro de la banda para evitar eliminarla.<br><br>
+                        ¡La riqueza de tu banda es importante!<br><br>
+                        Si la riqueza de tu banda llega a <b>-$250,000</b> estar&iacute;a en banca rota y no podr&iacute;an seguir teniendo los beneficios que esta otorga hasta que el l&iacute;der pague la deuda o se vea en la necesidad de eliminarla.
+                      </small>
+                    </div>
+                    <button class="accordion">Captura y defensa de Territorios</button>
+                    <div class="panel">
+                      <small>
+                        Para capturar un territorio es muy f&aacute;cil. Solo basta con dar doble clic a la bandera que se encuentra en el lugar. Si el territorio es controlado por una banda, &eacute;sta ser&aacute; alertada para defenderla.<br><br>
+                        La persona quien captura el territorio no debe moverse ni morir o se interrumpir&aacute; la captura del territorio.
+                        <br><br>
+                        Si tu banda tiene territorios bajo su control, recibir&aacute;n una alerta por radio cuando alguien los ataque. Deber&aacute;n matar o alejar a la persona de su bandera para defender su territorio.
+                      </small>
+                    </div>
+                    <button class="accordion">¿C&oacute;mo gano dinero?</button>
+                    <div class="panel">
+                      <small>
+                        Las acciones ilegales como fabricar armas, conseguir drogas (camionero), matar a miembros de bandas enemigas, etc. Te dar&aacute;n un bonus monetario, mismo que ser&aacute; dividido para la riqueza de la banda.<br>
+                        Estas acciones se ver&aacute;n reflejadas en las estad&iacute;sticas de la banda.<br><br>
+                        Toma en cuenta que as&iacute; como ganan dinero, tambi&eacute;n pueden perder dinero, ya sea por perder territorios o ser asesinados por bandas enemigas. ¡As&iacute; que todo el tiempo hay guerra!
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="CMDS_Trabajos" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <button class="accordion">Informaci&oacute;n General</button>
+                    <div class="panel">
+                      <small>
+                        <p>Los trabajos se dividen en dos grupos. <i>Trabajos primarios y trabajos secundarios.</i></p>
+                        <p>Usuarios VIP pueden tener hasta dos trabajos a la vez (Uno primario y uno secundario).</p><br>
+                        <b>Trabajos Primarios</b>
+                        <p>Los trabajos primarios son aquellos donde un fundador tiene que contratarte. Es decir, empresas. Generalmente en ellas tienes que enviar tu solicitud de empleo y el encargado evaluar&aacute; si eres apto para el puesto.</p>
+                        <p>Una vez contratado, usa <b>:trabajar</b> para comenzar un turno.</p>
+                        <p>Al terminar el turno recibir&aacute;s un cheque con tu pago. Las pagas var&iacute;an dependiendo el puesto y la empresa.</p>
+                        <p>Para dejar de trabajar usa <b>:notrabajar</b>.</p><br>
+                        <b>Trabajos Secundarios</b>
+                        <p>Los trabajos secundarios son aquellos que puedes obtener directamente en la zona del trabajo. (EJ: Basurero, Camionero, Mec&aacute;nico, Taxista, etc).</p>
+                        <p>En este tipo de trabajos no necesitas usar los comandos de los trabajos primarios (:trabajar/:notrabajar).</p>
+                        <p>Unicamente debes colocarte el <b>:uniforme</b> cerca de la zona de uniformes del trabajo (si es que este lo requiere).</p>
+                        <p>Encontrar&aacute;s informaci&oacute;n detallada de cada uno de ellos en las subsecciones de abajo.</p><br>
+                        <p>Recuerda que puedes <b>:renunciar [ID]</b> (ID del trabajo) en cualquier momento que desees.</p>
+                        <p>Puedes usar el comando <b>:stats</b> para averiguar el ID de tu(s) trabajo(s) actual(es).</p>
+                        <p>Usa el comando <b>:habilidad</b> para ver tu progreso en los trabajos secundarios.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Basurero</button>
+                    <div class="panel">
+                      <small>
+                        <p>El trabajo de basurero no requiere de un nivel m&iacute;nimo.</p>
+                        <p>Este trabajo se consigue en el basurero municipal de la ciudad.</p>
+                        <p>Para trabajar de basurero se necesitan dos personas, una que maneje el cami&oacute;n y la otra que recolecte la basura.</p>
+                        <br>
+                        <p>Los pagos se incrementan a medida que suben de nivel. Tambi&eacute;n el tiempo de recolecci&oacute;n disminuye al subir de nivel.</p>
+                        <p>En las bolsas de basura se puede llegar a encontrar una gran variedad de cosas.</p>
+                        <p>Las cosas encontradas ser&aacute;n repartidas por igual entre el recolector y el conductor.</p>
+                        <br>
+                        <p>Para comenzar a trabajar solo necesitan ponerse el <b>:uniforme</b> de basurero (cuentas VIP no necesitan).</p>
+                        <p>Uno debe arrancar un cami&oacute;n y el otro debe <b>:subir [chofer]</b> de pasajero para comenzar la ruta.</p>
+                        <p>Al encontrar un dep&oacute;sito de basura, el pasajero deber&aacute; bajar del cami&oacute;n para acercarse y hacer doble clic en &eacute;l.</p>
+                        <p>Cuando se tengan los suficientes dep&oacute;sitos recolectados, regresen al basurero municipal donde el chofer deber&aacute; usar <b>:descargarcamion</b> cerca del mont&oacute;n de basura para terminar el recorrido y recibir su paga.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Cosechador</button>
+                    <div class="panel">
+                      <small>
+                        <p>Este trabajo no ocupa lugar como trabajo primario ni secundario.</p>
+                        <p>Tampoco cuenta con nivel ni habilidad. No requiere uniforme.</p>
+                        <br>
+                        <p>Dir&iacute;gete a la Granja y usa <b>:comprar semillas</b> cerca del punto de venta. El costo de las semillas es de $150.</p>
+                        <p>Despu&eacute;s, sobre un surco de la granja, usa <b>:sembrar</b>.</p>
+                        <p>Una vez sembradas las semillas, ve por una regadera con agua cerca de la bomba del establo. ((Doble clic))</p>
+                        <p>Regresa a tu cultivo y usa <b>:regar</b>.</p>
+                        <p>Finalmente puedes usar <b>:cosechar</b>.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Mec&aacute;nico</button>
+                    <div class="panel">
+                      <small>
+                        <p>Para obtener el trabajo de mec&aacute;nico, tienes que ir al Taller de la ciudad.</p>
+                        <p>Este trabajo cuenta con nivel y habilidad.</p>
+                        <br>
+                        <p>Usa <b>:comprar repuestos [cantidad]</b> dentro del taller para poder reparar veh&iacute;culos, recuerda que solo puedes llevar 100 repuestos.
+                        <br>
+                        <p>Para saber cu&aacute;ntos repuestos vas a gastar en una reparaci&oacute;n, usa <b>:revisar</b> frente al veh&iacute;culo a reparar.</p>
+                        <p>Para reparar usa <b>:reparar [cliente] [precio]</b> (Acu&eacute;rdate de estar parado frente al motor del veh&iacute;culo).</p>
+                        <p>El precio recomendado para cobrar es de <i>$1000 + costo de los repuestos</i>.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Fabricante de armas</button>
+                    <div class="panel">
+                      <small>
+                        <p>Para obtener este trabajo necesitas como m&iacute;nimo nivel 3.</p>
+                        <p>En el Ammunation de la ciudad.</p>
+                        <p>En caso de no encontrarla  llama a un taxi <b>:servicio taxi</b>.</p>
+                        <p>Con este empleo podr&aacute;s fabricar una gran variedad de armas.</p>
+                        <p>Igualmente todas aquellas personas que no sean armeros, pueden vender sus armas con <b>:vender [usuario] [nombre-de-arma] [precio]</b>.</p>
+                        <br>
+                        <p>Para crear armas usa <b>:crear [nombre-de-arma]</b> cerca de la zona de Fabricaci&oacute;n de la Ammunation.</p>
+                        <p>Para esto es importante que cuentes con piezas suficientes en tu inventario.</p>
+                        <br>
+                        <p>Para conseguir piezas de armas, primero debes fabricarlas, para ello necesitas conseguir los materiales necesarios. Puedes hacerlo de la manera "f&aacute;cil", buscando puntos de recolecci&oacute;n clandestinos escondidos en las zonas m&aacute;s solitarias de la ciudad.</p>
+                        <p>Cerca de estos puntos usa <b>:comprar materiales</b>.</p>
+                        <p>Regresa a la Ammunation y usa <b>:crear piezas</b>.</p>
+                        <p>Finalmente con ellas podr&aacute;s crear armas.</p>
+                        <br>
+                        <p>Listado de armas:</p>
+                        <?php
+                          $SQL = $DB->Query("SELECT * FROM play_weapons");
+                            while($Row = mysqli_fetch_assoc($SQL)){
+                             echo "<p>" . $Row['publicname'] . " (". $Row['name'] .") | <i>Piezas: ". $Row['cost'] ." - Nivel ". $Row['level_requirement'] ."</i></p>";
+                          }
+                        ?>
+                      </small>
+                    </div>
+                    <button class="accordion">M&eacute;dico</button>
+                    <div class="panel">
+                      <small>
+                        <p>Para formar parte del equipo m&eacute;dico de la ciudad, debes ser m&iacute;nimo de Nivel 2 y pagar una cuota de $4000.</p>
+                        <p>Puedes aprender de este trabajo en el Hospital General de la ciudad.</p>
+                        <p>Esta profesi&oacute;n no cuenta con niveles.</p>
+                        <p>Para ponerte en servicio debes colocarte el <b>:uniforme</b>, ya sea sobre una Ambulancia o dentro del Hospital.</p>
+                        <br>
+                        <p>Este trabajo cuenta con dos modalidades. <i>Dentro y fuera del Hospital</i>.</p>
+                        <br>
+                        <p>Dentro del Hospital:</p>
+                        <p>Debes acercarte a un paciente en camilla y usa <b>:revisarpaciente [usuario]</b>.</p>
+                        <p>Dependiendo su padecimiento, deber&aacute;s ir al botiqu&iacute;n y sacar el remedio adecuado para el mismo.</p>
+                        <p>Ac&eacute;rcate al botiqu&iacute;n y usa <b>:verbotiquin</b>.</p>
+                        <p>Luego usa <b>:usarbotiquin [ID]</b> (ID del remedio a usar).</p>
+                        <p>Vuelve con el paciente y usa <b>:atenderpaciente [usuario]</b>.</p>
+                        <p>Ganar&aacute;s $800 por cada persona que salves correctamente.</p>
+                        <br>
+                        <p>Fuera del Hospital:</p>
+                        <p>Recibir&aacute;s alertas de personas que solicitaron <b>:servicio medico</b>, mostrandote la informaci&oacute;n de su ubicaci&oacute;n.</p>
+                        <p>Una vez est&eacute;s con el paciente, baja de la Ambulancia y usa <b>:reanimar [usuario]</b>.</p>
+                        <p>Luego sube a tu Ambulancia y usa <b>:subirpaciente [usuario]</b>.</p>
+                        <p>Dir&iacute;gete a la entrada del Hospital y usa <b>:salvar [usuario]</b>.</p>
+                        <p>Ganar&aacute;s $600 por cada persona que salves.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Taxista</button>
+                    <div class="panel">
+                      <small>
+                        <p>Puedes aprender de este trabajo en la base de Taxis de la ciudad.</p>
+                        <p>Esta profesi&oacute;n no cuenta con niveles.</p>
+                        <p>Ganar&aacute;s seg&uacute;n el precio que cobres.</p>
+                        <br>
+                        <p>Para ponerte en servicio, conduce un Taxi y escribe <b>:ficha [precio]</b>.</p>
+                        <p>En donde dice precio, escribe la cantidad que deseas cobrar cada 15 segundos. (min. $2, max. $50). Ej: <b>:ficha 5</b>.</p>
+                        <p>Para dejar de trabar y no recbir m&aacute;s alertas de pasajeros, escribe <b>:ficha</b> para apagar tu Tax&iacute;metro.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Camionero</button>
+                    <div class="panel">
+                      <small>
+                        <p>Este trabajo se obtiene en la Zona de cargamento y embarcaciones de la ciudad.</p>
+                        <p>Comienzas en nivel 1, ganando $1250 por entrega realizada.</p>
+                        <p>El trabajo es legal, siempre y cuando lleves productos legales.</p>
+                        <p>A medida que aumentas tu nivel como camionero, el pago ser&aacute; mayor, y los bonus de transporte ilegales ser&aacute;n mejores.</p>
+                        <p>Por ejemplo: Nivel 1 de camionero = 2 piezas de armas, Nivel 2 = 5 piezas de armas, etc. Tambi&eacute;n aumenta la cantidad de drogas y medicamentos.</p>
+                        <br>
+                        <p>Para ver las cargas a transportar usa <b>:cargas</b>.</p>
+                        <p>Para cargar tu cami&oacute;n, acercate a la zona de cargas y usa <b>:cargarcamion [ID]</b> (ID de la carga).</p>
+                        <p>Luego dir&iacute;gete al destino de entrega, al llegar, usa <b>:depositarcarga</b>.</p>
+                        <p>Vuelve a la base para <b>:entregarcamion</b> y recibir tu pago.</p>
+                        <p>Si quieres abandonar una carga usa <b>:abandonarcarga</b>.</p>
+                        <p>Los productos marcados con <i>[L]</i> son legales y con <i>[I]</i> son ilegales.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Ladr&oacute;n</button>
+                    <div class="panel">
+                      <small>
+                        <p>El trabajo ladr&oacute;n no tiene una ubicaci&oacute;n, ya que las ubicaciones son las casas de robo especiales situadas por toda la ciudad.</p>
+                        <p>Tampoco ocupa lugar como trabajo primario ni secundario.</p>
+                        <br>
+                        <p>El  ladr&oacute;n puede robar bienes de diferentes propiedades distribuidas por toda la ciudad.</p>
+                        <br>
+                        <p>Debes estar frente a la puerta de una casa de robo y usar <b>:forzarcerradura</b>.</p>
+                        <p>Para forzar cerraduras necesitas como m&iacute;nimo nivel 5 o una cuenta VIP2.</p>
+                        <p>Una vez rota la cerradura, debes <b>:entrar</b> al interior de la casa y acercarte a una estanter&iacute;a para despu&eacute;s usar <b>:robar objeto</b>.</p>
+                        <p>Para robar objetos necesitas como m&iacute;nimo nivel 3 o cuenta VIP2.</p>
+                        <p>Luego dir&iacute;gete a la Tienda de Objetos robados y usa <b>:vender objeto</b>.</p>
+                        <br>
+                        <p>Para el trabajo de ladr&oacute;n se usan herramientas, las cuales se pueden comprar en cualquier Ferreter&iacute;a.</p>
+                        <p>A medida que aumentas de nivel, podr&aacute;s usar otras herramientas para forzar las puertas m&aacute;s r&aacute;pido.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Guardaespaldas</button>
+                    <div class="panel">
+                      <small>
+                        <p>Puedes aprender de este trabajo en un Gimnasio. Esta profesi&oacute;n no cuenta con niveles.</p>
+                        <p>Un guardaespaldas puede darle 50% de blindaje a su protegido.</p>
+                        <br>
+                        <p>Los guardaespaldas est&aacute;n normalmente armados y tienen experiencia en el combate cuerpo a cuerpo y desarmado, conducci&oacute;n y primeros auxilios.</p>
+                        <p>Sin embargo, la habilidad m&aacute;s importante para un guardaespaldas es evaluar una situaci&oacute;n de peligro para su protegido y tratar de minimizar los daños.</p>
+                        <br>
+                        <p>Ganar&aacute;s seg&uacute;n el precio que cobres.</p>
+                        <br>
+                        <p>El mejor lugar para vender blindajes es en la vereda del Gimnasio.</p>
+                        <p>Para vender protecci&oacute;n, usa <b>:cubrir [usuario] [precio]</b>.</p>
+                        <p>El precio es al que vendes tu blindaje. (min. $400, max. $1000).</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Minero</button>
+                    <div class="panel">
+                      <small>
+                        <p>El trabajo de minero se consigue en las minas de la ciudad.</p>
+                        <p>Una vez tomado el trabajo, col&oacute;cate el uniforme e ingresa a la mina.</p>
+                        <p>Dentro ver&aacute;s varias rocas, ac&eacute;rcate a una y usa <b>:picar</b>.</p>
+                        <p>A medida que aumentes de nivel, podr&aacute;s trabajar en diferentes rocas (m&aacute;s cercanas) ganando as&iacute; m&aacute;s dinero.</p>
+                        <p>Una vez finalizada la acci&oacute;n debes dirigirte hacia la salida de la mina y acercarte a la procesadora donde deber&aacute;s usar <b>:dejarroca</b> para recibir tu pago.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Polic&iacute;a</button>
+                    <div class="panel">
+                      <small>
+                        <div class="police_info">
+                          <p>El trabajo de polic&iacute;a se puede considerar como ser parte del equipo de Kekoland. Es por ello que para ingresar a este trabajo se lanzan convocatorias limitadas para entrar al equipo.</p>
+                          <p>Debes ir a la Comisar&iacute;a de la ciudad y enviar tu solicitud de empleo.</p>
+                          <p>((Si en el emblema del trabajo, parte superior derecha, aparece la opci&oacute;n para enviar tu Solicitud de empleo, significa que las convocatorias est&iacute;n abiertas))</p><br><br>
+                          <p>Para enviar tu solicitud de Empleo asegurate de cumplir con los siguientes requisitos:</p><br>
+                          <p>1.- Tu cuenta debe ser propia y nadie debe jugarla mas que t&uacute;.</p>
+                          <p>2.- Ser nivel 4 como m&iacute;nimo.</p>
+                          <p>3.- Tener conocimientos previos de rol y saber interpretar cada situaci&oacute;n que se te plantee.</p><br>
+                          <p>Si no cumples con estos requisitos no env&iacute;es solicitud, de lo contrario se te rechazar&aacute; definitivamente.</p><br>
+                          <p><b>No olvides agregar tu n&uacute;mero de tel&eacute;fono (del juego) en la descripci&oacute;n de tu Solicitud</b><p><br>
+                          <br>
+                          <p>Una vez enviada la solicitud espera a que te contacten, esto puede tomar un tiempo dependiendo de la lista de espera que exista.</p>
+                          <p>Cuando te llamen, se te har&aacute; una entrevista de conocimientos de Rol y unas pruebas psicol&oacute;gicas (a ti y a tu personaje).</p>
+                          <p>Si pasas la entrevista se te aceptar&aacute; entrar al KLPD (Kekoland Police Department)</p>
+                          <p>Durante tu primer turno se te asignar&aacute; un compa&ntilde;ero para capacitarte.</p>
+                          <p>Ese compa&ntilde;ero tomar&aacute; la decisi&oacute;n final, si conservas el puesto o no.</p>
+                        </div>
+                        <div class="police_cmds" style="display: none;">
+                          <p><b>Comandos solo para miembros del KLPD</b></p>
+                          <br>
+                          <p>Nota: Toma en cuenta que algunos son especiales para cargos autorizados.</p><br>
+                          <p><b>:cargos [usuario] [estrellas]</b> - Agrega a alguien a la lista de buscados con un nivel de b&uacute;squeda.</p>
+                          <p><b>:nocargos [usuario]</b> - Quita a alguien el nivel de b&uacute;squeda y lo saca de la lista de buscados.</p>
+                          <p><b>:paralizar [usuario]</b> - Paraliza a alguien.</p>
+                          <p><b>:desparalizar [usuario]</b> - Desaraliza a alguien paralizado.</p>
+                          <p><b>:esposar [usuario]</b> - Esposa a alguien previamente paralizado.</p>
+                          <p><b>:escoltar [usuario]</b> - Somete a un convicto para llevarlo a Prisi&oacute;n.</p>
+                          <p><b>:soltar / :desescoltar</b> - Dejar de escoltar a alguien.</p>
+                          <p><b>:arrestar [usuario]</b> - En la prisi&oacute;n, teniendo escoltado al convicto, usa este comando para meterlo a una celda.</p>
+                          <p><b>:liberar [preso]</b> - Libera a alguien de prisi&oacute;n.</p>
+                          <p><b>:catear [usuario]</b> - Hace una inspecci&oacute;n a alguien de posibles objetos ilegales.</p>
+                          <p><b>:ref</b> - Pide refuerzos a todos los polic&iacute;as.</p>
+                          <p><b>:carinfo</b> - Mira la informaci&oacute;n de cualquier veh&iacute;culo.</p>
+                          <p><b>:r [mensaje]</b> - Habla por la radio de polic&iacute;a.</p>
+                          <p><b>:tradio</b> - Apaga/Enciende la radio de polic&iacute;a.</p>
+                          <p><b>:limpiarlista</b> - Limpia toda la lista de buscados.</p>
+                        </div>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="CMDS_Empresas" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <button class="accordion">Informaci&oacute;n General</button>
+                    <div class="panel">
+                      <small>
+                        <p>Las empresas son parte importante de la econom&iacute;a de la ciudad.</p>
+                        <p>Lee con detenimiento y atenci&oacute;n este apartado.</p>
+                        <br>
+                        <p>Basta con dar clic al logo de la Empresa, el cual debe apreciarse arriba a la derecha de tu pantalla. Esto te debe abrir un panel de gesti&oacute;n de la empresa.</p>
+                        <br>
+                        <p>Las empresas se dividen en dos tipos. <b>Removibles</b> y <b>No Removibles</b></p>
+                        <br>
+                        <p><b>Removibles (Proximamente)</b></p>
+                        <br>
+                        <br>
+                        <p><b>No Removibles</b></p>
+                        <p>Son aquellas pertenecientes al Gobierno. Es decir, el Gobierno establece de manera fija los nombres y puestos de la empresa.</p>
+                        <p>Si adquieres una de estas empresas, podr&aacute;s editar todo a excepci&oaucte;n de borrar los puestos existentes en esa empresa. Tampoco podr&aacute;s borrar la empresa, si quieres deshacerte de ella, tendr&aacute;s que venderla de vuelta; es ah&iacute; donde el Gobierno te reembolsar&aacute; el dinero actual que tengas en el banco de la empresa.</p>
+                        <br>
+                        <br>
+                        <p>Independientemente del tipo de empresa, todas funcionan financieramente igual. Es decir, tendr&aacute;s que abastecer el Stock de la empresa para poder vender/ofrecer tus servicios. Por cada unidad comprada tendr&aacute;s un margen de ganancia del 90% al 95%.</p>
+                        <p>La paga de los empleados por cada turno completado es descontado del banco de tu empresa.</p>
+                        <p>Las pagas, tiempos, uniformes y permisos son totalmente editables.</p>
+                        <br>
+                        <p>Sin duda es una nueva forma de generar bastante dinero si sabes administrarla estrat&eacute;gicamente y de manera inteligente.</p>
+                      </small>
+                    </div>
+                    <button class="accordion">Empresas Restaurantes</button>
+                    <div class="panel">
+                      <small>
+                        <p><b>:servir [batido/carne/espagueti/huevos/pancakes/papas]</b> - Sirve comida/bebida sobre una mesa.</p>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="CMDS_Terrenos" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <button class="accordion">Informaci&oacute;n General</button>
+                    <div class="panel">
+                      <small>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div id="CMDS_Staff" class="flex items-center" style="display: none;">
+            <div class="flex flex-col items-center flex-1">
+              <div class="flex justify-center mt-2 w-full">
+                <div class="box p-2 w-full">
+                  <div class="overflow-hidden">
+                    <?php if($UData['rank'] >= 3){ ?>
+                      <button class="accordion">Ayudantes</button>
+                      <div class="panel">
+                        <small>
+                          <b>:event [mensaje]</b> - Env&iacute;a una alerta para un evento especial.<br>
+                          <b>:publiciad</b> - Env&iacute;a una alerta para invitar usuarios a hacer oleadas publicitarias.<br>
+                          <b>:spush [usuario]</b> - Empuja a un usuario hasta 3 cuadros lejos de ti.<br>
+                          <b>:spull [usuario]</b> - Atrae a un usuario hacia ti desde cualquier distancia.<br>
+                          <b>:banchn [usuario] [minutos]</b> - (min. 10 - max. 4320) Banea a un usuario del Canal :n.<br>
+                          <b>:unbanchn [usuario]</b> - Desbanea a un usuario del Canal :n.<br>
+                        </small>
+                      </div>
+                    <?php } ?>
+                    <?php if($UData['rank'] >= 4){ ?>
+                      <button class="accordion">Moderadores</button>
+                      <div class="panel">
+                        <small>
+                          <b>:ban [usuario] [horas] [raz&oacute;n]</b> - Banea a un usuario temporalmente.<br>
+                          <b>:ipban [usuario] [raz&oacute;n]</b> - Banea la IP de un usuario.<br>
+                          <b>:mip [usuario] [raz&oacute;n]</b> - Baneo de tipo M&aacute;quina. (IP y Cuenta)<br>
+                          <b>:userinfo [usuario]</b> - Mira toda la informaci&oacute;n de un usuario.<br>
+                          <b>:mute [usuario] [segundos]</b> - Mutea a un usuario por un tiempo definido.<br>
+                          <b>:unmute [usuario]</b> - Desmutea a un usuario muteado.<br>
+                          <b>:roommute [mensaje]</b> - Mutea la zona actual.<br>
+                          <b>:roomunmute</b> - Desmutea una zona muteada.<br>
+                          <b>:roomalert [mensaje]</b> - Env&iacute;a una alerta a todos los usuarios de tu zona actual.<br>
+                          <b>:alert [mensaje]</b> - Alerta con un mensaje a un usuario espec&iacute;fico.<br>
+                          <b>:sa [mensaje]</b> - Env&iacute;a una alerta a todos los miemrbos del Staff online.<br>
+                          <b>:ha [mensaje]</b> - Env&iacute;a una alerta a todo el servidor.<br>
+                          <b>:hal [mensaje] [link]</b> - Env&iacute;a una alerta a todo el servidor con una URL.<br>
+                          <b>:notification [mensaje]</b> - Manda una notificaci&oacute;n a todo el servidor.<br>
+                          <b>:disconnect [usuario]</b> - Desconecta a un usuario.<br>
+                          <b>:tradeban [usuario] [d&iacute;as]</b> - (min. 1 d&iacute;s, max. 365 d&iacute;s) Banea o desbanea los tradeos de un usuario.<br>
+                          <b>:teleport</b> - Activa o desactiva la habilidad de Teletransportarte por la Zona.<br>
+                          <b>:summon [usuario]</b> - Trae a un usuario a tu zona actual.<br>
+                          <b>:override</b> - Activa o desactiva la habilidad de caminar sobre cualquier lugar.<br>
+                          <b>:freeze [usuario]</b> - Impide que un usuario pueda caminar.<br>
+                          <b>:unfreeze [usuario]</b> - Descongela a un usuario Freezeado.<br>
+                          <b>:fastwalk</b> - Activa o desactiva la habilidad de caminar r&iacute;pido.<br>
+                          <b>:run</b> - Activa o desactiva la habilidad de correr muy r&iacute;pido.<br>
+                          <b>:coords</b> - Obtener las coordenadas de tu personaje en la zona actual.<br>
+                          <b>:alleyesonme</b> - Haz que todos los personajes volteen hacia ti.<br>
+                          <b>:allaroundme</b> - Haz que todos los personajes caminen hacia ti.<br>
+                          <b>:forcesit [usuario]</b> - Forza a un usuario a sentarse.<br>
+                          <b>:ignorewhispers</b> - Activa o desactiva la habilidad de leer susurros.<br>
+                          <b>:forcedfx</b> - Activa o desactiva la habilidad de permitir efectos forzados en tu personaje.<br>
+                          <b>:makesay [usuario]</b> - Forza a una persona a decir un mensaje.<br>
+                          <b>:follow [usuario]</b> - Seguir a una persona en espec&iacute;fico.<br>
+                          <b>:flagme</b> - Activa la opci&oacute;n de cambiar tu nombre.<br>
+                          <b>:flaguser [usuario]</b> - Forza a una persona a cambiar su nombre.<br>
+                          <b>:createpoll [pregunta]</b> - Crea una encuesta a todos en la zona.<br>
+                          <b>:endpoll</b> - Finaliza una encuesta activa en la zona.<br>
+                          <b>:god / :dios</b> - Activar inmunidad.<br>
+                        </small>
+                      </div>
+                    <?php } ?>
+                    <?php if($UData['rank'] >= 5){ ?>
+                      <button class="accordion">Administradores</button>
+                      <div class="panel">
+                        <small>
+                          <b>:emptyuser [usuario]</b> - Limpia el inventario de un usuario.<br>
+                          <b>:ir [ID]</b> - (ID de la zona) Ir a una zona espec&iacute;fica.<br>
+                          <b>:roomids</b> - Muestra la lista de todas las salas con su id.<br>
+                          <b>:update [configuraci&oacute;n]</b> - (list) Refresca algo del servidor.<br>
+                          <b>:superhire [usuario] [jobid] [jobrank]</b> - Contrata a un usuario en un Empleo y Rango espec&iacute;fico.<br>
+                          <b>:givestats [usuario] [stat] [porcentaje]</b> - (vida/chaleco/hambre/higiene) Da un nivel espec&iacute;fico de stats a otro usuario.<br>
+                          <b>:kill [usuario]</b> - Mata a un usario.<br>
+                          <b>:heal [usuario]</b> - Establece la vida, higiene y hambre de un usuario a su m&iacute;ximo valor.<br>
+                          <b>:roomheal</b> - Establece los stats al m&aacute;ximo a todos en la misma Zona.<br>
+                          <b>:restore [usuario]</b> - Revive a una persona inconsciente o muerta.<br>
+                          <b>:roomrestore</b> - Revive a todas las personas inconscientes o muertas en tu misma Zona.<br>
+                          <b>:adminrelease [usuario]</b> - Libera alguien de prisi&oacute;n.<br>
+                          <b>:roomrelease</b> - Libera a todos de prisi&oacute;n.<br>
+                          <b>:adminjail [usuario]</b> - Encarcela a alguien.<br>
+                          <b>:purga</b> - Activa/Desactiva el evento Purga.<br>
+                        </small>
+                      </div>
+                    <?php } ?>
+                    <?php if($UData['rank'] >= 6){ ?>
+                      <button class="accordion">Desarrolladores</button>
+                      <div class="panel">
+                        <small>
+                          AVISO: Los comandos que aparecen aqu&iacute; pueden entorpecer los sistemas Roleplay. Por eso solo los desarrolladores tienen permitido usarlos en momentos cr&iacute;ticos o de suma necesidad.<br>
+                           <b>:massgive [recurso] [cantidad]</b> - (dinero/saldo/platinos/gotw) Da recursos a todos los que est&eacute;n el.<br>
+                          <b>:globalgive [recurso] [cantidad]</b> - (dinero/saldo/platinos/gotw) Da recursos a todos.<br>
+                          <b>:give [usuario] [recurso] [cantidad]</b> - (dinero/saldo/platinos/gotw) Da recursos a una persona.<br>
+                          <b>:roomcredits [cantidad]</b> - Da dinero a todos de tu zona actual.<br>
+                          <b>:deletegroup</b> - Borrar grupo de cach&eacute; y DB.<br>
+                          <b>:test</b> - Comando para pruebas.<br>
+                          <b>:color [color]</b> - (black/blue/red/orange/yellow/green/purple/pink/cyan) Cambia el color de tu chat.<br>
+                          <b>:colornombre [color]</b> - (black/blue/red/orange/yellow/green/purple/pink/HEX) Cambia el color de tu nombre.<br>
+                          <b>:sizenombre [tamaño]</b> - (1-20) Cambia el tamaño de tu nombre.<br>
+                          <b>:bubble [ID]</b> - (ID de bocadillo) Cambia el estilo de bocadillo de tu chat.<br>
+                          <b>:enable [ID]</b> - (ID de efecto) Activa un efecto en tu personaje.<br>
+                          <b>:handitem [ID]</b> - (ID de handitem) Aparece un handitem en tu personaje.<br>
+                          <b>:togglediagonal</b> - Activa o desactiva caminar en diagonal en esta zona.<br>
+                          <b>:massenable [ID]</b> - (ID de efecto) Pon un efecto a todos los usuarios de tu zona.<br>
+                          <b>:dance [ID]</b> - (ID de baile) Forza a todos los usuarios de tu zona a bailar.<br>
+                          <b>:disco</b> - Easter Egg.<br>
+                          <b>:pet [ID]</b> - (list) Transformate en una mascota.<br>
+                          <b>:casino [acci&oacute;n]</b> - (start/pl/reset) Mantiene la cuenta de tu juego de da2.<br>
+                          <b>:dnd</b> - Activa o desactiva los mensajes en consola.<br>
+                          <b>:room [configuraci&oacute;n]</b> - (list) Activa o desactiva el tipo de configuraci&oacute;n de una zona.<br>
+                          <b>:roombadge [ID]</b> - (ID de placa) Otorga una placa a todos los de tu zona.<br>
+                          <b>:massbadge [ID]</b> - (ID de placa) Otorga una placa a todos en el servidor.<br>
+                          <b>:givebadge [usuario] [ID]</b> - (ID de placa) Da una placa a un usuario.<br>
+                          <b>:takebadge [usuario] [ID]</b> - (ID de placa) Quita una placa de un usuario.<br>
+                          <b>:roomkick [mensaje]</b> - Kickea a todos en una zona con un mensaje.<br>
+                          <b>:kick (mensaje)</b> - Kickea a un usuario con una raz&oacute;n.<br>
+                        </small>
+                      </div>
+                    <?php } ?>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

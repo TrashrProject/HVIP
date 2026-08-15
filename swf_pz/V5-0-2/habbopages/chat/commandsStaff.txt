@@ -1,0 +1,124 @@
+﻿Comandos de Chat
+<span class="padding-top"><br></span><h2>Comandos Tradicionales</h2><span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span>
+<p class="bullet-item">·&nbsp;<b>:about</b>  - Informacion sobre el servidor del holo.</p>
+<p class="bullet-item">·&nbsp;<b>:disparar &lt;usuario&gt;</b> Dispara a un usuario con una revolver.</p>
+<p class="bullet-item">·&nbsp;<b>:spull &lt;usuario&gt;</b> - Atrae a otro usuario, sin limites!</p>
+<p class="bullet-item">·&nbsp;<b>:pickall</b>  - Recoge todos los furnis de tu sala.</p>
+<p class="bullet-item">·&nbsp;<b>:ejectall</b>  - Saca todos los furnis de tu sala.</p>
+<p class="bullet-item">·&nbsp;<b>:lay</b>  - Acuestate en cualquier lugar.</p>
+<p class="bullet-item">·&nbsp;<b>:sit</b>  - Sientate en cualquier lugar.</p>
+<p class="bullet-item">·&nbsp;<b>:color &lt;color&gt;</b> - (off/red/green/blue/purple/cyan) Cambia el color de tu chat</p>
+<p class="bullet-item">·&nbsp;<b>:colornombre &lt;color&gt;</b> - (off/red/green/blue/purple/pink/yellow/orange/ Codigo HEX) Cambia el color de tu nombre</p>
+<p class="bullet-item">·&nbsp;<b>:sizenombre &lt;numero&gt;</b> - (1-20) Cambia el tamaño de tu nombre</p>
+<p class="bullet-item">·&nbsp;<b>:emoji &lt;numero&gt;</b> - (1-189) Escribe un emoji</p>
+<p class="bullet-item">·&nbsp;<b>:stand</b>   - Te deja parar si estas sentado.</p>
+<p class="bullet-item">·&nbsp;<b>:besar &lt;usuario&gt;</b> - Besa al Usuario |</p>
+<p class="bullet-item">·&nbsp;<b>:mimic &lt;usuario&gt;</b> - Te gusta la ropa de otro keko? Copeala con este comando!</p>
+<p class="bullet-item">·&nbsp;<b>:dance &lt;usuario&gt;</b> - Demasiada paja para darle click en bailar? Puedes bailar con este comando!</p>
+<p class="bullet-item">·&nbsp;<b>:push &lt;usuario&gt;</b> - Empuja a otro usuario.</p>
+<p class="bullet-item">·&nbsp;<b>:pull &lt;usuario&gt;</b> - Atrae a otro usuario hacia tu keko.</p>
+<p class="bullet-item">·&nbsp;<b>:enable &lt;numero&gt;</b> - Puedes usar cualquier efecto!</p>
+<p class="bullet-item">·&nbsp;<b>:handitem &lt;numero&gt;</b> - Puedes cargar cualquier bebida</p>
+<p class="bullet-item">·&nbsp;<b>:follow &lt;usuario&gt;</b> - Quieres visitar a algun usuario? Puedes usar este comando!</p>
+<p class="bullet-item">·&nbsp;<b>:faceless</b>   - Usa este comando para quitarte la cara!</p>
+<p class="bullet-item">·&nbsp;<b>:moonwalk</b>   - Ponte los zapatos de Michael Jackson.</p>
+<p class="bullet-item">·&nbsp;<b>:empty</b>   - Tienes el inventario lleno? Puedes vaciarlo con este comando.</p>
+<p class="bullet-item">·&nbsp;<b>:flagme</b>   - Cambia tu nombre.</p>
+<p class="bullet-item">·&nbsp;<b>:stats</b>   - Ve tus estatisticas.</p>
+<p class="bullet-item">·&nbsp;<b>:dnd</b>   - Activa o desactiva los mensajes por consola.</p>
+<p class="bullet-item">·&nbsp;<b>:disablegifts</b>  - Activa o desactiva la abilidad de recibir regalos.</p>
+<p class="bullet-item">·&nbsp;<b>:convertcredits</b>   - Convierte tus lingos a creditos.</p>
+<p class="bullet-item">·&nbsp;<b>:disablemimic</b>   - Activa o desactiva la abilidad de que otros te puedan copiar la ropa.</p>
+<p class="bullet-item">·&nbsp;<b>:pet &lt;mascota&gt;</b>- Para transformar en una mascota..</p>
+<p class="bullet-item">·&nbsp;<b>:spush &lt;usuario&gt;</b> - Super-empujon a otro usuario. (Empuja 3 cuadros)</p>
+<p class="bullet-item">·&nbsp;<b>:superpush &lt;usuario&gt;</b>- Dale Super-empujon a otro usuario. (Empuja 3 cuadros)</p>
+<p class="bullet-item">·&nbsp;<b>:chooser</b> Ver todos los usuarios en la sala</p>
+<p class="bullet-item">·&nbsp;<b>:furni</b> Ver todos los furnis en la sala</p>
+<p class="bullet-item">·&nbsp;<b>:closedice</b> Ver todos los furnis en la sala</p>
+<p class="bullet-item">·&nbsp;<b>:casino &lt;start/pl&gt;</b> Ver todos los furnis en la sala</p>
+<span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span><h2>Comandos de Opciones de Sala</h2><span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span>
+<p class="bullet-item">·&nbsp;<b>:floor</b> Edita el plano de tu piso</p>
+<p class="bullet-item">·&nbsp;<b>:mutepets</b>   - Ignorar chat de mascotas.</p>
+<p class="bullet-item">·&nbsp;<b>:mutebots</b>   - Ignorar chat de bots.</p>
+<p class="bullet-item">·&nbsp;<b>:setmax &lt;numero&gt;</b> - Cambiar el numero maximo de visitantes de la sala.</p>
+<p class="bullet-item">·&nbsp;<b>:setspeed &lt;numero&gt;</b> - Cambia la velocidad de los roller de la sala.</p>
+<p class="bullet-item">·&nbsp;<b>:disablediagonal</b>   - Desactiva la abilidad de caminar en diagonal.</p>
+<p class="bullet-item">·&nbsp;<b>:kickpets</b>   - Dale kick a todas las mascotas en la sala.</p>
+<p class="bullet-item">·&nbsp;<b>:kickbots</b>   - Dale kick a todos los bots en la sala.</p>
+<p class="bullet-item">·&nbsp;<b>:unload &lt;id&gt;</b> - este comando se usa para cargar la sala de nuevo.</p>
+<p class="bullet-item">·&nbsp;<b>:fixroom</b>   - Esta bugeado el piso de tu sala? Arreglalo con este comando!</p>
+<p class="bullet-item">·&nbsp;<b>:room push/pull/enables/respect</b>  - Te de activar o desactivar comandos basicos en la sala.</p>
+<span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span><h2>Para Miembros de VIP Solamente</h2><span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span>
+<p class="bullet-item">·&nbsp;<b>:bubble &lt;numero&gt;</b> - Habla con una burbuja de chat distinta.</p>
+<span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span><h2>Para Staff Solamente</h2><span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span>
+<h3>Staff de Eventos</h3>
+<p class="bullet-item">·&nbsp;<b>:eha</b> Envia una alerta para un evento.</p>
+<p class="bullet-item">·&nbsp;<b>:eventha &lt;mensaje&gt;</b> - Envia una alerta para su evento!</p>
+<p class="bullet-item">·&nbsp;<b>:event &lt;mensaje&gt;</b> - Envia una alerta para su evento!</p>
+<p class="bullet-item">·&nbsp;<b>:publicidad &lt;mensaje&gt;</b> - Envia una alerta para un nuevo evento de publicidad!</p>
+<p class="bullet-item">·&nbsp;<b>:da2 &lt;mensaje&gt;</b> - Envia una alerta para un nuevo evento de dados!</p>
+<h3>Staff de Moderacion</h3>
+<p class="bullet-item">·&nbsp;<b>:ban &lt;usuario&gt; &lt;tiempo&gt; &lt;razon&gt;</b>  - Dale ban a un usuario por cierto tiempo.</p>
+<p class="bullet-item">·&nbsp;<b>:mip &lt;usuario&gt;</b> - Machine ban, IP ban and account ban another user.</p>
+<p class="bullet-item">·&nbsp;<b>:ipban &lt;usuario&gt;</b> - IP and account ban another user.</p>
+<p class="bullet-item">·&nbsp;<b>:ui &lt;usuario&gt;</b> - View another users profile information.</p>
+<p class="bullet-item">·&nbsp;<b>:userinfo &lt;usuario&gt;</b> - View another users profile information.</p>
+<p class="bullet-item">·&nbsp;<b>:sa &lt;usuario&gt;</b> - Sends a message typed by you to the current online staff members.</p>
+<p class="bullet-item">·&nbsp;<b>:roomunmute</b>  - Unmute the room.</p>
+<p class="bullet-item">·&nbsp;<b>:roommute &lt;mensaje&gt;</b> - Mute the room with a reason.</p>
+<p class="bullet-item">·&nbsp;<b>:roombadge &lt;placa&gt;</b> - Give a badge to the entire room!</p>
+<p class="bullet-item">·&nbsp;<b>:roomalert &lt;mensaje&gt;</b> - Send a message to the users in this room.</p>
+<p class="bullet-item">·&nbsp;<b>:roomkick &lt;mensaje&gt;</b> - Kick the room and provide a message to the users.</p>
+<p class="bullet-item">·&nbsp;<b>:mute &lt;usuario&gt; &lt;tiempo&gt;</b>- Mute another user for a certain amount of time.</p>
+<p class="bullet-item">·&nbsp;<b>:smute &lt;usuario&gt; &lt;tiempo&gt;</b> - Mute another user for a certain amount of time.</p>
+<p class="bullet-item">·&nbsp;<b>:unmute &lt;usuario&gt;</b> - Unmute a currently muted user.</p>
+<p class="bullet-item">·&nbsp;<b>:massbadge &lt;placa&gt;</b> - Give a badge to the entire hotel.</p>
+<p class="bullet-item">·&nbsp;<b>:massgive &lt;moneda&gt; &lt;cantidad&gt;</b> - dar moneda a todo el hotel</p>
+<p class="bullet-item">·&nbsp;<b>:kick &lt;usuario&gt; &lt;razon&gt;</b> - Kick a user from a room and send them a reason.</p>
+<p class="bullet-item">·&nbsp;<b>:skick &lt;usuario&gt;</b> &lt;razon&gt;</b> - Kick a user from a room and send them a reason.</p>
+<p class="bullet-item">·&nbsp;<b>:ha &lt;mensaje&gt;</b> - Manda un mensaje a todo el hotel.</p>
+<p class="bullet-item">·&nbsp;<b>:hotelalert &lt;mensaje&gt;</b> - Manda un mensaje a todo el hotel.</p>
+<p class="bullet-item">·&nbsp;<b>:hal &lt;mensaje&gt;</b> - Manda un mensaje con una link de web.</p>
+<p class="bullet-item">·&nbsp;<b>:give &lt;usuario&gt; &lt;moneda&gt; &lt;cantidad&gt;</b> - Dale credits/gotw/duckets/diamonds a un usuario</p>
+<p class="bullet-item">·&nbsp;<b>:givebadge &lt;usuario&gt; &lt;placa&gt;</b> - Da una placa a un usuario.</p>
+<p class="bullet-item">·&nbsp;<b>:takebadge &lt;usuario&gt; &lt;placa&gt;</b> - Quita una placa de un usuario.</p>
+<p class="bullet-item">·&nbsp;<b>:dc &lt;usuario&gt;</b> - Desconectas al usuario.</p>
+<p class="bullet-item">·&nbsp;<b>:disconnect&lt;usuario&gt;</b> - Desconectas al usuario.</p>
+<p class="bullet-item">·&nbsp;<b>:alert &lt;usuario&gt;</b> &lt;mensaje&gt;</b> - Alert a user with a message of your choice.</p>
+<p class="bullet-item">·&nbsp;<b>:tradeban &lt;usuario&gt;</b> &lt;tiempo&gt;</b> - Dale ban de cambios a un usuario.</p>
+<p class="bullet-item">·&nbsp;<b>:teleport</b>  - The ability to teleport anywhere within the room.</p>
+<p class="bullet-item">·&nbsp;<b>:summon &lt;usuario&gt;</b> - Bring another user to your current room.</p>
+<p class="bullet-item">·&nbsp;<b>:override</b>  - Gives you the ability to walk over anything.</p>
+<p class="bullet-item">·&nbsp;<b>:massenable &lt;numero&gt;</b> - Give every user in the room a specific enable ID.</p>
+<p class="bullet-item">·&nbsp;<b>:massdance &lt;numero&gt;</b> - Force everyone in the room to dance to a dance of your choice.</p>
+<p class="bullet-item">·&nbsp;<b>:freeze &lt;usuario&gt;</b> - Prevent another user from walking.</p>
+<p class="bullet-item">·&nbsp;<b>:unfreeze &lt;usuario&gt;</b> - Allow another user to walk again.</p>
+<p class="bullet-item">·&nbsp;<b>:fastwalk</b>  - Gives you the ability to walk very fast.</p>
+<p class="bullet-item">·&nbsp;<b>:superfastwalk</b>  - Gives you the ability to walk very very fast.</p>
+<p class="bullet-item">·&nbsp;<b>:coords</b>  - Used to get your current position within the room.</p>
+<p class="bullet-item">·&nbsp;<b>:alleyesonme</b>  - Want some attention? Make everyone face you!</p>
+<p class="bullet-item">·&nbsp;<b>:allaroundme</b>  - Need some attention? Pull all of the users to you.</p>
+<p class="bullet-item">·&nbsp;<b>:forcesit &lt;usuario&gt;</b> - Force another to user sit.</p>
+<p class="bullet-item">·&nbsp;<b>:ignorewhispers</b>  - Allows you to ignore all of the whispers in the room, except from your own.</p>
+<p class="bullet-item">·&nbsp;<b>:forced_effects</b>  - Gives you the ability to ignore or allow forced effects.</p>
+<p class="bullet-item">·&nbsp;<b>:makesay &lt;usuario&gt; &lt;mensaje&gt;</b> - Forces the specified user to say the specified message.</p>
+<p class="bullet-item">·&nbsp;<b>:flaguser &lt;usuario&gt;</b> - Forces the specified user to change their name.</p>
+<p class="bullet-item">·&nbsp;<b>:createpoll &lt;mensaje&gt;</b> - Empieza una encuesta nueva en la sala.</p>
+<p class="bullet-item">·&nbsp;<b>:flaguser &lt;endpoll&gt;</b> - Acaba la encuesta en la sala.</p>
+<h3>Staff de Administracion</h3>
+<p class="bullet-item">·&nbsp;<b>:update &lt;variable&gt;</b> - Reload a specific part of the hotel.</p>
+<p class="bullet-item">·&nbsp;<b>:deletegroup</b>  - Delete a group from the database and cache.</p>
+<p class="bullet-item">·&nbsp;<b>:goto &lt;id&gt;</b> - Ir a una sala con cierta room id</p>
+<p class="bullet-item">·&nbsp;<b>:testevent &lt;id&gt;</b> - Comando para pruebas tecnicas</p>
+<span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span><h2>Caracteres especiales con codigos alt!</h2><span class="padding-bottom"><br></span>
+<span class="padding-top"><br></span><p>Para mas diversion puedes usar signos especiales solo con presionar las siguientes teclas de tu teclado!</p><span class="padding-bottom"><br></span>
+<img src="http://habboo-a.akamaihd.net/c_images/habbopages/chat_altcodes.png" height="295" hspace="1" vspace="1"/><font size="12px"><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p></font><p><font size="-1"> </font></p><img src="http://images-eussl.habbo.com/c_images/reception/3b505e.png" width="1000" height="1"/><br>
+<span class="padding-top"><br></span><p>Tambien debes leer: <a href="event:habbopages/chat/emoji.txt">Lista de Emoji</a></p><span class="padding-bottom"><br></span>
