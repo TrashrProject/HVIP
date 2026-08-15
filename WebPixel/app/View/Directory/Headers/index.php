@@ -19,4 +19,5 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0uJzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
     <link rel="stylesheet" href="<?php echo CSS; ?>/index/index.css?<?php echo time(); ?>">
+    <link rel="stylesheet" href="<?php echo CSS; ?>/index/index-enhancements.css?<?php echo time(); ?>">
 </head>
