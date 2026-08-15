@@ -10,14 +10,11 @@ const TCP_PORT = Number(process.env.EMU_PORT || 2021);
 const MAX_PACKET = 8 * 1024 * 1024;
 const TRACE = process.env.NITRO_TRACE !== '0';
 const TRACE_FILE = path.join(__dirname, 'trace.log');
-// Temporary compatibility quarantine. The current emulator sends header 687
-// immediately before Nitro throws a DataView bounds error. Keep it configurable
-// so it can be removed as soon as the composer is corrected server-side.
 const DROP_HEADERS = new Set(
-  String(process.env.NITRO_DROP_HEADERS || '687')
+  String(process.env.NITRO_DROP_HEADERS || '')
     .split(',')
     .map(v => Number(v.trim()))
-    .filter(Number.isInteger)
+    .filter(v => Number.isInteger(v) && v > 0)
 );
 
 try { fs.writeFileSync(TRACE_FILE, '', 'utf8'); } catch (_) {}
@@ -39,14 +36,8 @@ log(`[NitroProxy] Compatibility drop headers: ${[...DROP_HEADERS].join(', ') || 
 
 function packetInfo(buffer) {
   if (!buffer || buffer.length < 6) return null;
-  try {
-    return {
-      declared: buffer.readUInt32BE(0),
-      header: buffer.readUInt16BE(4)
-    };
-  } catch (_) {
-    return null;
-  }
+  try { return { declared: buffer.readUInt32BE(0), header: buffer.readUInt16BE(4) }; }
+  catch (_) { return null; }
 }
 
 function describePacket(direction, buffer, sessionId) {
@@ -71,7 +62,6 @@ wss.on('connection', (ws, req) => {
   }
 
   log(`[NitroProxy] Session ${sessionId}: WebSocket connected from ${remote}`);
-
   const tcp = net.createConnection({ host: TCP_HOST, port: TCP_PORT, noDelay: true });
   activeSession = { id: sessionId, ws, tcp };
 
@@ -85,24 +75,22 @@ wss.on('connection', (ws, req) => {
     while (pending.length) tcp.write(pending.shift());
   });
 
-  ws.on('message', (data) => {
+  ws.on('message', data => {
     try {
-      const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
+      const buffer = Buffer.isBuffer(data) ? Buffer.from(data) : Buffer.from(data);
       if (!buffer.length) return;
       describePacket('C->S', buffer, sessionId);
-      if (tcpReady) tcp.write(buffer);
-      else pending.push(buffer);
+      if (tcpReady) tcp.write(buffer); else pending.push(buffer);
     } catch (err) {
       log(`[NitroProxy] Session ${sessionId}: WS -> TCP error: ${err.message}`);
     }
   });
 
-  tcp.on('data', (chunk) => {
+  tcp.on('data', chunk => {
     incoming = incoming.length ? Buffer.concat([incoming, chunk]) : Buffer.from(chunk);
 
     while (incoming.length >= 4) {
       const payloadLength = incoming.readUInt32BE(0);
-
       if (payloadLength <= 0 || payloadLength > MAX_PACKET) {
         log(`[NitroProxy] Session ${sessionId}: invalid packet length ${payloadLength}`);
         incoming = Buffer.alloc(0);
@@ -120,26 +108,24 @@ wss.on('connection', (ws, req) => {
 
       const info = packetInfo(packet);
       if (info && DROP_HEADERS.has(info.header)) {
-        log(`[COMPAT] Session ${sessionId}: dropped S->C header=${info.header} payload=${info.declared} to protect Nitro parser`);
+        log(`[COMPAT] Session ${sessionId}: dropped S->C header=${info.header} payload=${info.declared}`);
         continue;
       }
 
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send(packet, { binary: true }, (err) => {
+        ws.send(packet, { binary: true }, err => {
           if (err) log(`[NitroProxy] Session ${sessionId}: send error: ${err.message}`);
         });
       }
     }
   });
 
-  tcp.on('error', (err) => {
+  tcp.on('error', err => {
     log(`[NitroProxy] Session ${sessionId}: TCP error: ${err.message}`);
     try { ws.close(1011, 'Emulator connection failed'); } catch (_) {}
   });
 
-  ws.on('error', (err) => {
-    log(`[NitroProxy] Session ${sessionId}: WebSocket error: ${err.message}`);
-  });
+  ws.on('error', err => log(`[NitroProxy] Session ${sessionId}: WebSocket error: ${err.message}`));
 
   const cleanup = () => {
     if (activeSession && activeSession.id === sessionId) activeSession = null;
@@ -160,7 +146,7 @@ wss.on('connection', (ws, req) => {
   });
 });
 
-wss.on('error', (err) => {
+wss.on('error', err => {
   log(`[NitroProxy] Server error: ${err.message}`);
   process.exitCode = 1;
 });
