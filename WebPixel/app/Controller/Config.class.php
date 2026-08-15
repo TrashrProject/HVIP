@@ -10,7 +10,7 @@ class Config
     protected static $DBPass = '';
 
     ## Web Configuration ##
-    public static $WName = "HabboVIP";
+    public static $WName = "Velora RP";
     public static $URL = "http://localhost/WebPixel";
     public static $WEB_DY = "http://localhost/WebPixel/Dynamics";
     public static $SessionName = "PZ_lOGIN";
