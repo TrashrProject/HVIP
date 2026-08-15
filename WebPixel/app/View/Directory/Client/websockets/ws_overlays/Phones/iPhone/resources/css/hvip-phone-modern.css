@@ -1,95 +1,78 @@
-/* Compact premium RP phone skin - keeps existing app logic */
+/* Refined Habbo RP phone skin - keeps existing app logic */
 #phone{
-  width:274px!important;height:548px!important;left:50%!important;top:-1000px;
-  transform:translateX(-50%);font-family:'Lato',sans-serif!important;
-  filter:drop-shadow(0 18px 30px rgba(0,0,0,.5));
+  width:286px!important;height:560px!important;left:50%!important;top:-1000px;
+  transform:translateX(-50%);font-family:Inter,'Segoe UI',Arial,sans-serif!important;
+  filter:drop-shadow(0 20px 34px rgba(0,0,0,.5));
 }
 #phone .header-phone-extends{
-  position:absolute!important;inset:0!important;width:274px!important;height:548px!important;
-  border-radius:38px!important;background:linear-gradient(145deg,#15171b,#050608 58%,#191c21)!important;
-  border:2px solid #3f454d!important;
-  box-shadow:inset 0 0 0 2px #070809,inset 0 0 0 4px #242932,0 10px 28px rgba(0,0,0,.62)!important;
+  position:absolute!important;inset:0!important;width:286px!important;height:560px!important;
+  border-radius:38px!important;
+  background:linear-gradient(160deg,#242a33 0%,#0b0d12 38%,#020305 100%)!important;
+  border:1px solid #56606d!important;
+  box-shadow:inset 0 0 0 2px #080a0e,inset 0 0 0 4px #202630,0 12px 30px rgba(0,0,0,.6)!important;
 }
 #phone .header-phone-extends:before{
-  content:"";position:absolute;top:15px;left:91px;width:92px;height:25px;border-radius:18px;
-  background:#030405;box-shadow:inset 0 -1px 0 rgba(255,255,255,.05);z-index:4;
+  content:"";position:absolute;top:14px;left:95px;width:96px;height:20px;border-radius:14px;
+  background:#050608;box-shadow:inset 0 -1px 0 rgba(255,255,255,.08);
 }
 #phone .header-phone-extends:after{
-  content:"";position:absolute;top:23px;left:161px;width:7px;height:7px;border-radius:50%;
-  background:radial-gradient(circle,#2c7cff 0 18%,#0d274d 22% 48%,#020305 52%);z-index:5;
+  content:"";position:absolute;top:20px;left:104px;width:7px;height:7px;border-radius:50%;
+  background:#1178ff;box-shadow:0 0 0 2px #07101b,0 0 8px rgba(17,120,255,.55);
 }
 #phone_content{
-  width:238px!important;height:456px!important;left:18px!important;top:46px!important;margin:0!important;
+  width:252px!important;height:455px!important;left:17px!important;top:48px!important;margin:0!important;
   border-radius:26px!important;overflow:hidden!important;background:#07101b!important;
-  box-shadow:0 0 0 1px #000,inset 0 0 0 1px rgba(255,255,255,.06)!important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.07),0 0 0 2px #000!important;
 }
 #phone_bg{
-  width:238px!important;height:456px!important;position:relative!important;
+  width:252px!important;height:455px!important;position:relative!important;
   background:
-    linear-gradient(180deg,rgba(4,12,27,.18),rgba(4,10,20,.42)),
-    radial-gradient(circle at 70% 24%,rgba(68,145,255,.28),transparent 34%),
+    radial-gradient(circle at 78% 12%,rgba(82,145,255,.28),transparent 31%),
+    radial-gradient(circle at 15% 72%,rgba(21,219,187,.16),transparent 34%),
+    linear-gradient(180deg,rgba(5,12,28,.08),rgba(3,7,14,.58)),
     url('../images/iphone_bg1.jpg') center/cover no-repeat!important;
 }
-#flip,#panel{width:238px!important}
-#flip{
-  height:28px!important;padding-top:7px!important;box-sizing:border-box!important;background:rgba(3,8,17,.24)!important;
-  backdrop-filter:blur(9px);font-size:9px!important;font-weight:700!important;z-index:9400!important;
-}
-.notify_net{margin-left:20px!important}.notify_hour{font-weight:800!important}.notify_porcent{margin-right:22px!important}
-.signal_icon{left:4px!important;top:5px!important}.wifi_icon{left:54px!important;top:5px!important}.battery_icon{right:2px!important;top:5px!important}
-#screens_phone{position:absolute!important;left:0!important;top:35px!important;width:238px!important;height:350px!important;padding:10px 9px 0!important;box-sizing:border-box!important}
+#flip{width:252px!important;height:25px!important;padding:4px 8px 0!important;box-sizing:border-box!important;background:rgba(5,9,16,.54)!important;backdrop-filter:blur(12px);font-size:10px!important;z-index:9500!important}
+#panel{width:252px!important;height:455px!important;border-radius:26px!important;overflow:hidden!important}
+.notify_net,.notify_hour,.notify_porcent{font-weight:800!important;text-shadow:0 1px 2px #000!important}
+.notify_net{margin-left:17px!important}.notify_porcent{margin-right:17px!important}.signal_icon{left:7px!important;top:5px!important}.wifi_icon{left:57px!important;top:5px!important}.battery_icon{right:7px!important;top:5px!important}
+#screens_phone{position:absolute!important;left:0!important;top:34px!important;width:252px!important;height:350px!important;padding:10px 11px 0!important;box-sizing:border-box!important}
 #screen_apps,#screen_apps .swiper-slide{width:100%!important;height:100%!important}
-#screens_phone #columns-full{
-  display:grid!important;grid-template-columns:repeat(4,1fr)!important;grid-auto-rows:72px!important;
-  column-gap:5px!important;row-gap:7px!important;padding:0!important;align-content:start!important;
-}
-#screens_phone .column{
-  float:none!important;width:48px!important;height:62px!important;margin:0 auto!important;background:transparent!important;
-  border-radius:12px!important;position:relative!important;cursor:pointer!important;transition:transform .13s ease!important;
-}
-#screens_phone .column:hover{transform:translateY(-2px) scale(1.04)!important}
+#screens_phone #columns-full{display:grid!important;grid-template-columns:repeat(4,1fr)!important;grid-auto-rows:78px!important;gap:7px 5px!important;padding:0!important;align-content:start!important}
+#screens_phone .column{float:none!important;width:52px!important;height:67px!important;margin:0 auto!important;background:transparent!important;border-radius:14px!important;position:relative!important;cursor:pointer!important;transition:transform .14s ease,filter .14s ease!important}
+#screens_phone .column:hover{transform:translateY(-2px) scale(1.045);filter:brightness(1.09)}
+#screens_phone .column:active{transform:scale(.96)}
 .appicon{
-  width:48px!important;height:48px!important;border-radius:13px!important;background-image:none!important;background-position:center!important;
-  background-size:cover!important;box-shadow:0 4px 10px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.2)!important;
-  overflow:hidden!important;position:relative!important;
+  position:relative!important;width:50px!important;height:50px!important;border-radius:14px!important;
+  background-image:none!important;background:#172131!important;background-position:center!important;
+  box-shadow:0 6px 14px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.14)!important;
+  overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;
 }
-.appicon:before{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;
-  text-shadow:0 1px 2px rgba(0,0,0,.28);
-}
-/* Fallback icon art generated in CSS so no blank squares */
-.appicon[data-app="_Calendar"]{background:linear-gradient(#fff 0 28%,#f3f4f7 28%)!important}.appicon[data-app="_Calendar"]:before{content:"7";color:#15171a;font-size:25px;align-items:flex-end;padding-bottom:3px}.appicon[data-app="_Calendar"]:after{content:"SAM";position:absolute;top:4px;left:0;right:0;text-align:center;color:#ff3b30;font-size:7px;font-weight:900}
-.appicon[data-app="_Gallery"]{background:conic-gradient(from 0deg,#ff375f,#ff9f0a,#ffd60a,#30d158,#64d2ff,#0a84ff,#bf5af2,#ff375f)!important}.appicon[data-app="_Gallery"]:before{content:"✿";font-size:30px;color:#fff}
-.appicon[data-app="_Maps"]{background:linear-gradient(135deg,#d7f7df,#c9e7ff)!important}.appicon[data-app="_Maps"]:before{content:"⌖";font-size:28px;color:#ff453a;text-shadow:none}
-.appicon[data-app="_Calculator"]{background:linear-gradient(145deg,#2d2f34,#111214)!important}.appicon[data-app="_Calculator"]:before{content:"÷";font-size:30px;color:#ff9f0a}
-.appicon[data-app="_Settings"]{background:linear-gradient(145deg,#8e8e93,#4b4c51)!important}.appicon[data-app="_Settings"]:before{content:"⚙";font-size:25px}
-.appicon[data-app="_Contacts"]{background:linear-gradient(145deg,#ffbd66,#f08b24)!important}.appicon[data-app="_Contacts"]:before{content:"●";font-size:24px}
-.appicon[data-app="_WhatsApp"]{background:linear-gradient(145deg,#37df66,#16a843)!important}.appicon[data-app="_WhatsApp"]:before{content:"☎";font-size:23px}
-.appicon[data-app="_Health"]{background:linear-gradient(145deg,#fff,#eceef2)!important}.appicon[data-app="_Health"]:before{content:"♥";color:#ff375f;font-size:26px;text-shadow:none}
-.appicon[data-app="_Services"]{background:linear-gradient(145deg,#0a84ff,#0057c7)!important}.appicon[data-app="_Services"]:before{content:"★";font-size:22px}
-.appicon[data-app="_Messages"]{background:linear-gradient(145deg,#48e369,#22ad42)!important}.appicon[data-app="_Messages"]:before{content:"●";font-size:25px}
-.appicon[data-app="_Phone"]{background:linear-gradient(145deg,#52e870,#19b442)!important}.appicon[data-app="_Phone"]:before{content:"☎";font-size:23px}
-.appicon:not([data-app]),.appicon[data-app=""]{background:linear-gradient(145deg,#55708f,#26364a)!important}.appicon:not([data-app]):before,.appicon[data-app=""]:before{content:"•";font-size:28px}
-.app_name{
-  position:absolute!important;left:-6px!important;bottom:-2px!important;width:60px!important;margin:0!important;
-  color:#fff!important;font-size:8px!important;font-weight:700!important;line-height:10px!important;text-align:center!important;
-  text-shadow:0 1px 3px #000!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
-}
-.app_special-first,.app_special-second{display:none!important}
-#dock_apps{
-  left:9px!important;bottom:10px!important;width:220px!important;height:58px!important;padding:5px 7px!important;box-sizing:border-box!important;
-  border-radius:19px!important;background:rgba(18,25,37,.60)!important;backdrop-filter:blur(16px)!important;
-  border:1px solid rgba(255,255,255,.11)!important;box-shadow:0 5px 13px rgba(0,0,0,.32)!important;
-}
-#dock_apps #columns-full{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:6px!important;padding:0!important}
-.dock_apps .column{float:none!important;width:46px!important;height:46px!important;margin:0 auto!important;background:transparent!important}
-.dock_apps .appicon{width:46px!important;height:46px!important;border-radius:13px!important}.dock_apps .app_name{display:none!important}
-.swiper-pagination{bottom:76px!important}.swiper-pagination-bullet{width:5px!important;height:5px!important;background:#fff!important;opacity:.45!important}.swiper-pagination-bullet-active{opacity:1!important}
-/* Turn the old physical home button into a modern gesture indicator */
-#phone_home{width:78px!important;height:5px!important;left:98px!important;top:520px!important;margin:0!important;background:#d9dde4!important;border:0!important;border-radius:5px!important;box-shadow:none!important;opacity:.8!important}
-#phone_home:after{display:none!important}
-#phone_close{width:24px!important;height:4px!important;left:125px!important;top:7px!important;margin:0!important;border-radius:4px!important;background:#424750!important;opacity:.45!important}
-#phone_error,#app_bg,#app_bg_v2{width:238px!important;height:456px!important}
-#phone_msg_box{margin:135px auto 0!important;max-width:186px!important;border-radius:14px!important;box-shadow:0 14px 34px rgba(0,0,0,.36)!important}
-#PhoneButton{filter:drop-shadow(0 3px 6px rgba(0,0,0,.32));transition:transform .13s ease}#PhoneButton:hover{transform:scale(1.07)}
+.appicon:before{font-size:24px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+#screens_phone .column:nth-child(1) .appicon{background:linear-gradient(145deg,#268bff,#1e57d8)!important}#screens_phone .column:nth-child(1) .appicon:before{content:"✉"}
+#screens_phone .column:nth-child(2) .appicon{background:linear-gradient(145deg,#fff,#eef2f6)!important;color:#111!important}#screens_phone .column:nth-child(2) .appicon:before{content:"7";font-size:25px;font-weight:900}
+#screens_phone .column:nth-child(3) .appicon{background:linear-gradient(145deg,#ff6b7a,#ffaf45)!important}#screens_phone .column:nth-child(3) .appicon:before{content:"✦"}
+#screens_phone .column:nth-child(4) .appicon{background:linear-gradient(145deg,#6be38f,#2bb673)!important}#screens_phone .column:nth-child(4) .appicon:before{content:"⌖"}
+#screens_phone .column:nth-child(5) .appicon{background:linear-gradient(145deg,#252a31,#050607)!important}#screens_phone .column:nth-child(5) .appicon:before{content:"◷"}
+#screens_phone .column:nth-child(6) .appicon{background:linear-gradient(145deg,#4eb4ff,#8bdcff)!important}#screens_phone .column:nth-child(6) .appicon:before{content:"☀"}
+#screens_phone .column:nth-child(7) .appicon{background:linear-gradient(145deg,#ffe976,#f3c632)!important;color:#5b4600!important}#screens_phone .column:nth-child(7) .appicon:before{content:"≡"}
+#screens_phone .column:nth-child(8) .appicon{background:linear-gradient(145deg,#ff8a45,#ff5b45)!important}#screens_phone .column:nth-child(8) .appicon:before{content:"÷"}
+#screens_phone .column:nth-child(9) .appicon{background:linear-gradient(145deg,#9299a7,#56606d)!important}#screens_phone .column:nth-child(9) .appicon:before{content:"⚙"}
+#screens_phone .column:nth-child(10) .appicon{background:linear-gradient(145deg,#6c7bff,#4755ca)!important}#screens_phone .column:nth-child(10) .appicon:before{content:"👤";font-size:21px}
+#screens_phone .column:nth-child(11) .appicon{background:linear-gradient(145deg,#2ee36d,#17a94a)!important}#screens_phone .column:nth-child(11) .appicon:before{content:"☎"}
+#screens_phone .column:nth-child(12) .appicon{background:linear-gradient(145deg,#4aa7ff,#196fd0)!important}#screens_phone .column:nth-child(12) .appicon:before{content:"A";font-weight:900}
+#screens_phone .column:nth-child(13) .appicon{background:linear-gradient(145deg,#ff5570,#ef2f52)!important}#screens_phone .column:nth-child(13) .appicon:before{content:"♥"}
+#screens_phone .column:nth-child(14) .appicon{background:linear-gradient(145deg,#9b63ff,#6931d8)!important}#screens_phone .column:nth-child(14) .appicon:before{content:"✚"}
+.app_name{position:absolute!important;left:-7px!important;bottom:-13px!important;width:66px!important;margin:0!important;font-size:8.5px!important;font-weight:700!important;line-height:10px!important;text-align:center!important;color:#fff!important;text-shadow:0 1px 3px #000!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.app_special-first{display:none!important}.app_special-second{display:none!important}
+#dock_apps{left:13px!important;bottom:12px!important;width:226px!important;height:58px!important;border-radius:18px!important;padding:6px 10px!important;box-sizing:border-box!important;background:rgba(14,20,30,.66)!important;backdrop-filter:blur(16px)!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 8px 18px rgba(0,0,0,.30)!important}
+#dock_apps:has(.dock_apps:empty),#dock_apps:has(#columns-full:empty){display:none!important}
+#dock_apps #columns-full{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:7px!important;padding:0!important}.dock_apps .column{float:none!important;width:44px!important;height:44px!important;margin:0 auto!important;background:transparent!important}.dock_apps .appicon{width:44px!important;height:44px!important;border-radius:13px!important}.dock_apps .app_name{display:none!important}
+.swiper-pagination{bottom:74px!important}.swiper-pagination-bullet{width:5px!important;height:5px!important;background:#fff!important;opacity:.35!important}.swiper-pagination-bullet-active{opacity:.9!important}
+#phone_home{width:44px!important;height:44px!important;left:121px!important;top:509px!important;margin:0!important;background:linear-gradient(#151922,#090b0f)!important;border-radius:50%!important;border:1px solid #39414e!important;box-shadow:inset 0 0 0 2px #050608,0 3px 9px rgba(0,0,0,.75)!important}
+#phone_home:after{content:"";position:absolute;width:14px;height:14px;border:2px solid #778190;border-radius:4px;left:13px;top:13px}
+#phone_close{width:28px!important;height:4px!important;left:129px!important;top:7px!important;margin:0!important;border-radius:4px!important;background:#3c4653!important;opacity:.7!important}
+#phone_error,#app_bg,#app_bg_v2{width:252px!important;height:455px!important;border-radius:26px!important}
+#phone_msg_box{margin:135px auto 0!important;max-width:200px!important;border-radius:14px!important;box-shadow:0 15px 35px rgba(0,0,0,.35)!important}
+#PhoneButton{filter:drop-shadow(0 4px 7px rgba(0,0,0,.35));transition:transform .15s ease}#PhoneButton:hover{transform:scale(1.08)}
 @media(max-width:900px){#phone{left:50%!important;transform:translateX(-50%) scale(.92)!important;transform-origin:center top}}
