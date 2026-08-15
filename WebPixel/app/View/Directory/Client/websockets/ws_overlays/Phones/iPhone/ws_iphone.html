@@ -1,6 +1,5 @@
-<!-- RDP Pocket: clean RP phone shell. Existing data-app hooks are preserved. -->
+<!-- RDP Pocket v10: modern RP phone home. Existing app hooks are preserved. -->
 <link href="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
-<link href="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/css/swiper/swiper.min.css?p=<?php echo time(); ?>" rel="stylesheet">
 <link href="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?p=<?php echo time(); ?>" rel="stylesheet">
 <script type="text/javascript" src="<?php echo WS_DY; ?>/ws_overlays/Phones/iPhone/resources/js/scripts.js?p=<?php echo time(); ?>"></script>
 
@@ -54,36 +53,61 @@
             ?>
             <div id="AppViewer" class="AppLayout"><div id="app_bg_v2"></div></div>
 
-            <div id="screens_phone" class="swiper-container">
+            <div id="screens_phone" class="rdp-home-screen">
                 <div class="rdp-home-head">
                     <div class="rdp-home-copy">
                         <span class="rdp-home-kicker">RDP POCKET</span>
                         <strong>Ville connectée</strong>
-                        <small>Services RP disponibles</small>
+                        <small>Votre quotidien RP, au même endroit</small>
                     </div>
                     <span class="rdp-online-dot">ONLINE</span>
                 </div>
 
-                <div id="screen_apps" class="swiper-wrapper">
-                    <div class="swiper-slide">
-                        <div id="columns-full" class="rdp-app-grid">
-                            <div class="column swiper-no-swiping"><div class="appicon count rp-calendar" data-app="_Calendar" data-col-moves="0"><span class="rp-app-glyph">15</span></div><div class="app_name" data-name-app="Calendrier">Calendrier</div></div>
-                            <div class="column swiper-no-swiping"><div class="appicon count rp-gallery" data-app="_Gallery" data-col-moves="0"><span class="rp-app-glyph">◆</span></div><div class="app_name" data-name-app="Photos">Photos</div></div>
-                            <div class="column swiper-no-swiping"><div class="appicon count rp-map" data-app="_Maps" data-col-moves="0"><span class="rp-app-glyph">⌖</span></div><div class="app_name" data-name-app="Carte">Carte</div></div>
-                            <div class="column swiper-no-swiping"><div class="appicon count rp-calc" data-app="_Calculator" data-col-moves="0"><span class="rp-app-glyph">±</span></div><div class="app_name" data-name-app="Calculatrice">Calculatrice</div></div>
-                            <div class="column swiper-no-swiping"><div class="appicon count rp-settings" data-app="_Settings" data-col-moves="0"><span class="rp-app-glyph">⚙</span></div><div class="app_name" data-name-app="Réglages">Réglages</div></div>
-                            <div class="column swiper-no-swiping"><div class="appicon count rp-health" data-app="_Health" data-col-moves="0"><span class="rp-app-glyph">♥</span></div><div class="app_name" data-name-app="Santé">Santé</div></div>
-                            <div class="column swiper-no-swiping rdp-last-app"><div class="appicon count rp-services" data-app="_Services" data-col-moves="0"><span class="rp-app-glyph">+</span></div><div class="app_name" data-name-app="Services">Services</div></div>
-                        </div>
+                <div class="rdp-app-grid" aria-label="Applications">
+                    <div class="rdp-app-tile">
+                        <div class="appicon count rp-calendar" data-app="_Calendar" data-col-moves="0"><span class="rp-app-glyph rp-calendar-glyph"><small>AOÛ</small><b>15</b></span></div>
+                        <div class="app_name">Calendrier</div>
+                    </div>
+                    <div class="rdp-app-tile">
+                        <div class="appicon count rp-gallery" data-app="_Gallery" data-col-moves="0"><span class="rp-app-glyph">✦</span></div>
+                        <div class="app_name">Photos</div>
+                    </div>
+                    <div class="rdp-app-tile">
+                        <div class="appicon count rp-map" data-app="_Maps" data-col-moves="0"><span class="rp-app-glyph">⌖</span></div>
+                        <div class="app_name">Carte</div>
+                    </div>
+                    <div class="rdp-app-tile">
+                        <div class="appicon count rp-calc" data-app="_Calculator" data-col-moves="0"><span class="rp-app-glyph">±</span></div>
+                        <div class="app_name">Calculatrice</div>
+                    </div>
+                    <div class="rdp-app-tile">
+                        <div class="appicon count rp-settings" data-app="_Settings" data-col-moves="0"><span class="rp-app-glyph">⚙</span></div>
+                        <div class="app_name">Réglages</div>
+                    </div>
+                    <div class="rdp-app-tile">
+                        <div class="appicon count rp-health" data-app="_Health" data-col-moves="0"><span class="rp-app-glyph">♥</span></div>
+                        <div class="app_name">Santé</div>
+                    </div>
+                    <div class="rdp-app-tile">
+                        <div class="appicon count rp-services" data-app="_Services" data-col-moves="0"><span class="rp-app-glyph">✚</span></div>
+                        <div class="app_name">Services</div>
                     </div>
                 </div>
 
-                <div class="swiper-pagination" aria-hidden="true"></div>
-
+                <div class="rdp-section-label">COMMUNICATION</div>
                 <div id="dock_apps" class="rdp-dock">
-                    <div class="rdp-dock-app"><div class="appicon count rp-messages" data-app="_Messages" data-col-moves="0"><span class="rp-app-glyph">•••</span></div><span>Messages</span></div>
-                    <div class="rdp-dock-app"><div class="appicon count rp-whatsapp" data-app="_WhatsApp" data-col-moves="0"><span class="rp-app-glyph">☎</span></div><span>WhatsApp</span></div>
-                    <div class="rdp-dock-app"><div class="appicon count rp-contacts" data-app="_Contacts" data-col-moves="0"><span class="rp-app-glyph">●</span></div><span>Contacts</span></div>
+                    <div class="rdp-dock-app">
+                        <div class="appicon count rp-messages" data-app="_Messages" data-col-moves="0"><span class="rp-app-glyph">•••</span></div>
+                        <span>Messages</span>
+                    </div>
+                    <div class="rdp-dock-app">
+                        <div class="appicon count rp-whatsapp" data-app="_WhatsApp" data-col-moves="0"><span class="rp-app-glyph">☎</span></div>
+                        <span>WhatsApp</span>
+                    </div>
+                    <div class="rdp-dock-app">
+                        <div class="appicon count rp-contacts" data-app="_Contacts" data-col-moves="0"><span class="rp-app-glyph">●</span></div>
+                        <span>Contacts</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -92,18 +116,17 @@
     <div id="phone_home" title="Accueil"></div>
 </div>
 
-<script type="text/javascript" src="<?php echo WS_DY; ?>/ws_overlays/Phones/iPhone/resources/js/swiper/swiper.min.js?p=<?php echo time(); ?>"></script>
 <script type="text/javascript" src="<?php echo WS_DY; ?>/ws_overlays/Phones/iPhone/resources/js/scripts_bottom.js?p=<?php echo time(); ?>"></script>
 <script>
 (function(){
-    function lockPhoneGrid(){
-        document.querySelectorAll('#phone .column').forEach(function(el){
+    function protectPhoneHome(){
+        document.querySelectorAll('#phone .rdp-app-tile,#phone .rdp-dock-app').forEach(function(el){
             el.setAttribute('draggable','false');
-            el.addEventListener('dragstart', function(e){ e.preventDefault(); }, { once:false });
+            el.addEventListener('dragstart', function(e){ e.preventDefault(); });
         });
     }
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lockPhoneGrid);
-    else lockPhoneGrid();
-    setTimeout(lockPhoneGrid, 250);
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', protectPhoneHome);
+    else protectPhoneHome();
+    setTimeout(protectPhoneHome,250);
 })();
 </script>
