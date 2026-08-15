@@ -1,311 +1,303 @@
-/* RDP RP phone v6 — strict screen clipping + perfectly centered app grid */
+/* RDP Pocket v8 — clean, centered, functional RP phone UI. */
 #phone,#phone *{box-sizing:border-box!important}
 
 #phone{
-  width:300px!important;
-  height:590px!important;
+  width:316px!important;
+  height:610px!important;
   left:50%!important;
   top:-1000px;
   transform:translateX(-50%);
-  font-family:Inter,'Segoe UI',Arial,sans-serif!important;
-  color:#fff!important;
-  filter:drop-shadow(0 24px 42px rgba(0,0,0,.55));
+  font-family:Inter,"Segoe UI",Arial,sans-serif!important;
+  color:#f7fbff!important;
+  filter:drop-shadow(0 24px 42px rgba(0,0,0,.52));
 }
 
-/* Black device shell */
+/* Solid device shell: nothing from the screen can escape this frame. */
 #phone .header-phone-extends{
   position:absolute!important;
   inset:0!important;
-  width:300px!important;
-  height:590px!important;
-  border-radius:46px!important;
-  background:linear-gradient(145deg,#242932 0%,#0d1016 28%,#020305 78%,#1b2028 100%)!important;
-  border:2px solid #707986!important;
-  box-shadow:inset 0 0 0 2px #020305,inset 0 0 0 5px #171c23,0 16px 34px rgba(0,0,0,.5)!important;
+  width:316px!important;
+  height:610px!important;
+  border-radius:44px!important;
+  overflow:hidden!important;
+  background:linear-gradient(145deg,#252b33 0%,#0d1015 22%,#030507 78%,#161b22 100%)!important;
+  border:2px solid #8a939e!important;
+  box-shadow:
+    inset 0 0 0 2px #050608,
+    inset 0 0 0 5px #1b2027,
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 16px 34px rgba(0,0,0,.58)!important;
 }
 #phone .header-phone-extends:before{
   content:"";
   position:absolute;
-  z-index:40;
+  z-index:30;
   top:12px;
-  left:102px;
-  width:96px;
-  height:25px;
+  left:105px;
+  width:106px;
+  height:26px;
   border-radius:18px;
   background:#010203;
-  box-shadow:inset 0 -1px 0 rgba(255,255,255,.06);
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.06),0 2px 5px rgba(0,0,0,.65);
 }
 #phone .header-phone-extends:after{
   content:"";
   position:absolute;
-  z-index:41;
-  top:20px;
-  left:117px;
+  z-index:31;
+  top:21px;
+  left:121px;
   width:7px;
   height:7px;
   border-radius:50%;
-  background:radial-gradient(circle,#38a8ff 0 22%,#0f466f 24% 46%,#010204 50%);
-  box-shadow:0 0 7px rgba(56,168,255,.5);
+  background:radial-gradient(circle,#4db5ff 0 18%,#12456d 22% 48%,#020407 52%);
+  box-shadow:0 0 8px rgba(60,164,255,.42);
 }
 
-/* Screen = single clipped safe area. Nothing may draw outside this rectangle. */
+/* Actual screen viewport. All wallpaper / apps are clipped here. */
 #phone_content{
   position:absolute!important;
-  left:17px!important;
-  top:48px!important;
+  z-index:5!important;
+  left:16px!important;
+  top:46px!important;
+  width:284px!important;
+  height:532px!important;
   margin:0!important;
-  width:266px!important;
-  height:492px!important;
+  padding:0!important;
   overflow:hidden!important;
   border-radius:31px!important;
-  background:#07111d!important;
+  background:#07111b!important;
+  box-shadow:0 0 0 2px #000,0 0 0 3px rgba(255,255,255,.05)!important;
   isolation:isolate!important;
-  clip-path:inset(0 round 31px)!important;
-  box-shadow:0 0 0 1px rgba(255,255,255,.06),0 0 0 2px #000!important;
 }
 #phone_bg{
   position:absolute!important;
   inset:0!important;
-  width:266px!important;
-  height:492px!important;
+  width:284px!important;
+  height:532px!important;
+  margin:0!important;
+  padding:0!important;
   overflow:hidden!important;
   border-radius:31px!important;
   background:
-    radial-gradient(circle at 82% 8%,rgba(77,89,255,.28),transparent 31%),
-    radial-gradient(circle at 12% 60%,rgba(26,177,171,.12),transparent 35%),
-    radial-gradient(circle at 82% 94%,rgba(116,62,209,.17),transparent 35%),
-    linear-gradient(165deg,#0b1a2e 0%,#08131f 48%,#080b15 100%)!important;
+    radial-gradient(circle at 82% 6%,rgba(56,109,255,.20),transparent 28%),
+    radial-gradient(circle at 5% 76%,rgba(28,189,172,.11),transparent 33%),
+    linear-gradient(160deg,#0b1724 0%,#07121d 48%,#070b13 100%)!important;
 }
-#phone_bg:before{
+#phone_bg:after{
   content:"";
   position:absolute;
   inset:0;
+  z-index:0;
   pointer-events:none;
-  background:linear-gradient(120deg,transparent 0 48%,rgba(255,255,255,.015) 49% 50%,transparent 51% 100%);
+  background:
+    linear-gradient(120deg,transparent 0 45%,rgba(255,255,255,.018) 46% 48%,transparent 49% 100%),
+    radial-gradient(circle at 50% 120%,rgba(102,73,214,.10),transparent 42%);
 }
 
 /* Status bar */
 #flip{
   position:absolute!important;
+  z-index:9500!important;
   left:0!important;
   top:0!important;
-  width:266px!important;
-  height:28px!important;
-  padding:6px 10px 0!important;
-  background:rgba(2,7,13,.48)!important;
-  backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(255,255,255,.05)!important;
+  width:284px!important;
+  height:29px!important;
+  margin:0!important;
+  padding:6px 11px 0!important;
+  background:rgba(2,6,11,.74)!important;
+  border-bottom:1px solid rgba(255,255,255,.045)!important;
+  backdrop-filter:blur(12px)!important;
   font-size:9px!important;
-  z-index:9500!important;
+  cursor:pointer!important;
 }
+#flip_content{position:relative!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important}
+.notify_net,.notify_hour,.notify_porcent{position:absolute!important;top:0!important;margin:0!important;font-weight:800!important;line-height:14px!important;text-shadow:0 1px 2px #000!important;color:#f4f7fb!important}
+.notify_net{left:18px!important}.notify_hour{left:50%!important;transform:translateX(-50%)!important}.notify_porcent{right:18px!important}
+.signal_icon{left:7px!important;top:6px!important}.wifi_icon{left:44px!important;top:6px!important}.battery_icon{right:7px!important;top:6px!important}
+
+/* Notification shade / lock panel */
 #panel{
-  width:266px!important;
-  height:492px!important;
+  width:284px!important;
+  height:532px!important;
   border-radius:31px!important;
   overflow:hidden!important;
-  background:#07111d!important;
+  background:rgba(5,12,21,.96)!important;
 }
-.notify_net,.notify_hour,.notify_porcent{font-weight:800!important;text-shadow:0 1px 2px #000!important}
-.notify_net{margin-left:18px!important}.notify_porcent{margin-right:18px!important}
-.signal_icon{left:8px!important;top:6px!important}.wifi_icon{left:57px!important;top:6px!important}.battery_icon{right:8px!important;top:6px!important}
+#panel_content{width:100%!important;height:100%!important;background:linear-gradient(160deg,#101e30,#080d16)!important}
+#panel_content_text{padding:105px 24px 0!important;text-align:center!important;color:#fff!important}
+.rdp-lock-time{font-size:54px!important;font-weight:300!important;letter-spacing:-2px!important}.rdp-lock-date{margin-top:4px!important;font-size:13px!important;font-weight:800!important;letter-spacing:.8px!important}.rdp-lock-date+#panel_content_notify{margin-top:28px!important;font-size:11px!important;color:#9facba!important}
 
-/* Content zone */
+/* Home canvas */
 #screens_phone{
   position:absolute!important;
+  z-index:10!important;
   left:0!important;
-  top:28px!important;
-  width:266px!important;
-  height:464px!important;
+  top:29px!important;
+  width:284px!important;
+  height:503px!important;
+  margin:0!important;
   padding:0!important;
   overflow:hidden!important;
 }
-
-/* Compact modern RP card */
-#screens_phone:before{
-  content:"RDP MOBILE";
-  position:absolute;
-  left:16px;
-  top:14px;
-  width:234px;
-  height:58px;
-  padding:12px 14px 0;
-  border-radius:18px;
-  color:#f4f7ff;
-  font-size:10px;
-  font-weight:900;
-  letter-spacing:1.25px;
-  background:linear-gradient(135deg,rgba(63,91,210,.96),rgba(81,54,164,.86));
-  border:1px solid rgba(255,255,255,.16);
-  box-shadow:0 10px 22px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.15);
-}
-#screens_phone:after{
-  content:"Ville connectée  •  Services RP";
-  position:absolute;
-  left:30px;
-  top:47px;
-  color:rgba(255,255,255,.74);
-  font-size:8px;
-  font-weight:600;
-}
-
-#screen_apps,
-#screen_apps .swiper-slide{
+.rdp-home-head{
   position:absolute!important;
-  left:0!important;
-  top:0!important;
-  width:266px!important;
-  height:464px!important;
+  z-index:3!important;
+  left:17px!important;
+  top:15px!important;
+  width:250px!important;
+  height:72px!important;
+  padding:13px 14px!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  border-radius:17px!important;
   overflow:hidden!important;
+  background:linear-gradient(135deg,rgba(38,78,130,.94),rgba(30,45,82,.95))!important;
+  border:1px solid rgba(127,196,255,.20)!important;
+  box-shadow:0 11px 24px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.09)!important;
 }
+.rdp-home-head:after{content:"";position:absolute;right:-28px;bottom:-42px;width:125px;height:125px;border-radius:50%;background:radial-gradient(circle,rgba(57,199,177,.23),transparent 70%);pointer-events:none}
+.rdp-home-copy{position:relative!important;z-index:2!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;min-width:0!important}
+.rdp-home-kicker{font-size:8px!important;font-weight:900!important;letter-spacing:1.7px!important;color:#7ed9cf!important;margin-bottom:5px!important}
+.rdp-home-copy strong{font-size:14px!important;line-height:16px!important;color:#fff!important;font-weight:800!important}.rdp-home-copy small{margin-top:4px!important;font-size:8.5px!important;color:#aebccd!important;font-weight:600!important}
+.rdp-online-dot{position:relative!important;z-index:2!important;margin-top:1px!important;padding:4px 7px!important;border-radius:999px!important;background:rgba(44,214,158,.12)!important;border:1px solid rgba(62,222,170,.24)!important;color:#65e0b6!important;font-size:7px!important;font-weight:900!important;letter-spacing:.7px!important}
 
-/* The old HTML uses #columns-full. Turn it into one strict centered grid. */
-#screens_phone #columns-full{
+#screen_apps,#screen_apps .swiper-slide{position:absolute!important;left:0!important;top:0!important;width:284px!important;height:503px!important;margin:0!important;padding:0!important;overflow:hidden!important}
+
+/* 3-column app grid — fixed geometry, always centered. */
+#screens_phone #columns-full.rdp-app-grid{
   position:absolute!important;
   left:50%!important;
-  top:92px!important;
+  top:106px!important;
   transform:translateX(-50%)!important;
-  width:224px!important;
+  width:222px!important;
   margin:0!important;
   padding:0!important;
   display:grid!important;
-  grid-template-columns:repeat(4,50px)!important;
-  grid-auto-rows:69px!important;
-  column-gap:8px!important;
-  row-gap:6px!important;
+  grid-template-columns:repeat(3,62px)!important;
+  grid-auto-rows:76px!important;
+  column-gap:18px!important;
+  row-gap:7px!important;
   justify-content:center!important;
-  align-content:start!important;
+  align-items:start!important;
+  overflow:visible!important;
 }
-
 #screens_phone .column{
-  float:none!important;
   position:relative!important;
-  width:50px!important;
-  height:66px!important;
+  float:none!important;
+  width:62px!important;
+  height:76px!important;
   margin:0!important;
   padding:0!important;
   display:flex!important;
   flex-direction:column!important;
   align-items:center!important;
   justify-content:flex-start!important;
+  overflow:visible!important;
   background:transparent!important;
   border:0!important;
-  border-radius:14px!important;
-  overflow:visible!important;
+  user-select:none!important;
   cursor:pointer!important;
-  transition:transform .14s ease,filter .14s ease!important;
 }
-#screens_phone .column:hover{transform:translateY(-2px) scale(1.04);filter:brightness(1.06)}
-#screens_phone .column:active{transform:scale(.95)}
+#screens_phone .column.rdp-last-app{grid-column:2!important}
+#screens_phone .column:hover .appicon{transform:translateY(-2px) scale(1.045);filter:brightness(1.06)}
+#screens_phone .column:active .appicon{transform:scale(.95)}
 
-/* Center the final two applications as a pair */
-#screens_phone .column:nth-child(13){grid-column:2!important}
-#screens_phone .column:nth-child(14){grid-column:3!important}
-
-/* App tiles */
-.appicon{
+/* App icons */
+#phone .appicon{
   position:relative!important;
   left:auto!important;
   top:auto!important;
-  width:46px!important;
-  height:46px!important;
-  min-width:46px!important;
-  min-height:46px!important;
+  width:52px!important;
+  height:52px!important;
+  min-width:52px!important;
+  min-height:52px!important;
   margin:0 auto!important;
-  border-radius:14px!important;
+  padding:0!important;
+  border-radius:15px!important;
   background-image:none!important;
-  background:#172131!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
   overflow:hidden!important;
-  box-shadow:0 6px 13px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.20),inset 0 0 0 1px rgba(255,255,255,.08)!important;
+  color:#fff!important;
+  box-shadow:0 7px 14px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.22),inset 0 0 0 1px rgba(255,255,255,.08)!important;
+  transition:transform .14s ease,filter .14s ease!important;
 }
-.appicon:before{font-size:19px!important;line-height:1!important;filter:drop-shadow(0 2px 2px rgba(0,0,0,.2))}
+.rp-app-glyph{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;font-size:21px!important;line-height:1!important;font-weight:900!important;text-align:center!important;color:inherit!important;text-shadow:0 1px 3px rgba(0,0,0,.18)!important}
+.rp-calendar{background:linear-gradient(145deg,#f7f9fc,#d9e1eb)!important;color:#101722!important}.rp-calendar .rp-app-glyph{color:#101722!important;font-size:20px!important}
+.rp-gallery{background:linear-gradient(145deg,#ff896f,#ffb653)!important}.rp-map{background:linear-gradient(145deg,#47d89a,#20aa76)!important}.rp-calc{background:linear-gradient(145deg,#ff765f,#e7473f)!important}.rp-settings{background:linear-gradient(145deg,#7d8998,#4e5967)!important}.rp-health{background:linear-gradient(145deg,#ff5f79,#e73558)!important}.rp-services{background:linear-gradient(145deg,#8c72ef,#6550cc)!important}.rp-messages{background:linear-gradient(145deg,#4ca4ff,#246de6)!important}.rp-whatsapp{background:linear-gradient(145deg,#42df79,#1cad58)!important}.rp-contacts{background:linear-gradient(145deg,#6675ec,#4d54c8)!important}
 
-#screens_phone .column:nth-child(1) .appicon{background:linear-gradient(145deg,#4b9dff,#2166e9)!important}#screens_phone .column:nth-child(1) .appicon:before{content:"✉"}
-#screens_phone .column:nth-child(2) .appicon{background:linear-gradient(145deg,#fff,#dfe8f2)!important;color:#111821!important}#screens_phone .column:nth-child(2) .appicon:before{content:"7";font-size:22px!important;font-weight:900}
-#screens_phone .column:nth-child(3) .appicon{background:linear-gradient(145deg,#ff7976,#ffa14b)!important}#screens_phone .column:nth-child(3) .appicon:before{content:"✦"}
-#screens_phone .column:nth-child(4) .appicon{background:linear-gradient(145deg,#68dfa0,#2ebc78)!important}#screens_phone .column:nth-child(4) .appicon:before{content:"⌖"}
-#screens_phone .column:nth-child(5) .appicon{background:linear-gradient(145deg,#323c49,#111821)!important}#screens_phone .column:nth-child(5) .appicon:before{content:"◷"}
-#screens_phone .column:nth-child(6) .appicon{background:linear-gradient(145deg,#6fd3ff,#4b91ff)!important}#screens_phone .column:nth-child(6) .appicon:before{content:"☀"}
-#screens_phone .column:nth-child(7) .appicon{background:linear-gradient(145deg,#ffe56d,#f0be34)!important;color:#5a4500!important}#screens_phone .column:nth-child(7) .appicon:before{content:"≡"}
-#screens_phone .column:nth-child(8) .appicon{background:linear-gradient(145deg,#ff8e62,#ff594e)!important}#screens_phone .column:nth-child(8) .appicon:before{content:"÷"}
-#screens_phone .column:nth-child(9) .appicon{background:linear-gradient(145deg,#8995a5,#566170)!important}#screens_phone .column:nth-child(9) .appicon:before{content:"⚙"}
-#screens_phone .column:nth-child(10) .appicon{background:linear-gradient(145deg,#8d83ff,#5f58df)!important}#screens_phone .column:nth-child(10) .appicon:before{content:"●";font-size:15px!important}
-#screens_phone .column:nth-child(11) .appicon{background:linear-gradient(145deg,#47e87f,#1fb85a)!important}#screens_phone .column:nth-child(11) .appicon:before{content:"☎"}
-#screens_phone .column:nth-child(12) .appicon{background:linear-gradient(145deg,#61b9ff,#347fe8)!important}#screens_phone .column:nth-child(12) .appicon:before{content:"A";font-weight:900}
-#screens_phone .column:nth-child(13) .appicon{background:linear-gradient(145deg,#ff627b,#e63a59)!important}#screens_phone .column:nth-child(13) .appicon:before{content:"♥"}
-#screens_phone .column:nth-child(14) .appicon{background:linear-gradient(145deg,#aa72ff,#7447dd)!important}#screens_phone .column:nth-child(14) .appicon:before{content:"✚"}
-
-/* Labels are normal flex items now: no negative offsets, no overflow. */
-.app_name{
-  position:relative!important;
-  left:auto!important;
-  top:auto!important;
-  bottom:auto!important;
+/* Labels are real DOM text, not pseudo-elements. */
+#phone .app_name{
+  position:static!important;
   transform:none!important;
-  width:58px!important;
-  height:14px!important;
-  margin:4px 0 0!important;
+  width:62px!important;
+  height:16px!important;
+  margin:6px 0 0!important;
   padding:0!important;
-  font-size:0!important;
+  display:block!important;
+  overflow:hidden!important;
+  color:#dfe7ef!important;
+  font-size:8px!important;
+  font-weight:700!important;
   line-height:10px!important;
   text-align:center!important;
   white-space:nowrap!important;
-  overflow:hidden!important;
-  color:#fff!important;
-  text-shadow:0 1px 3px rgba(0,0,0,.95)!important;
+  text-overflow:ellipsis!important;
+  text-shadow:0 1px 2px rgba(0,0,0,.9)!important;
 }
-.app_name:after{display:block!important;font-size:7px!important;font-weight:700!important;line-height:10px!important;color:rgba(255,255,255,.92)}
-#screens_phone .column:nth-child(1) .app_name:after{content:"Mail"}
-#screens_phone .column:nth-child(2) .app_name:after{content:"Calendrier"}
-#screens_phone .column:nth-child(3) .app_name:after{content:"Photos"}
-#screens_phone .column:nth-child(4) .app_name:after{content:"Carte"}
-#screens_phone .column:nth-child(5) .app_name:after{content:"Horloge"}
-#screens_phone .column:nth-child(6) .app_name:after{content:"Météo"}
-#screens_phone .column:nth-child(7) .app_name:after{content:"Notes"}
-#screens_phone .column:nth-child(8) .app_name:after{content:"Calcul"}
-#screens_phone .column:nth-child(9) .app_name:after{content:"Réglages"}
-#screens_phone .column:nth-child(10) .app_name:after{content:"Contacts"}
-#screens_phone .column:nth-child(11) .app_name:after{content:"WhatsApp"}
-#screens_phone .column:nth-child(12) .app_name:after{content:"Apps"}
-#screens_phone .column:nth-child(13) .app_name:after{content:"Santé"}
-#screens_phone .column:nth-child(14) .app_name:after{content:"Services"}
 .app_special-first,.app_special-second{display:none!important}
 
-/* Hide old empty dock and pagination */
-#dock_apps,.swiper-pagination{display:none!important}
-
-/* Bottom gesture bar remains entirely on the black bezel */
-#phone_home{
+/* Bottom dock: three communication apps, centered and functional. */
+#dock_apps.rdp-dock{
   position:absolute!important;
-  left:107px!important;
-  top:566px!important;
-  width:86px!important;
-  height:5px!important;
+  z-index:5!important;
+  left:17px!important;
+  bottom:14px!important;
+  width:250px!important;
+  height:70px!important;
   margin:0!important;
-  padding:0!important;
-  background:#e7ecf3!important;
-  border:0!important;
-  border-radius:8px!important;
-  box-shadow:0 1px 3px rgba(0,0,0,.65)!important;
-  opacity:.86!important;
+  padding:8px 16px!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  gap:15px!important;
+  align-items:center!important;
+  border-radius:20px!important;
+  overflow:hidden!important;
+  background:rgba(15,24,36,.88)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:0 10px 22px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.05)!important;
+  backdrop-filter:blur(14px)!important;
 }
-#phone_home:after{display:none!important}
-#phone_close{position:absolute!important;width:22px!important;height:4px!important;left:139px!important;top:6px!important;margin:0!important;border-radius:5px!important;background:#4d5866!important;opacity:.32!important}
+.rdp-dock-app{width:62px!important;height:56px!important;margin:0 auto!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;cursor:pointer!important;user-select:none!important}
+.rdp-dock-app .appicon{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;border-radius:13px!important}.rdp-dock-app .rp-app-glyph{font-size:17px!important}.rdp-dock-app span:not(.rp-app-glyph){margin-top:4px!important;width:62px!important;overflow:hidden!important;text-align:center!important;color:#aebac8!important;font-size:7px!important;font-weight:700!important;white-space:nowrap!important;text-overflow:ellipsis!important}.rdp-dock-app:hover .appicon{transform:translateY(-2px) scale(1.04)!important}.rdp-dock-app:active .appicon{transform:scale(.95)!important}
 
-/* Apps opened inside the exact same clipped screen */
-#phone_error,#app_bg,#app_bg_v2{
+/* App windows: stay within the clipped screen. Existing app display logic remains untouched. */
+#phone .AppLayout{
   position:absolute!important;
-  inset:0!important;
-  width:266px!important;
-  height:492px!important;
-  border-radius:31px!important;
+  z-index:8000!important;
+  left:0!important;
+  top:29px!important;
+  width:284px!important;
+  height:503px!important;
+  max-width:284px!important;
+  max-height:503px!important;
+  border-radius:0 0 31px 31px!important;
   overflow:hidden!important;
 }
-#phone_msg_box{margin:145px auto 0!important;max-width:200px!important;border-radius:15px!important;box-shadow:0 18px 40px rgba(0,0,0,.38)!important}
-#PhoneButton{filter:drop-shadow(0 5px 8px rgba(0,0,0,.35));transition:transform .16s ease}#PhoneButton:hover{transform:scale(1.08)}
+#phone .AppLayout #app_bg,#phone .AppLayout #app_bg_v2,#phone_error,#app_bg,#app_bg_v2{max-width:284px!important;max-height:503px!important}
+#phone_error{position:absolute!important;z-index:9000!important;left:0!important;top:29px!important;width:284px!important;height:503px!important;border-radius:0 0 31px 31px!important;overflow:hidden!important}
+#phone_msg_box{max-width:216px!important;margin:145px auto 0!important;border-radius:15px!important;box-shadow:0 18px 36px rgba(0,0,0,.38)!important}
+
+/* Hardware controls */
+#phone_close{position:absolute!important;z-index:40!important;left:143px!important;top:7px!important;width:30px!important;height:4px!important;margin:0!important;border-radius:5px!important;background:#5d6875!important;opacity:.35!important;cursor:pointer!important}
+#phone_home{position:absolute!important;z-index:40!important;left:114px!important;top:590px!important;width:88px!important;height:5px!important;margin:0!important;padding:0!important;border:0!important;border-radius:8px!important;background:#e4e9ef!important;box-shadow:0 1px 3px rgba(0,0,0,.7)!important;opacity:.83!important;cursor:pointer!important}
+#phone_home:after{display:none!important}
+.swiper-pagination{display:none!important}
+
+#PhoneButton{filter:drop-shadow(0 4px 7px rgba(0,0,0,.35));transition:transform .15s ease!important}#PhoneButton:hover{transform:scale(1.07)!important}
 
 @media(max-width:900px){
-  #phone{left:50%!important;transform:translateX(-50%) scale(.92)!important;transform-origin:center top}
+  #phone{left:50%!important;transform:translateX(-50%) scale(.90)!important;transform-origin:center top!important}
 }
