@@ -61,8 +61,8 @@ $html = str_replace(
 );
 
 // Flash is no longer used, but the legacy template still calls swfobject.
-// Also convert only the dedicated RDP overlay websocket (2087) from WSS to
-// plain WS on localhost. Nitro itself uses the separate 2097 game bridge.
+// Convert only the dedicated RDP overlay websocket (2087) from WSS to WS on
+// localhost. Nitro itself uses the separate 2097 game bridge.
 $localhostShim = <<<'HTML'
 <script>
 (function () {
@@ -73,10 +73,31 @@ $localhostShim = <<<'HTML'
         const NativeWebSocket = window.WebSocket;
         window.WebSocket = new Proxy(NativeWebSocket, {
             construct(Target, args) {
+                let isRdpSocket = false;
                 if (typeof args[0] === 'string' && /^wss:\/\/(127\.0\.0\.1|localhost):2087\//i.test(args[0])) {
                     args[0] = args[0].replace(/^wss:/i, 'ws:');
+                    isRdpSocket = true;
                 }
-                return Reflect.construct(Target, args);
+
+                const socket = Reflect.construct(Target, args);
+
+                // rdp.c.js from this pack has compose_loader disabled, while
+                // the emulator still emits it. Consume it here before the old
+                // dispatcher logs an error for every loader update.
+                if (isRdpSocket) {
+                    socket.addEventListener('message', function(event) {
+                        if (typeof event.data !== 'string' || !/^compose_loader\|/i.test(event.data)) return;
+
+                        event.stopImmediatePropagation();
+                        const parts = event.data.split('|');
+                        const amount = parseInt(parts[1], 10);
+                        if (Number.isFinite(amount) && typeof window.SumLoader === 'function') {
+                            try { window.SumLoader(amount, 800); } catch (_) {}
+                        }
+                    });
+                }
+
+                return socket;
             }
         });
     }
