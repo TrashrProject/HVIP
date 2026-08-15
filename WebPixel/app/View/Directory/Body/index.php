@@ -95,7 +95,30 @@ try {
             <span class="device-notch"></span>
             <span class="device-home"></span>
 
+            <div class="device-backplate" aria-hidden="true">
+                <div class="back-camera-cluster">
+                    <span class="back-camera camera-one"></span>
+                    <span class="back-camera camera-two"></span>
+                    <span class="back-flash"></span>
+                </div>
+                <div class="back-brand">
+                    <span class="back-logo">V</span>
+                    <strong>VELORA</strong>
+                    <small>CITY ACCESS DEVICE</small>
+                </div>
+                <span class="back-mark">RP · 01</span>
+            </div>
+
             <div class="device-screen">
+                <div class="device-statusbar" aria-hidden="true">
+                    <span id="device-clock">00:00</span>
+                    <div class="device-status-icons">
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-wifi"></i>
+                        <span class="battery"><span></span></span>
+                    </div>
+                </div>
+
                 <div class="brand-zone">
                     <div class="brand-emblem">
                         <span class="emblem-city"></span>
@@ -114,6 +137,13 @@ try {
                         <div><strong><?php echo htmlspecialchars($registeredUsers, ENT_QUOTES, 'UTF-8'); ?></strong><span>INSCRITS</span></div>
                         <div><strong>30+</strong><span>MÉTIERS</span></div>
                         <div><strong>3</strong><span>QUARTIERS</span></div>
+                    </div>
+
+                    <div class="life-chips" aria-label="Possibilités RP">
+                        <span><i class="fas fa-briefcase"></i> Jobs</span>
+                        <span><i class="fas fa-store"></i> Business</span>
+                        <span><i class="fas fa-shield-alt"></i> Police</span>
+                        <span><i class="fas fa-user-secret"></i> Crime</span>
                     </div>
 
                     <p class="brand-pitch">
@@ -136,6 +166,11 @@ try {
                     </div>
 
                     <div id="login-box" class="auth-view active" data-auth-view="login">
+                        <div class="form-intro login-intro">
+                            <span class="intro-icon"><i class="fas fa-door-open"></i></span>
+                            <div><strong>Bon retour à Velora.</strong><small>Reprends directement là où ton histoire s'est arrêtée.</small></div>
+                        </div>
+
                         <div id="e-login-message" class="auth-alert error" style="display:none;">
                             <i class="fas fa-exclamation-circle"></i><span id="e-login-msg"></span>
                         </div>
@@ -167,9 +202,16 @@ try {
                         <button type="button" class="auth-secondary" data-open-auth="register">
                             <span>Créer un compte</span>
                         </button>
+
+                        <div class="auth-footnote"><i class="fas fa-circle"></i> Serveur RP disponible · progression sauvegardée</div>
                     </div>
 
                     <div id="register-box" class="auth-view" data-auth-view="register">
+                        <div class="form-intro register-intro">
+                            <span class="intro-icon"><i class="fas fa-id-card"></i></span>
+                            <div><strong>Créer ton identité citoyenne.</strong><small>Ton pseudo sera le nom de ton personnage en ville.</small></div>
+                        </div>
+
                         <div id="e-register-message" class="auth-alert error" style="display:none;">
                             <i class="fas fa-exclamation-circle"></i><span id="e-register-msg"></span>
                         </div>
@@ -207,6 +249,9 @@ try {
                             </div>
                         </div>
 
+                        <div class="password-strength" aria-hidden="true"><span id="password-strength-fill"></span></div>
+                        <small id="password-strength-label" class="password-strength-label">Sécurité du mot de passe</small>
+
                         <label class="rules-line">
                             <input id="rp-rules" type="checkbox" value="1">
                             <span>J'accepte les règles RP et le respect des autres joueurs.</span>
@@ -219,6 +264,8 @@ try {
                         <button type="button" class="auth-secondary" data-open-auth="login">
                             <span>J'ai déjà un compte</span>
                         </button>
+
+                        <div class="auth-footnote"><i class="fas fa-gift"></i> Identité RP + logement de départ après inscription</div>
                     </div>
                 </div>
             </div>
