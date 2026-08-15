@@ -1,7 +1,7 @@
 <?php
 /**
- * PixelZone by RDP Services, Emulated by Retro Development Server.
- * Localhost/XAMPP Nitro client entry point.
+ * PixelZone / RDP localhost client entry point.
+ * Keep the original RP overlay shell and replace only the remote Nitro iframe.
  */
 
 require_once "app/init.pz.php";
@@ -11,24 +11,54 @@ if(!$Session->Exist(Config::$SessionName)):
     exit;
 endif;
 
-$ClientAUTH = $UserMG->GenerateAUTH($UData['id']);
-$UserMG->GenerateMachineId($UData['id']);
-$UserMG->CheckVIPStatus($UData['id']);
+$PageName = "Play";
 
-$nitroUrl = Config::$URL . "/nitro/index.html?sso=" . rawurlencode($ClientAUTH);
-?>
-<!doctype html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo Config::$WName; ?> ~ Client</title>
-    <style>
-        html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#111; }
-        iframe { border:0; width:100%; height:100%; display:block; }
-    </style>
-</head>
-<body>
-    <iframe src="<?php echo htmlspecialchars($nitroUrl, ENT_QUOTES, 'UTF-8'); ?>" allow="camera; microphone; fullscreen" allowfullscreen></iframe>
-</body>
-</html>
+// The original client template contains the complete RDP RP UI (HUD, phone,
+// commands, stats, jobs, taxi, gangs, etc.). Capture it so localhost-only
+// substitutions can be applied without destroying that integration.
+ob_start();
+require_once CLIENT . 'client.php';
+$html = ob_get_clean();
+
+$localNitro = Config::$URL . '/nitro-last/index.html?sso=';
+$html = str_replace(
+    array(
+        'https://nitro.habbovip.us/index.html?sso=',
+        'https://dev.habbovip.us/index.html?sso='
+    ),
+    array($localNitro, $localNitro),
+    $html
+);
+
+// Flash is no longer used, but the legacy template still calls swfobject.
+// Also convert only the dedicated RDP overlay websocket (2087) from WSS to
+// plain WS on localhost. Nitro itself uses the separate 2097 game bridge.
+$localhostShim = <<<'HTML'
+<script>
+(function () {
+    window.swfobject = window.swfobject || { embedSWF: function () {} };
+
+    if (window.WebSocket && !window.__rdpLocalWsShim) {
+        window.__rdpLocalWsShim = true;
+        const NativeWebSocket = window.WebSocket;
+        window.WebSocket = new Proxy(NativeWebSocket, {
+            construct(Target, args) {
+                if (typeof args[0] === 'string' && /^wss:\/\/(127\.0\.0\.1|localhost):2087\//i.test(args[0])) {
+                    args[0] = args[0].replace(/^wss:/i, 'ws:');
+                }
+                return Reflect.construct(Target, args);
+            }
+        });
+    }
+})();
+</script>
+<style>
+html, body { width:100%; height:100%; margin:0; overflow:hidden; background:#000; }
+iframe.Nitro { position:fixed; inset:0; width:100%; height:100%; border:0; z-index:1; }
+#app { position:relative; z-index:20; }
+</style>
+HTML;
+
+$html = preg_replace('/<head(.*?)>/i', '<head$1>' . $localhostShim, $html, 1);
+
+echo $html;
