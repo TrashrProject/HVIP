@@ -13,9 +13,6 @@ endif;
 
 $PageName = "Play";
 
-// Pick an apartment automatically for localhost testing.
-// Priority: explicit ?room=ID -> first apartment owned by the logged user ->
-// first existing apartment in the RP database.
 $autoRoomId = 0;
 if (isset($_GET['room']) && is_numeric($_GET['room'])) {
     $autoRoomId = max(0, (int) $_GET['room']);
@@ -38,9 +35,6 @@ if ($autoRoomId <= 0) {
     }
 }
 
-// The original client template contains the complete RDP RP UI (HUD, phone,
-// commands, stats, jobs, taxi, gangs, etc.). Capture it so localhost-only
-// substitutions can be applied without destroying that integration.
 ob_start();
 require_once CLIENT . 'client.php';
 $html = ob_get_clean();
@@ -60,10 +54,8 @@ $html = str_replace(
     $html
 );
 
-// Flash is no longer used, but the legacy template still calls swfobject.
-// Convert only the dedicated RDP overlay websocket (2087) from WSS to WS on
-// localhost. Nitro itself uses the separate 2097 game bridge.
 $localhostShim = <<<'HTML'
+<link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?v=3">
 <script>
 (function () {
     window.swfobject = window.swfobject || { embedSWF: function () {} };
@@ -80,14 +72,9 @@ $localhostShim = <<<'HTML'
                 }
 
                 const socket = Reflect.construct(Target, args);
-
-                // rdp.c.js from this pack has compose_loader disabled, while
-                // the emulator still emits it. Consume it here before the old
-                // dispatcher logs an error for every loader update.
                 if (isRdpSocket) {
                     socket.addEventListener('message', function(event) {
                         if (typeof event.data !== 'string' || !/^compose_loader\|/i.test(event.data)) return;
-
                         event.stopImmediatePropagation();
                         const parts = event.data.split('|');
                         const amount = parseInt(parts[1], 10);
@@ -96,7 +83,6 @@ $localhostShim = <<<'HTML'
                         }
                     });
                 }
-
                 return socket;
             }
         });
