@@ -20,52 +20,18 @@ namespace Plus.HabboRoleplay.PhoneChat
         /// log4net
         /// </summary>
         private readonly ILog log = LogManager.GetLogger("Plus.HabboRoleplay.PhoneChat.PhoneChatManaer");
-        
 
         /// <summary>
-        /// Thread-safe dictionary containing all houses
+        /// Thread-safe dictionary containing all chats.
         /// </summary>
         public ConcurrentDictionary<int, PhoneChat> ChatList = new ConcurrentDictionary<int, PhoneChat>();
 
         /// <summary>
-        /// Initializes the house list dictionary
+        /// Initializes the chat list dictionary.
         /// </summary>
         public void Init()
         {
             ChatList.Clear();
-            /*
-            DataTable Houses;
-
-            using (IQueryAdapter DB = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
-            {
-                DB.SetQuery("SELECT * from `play_houses`");
-                Houses = DB.getTable();
-
-                if (Houses != null)
-                {
-                    foreach (DataRow Row in Houses.Rows)
-                    {
-                        int ItemId = Convert.ToInt32(Row["sign_id"]);
-                        int RoomId = Convert.ToInt32(Row["room_id"]);
-                        int OwnerId = Convert.ToInt32(Row["owner_id"]);
-                        int Cost = Convert.ToInt32(Row["cost"]);
-                        bool ForSale = PlusEnvironment.EnumToBool(Row["for_sale"].ToString());
-                        int Level = Convert.ToInt32(Row["level"]);
-                        string[] Upgrades = Row["upgrades"].ToString().Split(',');
-                        bool IsLocked = PlusEnvironment.EnumToBool(Row["is_locked"].ToString());
-                        int InsideRoomId = Convert.ToInt32(Row["inside_room_id"]);
-                        int DoorX = Convert.ToInt32(Row["door_x"]);
-                        int DoorY = Convert.ToInt32(Row["door_y"]);
-                        int DoorZ = Convert.ToInt32(Row["door_z"]);
-                        
-                        House newHouse = new House(ItemId, RoomId, OwnerId, Cost, ForSale, Level, Upgrades, IsLocked, InsideRoomId, DoorX, DoorY, DoorZ);
-                        HouseList.TryAdd(ItemId, newHouse);
-                    }
-                }
-            }
-
-            */
-
             log.Info("PhoneChat Initialized 100%");
         }
 
@@ -75,25 +41,34 @@ namespace Plus.HabboRoleplay.PhoneChat
             ChatList.TryAdd(ID, newChat);
         }
 
+        /// <summary>
+        /// Always return chats in chronological order. ConcurrentDictionary.Values does not
+        /// guarantee an order, which previously made fresh replies appear between older messages.
+        /// </summary>
+        private List<PhoneChat> Ordered(IEnumerable<PhoneChat> chats)
+        {
+            return chats
+                .OrderBy(x => x.TimeStamp)
+                .ThenBy(x => x.ID)
+                .ToList();
+        }
+
         public List<PhoneChat> GetPhoneChatsByMyID(int MyId)
         {
             if (MyId == 0)
                 return null;
 
-            if (ChatList.Values.Where(x => (x.EmisorId == MyId || x.ReceptorId == MyId) && x.Type == 1).ToList().Count > 0)
-                return ChatList.Values.Where(x => (x.EmisorId == MyId || x.ReceptorId == MyId) && x.Type == 1).ToList();
-            else
-                return null;
+            List<PhoneChat> chats = Ordered(ChatList.Values.Where(x => (x.EmisorId == MyId || x.ReceptorId == MyId) && x.Type == 1));
+            return chats.Count > 0 ? chats : null;
         }
+
         public List<PhoneChat> GetPhoneWhatsChatsByMyID(int MyId)
         {
             if (MyId == 0)
                 return null;
 
-            if (ChatList.Values.Where(x => (x.EmisorId == MyId || x.ReceptorId == MyId) && x.Type == 2).ToList().Count > 0)
-                return ChatList.Values.Where(x => (x.EmisorId == MyId || x.ReceptorId == MyId) && x.Type == 2).ToList();
-            else
-                return null;
+            List<PhoneChat> chats = Ordered(ChatList.Values.Where(x => (x.EmisorId == MyId || x.ReceptorId == MyId) && x.Type == 2));
+            return chats.Count > 0 ? chats : null;
         }
 
         public List<PhoneChat> GetPhoneWhatsChatsByChatting(int MyId, int ToId)
@@ -101,10 +76,8 @@ namespace Plus.HabboRoleplay.PhoneChat
             if (MyId == 0)
                 return null;
 
-            if (ChatList.Values.Where(x => ((x.EmisorId == MyId && x.ReceptorId == ToId) || (x.EmisorId == ToId && x.ReceptorId == MyId)) && x.Type == 2).ToList().Count > 0)
-                return ChatList.Values.Where(x => ((x.EmisorId == MyId && x.ReceptorId == ToId) || (x.EmisorId == ToId && x.ReceptorId == MyId)) && x.Type == 2).ToList();
-            else
-                return null;
+            List<PhoneChat> chats = Ordered(ChatList.Values.Where(x => ((x.EmisorId == MyId && x.ReceptorId == ToId) || (x.EmisorId == ToId && x.ReceptorId == MyId)) && x.Type == 2));
+            return chats.Count > 0 ? chats : null;
         }
 
         public int GetIDbyContact(GameClient Session, string Target)
