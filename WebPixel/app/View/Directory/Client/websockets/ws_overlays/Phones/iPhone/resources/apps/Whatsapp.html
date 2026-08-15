@@ -1,124 +1,114 @@
-<!-- EMOJI RESOURCES -->
-<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
+<!-- LOCAL EMOJI RESOURCES -->
 <link href="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/css/emoji.css?v=<?php echo time(); ?>" rel="stylesheet">
 <script src="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/js/config.js"></script>
 <script src="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/js/util.js"></script>
 <script src="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/js/jquery.emojiarea.js"></script>
 <script src="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/js/emoji-picker.js"></script>
-<!-- END EMOJI RESOURCES -->
 
-<div id="app_WhatsApp" class="AppLayout">
-	<div id="app_bg" class="app_WhatsApp">
-		<div id="app_title" class="Whats_Title">WhatsApp</div>
-		<!-- MENU -->
-		<div id="What_Menu" class="Whats_Menu_Content">
-			<div id="WhatsChats" class="Whats_Menu selected"
-			onclick="
-				$('#WhatsChats').addClass('selected'); 
-				$('#WS_WhatsApp').show(); 
-				$('#WhatsContacts').removeClass('selected'); 
-				$('#WS_WhatsApp_Contacts').hide();
-			">Chats</div>
-			<div id="WhatsContacts" class="Whats_Menu"
-			onclick="
-				$('#WhatsChats').removeClass('selected');
-				$('#WS_WhatsApp').hide();
-				$('#WhatsContacts').addClass('selected');
-				$('#WS_WhatsApp_Contacts').show();
-			">Contactos</div>
-		</div>
-		<!-- END MENU -->
+<div id="app_WhatsApp" class="AppLayout rdp-whatsapp-app">
+    <div id="app_bg" class="app_WhatsApp">
+        <div id="app_title" class="Whats_Title">
+            <div class="whats-brand">
+                <span class="whats-brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 48 48">
+                        <path d="M24 7a16 16 0 00-13.8 24L8 40l9.3-2.4A16 16 0 1024 7z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/>
+                        <path d="M18 16c1.2 5.8 5.2 9.8 11 12l3-3.5 5 2.5c-1.2 4.5-4.2 6-7.5 5.4-8.9-1.7-15-7.8-16.7-16.7-.6-3.3.9-6.3 5.4-7.5l2.5 5z" fill="currentColor" transform="scale(.72) translate(8 8)"/>
+                    </svg>
+                </span>
+                <div class="whats-brand-copy">
+                    <strong>WhatsApp</strong>
+                    <span>RDP Messenger</span>
+                </div>
+            </div>
+        </div>
 
-		<!-- CHATS -->
-		<div id="WS_WhatsApp">
-			<!-- WS Sended
-			<div data-whatsname="Nombre" class="app_msg_content" onclick="
-				$('.Whats_Title').hide();
-				$('#What_Menu').hide();
-				$('#WS_WhatsApp').hide();
-				$('#WS_WhatsApp_Contacts').hide();
-				$('#WS_WhatsApp_Chatting').show();
-			">
-				<div class="app_whats_profile_photo">
-					<div class="app_contacts_avatar" style="background-image: url(https://nitro-imager.kubbo.ch/?figure=&headonly=1);"></div>
-				</div>
-				<div class="app_whats_chat_info">
-					<div class="app_msg_dest">{Nombre}</div>
-					<div class="app_msg_time">9:29 AM</div>
-					<div class="app_msg_lastmsg">este es el ultimo mensaje enviado</div>
-				</div>
-			</div>
-			-->
-		</div>
-		<!-- END CHATS -->
+        <div id="What_Menu" class="Whats_Menu_Content">
+            <div id="WhatsChats" class="Whats_Menu selected" onclick="
+                $('#WhatsChats').addClass('selected');
+                $('#WS_WhatsApp').show();
+                $('#WhatsContacts').removeClass('selected');
+                $('#WS_WhatsApp_Contacts').hide();
+            ">Discussions</div>
+            <div id="WhatsContacts" class="Whats_Menu" onclick="
+                $('#WhatsChats').removeClass('selected');
+                $('#WS_WhatsApp').hide();
+                $('#WhatsContacts').addClass('selected');
+                $('#WS_WhatsApp_Contacts').show();
+            ">Contacts</div>
+        </div>
 
-		<!-- CONTACTS -->
-		<div id="WS_WhatsApp_Contacts" style="display: none;">
-			<!-- WS Sended
-			<div data-whatsname="Nombre" class="app_msg_content" onclick="
-				$('.Whats_Title').hide();
-				$('#What_Menu').hide();
-				$('#WS_WhatsApp').hide();
-				$('#WS_WhatsApp_Contacts').hide();
-				$('#WS_WhatsApp_Chatting').show();
-			">
-				<div class="app_whats_profile_photo">
-					<div class="app_contacts_avatar" style="background-image: url(https://nitro-imager.kubbo.ch/?figure=&headonly=1);"></div>
-				</div>
-				<div class="app_whats_chat_info">
-					<div class="app_msg_dest">{Nombre}</div>
-					<div class="app_msg_lastmsg">Hey there, I'm using WhatsApp!</div>
-				</div>
-			</div>
-			-->
-		</div>
-		<!-- END CONTACTS -->
+        <div id="WS_WhatsApp" class="whats-list-view">
+            <label class="whats-search" for="WhatsSearchChats">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input id="WhatsSearchChats" type="text" autocomplete="off" placeholder="Rechercher une discussion">
+            </label>
+            <!-- Rows are injected by the existing WebSocket phone system. -->
+        </div>
 
-		<!-- CHATTING -->
-		<div id="WS_WhatsApp_Chatting" style="display: none;">
-			<div class="app_WhatsApp_Chatting">
-				<div id="app_title" class="Whats_Title_Chatting">
-					<div class="app_title_options" onclick="
-						$('.Whats_Title').show();
-						$('#What_Menu').show();
-						$('#WS_WhatsApp').show();
-						$('#WS_WhatsApp_Contacts').hide();
-						$('#WS_WhatsApp_Chatting').hide();
-						$('#WhatsChats').addClass('selected');
-						$('#WhatsContacts').removeClass('selected'); 
-					" style="color:white;">
-						<i class="fas fa-arrow-left"></i>
-					</div>
-					<div class="app_whats_profile_photo app_whats_photo">
-						<!-- WS Sended
-						<div class="app_contacts_avatar" style="background-image: url(https://nitro-imager.kubbo.ch/?figure=&headonly=1);"></div>
-						-->
-					</div>
-					<div class="app_whats_chat_info">
-						<b class="app_whats_name">{Nombre}</b>
-						<div class="app_whats_lastonline">en l&iacute;nea</div>
-					</div>
-				</div>
-				<!-- Chat Bar -->
-				<div class="ChatBar" style="margin-top: 335px;">
-					<input id="mensaje" type="text" class="TextTo" placeholder="" data-emojiable="true">
-					<div id="TextTo" class="SendButtonMsg">Enviar</div>
-				</div>
-				<!-- END Chat Bar -->
-				<!-- MENSAJES -->
-				<div id="app_whats_messages" class="app_whats_messages">
-					<!-- WS Sended
-					<div class="Msg_Container">
-						<div class="Msg_From_Whats" title="22:10">Hola</div>
-					</div>
-					<div class="Msg_Container">
-						<div class="Msg_To_Whats" title="22:10">Hola 2</div>
-					</div>
-					-->
-				</div>
-				<!-- END MENSAJES -->
-			</div>
-		</div>
-		<!-- END CHATTING -->
-	</div>
+        <div id="WS_WhatsApp_Contacts" class="whats-list-view" style="display:none;">
+            <label class="whats-search" for="WhatsSearchContacts">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input id="WhatsSearchContacts" type="text" autocomplete="off" placeholder="Rechercher un contact">
+            </label>
+            <!-- Contacts are injected by the existing WebSocket phone system. -->
+        </div>
+
+        <div id="WS_WhatsApp_Chatting" style="display:none;">
+            <div class="app_WhatsApp_Chatting">
+                <div id="app_title" class="Whats_Title_Chatting">
+                    <button type="button" class="app_title_options whats-back" onclick="
+                        $('.Whats_Title').show();
+                        $('#What_Menu').show();
+                        $('#WS_WhatsApp').show();
+                        $('#WS_WhatsApp_Contacts').hide();
+                        $('#WS_WhatsApp_Chatting').hide();
+                        $('#WhatsChats').addClass('selected');
+                        $('#WhatsContacts').removeClass('selected');
+                    " aria-label="Retour">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5L8 12l6.5 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="app_whats_profile_photo app_whats_photo"></div>
+                    <div class="app_whats_chat_info">
+                        <b class="app_whats_name">Contact</b>
+                        <div class="app_whats_lastonline">en ligne</div>
+                    </div>
+                </div>
+
+                <div id="app_whats_messages" class="app_whats_messages"></div>
+
+                <div class="ChatBar">
+                    <div class="whats-compose-shell">
+                        <input id="mensaje" type="text" class="TextTo" placeholder="Message" data-emojiable="true" autocomplete="off">
+                    </div>
+                    <button id="TextTo" type="button" class="SendButtonMsg" aria-label="Envoyer">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.2l15-7-5.5 15-2.6-5.1L4 11.2z" fill="currentColor"/><path d="M10.9 14.1l3.9-4.1" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+(function(){
+    function filterRows(inputSelector, containerSelector){
+        var input = document.querySelector(inputSelector);
+        var container = document.querySelector(containerSelector);
+        if(!input || !container || input.dataset.rdpBound === '1') return;
+        input.dataset.rdpBound = '1';
+        input.addEventListener('input', function(){
+            var term = (this.value || '').toLowerCase().trim();
+            container.querySelectorAll('.app_msg_content').forEach(function(row){
+                row.style.display = !term || row.textContent.toLowerCase().indexOf(term) !== -1 ? '' : 'none';
+            });
+        });
+    }
+    function bindWhatsSearch(){
+        filterRows('#WhatsSearchChats','#WS_WhatsApp');
+        filterRows('#WhatsSearchContacts','#WS_WhatsApp_Contacts');
+    }
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindWhatsSearch);
+    else bindWhatsSearch();
+    setTimeout(bindWhatsSearch,250);
+})();
+</script>
