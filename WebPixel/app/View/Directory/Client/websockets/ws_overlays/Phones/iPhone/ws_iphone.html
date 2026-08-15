@@ -1,4 +1,4 @@
-<!-- RDP Pocket v11: modern RP phone home. Existing app hooks are preserved. -->
+<!-- RDP Pocket v12: modern RP phone home. Existing app hooks are preserved. -->
 <link href="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
 <link href="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?p=<?php echo time(); ?>" rel="stylesheet">
 <script type="text/javascript" src="<?php echo WS_DY; ?>/ws_overlays/Phones/iPhone/resources/js/scripts.js?p=<?php echo time(); ?>"></script>
@@ -64,14 +64,14 @@
                 </div>
 
                 <div class="rdp-app-grid" aria-label="Applications">
-                    <div class="rdp-app-tile">
+                    <div class="rdp-app-tile" data-rdp-key="_Calendar">
                         <div class="appicon count rp-calendar" data-app="_Calendar" data-col-moves="0">
                             <span class="rp-calendar-card"><small>AOÛ</small><b>15</b></span>
                         </div>
                         <div class="app_name">Calendrier</div>
                     </div>
 
-                    <div class="rdp-app-tile">
+                    <div class="rdp-app-tile" data-rdp-key="_Gallery">
                         <div class="appicon count rp-gallery" data-app="_Gallery" data-col-moves="0">
                             <svg class="rp-app-svg" viewBox="0 0 48 48" aria-hidden="true">
                                 <circle cx="24" cy="24" r="5" fill="#fff"/>
@@ -87,7 +87,7 @@
                         <div class="app_name">Photos</div>
                     </div>
 
-                    <div class="rdp-app-tile">
+                    <div class="rdp-app-tile" data-rdp-key="_Maps">
                         <div class="appicon count rp-map" data-app="_Maps" data-col-moves="0">
                             <svg class="rp-app-svg" viewBox="0 0 48 48" aria-hidden="true">
                                 <path d="M4 9l12-4 16 5 12-4v33l-12 4-16-5-12 4z" fill="#f5f7f4"/>
@@ -101,7 +101,7 @@
                         <div class="app_name">Carte</div>
                     </div>
 
-                    <div class="rdp-app-tile">
+                    <div class="rdp-app-tile" data-rdp-key="_Calculator">
                         <div class="appicon count rp-calc" data-app="_Calculator" data-col-moves="0">
                             <svg class="rp-app-svg rp-app-svg-small" viewBox="0 0 48 48" aria-hidden="true">
                                 <path d="M11 14h10M16 9v10M28 14h9M11 31h10M28 27l9 9M37 27l-9 9" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
@@ -110,7 +110,7 @@
                         <div class="app_name">Calculatrice</div>
                     </div>
 
-                    <div class="rdp-app-tile">
+                    <div class="rdp-app-tile" data-rdp-key="_Settings">
                         <div class="appicon count rp-settings" data-app="_Settings" data-col-moves="0">
                             <svg class="rp-app-svg rp-app-svg-small" viewBox="0 0 48 48" aria-hidden="true">
                                 <path d="M27.5 5l1.5 5.1a16 16 0 014.1 1.7l4.7-2.5 4 6.9-4.1 3.4c.2 1 .3 2.1.3 3.2s-.1 2.2-.3 3.2l4.1 3.4-4 6.9-4.7-2.5a16 16 0 01-4.1 1.7L27.5 41h-8l-1.5-5.1a16 16 0 01-4.1-1.7l-4.7 2.5-4-6.9 4.1-3.4a16 16 0 010-6.4l-4.1-3.4 4-6.9 4.7 2.5a16 16 0 014.1-1.7L19.5 5z" fill="#fff" fill-opacity=".92"/>
@@ -120,7 +120,7 @@
                         <div class="app_name">Réglages</div>
                     </div>
 
-                    <div class="rdp-app-tile">
+                    <div class="rdp-app-tile" data-rdp-key="_Health">
                         <div class="appicon count rp-health" data-app="_Health" data-col-moves="0">
                             <svg class="rp-app-svg rp-app-svg-small" viewBox="0 0 48 48" aria-hidden="true">
                                 <path d="M24 39S8 30 8 18.5C8 12 12.4 8 18 8c3.3 0 5.7 1.7 6 4.2C24.3 9.7 26.7 8 30 8c5.6 0 10 4 10 10.5C40 30 24 39 24 39z" fill="#ff3b5c"/>
@@ -129,7 +129,7 @@
                         <div class="app_name">Santé</div>
                     </div>
 
-                    <div class="rdp-app-tile">
+                    <div class="rdp-app-tile" data-rdp-key="_Services">
                         <div class="appicon count rp-services" data-app="_Services" data-col-moves="0">
                             <svg class="rp-app-svg rp-app-svg-small" viewBox="0 0 48 48" aria-hidden="true">
                                 <rect x="8" y="13" width="32" height="25" rx="8" fill="#fff" fill-opacity=".18"/>
@@ -142,7 +142,7 @@
 
                 <div class="rdp-section-label">COMMUNICATION</div>
                 <div id="dock_apps" class="rdp-dock">
-                    <div class="rdp-dock-app">
+                    <div class="rdp-dock-app" data-rdp-key="_Messages">
                         <div class="appicon count rp-messages" data-app="_Messages" data-col-moves="0">
                             <svg class="rp-app-svg rp-app-svg-small" viewBox="0 0 48 48" aria-hidden="true">
                                 <path d="M8 10h32v24H23l-9 7v-7H8z" fill="#fff"/>
@@ -151,7 +151,7 @@
                         </div>
                         <span>Messages</span>
                     </div>
-                    <div class="rdp-dock-app">
+                    <div class="rdp-dock-app" data-rdp-key="_WhatsApp">
                         <div class="appicon count rp-whatsapp" data-app="_WhatsApp" data-col-moves="0">
                             <svg class="rp-app-svg rp-app-svg-small" viewBox="0 0 48 48" aria-hidden="true">
                                 <path d="M24 7a16 16 0 00-13.8 24L8 40l9.3-2.4A16 16 0 1024 7z" fill="none" stroke="#fff" stroke-width="3.2" stroke-linejoin="round"/>
@@ -160,7 +160,7 @@
                         </div>
                         <span>WhatsApp</span>
                     </div>
-                    <div class="rdp-dock-app">
+                    <div class="rdp-dock-app" data-rdp-key="_Contacts">
                         <div class="appicon count rp-contacts" data-app="_Contacts" data-col-moves="0">
                             <svg class="rp-app-svg rp-app-svg-small" viewBox="0 0 48 48" aria-hidden="true">
                                 <circle cx="24" cy="17" r="8" fill="#fff"/>
@@ -178,16 +178,181 @@
 </div>
 
 <script type="text/javascript" src="<?php echo WS_DY; ?>/ws_overlays/Phones/iPhone/resources/js/scripts_bottom.js?p=<?php echo time(); ?>"></script>
+
+<style id="rdp-phone-interactions-v12">
+#phone .rdp-app-tile,#phone .rdp-dock-app{cursor:grab!important;touch-action:none}
+#phone .rdp-app-tile:active,#phone .rdp-dock-app:active{cursor:grabbing!important}
+#phone .rdp-app-tile.rdp-dragging,#phone .rdp-dock-app.rdp-dragging{opacity:.34!important;transform:scale(.90)!important;filter:saturate(.75)!important;z-index:30!important}
+#phone .rdp-app-tile.rdp-drop-target .appicon,#phone .rdp-dock-app.rdp-drop-target .appicon{transform:scale(1.08)!important;box-shadow:0 0 0 2px rgba(119,220,255,.45),0 10px 22px rgba(0,0,0,.32)!important}
+#phone .rdp-app-tile,#phone .rdp-dock-app{transition:transform .14s ease,opacity .14s ease!important}
+#phone .rp-app-svg,#phone .rp-calendar-card{pointer-events:none!important}
+</style>
+
 <script>
 (function(){
-    function protectPhoneHome(){
-        document.querySelectorAll('#phone .rdp-app-tile,#phone .rdp-dock-app').forEach(function(el){
-            el.setAttribute('draggable','false');
-            el.addEventListener('dragstart', function(e){ e.preventDefault(); });
+    var dragItem = null;
+    var dragContainer = null;
+    var dragMoved = false;
+    var suppressClickUntil = 0;
+
+    function storageAvailable(){
+        try{
+            var x='__rdp_phone_test__';
+            localStorage.setItem(x,x);
+            localStorage.removeItem(x);
+            return true;
+        }catch(e){ return false; }
+    }
+
+    var canStore = storageAvailable();
+
+    function getKey(item){
+        if(!item) return '';
+        return item.getAttribute('data-rdp-key') || ((item.querySelector('.appicon') || {}).dataset || {}).app || '';
+    }
+
+    function saveOrder(container, key){
+        if(!canStore || !container) return;
+        var order = Array.prototype.map.call(container.children, function(item){ return getKey(item); }).filter(Boolean);
+        try{ localStorage.setItem(key, JSON.stringify(order)); }catch(e){}
+    }
+
+    function restoreOrder(container, key){
+        if(!canStore || !container) return;
+        var order;
+        try{ order = JSON.parse(localStorage.getItem(key) || '[]'); }catch(e){ order = []; }
+        if(!Array.isArray(order) || !order.length) return;
+        var items = {};
+        Array.prototype.forEach.call(container.children, function(item){ items[getKey(item)] = item; });
+        order.forEach(function(appKey){ if(items[appKey]) container.appendChild(items[appKey]); });
+    }
+
+    function clearTargets(container){
+        if(!container) return;
+        container.querySelectorAll('.rdp-drop-target').forEach(function(el){ el.classList.remove('rdp-drop-target'); });
+    }
+
+    function bindReorder(container, itemSelector, storageKey){
+        if(!container || container.dataset.rdpReorderBound === '1') return;
+        container.dataset.rdpReorderBound = '1';
+        restoreOrder(container, storageKey);
+
+        function prepareItems(){
+            container.querySelectorAll(itemSelector).forEach(function(item){
+                item.setAttribute('draggable','true');
+                if(item.dataset.rdpDragBound === '1') return;
+                item.dataset.rdpDragBound = '1';
+
+                item.addEventListener('dragstart', function(e){
+                    dragItem = item;
+                    dragContainer = container;
+                    dragMoved = false;
+                    clearTargets(container);
+                    try{
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', getKey(item));
+                    }catch(_){}
+                    requestAnimationFrame(function(){ item.classList.add('rdp-dragging'); });
+                });
+
+                item.addEventListener('dragend', function(){
+                    item.classList.remove('rdp-dragging');
+                    clearTargets(container);
+                    if(dragMoved){
+                        saveOrder(container, storageKey);
+                        suppressClickUntil = Date.now() + 350;
+                    }
+                    dragItem = null;
+                    dragContainer = null;
+                    dragMoved = false;
+                });
+            });
+        }
+
+        prepareItems();
+
+        container.addEventListener('dragover', function(e){
+            if(!dragItem || dragContainer !== container) return;
+            e.preventDefault();
+            var target = e.target.closest(itemSelector);
+            if(!target || target === dragItem || target.parentNode !== container) return;
+
+            clearTargets(container);
+            target.classList.add('rdp-drop-target');
+
+            var rect = target.getBoundingClientRect();
+            var before = e.clientX < rect.left + rect.width / 2;
+            if(before) container.insertBefore(dragItem, target);
+            else container.insertBefore(dragItem, target.nextSibling);
+            dragMoved = true;
+        });
+
+        container.addEventListener('drop', function(e){
+            if(!dragItem || dragContainer !== container) return;
+            e.preventDefault();
+            clearTargets(container);
+            saveOrder(container, storageKey);
+            suppressClickUntil = Date.now() + 350;
         });
     }
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', protectPhoneHome);
-    else protectPhoneHome();
-    setTimeout(protectPhoneHome,250);
+
+    function sendPhoneApp(app){
+        if(!app || !window.rdp || !window.rdp_app || !rdp_app.webSocket) return;
+        try{
+            rdp['sendData']('event_phone', 'in_app,' + app + ',', false, false, rdp_app['webSocket'], rdp_app['startedSocket'], rdp_app['UserID']);
+        }catch(e){
+            console.warn('[RDP Pocket] impossible d\'ouvrir l\'application', app, e);
+        }
+    }
+
+    function openWhatsAppLocal(){
+        if(!window.jQuery) return;
+        $('#AppViewer').hide();
+        $('#app_WhatsApp').show();
+        $('#app_WhatsApp > .app_WhatsApp').show().css('display','inherit');
+        $('.Whats_Title').show();
+        $('#What_Menu').show();
+        $('#WS_WhatsApp').show();
+        $('#WS_WhatsApp_Contacts').hide();
+        $('#WS_WhatsApp_Chatting').hide();
+        $('#WhatsChats').addClass('selected');
+        $('#WhatsContacts').removeClass('selected');
+    }
+
+    function initPhoneInteractions(){
+        var phoneContent = document.getElementById('phone_content');
+        var grid = document.querySelector('#phone .rdp-app-grid');
+        var dock = document.querySelector('#phone #dock_apps.rdp-dock');
+        if(!phoneContent || !grid || !dock) return;
+
+        bindReorder(grid, '.rdp-app-tile', 'rdpPocketGridOrderV12');
+        bindReorder(dock, '.rdp-dock-app', 'rdpPocketDockOrderV12');
+
+        if(phoneContent.dataset.rdpClickFix === '1') return;
+        phoneContent.dataset.rdpClickFix = '1';
+
+        phoneContent.addEventListener('click', function(e){
+            if(Date.now() < suppressClickUntil){
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return;
+            }
+
+            var icon = e.target.closest('.appicon[data-app="_WhatsApp"]');
+            if(!icon || !phoneContent.contains(icon)) return;
+
+            // WhatsApp is rendered locally immediately, then the emulator is
+            // still asked for the current conversations/contacts as before.
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            openWhatsAppLocal();
+            sendPhoneApp('_WhatsApp');
+        }, true);
+    }
+
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPhoneInteractions);
+    else initPhoneInteractions();
+    setTimeout(initPhoneInteractions, 250);
+    setTimeout(initPhoneInteractions, 1000);
 })();
 </script>
