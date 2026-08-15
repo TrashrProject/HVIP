@@ -11,7 +11,7 @@ const MAX_PACKET = 8 * 1024 * 1024;
 const TRACE = process.env.NITRO_TRACE !== '0';
 const TRACE_FILE = path.join(__dirname, 'trace.log');
 const DROP_HEADERS = new Set(
-  String(process.env.NITRO_DROP_HEADERS || '')
+  String(process.env.NITRO_DROP_HEADERS || '2238')
     .split(',')
     .map(v => Number(v.trim()))
     .filter(v => Number.isInteger(v) && v > 0)
