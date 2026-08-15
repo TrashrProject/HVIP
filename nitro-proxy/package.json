@@ -1,0 +1,13 @@
+{
+  "name": "hvip-nitro-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebSocket to TCP bridge for Nitro -> RDP Emulator",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
