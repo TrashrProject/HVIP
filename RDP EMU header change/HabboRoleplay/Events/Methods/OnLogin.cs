@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Collections.Generic;
+using System.Linq;
 using Plus.HabboHotel.GameClients;
 using Plus.HabboHotel.Groups;
 using Plus.HabboHotel.Rooms;
@@ -38,7 +39,7 @@ namespace Plus.HabboRoleplay.Events.Methods
             PhoneCheck(Client);
             RoleplayManager.PoliceCMDSCheck(Client);
             CheckWS(Client);
-            //SocketConnection(Client);
+            NotifyContactsOnline(Client);
 
             // El primer usuario en conectarse se encargará de hacer que el emu precargue todas las salas
             if (!RoleplayManager.PreLoadedRooms)
@@ -48,19 +49,51 @@ namespace Plus.HabboRoleplay.Events.Methods
             }
         }
 
+        #region Contact Online Notification
+        public void NotifyContactsOnline(GameClient Client)
+        {
+            try
+            {
+                string username = (Client.GetHabbo().Username ?? string.Empty).Replace("|", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty);
+                string look = (Client.GetHabbo().Look ?? string.Empty).Replace("|", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty);
+
+                foreach (var Buddy in Client.GetHabbo().GetMessenger().GetFriends().ToList())
+                {
+                    if (Buddy == null)
+                        continue;
+
+                    GameClient FriendClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(Buddy.UserId);
+                    if (FriendClient == null || FriendClient.GetHabbo() == null || FriendClient.GetPlay() == null)
+                        continue;
+
+                    // A phone notification is only useful for players who own a phone and have a live WS session.
+                    if (FriendClient.GetPlay().Phone <= 0)
+                        continue;
+                    if (!PlusEnvironment.GetGame().GetWebEventManager().SocketReady(FriendClient, true))
+                        continue;
+
+                    PlusEnvironment.GetGame().GetWebEventManager().SendDataDirect(
+                        FriendClient,
+                        "compose_phone|contact_online|" + username + "|" + look
+                    );
+                }
+            }
+            catch
+            {
+                // Login must never fail because of a non-critical phone presence notification.
+            }
+        }
+        #endregion
+
         #region Check WS Connect
         public void CheckWS(GameClient Client)
         {
             if (!PlusEnvironment.GetGame().GetWebEventManager().SocketReady(Client, true))
             {
-                //Console.WriteLine("Los WebSockets NO conectaron");
-                //Client.SendMessage(new BroadcastMessageAlertComposer("¡Los WebSockets NO conectaron!\n\nEstos son necesarios para que pueas visualizar Ventanas Roleplay, tus stats, y muchas más herramientas dentro del servidor.\n\nIntenta reiniciar el Client para intentar reconectar.\nSi el problema persiste, asegurate de no teneer algún programa externo que lo bloquee."));
-                //Client.SendNotification("¡Los WebSockets NO conectaron!\n\nEstos son necesarios para que pueas visualizar Ventanas Roleplay, tus stats, y muchas más herramientas dentro del servidor.\n\nIntenta reiniciar el Client para intentar reconectar.\nSi el problema persiste, asegurate de no teneer algún programa externo que lo bloquee.");
                 Logging.WriteLine(Client.GetHabbo().Username + " se ha conectado.", ConsoleColor.DarkGreen);
             }
             else
             {
-                //Client.SendMessage(new BroadcastMessageAlertComposer("¡Los WebSockets NO. conectaron!\nEstos son necesarios para que pueas visualizar Ventanas Roleplay, tus stats, y muchas más herramientas dentro del servidor.\nIntenta reiniciar el Client para intentar reconectar.\nSi el problema persiste, asegurate de no teneer algún programa externo que lo bloquee."));
                 SocketConnection(Client);
                 Logging.WriteLine(Client.GetHabbo().Username + " se ha conectado. (+WS)", ConsoleColor.DarkGreen);
             }
@@ -87,17 +120,12 @@ namespace Plus.HabboRoleplay.Events.Methods
         #endregion
 
         #region DeathCheck
-        /// <summary>
-        /// Checks if the client is dead, if so send the user to hospital
-        /// </summary>
-        /// 
         public void DeathCheck(GameClient Client)
         {
             if (!Client.GetPlay().IsDead)
                 return;
             if(!Client.GetPlay().TimerManager.ActiveTimers.ContainsKey("death"))
                 Client.GetPlay().TimerManager.CreateTimer("death", 1000, true);
-
         }
         #endregion
 
@@ -106,17 +134,13 @@ namespace Plus.HabboRoleplay.Events.Methods
         {
             if (!Client.GetPlay().IsDying)
                 return;
-            
+
             if (!Client.GetPlay().TimerManager.ActiveTimers.ContainsKey("dying"))
                 Client.GetPlay().TimerManager.CreateTimer("dying", 1000, true);
         }
         #endregion
 
         #region NoobCheck
-
-        /// <summary>
-        /// Checks if the client is jailed, if so send the user to jail
-        /// </summary>
         public void NoobCheck(GameClient Client)
         {
             if (!Client.GetPlay().IsNoob)
@@ -127,13 +151,8 @@ namespace Plus.HabboRoleplay.Events.Methods
         #endregion
 
         #region JailedCheck
-        /// <summary>
-        /// Checks if the client is dead, if so send the user to hospital
-        /// </summary>
-        /// 
         public void JailedCheck(GameClient Client)
         {
-            // WS Wanted Stars
             if (Client.GetPlay().WebSocketConnection != null)
             {
                 if (Client.GetPlay().WantedLevel > 0)
@@ -149,15 +168,10 @@ namespace Plus.HabboRoleplay.Events.Methods
                 return;
             if (!Client.GetPlay().TimerManager.ActiveTimers.ContainsKey("jail"))
                 Client.GetPlay().TimerManager.CreateTimer("jail", 1000, true);
-
         }
         #endregion
 
         #region SancCheck
-        /// <summary>
-        /// Checks if the client is dead, if so send the user to hospital
-        /// </summary>
-        /// 
         public void SancCheck(GameClient Client)
         {
             if (!Client.GetPlay().IsSanc)
@@ -168,10 +182,6 @@ namespace Plus.HabboRoleplay.Events.Methods
         #endregion
 
         #region BanCHnCheck
-        /// <summary>
-        /// Checks if the client is dead, if so send the user to hospital
-        /// </summary>
-        /// 
         public void BanCHnCheck(GameClient Client)
         {
             if (!Client.GetPlay().ChNBanned)
@@ -182,10 +192,6 @@ namespace Plus.HabboRoleplay.Events.Methods
         #endregion
 
         #region PhoneCheck
-        /// <summary>
-        /// Checks if the client is dead, if so send the user to hospital
-        /// </summary>
-        /// 
         public void PhoneCheck(GameClient Client)
         {
             if (Client.GetPlay().Phone <= 0)
