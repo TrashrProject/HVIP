@@ -1,0 +1,11 @@
+{
+  "socket.url": "ws://127.0.0.1:2087/",
+  "asset.url": "http://localhost/swf_pz/V5-0-2",
+  "image.library.url": "http://localhost/swf_pz/V5-0-2/c_images/",
+  "hof.furni.url": "http://localhost/swf_pz/V5-0-2/dcr/hof_furni",
+  "url.prefix": "http://localhost/WebPixel",
+  "camera.url": "http://localhost/swf_pz/V5-0-2/c_images/camera",
+  "thumbnails.url": "http://localhost/swf_pz/V5-0-2/c_images/camera/thumbnails/%thumbnail%.png",
+  "habbopages.url": "http://localhost/swf_pz/V5-0-2/habbopages/",
+  "badge.asset.url": "http://localhost/swf_pz/V5-0-2/c_images/album1584/%badgename%.gif"
+}
