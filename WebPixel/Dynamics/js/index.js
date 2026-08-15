@@ -10,6 +10,13 @@
     var endpoint = baseUrl;
     var currentMode = null;
     var pivotLocked = false;
+    var cityPulseIndex = 0;
+    var cityPulseMessages = [
+        'La ville évolue avec les joueurs.',
+        'Les métiers et entreprises façonnent l’économie.',
+        'Chaque quartier possède sa propre ambiance.',
+        'Ta réputation se construit directement en RP.'
+    ];
 
     function parseResponse(data) {
         if (typeof data === 'object') return data;
@@ -90,11 +97,31 @@
         $('#password-strength-label').text(label);
     }
 
+    function updatePasswordMatch() {
+        var password = $('#register-password').val() || '';
+        var confirm = $('#register-password-confirm').val() || '';
+        var $label = $('#password-match-label');
+
+        $label.removeClass('match no-match');
+
+        if (!confirm.length) {
+            $label.text('');
+            return;
+        }
+
+        if (password === confirm) {
+            $label.addClass('match').text('✓ Les mots de passe correspondent');
+        } else {
+            $label.addClass('no-match').text('Les mots de passe ne correspondent pas encore');
+        }
+    }
+
     function applyAuthMode(mode) {
         hideMessages();
 
         $('.auth-tab').removeClass('active');
         $('.auth-tab[data-auth-tab="' + mode + '"]').addClass('active');
+        $('.auth-tabs').toggleClass('register-active', mode === 'register');
 
         $('.auth-view').removeClass('active').hide();
         $('[data-auth-view="' + mode + '"]').addClass('active').show();
@@ -105,6 +132,26 @@
 
     function clearFlipClasses($device) {
         $device.removeClass('flip-90 flip-180 flip-270 flip-reset');
+    }
+
+    function resetDeviceTilt($device) {
+        if (!$device || !$device.length) return;
+        $device.css({
+            '--tilt-x': '0deg',
+            '--tilt-y': '0deg',
+            '--shine-x': '50%',
+            '--shine-y': '18%'
+        }).removeClass('is-hovering');
+    }
+
+    function focusMode(mode) {
+        var id = mode === 'register' ? '#register-username' : '#pz-login-uname';
+        window.setTimeout(function () {
+            var $target = $(id);
+            if ($target.length && window.innerWidth > 700) {
+                $target.trigger('focus');
+            }
+        }, 90);
     }
 
     function openAuth(view, animate) {
@@ -127,10 +174,10 @@
         }
 
         pivotLocked = true;
+        resetDeviceTilt($device);
         clearFlipClasses($device);
 
-        // Full 360° pivot. The back of the phone is really visible in the middle
-        // of the rotation, then the next form returns on the front face.
+        // Full 360° pivot: the back of the device remains visible at mid-rotation.
         $device.addClass('flip-90');
 
         window.setTimeout(function () {
@@ -157,8 +204,40 @@
 
             window.setTimeout(function () {
                 pivotLocked = false;
+                focusMode(mode);
             }, 290);
         }, 505);
+    }
+
+    function saveRememberedUsername() {
+        try {
+            var remember = $('#remember-username').is(':checked');
+            var username = $('#pz-login-uname').val().trim();
+
+            if (remember && username) {
+                window.localStorage.setItem('veloraRememberUsername', username);
+                window.localStorage.setItem('veloraRememberEnabled', '1');
+            } else {
+                window.localStorage.removeItem('veloraRememberUsername');
+                window.localStorage.removeItem('veloraRememberEnabled');
+            }
+        } catch (e) {
+            // localStorage may be blocked; authentication must still work normally.
+        }
+    }
+
+    function restoreRememberedUsername() {
+        try {
+            var enabled = window.localStorage.getItem('veloraRememberEnabled') === '1';
+            var username = window.localStorage.getItem('veloraRememberUsername') || '';
+
+            if (enabled && username) {
+                $('#remember-username').prop('checked', true);
+                $('#pz-login-uname').val(username);
+            }
+        } catch (e) {
+            // Ignore storage restrictions.
+        }
     }
 
     function login() {
@@ -172,6 +251,7 @@
             return;
         }
 
+        saveRememberedUsername();
         setLoading('#subrmit-login', true);
 
         $.ajax({
@@ -270,6 +350,72 @@
         });
     }
 
+    function initDeviceTilt() {
+        var $device = $('.device-shell');
+        if (!$device.length || window.innerWidth <= 900) return;
+
+        $device.on('mousemove', function (event) {
+            if (pivotLocked || $device.is('.flip-90,.flip-180,.flip-270,.flip-reset')) return;
+
+            var rect = this.getBoundingClientRect();
+            var px = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+            var py = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+            var tiltY = (px - 0.5) * 3.2;
+            var tiltX = (0.5 - py) * 2.4;
+
+            $(this).css({
+                '--tilt-x': tiltX.toFixed(2) + 'deg',
+                '--tilt-y': tiltY.toFixed(2) + 'deg',
+                '--shine-x': (px * 100).toFixed(1) + '%',
+                '--shine-y': (py * 100).toFixed(1) + '%'
+            }).addClass('is-hovering');
+        });
+
+        $device.on('mouseleave', function () {
+            resetDeviceTilt($(this));
+        });
+    }
+
+    function initCapsLockHint() {
+        $('#pz-login-pass').on('keydown keyup', function (event) {
+            var caps = event.originalEvent && event.originalEvent.getModifierState && event.originalEvent.getModifierState('CapsLock');
+            $('#caps-lock-hint').toggleClass('visible', !!caps);
+        }).on('blur', function () {
+            $('#caps-lock-hint').removeClass('visible');
+        });
+    }
+
+    function initButtonRipples() {
+        $('.auth-primary').on('pointerdown', function (event) {
+            var rect = this.getBoundingClientRect();
+            var $button = $(this);
+            $button.css({
+                '--ripple-x': (event.clientX - rect.left) + 'px',
+                '--ripple-y': (event.clientY - rect.top) + 'px'
+            }).removeClass('ripple');
+
+            if (this.offsetWidth) {
+                void this.offsetWidth;
+            }
+
+            $button.addClass('ripple');
+            window.setTimeout(function () {
+                $button.removeClass('ripple');
+            }, 480);
+        });
+    }
+
+    function rotateCityPulse() {
+        var $text = $('#city-pulse-text');
+        if (!$text.length) return;
+
+        $text.addClass('is-changing');
+        window.setTimeout(function () {
+            cityPulseIndex = (cityPulseIndex + 1) % cityPulseMessages.length;
+            $text.text(cityPulseMessages[cityPulseIndex]).removeClass('is-changing');
+        }, 160);
+    }
+
     $(document).ready(function () {
         $('[data-open-auth], [data-auth-tab]').on('click', function () {
             openAuth($(this).data('open-auth') || $(this).data('auth-tab'), true);
@@ -297,11 +443,23 @@
             $icon.toggleClass('fa-eye', !show).toggleClass('fa-eye-slash', show);
         });
 
-        $('#register-password').on('input', updatePasswordStrength);
+        $('#register-password').on('input', function () {
+            updatePasswordStrength();
+            updatePasswordMatch();
+        });
+        $('#register-password-confirm').on('input', updatePasswordMatch);
+        $('#remember-username').on('change', saveRememberedUsername);
 
+        restoreRememberedUsername();
         updateClock();
         window.setInterval(updateClock, 30000);
         updatePasswordStrength();
+        updatePasswordMatch();
+        initDeviceTilt();
+        initCapsLockHint();
+        initButtonRipples();
+
+        window.setInterval(rotateCityPulse, 4200);
 
         openAuth(window.location.hash === '#register' ? 'register' : 'login', false);
     });
