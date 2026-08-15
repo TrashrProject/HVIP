@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# Nitro build uses absolute /static/... URLs. Route them to the bundled client.
+RewriteRule ^static/(.*)$ WebPixel/nitro/static/$1 [L]
+
+# Root-level Nitro files referenced by the compiled build / manifest.
+RewriteRule ^favicon\.ico$ WebPixel/nitro/favicon.ico [L]
+RewriteRule ^favicon-16x16\.png$ WebPixel/nitro/favicon-16x16.png [L]
+RewriteRule ^favicon-32x32\.png$ WebPixel/nitro/favicon-32x32.png [L]
+RewriteRule ^apple-touch-icon\.png$ WebPixel/nitro/apple-touch-icon.png [L]
+RewriteRule ^site\.webmanifest$ WebPixel/nitro/site.webmanifest [L]
+RewriteRule ^safari-pinned-tab\.svg$ WebPixel/nitro/safari-pinned-tab.svg [L]
+RewriteRule ^browserconfig\.xml$ WebPixel/nitro/browserconfig.xml [L]
+RewriteRule ^asset-manifest\.json$ WebPixel/nitro/asset-manifest.json [L]
+
+# Compatibility for Nitro configs if an old compiled chunk requests them from /. 
+RewriteRule ^renderer-config\.json$ WebPixel/nitro/renderer-config.json [L]
+RewriteRule ^ui-config\.json$ WebPixel/nitro/ui-config.json [L]
+RewriteRule ^local-config\.json$ WebPixel/nitro/local-config.json [L]
