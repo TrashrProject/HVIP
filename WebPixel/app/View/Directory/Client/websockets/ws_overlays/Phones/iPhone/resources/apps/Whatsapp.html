@@ -1,4 +1,5 @@
-<!-- LOCAL EMOJI RESOURCES -->
+<!-- Keep the legacy emoji assets loaded because scripts_bottom.js expects EmojiPicker to exist.
+     RDP Pocket v14 uses its own lightweight Unicode emoji tray instead of transforming the input. -->
 <link href="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/css/emoji.css?v=<?php echo time(); ?>" rel="stylesheet">
 <script src="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/js/config.js"></script>
 <script src="<?php echo WS_DY;?>/ws_overlays/Phones/iPhone/resources/emojis/lib/js/util.js"></script>
@@ -23,62 +24,54 @@
         </div>
 
         <div id="What_Menu" class="Whats_Menu_Content">
-            <div id="WhatsChats" class="Whats_Menu selected" onclick="
-                $('#WhatsChats').addClass('selected');
-                $('#WS_WhatsApp').show();
-                $('#WhatsContacts').removeClass('selected');
-                $('#WS_WhatsApp_Contacts').hide();
-            ">Discussions</div>
-            <div id="WhatsContacts" class="Whats_Menu" onclick="
-                $('#WhatsChats').removeClass('selected');
-                $('#WS_WhatsApp').hide();
-                $('#WhatsContacts').addClass('selected');
-                $('#WS_WhatsApp_Contacts').show();
-            ">Contacts</div>
+            <button id="WhatsChats" type="button" class="Whats_Menu selected">Discussions</button>
+            <button id="WhatsContacts" type="button" class="Whats_Menu">Contacts</button>
         </div>
 
-        <div id="WS_WhatsApp" class="whats-list-view">
-            <label class="whats-search" for="WhatsSearchChats">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input id="WhatsSearchChats" type="text" autocomplete="off" placeholder="Rechercher une discussion">
-            </label>
-        </div>
+        <!-- Search lives OUTSIDE the WS-filled containers so a sync can never erase it. -->
+        <label class="whats-search rdp-wa-search" for="WhatsUniversalSearch">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <input id="WhatsUniversalSearch" type="text" autocomplete="off" placeholder="Rechercher">
+        </label>
 
-        <div id="WS_WhatsApp_Contacts" class="whats-list-view" style="display:none;">
-            <label class="whats-search" for="WhatsSearchContacts">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input id="WhatsSearchContacts" type="text" autocomplete="off" placeholder="Rechercher un contact">
-            </label>
-        </div>
+        <!-- The existing emulator injects discussions and Messenger contacts here. -->
+        <div id="WS_WhatsApp" class="whats-list-view"></div>
+        <div id="WS_WhatsApp_Contacts" class="whats-list-view" style="display:none;"></div>
 
         <div id="WS_WhatsApp_Chatting" style="display:none;">
             <div class="app_WhatsApp_Chatting">
                 <div id="app_title" class="Whats_Title_Chatting">
-                    <button type="button" class="app_title_options whats-back" onclick="
-                        $('.Whats_Title').show();
-                        $('#What_Menu').show();
-                        $('#WS_WhatsApp').show();
-                        $('#WS_WhatsApp_Contacts').hide();
-                        $('#WS_WhatsApp_Chatting').hide();
-                        $('#WhatsChats').addClass('selected');
-                        $('#WhatsContacts').removeClass('selected');
-                    " aria-label="Retour">
+                    <button type="button" class="app_title_options whats-back" aria-label="Retour">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5L8 12l6.5 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                     <div class="app_whats_profile_photo app_whats_photo"></div>
                     <div class="app_whats_chat_info">
                         <b class="app_whats_name">Contact</b>
-                        <div class="app_whats_lastonline">en ligne</div>
+                        <div class="app_whats_lastonline">hors ligne</div>
                     </div>
                 </div>
 
                 <div id="app_whats_messages" class="app_whats_messages"></div>
 
+                <div id="RdpWaEmojiPanel" class="rdp-wa-emoji-panel" hidden>
+                    <button type="button">😀</button><button type="button">😂</button><button type="button">🥹</button><button type="button">😍</button>
+                    <button type="button">😘</button><button type="button">😎</button><button type="button">🤔</button><button type="button">😭</button>
+                    <button type="button">😡</button><button type="button">😴</button><button type="button">🥳</button><button type="button">🤝</button>
+                    <button type="button">👍</button><button type="button">👎</button><button type="button">🙏</button><button type="button">👏</button>
+                    <button type="button">❤️</button><button type="button">💔</button><button type="button">🔥</button><button type="button">💯</button>
+                    <button type="button">🎉</button><button type="button">🚗</button><button type="button">🚓</button><button type="button">💰</button>
+                    <button type="button">📍</button><button type="button">📞</button><button type="button">✅</button><button type="button">❌</button>
+                </div>
+
                 <div class="ChatBar">
+                    <button id="RdpWaEmojiToggle" type="button" class="rdp-wa-emoji-toggle" aria-label="Emojis">☺</button>
                     <div class="whats-compose-shell">
-                        <input id="mensaje" type="text" class="TextTo" placeholder="Message" data-emojiable="true" autocomplete="off">
+                        <input id="mensaje" type="text" class="TextTo" placeholder="Message" autocomplete="off" maxlength="500">
+                        <!-- Legacy rdp.c.js writes to TextTo[1], keep a safe hidden target. -->
+                        <div class="TextTo rdp-legacy-textto" aria-hidden="true"></div>
                     </div>
-                    <button id="TextTo" type="button" class="SendButtonMsg" aria-label="Envoyer">
+                    <!-- Not SendButtonMsg: the old handler assumes a generated emoji editor and would double-send. -->
+                    <button id="TextTo" type="button" class="rdp-wa-send" aria-label="Envoyer">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.2l15-7-5.5 15-2.6-5.1L4 11.2z" fill="currentColor"/><path d="M10.9 14.1l3.9-4.1" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
                     </button>
                 </div>
@@ -87,303 +80,51 @@
     </div>
 </div>
 
-<style id="rdp-whatsapp-layout-fix-v13">
-/* Keep the chat comfortably inside the phone screen. */
-#app_WhatsApp #WS_WhatsApp_Chatting,
-#app_WhatsApp .app_WhatsApp_Chatting{
-    width:300px!important;
-    height:559px!important;
-    min-height:559px!important;
-    overflow:hidden!important;
-}
-
-#app_WhatsApp .Whats_Title_Chatting{
-    position:absolute!important;
-    left:0!important;
-    top:0!important;
-    width:300px!important;
-    height:56px!important;
-    min-height:56px!important;
-    padding:0!important;
-    margin:0!important;
-    border:0!important;
-    border-bottom:1px solid rgba(255,255,255,.045)!important;
-    background:linear-gradient(180deg,#102a2b 0%,#0d2425 100%)!important;
-    box-shadow:0 5px 18px rgba(0,0,0,.12)!important;
-}
-#app_WhatsApp .whats-back{
-    left:7px!important;
-    top:12px!important;
-    width:31px!important;
-    height:31px!important;
-    margin:0!important;
-    padding:7px!important;
-    border-radius:10px!important;
-}
-#app_WhatsApp .Whats_Title_Chatting>.app_whats_profile_photo{
-    left:43px!important;
-    top:8px!important;
-    width:40px!important;
-    height:40px!important;
-    margin:0!important;
-}
-#app_WhatsApp .Whats_Title_Chatting>.app_whats_profile_photo .app_contacts_avatar{
-    width:40px!important;
-    height:40px!important;
-    min-width:40px!important;
-    min-height:40px!important;
-    border-radius:50%!important;
-    border:1px solid rgba(255,255,255,.08)!important;
-    box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)!important;
-}
-#app_WhatsApp .Whats_Title_Chatting>.app_whats_chat_info{
-    left:91px!important;
-    right:10px!important;
-    top:12px!important;
-    width:auto!important;
-    height:34px!important;
-    padding:0!important;
-    margin:0!important;
-}
-#app_WhatsApp .app_whats_name{
-    max-width:185px!important;
-    font-size:11px!important;
-    line-height:13px!important;
-    font-weight:850!important;
-}
-#app_WhatsApp .app_whats_lastonline{
-    margin-top:2px!important;
-    font-size:7.5px!important;
-    line-height:9px!important;
-}
-
-/* Message canvas. */
-#app_WhatsApp #app_whats_messages{
-    position:absolute!important;
-    z-index:5!important;
-    left:0!important;
-    top:56px!important;
-    bottom:64px!important;
-    width:300px!important;
-    height:auto!important;
-    max-height:none!important;
-    margin:0!important;
-    padding:12px 11px 18px!important;
-    overflow-x:hidden!important;
-    overflow-y:auto!important;
-    scroll-behavior:smooth!important;
-    font-size:10px!important;
-}
-#app_WhatsApp .Msg_Container{
-    width:100%!important;
-    min-height:1px!important;
-    height:auto!important;
-    margin:4px 0 7px!important;
-    padding:0!important;
-    display:flex!important;
-    align-items:flex-end!important;
-    clear:both!important;
-    overflow:visible!important;
-}
-#app_WhatsApp .Msg_From_Whats,
-#app_WhatsApp .Msg_To_Whats{
-    position:relative!important;
-    float:none!important;
-    clear:none!important;
-    display:block!important;
-    width:auto!important;
-    min-width:62px!important;
-    max-width:218px!important;
-    min-height:32px!important;
-    margin-top:0!important;
-    padding:8px 10px 16px!important;
-    border:0!important;
-    border-radius:13px!important;
-    color:#eef7f5!important;
-    font-size:10px!important;
-    line-height:14px!important;
-    font-weight:550!important;
-    white-space:normal!important;
-    overflow-wrap:anywhere!important;
-    word-break:normal!important;
-    box-shadow:0 5px 14px rgba(0,0,0,.17)!important;
-}
-#app_WhatsApp .Msg_From_Whats{
-    margin-left:0!important;
-    margin-right:auto!important;
-    background:#17272d!important;
-    border-bottom-left-radius:4px!important;
-}
-#app_WhatsApp .Msg_To_Whats{
-    margin-left:auto!important;
-    margin-right:0!important;
-    background:linear-gradient(145deg,#187452,#126044)!important;
-    border-bottom-right-radius:4px!important;
-}
-/* The old title contained the full date and wrapped into 3/4 lines. Only HH:MM is shown now. */
-#app_WhatsApp .Msg_From_Whats:after,
-#app_WhatsApp .Msg_To_Whats:after{
-    content:attr(data-rdp-time)!important;
-    position:absolute!important;
-    right:8px!important;
-    bottom:4px!important;
-    width:auto!important;
-    max-width:none!important;
-    height:8px!important;
-    padding:0!important;
-    margin:0!important;
-    color:rgba(218,233,230,.54)!important;
-    font-size:6.5px!important;
-    line-height:8px!important;
-    font-weight:650!important;
-    letter-spacing:.05px!important;
-    white-space:nowrap!important;
-    text-align:right!important;
-    background:none!important;
-}
-#app_WhatsApp .Msg_To_Whats:after{color:rgba(232,246,239,.62)!important}
-
-/* Composer stays fixed and never overlaps messages. */
-#app_WhatsApp .ChatBar{
-    position:absolute!important;
-    z-index:25!important;
-    left:0!important;
-    bottom:0!important;
-    width:300px!important;
-    height:64px!important;
-    margin:0!important;
-    padding:9px 10px 11px!important;
-    display:flex!important;
-    align-items:center!important;
-    gap:8px!important;
-    background:linear-gradient(180deg,rgba(8,20,24,.82),#081418 42%)!important;
-    border-top:1px solid rgba(255,255,255,.045)!important;
-    backdrop-filter:blur(14px)!important;
-}
-#app_WhatsApp .whats-compose-shell{
-    position:relative!important;
-    flex:1 1 auto!important;
-    width:auto!important;
-    height:43px!important;
-    min-width:0!important;
-    margin:0!important;
-    padding:0!important;
-    border-radius:14px!important;
-    overflow:hidden!important;
-    background:#13282f!important;
-    border:1px solid rgba(147,195,200,.13)!important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
-}
-#app_WhatsApp .whats-compose-shell input.TextTo,
-#app_WhatsApp .whats-compose-shell .emoji-wysiwyg-editor{
-    width:100%!important;
-    height:43px!important;
-    min-height:43px!important;
-    max-height:43px!important;
-    margin:0!important;
-    padding:12px 35px 10px 12px!important;
-    border:0!important;
-    outline:0!important;
-    resize:none!important;
-    overflow:hidden!important;
-    background:transparent!important;
-    color:#eef6f5!important;
-    font-family:Inter,"Segoe UI",Arial,sans-serif!important;
-    font-size:10px!important;
-    line-height:18px!important;
-}
-#app_WhatsApp .whats-compose-shell .emoji-picker-container{
-    width:100%!important;
-    height:43px!important;
-    margin:0!important;
-}
-#app_WhatsApp .whats-compose-shell .emoji-picker-icon{
-    top:13px!important;
-    right:11px!important;
-    color:#7b969b!important;
-    font-size:15px!important;
-}
-#app_WhatsApp .SendButtonMsg{
-    position:relative!important;
-    flex:0 0 43px!important;
-    width:43px!important;
-    height:43px!important;
-    min-width:43px!important;
-    min-height:43px!important;
-    margin:0!important;
-    padding:11px!important;
-    float:none!important;
-    border:0!important;
-    border-radius:50%!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    color:#fff!important;
-    background:linear-gradient(145deg,#38d878,#18af5c)!important;
-    box-shadow:0 7px 16px rgba(15,143,77,.27),inset 0 1px 0 rgba(255,255,255,.19)!important;
-}
-#app_WhatsApp .SendButtonMsg svg{width:20px!important;height:20px!important}
-#app_WhatsApp .SendButtonMsg:hover{filter:brightness(1.07)!important}
-#app_WhatsApp .SendButtonMsg:active{transform:scale(.94)!important}
+<style id="rdp-whatsapp-v14">
+#app_WhatsApp.rdp-whatsapp-app{position:absolute!important;left:0!important;top:31px!important;width:300px!important;height:559px!important;overflow:hidden!important;z-index:9999!important;background:#071018!important;color:#edf5f4!important}
+#app_WhatsApp.rdp-whatsapp-app>#app_bg.app_WhatsApp{position:absolute!important;inset:0!important;width:300px!important;height:559px!important;min-height:559px!important;margin:0!important;padding:0!important;overflow:hidden!important;background:linear-gradient(160deg,#071518,#071116)!important}
+#app_WhatsApp .Whats_Title{position:absolute!important;z-index:20!important;left:0!important;top:0!important;width:300px!important;height:55px!important;padding:11px 15px!important;margin:0!important;border:0!important;background:linear-gradient(180deg,#102a2b,#0d2425)!important;color:#fff!important}
+#app_WhatsApp .whats-brand{height:34px!important;display:flex!important;align-items:center!important;gap:9px!important}.whats-brand-mark{width:28px!important;height:28px!important;color:#42df8a!important;display:flex!important;align-items:center!important;justify-content:center!important}.whats-brand-mark svg{width:25px!important;height:25px!important}.whats-brand-copy{display:flex!important;flex-direction:column!important}.whats-brand-copy strong{font-size:12px!important;line-height:14px!important}.whats-brand-copy span{font-size:7px!important;line-height:9px!important;color:#7db7a6!important;margin-top:1px!important}
+#app_WhatsApp .Whats_Menu_Content{position:absolute!important;z-index:19!important;left:0!important;top:55px!important;width:300px!important;height:37px!important;margin:0!important;padding:0 13px!important;display:flex!important;gap:8px!important;background:#0b2022!important;border-bottom:1px solid rgba(255,255,255,.045)!important}#app_WhatsApp .Whats_Menu{height:37px!important;flex:1!important;margin:0!important;padding:0!important;border:0!important;border-bottom:2px solid transparent!important;background:transparent!important;color:#849b9c!important;font-family:inherit!important;font-size:8.5px!important;font-weight:800!important;cursor:pointer!important}#app_WhatsApp .Whats_Menu.selected{color:#70e6ac!important;border-bottom-color:#36d67f!important}
+#app_WhatsApp .rdp-wa-search{position:absolute!important;z-index:18!important;left:13px!important;top:103px!important;width:274px!important;height:34px!important;margin:0!important;padding:0 11px!important;display:flex!important;align-items:center!important;gap:7px!important;border:1px solid rgba(255,255,255,.055)!important;border-radius:12px!important;background:#102329!important;color:#769095!important}#app_WhatsApp .rdp-wa-search svg{width:14px!important;height:14px!important;flex:none!important}#app_WhatsApp .rdp-wa-search input{flex:1!important;min-width:0!important;width:auto!important;height:30px!important;margin:0!important;padding:0!important;border:0!important;outline:0!important;background:transparent!important;color:#ecf4f3!important;font-family:inherit!important;font-size:9px!important}#app_WhatsApp .rdp-wa-search input::placeholder{color:#667e82!important}
+#app_WhatsApp #WS_WhatsApp,#app_WhatsApp #WS_WhatsApp_Contacts{position:absolute!important;z-index:10!important;left:0!important;top:147px!important;bottom:0!important;width:300px!important;margin:0!important;padding:0 9px 12px!important;overflow-x:hidden!important;overflow-y:auto!important;background:transparent!important}#app_WhatsApp .app_msg_content{position:relative!important;width:100%!important;min-height:57px!important;height:auto!important;margin:0!important;padding:7px 6px!important;display:flex!important;align-items:center!important;border:0!important;border-bottom:1px solid rgba(255,255,255,.045)!important;background:transparent!important;color:#edf4f2!important;cursor:pointer!important}#app_WhatsApp .app_msg_content:hover{background:rgba(255,255,255,.025)!important;border-radius:10px!important}
+#app_WhatsApp .app_whats_profile_photo{flex:0 0 43px!important;width:43px!important;height:43px!important;margin:0 9px 0 0!important;padding:0!important;float:none!important}#app_WhatsApp .app_contacts_avatar{width:43px!important;height:43px!important;min-width:43px!important;min-height:43px!important;margin:0!important;border-radius:50%!important;background-size:auto 62px!important;background-position:center -7px!important;background-repeat:no-repeat!important;background-color:#20343a!important}#app_WhatsApp .app_msg_content>.app_whats_chat_info{position:relative!important;flex:1!important;width:auto!important;height:auto!important;min-width:0!important;margin:0!important;padding:2px 0!important;float:none!important}#app_WhatsApp .app_msg_dest{font-size:9.5px!important;line-height:12px!important;font-weight:850!important;color:#edf5f3!important;max-width:175px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}#app_WhatsApp .app_msg_lastmsg{margin-top:4px!important;width:195px!important;max-width:195px!important;height:11px!important;line-height:11px!important;font-size:7.7px!important;color:#809598!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}#app_WhatsApp .app_msg_time{position:absolute!important;right:0!important;top:2px!important;float:none!important;margin:0!important;font-size:6.5px!important;line-height:8px!important;color:#6d9c8d!important;font-weight:700!important}
+#app_WhatsApp #WS_WhatsApp_Chatting,#app_WhatsApp .app_WhatsApp_Chatting{position:absolute!important;inset:0!important;width:300px!important;height:559px!important;min-height:559px!important;margin:0!important;padding:0!important;overflow:hidden!important;background:radial-gradient(circle at 12% 15%,rgba(50,105,87,.11),transparent 22%),linear-gradient(160deg,#0d1b1c,#081115)!important}#app_WhatsApp .app_WhatsApp_Chatting:before{content:"";position:absolute;inset:56px 0 64px;pointer-events:none;opacity:.20;background-image:radial-gradient(circle at 8px 8px,rgba(255,255,255,.06) 0 1px,transparent 1.5px);background-size:22px 22px}
+#app_WhatsApp .Whats_Title_Chatting{position:absolute!important;z-index:20!important;left:0!important;top:0!important;width:300px!important;height:56px!important;min-height:56px!important;margin:0!important;padding:0!important;border:0!important;border-bottom:1px solid rgba(255,255,255,.045)!important;background:linear-gradient(180deg,#102a2b,#0d2425)!important;box-shadow:0 5px 18px rgba(0,0,0,.12)!important}#app_WhatsApp .whats-back{position:absolute!important;left:7px!important;top:12px!important;width:31px!important;height:31px!important;margin:0!important;padding:7px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#a8c0bd!important;cursor:pointer!important}#app_WhatsApp .whats-back:hover{background:rgba(255,255,255,.05)!important;color:#fff!important}#app_WhatsApp .whats-back svg{width:17px!important;height:17px!important}#app_WhatsApp .Whats_Title_Chatting>.app_whats_profile_photo{position:absolute!important;left:43px!important;top:8px!important;width:40px!important;height:40px!important;margin:0!important;padding:0!important}#app_WhatsApp .Whats_Title_Chatting>.app_whats_profile_photo .app_contacts_avatar{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important}#app_WhatsApp .Whats_Title_Chatting>.app_whats_chat_info{position:absolute!important;left:91px!important;right:10px!important;top:12px!important;width:auto!important;height:34px!important;margin:0!important;padding:0!important;float:none!important}#app_WhatsApp .app_whats_name{display:block!important;max-width:185px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;color:#fff!important;font-size:11px!important;line-height:13px!important;font-weight:850!important}#app_WhatsApp .app_whats_lastonline{margin-top:2px!important;color:#72cda5!important;font-size:7.5px!important;line-height:9px!important;font-weight:700!important}
+#app_WhatsApp #app_whats_messages{position:absolute!important;z-index:5!important;left:0!important;top:56px!important;bottom:64px!important;width:300px!important;height:auto!important;max-height:none!important;margin:0!important;padding:12px 11px 18px!important;overflow-x:hidden!important;overflow-y:auto!important;scroll-behavior:smooth!important;font-size:10px!important;scrollbar-width:thin!important;scrollbar-color:#284039 transparent!important}#app_WhatsApp #app_whats_messages::-webkit-scrollbar{width:3px!important}#app_WhatsApp #app_whats_messages::-webkit-scrollbar-thumb{background:#284039!important;border-radius:999px!important}#app_WhatsApp .Msg_Container{width:100%!important;min-height:1px!important;height:auto!important;margin:4px 0 7px!important;padding:0!important;display:flex!important;align-items:flex-end!important;clear:both!important;overflow:visible!important}#app_WhatsApp .Msg_From_Whats,#app_WhatsApp .Msg_To_Whats{position:relative!important;float:none!important;clear:none!important;display:block!important;width:auto!important;min-width:62px!important;max-width:218px!important;min-height:32px!important;margin-top:0!important;padding:8px 10px 16px!important;border:0!important;border-radius:13px!important;color:#eef7f5!important;font-size:10px!important;line-height:14px!important;font-weight:550!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important;box-shadow:0 5px 14px rgba(0,0,0,.17)!important}#app_WhatsApp .Msg_From_Whats{margin-left:0!important;margin-right:auto!important;background:#17272d!important;border-bottom-left-radius:4px!important}#app_WhatsApp .Msg_To_Whats{margin-left:auto!important;margin-right:0!important;background:linear-gradient(145deg,#187452,#126044)!important;border-bottom-right-radius:4px!important}#app_WhatsApp .Msg_From_Whats:after,#app_WhatsApp .Msg_To_Whats:after{content:attr(data-rdp-time)!important;position:absolute!important;right:8px!important;bottom:4px!important;height:8px!important;margin:0!important;padding:0!important;color:rgba(218,233,230,.54)!important;font-size:6.5px!important;line-height:8px!important;font-weight:650!important;white-space:nowrap!important;background:none!important}#app_WhatsApp .Msg_To_Whats:after{color:rgba(232,246,239,.62)!important}#app_WhatsApp .Msg_To_Whats.rdp-pending{opacity:.72!important}#app_WhatsApp .Msg_To_Whats.rdp-pending:before{content:"…";position:absolute;left:7px;bottom:3px;font-size:7px;color:rgba(255,255,255,.45)}
+#app_WhatsApp .ChatBar{position:absolute!important;z-index:25!important;left:0!important;bottom:0!important;width:300px!important;height:64px!important;margin:0!important;padding:9px 10px 11px!important;display:flex!important;align-items:center!important;gap:7px!important;background:linear-gradient(180deg,rgba(8,20,24,.82),#081418 42%)!important;border-top:1px solid rgba(255,255,255,.045)!important;backdrop-filter:blur(14px)!important}#app_WhatsApp .rdp-wa-emoji-toggle{flex:0 0 35px!important;width:35px!important;height:35px!important;margin:0!important;padding:0!important;border:1px solid rgba(255,255,255,.06)!important;border-radius:50%!important;background:#10272d!important;color:#9eb7b9!important;font-size:17px!important;line-height:35px!important;text-align:center!important;cursor:pointer!important}#app_WhatsApp .rdp-wa-emoji-toggle.active{background:#164136!important;color:#61dda0!important}#app_WhatsApp .whats-compose-shell{position:relative!important;flex:1 1 auto!important;min-width:0!important;width:auto!important;height:43px!important;margin:0!important;padding:0!important;border-radius:14px!important;overflow:hidden!important;background:#13282f!important;border:1px solid rgba(147,195,200,.13)!important}#app_WhatsApp #mensaje{display:block!important;width:100%!important;height:43px!important;min-height:43px!important;margin:0!important;padding:0 12px!important;border:0!important;outline:0!important;background:transparent!important;color:#eef6f5!important;font-family:Inter,"Segoe UI",Arial,sans-serif!important;font-size:10px!important;line-height:43px!important}#app_WhatsApp #mensaje::placeholder{color:#72888b!important}#app_WhatsApp .rdp-legacy-textto{display:none!important}#app_WhatsApp .rdp-wa-send{position:relative!important;flex:0 0 43px!important;width:43px!important;height:43px!important;min-width:43px!important;min-height:43px!important;margin:0!important;padding:11px!important;border:0!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;color:#fff!important;background:linear-gradient(145deg,#38d878,#18af5c)!important;box-shadow:0 7px 16px rgba(15,143,77,.27),inset 0 1px 0 rgba(255,255,255,.19)!important;cursor:pointer!important}#app_WhatsApp .rdp-wa-send svg{width:20px!important;height:20px!important}#app_WhatsApp .rdp-wa-send:hover{filter:brightness(1.07)!important}#app_WhatsApp .rdp-wa-send:active{transform:scale(.94)!important}
+#app_WhatsApp .rdp-wa-emoji-panel{position:absolute!important;z-index:40!important;left:10px!important;right:10px!important;bottom:67px!important;height:126px!important;margin:0!important;padding:9px!important;display:grid!important;grid-template-columns:repeat(7,1fr)!important;gap:5px!important;overflow-y:auto!important;border:1px solid rgba(255,255,255,.075)!important;border-radius:16px!important;background:rgba(10,27,31,.97)!important;box-shadow:0 16px 30px rgba(0,0,0,.42)!important;backdrop-filter:blur(14px)!important}#app_WhatsApp .rdp-wa-emoji-panel[hidden]{display:none!important}#app_WhatsApp .rdp-wa-emoji-panel button{height:25px!important;margin:0!important;padding:0!important;border:0!important;border-radius:7px!important;background:transparent!important;font-size:16px!important;line-height:25px!important;cursor:pointer!important}#app_WhatsApp .rdp-wa-emoji-panel button:hover{background:rgba(255,255,255,.07)!important}
+.rdp-phone-toast-stack{position:fixed;z-index:1000000;right:18px;bottom:20px;width:270px;display:flex;flex-direction:column;gap:8px;pointer-events:none;font-family:Inter,"Segoe UI",Arial,sans-serif}.rdp-phone-toast{position:relative;width:270px;min-height:58px;padding:10px 12px 10px 52px;border:1px solid rgba(255,255,255,.10);border-radius:15px;background:linear-gradient(145deg,rgba(15,35,42,.97),rgba(8,20,25,.97));box-shadow:0 14px 34px rgba(0,0,0,.42);color:#edf7f4;transform:translateX(18px);opacity:0;transition:transform .2s ease,opacity .2s ease;overflow:hidden}.rdp-phone-toast.show{transform:translateX(0);opacity:1}.rdp-phone-toast.hide{transform:translateX(18px);opacity:0}.rdp-phone-toast-icon{position:absolute;left:11px;top:10px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#36d879,#19ae5a);color:#fff;font-size:16px;font-weight:900;box-shadow:0 5px 14px rgba(19,164,85,.24)}.rdp-phone-toast strong{display:block;font-size:10px;line-height:13px}.rdp-phone-toast span{display:block;margin-top:3px;font-size:8px;line-height:10px;color:#85bda7}.rdp-phone-toast:after{content:"";position:absolute;left:0;bottom:0;width:100%;height:2px;background:#35d77c}
 </style>
 
 <script>
 (function(){
-    function filterRows(inputSelector, containerSelector){
-        var input = document.querySelector(inputSelector);
-        var container = document.querySelector(containerSelector);
-        if(!input || !container || input.dataset.rdpBound === '1') return;
-        input.dataset.rdpBound = '1';
-        input.addEventListener('input', function(){
-            var term = (this.value || '').toLowerCase().trim();
-            container.querySelectorAll('.app_msg_content').forEach(function(row){
-                row.style.display = !term || row.textContent.toLowerCase().indexOf(term) !== -1 ? '' : 'none';
-            });
-        });
-    }
+    'use strict';
+    var incomingPatched=false,lastRefresh=0;
 
-    function normalizeMessageTimes(root){
-        var scope = root && root.querySelectorAll ? root : document;
-        scope.querySelectorAll('#app_WhatsApp .Msg_From_Whats,#app_WhatsApp .Msg_To_Whats').forEach(function(bubble){
-            var raw = bubble.getAttribute('title') || '';
-            var match = raw.match(/(?:^|\s)(\d{1,2}:\d{2})(?::\d{2})?/);
-            if(!match) match = raw.match(/(\d{1,2}:\d{2})/);
-            bubble.setAttribute('data-rdp-time', match ? match[1] : '');
-        });
-    }
-
-    function scrollChatToBottom(){
-        var box = document.getElementById('app_whats_messages');
-        if(!box) return;
-        requestAnimationFrame(function(){ box.scrollTop = box.scrollHeight; });
-    }
-
-    function bindWhatsSearch(){
-        filterRows('#WhatsSearchChats','#WS_WhatsApp');
-        filterRows('#WhatsSearchContacts','#WS_WhatsApp_Contacts');
-    }
-
-    function initWhatsUi(){
-        bindWhatsSearch();
-        normalizeMessageTimes(document);
-        var messages = document.getElementById('app_whats_messages');
-        if(messages && messages.dataset.rdpObserver !== '1'){
-            messages.dataset.rdpObserver = '1';
-            new MutationObserver(function(mutations){
-                mutations.forEach(function(mutation){
-                    mutation.addedNodes.forEach(function(node){
-                        if(node.nodeType === 1) normalizeMessageTimes(node.parentNode || node);
-                    });
-                });
-                normalizeMessageTimes(messages);
-                scrollChatToBottom();
-            }).observe(messages,{childList:true,subtree:true});
-        }
-    }
-
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initWhatsUi);
-    else initWhatsUi();
-    setTimeout(initWhatsUi,250);
-    setTimeout(initWhatsUi,900);
+    function wsReady(){return window.rdp&&window.rdp_app&&rdp_app.webSocket&&rdp_app.startedSocket;}
+    function sendPhone(action){if(!wsReady())return false;try{rdp.sendData('event_phone',action,false,false,rdp_app.webSocket,rdp_app.startedSocket,rdp_app.UserID);return true;}catch(e){return false;}}
+    function refreshWhatsApp(force){var now=Date.now();if(!force&&now-lastRefresh<700)return;lastRefresh=now;sendPhone('open_whatsapp,');}
+    function refreshContacts(){sendPhone('open_contacts,');}
+    function activeList(){return document.getElementById('WhatsContacts')&&document.getElementById('WhatsContacts').classList.contains('selected')?document.getElementById('WS_WhatsApp_Contacts'):document.getElementById('WS_WhatsApp');}
+    function filterCurrentList(){var input=document.getElementById('WhatsUniversalSearch'),list=activeList();if(!input||!list)return;var term=(input.value||'').toLowerCase().trim();list.querySelectorAll('.app_msg_content').forEach(function(row){row.style.display=!term||row.textContent.toLowerCase().indexOf(term)!==-1?'':'none';});}
+    function showChats(){var a=document.getElementById('WhatsChats'),b=document.getElementById('WhatsContacts'),c=document.getElementById('WS_WhatsApp'),d=document.getElementById('WS_WhatsApp_Contacts');if(a)a.classList.add('selected');if(b)b.classList.remove('selected');if(c)c.style.display='';if(d)d.style.display='none';filterCurrentList();}
+    function showContacts(){var a=document.getElementById('WhatsChats'),b=document.getElementById('WhatsContacts'),c=document.getElementById('WS_WhatsApp'),d=document.getElementById('WS_WhatsApp_Contacts');if(a)a.classList.remove('selected');if(b)b.classList.add('selected');if(c)c.style.display='none';if(d)d.style.display='';refreshWhatsApp(true);filterCurrentList();}
+    function backToList(){var title=document.querySelector('#app_WhatsApp .Whats_Title'),menu=document.getElementById('What_Menu'),chat=document.getElementById('WS_WhatsApp_Chatting');if(title)title.style.display='';if(menu)menu.style.display='';if(chat)chat.style.display='none';showChats();refreshWhatsApp(true);}
+    function normalizeTime(raw){var m=String(raw||'').match(/(\d{1,2}):(\d{2})(?::\d{2})?/g);if(!m||!m.length)return'';var p=m[m.length-1].split(':');return String(p[0]).padStart(2,'0')+':'+p[1];}
+    function scrollMessages(smooth){var box=document.getElementById('app_whats_messages');if(!box)return;requestAnimationFrame(function(){requestAnimationFrame(function(){if(smooth&&box.scrollTo)box.scrollTo({top:box.scrollHeight,behavior:'smooth'});else box.scrollTop=box.scrollHeight;});});}
+    function enhanceMessages(){document.querySelectorAll('#app_WhatsApp .Msg_From_Whats,#app_WhatsApp .Msg_To_Whats').forEach(function(b){b.setAttribute('data-rdp-time',normalizeTime(b.getAttribute('title')));});scrollMessages(false);}
+    function escapeHtml(text){return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+    function appendPending(text){var box=document.getElementById('app_whats_messages');if(!box)return;var row=document.createElement('div');row.className='Msg_Container rdp-pending-row';var b=document.createElement('div');b.className='Msg_To_Whats rdp-pending';var n=new Date();b.setAttribute('data-rdp-time',String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'));b.textContent=text;row.appendChild(b);box.appendChild(row);scrollMessages(true);}
+    function closeEmojiPanel(){var p=document.getElementById('RdpWaEmojiPanel'),t=document.getElementById('RdpWaEmojiToggle');if(p)p.hidden=true;if(t)t.classList.remove('active');}
+    function sendWhatsApp(){var input=document.getElementById('mensaje'),name=document.querySelector('#app_WhatsApp .app_whats_name');if(!input||!name)return;var raw=(input.value||'').trim(),to=(name.textContent||'').trim();if(!raw||!to||to==='Contact')return;var clean=raw.replace(/\|/g,'¦'),encoded=escapeHtml(clean).replace(/\r?\n/g,'::br::');appendPending(clean);input.value='';closeEmojiPanel();if(!sendPhone('send_whatsapp,|'+encoded+'|'+to)){var pending=document.querySelector('#app_whats_messages .rdp-pending-row:last-child');if(pending)pending.remove();input.value=raw;}}
+    function insertEmoji(emoji){var input=document.getElementById('mensaje');if(!input)return;input.focus();var s=typeof input.selectionStart==='number'?input.selectionStart:input.value.length,e=typeof input.selectionEnd==='number'?input.selectionEnd:input.value.length;if(input.setRangeText)input.setRangeText(emoji,s,e,'end');else input.value=input.value.slice(0,s)+emoji+input.value.slice(e);}
+    function toggleEmojiPanel(){var p=document.getElementById('RdpWaEmojiPanel'),t=document.getElementById('RdpWaEmojiToggle');if(!p)return;p.hidden=!p.hidden;if(t)t.classList.toggle('active',!p.hidden);}
+    function ensureToastStack(){var s=document.getElementById('RdpPhoneToastStack');if(s)return s;s=document.createElement('div');s.id='RdpPhoneToastStack';s.className='rdp-phone-toast-stack';document.body.appendChild(s);return s;}
+    function notifyOnline(username){username=String(username||'').trim();if(!username)return;var stack=ensureToastStack(),toast=document.createElement('div');toast.className='rdp-phone-toast';toast.innerHTML='<div class="rdp-phone-toast-icon">✓</div><strong></strong><span>vient de se connecter • En ligne</span>';toast.querySelector('strong').textContent=username;stack.appendChild(toast);requestAnimationFrame(function(){toast.classList.add('show');});setTimeout(function(){toast.classList.add('hide');setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast);},250);},4200);var open=document.querySelector('#app_WhatsApp .app_whats_name');if(open&&(open.textContent||'').trim().toLowerCase()===username.toLowerCase()){var state=document.querySelector('#app_WhatsApp .app_whats_lastonline');if(state)state.innerHTML='en ligne';}refreshWhatsApp(true);}
+    function patchIncoming(){if(incomingPatched||!window.rdp||typeof rdp.IncomingPacket!=='function')return false;var original=rdp.IncomingPacket;rdp.IncomingPacket=function(RDPEvent,ExtraData,EventData,UName,UID){var action=String(ExtraData||'').trim();if(RDPEvent==='compose_phone'&&action==='contact_online')notifyOnline(EventData&&EventData[2]);var result=original.apply(this,arguments);if(RDPEvent==='compose_phone'){if(action==='open_whatsapp')setTimeout(function(){filterCurrentList();if(document.getElementById('WhatsContacts')&&document.getElementById('WhatsContacts').classList.contains('selected')){var c=document.getElementById('WS_WhatsApp'),d=document.getElementById('WS_WhatsApp_Contacts');if(c)c.style.display='none';if(d)d.style.display='';}},0);if(action==='open_whatschats'||action==='update_whatschats')setTimeout(function(){document.querySelectorAll('#app_whats_messages .rdp-pending-row').forEach(function(row){row.remove();});enhanceMessages();var input=document.getElementById('mensaje');if(input)input.value='';},0);}return result;};incomingPatched=true;return true;}
+    function bind(){var chats=document.getElementById('WhatsChats'),contacts=document.getElementById('WhatsContacts'),search=document.getElementById('WhatsUniversalSearch'),back=document.querySelector('#app_WhatsApp .whats-back'),send=document.querySelector('#app_WhatsApp .rdp-wa-send'),input=document.getElementById('mensaje'),toggle=document.getElementById('RdpWaEmojiToggle'),panel=document.getElementById('RdpWaEmojiPanel');if(chats&&!chats.dataset.rdp14){chats.dataset.rdp14='1';chats.addEventListener('click',showChats);}if(contacts&&!contacts.dataset.rdp14){contacts.dataset.rdp14='1';contacts.addEventListener('click',showContacts);}if(search&&!search.dataset.rdp14){search.dataset.rdp14='1';search.addEventListener('input',filterCurrentList);}if(back&&!back.dataset.rdp14){back.dataset.rdp14='1';back.addEventListener('click',backToList);}if(send&&!send.dataset.rdp14){send.dataset.rdp14='1';send.addEventListener('click',sendWhatsApp);}if(input&&!input.dataset.rdp14){input.dataset.rdp14='1';input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendWhatsApp();}});}if(toggle&&!toggle.dataset.rdp14){toggle.dataset.rdp14='1';toggle.addEventListener('click',toggleEmojiPanel);}if(panel&&!panel.dataset.rdp14){panel.dataset.rdp14='1';panel.addEventListener('click',function(e){var btn=e.target.closest('button');if(btn)insertEmoji(btn.textContent);});}var messages=document.getElementById('app_whats_messages');if(messages&&!messages.dataset.rdpObserver){messages.dataset.rdpObserver='1';new MutationObserver(enhanceMessages).observe(messages,{childList:true,subtree:true});}if(!document.documentElement.dataset.rdpPhoneSpecialApps){document.documentElement.dataset.rdpPhoneSpecialApps='1';document.addEventListener('click',function(e){var icon=e.target.closest&&e.target.closest('#phone .appicon[data-app]');if(!icon)return;var app=icon.getAttribute('data-app')||'';if(app==='_WhatsApp'||app==='WhatsApp')setTimeout(function(){refreshWhatsApp(true);},80);else if(app==='_Contacts'||app==='Contacts')setTimeout(refreshContacts,80);else if(app==='_Messages'||app==='Messages')setTimeout(function(){sendPhone('open_chatrooms,');},80);},true);}patchIncoming();enhanceMessages();}
+    function boot(){bind();var tries=0,t=setInterval(function(){bind();if(patchIncoming()||incomingPatched||++tries>40)clearInterval(t);},250);}
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
