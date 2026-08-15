@@ -1,0 +1,345 @@
+/* Velora RP - visual polish v2
+   Additive layer only: keeps the existing street / phone identity intact. */
+
+:root{
+    --velora-red:#c65d58;
+    --velora-red-dark:#a8423e;
+    --velora-ink:#252a37;
+    --velora-soft:#f7f6f8;
+}
+
+/* --- Ambient city depth -------------------------------------------------- */
+.street-scene::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:.16;
+    background-image:
+        radial-gradient(circle at 22% 33%,rgba(255,255,255,.36) 0 1px,transparent 1.5px),
+        radial-gradient(circle at 72% 19%,rgba(255,255,255,.26) 0 1px,transparent 1.5px),
+        radial-gradient(circle at 58% 42%,rgba(255,255,255,.18) 0 1px,transparent 1.5px);
+    background-size:137px 137px,191px 191px,223px 223px;
+}
+
+.road{
+    overflow:hidden;
+}
+
+.street-light-sweep{
+    position:absolute;
+    left:-220px;
+    bottom:8px;
+    width:190px;
+    height:15px;
+    border-radius:50%;
+    opacity:.34;
+    filter:blur(8px);
+    background:linear-gradient(90deg,transparent,rgba(255,235,187,.76),rgba(255,255,255,.45),transparent);
+    animation:veloraHeadlight 10s linear infinite;
+}
+
+.street-puddle{
+    position:absolute;
+    bottom:13px;
+    width:72px;
+    height:7px;
+    border-radius:50%;
+    opacity:.22;
+    filter:blur(1px);
+    background:linear-gradient(90deg,transparent,rgba(124,157,232,.72),transparent);
+}
+.puddle-a{left:31%}
+.puddle-b{right:22%;width:96px;opacity:.16}
+
+.left-main .wall-window.w2,
+.right-main .wall-window.w1{
+    animation:veloraWindowLife 8s ease-in-out infinite alternate;
+}
+.right-main .wall-window.w1{animation-delay:-3s}
+
+/* --- Top bar ------------------------------------------------------------- */
+.minimal-topbar{
+    max-width:1280px;
+    width:100%;
+    margin:0 auto;
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.season-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    height:30px;
+    padding:0 10px;
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:999px;
+    color:#aebbd6;
+    background:rgba(5,16,41,.22);
+    backdrop-filter:blur(8px);
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.11em;
+}
+.season-pill i{color:#d2746e;font-size:7px}
+
+/* --- Device: richer material + cursor light ----------------------------- */
+.device-shell{
+    --tilt-x:0deg;
+    --tilt-y:0deg;
+    --shine-x:50%;
+    --shine-y:18%;
+    transform:perspective(1800px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+    transition:
+        transform .24s cubic-bezier(.2,.8,.2,1),
+        opacity .16s ease,
+        filter .16s ease,
+        box-shadow .22s ease,
+        border-color .22s ease;
+}
+
+.device-shell::after{
+    background:
+        radial-gradient(circle at var(--shine-x) var(--shine-y),rgba(255,255,255,.22),transparent 19%),
+        linear-gradient(118deg,rgba(255,255,255,.13),transparent 29%,transparent 72%,rgba(255,255,255,.045));
+    opacity:.58;
+}
+
+.device-shell.is-hovering{
+    box-shadow:
+        0 52px 120px rgba(0,0,0,.38),
+        0 16px 34px rgba(0,0,0,.18),
+        inset 0 0 0 1px rgba(255,255,255,.28);
+}
+
+/* Keep the existing full flip intact while neutralising the cursor tilt. */
+.device-shell.flip-90{transform:perspective(1800px) rotateX(0deg) rotateY(90deg) scale(.965)}
+.device-shell.flip-180{transform:perspective(1800px) rotateX(0deg) rotateY(180deg) scale(.985)}
+.device-shell.flip-270{transform:perspective(1800px) rotateX(0deg) rotateY(270deg) scale(.965)}
+.device-shell.flip-reset{transform:perspective(1800px) rotateX(0deg) rotateY(-90deg) scale(.965)}
+
+.device-screen{
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.82),
+        inset 0 0 0 1px rgba(32,36,49,.035);
+}
+
+.device-screen::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    opacity:.19;
+    background:repeating-linear-gradient(180deg,rgba(20,24,34,.018) 0 1px,transparent 1px 4px);
+}
+
+.device-notch{
+    box-shadow:inset 0 0 0 2px #1c1e25,0 5px 12px rgba(0,0,0,.2);
+}
+
+/* --- Brand / city pulse -------------------------------------------------- */
+.brand-title{
+    text-shadow:0 1px 0 #fff;
+}
+
+.city-pulse{
+    width:100%;
+    max-width:270px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin-top:13px;
+    padding:8px 9px;
+    border:1px solid #d7d7dc;
+    border-radius:10px;
+    background:rgba(255,255,255,.52);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+    text-align:left;
+}
+
+.city-pulse-label{
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    color:#b34e49;
+    font-size:6px;
+    font-weight:900;
+    letter-spacing:.1em;
+}
+.city-pulse-label i{
+    font-size:5px;
+    animation:veloraPulseDot 1.6s ease-in-out infinite;
+}
+.city-pulse strong{
+    min-width:0;
+    color:#6d7380;
+    font-size:7px;
+    font-weight:800;
+    line-height:1.35;
+    transition:opacity .15s ease,transform .15s ease;
+}
+.city-pulse strong.is-changing{opacity:0;transform:translateY(3px)}
+
+/* --- Cleaner segmented auth tabs --------------------------------------- */
+.auth-tabs{
+    position:relative;
+    isolation:isolate;
+    padding:3px;
+    border:1px solid #d7d7dc;
+    border-radius:11px;
+    background:#e1e1e5;
+    overflow:hidden;
+}
+
+.auth-tabs::before{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    top:3px;
+    bottom:3px;
+    left:3px;
+    width:calc(50% - 5px);
+    border-radius:8px;
+    background:linear-gradient(180deg,#d06a64,#b84e49);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 5px rgba(139,53,49,.16);
+    transition:transform .26s cubic-bezier(.22,.9,.26,1);
+}
+.auth-tabs.register-active::before{transform:translateX(calc(100% + 4px))}
+
+.auth-tab,
+.auth-tab.active{
+    position:relative;
+    z-index:2;
+    background:transparent !important;
+    box-shadow:none !important;
+}
+.auth-tab{color:#777c88}
+.auth-tab.active{color:#fff}
+
+/* --- Fields / live feedback -------------------------------------------- */
+.field-wrap{
+    overflow:hidden;
+}
+.field-wrap::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:100%;
+    bottom:0;
+    height:2px;
+    background:linear-gradient(90deg,#b84d48,#d87b74);
+    transition:right .2s ease;
+}
+.field-wrap:focus-within::after{right:0}
+.field-wrap:focus-within>i{color:#bd5651;transform:scale(1.05)}
+.field-wrap>i{transition:color .16s ease,transform .16s ease}
+
+.login-options{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:9px;
+}
+.remember-line{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin:0;
+    color:#8a8f9b;
+    font-size:7px;
+    font-weight:700;
+    cursor:pointer;
+    user-select:none;
+}
+.remember-line input{accent-color:#bd5651}
+.caps-hint{
+    display:none;
+    align-items:center;
+    gap:4px;
+    color:#a06f38;
+    font-size:7px;
+    font-weight:800;
+}
+.caps-hint.visible{display:inline-flex}
+
+.password-match-label{
+    display:block;
+    min-height:10px;
+    margin-top:4px;
+    color:#9a9ea8;
+    font-size:7px;
+    font-weight:700;
+}
+.password-match-label.match{color:#4f9e6c}
+.password-match-label.no-match{color:#bd5954}
+
+.auth-primary{
+    position:relative;
+    overflow:hidden;
+}
+.auth-primary::after{
+    content:"";
+    position:absolute;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    left:var(--ripple-x,50%);
+    top:var(--ripple-y,50%);
+    transform:translate(-50%,-50%) scale(0);
+    opacity:0;
+    background:rgba(255,255,255,.36);
+}
+.auth-primary.ripple::after{animation:veloraButtonRipple .45s ease-out}
+
+.auth-footnote{
+    opacity:.86;
+}
+
+/* --- Responsive ---------------------------------------------------------- */
+@media (max-width:900px){
+    .season-pill{display:none}
+    .device-shell{transform:none}
+    .city-pulse{max-width:100%}
+}
+
+@media (max-width:700px){
+    .topbar-right{gap:6px}
+    .login-options{align-items:flex-start;flex-direction:column}
+    .caps-hint{align-self:flex-end;margin-top:-18px}
+}
+
+@media (prefers-reduced-motion:reduce){
+    .street-light-sweep,
+    .left-main .wall-window.w2,
+    .right-main .wall-window.w1,
+    .city-pulse-label i{
+        animation:none !important;
+    }
+}
+
+@keyframes veloraHeadlight{
+    0%{left:-240px;opacity:0}
+    8%{opacity:.34}
+    55%{opacity:.28}
+    62%,100%{left:calc(100% + 180px);opacity:0}
+}
+@keyframes veloraWindowLife{
+    0%,42%{filter:brightness(.82)}
+    55%,100%{filter:brightness(1.18)}
+}
+@keyframes veloraPulseDot{
+    0%,100%{opacity:.45;transform:scale(.8)}
+    50%{opacity:1;transform:scale(1.2)}
+}
+@keyframes veloraButtonRipple{
+    0%{opacity:.5;transform:translate(-50%,-50%) scale(0)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(18)}
+}
