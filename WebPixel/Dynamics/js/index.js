@@ -1,4 +1,4 @@
-/* Velora RP - landing authentication */
+/* Velora RP - street landing authentication */
 (function ($) {
     'use strict';
 
@@ -46,23 +46,16 @@
         $(box).stop(true, true).fadeIn(120);
     }
 
-    function openAuth(view, scroll) {
+    function openAuth(view) {
         var mode = view === 'register' ? 'register' : 'login';
 
         hideMessages();
         $('.auth-tab').removeClass('active');
         $('.auth-tab[data-auth-tab="' + mode + '"]').addClass('active');
 
-        $('.auth-form').removeClass('active').hide();
+        $('.auth-view').removeClass('active').hide();
         $('[data-auth-view="' + mode + '"]').addClass('active').fadeIn(120);
         $('#auth-title').text(mode === 'register' ? 'Inscription' : 'Connexion');
-
-        if (scroll !== false) {
-            var panel = document.getElementById('auth-panel');
-            if (panel) {
-                panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
     }
 
     function login() {
@@ -175,12 +168,8 @@
     }
 
     $(document).ready(function () {
-        $('[data-open-auth]').on('click', function () {
-            openAuth($(this).data('open-auth'), true);
-        });
-
-        $('[data-auth-tab]').on('click', function () {
-            openAuth($(this).data('auth-tab'), false);
+        $('[data-open-auth], [data-auth-tab]').on('click', function () {
+            openAuth($(this).data('open-auth') || $(this).data('auth-tab'));
         });
 
         $('#subrmit-login').on('click', login);
@@ -205,6 +194,6 @@
             $icon.toggleClass('fa-eye', !show).toggleClass('fa-eye-slash', show);
         });
 
-        openAuth(window.location.hash === '#register' ? 'register' : 'login', false);
+        openAuth(window.location.hash === '#register' ? 'register' : 'login');
     });
 })(jQuery);
