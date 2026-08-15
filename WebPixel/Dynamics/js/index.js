@@ -8,6 +8,8 @@
     }
 
     var endpoint = baseUrl;
+    var currentMode = null;
+    var pivotLocked = false;
 
     function parseResponse(data) {
         if (typeof data === 'object') return data;
@@ -46,16 +48,61 @@
         $(box).stop(true, true).fadeIn(120);
     }
 
-    function openAuth(view) {
-        var mode = view === 'register' ? 'register' : 'login';
-
+    function applyAuthMode(mode) {
         hideMessages();
+
         $('.auth-tab').removeClass('active');
         $('.auth-tab[data-auth-tab="' + mode + '"]').addClass('active');
 
         $('.auth-view').removeClass('active').hide();
-        $('[data-auth-view="' + mode + '"]').addClass('active').fadeIn(120);
+        $('[data-auth-view="' + mode + '"]').addClass('active').show();
+
         $('#auth-title').text(mode === 'register' ? 'Inscription' : 'Connexion');
+        $('.device-shell').toggleClass('auth-register', mode === 'register');
+    }
+
+    function openAuth(view, animate) {
+        var mode = view === 'register' ? 'register' : 'login';
+        var $device = $('.device-shell');
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (currentMode === mode) {
+            return;
+        }
+
+        if (!currentMode || animate === false || reduceMotion || !$device.length) {
+            applyAuthMode(mode);
+            currentMode = mode;
+            return;
+        }
+
+        if (pivotLocked) {
+            return;
+        }
+
+        pivotLocked = true;
+        $device.removeClass('flip-in').addClass('flip-out');
+
+        window.setTimeout(function () {
+            applyAuthMode(mode);
+            currentMode = mode;
+
+            // At 90 degrees the face is almost invisible. We place the new face
+            // on the opposite side, then let it finish the rotation naturally.
+            $device.removeClass('flip-out').addClass('flip-in');
+
+            if ($device[0]) {
+                void $device[0].offsetWidth;
+            }
+
+            window.requestAnimationFrame(function () {
+                $device.removeClass('flip-in');
+            });
+
+            window.setTimeout(function () {
+                pivotLocked = false;
+            }, 320);
+        }, 255);
     }
 
     function login() {
@@ -169,7 +216,7 @@
 
     $(document).ready(function () {
         $('[data-open-auth], [data-auth-tab]').on('click', function () {
-            openAuth($(this).data('open-auth') || $(this).data('auth-tab'));
+            openAuth($(this).data('open-auth') || $(this).data('auth-tab'), true);
         });
 
         $('#subrmit-login').on('click', login);
@@ -194,6 +241,6 @@
             $icon.toggleClass('fa-eye', !show).toggleClass('fa-eye-slash', show);
         });
 
-        openAuth(window.location.hash === '#register' ? 'register' : 'login');
+        openAuth(window.location.hash === '#register' ? 'register' : 'login', false);
     });
 })(jQuery);
