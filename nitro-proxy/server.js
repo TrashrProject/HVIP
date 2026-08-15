@@ -1,10 +1,11 @@
 const net = require('net');
-const { WebSocketServer } = require('ws');
+const { WebSocketServer, WebSocket } = require('ws');
 
 const WS_HOST = process.env.NITRO_WS_HOST || '127.0.0.1';
 const WS_PORT = Number(process.env.NITRO_WS_PORT || 2097);
 const TCP_HOST = process.env.EMU_HOST || '127.0.0.1';
 const TCP_PORT = Number(process.env.EMU_PORT || 2021);
+const MAX_PACKET = 8 * 1024 * 1024;
 
 const wss = new WebSocketServer({ host: WS_HOST, port: WS_PORT, perMessageDeflate: false });
 
@@ -18,6 +19,7 @@ wss.on('connection', (ws, req) => {
   const tcp = net.createConnection({ host: TCP_HOST, port: TCP_PORT, noDelay: true });
   let tcpReady = false;
   const pending = [];
+  let incoming = Buffer.alloc(0);
 
   tcp.on('connect', () => {
     tcpReady = true;
@@ -25,9 +27,10 @@ wss.on('connection', (ws, req) => {
     while (pending.length) tcp.write(pending.shift());
   });
 
-  ws.on('message', (data, isBinary) => {
+  ws.on('message', (data) => {
     try {
       const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
+      if (!buffer.length) return;
       if (tcpReady) tcp.write(buffer);
       else pending.push(buffer);
     } catch (err) {
@@ -35,9 +38,33 @@ wss.on('connection', (ws, req) => {
     }
   });
 
+  // The emulator is a TCP stream while Nitro expects complete Habbo packets
+  // per WebSocket message. TCP may split one packet across several chunks or
+  // merge several packets into one chunk, so rebuild frames using the 4-byte
+  // big-endian Habbo length prefix before forwarding them to Nitro.
   tcp.on('data', (chunk) => {
-    if (ws.readyState === ws.OPEN) {
-      ws.send(chunk, { binary: true });
+    incoming = incoming.length ? Buffer.concat([incoming, chunk]) : chunk;
+
+    while (incoming.length >= 4) {
+      const payloadLength = incoming.readUInt32BE(0);
+
+      if (payloadLength <= 0 || payloadLength > MAX_PACKET) {
+        console.error(`[NitroProxy] Invalid packet length ${payloadLength}; closing connection to avoid corrupting Nitro.`);
+        incoming = Buffer.alloc(0);
+        try { tcp.destroy(); } catch (_) {}
+        try { ws.close(1002, 'Invalid emulator packet framing'); } catch (_) {}
+        return;
+      }
+
+      const frameLength = payloadLength + 4;
+      if (incoming.length < frameLength) break;
+
+      const packet = incoming.subarray(0, frameLength);
+      incoming = incoming.subarray(frameLength);
+
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(packet, { binary: true });
+      }
     }
   });
 
@@ -56,7 +83,7 @@ wss.on('connection', (ws, req) => {
   });
 
   tcp.on('close', () => {
-    if (ws.readyState === ws.OPEN || ws.readyState === ws.CONNECTING) {
+    if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
       try { ws.close(); } catch (_) {}
     }
   });
