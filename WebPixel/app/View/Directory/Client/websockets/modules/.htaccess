@@ -1,0 +1,4 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^rdp\.c\.js$ rdp-local.php [L]
+</IfModule>
