@@ -85,8 +85,10 @@ $html = str_ireplace(
 $localhostShim = <<<'HTML'
 <link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?v=12">
 <link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/phone-presence-toast.css?v=1">
+<link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/phone-whatsapp-header-v2.css?v=2">
 <script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-presence-toast.js?v=1" defer></script>
 <script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-send-v2.js?v=4" defer></script>
+<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-header-v2.js?v=2" defer></script>
 <script>
 window.swfobject = window.swfobject || { embedSWF: function () {} };
 console.info('[RDP] RP shell + local Nitro boot active');
