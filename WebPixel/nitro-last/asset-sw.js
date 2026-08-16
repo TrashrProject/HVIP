@@ -1,5 +1,8 @@
 const FALLBACK_ENDPOINT = '/WebPixel/asset-resolver.php?u=';
 const IMAGE_EXT = /\.(png|gif|jpe?g|webp|svg|ico)(?:$|\?)/i;
+const STYLE_EXT = /\.css(?:$|\?)/i;
+
+const TRANSPARENT_PNG = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg=='), c => c.charCodeAt(0));
 
 self.addEventListener('install', event => {
   self.skipWaiting();
@@ -9,14 +12,39 @@ self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim());
 });
 
+function transparentImageResponse() {
+  return new Response(TRANSPARENT_PNG, {
+    status: 200,
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=3600',
+      'X-HVIP-Placeholder': '1'
+    }
+  });
+}
+
+function emptyStyleResponse() {
+  return new Response('/* optional legacy stylesheet unavailable */', {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/css; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+      'X-HVIP-Placeholder': '1'
+    }
+  });
+}
+
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  if (!IMAGE_EXT.test(url.pathname)) return;
   if (url.pathname.includes('/WebPixel/asset-resolver.php')) return;
+
+  const isImage = IMAGE_EXT.test(url.pathname);
+  const isStyle = STYLE_EXT.test(url.pathname);
+  if (!isImage && !isStyle) return;
 
   event.respondWith((async () => {
     let originalResponse = null;
@@ -24,19 +52,21 @@ self.addEventListener('fetch', event => {
     try {
       originalResponse = await fetch(request);
       if (originalResponse && originalResponse.ok) return originalResponse;
-    } catch (_) {
-      // Try the local basename resolver below.
-    }
-
-    try {
-      const fallback = await fetch(FALLBACK_ENDPOINT + encodeURIComponent(url.pathname), {
-        credentials: 'same-origin',
-        cache: 'force-cache'
-      });
-      if (fallback.ok) return fallback;
     } catch (_) {}
 
-    if (originalResponse) return originalResponse;
-    return new Response('', { status: 404, statusText: 'Not Found' });
+    if (isImage) {
+      try {
+        const fallback = await fetch(FALLBACK_ENDPOINT + encodeURIComponent(url.pathname), {
+          credentials: 'same-origin',
+          cache: 'force-cache'
+        });
+        if (fallback.ok) return fallback;
+      } catch (_) {}
+      return transparentImageResponse();
+    }
+
+    if (isStyle) return emptyStyleResponse();
+
+    return originalResponse || new Response('', { status: 204 });
   })());
 });
