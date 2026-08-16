@@ -80,28 +80,26 @@
           }
         }).observe(document.documentElement, { childList: true, subtree: true });
 
-        // Ignore the generic Event rejections produced by optional legacy image
-        // loaders. Real Error objects still surface normally.
         window.addEventListener('unhandledrejection', event => {
           if (event.reason instanceof Event) event.preventDefault();
         });
 
-        // Retry missing legacy assets locally. Missing optional images/styles are
-        // answered with harmless placeholders instead of repeated 404 responses.
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('./asset-sw.js?v=2', { scope: './' })
+          navigator.serviceWorker.register('./asset-sw.js?v=3', { scope: './' })
             .then(registration => registration.update().then(() => registration))
             .then(() => navigator.serviceWorker.ready)
             .then(() => {
-              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded-v2')) {
-                sessionStorage.setItem('hvip-sw-reloaded-v2', '1');
+              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded-v3')) {
+                sessionStorage.setItem('hvip-sw-reloaded-v3', '1');
                 location.reload();
               }
             })
             .catch(err => console.warn('[HVIP] Asset fallback worker unavailable:', err));
         }
 
-        // Passive packet diagnostics: do not modify packets.
+        // Passive packet diagnostics. The proxy is deliberately untouched here:
+        // we only record what Nitro actually receives so the precise bad packet
+        // can be corrected in the emulator instead of hiding the parser error.
         const NativeWebSocket = window.WebSocket;
         window.__nitroPacketDiag = { last: null, recent: [] };
         window.WebSocket = new Proxy(NativeWebSocket, {
@@ -113,20 +111,40 @@
                 if (event.data instanceof ArrayBuffer) buffer = event.data;
                 else if (event.data instanceof Blob) buffer = await event.data.arrayBuffer();
                 else if (ArrayBuffer.isView(event.data)) buffer = event.data.buffer.slice(event.data.byteOffset, event.data.byteOffset + event.data.byteLength);
-                if (!buffer || buffer.byteLength < 6) return;
+                if (!buffer) return;
 
-                const view = new DataView(buffer);
-                const declaredLength = view.getUint32(0, false);
-                const header = view.getUint16(4, false);
-                const item = { header, declaredLength, bytes: buffer.byteLength, at: Date.now() };
+                const item = { bytes: buffer.byteLength, at: Date.now(), declaredLength: null, header: null, complete: null };
+                if (buffer.byteLength >= 4) {
+                  const view = new DataView(buffer);
+                  item.declaredLength = view.getUint32(0, false);
+                  item.complete = (item.declaredLength + 4 === buffer.byteLength);
+                  if (buffer.byteLength >= 6) item.header = view.getUint16(4, false);
+                }
                 window.__nitroPacketDiag.last = item;
                 window.__nitroPacketDiag.recent.push(item);
-                if (window.__nitroPacketDiag.recent.length > 20) window.__nitroPacketDiag.recent.shift();
+                if (window.__nitroPacketDiag.recent.length > 30) window.__nitroPacketDiag.recent.shift();
               } catch (_) {}
             });
             return ws;
           }
         });
+
+        // Nitro catches the parser exception internally and writes it through
+        // console.error, so window.onerror cannot see it. Mirror that exact log
+        // with the recorded frame metadata. This gives us the packet header and
+        // frame-size mismatch needed to repair the real source.
+        const nativeConsoleError = console.error.bind(console);
+        console.error = function() {
+          let text = '';
+          try { text = Array.from(arguments).map(v => String(v && (v.stack || v.message) || v)).join(' '); } catch (_) {}
+          nativeConsoleError.apply(console, arguments);
+          if (/Error parsing message|outside the bounds of the DataView|RangeError.*DataView/i.test(text)) {
+            try {
+              nativeConsoleError('[NitroDiag] PARSER_FAILURE_LAST_PACKET=' + JSON.stringify(window.__nitroPacketDiag.last));
+              nativeConsoleError('[NitroDiag] RECENT_PACKETS=' + JSON.stringify(window.__nitroPacketDiag.recent));
+            } catch (_) {}
+          }
+        };
       })();
 
       const query = new URLSearchParams(window.location.search);
@@ -136,7 +154,8 @@
         "forward.type": query.get("room") ? 2 : -1,
         "forward.id": query.get("room") || 0,
         "friend.id": query.get("friend") || 0,
-        "roomenterad.habbohotel.enabled": false
+        "roomenterad.habbohotel.enabled": false,
+        "roomenterad.habblet.enabled": false
       };
     </script>
     <script type="module" crossorigin src="./assets/index-9f9954ad.js"></script>
