@@ -1,14 +1,12 @@
 (function(){
     'use strict';
-    if(window.__rdpWhatsHeaderV7) return;
-    window.__rdpWhatsHeaderV7 = true;
-
-    var LOCAL_IMAGER = 'http://127.0.0.1:3030/';
+    if(window.__rdpWhatsHeaderV8) return;
+    window.__rdpWhatsHeaderV8 = true;
 
     function extractFigure(value){
         value = String(value || '');
-        var m = value.match(/[?&]figure=([^&"')]+)/i);
-        if(!m) m = value.match(/figure%3D([^&"')]+)/i);
+        var m = value.match(/[?&]figure=([^&\"')]+)/i);
+        if(!m) m = value.match(/figure%3D([^&\"')]+)/i);
         if(!m) return '';
         try { return decodeURIComponent(m[1]); } catch(e) { return m[1]; }
     }
@@ -23,11 +21,7 @@
         return extractFigure(inline) || extractFigure(computed) || '';
     }
 
-    function localAvatar(figure){
-        return LOCAL_IMAGER + '?figure=' + encodeURIComponent(figure) + '&gesture=sml&direction=2&head_direction=2&headonly=1&size=l&img_format=png';
-    }
-
-    function officialAvatar(figure){
+    function avatarUrl(figure){
         return 'https://www.habbo.com/habbo-imaging/avatarimage?figure=' + encodeURIComponent(figure) + '&gesture=sml&direction=2&head_direction=2&headonly=1&size=m';
     }
 
@@ -46,14 +40,9 @@
         img.className = 'rdp-habbo-avatar-img';
         img.alt = '';
         img.draggable = false;
-        img.dataset.rdpFallback = '0';
-        img.src = localAvatar(figure);
+        img.src = avatarUrl(figure);
         img.onerror = function(){
-            if(img.dataset.rdpFallback === '0'){
-                img.dataset.rdpFallback = '1';
-                img.src = officialAvatar(figure);
-                return;
-            }
+            img.removeAttribute('src');
             img.style.display = 'none';
             avatar.classList.add('rdp-avatar-failed');
         };
