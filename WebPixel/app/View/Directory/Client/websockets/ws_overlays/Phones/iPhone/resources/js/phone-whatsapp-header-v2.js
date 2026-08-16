@@ -1,7 +1,7 @@
 (function(){
     'use strict';
-    if(window.__rdpWhatsHeaderV4) return;
-    window.__rdpWhatsHeaderV4 = true;
+    if(window.__rdpWhatsHeaderV5) return;
+    window.__rdpWhatsHeaderV5 = true;
 
     function extractFigure(value){
         value = String(value || '');
@@ -13,14 +13,49 @@
 
     function getFigure(avatar){
         if(!avatar) return '';
+        var direct = avatar.getAttribute('data-figure') || '';
+        if(direct) return direct;
         var inline = avatar.style.backgroundImage || '';
         var computed = '';
         try { computed = window.getComputedStyle(avatar).backgroundImage || ''; } catch(e) {}
-        return extractFigure(inline) || extractFigure(computed) || avatar.getAttribute('data-figure') || '';
+        return extractFigure(inline) || extractFigure(computed) || '';
     }
 
-    function buildAvatar(figure){
-        return 'https://nitro-imager.kubbo.ch/?figure=' + encodeURIComponent(figure) + '&gesture=sml&direction=2&head_direction=2&headonly=1&size=m';
+    function officialAvatar(figure){
+        return 'https://www.habbo.com/habbo-imaging/avatarimage?figure=' + encodeURIComponent(figure) + '&gesture=sml&direction=2&head_direction=2&headonly=1&size=m';
+    }
+
+    function installAvatar(avatar, figure){
+        if(!avatar || !figure) return;
+        avatar.setAttribute('data-figure', figure);
+        avatar.classList.add('rdp-real-habbo-avatar');
+
+        if(avatar.dataset.rdpRenderedFigure === figure) return;
+        avatar.dataset.rdpRenderedFigure = figure;
+
+        /*
+         * The old retro imager (nitro-imager.kubbo.city/.ch) no longer resolves.
+         * Use a real <img> so DNS/image failures cannot leave a CSS-only empty box.
+         * Keep the full figure string untouched; custom parts that Habbo's public
+         * imager does not know are simply ignored instead of hiding the avatar.
+         */
+        avatar.style.setProperty('background-image', 'none', 'important');
+        avatar.innerHTML = '';
+
+        var img = document.createElement('img');
+        img.className = 'rdp-habbo-avatar-img';
+        img.alt = '';
+        img.draggable = false;
+        img.src = officialAvatar(figure);
+        img.onerror = function(){
+            img.style.display = 'none';
+            avatar.classList.add('rdp-avatar-failed');
+        };
+        img.onload = function(){
+            avatar.classList.remove('rdp-avatar-failed');
+            img.style.display = 'block';
+        };
+        avatar.appendChild(img);
     }
 
     function enhanceHeader(){
@@ -30,15 +65,8 @@
         var status = document.querySelector('#app_WhatsApp .app_whats_lastonline');
 
         if(avatar){
-            avatar.classList.add('rdp-real-habbo-avatar');
             var figure = getFigure(avatar);
-            if(figure){
-                avatar.setAttribute('data-figure', figure);
-                if(avatar.dataset.rdpRenderedFigure !== figure){
-                    avatar.dataset.rdpRenderedFigure = figure;
-                    avatar.style.setProperty('background-image', 'url("' + buildAvatar(figure) + '")', 'important');
-                }
-            }
+            if(figure) installAvatar(avatar, figure);
         }
 
         if(status){
@@ -58,7 +86,7 @@
                 childList:true,
                 subtree:true,
                 attributes:true,
-                attributeFilter:['style','class']
+                attributeFilter:['style','class','data-figure']
             });
         }
         setInterval(enhanceHeader,800);
