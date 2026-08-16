@@ -1,5 +1,5 @@
 <?php
-/** Velora RP - dashboard header */
+/** Velora RP - citizen launcher header */
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -7,11 +7,11 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#0a214f">
-    <meta name="description" content="Tableau de bord citoyen Velora RP.">
+    <meta name="theme-color" content="#071426">
+    <meta name="description" content="Espace citoyen Velora RP : progression, économie et accès à la ville.">
     <title><?php echo Config::$WName; ?> — Mon espace</title>
 
-    <link rel="shortcut icon" href="<?php echo IMG; ?>/favicon.ico?v8" type="image/vnd.microsoft.icon">
+    <link rel="shortcut icon" href="<?php echo IMG; ?>/favicon.ico?v9" type="image/vnd.microsoft.icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
