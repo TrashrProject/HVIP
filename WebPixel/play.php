@@ -76,9 +76,18 @@ $html = str_ireplace(
         'https://nitro.habbovip.us',
         'http://nitro.habbovip.us',
         'https://dev.habbovip.us',
-        'http://dev.habbovip.us'
+        'http://dev.habbovip.us',
+        'https://nitro-imager.kubbo.city/?figure=',
+        'http://nitro-imager.kubbo.city/?figure='
     ),
-    '/WebPixel/nitro-last',
+    array(
+        '/WebPixel/nitro-last',
+        '/WebPixel/nitro-last',
+        '/WebPixel/nitro-last',
+        '/WebPixel/nitro-last',
+        '/WebPixel/avatar-image.php?figure=',
+        '/WebPixel/avatar-image.php?figure='
+    ),
     $html
 );
 
@@ -89,6 +98,45 @@ $localhostShim = <<<'HTML'
 <script>
 window.swfobject = window.swfobject || { embedSWF: function () {} };
 window.Swiper = window.Swiper || function(){ return { update:function(){}, slideTo:function(){}, destroy:function(){} }; };
+
+// Old optional dashboard widgets try to render charts even when their target
+// element is not present in the phone shell. Do not surface those harmless
+// rejected promises as application errors.
+window.addEventListener('unhandledrejection', function (event) {
+    var reason = event && event.reason;
+    var text = '';
+    try { text = String(reason && (reason.message || reason) || ''); } catch (_) {}
+    if ((reason && reason.constructor && reason.constructor.name === 'Event') || /Element not found/i.test(text)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }
+}, true);
+
+// Replace obsolete external RP-imager URLs before dynamically inserted phone
+// markup can request them.
+(function () {
+    function cleanUrl(value) {
+        value = String(value || '');
+        return value.replace(/^https?:\/\/nitro-imager\.kubbo\.city\/\?figure=/i, '/WebPixel/avatar-image.php?figure=');
+    }
+
+    var imageSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+    if (imageSrc && imageSrc.set) {
+        Object.defineProperty(HTMLImageElement.prototype, 'src', {
+            get: imageSrc.get,
+            set: function (value) { return imageSrc.set.call(this, cleanUrl(value)); },
+            configurable: true,
+            enumerable: imageSrc.enumerable
+        });
+    }
+
+    var nativeSetAttribute = Element.prototype.setAttribute;
+    Element.prototype.setAttribute = function (name, value) {
+        if (String(name).toLowerCase() === 'src') value = cleanUrl(value);
+        return nativeSetAttribute.call(this, name, value);
+    };
+})();
+
 console.info('[RDP] RP shell + local Nitro boot active');
 </script>
 <script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-presence-toast.js?v=1" defer></script>
