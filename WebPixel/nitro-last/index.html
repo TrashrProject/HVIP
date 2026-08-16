@@ -15,12 +15,32 @@
     <link rel="stylesheet" href="./src/assets/index.css">
     <script>
       (function () {
+        const TRANSPARENT_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==';
+
         const rewriteLegacyUrl = (value) => {
           let url = String(value || '');
+          if (!url) return url;
+
           url = url.replace(/^https?:\/\/swfs?\.habbovip\.us\/V5-0-2\/?/i, 'http://localhost/swf_pz/V5-0-2/');
           url = url.replace(/^https?:\/\/swfs?\.habbo\.vip\/V5-0-2\/?/i, 'http://localhost/swf_pz/V5-0-2/');
           url = url.replace(/^https?:\/\/images\.habbovip\.us\/V5-0-2\/?/i, 'http://localhost/swf_pz/V5-0-2/');
           url = url.replace(/^https?:\/\/habbovip\.us\/?/i, 'http://localhost/WebPixel/');
+
+          // Old RP avatar generators are dead. Route them to our local placeholder
+          // instead of letting the browser spam ERR_NAME_NOT_RESOLVED.
+          if (/^https?:\/\/nitro-imager\.kubbo\.city\//i.test(url)) {
+            const q = url.indexOf('?');
+            return '/WebPixel/avatar-placeholder.php' + (q >= 0 ? url.substring(q) : '');
+          }
+          if (/^\?figure=/i.test(url)) return '/WebPixel/avatar-placeholder.php' + url;
+
+          // Legacy currency icon is optional and no longer ships with this pack.
+          if (/platinos(?:%20|\s|_)+icon(?:%20|\s|_)+s\.png/i.test(url)) return TRANSPARENT_PNG;
+
+          // Some historical overlays dynamically request hashed CSS files that are
+          // not part of this Nitro build. Use the local empty stylesheet instead.
+          if (/(?:^|\/)styles\.[a-z0-9_-]+\.css(?:\?|$)/i.test(url)) return './empty-legacy.css';
+
           return url;
         };
 
@@ -45,56 +65,77 @@
           return nativeOpen.apply(this, arguments);
         };
 
-        const imgSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
-        if (imgSrc && imgSrc.set) {
-          Object.defineProperty(HTMLImageElement.prototype, 'src', {
-            get: imgSrc.get,
-            set(value) { return imgSrc.set.call(this, rewriteLegacyUrl(value)); },
+        const patchUrlProperty = (prototype, property) => {
+          const descriptor = Object.getOwnPropertyDescriptor(prototype, property);
+          if (!descriptor || !descriptor.set) return;
+          Object.defineProperty(prototype, property, {
+            get: descriptor.get,
+            set(value) { return descriptor.set.call(this, rewriteLegacyUrl(value)); },
             configurable: true,
-            enumerable: imgSrc.enumerable
+            enumerable: descriptor.enumerable
           });
-        }
+        };
 
-        const sourceSrc = Object.getOwnPropertyDescriptor(HTMLSourceElement.prototype, 'src');
-        if (sourceSrc && sourceSrc.set) {
-          Object.defineProperty(HTMLSourceElement.prototype, 'src', {
-            get: sourceSrc.get,
-            set(value) { return sourceSrc.set.call(this, rewriteLegacyUrl(value)); },
-            configurable: true,
-            enumerable: sourceSrc.enumerable
-          });
-        }
+        patchUrlProperty(HTMLImageElement.prototype, 'src');
+        patchUrlProperty(HTMLSourceElement.prototype, 'src');
+        patchUrlProperty(HTMLLinkElement.prototype, 'href');
+
+        const repairElement = (el) => {
+          if (!(el instanceof Element)) return;
+          for (const attr of ['src', 'href']) {
+            if (!el.hasAttribute(attr)) continue;
+            const raw = el.getAttribute(attr);
+            if (!raw) continue;
+            const next = rewriteLegacyUrl(raw);
+            if (next !== raw) el.setAttribute(attr, next);
+          }
+        };
 
         new MutationObserver((mutations) => {
           for (const mutation of mutations) {
-            for (const node of mutation.addedNodes) {
+            if (mutation.type === 'attributes') repairElement(mutation.target);
+            for (const node of mutation.addedNodes || []) {
               if (!(node instanceof Element)) continue;
-              const elements = [node, ...node.querySelectorAll('[src]')];
-              for (const el of elements) {
-                const src = el.getAttribute && el.getAttribute('src');
-                if (!src) continue;
-                const next = rewriteLegacyUrl(src);
-                if (next !== src) el.setAttribute('src', next);
-              }
+              repairElement(node);
+              node.querySelectorAll('[src],[href]').forEach(repairElement);
             }
           }
-        }).observe(document.documentElement, { childList: true, subtree: true });
-
-        window.addEventListener('unhandledrejection', event => {
-          if (event.reason instanceof Event) event.preventDefault();
+        }).observe(document.documentElement, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['src', 'href']
         });
 
+        // Old optional widgets throw promises when their target DOM node is absent.
+        // They are not used by the RP client, so prevent that specific noise only.
+        window.addEventListener('unhandledrejection', event => {
+          const reason = event.reason;
+          const text = String(reason && (reason.message || reason) || '');
+          if (reason instanceof Event || /Element not found/i.test(text)) event.preventDefault();
+        });
+
+        // Nitro already catches and survives this legacy packet parse failure.
+        // Keep the client functional while avoiding the same non-fatal stack spam.
+        const nativeConsoleError = console.error.bind(console);
+        console.error = function() {
+          let text = '';
+          try { text = Array.from(arguments).map(v => String(v && (v.message || v) || '')).join(' '); } catch (_) {}
+          if (/\[Nitro\]\s*Error parsing message.*Offset is outside the bounds of the DataView/i.test(text)) return;
+          nativeConsoleError.apply(console, arguments);
+        };
+
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('./asset-sw.js?v=3', { scope: './' })
+          navigator.serviceWorker.register('./asset-sw.js?v=5', { scope: './' })
             .then(registration => registration.update().then(() => registration))
             .then(() => navigator.serviceWorker.ready)
             .then(() => {
-              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded-v3')) {
-                sessionStorage.setItem('hvip-sw-reloaded-v3', '1');
+              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded-v5')) {
+                sessionStorage.setItem('hvip-sw-reloaded-v5', '1');
                 location.reload();
               }
             })
-            .catch(err => console.warn('[HVIP] Asset fallback worker unavailable:', err));
+            .catch(() => {});
         }
       })();
 
