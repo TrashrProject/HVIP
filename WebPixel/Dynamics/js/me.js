@@ -2,19 +2,30 @@
     'use strict';
 
     var sidebar = document.getElementById('rp-sidebar');
-    var sidebarToggle = document.getElementById('rp-mobile-sidebar');
-    var sidebarOverlay = document.getElementById('sidebar-mobile-overlay');
+    var sidebarOverlay = document.getElementById('rp-sidebar-overlay');
+    var menuButton = document.getElementById('rp-menu-button');
+    var userToggle = document.getElementById('rp-user-toggle');
+    var userDropdown = document.getElementById('rp-user-dropdown');
+    var phoneClock = document.getElementById('rp-phone-clock');
+    var eventPanel = document.querySelector('.rp-event-panel[data-event-end]');
 
     function setSidebar(open) {
-        if (!sidebar || !sidebarOverlay) return;
-        sidebar.classList.toggle('mobile-open', open);
-        sidebarOverlay.classList.toggle('show', open);
-        document.body.classList.toggle('sidebar-open', open);
+        if (!sidebar) return;
+        sidebar.classList.toggle('mobile-open', !!open);
+        if (sidebarOverlay) sidebarOverlay.classList.toggle('show', !!open);
+        document.body.classList.toggle('rp-sidebar-open', !!open);
     }
 
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function () {
-            setSidebar(!sidebar.classList.contains('mobile-open'));
+    function closeUserMenu() {
+        if (userDropdown) userDropdown.classList.remove('open');
+        if (userToggle) userToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    if (menuButton) {
+        menuButton.addEventListener('click', function () {
+            var isOpen = sidebar && sidebar.classList.contains('mobile-open');
+            setSidebar(!isOpen);
+            closeUserMenu();
         });
     }
 
@@ -24,71 +35,78 @@
         });
     }
 
+    if (userToggle && userDropdown) {
+        userToggle.addEventListener('click', function (event) {
+            event.stopPropagation();
+            var open = userDropdown.classList.toggle('open');
+            userToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+    }
+
+    document.addEventListener('click', function (event) {
+        if (userDropdown && userToggle && !userDropdown.contains(event.target) && !userToggle.contains(event.target)) {
+            closeUserMenu();
+        }
+    });
+
     document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') setSidebar(false);
+        if (event.key === 'Escape') {
+            setSidebar(false);
+            closeUserMenu();
+        }
     });
 
     window.addEventListener('resize', function () {
-        if (window.innerWidth > 1180) setSidebar(false);
+        if (window.innerWidth > 1060) setSidebar(false);
     });
 
     function pad(value) {
-        return String(value).padStart(2, '0');
+        return String(Math.max(0, value)).padStart(2, '0');
     }
 
-    function getNextDrawDate() {
+    function updateClock() {
+        if (!phoneClock) return;
         var now = new Date();
-        var target = new Date(now);
-        var daysUntilSunday = (7 - now.getDay()) % 7;
-
-        if (daysUntilSunday === 0 && now.getHours() >= 20) {
-            daysUntilSunday = 7;
-        }
-
-        target.setDate(now.getDate() + daysUntilSunday);
-        target.setHours(20, 0, 0, 0);
-        return target;
+        phoneClock.textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
     }
 
-    var drawDate = getNextDrawDate();
+    function updateEventCountdown() {
+        if (!eventPanel) return;
 
-    function updateCountdown() {
-        var now = new Date();
-        var diff = drawDate.getTime() - now.getTime();
+        var end = Number(eventPanel.getAttribute('data-event-end'));
+        if (!Number.isFinite(end)) return;
 
-        if (diff <= 0) {
-            drawDate = getNextDrawDate();
-            diff = drawDate.getTime() - now.getTime();
-        }
-
-        var totalSeconds = Math.max(0, Math.floor(diff / 1000));
+        var remaining = Math.max(0, end - Date.now());
+        var totalSeconds = Math.floor(remaining / 1000);
         var days = Math.floor(totalSeconds / 86400);
         var hours = Math.floor((totalSeconds % 86400) / 3600);
         var minutes = Math.floor((totalSeconds % 3600) / 60);
         var seconds = totalSeconds % 60;
 
-        var daysNode = document.getElementById('count-days');
-        var hoursNode = document.getElementById('count-hours');
-        var minutesNode = document.getElementById('count-minutes');
-        var secondsNode = document.getElementById('count-seconds');
+        var dayNode = document.getElementById('rp-days');
+        var hourNode = document.getElementById('rp-hours');
+        var minuteNode = document.getElementById('rp-minutes');
+        var secondNode = document.getElementById('rp-seconds');
 
-        if (daysNode) daysNode.textContent = pad(days);
-        if (hoursNode) hoursNode.textContent = pad(hours);
-        if (minutesNode) minutesNode.textContent = pad(minutes);
-        if (secondsNode) secondsNode.textContent = pad(seconds);
+        if (dayNode) dayNode.textContent = pad(days);
+        if (hourNode) hourNode.textContent = pad(hours);
+        if (minuteNode) minuteNode.textContent = pad(minutes);
+        if (secondNode) secondNode.textContent = pad(seconds);
     }
 
-    document.querySelectorAll('.inventory-tile').forEach(function (tile) {
-        tile.addEventListener('click', function () {
-            tile.classList.remove('tile-pop');
-            void tile.offsetWidth;
-            tile.classList.add('tile-pop');
+    document.querySelectorAll('.inventory-slot, .side-document').forEach(function (item) {
+        item.addEventListener('click', function () {
+            item.classList.remove('clicked');
+            void item.offsetWidth;
+            item.classList.add('clicked');
             window.setTimeout(function () {
-                tile.classList.remove('tile-pop');
-            }, 230);
+                item.classList.remove('clicked');
+            }, 260);
         });
     });
 
-    updateCountdown();
-    window.setInterval(updateCountdown, 1000);
+    updateClock();
+    updateEventCountdown();
+    window.setInterval(updateClock, 30000);
+    window.setInterval(updateEventCountdown, 1000);
 })();
