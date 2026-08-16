@@ -163,8 +163,26 @@ window.onunhandledrejection = function(event) {
     patchProperty(HTMLSourceElement.prototype, 'src');
     patchProperty(HTMLLinkElement.prototype, 'href');
 
-    // Critical fix: old overlays are inserted through jQuery .html()/innerHTML.
-    // Rewrite dead avatar hosts BEFORE the browser parses the HTML, so no DNS request is ever sent.
+    // jQuery .css() and direct style.backgroundImage assignments bypass src/innerHTML.
+    // Intercept CSS values before the browser can resolve the dead Kubbo hostname.
+    try {
+        ['backgroundImage', 'background'].forEach(function(prop) {
+            var cssDesc = Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, prop);
+            if (!cssDesc || !cssDesc.set) return;
+            Object.defineProperty(CSSStyleDeclaration.prototype, prop, {
+                get: cssDesc.get,
+                set: function(value) { return cssDesc.set.call(this, cleanStyle(value)); },
+                configurable: true,
+                enumerable: cssDesc.enumerable
+            });
+        });
+        var nativeCssSetProperty = CSSStyleDeclaration.prototype.setProperty;
+        CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
+            if (/^(?:background|background-image)$/i.test(String(name || ''))) value = cleanStyle(value);
+            return nativeCssSetProperty.call(this, name, value, priority);
+        };
+    } catch (_) {}
+
     try {
         var innerHTMLDesc = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
         if (innerHTMLDesc && innerHTMLDesc.set) {
