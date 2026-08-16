@@ -99,41 +99,78 @@ $localhostShim = <<<'HTML'
 window.swfobject = window.swfobject || { embedSWF: function () {} };
 window.Swiper = window.Swiper || function(){ return { update:function(){}, slideTo:function(){}, destroy:function(){} }; };
 
-// Old optional dashboard widgets try to render charts even when their target
-// element is not present in the phone shell. Do not surface those harmless
-// rejected promises as application errors.
-window.addEventListener('unhandledrejection', function (event) {
+// Ignore only the known optional ApexCharts failure caused by a missing legacy
+// dashboard target. This does not hide unrelated application errors.
+function rdpIgnoreOptionalPromise(event) {
     var reason = event && event.reason;
     var text = '';
     try { text = String(reason && (reason.message || reason) || ''); } catch (_) {}
     if ((reason && reason.constructor && reason.constructor.name === 'Event') || /Element not found/i.test(text)) {
         event.preventDefault();
-        event.stopImmediatePropagation();
+        if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+        return false;
     }
-}, true);
+}
+window.addEventListener('unhandledrejection', rdpIgnoreOptionalPromise, true);
+window.onunhandledrejection = function(event) {
+    if (rdpIgnoreOptionalPromise(event) === false) return true;
+};
 
-// Replace obsolete external RP-imager URLs before dynamically inserted phone
-// markup can request them.
+// Resolve dead legacy assets before the browser attempts a network request.
 (function () {
+    var TRANSPARENT_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==';
+
     function cleanUrl(value) {
         value = String(value || '');
-        return value.replace(/^https?:\/\/nitro-imager\.kubbo\.city\/\?figure=/i, '/WebPixel/avatar-image.php?figure=');
+        if (!value) return value;
+
+        if (/^https?:\/\/nitro-imager\.kubbo\.city\//i.test(value)) {
+            var q = value.indexOf('?');
+            return '/WebPixel/avatar-image.php' + (q >= 0 ? value.substring(q) : '');
+        }
+        if (/^\/?\?figure=/i.test(value)) {
+            return '/WebPixel/avatar-image.php' + value.replace(/^\/?/, '');
+        }
+        if (/platinos(?:%20|\s|_)+icon(?:%20|\s|_)+s\.png/i.test(value)) {
+            return TRANSPARENT_PNG;
+        }
+        if (/(?:^|\/)styles\.[a-z0-9_-]+\.css(?:\?|$)/i.test(value)) {
+            return '/WebPixel/nitro-last/empty-legacy.css';
+        }
+        return value;
     }
 
-    var imageSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
-    if (imageSrc && imageSrc.set) {
-        Object.defineProperty(HTMLImageElement.prototype, 'src', {
-            get: imageSrc.get,
-            set: function (value) { return imageSrc.set.call(this, cleanUrl(value)); },
+    function patchProperty(proto, prop) {
+        var desc = Object.getOwnPropertyDescriptor(proto, prop);
+        if (!desc || !desc.set) return;
+        Object.defineProperty(proto, prop, {
+            get: desc.get,
+            set: function(value) { return desc.set.call(this, cleanUrl(value)); },
             configurable: true,
-            enumerable: imageSrc.enumerable
+            enumerable: desc.enumerable
         });
     }
 
+    patchProperty(HTMLImageElement.prototype, 'src');
+    patchProperty(HTMLSourceElement.prototype, 'src');
+    patchProperty(HTMLLinkElement.prototype, 'href');
+
     var nativeSetAttribute = Element.prototype.setAttribute;
-    Element.prototype.setAttribute = function (name, value) {
-        if (String(name).toLowerCase() === 'src') value = cleanUrl(value);
+    Element.prototype.setAttribute = function(name, value) {
+        var n = String(name).toLowerCase();
+        if (n === 'src' || n === 'href') value = cleanUrl(value);
         return nativeSetAttribute.call(this, name, value);
+    };
+
+    var nativeInsertAdjacentHTML = Element.prototype.insertAdjacentHTML;
+    Element.prototype.insertAdjacentHTML = function(position, html) {
+        if (typeof html === 'string') {
+            html = html
+                .replace(/https?:\/\/nitro-imager\.kubbo\.city\/\?figure=/gi, '/WebPixel/avatar-image.php?figure=')
+                .replace(/(["'])\/?\?figure=/gi, '$1/WebPixel/avatar-image.php?figure=')
+                .replace(/(["'])[^"']*platinos(?:%20|\s|_)+icon(?:%20|\s|_)+s\.png/gi, '$1' + TRANSPARENT_PNG);
+        }
+        return nativeInsertAdjacentHTML.call(this, position, html);
     };
 })();
 
