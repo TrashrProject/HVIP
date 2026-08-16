@@ -125,32 +125,28 @@ window.onunhandledrejection = function(event) {
 (function () {
     var TRANSPARENT_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==';
 
+    function cleanMarkup(value) {
+        value = String(value || '');
+        return value
+            .replace(/https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\/\?figure=/gi, '/WebPixel/avatar-image.php?figure=')
+            .replace(/https?:\/\/dynamics\.habbovip\.us\/img\/extras\/platinos_icon_s\.png/gi, TRANSPARENT_PNG)
+            .replace(/(["'])\/?\?figure=/gi, '$1/WebPixel/avatar-image.php?figure=');
+    }
+
     function cleanUrl(value) {
         value = String(value || '');
         if (!value) return value;
-
         if (/^https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\//i.test(value)) {
             var q = value.indexOf('?');
             return '/WebPixel/avatar-image.php' + (q >= 0 ? value.substring(q) : '');
         }
-        if (/^\/?\?figure=/i.test(value)) {
-            return '/WebPixel/avatar-image.php' + value.replace(/^\/?/, '');
-        }
-        if (/platinos(?:%20|\s|_)+icon(?:%20|\s|_)+s\.png/i.test(value)) {
-            return TRANSPARENT_PNG;
-        }
-        if (/(?:^|\/)styles\.[a-z0-9_-]+\.css(?:\?|$)/i.test(value)) {
-            return '/WebPixel/nitro-last/empty-legacy.css';
-        }
+        if (/^\/?\?figure=/i.test(value)) return '/WebPixel/avatar-image.php' + value.replace(/^\/?/, '');
+        if (/platinos(?:%20|\s|_)+icon(?:%20|\s|_)+s\.png/i.test(value)) return TRANSPARENT_PNG;
+        if (/(?:^|\/)styles\.[a-z0-9_-]+\.css(?:\?|$)/i.test(value)) return '/WebPixel/nitro-last/empty-legacy.css';
         return value;
     }
 
-    function cleanStyle(value) {
-        value = String(value || '');
-        return value
-            .replace(/https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\/\?figure=/gi, '/WebPixel/avatar-image.php?figure=')
-            .replace(/url\((["']?)\/?\?figure=/gi, 'url($1/WebPixel/avatar-image.php?figure=');
-    }
+    function cleanStyle(value) { return cleanMarkup(value); }
 
     function patchProperty(proto, prop) {
         var desc = Object.getOwnPropertyDescriptor(proto, prop);
@@ -167,6 +163,20 @@ window.onunhandledrejection = function(event) {
     patchProperty(HTMLSourceElement.prototype, 'src');
     patchProperty(HTMLLinkElement.prototype, 'href');
 
+    // Critical fix: old overlays are inserted through jQuery .html()/innerHTML.
+    // Rewrite dead avatar hosts BEFORE the browser parses the HTML, so no DNS request is ever sent.
+    try {
+        var innerHTMLDesc = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        if (innerHTMLDesc && innerHTMLDesc.set) {
+            Object.defineProperty(Element.prototype, 'innerHTML', {
+                get: innerHTMLDesc.get,
+                set: function(value) { return innerHTMLDesc.set.call(this, cleanMarkup(value)); },
+                configurable: true,
+                enumerable: innerHTMLDesc.enumerable
+            });
+        }
+    } catch (_) {}
+
     var nativeSetAttribute = Element.prototype.setAttribute;
     Element.prototype.setAttribute = function(name, value) {
         var n = String(name).toLowerCase();
@@ -174,6 +184,19 @@ window.onunhandledrejection = function(event) {
         if (n === 'style') value = cleanStyle(value);
         return nativeSetAttribute.call(this, name, value);
     };
+
+    var nativeInsertAdjacentHTML = Element.prototype.insertAdjacentHTML;
+    Element.prototype.insertAdjacentHTML = function(position, html) {
+        return nativeInsertAdjacentHTML.call(this, position, cleanMarkup(html));
+    };
+
+    if (window.DOMParser && DOMParser.prototype.parseFromString) {
+        var nativeParseFromString = DOMParser.prototype.parseFromString;
+        DOMParser.prototype.parseFromString = function(str, type) {
+            if (/html|xml/i.test(String(type || ''))) str = cleanMarkup(str);
+            return nativeParseFromString.call(this, str, type);
+        };
+    }
 
     function repairNode(node) {
         if (!(node instanceof Element)) return;
@@ -204,17 +227,6 @@ window.onunhandledrejection = function(event) {
         attributes: true,
         attributeFilter: ['src','href','style']
     });
-
-    var nativeInsertAdjacentHTML = Element.prototype.insertAdjacentHTML;
-    Element.prototype.insertAdjacentHTML = function(position, html) {
-        if (typeof html === 'string') {
-            html = html
-                .replace(/https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\/\?figure=/gi, '/WebPixel/avatar-image.php?figure=')
-                .replace(/(["'])\/?\?figure=/gi, '$1/WebPixel/avatar-image.php?figure=')
-                .replace(/(["'])[^"']*platinos(?:%20|\s|_)+icon(?:%20|\s|_)+s\.png/gi, '$1' + TRANSPARENT_PNG);
-        }
-        return nativeInsertAdjacentHTML.call(this, position, html);
-    };
 })();
 
 console.info('[RDP] RP shell + local Nitro boot active');
