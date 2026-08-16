@@ -86,7 +86,7 @@ $localhostShim = <<<'HTML'
 <link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?v=12">
 <link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/phone-presence-toast.css?v=1">
 <script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-presence-toast.js?v=1" defer></script>
-<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-send-v2.js?v=3" defer></script>
+<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-send-v2.js?v=4" defer></script>
 <script>
 window.swfobject = window.swfobject || { embedSWF: function () {} };
 console.info('[RDP] RP shell + local Nitro boot active');
@@ -106,6 +106,15 @@ console.info('[RDP] RP shell + local Nitro boot active');
 
             const socket = Reflect.construct(Target, args);
             if (isRdpSocket) {
+                window.__rdpPhoneSocket = socket;
+                try {
+                    const u = new URL(args[0]);
+                    window.__rdpPhoneUserId = (u.pathname || '').replace(/^\/+/, '').split('/')[0] || null;
+                } catch (_) {}
+                socket.addEventListener('open', function () {
+                    window.__rdpPhoneSocket = socket;
+                    console.info('[RDP] Phone WebSocket ready', window.__rdpPhoneUserId || '');
+                });
                 socket.addEventListener('message', function (event) {
                     if (typeof event.data !== 'string' || !/^compose_loader\|/i.test(event.data)) return;
                     event.stopImmediatePropagation();
