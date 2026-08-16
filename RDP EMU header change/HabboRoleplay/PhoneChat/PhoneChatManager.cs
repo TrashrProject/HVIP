@@ -11,6 +11,7 @@ using Plus.HabboHotel.Items;
 using Plus.HabboHotel.Pathfinding;
 using log4net;
 using Plus.HabboHotel.GameClients;
+using Plus.HabboRoleplay.Misc;
 
 namespace Plus.HabboRoleplay.PhoneChat
 {
@@ -26,19 +27,111 @@ namespace Plus.HabboRoleplay.PhoneChat
         /// </summary>
         public ConcurrentDictionary<int, PhoneChat> ChatList = new ConcurrentDictionary<int, PhoneChat>();
 
+        private const string TableName = "play_phone_chats";
+
         /// <summary>
-        /// Initializes the chat list dictionary.
+        /// Initializes the chat list dictionary and restores every saved phone conversation.
+        /// Chats used to live only in RAM, which made WhatsApp discussions disappear after a
+        /// client/emulator restart. The database is now the source of persistence.
         /// </summary>
         public void Init()
         {
             ChatList.Clear();
-            log.Info("PhoneChat Initialized 100%");
+
+            try
+            {
+                using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                {
+                    if (dbClient == null)
+                    {
+                        log.Error("PhoneChat: database unavailable while loading conversations.");
+                        return;
+                    }
+
+                    dbClient.RunQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + TableName + "` (" +
+                        "`id` INT NOT NULL AUTO_INCREMENT," +
+                        "`type` INT NOT NULL DEFAULT 2," +
+                        "`emisor_id` INT NOT NULL," +
+                        "`emisor_name` VARCHAR(64) NOT NULL," +
+                        "`receptor_id` INT NOT NULL," +
+                        "`receptor_name` VARCHAR(64) NOT NULL," +
+                        "`msg` TEXT NOT NULL," +
+                        "`timestamp` DATETIME NOT NULL," +
+                        "PRIMARY KEY (`id`)," +
+                        "KEY `idx_phone_sender` (`emisor_id`)," +
+                        "KEY `idx_phone_receiver` (`receptor_id`)," +
+                        "KEY `idx_phone_type` (`type`)" +
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+                    );
+
+                    dbClient.SetQuery("SELECT `id`,`type`,`emisor_id`,`emisor_name`,`receptor_id`,`receptor_name`,`msg`,`timestamp` FROM `" + TableName + "` ORDER BY `id` ASC");
+                    DataTable table = dbClient.getTable();
+
+                    int maxId = 0;
+                    if (table != null)
+                    {
+                        foreach (DataRow row in table.Rows)
+                        {
+                            int id = Convert.ToInt32(row["id"]);
+                            int type = Convert.ToInt32(row["type"]);
+                            int senderId = Convert.ToInt32(row["emisor_id"]);
+                            string senderName = Convert.ToString(row["emisor_name"]);
+                            int receiverId = Convert.ToInt32(row["receptor_id"]);
+                            string receiverName = Convert.ToString(row["receptor_name"]);
+                            string message = Convert.ToString(row["msg"]);
+                            DateTime timestamp = Convert.ToDateTime(row["timestamp"]);
+
+                            ChatList.TryAdd(id, new PhoneChat(id, type, senderId, senderName, receiverId, receiverName, message, timestamp));
+                            if (id > maxId) maxId = id;
+                        }
+                    }
+
+                    if (maxId > RoleplayManager.ChatsID)
+                        RoleplayManager.ChatsID = maxId;
+                }
+            }
+            catch (Exception e)
+            {
+                log.Error("PhoneChat persistence initialization failed: " + e);
+            }
+
+            log.Info("PhoneChat Initialized 100% - " + ChatList.Count + " conversation message(s) restored");
         }
 
         public void NewPhoneChat(int ID, int Type, int EmisorId, string EmisorName, int ReceptorId, string ReceptorName, string Msg, DateTime TimeStamp)
         {
             PhoneChat newChat = new PhoneChat(ID, Type, EmisorId, EmisorName, ReceptorId, ReceptorName, Msg, TimeStamp);
             ChatList.TryAdd(ID, newChat);
+
+            try
+            {
+                using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                {
+                    if (dbClient == null) return;
+
+                    dbClient.SetQuery(
+                        "INSERT INTO `" + TableName + "` (`id`,`type`,`emisor_id`,`emisor_name`,`receptor_id`,`receptor_name`,`msg`,`timestamp`) " +
+                        "VALUES (@id,@type,@senderId,@senderName,@receiverId,@receiverName,@message,@timestamp) " +
+                        "ON DUPLICATE KEY UPDATE `type`=VALUES(`type`),`emisor_id`=VALUES(`emisor_id`),`emisor_name`=VALUES(`emisor_name`)," +
+                        "`receptor_id`=VALUES(`receptor_id`),`receptor_name`=VALUES(`receptor_name`),`msg`=VALUES(`msg`),`timestamp`=VALUES(`timestamp`)"
+                    );
+                    dbClient.AddParameter("id", ID);
+                    dbClient.AddParameter("type", Type);
+                    dbClient.AddParameter("senderId", EmisorId);
+                    dbClient.AddParameter("senderName", EmisorName ?? string.Empty);
+                    dbClient.AddParameter("receiverId", ReceptorId);
+                    dbClient.AddParameter("receiverName", ReceptorName ?? string.Empty);
+                    dbClient.AddParameter("message", Msg ?? string.Empty);
+                    dbClient.AddParameter("timestamp", TimeStamp);
+                    dbClient.RunQuery();
+                }
+            }
+            catch (Exception e)
+            {
+                // Never break live messaging if persistence fails; keep the RAM copy alive.
+                log.Error("PhoneChat could not persist message " + ID + ": " + e);
+            }
         }
 
         /// <summary>
