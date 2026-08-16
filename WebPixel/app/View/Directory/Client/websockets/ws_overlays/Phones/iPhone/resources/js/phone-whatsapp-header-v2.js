@@ -1,7 +1,9 @@
 (function(){
     'use strict';
-    if(window.__rdpWhatsHeaderV6) return;
-    window.__rdpWhatsHeaderV6 = true;
+    if(window.__rdpWhatsHeaderV7) return;
+    window.__rdpWhatsHeaderV7 = true;
+
+    var LOCAL_IMAGER = 'http://127.0.0.1:3030/';
 
     function extractFigure(value){
         value = String(value || '');
@@ -19,6 +21,10 @@
         var computed = '';
         try { computed = window.getComputedStyle(avatar).backgroundImage || ''; } catch(e) {}
         return extractFigure(inline) || extractFigure(computed) || '';
+    }
+
+    function localAvatar(figure){
+        return LOCAL_IMAGER + '?figure=' + encodeURIComponent(figure) + '&gesture=sml&direction=2&head_direction=2&headonly=1&size=l&img_format=png';
     }
 
     function officialAvatar(figure){
@@ -40,8 +46,14 @@
         img.className = 'rdp-habbo-avatar-img';
         img.alt = '';
         img.draggable = false;
-        img.src = officialAvatar(figure);
+        img.dataset.rdpFallback = '0';
+        img.src = localAvatar(figure);
         img.onerror = function(){
+            if(img.dataset.rdpFallback === '0'){
+                img.dataset.rdpFallback = '1';
+                img.src = officialAvatar(figure);
+                return;
+            }
             img.style.display = 'none';
             avatar.classList.add('rdp-avatar-failed');
         };
@@ -59,12 +71,7 @@
     }
 
     function enhanceAllAvatars(){
-        /* Header of the currently opened conversation. */
-        var headerAvatar = document.querySelector('#app_WhatsApp .Whats_Title_Chatting .app_whats_photo .app_contacts_avatar');
-        enhanceAvatar(headerAvatar);
-
-        /* Discussions + Contacts tabs. These rows are replaced by websocket sync,
-           so we re-apply the real Habbo image every time the list is refreshed. */
+        enhanceAvatar(document.querySelector('#app_WhatsApp .Whats_Title_Chatting .app_whats_photo .app_contacts_avatar'));
         document.querySelectorAll('#WS_WhatsApp .app_contacts_avatar, #WS_WhatsApp_Contacts .app_contacts_avatar').forEach(enhanceAvatar);
     }
 
@@ -72,7 +79,6 @@
         var header = document.querySelector('#app_WhatsApp .Whats_Title_Chatting');
         var status = document.querySelector('#app_WhatsApp .app_whats_lastonline');
         if(!status) return;
-
         var txt = String(status.textContent || '').replace(/\u00a0/g,' ').trim().toLowerCase();
         var online = txt === 'en ligne' || txt === 'online' || txt === 'en línea' || txt === 'en l&iacute;nea';
         status.classList.toggle('is-online', online);
@@ -87,27 +93,15 @@
 
     function boot(){
         enhanceWhatsApp();
-
-        /* Observe the entire WhatsApp app, not only the open chat: open_whatsapp
-           replaces the discussion/contact HTML after every server sync. */
         var root = document.getElementById('app_WhatsApp');
         if(root){
             var scheduled = false;
             new MutationObserver(function(){
                 if(scheduled) return;
                 scheduled = true;
-                setTimeout(function(){
-                    scheduled = false;
-                    enhanceWhatsApp();
-                }, 0);
-            }).observe(root,{
-                childList:true,
-                subtree:true,
-                attributes:true,
-                attributeFilter:['style','class','data-figure']
-            });
+                setTimeout(function(){ scheduled = false; enhanceWhatsApp(); }, 0);
+            }).observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','data-figure']});
         }
-
         setInterval(enhanceWhatsApp,1000);
     }
 
