@@ -1,7 +1,7 @@
 (function(){
   'use strict';
-  if(window.__rdpWhatsStateV1) return;
-  window.__rdpWhatsStateV1 = true;
+  if(window.__rdpWhatsStateV2) return;
+  window.__rdpWhatsStateV2 = true;
 
   var KEY = 'rdp.whatsapp.lastChat';
 
@@ -56,10 +56,10 @@
   function restoreChat(){
     var name = currentSaved();
     if(!name) return false;
-    if(!sendPhone('open_whatsapp,')) return false;
+    if(!sendPhone('in_app,WhatsApp')) return false;
     setTimeout(function(){
-      if(sendPhone('open_whatschats,' + name)) showChatShell();
-    },120);
+      if(sendPhone('open_whatschats,' + name.replace(/[|,]/g,''))) showChatShell();
+    },220);
     return true;
   }
 
@@ -75,7 +75,7 @@
     var tries=0;
     var timer=setInterval(function(){
       tries++;
-      if(restoreChat() || tries>40) clearInterval(timer);
+      if(restoreChat() || tries>80) clearInterval(timer);
     },250);
   }
 
