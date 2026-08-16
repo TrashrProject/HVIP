@@ -34,6 +34,7 @@
   "habbopages.url": "http://localhost/WebPixel/",
   "group.homepage.url": "http://localhost/WebPixel/groups/%groupid%/id",
   "roomenterad.habbohotel.enabled": false,
+  "roomenterad.habblet.enabled": false,
   "system.log.debug": false,
   "system.log.warn": true,
   "system.log.error": true,
