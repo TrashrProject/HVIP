@@ -95,7 +95,7 @@ console.info('[RDP] RP shell + local Nitro boot active');
 <script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-send-v2.js?v=6" defer></script>
 <script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-header-v2.js?v=8" defer></script>
 <script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-state.js?v=2" defer></script>
-<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-global.js?v=2" defer></script>
+<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-global.js?v=3" defer></script>
 <script>
 (function () {
     if (!window.WebSocket || window.__rdpLocalWsShim) return;
