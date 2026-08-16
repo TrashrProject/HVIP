@@ -1,67 +1,94 @@
 (function () {
     'use strict';
 
-    var accountToggle = document.getElementById('vx-account-toggle');
-    var accountMenu = document.getElementById('vx-account-menu');
-    var mobileToggle = document.getElementById('vx-mobile-toggle');
-    var nav = document.getElementById('vx-nav');
-    var clock = document.getElementById('vx-clock');
+    var sidebar = document.getElementById('rp-sidebar');
+    var sidebarToggle = document.getElementById('rp-mobile-sidebar');
+    var sidebarOverlay = document.getElementById('sidebar-mobile-overlay');
 
-    function updateClock() {
-        if (!clock) return;
-        var now = new Date();
-        var hours = String(now.getHours()).padStart(2, '0');
-        var minutes = String(now.getMinutes()).padStart(2, '0');
-        clock.textContent = hours + ':' + minutes;
+    function setSidebar(open) {
+        if (!sidebar || !sidebarOverlay) return;
+        sidebar.classList.toggle('mobile-open', open);
+        sidebarOverlay.classList.toggle('show', open);
+        document.body.classList.toggle('sidebar-open', open);
     }
 
-    function closeAccount() {
-        if (accountMenu) accountMenu.classList.remove('open');
-        if (accountToggle) accountToggle.setAttribute('aria-expanded', 'false');
-    }
-
-    function closeNav() {
-        if (nav) nav.classList.remove('mobile-open');
-    }
-
-    if (accountToggle && accountMenu) {
-        accountToggle.addEventListener('click', function (event) {
-            event.stopPropagation();
-            var open = accountMenu.classList.toggle('open');
-            accountToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-            closeNav();
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            setSidebar(!sidebar.classList.contains('mobile-open'));
         });
     }
 
-    if (mobileToggle && nav) {
-        mobileToggle.addEventListener('click', function (event) {
-            event.stopPropagation();
-            nav.classList.toggle('mobile-open');
-            closeAccount();
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function () {
+            setSidebar(false);
         });
     }
-
-    document.addEventListener('click', function (event) {
-        if (accountMenu && accountToggle && !accountMenu.contains(event.target) && !accountToggle.contains(event.target)) {
-            closeAccount();
-        }
-
-        if (nav && mobileToggle && window.innerWidth <= 900 && !nav.contains(event.target) && !mobileToggle.contains(event.target)) {
-            closeNav();
-        }
-    });
 
     document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            closeAccount();
-            closeNav();
-        }
+        if (event.key === 'Escape') setSidebar(false);
     });
 
     window.addEventListener('resize', function () {
-        if (window.innerWidth > 900) closeNav();
+        if (window.innerWidth > 1180) setSidebar(false);
     });
 
-    updateClock();
-    window.setInterval(updateClock, 30000);
+    function pad(value) {
+        return String(value).padStart(2, '0');
+    }
+
+    function getNextDrawDate() {
+        var now = new Date();
+        var target = new Date(now);
+        var daysUntilSunday = (7 - now.getDay()) % 7;
+
+        if (daysUntilSunday === 0 && now.getHours() >= 20) {
+            daysUntilSunday = 7;
+        }
+
+        target.setDate(now.getDate() + daysUntilSunday);
+        target.setHours(20, 0, 0, 0);
+        return target;
+    }
+
+    var drawDate = getNextDrawDate();
+
+    function updateCountdown() {
+        var now = new Date();
+        var diff = drawDate.getTime() - now.getTime();
+
+        if (diff <= 0) {
+            drawDate = getNextDrawDate();
+            diff = drawDate.getTime() - now.getTime();
+        }
+
+        var totalSeconds = Math.max(0, Math.floor(diff / 1000));
+        var days = Math.floor(totalSeconds / 86400);
+        var hours = Math.floor((totalSeconds % 86400) / 3600);
+        var minutes = Math.floor((totalSeconds % 3600) / 60);
+        var seconds = totalSeconds % 60;
+
+        var daysNode = document.getElementById('count-days');
+        var hoursNode = document.getElementById('count-hours');
+        var minutesNode = document.getElementById('count-minutes');
+        var secondsNode = document.getElementById('count-seconds');
+
+        if (daysNode) daysNode.textContent = pad(days);
+        if (hoursNode) hoursNode.textContent = pad(hours);
+        if (minutesNode) minutesNode.textContent = pad(minutes);
+        if (secondsNode) secondsNode.textContent = pad(seconds);
+    }
+
+    document.querySelectorAll('.inventory-tile').forEach(function (tile) {
+        tile.addEventListener('click', function () {
+            tile.classList.remove('tile-pop');
+            void tile.offsetWidth;
+            tile.classList.add('tile-pop');
+            window.setTimeout(function () {
+                tile.classList.remove('tile-pop');
+            }, 230);
+        });
+    });
+
+    updateCountdown();
+    window.setInterval(updateCountdown, 1000);
 })();
