@@ -1,0 +1,132 @@
+/* RDP Pocket WhatsApp chat header v2 */
+#app_WhatsApp .Whats_Title_Chatting{
+    height:62px!important;
+    min-height:62px!important;
+    background:
+        radial-gradient(circle at 22% 0%,rgba(44,208,144,.13),transparent 34%),
+        linear-gradient(180deg,#0f2d2d 0%,#0b2325 100%)!important;
+    border-bottom:1px solid rgba(103,229,177,.10)!important;
+    box-shadow:0 8px 24px rgba(0,0,0,.22)!important;
+}
+#app_WhatsApp .whats-back{
+    left:7px!important;
+    top:15px!important;
+    width:31px!important;
+    height:31px!important;
+    border-radius:10px!important;
+    color:#a9c9c4!important;
+    transition:background .16s ease,color .16s ease,transform .16s ease!important;
+}
+#app_WhatsApp .whats-back:hover{
+    background:rgba(255,255,255,.055)!important;
+    color:#fff!important;
+}
+#app_WhatsApp .whats-back:active{transform:scale(.92)!important}
+
+#app_WhatsApp .Whats_Title_Chatting>.app_whats_profile_photo{
+    position:absolute!important;
+    left:42px!important;
+    top:9px!important;
+    width:44px!important;
+    height:44px!important;
+    margin:0!important;
+    padding:0!important;
+    border-radius:50%!important;
+    overflow:hidden!important;
+    background:linear-gradient(145deg,#17393b,#10272c)!important;
+    border:1px solid rgba(101,230,177,.42)!important;
+    box-shadow:0 0 0 2px rgba(33,196,125,.08),0 6px 16px rgba(0,0,0,.24)!important;
+}
+#app_WhatsApp .Whats_Title_Chatting>.app_whats_profile_photo .app_contacts_avatar{
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+    margin:0!important;
+    border-radius:50%!important;
+    background-color:#173238!important;
+    background-repeat:no-repeat!important;
+    background-position:center -4px!important;
+    background-size:auto 58px!important;
+    image-rendering:auto!important;
+}
+#app_WhatsApp .Whats_Title_Chatting>.app_whats_profile_photo:after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    pointer-events:none;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+#app_WhatsApp .Whats_Title_Chatting>.app_whats_chat_info{
+    position:absolute!important;
+    left:96px!important;
+    right:10px!important;
+    top:11px!important;
+    width:auto!important;
+    height:42px!important;
+    margin:0!important;
+    padding:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+}
+#app_WhatsApp .app_whats_name{
+    display:block!important;
+    max-width:185px!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+    color:#f6fbfa!important;
+    font-size:11.5px!important;
+    line-height:14px!important;
+    font-weight:900!important;
+    letter-spacing:-.1px!important;
+    text-shadow:0 1px 8px rgba(0,0,0,.22)!important;
+}
+#app_WhatsApp .app_whats_lastonline{
+    margin-top:4px!important;
+    min-height:12px!important;
+    color:#85aaa3!important;
+    font-size:6.8px!important;
+    line-height:10px!important;
+    font-weight:750!important;
+    white-space:nowrap!important;
+}
+#app_WhatsApp .app_whats_lastonline.is-online{
+    position:relative!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    gap:4px!important;
+    min-height:16px!important;
+    margin-top:3px!important;
+    padding:2px 7px 2px 16px!important;
+    border:1px solid rgba(65,221,143,.22)!important;
+    border-radius:999px!important;
+    background:linear-gradient(180deg,rgba(39,176,112,.18),rgba(23,125,83,.14))!important;
+    color:#69e6aa!important;
+    font-size:6.4px!important;
+    line-height:10px!important;
+    font-weight:900!important;
+    letter-spacing:.25px!important;
+    text-transform:uppercase!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+#app_WhatsApp .app_whats_lastonline.is-online:before{
+    content:"";
+    position:absolute;
+    left:6px;
+    top:50%;
+    width:5px;
+    height:5px;
+    margin-top:-2.5px;
+    border-radius:50%;
+    background:#38df87;
+    box-shadow:0 0 0 2px rgba(56,223,135,.10),0 0 7px rgba(56,223,135,.55);
+}
+
+/* compensate the slightly taller premium header */
+#app_WhatsApp #app_whats_messages{top:62px!important}
+#app_WhatsApp .app_WhatsApp_Chatting:before{inset:62px 0 64px!important}
