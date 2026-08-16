@@ -15,23 +15,12 @@
     <link rel="stylesheet" href="./src/assets/index.css">
     <script>
       (function () {
-        const TRANSPARENT_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==';
-
         const rewriteLegacyUrl = (value) => {
           let url = String(value || '');
           url = url.replace(/^https?:\/\/swfs?\.habbovip\.us\/V5-0-2\/?/i, 'http://localhost/swf_pz/V5-0-2/');
           url = url.replace(/^https?:\/\/swfs?\.habbo\.vip\/V5-0-2\/?/i, 'http://localhost/swf_pz/V5-0-2/');
           url = url.replace(/^https?:\/\/images\.habbovip\.us\/V5-0-2\/?/i, 'http://localhost/swf_pz/V5-0-2/');
           url = url.replace(/^https?:\/\/habbovip\.us\/?/i, 'http://localhost/WebPixel/');
-
-          if (/^https?:\/\/nitro-imager\.kubbo\.city\//i.test(url)) {
-            const q = url.indexOf('?');
-            return '/WebPixel/avatar-placeholder.php' + (q >= 0 ? url.substring(q) : '');
-          }
-          if (/^\?figure=/i.test(url)) return '/WebPixel/avatar-placeholder.php' + url;
-          if (/platinos(?:%20|\s)+icon(?:%20|\s)+s\.png/i.test(url)) return TRANSPARENT_PNG;
-          if (/(?:^|\/)styles\.[a-z0-9_-]+\.css(?:\?|$)/i.test(url)) return './empty-legacy.css';
-
           return url;
         };
 
@@ -76,28 +65,16 @@
           });
         }
 
-        const linkHref = Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, 'href');
-        if (linkHref && linkHref.set) {
-          Object.defineProperty(HTMLLinkElement.prototype, 'href', {
-            get: linkHref.get,
-            set(value) { return linkHref.set.call(this, rewriteLegacyUrl(value)); },
-            configurable: true,
-            enumerable: linkHref.enumerable
-          });
-        }
-
         new MutationObserver((mutations) => {
           for (const mutation of mutations) {
             for (const node of mutation.addedNodes) {
               if (!(node instanceof Element)) continue;
-              const elements = [node, ...node.querySelectorAll('[src],[href]')];
+              const elements = [node, ...node.querySelectorAll('[src]')];
               for (const el of elements) {
-                const attr = el.hasAttribute('src') ? 'src' : (el.hasAttribute('href') ? 'href' : null);
-                if (!attr) continue;
-                const raw = el.getAttribute(attr);
-                if (!raw) continue;
-                const next = rewriteLegacyUrl(raw);
-                if (next !== raw) el.setAttribute(attr, next);
+                const src = el.getAttribute && el.getAttribute('src');
+                if (!src) continue;
+                const next = rewriteLegacyUrl(src);
+                if (next !== src) el.setAttribute('src', next);
               }
             }
           }
@@ -108,48 +85,17 @@
         });
 
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('./asset-sw.js?v=4', { scope: './' })
+          navigator.serviceWorker.register('./asset-sw.js?v=3', { scope: './' })
             .then(registration => registration.update().then(() => registration))
             .then(() => navigator.serviceWorker.ready)
             .then(() => {
-              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded-v4')) {
-                sessionStorage.setItem('hvip-sw-reloaded-v4', '1');
+              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded-v3')) {
+                sessionStorage.setItem('hvip-sw-reloaded-v3', '1');
                 location.reload();
               }
             })
-            .catch(() => {});
+            .catch(err => console.warn('[HVIP] Asset fallback worker unavailable:', err));
         }
-
-        // Passive diagnostics only. Nitro expects WebSocket binary messages as Blob.
-        // Do not change binaryType and do not stop message propagation here.
-        const NativeWebSocket = window.WebSocket;
-        window.__nitroPacketDiag = { last: null, recent: [] };
-        window.WebSocket = new Proxy(NativeWebSocket, {
-          construct(Target, args) {
-            const ws = Reflect.construct(Target, args);
-            ws.addEventListener('message', async (event) => {
-              try {
-                let buffer = null;
-                if (event.data instanceof Blob) buffer = await event.data.arrayBuffer();
-                else if (event.data instanceof ArrayBuffer) buffer = event.data;
-                else if (ArrayBuffer.isView(event.data)) buffer = event.data.buffer.slice(event.data.byteOffset, event.data.byteOffset + event.data.byteLength);
-                if (!buffer) return;
-
-                const item = { bytes: buffer.byteLength, at: Date.now(), declaredLength: null, header: null, complete: null };
-                if (buffer.byteLength >= 4) {
-                  const view = new DataView(buffer);
-                  item.declaredLength = view.getUint32(0, false);
-                  item.complete = (item.declaredLength + 4 === buffer.byteLength);
-                  if (buffer.byteLength >= 6) item.header = view.getUint16(4, false);
-                }
-                window.__nitroPacketDiag.last = item;
-                window.__nitroPacketDiag.recent.push(item);
-                if (window.__nitroPacketDiag.recent.length > 30) window.__nitroPacketDiag.recent.shift();
-              } catch (_) {}
-            });
-            return ws;
-          }
-        });
       })();
 
       const query = new URLSearchParams(window.location.search);
