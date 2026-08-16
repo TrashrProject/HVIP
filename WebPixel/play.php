@@ -78,7 +78,11 @@ $html = str_ireplace(
         'https://dev.habbovip.us',
         'http://dev.habbovip.us',
         'https://nitro-imager.kubbo.city/?figure=',
-        'http://nitro-imager.kubbo.city/?figure='
+        'http://nitro-imager.kubbo.city/?figure=',
+        'https://nitro-imager.kubbo.ch/?figure=',
+        'http://nitro-imager.kubbo.ch/?figure=',
+        'https://dynamics.habbovip.us/img/extras/platinos_icon_s.png',
+        'http://dynamics.habbovip.us/img/extras/platinos_icon_s.png'
     ),
     array(
         '/WebPixel/nitro-last',
@@ -86,7 +90,11 @@ $html = str_ireplace(
         '/WebPixel/nitro-last',
         '/WebPixel/nitro-last',
         '/WebPixel/avatar-image.php?figure=',
-        '/WebPixel/avatar-image.php?figure='
+        '/WebPixel/avatar-image.php?figure=',
+        '/WebPixel/avatar-image.php?figure=',
+        '/WebPixel/avatar-image.php?figure=',
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==',
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg=='
     ),
     $html
 );
@@ -99,8 +107,6 @@ $localhostShim = <<<'HTML'
 window.swfobject = window.swfobject || { embedSWF: function () {} };
 window.Swiper = window.Swiper || function(){ return { update:function(){}, slideTo:function(){}, destroy:function(){} }; };
 
-// Ignore only the known optional ApexCharts failure caused by a missing legacy
-// dashboard target. This does not hide unrelated application errors.
 function rdpIgnoreOptionalPromise(event) {
     var reason = event && event.reason;
     var text = '';
@@ -116,7 +122,6 @@ window.onunhandledrejection = function(event) {
     if (rdpIgnoreOptionalPromise(event) === false) return true;
 };
 
-// Resolve dead legacy assets before the browser attempts a network request.
 (function () {
     var TRANSPARENT_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==';
 
@@ -124,7 +129,7 @@ window.onunhandledrejection = function(event) {
         value = String(value || '');
         if (!value) return value;
 
-        if (/^https?:\/\/nitro-imager\.kubbo\.city\//i.test(value)) {
+        if (/^https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\//i.test(value)) {
             var q = value.indexOf('?');
             return '/WebPixel/avatar-image.php' + (q >= 0 ? value.substring(q) : '');
         }
@@ -138,6 +143,13 @@ window.onunhandledrejection = function(event) {
             return '/WebPixel/nitro-last/empty-legacy.css';
         }
         return value;
+    }
+
+    function cleanStyle(value) {
+        value = String(value || '');
+        return value
+            .replace(/https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\/\?figure=/gi, '/WebPixel/avatar-image.php?figure=')
+            .replace(/url\((["']?)\/?\?figure=/gi, 'url($1/WebPixel/avatar-image.php?figure=');
     }
 
     function patchProperty(proto, prop) {
@@ -159,14 +171,45 @@ window.onunhandledrejection = function(event) {
     Element.prototype.setAttribute = function(name, value) {
         var n = String(name).toLowerCase();
         if (n === 'src' || n === 'href') value = cleanUrl(value);
+        if (n === 'style') value = cleanStyle(value);
         return nativeSetAttribute.call(this, name, value);
     };
+
+    function repairNode(node) {
+        if (!(node instanceof Element)) return;
+        ['src', 'href'].forEach(function(attr) {
+            if (!node.hasAttribute(attr)) return;
+            var raw = node.getAttribute(attr);
+            var next = cleanUrl(raw);
+            if (next !== raw) nativeSetAttribute.call(node, attr, next);
+        });
+        if (node.hasAttribute('style')) {
+            var rawStyle = node.getAttribute('style') || '';
+            var nextStyle = cleanStyle(rawStyle);
+            if (nextStyle !== rawStyle) nativeSetAttribute.call(node, 'style', nextStyle);
+        }
+    }
+
+    new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes') repairNode(mutation.target);
+            Array.prototype.forEach.call(mutation.addedNodes || [], function(node) {
+                repairNode(node);
+                if (node.querySelectorAll) node.querySelectorAll('[src],[href],[style]').forEach(repairNode);
+            });
+        });
+    }).observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['src','href','style']
+    });
 
     var nativeInsertAdjacentHTML = Element.prototype.insertAdjacentHTML;
     Element.prototype.insertAdjacentHTML = function(position, html) {
         if (typeof html === 'string') {
             html = html
-                .replace(/https?:\/\/nitro-imager\.kubbo\.city\/\?figure=/gi, '/WebPixel/avatar-image.php?figure=')
+                .replace(/https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\/\?figure=/gi, '/WebPixel/avatar-image.php?figure=')
                 .replace(/(["'])\/?\?figure=/gi, '$1/WebPixel/avatar-image.php?figure=')
                 .replace(/(["'])[^"']*platinos(?:%20|\s|_)+icon(?:%20|\s|_)+s\.png/gi, '$1' + TRANSPARENT_PNG);
         }
