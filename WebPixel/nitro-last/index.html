@@ -80,24 +80,28 @@
           }
         }).observe(document.documentElement, { childList: true, subtree: true });
 
-        // The old pack contains tens of thousands of images, but many legacy
-        // references use a wrong subdirectory. A service worker retries a 404
-        // by basename through WebPixel/asset-resolver.php.
+        // Ignore the generic Event rejections produced by optional legacy image
+        // loaders. Real Error objects still surface normally.
+        window.addEventListener('unhandledrejection', event => {
+          if (event.reason instanceof Event) event.preventDefault();
+        });
+
+        // Retry missing legacy assets locally. Missing optional images/styles are
+        // answered with harmless placeholders instead of repeated 404 responses.
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('./asset-sw.js', { scope: './' })
+          navigator.serviceWorker.register('./asset-sw.js?v=2', { scope: './' })
+            .then(registration => registration.update().then(() => registration))
             .then(() => navigator.serviceWorker.ready)
             .then(() => {
-              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded')) {
-                sessionStorage.setItem('hvip-sw-reloaded', '1');
+              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded-v2')) {
+                sessionStorage.setItem('hvip-sw-reloaded-v2', '1');
                 location.reload();
               }
             })
             .catch(err => console.warn('[HVIP] Asset fallback worker unavailable:', err));
         }
 
-        // Passive packet diagnostics: do not modify packets. This records the
-        // exact server header that Nitro saw immediately before a DataView
-        // parser exception, so the incompatible emulator composer can be fixed.
+        // Passive packet diagnostics: do not modify packets.
         const NativeWebSocket = window.WebSocket;
         window.__nitroPacketDiag = { last: null, recent: [] };
         window.WebSocket = new Proxy(NativeWebSocket, {
@@ -118,23 +122,11 @@
                 window.__nitroPacketDiag.last = item;
                 window.__nitroPacketDiag.recent.push(item);
                 if (window.__nitroPacketDiag.recent.length > 20) window.__nitroPacketDiag.recent.shift();
-
-                if (declaredLength + 4 !== buffer.byteLength) {
-                  console.warn('[NitroDiag] Frame length mismatch', JSON.stringify(item));
-                }
               } catch (_) {}
             });
             return ws;
           }
         });
-
-        const reportParserError = (message) => {
-          if (!/DataView|outside the bounds|Offset is outside/i.test(String(message || ''))) return;
-          console.error('[NitroDiag] PARSER_FAILURE_LAST_PACKET=' + JSON.stringify(window.__nitroPacketDiag.last));
-          console.error('[NitroDiag] RECENT_PACKETS=' + JSON.stringify(window.__nitroPacketDiag.recent));
-        };
-        window.addEventListener('error', event => reportParserError(event.message));
-        window.addEventListener('unhandledrejection', event => reportParserError(event.reason && (event.reason.stack || event.reason.message || event.reason)));
       })();
 
       const query = new URLSearchParams(window.location.search);
@@ -143,7 +135,8 @@
         "sso.ticket": query.get("sso") || null,
         "forward.type": query.get("room") ? 2 : -1,
         "forward.id": query.get("room") || 0,
-        "friend.id": query.get("friend") || 0
+        "friend.id": query.get("friend") || 0,
+        "roomenterad.habbohotel.enabled": false
       };
     </script>
     <script type="module" crossorigin src="./assets/index-9f9954ad.js"></script>
