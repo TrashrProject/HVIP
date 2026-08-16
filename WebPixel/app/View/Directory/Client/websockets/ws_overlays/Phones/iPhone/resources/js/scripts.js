@@ -2,6 +2,8 @@
     'use strict';
 
     var leaveTimer = null;
+    var guardTimer = null;
+    var healthPinned = false;
 
     function hidePhoneApps(){
         var selectors = [
@@ -18,14 +20,38 @@
         var home = document.getElementById('screens_phone');
         if(!home) return;
         home.style.opacity = show ? '1' : '0';
+        home.style.visibility = show ? 'visible' : 'hidden';
         home.style.pointerEvents = show ? '' : 'none';
         home.style.transition = 'opacity .18s ease';
+    }
+
+    function enforceHealth(){
+        if(!healthPinned) return;
+        var health = document.getElementById('app_Health');
+        if(!health) return;
+        hidePhoneApps();
+        showHomeScreen(false);
+        health.style.display = 'block';
+        health.classList.add('rdp-health-open');
+        health.classList.remove('rdp-health-leaving');
+        health.setAttribute('aria-hidden','false');
+    }
+
+    function startGuard(){
+        if(guardTimer) clearInterval(guardTimer);
+        guardTimer = setInterval(enforceHealth, 180);
+    }
+
+    function stopGuard(){
+        if(guardTimer){ clearInterval(guardTimer); guardTimer = null; }
     }
 
     function openHealth(){
         var health = document.getElementById('app_Health');
         if(!health) return false;
         if(leaveTimer){ clearTimeout(leaveTimer); leaveTimer = null; }
+        healthPinned = true;
+        window.__rdpCurrentApp = '_Health';
         hidePhoneApps();
         showHomeScreen(false);
         health.classList.remove('rdp-health-leaving');
@@ -34,6 +60,7 @@
         requestAnimationFrame(function(){
             requestAnimationFrame(function(){ health.classList.add('rdp-health-open'); });
         });
+        startGuard();
         if(typeof window.VeloraHealthRender === 'function') {
             try { window.VeloraHealthRender(); } catch(_) {}
         }
@@ -42,6 +69,9 @@
 
     function closeHealth(restoreHome){
         var health = document.getElementById('app_Health');
+        healthPinned = false;
+        window.__rdpCurrentApp = null;
+        stopGuard();
         if(!health) return;
         health.classList.remove('rdp-health-open');
         health.classList.add('rdp-health-leaving');
@@ -74,7 +104,7 @@
         }
 
         var homeButton = target.closest('#phone_home');
-        if(homeButton) {
+        if(homeButton && healthPinned) {
             closeHealth(true);
         }
     }, true);
