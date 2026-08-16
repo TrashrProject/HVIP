@@ -1,7 +1,7 @@
 (function(){
     'use strict';
-    if(window.__rdpWhatsHeaderV5) return;
-    window.__rdpWhatsHeaderV5 = true;
+    if(window.__rdpWhatsHeaderV6) return;
+    window.__rdpWhatsHeaderV6 = true;
 
     function extractFigure(value){
         value = String(value || '');
@@ -30,15 +30,9 @@
         avatar.setAttribute('data-figure', figure);
         avatar.classList.add('rdp-real-habbo-avatar');
 
-        if(avatar.dataset.rdpRenderedFigure === figure) return;
+        if(avatar.dataset.rdpRenderedFigure === figure && avatar.querySelector('.rdp-habbo-avatar-img')) return;
         avatar.dataset.rdpRenderedFigure = figure;
 
-        /*
-         * The old retro imager (nitro-imager.kubbo.city/.ch) no longer resolves.
-         * Use a real <img> so DNS/image failures cannot leave a CSS-only empty box.
-         * Keep the full figure string untouched; custom parts that Habbo's public
-         * imager does not know are simply ignored instead of hiding the avatar.
-         */
         avatar.style.setProperty('background-image', 'none', 'important');
         avatar.innerHTML = '';
 
@@ -58,38 +52,63 @@
         avatar.appendChild(img);
     }
 
-    function enhanceHeader(){
+    function enhanceAvatar(avatar){
+        if(!avatar) return;
+        var figure = getFigure(avatar);
+        if(figure) installAvatar(avatar, figure);
+    }
+
+    function enhanceAllAvatars(){
+        /* Header of the currently opened conversation. */
+        var headerAvatar = document.querySelector('#app_WhatsApp .Whats_Title_Chatting .app_whats_photo .app_contacts_avatar');
+        enhanceAvatar(headerAvatar);
+
+        /* Discussions + Contacts tabs. These rows are replaced by websocket sync,
+           so we re-apply the real Habbo image every time the list is refreshed. */
+        document.querySelectorAll('#WS_WhatsApp .app_contacts_avatar, #WS_WhatsApp_Contacts .app_contacts_avatar').forEach(enhanceAvatar);
+    }
+
+    function enhanceStatus(){
         var header = document.querySelector('#app_WhatsApp .Whats_Title_Chatting');
-        var photo = header && header.querySelector('.app_whats_photo');
-        var avatar = photo && photo.querySelector('.app_contacts_avatar');
         var status = document.querySelector('#app_WhatsApp .app_whats_lastonline');
+        if(!status) return;
 
-        if(avatar){
-            var figure = getFigure(avatar);
-            if(figure) installAvatar(avatar, figure);
-        }
+        var txt = String(status.textContent || '').replace(/\u00a0/g,' ').trim().toLowerCase();
+        var online = txt === 'en ligne' || txt === 'online' || txt === 'en línea' || txt === 'en l&iacute;nea';
+        status.classList.toggle('is-online', online);
+        if(header) header.classList.toggle('rdp-online', online);
+        if(online) status.textContent = 'En ligne';
+    }
 
-        if(status){
-            var txt = String(status.textContent || '').replace(/\u00a0/g,' ').trim().toLowerCase();
-            var online = txt === 'en ligne' || txt === 'online' || txt === 'en línea' || txt === 'en l&iacute;nea';
-            status.classList.toggle('is-online', online);
-            if(header) header.classList.toggle('rdp-online', online);
-            if(online) status.textContent = 'En ligne';
-        }
+    function enhanceWhatsApp(){
+        enhanceAllAvatars();
+        enhanceStatus();
     }
 
     function boot(){
-        enhanceHeader();
-        var root = document.getElementById('WS_WhatsApp_Chatting') || document.getElementById('app_WhatsApp');
+        enhanceWhatsApp();
+
+        /* Observe the entire WhatsApp app, not only the open chat: open_whatsapp
+           replaces the discussion/contact HTML after every server sync. */
+        var root = document.getElementById('app_WhatsApp');
         if(root){
-            new MutationObserver(function(){ setTimeout(enhanceHeader,0); }).observe(root,{
+            var scheduled = false;
+            new MutationObserver(function(){
+                if(scheduled) return;
+                scheduled = true;
+                setTimeout(function(){
+                    scheduled = false;
+                    enhanceWhatsApp();
+                }, 0);
+            }).observe(root,{
                 childList:true,
                 subtree:true,
                 attributes:true,
                 attributeFilter:['style','class','data-figure']
             });
         }
-        setInterval(enhanceHeader,800);
+
+        setInterval(enhanceWhatsApp,1000);
     }
 
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded',boot);
