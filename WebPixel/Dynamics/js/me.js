@@ -94,6 +94,17 @@
         if (secondNode) secondNode.textContent = pad(seconds);
     }
 
+    function installHealthApp() {
+        var grid = document.querySelector('.phone-app-grid');
+        if (!grid || grid.querySelector('[data-health-app]')) return;
+
+        var link = document.createElement('a');
+        link.href = 'health';
+        link.setAttribute('data-health-app', '1');
+        link.innerHTML = '<span class="app-icon" style="background:linear-gradient(180deg,#f06472,#cf3e4c);color:#fff"><i class="fas fa-heartbeat"></i></span><small>Santé</small>';
+        grid.appendChild(link);
+    }
+
     document.querySelectorAll('.inventory-slot, .side-document').forEach(function (item) {
         item.addEventListener('click', function () {
             item.classList.remove('clicked');
@@ -105,6 +116,7 @@
         });
     });
 
+    installHealthApp();
     updateClock();
     updateEventCountdown();
     window.setInterval(updateClock, 30000);
