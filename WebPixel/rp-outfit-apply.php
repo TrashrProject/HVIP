@@ -4,67 +4,71 @@ require_once __DIR__ . '/app/init.pz.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
-if (!$Session->Exist(Config::$SessionName) || !isset($UData['id'])) {
-    http_response_code(401);
-    echo json_encode(['ok' => false, 'error' => 'Session expirée']);
+function fail_json($code, $message) {
+    http_response_code($code);
+    echo json_encode(['ok' => false, 'error' => $message], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
+function clean_figure($value) {
+    $value = trim((string)$value);
+    if ($value === '' || stripos($value, 'undefined') !== false) return '';
+    return preg_match('/^[a-z0-9.\-]+$/i', $value) ? $value : '';
+}
 
-$raw = file_get_contents('php://input');
-$data = json_decode($raw ?: '{}', true);
+if (!$Session->Exist(Config::$SessionName) || !isset($UData['id'])) fail_json(401, 'Session expirée');
+
+$data = json_decode(file_get_contents('php://input') ?: '{}', true);
 $outfitId = isset($data['id']) ? (string)$data['id'] : '';
-
-if (!preg_match('/^rp-\d+$/', $outfitId)) {
-    http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'Tenue invalide']);
-    exit;
-}
-
-$file = __DIR__ . '/nitro-last/rp-outfits.json';
-if (!is_file($file)) {
-    http_response_code(503);
-    echo json_encode(['ok' => false, 'error' => 'Catalogue RP non généré']);
-    exit;
-}
-
-$catalog = json_decode(file_get_contents($file), true);
-$selected = null;
-foreach (($catalog['outfits'] ?? []) as $outfit) {
-    if (($outfit['id'] ?? '') === $outfitId) {
-        $selected = $outfit;
-        break;
-    }
-}
-
-if (!$selected) {
-    http_response_code(404);
-    echo json_encode(['ok' => false, 'error' => 'Tenue introuvable']);
-    exit;
-}
-
-$figure = (string)($selected['figure'] ?? '');
-$gender = strtoupper((string)($selected['gender'] ?? 'M'));
-if (!preg_match('/^[a-z0-9.\-]+$/i', $figure) || !in_array($gender, ['M', 'F'], true)) {
-    http_response_code(422);
-    echo json_encode(['ok' => false, 'error' => 'Données de tenue invalides']);
-    exit;
-}
-
 $uid = (int)$UData['id'];
-$sql = "UPDATE `users` SET `look`='" . $figure . "', `gender`='" . $gender . "' WHERE `id`='" . $uid . "' LIMIT 1";
-$result = $DB->Query($sql);
+$gender = strtoupper((string)($UData['gender'] ?? 'M')) === 'F' ? 'F' : 'M';
+$userRank = (int)($UData['rank'] ?? 1);
+$figure = '';
+$name = 'Tenue RP';
 
-if ($result === false) {
-    http_response_code(500);
-    echo json_encode(['ok' => false, 'error' => 'Impossible de sauvegarder la tenue']);
-    exit;
+if (preg_match('/^job-(\d+)-rank-(\d+)$/', $outfitId, $m)) {
+    $jobId = (int)$m[1];
+    $rank = (int)$m[2];
+    $membership = $DB->Query("SELECT gm.rank AS member_rank FROM group_memberships gm WHERE gm.user_id='" . $uid . "' AND gm.group_id='" . $jobId . "' LIMIT 1");
+    if (!$membership || mysqli_num_rows($membership) === 0) fail_json(403, 'Tu ne fais pas partie de ce métier');
+    $member = mysqli_fetch_assoc($membership);
+    if ($rank < 1 || $rank > (int)$member['member_rank']) fail_json(403, 'Cette tenue dépasse ton grade');
+
+    $rows = $DB->Query("SELECT name, male_figure, female_figure FROM play_jobs_ranks WHERE job='" . $jobId . "' AND rank='" . $rank . "' LIMIT 1");
+    if (!$rows || mysqli_num_rows($rows) === 0) fail_json(404, 'Tenue métier introuvable');
+    $row = mysqli_fetch_assoc($rows);
+    $figure = clean_figure($gender === 'F' ? $row['female_figure'] : $row['male_figure']);
+    $name = (string)$row['name'];
+    if ($figure === '') fail_json(422, 'Cette tenue métier n’est pas configurée pour ton genre');
+} elseif (preg_match('/^staff-(rp-\d+)$/', $outfitId, $m)) {
+    $isStaff = $userRank >= 6;
+    if (!$isStaff) {
+        $staffQuery = $DB->Query("SELECT g.name FROM group_memberships gm INNER JOIN groups g ON g.id=gm.group_id WHERE gm.user_id='" . $uid . "'");
+        if ($staffQuery) {
+            while ($row = mysqli_fetch_assoc($staffQuery)) {
+                if (preg_match('/staff|fondateur|founder|gerant|gérant|developpeur|développeur|developer|administrat|owner/i', (string)$row['name'])) { $isStaff = true; break; }
+            }
+        }
+    }
+    if (!$isStaff) fail_json(403, 'Cette tenue est réservée au staff');
+
+    $file = __DIR__ . '/nitro-last/rp-outfits.json';
+    if (!is_file($file)) fail_json(503, 'Catalogue staff indisponible');
+    $catalog = json_decode(file_get_contents($file), true);
+    $selected = null;
+    foreach (($catalog['outfits'] ?? []) as $o) if (($o['id'] ?? '') === $m[1]) { $selected = $o; break; }
+    if (!$selected) fail_json(404, 'Tenue staff introuvable');
+    $selectedGender = strtoupper((string)($selected['gender'] ?? 'M')) === 'F' ? 'F' : 'M';
+    if ($selectedGender !== $gender) fail_json(422, 'Tenue incompatible avec ton genre');
+    $figure = clean_figure($selected['figure'] ?? '');
+    $name = (string)($selected['name'] ?? 'Tenue staff');
+    if ($figure === '') fail_json(422, 'Données de tenue invalides');
+} else {
+    fail_json(400, 'Tenue invalide');
 }
 
-echo json_encode([
-    'ok' => true,
-    'id' => $outfitId,
-    'name' => (string)($selected['name'] ?? 'Tenue RP'),
-    'figure' => $figure,
-    'gender' => $gender,
-    'reload' => true
-]);
+$escapedFigure = mysqli_real_escape_string($DB->Connection, $figure);
+$escapedGender = mysqli_real_escape_string($DB->Connection, $gender);
+$result = $DB->Query("UPDATE users SET look='" . $escapedFigure . "', gender='" . $escapedGender . "' WHERE id='" . $uid . "' LIMIT 1");
+if ($result === false) fail_json(500, 'Impossible de sauvegarder la tenue');
+
+echo json_encode(['ok' => true, 'id' => $outfitId, 'name' => $name, 'figure' => $figure, 'gender' => $gender, 'reload' => true], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
