@@ -28,9 +28,9 @@
           url = url.replace(/^https?:\/\/habbovip\.us\/?/i, 'https://paradiserp.fr/');
           if (/^https?:\/\/nitro-imager\.kubbo\.city\//i.test(url)) {
             const q = url.indexOf('?');
-            return 'https://paradiserp.fr/avatar-placeholder.php' + (q >= 0 ? url.substring(q) : '');
+            return './avatar-placeholder.php' + (q >= 0 ? url.substring(q) : '');
           }
-          if (/^\?figure=/i.test(url)) return 'https://paradiserp.fr/avatar-placeholder.php' + url;
+          if (/^\?figure=/i.test(url)) return './avatar-placeholder.php' + url;
           if (/platinos(?:%20|\s|_)+icon(?:%20|\s|_)+s\.png/i.test(url)) return TRANSPARENT_PNG;
           if (/(?:^|\/)styles\.[a-z0-9_-]+\.css(?:\?|$)/i.test(url)) return './empty-legacy.css';
           return url;
@@ -99,12 +99,12 @@
           nativeConsoleError.apply(console, arguments);
         };
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('./asset-sw.js?v=6', { scope: './' })
+          navigator.serviceWorker.register('./asset-sw.js?v=7', { scope: './' })
             .then(registration => registration.update().then(() => registration))
             .then(() => navigator.serviceWorker.ready)
             .then(() => {
-              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded-v6')) {
-                sessionStorage.setItem('hvip-sw-reloaded-v6', '1');
+              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded-v7')) {
+                sessionStorage.setItem('hvip-sw-reloaded-v7', '1');
                 location.reload();
               }
             })
@@ -168,7 +168,7 @@
     </div>
 
     <div id="root" class="w-100 h-100"></div>
-    <script src="./paradise-loader.js?v=10"></script>
+    <script src="./paradise-loader.js?v=11"></script>
     <script src="./rp-wardrobe-safe.js?v=1" defer></script>
     <script src="./rp-avatar-grid.js?v=2" defer></script>
   </body>
