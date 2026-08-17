@@ -1,48 +1,57 @@
-/* ParadiseRP — fiche joueur RP premium, compacte et lisible */
-.hvip-rp-source-card{position:fixed!important;right:-3000px!important;left:auto!important;top:0!important;opacity:0!important;pointer-events:none!important}
+/* ParadiseRP — dossier joueur RP premium v4 */
+.hvip-rp-source-card{position:fixed!important;right:-4000px!important;left:auto!important;top:0!important;opacity:0!important;pointer-events:none!important}
 .hvip-rp-dossier,.hvip-rp-dossier *{box-sizing:border-box!important}
 .hvip-rp-dossier{
-  --bg:#12191f;--panel:#1a242b;--panel2:#202c34;--line:rgba(142,177,187,.16);--text:#f5f8f9;--muted:#8ea2aa;--green:#35dea0;--gold:#f1bd58;
-  position:fixed;top:92px;right:22px;z-index:1000000;width:272px;padding:0;border-radius:14px;
-  border:1px solid rgba(109,151,163,.24);background:linear-gradient(160deg,#18232a 0%,#10171c 70%);
-  box-shadow:0 18px 42px rgba(0,0,0,.46),inset 0 1px 0 rgba(255,255,255,.035);
-  color:var(--text);font-family:Inter,"Segoe UI",Arial,sans-serif;opacity:0;pointer-events:none;transform:translateX(14px) scale(.985);transition:.16s ease;overflow:hidden
+  --ink:#081015;--ink2:#0d171d;--panel:#132129;--panel2:#182931;--line:rgba(144,190,199,.14);--text:#f5fbfc;--muted:#789097;--green:#36e3a2;--cyan:#62d4e7;--gold:#f2bd5c;
+  position:fixed;top:86px;right:24px;z-index:1000000;width:314px;padding:0;border-radius:19px;
+  border:1px solid rgba(114,169,181,.24);background:linear-gradient(165deg,#142229 0%,#0a1116 68%,#071015 100%);
+  box-shadow:0 28px 75px rgba(0,0,0,.50),0 7px 22px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);
+  color:var(--text);font-family:Inter,"Segoe UI",Arial,sans-serif;opacity:0;pointer-events:none;transform:translateX(18px) scale(.985);transition:opacity .16s ease,transform .2s cubic-bezier(.2,.8,.2,1);overflow:hidden
 }
 .hvip-rp-dossier.is-visible{opacity:1;pointer-events:auto;transform:translateX(0) scale(1)}
-.hvip-rp-dossier-accent{height:3px;background:linear-gradient(90deg,var(--green),#4ab5ca 55%,var(--gold));opacity:.95}
-.hvip-rp-dossier-head{display:flex;align-items:center;justify-content:space-between;height:42px;padding:0 12px;border-bottom:1px solid var(--line);background:rgba(7,12,15,.24)}
-.hvip-rp-eyebrow{display:flex;align-items:center;min-width:0;color:#f8fbfc;font-size:12px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 rgba(0,0,0,.45)}
-.hvip-rp-eyebrow:before{content:"ID";display:grid;place-items:center;width:22px;height:22px;margin-right:8px;border-radius:7px;background:rgba(53,222,160,.11);border:1px solid rgba(53,222,160,.19);color:#72efbd;font-size:8px;font-weight:950;letter-spacing:.4px}
-.hvip-rp-live{display:none}
-.hvip-rp-dossier-close{display:grid;place-items:center;width:28px;height:28px;padding:0;border:1px solid rgba(255,255,255,.055);border-radius:8px;background:rgba(255,255,255,.025);color:#a8b4b9;font-size:18px;font-weight:800;line-height:1;cursor:pointer;transition:.14s ease}
-.hvip-rp-dossier-close:hover{color:#fff;background:rgba(255,94,94,.12);border-color:rgba(255,94,94,.18)}
-.hvip-rp-identity{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:stretch;padding:12px 12px 9px}
-.hvip-rp-portrait{position:relative;height:132px;overflow:hidden;border-radius:11px;background:radial-gradient(circle at 50% 28%,rgba(60,154,166,.15),transparent 44%),linear-gradient(180deg,#24343d,#19242b);border:1px solid rgba(125,175,185,.17);box-shadow:inset 0 1px 0 rgba(255,255,255,.028)}
-.hvip-rp-portrait:after{content:"";position:absolute;left:9px;right:9px;bottom:8px;height:1px;background:linear-gradient(90deg,transparent,rgba(126,194,201,.24),transparent)}
-.hvip-rp-portrait-grid{position:absolute;inset:0;opacity:.14;background-image:linear-gradient(rgba(133,181,190,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(133,181,190,.13) 1px,transparent 1px);background-size:14px 14px;mask-image:linear-gradient(#000,transparent 92%)}
-.hvip-rp-id-label{position:absolute;z-index:4;left:7px;top:7px;padding:3px 5px;border-radius:5px;background:rgba(5,10,13,.38);color:#7f9ca4;font-size:6px;font-weight:900;letter-spacing:.7px}
-.hvip-rp-dossier-avatar{position:absolute;z-index:3;left:50%;bottom:4px;max-width:90px;max-height:121px;transform:translateX(-50%);image-rendering:pixelated;filter:drop-shadow(0 7px 5px rgba(0,0,0,.36))}
-.hvip-rp-person{min-width:0;padding:2px 0;display:flex;flex-direction:column}
-.hvip-rp-mini-label{display:block;color:#748990;font-size:7px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
-.hvip-rp-dossier-name{display:flex;align-items:center;margin-top:6px;min-height:25px;color:#fff;font-size:17px;font-weight:900;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hvip-rp-dossier-name:before{content:"";flex:0 0 auto;width:7px;height:7px;margin-right:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(53,222,160,.10),0 0 10px rgba(53,222,160,.30)}
-.hvip-rp-dossier-sub{display:block;margin:2px 0 10px;color:#6f858d;font-size:8px;font-weight:700}
-.hvip-rp-badge-box{margin-top:auto}
-.hvip-rp-badge-box:before{content:"INSIGNE";display:block;margin-bottom:5px;color:#748990;font-size:7px;font-weight:900;letter-spacing:.9px}
-.hvip-rp-badge-stage{display:flex;align-items:center;justify-content:center;width:56px;height:52px;border-radius:9px;background:rgba(241,189,88,.055);border:1px solid rgba(241,189,88,.13)}
-.hvip-rp-dossier-badge{max-width:42px;max-height:42px;image-rendering:pixelated;filter:drop-shadow(0 4px 5px rgba(0,0,0,.28))}
-.hvip-rp-badge-stage.is-empty:after{content:"—";color:#60727a;font-weight:800}
-.hvip-rp-info-card{margin:0 12px 9px;padding:0;border:0;background:transparent;box-shadow:none}
-.hvip-rp-role-line{display:flex;align-items:center;min-height:39px;padding:7px 9px;border-radius:10px;background:linear-gradient(180deg,rgba(39,54,63,.94),rgba(31,43,50,.94));border:1px solid rgba(127,170,179,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
-.hvip-rp-role-mark{display:grid;place-items:center;flex:0 0 24px;width:24px;height:24px;margin-right:8px;border-radius:7px;background:rgba(241,189,88,.09);color:#f4ca75;font-size:10px}
-.hvip-rp-dossier-role{min-width:0;color:#eef4f5;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hvip-rp-rep-card{margin:0 12px 12px;padding:9px 10px;border-radius:10px;background:rgba(8,14,18,.23);border:1px solid rgba(255,255,255,.045)}
-.hvip-rp-rep-top{display:flex;align-items:center;justify-content:space-between}
-.hvip-rp-rep-top>div{display:flex;align-items:center;gap:6px}
-.hvip-rp-rep-top>div:before{content:"RÉPUTATION RP";color:#80959c;font-size:7px;font-weight:900;letter-spacing:.8px}
-.hvip-rp-dossier-reward{display:inline;margin:0;padding:4px 7px;border-radius:7px;background:rgba(241,189,88,.08);color:#f8cf7c;font-size:12px;line-height:1;font-weight:950}
-.hvip-rp-rep-grade{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:999px;background:rgba(53,222,160,.07);border:1px solid rgba(53,222,160,.12);color:#77dbae;font-size:7px;font-weight:900;letter-spacing:.55px}
-.hvip-rp-rep-track{height:3px;margin-top:8px;border-radius:999px;background:rgba(255,255,255,.05);overflow:hidden}
-.hvip-rp-rep-track span{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--green),var(--gold));transition:width .2s ease}
-.hvip-rp-dossier-foot{display:none}
-@media(max-width:720px){.hvip-rp-dossier{right:8px;top:76px;width:258px}}
+.hvip-rp-dossier-accent{height:3px;background:linear-gradient(90deg,var(--green) 0%,var(--cyan) 48%,var(--gold) 100%);box-shadow:0 0 18px rgba(54,227,162,.18)}
+.hvip-rp-dossier-head{display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0))}
+.hvip-rp-head-copy{min-width:0;display:flex;flex-direction:column;gap:3px}
+.hvip-rp-head-kicker{color:#6f8b92;font-size:7px;font-weight:950;letter-spacing:1.5px;text-transform:uppercase}
+.hvip-rp-eyebrow{display:block;max-width:225px;color:#f9fcfd;font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 rgba(0,0,0,.45)}
+.hvip-rp-dossier-close{display:grid;place-items:center;width:30px;height:30px;padding:0;border:1px solid rgba(255,255,255,.055);border-radius:9px;background:rgba(255,255,255,.025);color:#94a8ad;font-size:18px;font-weight:800;line-height:1;cursor:pointer;transition:.14s ease}
+.hvip-rp-dossier-close:hover{color:#fff;background:rgba(255,94,94,.12);border-color:rgba(255,94,94,.2);transform:rotate(3deg)}
+.hvip-rp-hero{display:grid;grid-template-columns:118px 1fr;gap:13px;padding:14px 14px 11px}
+.hvip-rp-portrait{position:relative;height:164px;overflow:hidden;border-radius:15px;background:radial-gradient(circle at 50% 27%,rgba(94,212,231,.16),transparent 46%),linear-gradient(180deg,#21353d,#101d23);border:1px solid rgba(118,180,191,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 7px 20px rgba(0,0,0,.18)}
+.hvip-rp-portrait:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(145deg,rgba(255,255,255,.03),transparent 32%,transparent 70%,rgba(54,227,162,.035));pointer-events:none}
+.hvip-rp-portrait-grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(rgba(143,194,203,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(143,194,203,.13) 1px,transparent 1px);background-size:15px 15px;mask-image:linear-gradient(#000,transparent 94%)}
+.hvip-rp-id-label{position:absolute;z-index:5;left:8px;top:8px;padding:4px 6px;border-radius:6px;background:rgba(4,9,12,.46);border:1px solid rgba(255,255,255,.04);color:#89a4aa;font-size:6px;font-weight:950;letter-spacing:.8px}
+.hvip-rp-dossier-avatar{position:absolute;z-index:3;left:50%;bottom:6px;max-width:109px;max-height:151px;transform:translateX(-50%);image-rendering:pixelated;filter:drop-shadow(0 9px 6px rgba(0,0,0,.38))}
+.hvip-rp-presence{position:absolute;z-index:6;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:5px;padding:4px 6px;border-radius:999px;background:rgba(5,13,17,.75);border:1px solid rgba(54,227,162,.12);color:#84e9bb;font-size:6px;font-weight:950;letter-spacing:.55px}
+.hvip-rp-presence:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(54,227,162,.09),0 0 8px rgba(54,227,162,.35)}
+.hvip-rp-person{min-width:0;padding-top:1px;display:flex;flex-direction:column}
+.hvip-rp-mini-label{display:block;color:#71888f;font-size:7px;font-weight:950;letter-spacing:1.05px;text-transform:uppercase}
+.hvip-rp-dossier-name{display:block;margin-top:6px;color:#fff;font-size:21px;font-weight:950;line-height:1.03;letter-spacing:-.35px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hvip-rp-dossier-sub{display:block;margin-top:5px;color:#769099;font-size:9px;font-weight:650;line-height:1.3}
+.hvip-rp-meta{display:grid;grid-template-columns:1fr;gap:6px;margin-top:12px}
+.hvip-rp-meta-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:8px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.035)}
+.hvip-rp-meta-row span{color:#70868d;font-size:7px;font-weight:900;letter-spacing:.65px;text-transform:uppercase}
+.hvip-rp-meta-row strong{min-width:0;color:#dce8ea;font-size:8px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hvip-rp-badge-box{margin-top:auto;padding-top:10px}
+.hvip-rp-badge-box:before{content:"INSIGNE";display:block;margin-bottom:5px;color:#71888f;font-size:7px;font-weight:950;letter-spacing:.9px}
+.hvip-rp-badge-stage{display:flex;align-items:center;justify-content:center;width:60px;height:54px;border-radius:10px;background:radial-gradient(circle,rgba(242,189,92,.10),rgba(242,189,92,.035));border:1px solid rgba(242,189,92,.14)}
+.hvip-rp-dossier-badge{max-width:44px;max-height:44px;image-rendering:pixelated;filter:drop-shadow(0 5px 6px rgba(0,0,0,.30))}
+.hvip-rp-badge-stage.is-empty:after{content:"—";color:#60737a;font-weight:800}
+.hvip-rp-divider{height:1px;margin:0 14px;background:linear-gradient(90deg,transparent,rgba(125,172,181,.16),transparent)}
+.hvip-rp-info-grid{display:grid;grid-template-columns:1fr 96px;gap:9px;padding:11px 14px 9px}
+.hvip-rp-info-card,.hvip-rp-rep-card{margin:0;padding:10px;border-radius:12px;background:linear-gradient(180deg,rgba(24,41,49,.90),rgba(15,27,33,.92));border:1px solid rgba(120,168,177,.11);box-shadow:inset 0 1px 0 rgba(255,255,255,.02)}
+.hvip-rp-role-line{display:flex;align-items:center;gap:8px;margin-top:8px;min-height:31px}
+.hvip-rp-role-mark{display:grid;place-items:center;flex:0 0 27px;width:27px;height:27px;border-radius:8px;background:rgba(242,189,92,.09);border:1px solid rgba(242,189,92,.10);color:#f4ca76;font-size:10px}
+.hvip-rp-dossier-role{min-width:0;color:#eef5f6;font-size:11px;font-weight:850;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hvip-rp-rep-card{display:flex;flex-direction:column;justify-content:space-between}
+.hvip-rp-rep-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.hvip-rp-rep-top>div{display:flex;flex-direction:column;gap:4px}
+.hvip-rp-rep-top>div:before{content:"RÉPUTATION";color:#71888f;font-size:7px;font-weight:950;letter-spacing:.8px}
+.hvip-rp-dossier-reward{display:block;margin:0;color:#ffd681;font-size:23px;line-height:1;font-weight:950;text-shadow:0 0 14px rgba(242,189,92,.10)}
+.hvip-rp-rep-grade{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:999px;background:rgba(54,227,162,.065);border:1px solid rgba(54,227,162,.11);color:#76dcae;font-size:6px;font-weight:950;letter-spacing:.55px}
+.hvip-rp-rep-track{height:4px;margin-top:9px;border-radius:999px;background:rgba(255,255,255,.05);overflow:hidden}
+.hvip-rp-rep-track span{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--green),var(--cyan),var(--gold));box-shadow:0 0 9px rgba(54,227,162,.20);transition:width .22s ease}
+.hvip-rp-dossier-foot{display:flex;align-items:center;justify-content:space-between;margin:0 14px 13px;padding:8px 10px;border-radius:10px;background:rgba(5,11,14,.28);border:1px solid rgba(255,255,255,.035);color:#687e85;font-size:7px;font-weight:800;letter-spacing:.45px}
+.hvip-rp-foot-seal{display:inline-flex;align-items:center;gap:5px;color:#7e989f}
+.hvip-rp-foot-seal:before{content:"◆";color:#4fbf9a;font-size:6px}
+@media(max-width:720px){.hvip-rp-dossier{right:8px;top:72px;width:292px}.hvip-rp-hero{grid-template-columns:110px 1fr}.hvip-rp-portrait{height:154px}}
