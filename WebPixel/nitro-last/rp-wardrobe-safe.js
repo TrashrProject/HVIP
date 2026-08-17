@@ -1,5 +1,5 @@
 (() => {
-  const STATE = { loaded: false, outfits: [], categories: [], active: 'all', panel: null, tab: null, accessLoaded: false, access: null };
+  const STATE = { loaded: false, outfits: [], categories: [], active: 'all', panel: null, tab: null, accessLoaded: false, access: null, mode: 'outfits', avatar: null };
 
   const textOf = el => (el && (el.textContent || '') || '').trim();
   const esc = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -22,14 +22,30 @@
     STATE.loaded = true;
   }
 
+  async function loadAvatarEditor() {
+    const response = await fetch('/rp-avatar-editor.php?v=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Éditeur avatar indisponible');
+    STATE.avatar = data;
+    return data;
+  }
+
   function previewUrl(figure) {
     return 'https://www.habbo.com/habbo-imaging/avatarimage?figure=' + encodeURIComponent(figure || '') + '&size=l&direction=2&head_direction=2&gesture=sml&action=std';
+  }
+
+  function replacePart(look, type, setId, colorId) {
+    const part = `${type}-${setId}-${colorId}`;
+    const re = new RegExp(`(^|\\.)${type}-\\d+(?:-\\d+)*`, 'i');
+    if (re.test(look || '')) return String(look || '').replace(re, (m, sep) => (sep === '.' ? '.' : '') + part);
+    return look ? `${look}.${part}` : part;
   }
 
   function closePanel() {
     if (!STATE.panel) return;
     STATE.panel.remove();
     STATE.panel = null;
+    STATE.mode = 'outfits';
     if (STATE.tab) STATE.tab.classList.remove('pr-rp-active');
   }
 
@@ -89,6 +105,101 @@
     }
   }
 
+  function setTopMode(mode) {
+    STATE.mode = mode;
+    if (!STATE.panel) return;
+    STATE.panel.querySelectorAll('.pr-rp-mode-btn').forEach(b => b.classList.toggle('is-active', b.dataset.mode === mode));
+    const outfitArea = STATE.panel.querySelector('.pr-rp-outfit-area');
+    const editorArea = STATE.panel.querySelector('.pr-rp-editor-area');
+    if (outfitArea) outfitArea.hidden = mode !== 'outfits';
+    if (editorArea) editorArea.hidden = mode !== 'editor';
+    if (mode === 'editor') renderAvatarEditor(editorArea);
+  }
+
+  async function renderAvatarEditor(container) {
+    if (!container) return;
+    container.hidden = false;
+    container.innerHTML = '<div class="pr-rp-loading">Chargement de l’éditeur avatar...</div>';
+    try {
+      const data = await loadAvatarEditor();
+      const cur = data.current || {};
+      const hairSets = Array.isArray(data.hair_sets) ? data.hair_sets : [];
+      const hairColors = Array.isArray(data.hair_colors) ? data.hair_colors : [];
+      const skinColors = Array.isArray(data.skin_colors) ? data.skin_colors : [];
+      container.innerHTML = `
+        <div class="pr-rp-editor-layout">
+          <div class="pr-rp-editor-preview">
+            <img class="pr-rp-editor-img" src="${esc(previewUrl(data.look || ''))}" alt="Aperçu avatar">
+            <strong>Personnalisation RP</strong>
+            <small>La tenue métier reste intacte : seuls les cheveux et le teint sont modifiés.</small>
+          </div>
+          <div class="pr-rp-editor-controls">
+            <label>Coupe de cheveux
+              <select class="pr-rp-hair-select">
+                ${hairSets.map(h => `<option value="${h.id}"${Number(h.id) === Number(cur.hair_set) ? ' selected' : ''}>Coupe #${h.id}</option>`).join('')}
+              </select>
+            </label>
+            <div class="pr-rp-editor-group"><b>Couleur des cheveux</b><div class="pr-rp-swatches pr-rp-hair-colors"></div></div>
+            <div class="pr-rp-editor-group"><b>Teint de peau</b><div class="pr-rp-swatches pr-rp-skin-colors"></div></div>
+            <button type="button" class="pr-rp-avatar-save">Appliquer la personnalisation</button>
+            <div class="pr-rp-editor-status"></div>
+          </div>
+        </div>`;
+
+      const hairSelect = container.querySelector('.pr-rp-hair-select');
+      const hairBox = container.querySelector('.pr-rp-hair-colors');
+      const skinBox = container.querySelector('.pr-rp-skin-colors');
+      const img = container.querySelector('.pr-rp-editor-img');
+      let hairColor = Number(cur.hair_color || (hairColors[0] && hairColors[0].id) || 0);
+      let skinColor = Number(cur.skin_color || (skinColors[0] && skinColors[0].id) || 0);
+
+      const updatePreview = () => {
+        let look = String(data.look || '');
+        const hairSet = Number(hairSelect.value || cur.hair_set || 0);
+        const headMatch = look.match(/(?:^|\.)hd-(\d+)(?:-\d+)?/i);
+        const headSet = headMatch ? Number(headMatch[1]) : 180;
+        if (hairSet && hairColor) look = replacePart(look, 'hr', hairSet, hairColor);
+        if (skinColor) look = replacePart(look, 'hd', headSet, skinColor);
+        img.src = previewUrl(look);
+      };
+
+      hairColors.forEach(c => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'pr-rp-swatch'; b.title = `Couleur #${c.id}`; b.style.background = '#' + c.hex; b.dataset.id = c.id;
+        b.classList.toggle('is-active', Number(c.id) === hairColor);
+        b.addEventListener('click', () => { hairColor = Number(c.id); hairBox.querySelectorAll('.pr-rp-swatch').forEach(x => x.classList.toggle('is-active', x === b)); updatePreview(); });
+        hairBox.appendChild(b);
+      });
+      skinColors.forEach(c => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'pr-rp-swatch'; b.title = `Teint #${c.id}`; b.style.background = '#' + c.hex; b.dataset.id = c.id;
+        b.classList.toggle('is-active', Number(c.id) === skinColor);
+        b.addEventListener('click', () => { skinColor = Number(c.id); skinBox.querySelectorAll('.pr-rp-swatch').forEach(x => x.classList.toggle('is-active', x === b)); updatePreview(); });
+        skinBox.appendChild(b);
+      });
+      hairSelect.addEventListener('change', updatePreview);
+
+      container.querySelector('.pr-rp-avatar-save').addEventListener('click', async event => {
+        const button = event.currentTarget;
+        const status = container.querySelector('.pr-rp-editor-status');
+        button.disabled = true; button.textContent = 'Application...'; status.textContent = '';
+        try {
+          const response = await fetch('/rp-avatar-editor.php', { method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ hair_set:Number(hairSelect.value), hair_color:hairColor, skin_color:skinColor }) });
+          const saved = await response.json().catch(() => ({}));
+          if (!response.ok || !saved.ok) throw new Error(saved.error || 'Impossible de sauvegarder');
+          status.textContent = 'Personnalisation enregistrée ✓';
+          button.textContent = 'Enregistré ✓';
+          setTimeout(() => { try { window.top.location.reload(); } catch (_) { window.location.reload(); } }, 650);
+        } catch (error) {
+          button.disabled = false; button.textContent = 'Appliquer la personnalisation';
+          status.textContent = 'Erreur : ' + (error && error.message ? error.message : 'échec');
+        }
+      });
+    } catch (error) {
+      container.innerHTML = '<div class="pr-rp-empty">Éditeur avatar indisponible : ' + esc(error && error.message ? error.message : 'erreur') + '</div>';
+    }
+  }
+
   async function openPanel() {
     if (STATE.panel) return closePanel();
     const access = await loadAccess();
@@ -105,12 +216,17 @@
         <div><b>Tenues RP</b><span>${esc(context)}</span></div>
         <button type="button" class="pr-rp-close" aria-label="Fermer">×</button>
       </div>
-      <div class="pr-rp-filters-safe"><button type="button" data-cat="all" class="is-active">Toutes mes tenues</button></div>
-      <div class="pr-rp-grid-safe"><div class="pr-rp-loading">Chargement des tenues autorisées...</div></div>
-      <div class="pr-rp-note">Seules les tenues correspondant à tes métiers, ton grade ou ton rôle staff sont affichées.</div>`;
+      <div class="pr-rp-modebar"><button type="button" class="pr-rp-mode-btn is-active" data-mode="outfits">👔 Tenues métier</button><button type="button" class="pr-rp-mode-btn" data-mode="editor">✂️ Cheveux & teint</button></div>
+      <div class="pr-rp-outfit-area">
+        <div class="pr-rp-filters-safe"><button type="button" data-cat="all" class="is-active">Toutes mes tenues</button></div>
+        <div class="pr-rp-grid-safe"><div class="pr-rp-loading">Chargement des tenues autorisées...</div></div>
+      </div>
+      <div class="pr-rp-editor-area" hidden></div>
+      <div class="pr-rp-note">Tenues filtrées selon le métier et le grade. L’éditeur cheveux/teint ne modifie pas les vêtements.</div>`;
     document.body.appendChild(panel);
     STATE.panel = panel;
     panel.querySelector('.pr-rp-close').addEventListener('click', closePanel);
+    panel.querySelectorAll('.pr-rp-mode-btn').forEach(b => b.addEventListener('click', () => setTopMode(b.dataset.mode)));
 
     const grid = panel.querySelector('.pr-rp-grid-safe');
     const filters = panel.querySelector('.pr-rp-filters-safe');
@@ -118,8 +234,7 @@
       await loadCatalog();
       STATE.categories.forEach(category => {
         const b = document.createElement('button');
-        b.type = 'button';
-        b.dataset.cat = category.id;
+        b.type = 'button'; b.dataset.cat = category.id;
         b.textContent = `${category.icon || ''} ${category.label || category.id} (${category.count || 0})`.trim();
         filters.appendChild(b);
       });
