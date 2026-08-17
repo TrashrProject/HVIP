@@ -7,118 +7,115 @@
     const status = document.querySelector('.pr-loader-status-copy');
     if (!loader || !root || !bar || !percent || !status) return;
 
-    let progress = 3;
-    let realProgress = 0;
+    const navigation = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    const isReload = navigation ? navigation.type === 'reload' : false;
+    const hasLoadedOnce = sessionStorage.getItem('paradise-client-loaded') === '1';
+
+    let progress = 2;
     let hidden = false;
-    let lastRealUpdate = performance.now();
+    let realProgress = 0;
     const startedAt = performance.now();
 
-    const setProgress = (value) => {
-      if (hidden) return;
-      const next = Math.max(progress, Math.min(100, Math.round(Number(value) || 0)));
-      progress = next;
-      bar.style.width = `${next}%`;
-      percent.textContent = `${next}%`;
-
-      if (next < 18) status.textContent = 'Initialisation du client';
-      else if (next < 42) status.textContent = 'Chargement des ressources';
-      else if (next < 68) status.textContent = 'Connexion à ParadiseRP';
-      else if (next < 90) status.textContent = 'Préparation de votre session';
-      else status.textContent = 'Entrée dans ParadiseRP';
+    const setStatus = value => {
+      if (value < 18) status.textContent = 'Ouverture de ParadiseRP';
+      else if (value < 38) status.textContent = 'Chargement du moteur de jeu';
+      else if (value < 62) status.textContent = 'Synchronisation de votre personnage';
+      else if (value < 82) status.textContent = 'Préparation de votre environnement';
+      else if (value < 97) status.textContent = 'Connexion à l’hôtel';
+      else status.textContent = 'Bienvenue sur ParadiseRP';
     };
 
-    const hide = () => {
+    const render = value => {
+      progress = Math.max(progress, Math.min(100, Number(value) || 0));
+      const rounded = Math.round(progress);
+      bar.style.width = `${rounded}%`;
+      percent.textContent = `${rounded}%`;
+      setStatus(rounded);
+    };
+
+    const hide = (fast = false) => {
       if (hidden) return;
       hidden = true;
-      progress = 100;
-      bar.style.width = '100%';
-      percent.textContent = '100%';
-      status.textContent = 'Bienvenue à ParadiseRP';
-      setTimeout(() => loader.classList.add('is-hidden'), 120);
-      setTimeout(() => loader.remove(), 650);
+      sessionStorage.setItem('paradise-client-loaded', '1');
+      render(100);
+      loader.classList.add('is-ready');
+      const delay = fast ? 80 : 180;
+      setTimeout(() => loader.classList.add('is-hidden'), delay);
+      setTimeout(() => loader.remove(), fast ? 450 : 700);
     };
 
-    const hasGameSurface = () => {
+    const hasPlayableSurface = () => {
+      const canvas = root.querySelector('canvas');
+      if (canvas && canvas.width > 0 && canvas.height > 0) return true;
       return !!root.querySelector(
-        'canvas, .nitro-room-view, [class*="room-view"], [class*="hotel-view"], [class*="nitro-room"], [class*="nitro-hotel"]'
+        '.nitro-room-view,[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"]'
       );
     };
 
-    const readProgress = () => {
-      if (hidden) return;
-
-      if (hasGameSurface()) {
-        setProgress(100);
-        setTimeout(hide, 120);
-        return;
-      }
-
+    const readRealProgress = () => {
       const text = root.innerText || root.textContent || '';
       const matches = [...text.matchAll(/(?:^|\s)(100|[1-9]?\d)\s*%/g)];
       if (matches.length) {
-        const value = Math.max(...matches.map(match => Number(match[1])));
-        if (value > realProgress) {
-          realProgress = value;
-          lastRealUpdate = performance.now();
-        }
-
-        // Never let the decorative loader visually lag behind Nitro.
-        // Keep 100% reserved for the moment the game surface actually appears.
-        setProgress(value >= 100 ? 96 : Math.min(96, value));
+        realProgress = Math.max(realProgress, ...matches.map(match => Number(match[1])));
+        render(realProgress);
       }
 
-      // Nitro sometimes stops reporting progress around 50-70% while it is still
-      // building the client. Continue the visual progress smoothly instead of
-      // making the player think the client is frozen.
-      const stalledFor = performance.now() - lastRealUpdate;
-      if (stalledFor > 1200 && progress < 94) {
-        const elapsed = performance.now() - startedAt;
-        const softTarget = Math.min(94, 35 + Math.floor(elapsed / 180));
-        if (softTarget > progress) setProgress(Math.min(progress + 1, softTarget));
+      if (hasPlayableSurface()) {
+        hide(true);
+        return true;
       }
+
+      return false;
     };
 
-    const observer = new MutationObserver(readProgress);
+    // A reload must never trap the player behind our decorative overlay.
+    // Nitro keeps loading underneath; the overlay is removed almost immediately.
+    if (isReload || hasLoadedOnce) {
+      render(74);
+      status.textContent = 'Reconnexion à votre session';
+      setTimeout(() => {
+        readRealProgress();
+        if (!hidden) hide(true);
+      }, 650);
+    }
+
+    const observer = new MutationObserver(() => readRealProgress());
     observer.observe(root, { childList: true, subtree: true, characterData: true, attributes: true });
 
-    setProgress(3);
+    render(progress);
 
-    // Smooth cosmetic progression from the first frame. Real Nitro progress can
-    // jump ahead at any time and always takes priority.
-    const animation = setInterval(() => {
-      if (hidden) {
-        clearInterval(animation);
-        return;
-      }
+    // Smooth visual progress for a first launch only. It never blocks game readiness.
+    const tick = () => {
+      if (hidden) return;
+      readRealProgress();
+      if (hidden) return;
 
-      readProgress();
+      const elapsed = performance.now() - startedAt;
+      let target;
+      if (elapsed < 1000) target = 16;
+      else if (elapsed < 2200) target = 34;
+      else if (elapsed < 3800) target = 56;
+      else if (elapsed < 5600) target = 76;
+      else target = 91;
 
-      if (progress < 30) setProgress(progress + 2);
-      else if (progress < 60) setProgress(progress + 1);
-      else if (progress < 88 && performance.now() - lastRealUpdate > 700) setProgress(progress + 1);
-    }, 320);
+      if (realProgress > target) target = realProgress;
+      progress += Math.max(0.35, (target - progress) * 0.075);
+      render(progress);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
 
-    window.addEventListener('load', () => setTimeout(readProgress, 80));
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        readRealProgress();
+        // Once the document is fully loaded, our overlay stops being blocking.
+        if (!hidden && performance.now() - startedAt > 2500) hide();
+      }, 250);
+    });
 
-    // Extra polling covers Nitro updates that do not mutate visible text.
-    const poll = setInterval(() => {
-      if (hidden) {
-        clearInterval(poll);
-        return;
-      }
-      readProgress();
-    }, 250);
-
-    // Do not leave the custom overlay blocking the client indefinitely.
-    // If Nitro has mounted content, reveal it after a reasonable startup window.
-    setTimeout(() => {
-      if (!hidden && root.children.length > 0) hide();
-    }, 18000);
-
-    // Absolute fallback for unusually slow/legacy sessions.
-    setTimeout(() => {
-      if (!hidden) hide();
-    }, 28000);
+    // Hard guarantees: this UI is decorative and must never lock access to Nitro.
+    setTimeout(() => { if (!hidden && root.children.length > 0) hide(); }, 6500);
+    setTimeout(() => { if (!hidden) hide(true); }, 9000);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
