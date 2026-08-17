@@ -25,12 +25,14 @@ console.log("%c      #  #,|__|    \\__\\,|_________/   ,|__|        ,|__________
 console.log("%c      #  #,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,V:1.0.0.1,,,#  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
 console.log("%c      #  #,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
 console.log("%c      #  ##########################################################################################  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
-console.log("%c      #  Licensed To: PZN2020                                                        Jeihden & Zedd  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #                                                                                          #  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #                                PARADISERP                                                #  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #                                                                                          #  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
 console.log("%c      ################################################################################################", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
 console.log("");
 console.log("");
 
-console.log("[Init] -> Inicializando systema RDP");
+console.log("[Init] -> Initialisation du système ParadiseRP");
 
 function LOG(STR){
     console.log("[RDP] -> " + STR);
@@ -38,35 +40,45 @@ function LOG(STR){
 
 // Users Look Up
 $(document).ready(function(){
-    // Verify Username
-    $('input[name=\"username-lookup\"]').keyup(function(){
-        var U = $("input[name=\"username-lookup\"]").val();
-        var results = $('#lookup-results');
-        var searchUrl = results.data('search-url') || '/WebPixel/search_users';
+    var usernameInput = $('input[name="username-lookup"]');
+    var results = $('#lookup-results');
+
+    if (!usernameInput.length || !results.length) return;
+
+    usernameInput.on('keyup', function(){
+        var U = usernameInput.val() || '';
+        var searchUrl = results.data('search-url') || '/search_users';
+
         $.post(searchUrl,
             {
-                uname: '' + U
+                uname: String(U)
             },
             function(data){
                 results.html(data);
             });
     });
-    if ($('input[name=\"username-lookup\"]').val().trim().length) {
-        $('input[name=\"username-lookup\"]').trigger('keyup');
+
+    var initialValue = usernameInput.val();
+    if (typeof initialValue === 'string' && initialValue.trim().length) {
+        usernameInput.trigger('keyup');
     }
 });
 
 // Gangs Look Up
 $(document).ready(function(){
-    // Verify Username
-    $('input[name=\"gang-lookup\"]').keyup(function(){
-        var G = $("input[name=\"gang-lookup\"]").val();
-        $.post("/gangs",
+    var gangInput = $('input[name="gang-lookup"]');
+    var gangResults = $('#gangs-results');
+
+    if (!gangInput.length || !gangResults.length) return;
+
+    gangInput.on('keyup', function(){
+        var G = gangInput.val() || '';
+        $.post('/gangs',
             {
-                gname: '' + G
+                gname: String(G)
             },
             function(data){
-                $('#gangs-results').html(data);
+                gangResults.html(data);
             });
     });
 });
