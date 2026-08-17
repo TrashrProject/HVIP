@@ -28,8 +28,6 @@ if (!(Get-Command git -ErrorAction SilentlyContinue)) { throw 'Git est introuvab
 
 New-Item -ItemType Directory -Force -Path (Split-Path $ServiceDir), $Cache, $RuntimeRoot | Out-Null
 
-# Nitro Imager utilise canvas 2.8.0. Node 24 force une compilation native qui échoue.
-# On installe un Node 16 portable uniquement pour ce service, sans modifier Node global du VPS.
 if (!(Test-Path $NodeExe) -or !(Test-Path $NpmCli)) {
     Write-Host '[0/4] Installation du runtime Node 16 portable...' -ForegroundColor Yellow
     if (Test-Path $NodeDir) { Remove-Item -Recurse -Force $NodeDir }
@@ -77,15 +75,30 @@ AVATAR_ASSET_EFFECT_URL=C:/HVIP/swf_pz/V5-0-2/effect/%libname%.nitro
 "@
 Set-Content -Path (Join-Path $ServiceDir '.env') -Value $envText -Encoding ASCII
 
+# IMPORTANT : node-pre-gyp / node-gyp lancent parfois simplement `node`.
+# On met donc le Node 16 portable EN PREMIER dans PATH afin qu'aucun sous-processus
+# ne retombe sur C:\Program Files\nodejs\node.exe (Node 24).
+$OldPath = $env:PATH
+$OldNode = $env:NODE
+$OldNpmNodeExecPath = $env:npm_node_execpath
+$env:PATH = "$NodeDir;$env:PATH"
+$env:NODE = $NodeExe
+$env:npm_node_execpath = $NodeExe
+$env:npm_config_node_gyp = Join-Path $NodeDir 'node_modules\npm\node_modules\node-gyp\bin\node-gyp.js'
+
 Push-Location $ServiceDir
 try {
-    # Supprime l'installation partielle faite précédemment avec Node 24.
     if (Test-Path 'node_modules') {
         Write-Host 'Nettoyage de node_modules incompatible...' -ForegroundColor DarkYellow
         Remove-Item -Recurse -Force 'node_modules'
     }
+    if (Test-Path 'package-lock.json') {
+        Write-Host 'Suppression du package-lock généré avec un autre runtime...' -ForegroundColor DarkYellow
+        Remove-Item -Force 'package-lock.json'
+    }
 
-    Write-Host '[1/4] Installation des dépendances avec Node 16...' -ForegroundColor Yellow
+    Write-Host '[1/4] Installation des dépendances avec Node 16 forcé...' -ForegroundColor Yellow
+    Write-Host ('node résolu dans PATH : ' + (& node --version)) -ForegroundColor DarkGray
     & $NodeExe $NpmCli install --no-audit --no-fund
     if ($LASTEXITCODE -ne 0) { throw "npm install a échoué avec le code $LASTEXITCODE" }
 
@@ -94,6 +107,10 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "npm run build a échoué avec le code $LASTEXITCODE" }
 } finally {
     Pop-Location
+    $env:PATH = $OldPath
+    if ($null -eq $OldNode) { Remove-Item Env:NODE -ErrorAction SilentlyContinue } else { $env:NODE = $OldNode }
+    if ($null -eq $OldNpmNodeExecPath) { Remove-Item Env:npm_node_execpath -ErrorAction SilentlyContinue } else { $env:npm_node_execpath = $OldNpmNodeExecPath }
+    Remove-Item Env:npm_config_node_gyp -ErrorAction SilentlyContinue
 }
 
 $startCmd = Join-Path $Root 'tools\start-nitro-imager.cmd'
@@ -104,7 +121,6 @@ $cmdLines = @(
 )
 Set-Content -Path $startCmd -Value ($cmdLines -join "`r`n") -Encoding ASCII
 
-# Arrête uniquement le processus qui écoute déjà sur 3030.
 try {
     $existing = Get-NetTCPConnection -LocalPort 3030 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($existing) {
@@ -113,7 +129,6 @@ try {
     }
 } catch {}
 
-# Vide l'ancien log pour que le diagnostic soit lisible.
 $logFile = Join-Path $Cache 'service.log'
 Set-Content -Path $logFile -Value '' -Encoding ASCII
 
@@ -141,7 +156,6 @@ if (!$ok) {
     exit 1
 }
 
-# Démarrage automatique à l'ouverture de session Windows.
 try {
     $action = New-ScheduledTaskAction -Execute $startCmd
     $trigger = New-ScheduledTaskTrigger -AtLogOn
