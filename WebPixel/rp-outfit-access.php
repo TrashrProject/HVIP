@@ -11,42 +11,47 @@ if (!$Session->Exist(Config::$SessionName) || !isset($UData['id'])) {
 }
 
 $uid = (int)$UData['id'];
-
+$userRank = (int)($UData['rank'] ?? 1);
+$isStaff = $userRank >= 6;
+$staffName = '';
 $jobs = [];
+
 $sql = "SELECT gm.group_id, gm.rank AS member_rank, g.name, g.activity
         FROM group_memberships gm
         INNER JOIN groups g ON g.id = gm.group_id
         WHERE gm.user_id = '" . $uid . "'
-          AND EXISTS(
-              SELECT 1 FROM play_jobs_ranks pjr
-              WHERE pjr.job = gm.group_id
-                AND ((pjr.male_figure IS NOT NULL AND pjr.male_figure <> '')
-                  OR (pjr.female_figure IS NOT NULL AND pjr.female_figure <> ''))
-          )
         ORDER BY gm.group_id ASC";
 $res = $DB->Query($sql);
 if ($res) {
     while ($row = mysqli_fetch_assoc($res)) {
         $name = trim((string)$row['name']);
-        // Les groupes staff ne sont jamais considérés comme des métiers pour les tenues RP.
-        if (preg_match('/staff|fondateur|founder|gerant|gérant|developpeur|développeur|developer|administrat|owner/i', $name)) continue;
+        $isStaffGroup = (bool)preg_match('/staff|fondateur|founder|gerant|gérant|developpeur|développeur|developer|administrat|owner/i', $name);
+        if ($isStaffGroup) {
+            $isStaff = true;
+            if ($staffName === '') $staffName = $name;
+            continue;
+        }
 
-        $jobs[] = [
-            'group_id' => (int)$row['group_id'],
-            'rank' => (int)$row['member_rank'],
-            'name' => $name,
-            'activity' => (string)$row['activity']
-        ];
+        $groupId = (int)$row['group_id'];
+        $has = $DB->Query("SELECT 1 FROM play_jobs_ranks WHERE job='" . $groupId . "' AND ((male_figure IS NOT NULL AND male_figure <> '') OR (female_figure IS NOT NULL AND female_figure <> '')) LIMIT 1");
+        if ($has && mysqli_num_rows($has) > 0) {
+            $jobs[] = [
+                'group_id' => $groupId,
+                'rank' => (int)$row['member_rank'],
+                'name' => $name,
+                'activity' => (string)$row['activity']
+            ];
+        }
     }
 }
 
-$allowed = count($jobs) > 0;
-$primary = $allowed ? $jobs[0]['name'] : '';
+$allowed = $isStaff || count($jobs) > 0;
+$primary = count($jobs) ? $jobs[0]['name'] : ($isStaff ? 'Gestion' : '');
 
 echo json_encode([
     'ok' => true,
     'allowed' => $allowed,
     'label' => $allowed ? ('Tenues RP' . ($primary !== '' ? ' • ' . $primary : '')) : '',
     'jobs' => $jobs,
-    'staff' => null
+    'staff' => $isStaff ? ['name' => ($staffName ?: 'Gestion ParadiseRP'), 'preview_all_jobs' => true] : null
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
