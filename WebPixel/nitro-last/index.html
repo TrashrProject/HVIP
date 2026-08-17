@@ -17,6 +17,20 @@
     <link rel="stylesheet" href="./rp-wardrobe-safe.css?v=1">
     <script>
       (function () {
+        // Recovery: an older asset service worker can keep a stale /play session stuck at 0%.
+        // Unregister it before Nitro starts and reload once if this page was still controlled.
+        if ('serviceWorker' in navigator) {
+          const wasControlled = !!navigator.serviceWorker.controller;
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            return Promise.all(registrations.map(function(registration) { return registration.unregister(); }));
+          }).then(function() {
+            if (wasControlled && !sessionStorage.getItem('hvip-sw-clean-reload')) {
+              sessionStorage.setItem('hvip-sw-clean-reload', '1');
+              location.reload();
+            }
+          }).catch(function() {});
+        }
+
         const TRANSPARENT_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==';
         const rewriteLegacyUrl = (value) => {
           let url = String(value || '');
@@ -97,18 +111,6 @@
           if (/\[Nitro\]\s*Error parsing message.*Offset is outside the bounds of the DataView/i.test(text)) return;
           nativeConsoleError.apply(console, arguments);
         };
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('./asset-sw.js?v=6', { scope: './' })
-            .then(registration => registration.update().then(() => registration))
-            .then(() => navigator.serviceWorker.ready)
-            .then(() => {
-              if (!navigator.serviceWorker.controller && !sessionStorage.getItem('hvip-sw-reloaded-v6')) {
-                sessionStorage.setItem('hvip-sw-reloaded-v6', '1');
-                location.reload();
-              }
-            })
-            .catch(() => {});
-        }
       })();
       const query = new URLSearchParams(window.location.search);
       window.NitroConfig = {
