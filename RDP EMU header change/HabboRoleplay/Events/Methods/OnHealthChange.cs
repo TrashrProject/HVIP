@@ -49,7 +49,7 @@ namespace Plus.HabboRoleplay.Events.Methods
                 int TimeCount = Client.GetPlay().TimerManager.ActiveTimers["hunger"].TimeCount;
 
                 if (TimeCount == 0)
-                    Client.SendWhisper("Tu salud ha bajado debido a que estás hambrient@. [" + Client.GetPlay().CurHealth + "/" + Client.GetPlay().MaxHealth + "]! ¡Será mejor que comas algo antes de que pierdas toda tu salud!", 1);
+                    Client.SendWhisper("Ta santé a baissé parce que tu as faim. [" + Client.GetPlay().CurHealth + "/" + Client.GetPlay().MaxHealth + "] ! Mange quelque chose avant de perdre toute ta santé !", 1);
                 //else
                   //  RoleplayManager.Shout(Client, "*[" + Client.GetPlay().CurHealth + "/" + Client.GetPlay().MaxHealth + "]*", 3);
             }
@@ -67,10 +67,10 @@ namespace Plus.HabboRoleplay.Events.Methods
             {
                 if (!Client.GetPlay().TimerManager.ActiveTimers.ContainsKey("dying") && !Client.GetPlay().TimerManager.ActiveTimers.ContainsKey("death"))
                 {
-                    RoleplayManager.Shout(Client, "*Cae colapsandose en el suelo y pierde la consciencia*", 32);
+                    RoleplayManager.Shout(Client, "*S'effondre au sol et perd connaissance*", 32);
                     Client.GetHabbo().HomeRoom = Client.GetRoomUser().RoomId;
                     /*
-                    Client.SendWhisper("¡Has muerto! Usa ':servicio medico' para llamar a una ambulancia ó ':aceptarmuerte' para reaparecer en el hospital.", 1);
+                    Client.SendWhisper("Tu es mort ! Utilise ':service medical' pour appeler une ambulance ou ':acceptermort' pour réapparaître à l'hôpital.", 1);
 
                     if (Client.GetRoomUser() != null)
                         Client.GetRoomUser().ApplyEffect(0);
