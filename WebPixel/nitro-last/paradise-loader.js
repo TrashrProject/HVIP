@@ -38,6 +38,7 @@
         el.style.setProperty('display', 'none', 'important');
         el.style.setProperty('visibility', 'hidden', 'important');
         el.style.setProperty('pointer-events', 'none', 'important');
+        el.remove();
       });
     };
 
@@ -50,8 +51,8 @@
       render(100);
       status.textContent = 'Bienvenue sur ParadiseRP';
       loader.classList.add('is-ready');
-      setTimeout(() => loader.classList.add('is-hidden'), 120);
-      setTimeout(() => loader.remove(), 520);
+      setTimeout(() => loader.classList.add('is-hidden'), 80);
+      setTimeout(() => loader.remove(), 420);
     };
 
     const nativeProgress = () => {
@@ -60,10 +61,8 @@
       return values.length ? Math.max(...values) : null;
     };
 
-    const hasReadyUi = () => {
-      return !!root.querySelector(
-        '.nitro-room-view,[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"],.nitro-toolbar,[class*="toolbar"],canvas'
-      );
+    const hasClientSurface = () => {
+      return !!root.querySelector('canvas,.nitro-room-view,[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"],.nitro-toolbar,[class*="toolbar"]');
     };
 
     const inspect = () => {
@@ -81,13 +80,15 @@
 
         render(Math.max(progress, Math.min(95, current)));
 
-        // Sur ce build Nitro la progression native peut rester à 90% alors que
-        // le websocket et le client sont déjà initialisés. Dans ce cas on enlève
-        // l'écran de chargement natif au lieu de bloquer l'utilisateur.
+        // Ce build Nitro reste parfois figé à 90% alors que le WebSocket est déjà connecté.
+        // À 90% on ne dépend plus de la détection des classes internes du client :
+        // après un court délai on enlève l'overlay Nitro + le loader ParadiseRP.
         if (current >= 90) {
           if (!highProgressSince) highProgressSince = performance.now();
-          if ((performance.now() - highProgressSince) > 2200 && hasReadyUi()) {
+          const highFor = performance.now() - highProgressSince;
+          if (highFor > 2600) {
             status.textContent = 'Ouverture de l’hôtel';
+            dismissNativeLoader();
             hide();
             return;
           }
@@ -111,7 +112,7 @@
       }
 
       noNativeProgressReads++;
-      if (hasReadyUi() && noNativeProgressReads >= 2) hide();
+      if (hasClientSurface() && noNativeProgressReads >= 2) hide();
     };
 
     const observer = new MutationObserver(inspect);
@@ -145,13 +146,12 @@
     };
 
     requestAnimationFrame(tick);
-    setInterval(inspect, 350);
+    setInterval(inspect, 250);
 
-    // Fallback absolu : si Nitro a déjà monté son canvas mais garde son overlay
-    // de chargement, on libère le client au lieu de laisser ParadiseRP bloqué.
+    // Dernier filet de sécurité : le loader ParadiseRP ne doit jamais emprisonner le client.
     setTimeout(() => {
-      if (!hidden && hasReadyUi()) hide();
-    }, 18000);
+      if (!hidden && (nativeProgress() >= 90 || hasClientSurface())) hide();
+    }, 12000);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
