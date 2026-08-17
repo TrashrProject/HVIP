@@ -9,6 +9,7 @@ using Plus.HabboRoleplay.RoleplayUsers;
 using Plus.HabboHotel.Groups;
 using Plus.HabboRoleplay.Misc;
 using Plus.HabboHotel.RolePlay.PlayRoom;
+using Plus.Communication.Packets.Outgoing.Rooms.Engine;
 
 namespace Plus.HabboHotel.Rooms.Chat.Commands.Users.Jobs.General
 {
@@ -27,6 +28,61 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Users.Jobs.General
         public string Description
         {
             get { return "Comienzas a trabajar."; }
+        }
+
+        private static string GetFigurePart(string look, string type)
+        {
+            if (String.IsNullOrWhiteSpace(look))
+                return "";
+
+            foreach (string part in look.Split('.'))
+            {
+                if (part.StartsWith(type + "-", StringComparison.OrdinalIgnoreCase))
+                    return part;
+            }
+
+            return "";
+        }
+
+        private static string ReplaceFigurePart(string look, string type, string replacement)
+        {
+            if (String.IsNullOrWhiteSpace(replacement))
+                return look ?? "";
+
+            List<string> parts = String.IsNullOrWhiteSpace(look)
+                ? new List<string>()
+                : look.Split('.').Where(x => !String.IsNullOrWhiteSpace(x)).ToList();
+
+            bool replaced = false;
+            for (int i = 0; i < parts.Count; i++)
+            {
+                if (parts[i].StartsWith(type + "-", StringComparison.OrdinalIgnoreCase))
+                {
+                    parts[i] = replacement;
+                    replaced = true;
+                    break;
+                }
+            }
+
+            if (!replaced)
+                parts.Add(replacement);
+
+            return String.Join(".", parts);
+        }
+
+        private static void RestoreCurrentHair(GameClients.GameClient Session, Rooms.Room Room, string hair)
+        {
+            if (Session == null || Session.GetHabbo() == null || String.IsNullOrWhiteSpace(hair))
+                return;
+
+            Session.GetHabbo().Look = ReplaceFigurePart(Session.GetHabbo().Look, "hr", hair);
+
+            RoomUser user = Room != null ? Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id) : null;
+            if (user != null)
+            {
+                Session.SendMessage(new UserChangeComposer(user, true));
+                Room.SendMessage(new UserChangeComposer(user, false));
+            }
         }
 
         public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
@@ -83,7 +139,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Users.Jobs.General
             #endregion
 
             #region Group Conditions
-            List<Group> Groups = PlusEnvironment.GetGame().GetGroupManager().GetJobsForUser(Session.GetHabbo().Id);           
+            List<Group> Groups = PlusEnvironment.GetGame().GetGroupManager().GetJobsForUser(Session.GetHabbo().Id);
 
             if (Groups.Count <= 0)
             {
@@ -92,7 +148,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Users.Jobs.General
             }
 
             int GroupNumber = -1;
-            
+
             if(Groups[0].GType != 1)
             {
                 if(Groups.Count > 1)
@@ -102,7 +158,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Users.Jobs.General
                         Session.SendWhisper("((No perteneces a ninguna empresa para usar ese comando))", 1);
                         return;
                     }
-                    GroupNumber = 1; // Segundo indicie de variable
+                    GroupNumber = 1;
                 }
                 else
                 {
@@ -112,33 +168,28 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Users.Jobs.General
             }
             else
             {
-                GroupNumber = 0; // Primer indice de Variable Group
+                GroupNumber = 0;
             }
-            
+
             Session.GetPlay().JobId = Groups[GroupNumber].Id;
             Session.GetPlay().JobRank = Groups[GroupNumber].Members[Session.GetHabbo().Id].UserRank;
             #endregion
 
-            #region Extra Conditions            
-            // Existe el trabajo?
+            #region Extra Conditions
             if (!PlusEnvironment.GetGame().GetGroupManager().JobExists(Session.GetPlay().JobId, Session.GetPlay().JobRank))
             {
                 Session.GetPlay().TimeWorked = 0;
-                Session.GetPlay().JobId = 0; // Desempleado
+                Session.GetPlay().JobId = 0;
                 Session.GetPlay().JobRank = 0;
-
-                //Room.Group.DeleteMember(Session.GetHabbo().Id);// OJO ACÁ
 
                 Session.SendWhisper("Lo sentimos, ese trabajo no existe. Te hemos removido ese trabajo.", 1);
                 return;
             }
-            
-            // Puede trabajar aquí?
+
             Group Job = PlusEnvironment.GetGame().GetGroupManager().GetJob(Session.GetPlay().JobId);
             GroupRank Rank = PlusEnvironment.GetGame().GetGroupManager().GetJobRank(Job.Id, Session.GetPlay().JobRank);
             if (!Rank.CanWorkHere(Room.Id))
             {
-                //String.Join(",", Rank.WorkRooms)
                 Session.SendWhisper("Debes ir a la Zona del Trabajo "+Job.Name+" para comenzar a trabajar.", 1);
                 return;
             }
@@ -155,8 +206,10 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Users.Jobs.General
             #endregion
 
             #region Execute
+            string currentHair = GetFigurePart(Session.GetHabbo().Look, "hr");
             Session.GetPlay().IsWorking = true;
             RoleplayManager.GetLookAndMotto(Session);
+            RestoreCurrentHair(Session, Room, currentHair);
             WorkManager.AddWorkerToList(Session);
             Session.GetPlay().TimerManager.CreateTimer("work", 1000, true);
             Session.GetPlay().CooldownManager.CreateCooldown("startwork", 1000, 10);
