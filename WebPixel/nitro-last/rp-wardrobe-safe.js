@@ -1,137 +1,253 @@
 (() => {
-  const STATE = { loaded:false, outfits:[], categories:[], active:'all', panel:null, tab:null, accessLoaded:false, access:null, mode:'outfits', avatar:null };
-  const textOf = el => (el && (el.textContent || '') || '').trim();
-  const esc = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const S = { access:null, accessLoaded:false, outfits:[], categories:[], active:'all', panel:null, tab:null, mode:'outfits', avatar:null };
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const txt = el => (el && el.textContent || '').trim();
 
-  async function loadAccess(){
-    if(STATE.accessLoaded) return STATE.access;
-    const response=await fetch('/rp-outfit-access.php?v='+Date.now(),{cache:'no-store',credentials:'same-origin'});
-    const data=await response.json().catch(()=>({}));
-    STATE.access=response.ok&&data&&data.ok?data:{allowed:false}; STATE.accessLoaded=true; return STATE.access;
-  }
-  async function loadCatalog(){
-    const response=await fetch('/rp-authorized-outfits.php?v='+Date.now(),{cache:'no-store',credentials:'same-origin'});
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok||!data.ok) throw new Error(data.error||('HTTP '+response.status));
-    STATE.outfits=Array.isArray(data.outfits)?data.outfits:[]; STATE.categories=Array.isArray(data.categories)?data.categories:[]; STATE.loaded=true;
-  }
-  async function loadAvatarEditor(){
-    const response=await fetch('/rp-avatar-editor.php?v='+Date.now(),{cache:'no-store',credentials:'same-origin'});
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok||!data.ok) throw new Error(data.error||'Éditeur avatar indisponible');
-    STATE.avatar=data; return data;
+  async function json(url, options={}) {
+    const r = await fetch(url, { credentials:'same-origin', cache:'no-store', ...options });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d || d.ok === false) throw new Error(d.error || `HTTP ${r.status}`);
+    return d;
   }
 
-  function previewUrl(figure, headOnly=false){
-    return 'https://www.habbo.com/habbo-imaging/avatarimage?figure='+encodeURIComponent(figure||'')+'&size=l&direction=2&head_direction=2&gesture=sml&action=std'+(headOnly?'&headonly=1':'');
-  }
-  function replacePart(look,type,setId,colorId){
-    const part=`${type}-${Number(setId)||0}${Number(colorId)>0?'-'+Number(colorId):''}`;
-    const re=new RegExp(`(^|\\.)${type}-\\d+(?:-\\d+)*`,'i');
-    if(re.test(look||'')) return String(look||'').replace(re,(m,sep)=>(sep==='.'?'.':'')+part);
-    return look?`${look}.${part}`:part;
+  function imager(figure, headOnly=false, size='l') {
+    const p = new URLSearchParams({ figure:String(figure||''), size, direction:'2', head_direction:'2', gesture:'std', action:'std' });
+    if (headOnly) p.set('headonly','1');
+    return '/avatar-image.php?' + p.toString();
   }
 
-  function closePanel(){ if(!STATE.panel)return; STATE.panel.remove(); STATE.panel=null; STATE.mode='outfits'; if(STATE.tab)STATE.tab.classList.remove('pr-rp-active'); }
+  async function loadAccess() {
+    if (S.accessLoaded) return S.access;
+    try { S.access = await json('/rp-outfit-access.php?v=' + Date.now()); }
+    catch { S.access = { allowed:false }; }
+    S.accessLoaded = true;
+    return S.access;
+  }
 
-  function renderCards(container){
-    const list=STATE.active==='all'?STATE.outfits:STATE.outfits.filter(o=>o.category===STATE.active);
-    container.innerHTML='';
-    if(!list.length){container.innerHTML='<div class="pr-rp-empty">Aucune tenue disponible pour ton métier et ton grade.</div>';return;}
-    list.forEach(outfit=>{
-      const card=document.createElement('article'); card.className='pr-rp-card-safe';
-      card.innerHTML=`<div class="pr-rp-preview"><div class="pr-rp-preview-fallback">${esc(outfit.icon||'★')}</div></div><div class="pr-rp-card-copy"><strong>${esc(outfit.name||'Tenue RP')}</strong><span>${esc(outfit.categoryLabel||'ParadiseRP')}</span><small>${esc(outfit.source||'')}</small></div><button type="button" class="pr-rp-equip">Équiper</button>`;
-      card.querySelector('.pr-rp-equip').addEventListener('click',()=>equip(outfit,card)); container.appendChild(card);
+  async function loadCatalog() {
+    const d = await json('/rp-authorized-outfits.php?v=' + Date.now());
+    S.outfits = Array.isArray(d.outfits) ? d.outfits : [];
+    S.categories = Array.isArray(d.categories) ? d.categories : [];
+  }
+
+  async function loadAvatar() {
+    S.avatar = await json('/rp-avatar-editor.php?v=' + Date.now());
+    return S.avatar;
+  }
+
+  function closePanel() {
+    if (S.panel) S.panel.remove();
+    S.panel = null;
+    S.mode = 'outfits';
+    if (S.tab) S.tab.classList.remove('pr-rp-active');
+  }
+
+  function setMode(mode) {
+    S.mode = mode;
+    if (!S.panel) return;
+    S.panel.querySelectorAll('.pr-rp-mode-btn').forEach(b => b.classList.toggle('is-active', b.dataset.mode === mode));
+    const outfit = S.panel.querySelector('.pr-rp-outfit-area');
+    const editor = S.panel.querySelector('.pr-rp-editor-area');
+    outfit.hidden = mode !== 'outfits';
+    editor.hidden = mode !== 'editor';
+    if (mode === 'editor') renderEditor(editor);
+  }
+
+  function renderOutfits(grid) {
+    const list = S.active === 'all' ? S.outfits : S.outfits.filter(x => x.category === S.active);
+    grid.innerHTML = '';
+    if (!list.length) {
+      grid.innerHTML = '<div class="pr-rp-empty">Aucune tenue disponible pour ce métier et ce grade.</div>';
+      return;
+    }
+    list.forEach(outfit => {
+      const card = document.createElement('article');
+      card.className = 'pr-rp-card-safe';
+      card.innerHTML = `
+        <div class="pr-rp-preview">
+          <div class="pr-rp-preview-loading">Chargement…</div>
+          <img src="${esc(imager(outfit.figure,false,'l'))}" alt="${esc(outfit.name || 'Tenue RP')}" loading="lazy">
+          <div class="pr-rp-preview-fallback">Aperçu indisponible</div>
+        </div>
+        <div class="pr-rp-card-copy">
+          <strong>${esc(outfit.name || 'Tenue RP')}</strong>
+          <span>${esc(outfit.categoryLabel || 'ParadiseRP')}</span>
+          <small>${esc(outfit.source || '')}</small>
+        </div>
+        <button class="pr-rp-equip" type="button">Équiper</button>`;
+      const img = card.querySelector('img');
+      img.addEventListener('load', () => card.classList.add('is-preview-ready'));
+      img.addEventListener('error', () => card.classList.add('is-preview-error'));
+      card.querySelector('.pr-rp-equip').addEventListener('click', () => equip(outfit, card));
+      grid.appendChild(card);
     });
   }
-  async function equip(outfit,card){
-    const button=card.querySelector('.pr-rp-equip'); if(!button||button.disabled)return;
-    const old=button.textContent; button.disabled=true; button.textContent='Application...';
-    try{
-      const response=await fetch('/rp-outfit-apply.php',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:outfit.id})});
-      const data=await response.json().catch(()=>({})); if(!response.ok||!data.ok)throw new Error(data.error||'Erreur serveur');
-      button.textContent='Équipé ✓'; card.classList.add('pr-rp-equipped');
-      const note=STATE.panel&&STATE.panel.querySelector('.pr-rp-note'); if(note)note.textContent=`${data.name||'Tenue RP'} équipée. Reconnexion au client...`;
-      setTimeout(()=>{try{window.top.location.reload();}catch(_){window.location.reload();}},650);
-    }catch(error){button.disabled=false;button.textContent=old;const note=STATE.panel&&STATE.panel.querySelector('.pr-rp-note');if(note)note.textContent='Erreur : '+(error?.message||'impossible d’équiper la tenue');}
+
+  async function equip(outfit, card) {
+    const btn = card.querySelector('.pr-rp-equip');
+    if (!btn || btn.disabled) return;
+    const old = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Application…';
+    try {
+      const d = await json('/rp-outfit-apply.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:outfit.id}) });
+      btn.textContent = 'Équipé ✓'; card.classList.add('pr-rp-equipped');
+      const note = S.panel?.querySelector('.pr-rp-note');
+      if (note) note.textContent = `${d.name || outfit.name || 'Tenue'} équipée. Actualisation du personnage…`;
+      setTimeout(() => { try { window.top.location.reload(); } catch { location.reload(); } }, 650);
+    } catch (e) {
+      btn.disabled = false; btn.textContent = old;
+      const note = S.panel?.querySelector('.pr-rp-note');
+      if (note) note.textContent = 'Erreur : ' + (e.message || 'impossible d’équiper');
+    }
   }
 
-  function setTopMode(mode){
-    STATE.mode=mode; if(!STATE.panel)return;
-    STATE.panel.querySelectorAll('.pr-rp-mode-btn').forEach(b=>b.classList.toggle('is-active',b.dataset.mode===mode));
-    const outfitArea=STATE.panel.querySelector('.pr-rp-outfit-area'); const editorArea=STATE.panel.querySelector('.pr-rp-editor-area');
-    if(outfitArea)outfitArea.hidden=mode!=='outfits'; if(editorArea)editorArea.hidden=mode!=='editor'; if(mode==='editor')renderAvatarEditor(editorArea);
+  function swatch(c, active, onClick, title) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pr-rp-swatch'; b.style.background = '#' + c.hex; b.title = title || `#${c.id}`;
+    b.classList.toggle('is-active', Number(c.id) === Number(active));
+    b.addEventListener('click', () => onClick(Number(c.id), b));
+    return b;
   }
 
-  async function renderAvatarEditor(container){
-    container.hidden=false; container.innerHTML='<div class="pr-rp-loading">Chargement des coiffures...</div>';
-    try{
-      const data=await loadAvatarEditor(); const cur=data.current||{};
-      const hairSets=Array.isArray(data.hair_sets)?data.hair_sets:[]; const hairColors=Array.isArray(data.hair_colors)?data.hair_colors:[]; const skinColors=Array.isArray(data.skin_colors)?data.skin_colors:[];
-      if(!hairSets.length)throw new Error('Aucune coupe compatible trouvée');
-      let selectedHair=Number(cur.hair_set||hairSets[0].id||0); let hairColor=Number(cur.hair_color||(hairColors[0]?.id)||0); let skinColor=Number(cur.skin_color||(skinColors[0]?.id)||0);
+  async function renderEditor(container) {
+    container.hidden = false;
+    container.innerHTML = '<div class="pr-rp-loading">Chargement du studio personnage…</div>';
+    try {
+      const d = await loadAvatar();
+      const cur = d.current || {};
+      const hairs = Array.isArray(d.hair_sets) ? d.hair_sets : [];
+      const hairColors = Array.isArray(d.hair_colors) ? d.hair_colors : [];
+      const skinColors = Array.isArray(d.skin_colors) ? d.skin_colors : [];
+      let hairSet = Number(cur.hair_set || hairs[0]?.id || 0);
+      let hairColor = Number(cur.hair_color || hairColors[0]?.id || 0);
+      let skinColor = Number(cur.skin_color || skinColors[0]?.id || 0);
+      let filtered = hairs;
 
-      container.innerHTML=`
-        <div class="pr-rp-avatar-studio">
+      container.innerHTML = `
+        <div class="pr-rp-studio">
           <aside class="pr-rp-studio-preview">
-            <div class="pr-rp-live-badge"><i></i>APERÇU</div>
-            <div class="pr-rp-avatar-stage"><img class="pr-rp-editor-img" src="${esc(previewUrl(data.look||''))}" alt="Aperçu avatar"></div>
-            <div class="pr-rp-preview-copy"><strong>Ton personnage</strong><small>La tenue reste intacte. Seuls les cheveux et le teint sont modifiés.</small></div>
+            <div class="pr-rp-live-badge"><i></i>Aperçu exact Nitro</div>
+            <div class="pr-rp-live-stage"><img class="pr-rp-live-img" alt="Aperçu personnage"></div>
+            <h3>Ton personnage</h3>
+            <p>La tenue reste intacte. Seuls les cheveux et le teint sont modifiés.</p>
           </aside>
-          <section class="pr-rp-studio-controls">
-            <header class="pr-rp-editor-head"><div><b>Personnalisation</b><span>Choisis visuellement ta coupe avant de l'appliquer.</span></div><div class="pr-rp-hair-count">${hairSets.length} coupes</div></header>
-            <div class="pr-rp-editor-section"><div class="pr-rp-editor-title"><b>Coiffure</b><span>Clique directement sur un aperçu</span></div><div class="pr-rp-hair-gallery"></div></div>
-            <div class="pr-rp-editor-section"><div class="pr-rp-editor-title"><b>Couleur des cheveux</b></div><div class="pr-rp-swatches pr-rp-hair-colors"></div></div>
-            <div class="pr-rp-editor-section"><div class="pr-rp-editor-title"><b>Teint de peau</b></div><div class="pr-rp-swatches pr-rp-skin-colors"></div></div>
-            <div class="pr-rp-editor-actions"><div class="pr-rp-editor-status"></div><button type="button" class="pr-rp-avatar-save">Appliquer la personnalisation</button></div>
-          </section>
+          <main class="pr-rp-studio-main">
+            <div class="pr-rp-studio-title"><div><h2>Personnalisation</h2><p>Choisis visuellement ta coupe avant de l’appliquer.</p></div><span>${hairs.length} coupes</span></div>
+            <div class="pr-rp-search-row"><label>Coiffure</label><input class="pr-rp-hair-search" type="search" placeholder="Rechercher une coupe…"></div>
+            <div class="pr-rp-hair-grid"></div>
+            <div class="pr-rp-editor-group"><b>Couleur des cheveux</b><div class="pr-rp-swatches pr-rp-hair-colors"></div></div>
+            <div class="pr-rp-editor-group"><b>Teint de peau</b><div class="pr-rp-swatches pr-rp-skin-colors"></div></div>
+            <div class="pr-rp-save-row"><button type="button" class="pr-rp-avatar-save">Appliquer la personnalisation</button><div class="pr-rp-editor-status"></div></div>
+          </main>
         </div>`;
 
-      const gallery=container.querySelector('.pr-rp-hair-gallery'); const hairBox=container.querySelector('.pr-rp-hair-colors'); const skinBox=container.querySelector('.pr-rp-skin-colors'); const img=container.querySelector('.pr-rp-editor-img');
-      const currentHeadSet=(()=>{const m=String(data.look||'').match(/(?:^|\.)hd-(\d+)/i);return m?Number(m[1]):180;})();
-      const buildLook=()=>{let look=String(data.look||''); if(selectedHair&&hairColor)look=replacePart(look,'hr',selectedHair,hairColor); if(skinColor)look=replacePart(look,'hd',currentHeadSet,skinColor); return look;};
-      const updatePreview=()=>{img.src=previewUrl(buildLook());};
+      const live = container.querySelector('.pr-rp-live-img');
+      const grid = container.querySelector('.pr-rp-hair-grid');
+      const hairBox = container.querySelector('.pr-rp-hair-colors');
+      const skinBox = container.querySelector('.pr-rp-skin-colors');
+      const search = container.querySelector('.pr-rp-hair-search');
 
-      const renderHairCards=()=>{
-        gallery.innerHTML='';
-        hairSets.forEach((hair,index)=>{
-          const card=document.createElement('button'); card.type='button'; card.className='pr-rp-hair-card'; card.dataset.id=hair.id; card.classList.toggle('is-active',Number(hair.id)===selectedHair);
-          let thumbFigure=String(hair.preview_figure||data.look||''); thumbFigure=replacePart(thumbFigure,'hr',Number(hair.id),hairColor||Number(cur.hair_color)||40);
-          card.innerHTML=`<span class="pr-rp-hair-thumb"><img src="${esc(previewUrl(thumbFigure,true))}" loading="lazy" alt="Coiffure"></span><span class="pr-rp-hair-label">Style ${index+1}</span><span class="pr-rp-hair-check">✓</span>`;
-          card.addEventListener('click',()=>{selectedHair=Number(hair.id);gallery.querySelectorAll('.pr-rp-hair-card').forEach(x=>x.classList.toggle('is-active',x===card));updatePreview();});
-          gallery.appendChild(card);
+      const buildLook = () => {
+        let look = String(d.look || '');
+        const replace = (type,set,color) => {
+          const part = `${type}-${set}-${color}`;
+          const re = new RegExp(`(^|\\.)${type}-\\d+(?:-\\d+)*`,'i');
+          look = re.test(look) ? look.replace(re,(m,sep)=>(sep==='.'?'.':'')+part) : (look ? look+'.'+part : part);
+        };
+        const hm = look.match(/(?:^|\.)hd-(\d+)(?:-\d+)?/i);
+        replace('hr', hairSet, hairColor);
+        replace('hd', hm ? Number(hm[1]) : 180, skinColor);
+        return look;
+      };
+      const refreshLive = () => { live.src = imager(buildLook(), false, 'l') + '&_=' + Date.now(); };
+
+      const renderHairGrid = () => {
+        grid.innerHTML = '';
+        if (!filtered.length) { grid.innerHTML = '<div class="pr-rp-empty">Aucune coupe trouvée.</div>'; return; }
+        filtered.forEach((h, i) => {
+          const card = document.createElement('button');
+          card.type = 'button'; card.className = 'pr-rp-hair-card'; card.dataset.id = h.id;
+          card.classList.toggle('is-active', Number(h.id) === hairSet);
+          card.innerHTML = `<div class="pr-rp-hair-thumb"><span>Chargement…</span><img src="${esc(imager(h.preview_figure || d.look,true,'n'))}" alt="Style ${i+1}" loading="lazy"></div><strong>Style ${i+1}</strong><small>Coupe ${h.id}</small><i class="pr-rp-selected-check">✓</i>`;
+          const img = card.querySelector('img');
+          img.addEventListener('load',()=>card.classList.add('is-ready'));
+          img.addEventListener('error',()=>card.classList.add('is-error'));
+          card.addEventListener('click',()=>{ hairSet=Number(h.id); renderHairGrid(); refreshLive(); });
+          grid.appendChild(card);
         });
       };
-      renderHairCards();
 
-      hairColors.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='pr-rp-swatch';b.title='Couleur de cheveux';b.style.background='#'+c.hex;b.classList.toggle('is-active',Number(c.id)===hairColor);b.addEventListener('click',()=>{hairColor=Number(c.id);hairBox.querySelectorAll('.pr-rp-swatch').forEach(x=>x.classList.toggle('is-active',x===b));renderHairCards();updatePreview();});hairBox.appendChild(b);});
-      skinColors.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='pr-rp-swatch';b.title='Teint';b.style.background='#'+c.hex;b.classList.toggle('is-active',Number(c.id)===skinColor);b.addEventListener('click',()=>{skinColor=Number(c.id);skinBox.querySelectorAll('.pr-rp-swatch').forEach(x=>x.classList.toggle('is-active',x===b));updatePreview();});skinBox.appendChild(b);});
-
-      container.querySelector('.pr-rp-avatar-save').addEventListener('click',async event=>{
-        const button=event.currentTarget;const status=container.querySelector('.pr-rp-editor-status');button.disabled=true;button.textContent='Application...';status.textContent='';
-        try{
-          const response=await fetch('/rp-avatar-editor.php',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({hair_set:selectedHair,hair_color:hairColor,skin_color:skinColor})});
-          const saved=await response.json().catch(()=>({}));if(!response.ok||!saved.ok)throw new Error(saved.error||'Impossible de sauvegarder');
-          status.textContent='Personnalisation enregistrée ✓';button.textContent='Enregistré ✓';setTimeout(()=>{try{window.top.location.reload();}catch(_){window.location.reload();}},650);
-        }catch(error){button.disabled=false;button.textContent='Appliquer la personnalisation';status.textContent='Erreur : '+(error?.message||'échec');}
+      hairColors.forEach(c => hairBox.appendChild(swatch(c,hairColor,(id,b)=>{hairColor=id;hairBox.querySelectorAll('.pr-rp-swatch').forEach(x=>x.classList.toggle('is-active',x===b));renderHairGrid();refreshLive();},`Couleur cheveux ${c.id}`)));
+      skinColors.forEach(c => skinBox.appendChild(swatch(c,skinColor,(id,b)=>{skinColor=id;skinBox.querySelectorAll('.pr-rp-swatch').forEach(x=>x.classList.toggle('is-active',x===b));refreshLive();},`Teint ${c.id}`)));
+      search.addEventListener('input',()=>{
+        const q = search.value.trim().toLowerCase();
+        filtered = !q ? hairs : hairs.filter((h,i)=>String(h.id).includes(q) || `style ${i+1}`.includes(q));
+        renderHairGrid();
       });
-    }catch(error){container.innerHTML='<div class="pr-rp-empty">Éditeur avatar indisponible : '+esc(error?.message||'erreur')+'</div>';}
+      renderHairGrid(); refreshLive();
+
+      container.querySelector('.pr-rp-avatar-save').addEventListener('click', async e => {
+        const btn=e.currentTarget, status=container.querySelector('.pr-rp-editor-status');
+        btn.disabled=true; btn.textContent='Application…'; status.textContent='';
+        try {
+          await json('/rp-avatar-editor.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hair_set:hairSet,hair_color:hairColor,skin_color:skinColor})});
+          btn.textContent='Enregistré ✓'; status.textContent='Personnalisation enregistrée.';
+          setTimeout(()=>{try{window.top.location.reload();}catch{location.reload();}},650);
+        } catch(err) { btn.disabled=false; btn.textContent='Appliquer la personnalisation'; status.textContent='Erreur : '+(err.message||'échec'); }
+      });
+    } catch(e) {
+      container.innerHTML = `<div class="pr-rp-empty">Éditeur indisponible : ${esc(e.message || 'erreur')}</div>`;
+    }
   }
 
-  async function openPanel(){
-    if(STATE.panel)return closePanel(); const access=await loadAccess(); if(!access||!access.allowed)return; if(STATE.tab)STATE.tab.classList.add('pr-rp-active');
-    const panel=document.createElement('section');panel.id='paradise-rp-wardrobe-panel';
-    const jobs=Array.isArray(access.jobs)?access.jobs.map(j=>j.name).filter(Boolean):[]; const staffName=access.staff&&access.staff.name?access.staff.name:''; const context=jobs.length?jobs.join(' · '):(staffName||'ParadiseRP');
-    panel.innerHTML=`<div class="pr-rp-panel-head"><div><span class="pr-rp-eyebrow">PARADISERP • PERSONNAGE</span><b>Vestiaire RP</b><span>${esc(context)}</span></div><button type="button" class="pr-rp-close" aria-label="Fermer">×</button></div><div class="pr-rp-modebar"><button type="button" class="pr-rp-mode-btn is-active" data-mode="outfits">👔 Tenues métier</button><button type="button" class="pr-rp-mode-btn" data-mode="editor">✂️ Cheveux & teint</button></div><div class="pr-rp-outfit-area"><div class="pr-rp-filters-safe"><button type="button" data-cat="all" class="is-active">Toutes mes tenues</button></div><div class="pr-rp-grid-safe"><div class="pr-rp-loading">Chargement des tenues autorisées...</div></div></div><div class="pr-rp-editor-area" hidden></div><div class="pr-rp-note">Accès filtré selon le métier et le grade.</div>`;
-    document.body.appendChild(panel);STATE.panel=panel;panel.querySelector('.pr-rp-close').addEventListener('click',closePanel);panel.querySelectorAll('.pr-rp-mode-btn').forEach(b=>b.addEventListener('click',()=>setTopMode(b.dataset.mode)));
-    const grid=panel.querySelector('.pr-rp-grid-safe');const filters=panel.querySelector('.pr-rp-filters-safe');
-    try{await loadCatalog();STATE.categories.forEach(category=>{const b=document.createElement('button');b.type='button';b.dataset.cat=category.id;b.textContent=`${category.icon||''} ${category.label||category.id} (${category.count||0})`.trim();filters.appendChild(b);});filters.addEventListener('click',event=>{const b=event.target.closest('button[data-cat]');if(!b)return;STATE.active=b.dataset.cat||'all';filters.querySelectorAll('button').forEach(x=>x.classList.toggle('is-active',x===b));renderCards(grid);});renderCards(grid);}catch(error){grid.innerHTML='<div class="pr-rp-empty">Impossible de charger tes tenues autorisées.</div>';panel.querySelector('.pr-rp-note').textContent='Erreur : '+(error?.message||'catalogue indisponible');}
+  async function openPanel() {
+    if (S.panel) return closePanel();
+    const access = await loadAccess();
+    if (!access?.allowed) return;
+    if (S.tab) S.tab.classList.add('pr-rp-active');
+    const jobs = Array.isArray(access.jobs) ? access.jobs.map(x=>x.name).filter(Boolean) : [];
+    const context = jobs.length ? jobs.join(' · ') : (access.staff?.name || 'ParadiseRP');
+    const panel = document.createElement('section');
+    panel.id='paradise-rp-wardrobe-panel';
+    panel.innerHTML=`
+      <header class="pr-rp-panel-head"><div><small>PARADISERP • PERSONNAGE</small><b>Vestiaire RP</b><span>${esc(context)}</span></div><button class="pr-rp-close" type="button">×</button></header>
+      <nav class="pr-rp-modebar"><button class="pr-rp-mode-btn is-active" data-mode="outfits">👔 Tenues métier</button><button class="pr-rp-mode-btn" data-mode="editor">✂️ Cheveux & teint</button></nav>
+      <section class="pr-rp-outfit-area"><div class="pr-rp-filters-safe"><button data-cat="all" class="is-active">Toutes mes tenues</button></div><div class="pr-rp-grid-safe"><div class="pr-rp-loading">Chargement…</div></div></section>
+      <section class="pr-rp-editor-area" hidden></section>
+      <footer class="pr-rp-note">Aperçus rendus avec les mêmes assets Nitro que le client.</footer>`;
+    document.body.appendChild(panel); S.panel=panel;
+    panel.querySelector('.pr-rp-close').addEventListener('click',closePanel);
+    panel.querySelectorAll('.pr-rp-mode-btn').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+    const grid=panel.querySelector('.pr-rp-grid-safe'), filters=panel.querySelector('.pr-rp-filters-safe');
+    try {
+      await loadCatalog();
+      S.categories.forEach(c=>{const b=document.createElement('button');b.type='button';b.dataset.cat=c.id;b.textContent=`${c.icon||'💼'} ${c.label||c.id} (${c.count||0})`;filters.appendChild(b);});
+      filters.addEventListener('click',e=>{const b=e.target.closest('button[data-cat]');if(!b)return;S.active=b.dataset.cat||'all';filters.querySelectorAll('button').forEach(x=>x.classList.toggle('is-active',x===b));renderOutfits(grid);});
+      renderOutfits(grid);
+    } catch(e) { grid.innerHTML='<div class="pr-rp-empty">Impossible de charger les tenues.</div>'; panel.querySelector('.pr-rp-note').textContent='Erreur : '+(e.message||'catalogue indisponible'); }
   }
 
-  function findWardrobeTab(){const nodes=Array.from(document.querySelectorAll('button,[role="tab"],div,span'));return nodes.find(el=>{const t=textOf(el).toLowerCase();if(t!=='armario'&&t!=='wardrobe')return false;const rect=el.getBoundingClientRect();return rect.width>20&&rect.height>15&&rect.top>=0&&rect.left>=0;})||null;}
-  async function installTab(){
-    if(STATE.tab&&document.contains(STATE.tab))return;const access=await loadAccess();if(!access||!access.allowed){if(STATE.tab&&document.contains(STATE.tab))STATE.tab.remove();STATE.tab=null;return;}
-    const wardrobe=findWardrobeTab();if(!wardrobe||!wardrobe.parentElement)return;const tab=document.createElement(wardrobe.tagName.toLowerCase()==='button'?'button':'div');if(tab.tagName==='BUTTON')tab.type='button';tab.className=(wardrobe.className||'')+' pr-rp-tab-safe';tab.textContent='Tenues RP';tab.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openPanel();});wardrobe.parentElement.appendChild(tab);STATE.tab=tab;
+  function findWardrobeTab() {
+    return Array.from(document.querySelectorAll('button,[role="tab"],div,span')).find(el=>{
+      const t=txt(el).toLowerCase(); if(t!=='armario'&&t!=='wardrobe')return false;
+      const r=el.getBoundingClientRect(); return r.width>20&&r.height>15&&r.top>=0&&r.left>=0;
+    }) || null;
   }
-  new MutationObserver(()=>installTab()).observe(document.documentElement,{childList:true,subtree:true});setInterval(installTab,900);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installTab);else installTab();
+
+  async function installTab() {
+    if (S.tab && document.contains(S.tab)) return;
+    const access=await loadAccess();
+    if(!access?.allowed){ if(S.tab?.isConnected)S.tab.remove(); S.tab=null; return; }
+    const wardrobe=findWardrobeTab(); if(!wardrobe||!wardrobe.parentElement)return;
+    const tab=document.createElement(wardrobe.tagName.toLowerCase()==='button'?'button':'div');
+    tab.className=(wardrobe.className||'')+' pr-rp-tab-safe';
+    tab.textContent='Tenues RP'; tab.type=tab.tagName==='BUTTON'?'button':undefined;
+    tab.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPanel();});
+    wardrobe.parentElement.appendChild(tab); S.tab=tab;
+  }
+
+  const obs=new MutationObserver(()=>installTab());
+  obs.observe(document.documentElement,{childList:true,subtree:true});
+  setInterval(installTab,1000);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installTab);else installTab();
 })();
