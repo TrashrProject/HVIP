@@ -1,194 +1,334 @@
-/* ParadiseRP — dossier joueur dynamique */
-.hvip-rp-user-card {
-  --rp-card-bg: rgba(8, 15, 21, .97);
-  --rp-card-panel: rgba(16, 28, 36, .95);
-  --rp-card-line: rgba(121, 174, 183, .17);
-  --rp-card-text: #eef8f8;
-  --rp-card-muted: #8da5aa;
-  --rp-card-green: #38e39a;
-  --rp-card-gold: #f0bb58;
+/* ParadiseRP — dossier joueur moderne, distinct de l'ancienne DA */
+.hvip-rp-source-card {
   position: fixed !important;
-  top: 50% !important;
-  right: 18px !important;
+  right: -2000px !important;
   left: auto !important;
-  bottom: auto !important;
-  transform: translateY(-50%) !important;
-  z-index: 999999 !important;
-  width: 248px !important;
-  min-width: 248px !important;
-  max-width: 248px !important;
-  padding: 0 12px 12px !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  box-sizing: border-box !important;
-  border: 1px solid rgba(104, 166, 176, .25) !important;
-  border-radius: 15px !important;
+  top: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.hvip-rp-dossier,
+.hvip-rp-dossier * { box-sizing: border-box !important; }
+
+.hvip-rp-dossier {
+  --bg: #071015;
+  --panel: #0d1a20;
+  --panel2: #102229;
+  --line: rgba(143, 183, 190, .15);
+  --text: #f2fbfc;
+  --muted: #78939a;
+  --green: #39e79c;
+  --gold: #f5ba59;
+  position: fixed;
+  top: 50%;
+  right: 24px;
+  z-index: 1000000;
+  width: 294px;
+  padding: 15px;
+  border: 1px solid rgba(116, 173, 182, .19);
+  border-radius: 22px;
   background:
-    radial-gradient(circle at 94% 3%, rgba(240, 187, 88, .10), transparent 30%),
-    linear-gradient(155deg, rgba(18, 31, 39, .99), var(--rp-card-bg)) !important;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, .48), inset 0 1px 0 rgba(255,255,255,.04) !important;
-  color: var(--rp-card-text) !important;
-  isolation: isolate;
+    radial-gradient(circle at 85% 0%, rgba(57,231,156,.08), transparent 28%),
+    radial-gradient(circle at 0% 100%, rgba(245,186,89,.055), transparent 34%),
+    linear-gradient(160deg, #0a151b 0%, #071015 58%, #050c10 100%);
+  box-shadow:
+    0 26px 70px rgba(0,0,0,.50),
+    0 8px 24px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.035);
+  color: var(--text);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  transform: translate(24px,-50%) scale(.97);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .22s ease;
+  overflow: hidden;
 }
 
-.hvip-rp-user-card::before {
-  content: "DOSSIER JOUEUR";
-  display: block;
-  height: 27px;
-  margin: 0 -12px 11px;
-  padding: 0 12px;
-  border-bottom: 1px solid var(--rp-card-line);
-  background: rgba(3, 10, 15, .52);
-  color: #72959b;
-  font: 800 8px/27px Arial, sans-serif;
-  letter-spacing: 1.3px;
+.hvip-rp-dossier.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(0,-50%) scale(1);
 }
 
-.hvip-rp-user-card::after {
-  content: "";
+.hvip-rp-dossier-accent {
   position: absolute;
-  left: 0;
   top: 0;
-  width: 3px;
-  height: 50px;
-  background: linear-gradient(180deg, var(--rp-card-green), rgba(56,227,154,0));
-  pointer-events: none;
+  left: 24px;
+  right: 24px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(57,231,156,.7), rgba(245,186,89,.45), transparent);
+  opacity: .9;
 }
 
-.hvip-rp-user-card,
-.hvip-rp-user-card * { box-sizing: border-box !important; }
-
-.hvip-rp-user-card .hvip-rp-close {
-  position: absolute !important;
-  top: 4px !important;
-  right: 6px !important;
-  z-index: 10 !important;
-  width: 23px !important;
-  height: 23px !important;
-  min-width: 23px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border: 0 !important;
-  border-radius: 7px !important;
-  background: transparent !important;
-  color: #93a8ad !important;
-  font-weight: 800 !important;
-  line-height: 23px !important;
-  text-align: center !important;
-  cursor: pointer !important;
-}
-.hvip-rp-user-card .hvip-rp-close:hover {
-  color: #fff !important;
-  background: rgba(255, 77, 77, .16) !important;
+.hvip-rp-dossier-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 44px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
 }
 
-.hvip-rp-user-card .hvip-rp-username {
-  color: #fff !important;
-  font-size: 14px !important;
-  font-weight: 900 !important;
-  letter-spacing: .1px !important;
-  text-shadow: 0 1px 0 rgba(0,0,0,.45) !important;
+.hvip-rp-eyebrow,
+.hvip-rp-mini-label,
+.hvip-rp-id-label {
+  display: block;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 1.45px;
+  text-transform: uppercase;
 }
 
-.hvip-rp-user-card .hvip-rp-avatar-wrap {
-  position: relative !important;
-  overflow: hidden !important;
-  min-width: 76px !important;
-  min-height: 108px !important;
-  border: 1px solid rgba(82, 164, 174, .26) !important;
-  border-radius: 12px !important;
+.hvip-rp-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  padding: 5px 8px;
+  border: 1px solid rgba(57,231,156,.16);
+  border-radius: 999px;
+  background: rgba(57,231,156,.065);
+  color: #8af0bd;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .75px;
+}
+
+.hvip-rp-live i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(57,231,156,.10), 0 0 9px rgba(57,231,156,.45);
+}
+
+.hvip-rp-dossier-close {
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+  background: rgba(255,255,255,.025);
+  color: #82969b;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: .15s ease;
+}
+
+.hvip-rp-dossier-close:hover {
+  color: #fff;
+  border-color: rgba(255,105,105,.22);
+  background: rgba(255,85,85,.10);
+}
+
+.hvip-rp-identity {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 13px;
+  margin-top: 14px;
+}
+
+.hvip-rp-portrait {
+  position: relative;
+  height: 156px;
+  overflow: hidden;
+  border: 1px solid rgba(104,161,169,.17);
+  border-radius: 16px;
   background:
-    linear-gradient(rgba(255,255,255,.02), rgba(255,255,255,0)),
-    repeating-linear-gradient(0deg, rgba(70,130,138,.045) 0 1px, transparent 1px 8px),
-    #102129 !important;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.18) !important;
+    radial-gradient(circle at 50% 18%, rgba(64,137,146,.12), transparent 38%),
+    linear-gradient(180deg, #11232a 0%, #0b171c 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
 }
-.hvip-rp-user-card .hvip-rp-avatar-wrap::after {
-  content: "IDENTITÉ";
+
+.hvip-rp-portrait-grid {
   position: absolute;
-  left: 7px;
-  bottom: 5px;
-  color: rgba(173, 208, 212, .48);
-  font: 700 7px/1 Arial, sans-serif;
-  letter-spacing: .8px;
-  pointer-events: none;
+  inset: 0;
+  opacity: .18;
+  background-image:
+    linear-gradient(rgba(132,180,186,.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(132,180,186,.12) 1px, transparent 1px);
+  background-size: 16px 16px;
+  mask-image: linear-gradient(to bottom, #000, transparent 85%);
 }
 
-.hvip-rp-user-card .hvip-rp-avatar {
-  filter: drop-shadow(0 6px 5px rgba(0,0,0,.34)) !important;
+.hvip-rp-dossier-avatar {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 13px;
+  max-width: 98px;
+  max-height: 138px;
+  transform: translateX(-50%);
   image-rendering: pixelated;
+  filter: drop-shadow(0 10px 9px rgba(0,0,0,.35));
 }
 
-.hvip-rp-user-card .hvip-rp-badge-wrap {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 52px !important;
-  min-height: 52px !important;
-  padding: 6px !important;
-  border: 1px solid rgba(240,187,88,.16) !important;
-  border-radius: 11px !important;
-  background: rgba(240,187,88,.055) !important;
-}
-.hvip-rp-user-card .hvip-rp-badge {
-  filter: drop-shadow(0 4px 7px rgba(0,0,0,.35));
+.hvip-rp-id-label {
+  position: absolute;
+  z-index: 3;
+  left: 9px;
+  bottom: 8px;
+  color: rgba(187,217,220,.42);
+  font-size: 6px;
+  letter-spacing: .9px;
 }
 
-.hvip-rp-user-card .hvip-rp-role {
-  display: flex !important;
-  align-items: center !important;
-  width: 100% !important;
-  min-height: 32px !important;
-  margin-top: 9px !important;
-  padding: 7px 9px !important;
-  border: 1px solid rgba(100, 160, 169, .16) !important;
-  border-radius: 9px !important;
-  background: rgba(255,255,255,.045) !important;
-  color: #dce9eb !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
+.hvip-rp-person {
+  min-width: 0;
+  padding-top: 3px;
 }
-.hvip-rp-user-card .hvip-rp-role::before {
-  content: "◆";
-  margin-right: 7px;
-  color: var(--rp-card-gold);
+
+.hvip-rp-dossier-name {
+  display: block;
+  margin-top: 7px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 21px;
+  line-height: 1.05;
+  font-weight: 950;
+  letter-spacing: -.45px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.hvip-rp-dossier-sub {
+  display: block;
+  margin-top: 5px;
+  color: #79939a;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.hvip-rp-badge-box {
+  margin-top: 18px;
+}
+
+.hvip-rp-badge-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  margin-top: 7px;
+  border: 1px solid rgba(245,186,89,.16);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle, rgba(245,186,89,.10), transparent 62%),
+    rgba(245,186,89,.025);
+}
+
+.hvip-rp-dossier-badge {
+  max-width: 44px;
+  max-height: 44px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,.30));
+}
+
+.hvip-rp-badge-stage.is-empty::after {
+  content: "—";
+  color: #536970;
+  font-size: 18px;
+}
+
+.hvip-rp-info-card,
+.hvip-rp-rep-card {
+  margin-top: 11px;
+  padding: 12px;
+  border: 1px solid rgba(119,170,177,.13);
+  border-radius: 15px;
+  background: linear-gradient(180deg, rgba(17,34,41,.78), rgba(10,21,26,.86));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.018);
+}
+
+.hvip-rp-role-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.hvip-rp-role-mark {
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 8px;
+  background: rgba(245,186,89,.09);
+  color: var(--gold);
   font-size: 8px;
 }
 
-.hvip-rp-user-card .hvip-rp-rewards {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  width: 100% !important;
-  min-height: 29px !important;
-  margin-top: 8px !important;
-  padding: 7px 9px !important;
-  border-top: 1px solid var(--rp-card-line) !important;
-  color: var(--rp-card-muted) !important;
-  font-size: 10px !important;
-}
-.hvip-rp-user-card .hvip-rp-rewards strong,
-.hvip-rp-user-card .hvip-rp-reward-value {
-  color: var(--rp-card-gold) !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
+.hvip-rp-dossier-role {
+  min-width: 0;
+  overflow: hidden;
+  color: #eaf4f5;
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.hvip-rp-user-card .hvip-rp-online-dot {
-  display: inline-block !important;
-  width: 7px !important;
-  height: 7px !important;
-  margin-right: 6px !important;
-  border-radius: 50% !important;
-  background: var(--rp-card-green) !important;
-  box-shadow: 0 0 0 3px rgba(56,227,154,.10), 0 0 9px rgba(56,227,154,.35) !important;
+.hvip-rp-rep-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.hvip-rp-dossier-reward {
+  display: block;
+  margin-top: 5px;
+  color: #fff0c9;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 950;
+}
+
+.hvip-rp-rep-grade {
+  padding: 5px 7px;
+  border: 1px solid rgba(245,186,89,.14);
+  border-radius: 999px;
+  background: rgba(245,186,89,.055);
+  color: #d8b66f;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .8px;
+}
+
+.hvip-rp-rep-track {
+  height: 4px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.055);
+}
+
+.hvip-rp-rep-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #3ce29a, #d9bb64);
+  box-shadow: 0 0 10px rgba(57,231,156,.22);
+  transition: width .25s ease;
+}
+
+.hvip-rp-dossier-foot {
+  margin-top: 11px;
+  padding: 0 3px;
+  color: #587079;
+  font-size: 8px;
+  line-height: 1.35;
+  text-align: center;
 }
 
 @media (max-width: 720px) {
-  .hvip-rp-user-card {
-    right: 8px !important;
-    width: 220px !important;
-    min-width: 220px !important;
-    max-width: 220px !important;
+  .hvip-rp-dossier {
+    right: 10px;
+    width: 272px;
   }
 }
