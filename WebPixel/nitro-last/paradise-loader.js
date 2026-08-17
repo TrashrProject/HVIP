@@ -7,13 +7,12 @@
     const status = document.querySelector('.pr-loader-status-copy');
     if (!loader || !root || !bar || !percent || !status) return;
 
-    const navigation = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-    const isReload = navigation ? navigation.type === 'reload' : false;
-    const hasLoadedOnce = sessionStorage.getItem('paradise-client-loaded') === '1';
-
     let progress = 2;
     let hidden = false;
     let realProgress = 0;
+    let lastNativeProgress = -1;
+    let lastNativeChangeAt = performance.now();
+    let noNativeProgressReads = 0;
     const startedAt = performance.now();
 
     const setStatus = value => {
@@ -21,7 +20,7 @@
       else if (value < 38) status.textContent = 'Chargement du moteur de jeu';
       else if (value < 62) status.textContent = 'Synchronisation de votre personnage';
       else if (value < 82) status.textContent = 'Préparation de votre environnement';
-      else if (value < 97) status.textContent = 'Connexion à l’hôtel';
+      else if (value < 96) status.textContent = 'Connexion à l’hôtel';
       else status.textContent = 'Bienvenue sur ParadiseRP';
     };
 
@@ -33,89 +32,102 @@
       setStatus(rounded);
     };
 
-    const hide = (fast = false) => {
+    const hide = () => {
       if (hidden) return;
       hidden = true;
       sessionStorage.setItem('paradise-client-loaded', '1');
+      sessionStorage.removeItem('paradise-auto-retry');
       render(100);
+      status.textContent = 'Bienvenue sur ParadiseRP';
       loader.classList.add('is-ready');
-      const delay = fast ? 80 : 180;
-      setTimeout(() => loader.classList.add('is-hidden'), delay);
-      setTimeout(() => loader.remove(), fast ? 450 : 700);
+      setTimeout(() => loader.classList.add('is-hidden'), 120);
+      setTimeout(() => loader.remove(), 520);
     };
 
-    const hasPlayableSurface = () => {
-      const canvas = root.querySelector('canvas');
-      if (canvas && canvas.width > 0 && canvas.height > 0) return true;
+    const nativeProgress = () => {
+      const text = root.innerText || root.textContent || '';
+      const values = [...text.matchAll(/(?:^|\s)(100|[1-9]?\d)\s*%/g)].map(m => Number(m[1]));
+      return values.length ? Math.max(...values) : null;
+    };
+
+    const hasReadyUi = () => {
       return !!root.querySelector(
-        '.nitro-room-view,[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"]'
+        '.nitro-room-view,[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"],.nitro-toolbar,[class*="toolbar"]'
       );
     };
 
-    const readRealProgress = () => {
-      const text = root.innerText || root.textContent || '';
-      const matches = [...text.matchAll(/(?:^|\s)(100|[1-9]?\d)\s*%/g)];
-      if (matches.length) {
-        realProgress = Math.max(realProgress, ...matches.map(match => Number(match[1])));
-        render(realProgress);
+    const inspect = () => {
+      if (hidden) return;
+      const current = nativeProgress();
+
+      if (current !== null) {
+        noNativeProgressReads = 0;
+        realProgress = Math.max(realProgress, current);
+
+        if (current !== lastNativeProgress) {
+          lastNativeProgress = current;
+          lastNativeChangeAt = performance.now();
+        }
+
+        render(Math.max(progress, Math.min(95, current)));
+
+        const stalledFor = performance.now() - lastNativeChangeAt;
+        if (current >= 50 && current < 100 && stalledFor > 9000) {
+          const alreadyRetried = sessionStorage.getItem('paradise-auto-retry') === '1';
+          if (!alreadyRetried) {
+            sessionStorage.setItem('paradise-auto-retry', '1');
+            status.textContent = 'Reconnexion automatique au client';
+            render(Math.max(progress, 88));
+            setTimeout(() => location.reload(), 450);
+          } else {
+            status.textContent = 'Finalisation de la connexion';
+          }
+        }
+        return;
       }
 
-      if (hasPlayableSurface()) {
-        hide(true);
-        return true;
-      }
-
-      return false;
+      noNativeProgressReads++;
+      if (hasReadyUi() && noNativeProgressReads >= 2) hide();
     };
 
-    // A reload must never trap the player behind our decorative overlay.
-    // Nitro keeps loading underneath; the overlay is removed almost immediately.
-    if (isReload || hasLoadedOnce) {
-      render(74);
-      status.textContent = 'Reconnexion à votre session';
-      setTimeout(() => {
-        readRealProgress();
-        if (!hidden) hide(true);
-      }, 650);
-    }
-
-    const observer = new MutationObserver(() => readRealProgress());
+    const observer = new MutationObserver(inspect);
     observer.observe(root, { childList: true, subtree: true, characterData: true, attributes: true });
 
-    render(progress);
+    const navigation = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (navigation && navigation.type === 'reload') {
+      render(22);
+      status.textContent = 'Reconnexion à votre session';
+    } else {
+      render(4);
+    }
 
-    // Smooth visual progress for a first launch only. It never blocks game readiness.
     const tick = () => {
       if (hidden) return;
-      readRealProgress();
+      inspect();
       if (hidden) return;
 
       const elapsed = performance.now() - startedAt;
-      let target;
-      if (elapsed < 1000) target = 16;
-      else if (elapsed < 2200) target = 34;
-      else if (elapsed < 3800) target = 56;
-      else if (elapsed < 5600) target = 76;
-      else target = 91;
+      let target = 18;
+      if (elapsed > 900) target = 34;
+      if (elapsed > 1800) target = 52;
+      if (elapsed > 3000) target = 68;
+      if (elapsed > 4500) target = 80;
+      if (elapsed > 6500) target = 90;
+      if (realProgress > target) target = Math.min(95, realProgress);
 
-      if (realProgress > target) target = realProgress;
-      progress += Math.max(0.35, (target - progress) * 0.075);
+      if (progress < target) progress += Math.max(0.18, (target - progress) * 0.055);
       render(progress);
       requestAnimationFrame(tick);
     };
+
     requestAnimationFrame(tick);
+    setInterval(inspect, 350);
 
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        readRealProgress();
-        // Once the document is fully loaded, our overlay stops being blocking.
-        if (!hidden && performance.now() - startedAt > 2500) hide();
-      }, 250);
-    });
-
-    // Hard guarantees: this UI is decorative and must never lock access to Nitro.
-    setTimeout(() => { if (!hidden && root.children.length > 0) hide(); }, 6500);
-    setTimeout(() => { if (!hidden) hide(true); }, 9000);
+    // Le loader ParadiseRP reste affiché tant que le loader Nitro natif (canard + %)
+    // existe. Il disparaît uniquement quand Nitro a réellement quitté son écran de chargement.
+    setTimeout(() => {
+      if (!hidden && nativeProgress() === null && hasReadyUi()) hide();
+    }, 30000);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
