@@ -29,8 +29,6 @@ function replace_part($look, $type, $setId, $colorId) {
 }
 function find_set_groups_recursive($node, &$groups) {
     if (!is_array($node)) return;
-    // FigureData existe sous plusieurs structures selon les packs. On cherche récursivement
-    // tout objet ayant un type (hr, hd, ch...) et une collection sets.
     if (isset($node['type']) && isset($node['sets']) && is_array($node['sets'])) {
         $type = strtolower((string)$node['type']);
         if ($type !== '' && !isset($groups[$type])) $groups[$type] = $node;
@@ -49,11 +47,31 @@ function flatten_sets($sets) {
     $out = [];
     foreach ($sets as $k => $set) {
         if (!is_array($set)) continue;
-        // Certains exports utilisent un objet indexé par id plutôt qu'une liste.
         if (!isset($set['id']) && is_numeric($k)) $set['id'] = (int)$k;
         $out[] = $set;
     }
     return $out;
+}
+function is_realistic_skin_hex($hex) {
+    if (!preg_match('/^[0-9A-F]{6}$/i', $hex)) return false;
+    $r = hexdec(substr($hex,0,2));
+    $g = hexdec(substr($hex,2,2));
+    $b = hexdec(substr($hex,4,2));
+    $max = max($r,$g,$b); $min = min($r,$g,$b);
+    $delta = $max - $min;
+    $brightness = ($max + $min) / 2;
+
+    // Écarte les couleurs artificielles (bleu, vert, violet, fluo, noir/blanc purs).
+    // Les carnations Habbo réalistes ont généralement R >= G >= B avec une tolérance pour les peaux rosées/claires.
+    if ($brightness < 35 || $brightness > 248) return false;
+    if ($b > $r + 18) return false;
+    if ($g > $r + 12) return false;
+    if ($delta > 150) return false;
+
+    // Accepte du très clair au très foncé, y compris tons rosés et olive naturels.
+    if ($r >= $g - 8 && $g >= $b - 16) return true;
+    if ($r >= 90 && abs($r-$g) <= 55 && abs($g-$b) <= 55) return true;
+    return false;
 }
 
 if (!$Session->Exist(Config::$SessionName) || !isset($UData['id'])) out_json(['ok'=>false,'error'=>'Session expirée'], 401);
@@ -73,11 +91,7 @@ find_palettes_recursive($fig, $paletteMap);
 $hairGroup = $groups['hr'] ?? null;
 $headGroup = $groups['hd'] ?? null;
 if (!$hairGroup || !$headGroup) {
-    out_json([
-        'ok'=>false,
-        'error'=>'Données avatar incomplètes',
-        'debug'=>['groups_detected'=>array_keys($groups), 'palettes_detected'=>array_keys($paletteMap)]
-    ], 503);
+    out_json(['ok'=>false,'error'=>'Données avatar incomplètes','debug'=>['groups_detected'=>array_keys($groups),'palettes_detected'=>array_keys($paletteMap)]], 503);
 }
 
 $validHairSets = [];
@@ -112,7 +126,6 @@ foreach (($paletteMap[$hairPaletteId] ?? []) as $color) {
 }
 
 $skinColors = [];
-$validSkinColors = [];
 foreach (($paletteMap[$skinPaletteId] ?? []) as $color) {
     if (!is_array($color)) continue;
     if (array_key_exists('selectable',$color) && !$color['selectable']) continue;
@@ -120,14 +133,25 @@ foreach (($paletteMap[$skinPaletteId] ?? []) as $color) {
     $index = (int)($color['index'] ?? 0);
     if ($id <= 0) continue;
     $hex = strtoupper(trim((string)($color['hexCode'] ?? $color['hexcode'] ?? '')));
-    if (!preg_match('/^[0-9A-F]{6}$/', $hex)) continue;
-    // Palette 1 peut contenir des couleurs fantaisie customs. On conserve les 96 premières
-    // teintes ordonnées par index, ce qui correspond aux teintes visage réellement proposées.
-    $validSkinColors[$id] = true;
+    if (!is_realistic_skin_hex($hex)) continue;
     $skinColors[] = ['id'=>$id,'hex'=>$hex,'index'=>$index];
 }
-usort($skinColors, function($a,$b){ return $a['index'] <=> $b['index']; });
-if (count($skinColors) > 96) $skinColors = array_slice($skinColors, 0, 96);
+usort($skinColors, function($a,$b){
+    $la = hexdec(substr($a['hex'],0,2)) + hexdec(substr($a['hex'],2,2)) + hexdec(substr($a['hex'],4,2));
+    $lb = hexdec(substr($b['hex'],0,2)) + hexdec(substr($b['hex'],2,2)) + hexdec(substr($b['hex'],4,2));
+    return $lb <=> $la;
+});
+
+// Déduplique les couleurs visuellement identiques et garde une palette compacte.
+$skinSeen = [];
+$skinCompact = [];
+foreach ($skinColors as $c) {
+    if (isset($skinSeen[$c['hex']])) continue;
+    $skinSeen[$c['hex']] = true;
+    $skinCompact[] = $c;
+    if (count($skinCompact) >= 40) break;
+}
+$skinColors = $skinCompact;
 $validSkinColors = [];
 foreach ($skinColors as $c) $validSkinColors[(int)$c['id']] = true;
 
@@ -144,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         'hair_sets'=>$hairOptions,
         'hair_colors'=>$hairColors,
         'skin_colors'=>$skinColors,
-        'debug'=>['hair_group_sets'=>count($hairOptions),'hair_palette'=>$hairPaletteId,'skin_palette'=>$skinPaletteId]
+        'debug'=>['hair_group_sets'=>count($hairOptions),'hair_palette'=>$hairPaletteId,'skin_palette'=>$skinPaletteId,'skin_tones'=>count($skinColors)]
     ]);
 }
 
