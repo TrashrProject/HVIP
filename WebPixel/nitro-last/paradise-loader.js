@@ -11,9 +11,18 @@
     let shown = 4;
     const started = performance.now();
 
+    const suppressNativeBlueLoader = () => {
+      document.querySelectorAll('.nitro-loading,[class*="nitro-loading"]').forEach(el => {
+        if (el === loader || loader.contains(el)) return;
+        el.style.setProperty('opacity', '0', 'important');
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
+      });
+    };
+
     const render = value => {
       if (hidden) return;
-      shown = Math.max(shown, Math.min(100, value));
+      shown = Math.max(shown, Math.min(99, value));
       const v = Math.round(shown);
       bar.style.width = v + '%';
       percent.textContent = v + '%';
@@ -26,16 +35,28 @@
 
     const clientReady = () => {
       if (!root) return false;
-      if (root.querySelector('canvas')) return true;
-      if (root.querySelector('[class*="toolbar"],[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"]')) return true;
-      const children = root.children ? root.children.length : 0;
-      if (children > 0 && performance.now() - started > 1200) return true;
+
+      const canvas = root.querySelector('canvas');
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width > 200 && rect.height > 150) return true;
+      }
+
+      const realUi = root.querySelector(
+        '.nitro-toolbar,[class*="nitro-toolbar"],[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"],[class*="navigator-container"],[class*="hotel-view"]'
+      );
+      if (realUi) {
+        const rect = realUi.getBoundingClientRect();
+        if (rect.width > 20 && rect.height > 20) return true;
+      }
+
       return false;
     };
 
     const hide = () => {
       if (hidden) return;
       hidden = true;
+      suppressNativeBlueLoader();
       bar.style.width = '100%';
       percent.textContent = '100%';
       status.textContent = 'Bienvenue sur ParadiseRP';
@@ -45,7 +66,9 @@
 
     const tick = () => {
       if (hidden) return;
+      suppressNativeBlueLoader();
       if (clientReady()) return hide();
+
       const elapsed = performance.now() - started;
       let target = 18;
       if (elapsed > 700) target = 35;
@@ -53,19 +76,26 @@
       if (elapsed > 2600) target = 72;
       if (elapsed > 4200) target = 86;
       if (elapsed > 6200) target = 94;
-      if (shown < target) shown += Math.max(.3, (target - shown) * .08);
+      if (elapsed > 9000) target = 97;
+      if (elapsed > 13000) target = 99;
+
+      if (shown < target) shown += Math.max(.22, (target - shown) * .07);
       render(shown);
       requestAnimationFrame(tick);
     };
 
-    const observer = new MutationObserver(() => { if (clientReady()) hide(); });
+    const observer = new MutationObserver(() => {
+      suppressNativeBlueLoader();
+      if (clientReady()) hide();
+    });
     observer.observe(root, { childList: true, subtree: true, attributes: true });
 
     render(4);
+    suppressNativeBlueLoader();
     requestAnimationFrame(tick);
 
-    // Important: le loader ne peut jamais bloquer Nitro, même si la détection échoue.
-    setTimeout(hide, 8000);
+    // Pas de timeout qui révèle l'écran bleu Nitro : le loader ParadiseRP reste
+    // affiché jusqu'à ce qu'une vraie surface de jeu soit détectée.
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
