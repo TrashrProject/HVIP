@@ -1,57 +1,42 @@
-/* ParadiseRP — dossier joueur RP premium v4 */
-.hvip-rp-source-card{position:fixed!important;right:-4000px!important;left:auto!important;top:0!important;opacity:0!important;pointer-events:none!important}
+/* ParadiseRP — fiche joueur compacte inspirée de la carte RP d'origine */
+.hvip-rp-source-card{position:fixed!important;right:-3000px!important;left:auto!important;top:0!important;opacity:0!important;pointer-events:none!important}
 .hvip-rp-dossier,.hvip-rp-dossier *{box-sizing:border-box!important}
 .hvip-rp-dossier{
-  --ink:#081015;--ink2:#0d171d;--panel:#132129;--panel2:#182931;--line:rgba(144,190,199,.14);--text:#f5fbfc;--muted:#789097;--green:#36e3a2;--cyan:#62d4e7;--gold:#f2bd5c;
-  position:fixed;top:86px;right:24px;z-index:1000000;width:314px;padding:0;border-radius:19px;
-  border:1px solid rgba(114,169,181,.24);background:linear-gradient(165deg,#142229 0%,#0a1116 68%,#071015 100%);
-  box-shadow:0 28px 75px rgba(0,0,0,.50),0 7px 22px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);
-  color:var(--text);font-family:Inter,"Segoe UI",Arial,sans-serif;opacity:0;pointer-events:none;transform:translateX(18px) scale(.985);transition:opacity .16s ease,transform .2s cubic-bezier(.2,.8,.2,1);overflow:hidden
+  --bg:#252a2f;--bg2:#20252a;--panel:#353b41;--panel2:#2b3136;--line:#3c454c;--text:#f4f5f6;--muted:#aeb8bf;--green:#38d996;--gold:#f0b743;
+  position:fixed;top:110px;right:22px;z-index:1000000;width:236px;padding:7px;border-radius:5px;
+  border:1px solid #11171b;background:linear-gradient(180deg,var(--bg),var(--bg2));
+  box-shadow:0 8px 22px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.05);
+  color:var(--text);font-family:Arial,"Segoe UI",sans-serif;opacity:0;pointer-events:none;transform:translateX(12px);transition:.14s ease;overflow:hidden
 }
-.hvip-rp-dossier.is-visible{opacity:1;pointer-events:auto;transform:translateX(0) scale(1)}
-.hvip-rp-dossier-accent{height:3px;background:linear-gradient(90deg,var(--green) 0%,var(--cyan) 48%,var(--gold) 100%);box-shadow:0 0 18px rgba(54,227,162,.18)}
-.hvip-rp-dossier-head{display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0))}
-.hvip-rp-head-copy{min-width:0;display:flex;flex-direction:column;gap:3px}
-.hvip-rp-head-kicker{color:#6f8b92;font-size:7px;font-weight:950;letter-spacing:1.5px;text-transform:uppercase}
-.hvip-rp-eyebrow{display:block;max-width:225px;color:#f9fcfd;font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 rgba(0,0,0,.45)}
-.hvip-rp-dossier-close{display:grid;place-items:center;width:30px;height:30px;padding:0;border:1px solid rgba(255,255,255,.055);border-radius:9px;background:rgba(255,255,255,.025);color:#94a8ad;font-size:18px;font-weight:800;line-height:1;cursor:pointer;transition:.14s ease}
-.hvip-rp-dossier-close:hover{color:#fff;background:rgba(255,94,94,.12);border-color:rgba(255,94,94,.2);transform:rotate(3deg)}
-.hvip-rp-hero{display:grid;grid-template-columns:118px 1fr;gap:13px;padding:14px 14px 11px}
-.hvip-rp-portrait{position:relative;height:164px;overflow:hidden;border-radius:15px;background:radial-gradient(circle at 50% 27%,rgba(94,212,231,.16),transparent 46%),linear-gradient(180deg,#21353d,#101d23);border:1px solid rgba(118,180,191,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 7px 20px rgba(0,0,0,.18)}
-.hvip-rp-portrait:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(145deg,rgba(255,255,255,.03),transparent 32%,transparent 70%,rgba(54,227,162,.035));pointer-events:none}
-.hvip-rp-portrait-grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(rgba(143,194,203,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(143,194,203,.13) 1px,transparent 1px);background-size:15px 15px;mask-image:linear-gradient(#000,transparent 94%)}
-.hvip-rp-id-label{position:absolute;z-index:5;left:8px;top:8px;padding:4px 6px;border-radius:6px;background:rgba(4,9,12,.46);border:1px solid rgba(255,255,255,.04);color:#89a4aa;font-size:6px;font-weight:950;letter-spacing:.8px}
-.hvip-rp-dossier-avatar{position:absolute;z-index:3;left:50%;bottom:6px;max-width:109px;max-height:151px;transform:translateX(-50%);image-rendering:pixelated;filter:drop-shadow(0 9px 6px rgba(0,0,0,.38))}
-.hvip-rp-presence{position:absolute;z-index:6;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:5px;padding:4px 6px;border-radius:999px;background:rgba(5,13,17,.75);border:1px solid rgba(54,227,162,.12);color:#84e9bb;font-size:6px;font-weight:950;letter-spacing:.55px}
-.hvip-rp-presence:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(54,227,162,.09),0 0 8px rgba(54,227,162,.35)}
-.hvip-rp-person{min-width:0;padding-top:1px;display:flex;flex-direction:column}
-.hvip-rp-mini-label{display:block;color:#71888f;font-size:7px;font-weight:950;letter-spacing:1.05px;text-transform:uppercase}
-.hvip-rp-dossier-name{display:block;margin-top:6px;color:#fff;font-size:21px;font-weight:950;line-height:1.03;letter-spacing:-.35px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hvip-rp-dossier-sub{display:block;margin-top:5px;color:#769099;font-size:9px;font-weight:650;line-height:1.3}
-.hvip-rp-meta{display:grid;grid-template-columns:1fr;gap:6px;margin-top:12px}
-.hvip-rp-meta-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:8px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.035)}
-.hvip-rp-meta-row span{color:#70868d;font-size:7px;font-weight:900;letter-spacing:.65px;text-transform:uppercase}
-.hvip-rp-meta-row strong{min-width:0;color:#dce8ea;font-size:8px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hvip-rp-badge-box{margin-top:auto;padding-top:10px}
-.hvip-rp-badge-box:before{content:"INSIGNE";display:block;margin-bottom:5px;color:#71888f;font-size:7px;font-weight:950;letter-spacing:.9px}
-.hvip-rp-badge-stage{display:flex;align-items:center;justify-content:center;width:60px;height:54px;border-radius:10px;background:radial-gradient(circle,rgba(242,189,92,.10),rgba(242,189,92,.035));border:1px solid rgba(242,189,92,.14)}
-.hvip-rp-dossier-badge{max-width:44px;max-height:44px;image-rendering:pixelated;filter:drop-shadow(0 5px 6px rgba(0,0,0,.30))}
-.hvip-rp-badge-stage.is-empty:after{content:"—";color:#60737a;font-weight:800}
-.hvip-rp-divider{height:1px;margin:0 14px;background:linear-gradient(90deg,transparent,rgba(125,172,181,.16),transparent)}
-.hvip-rp-info-grid{display:grid;grid-template-columns:1fr 96px;gap:9px;padding:11px 14px 9px}
-.hvip-rp-info-card,.hvip-rp-rep-card{margin:0;padding:10px;border-radius:12px;background:linear-gradient(180deg,rgba(24,41,49,.90),rgba(15,27,33,.92));border:1px solid rgba(120,168,177,.11);box-shadow:inset 0 1px 0 rgba(255,255,255,.02)}
-.hvip-rp-role-line{display:flex;align-items:center;gap:8px;margin-top:8px;min-height:31px}
-.hvip-rp-role-mark{display:grid;place-items:center;flex:0 0 27px;width:27px;height:27px;border-radius:8px;background:rgba(242,189,92,.09);border:1px solid rgba(242,189,92,.10);color:#f4ca76;font-size:10px}
-.hvip-rp-dossier-role{min-width:0;color:#eef5f6;font-size:11px;font-weight:850;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hvip-rp-rep-card{display:flex;flex-direction:column;justify-content:space-between}
-.hvip-rp-rep-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
-.hvip-rp-rep-top>div{display:flex;flex-direction:column;gap:4px}
-.hvip-rp-rep-top>div:before{content:"RÉPUTATION";color:#71888f;font-size:7px;font-weight:950;letter-spacing:.8px}
-.hvip-rp-dossier-reward{display:block;margin:0;color:#ffd681;font-size:23px;line-height:1;font-weight:950;text-shadow:0 0 14px rgba(242,189,92,.10)}
-.hvip-rp-rep-grade{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:999px;background:rgba(54,227,162,.065);border:1px solid rgba(54,227,162,.11);color:#76dcae;font-size:6px;font-weight:950;letter-spacing:.55px}
-.hvip-rp-rep-track{height:4px;margin-top:9px;border-radius:999px;background:rgba(255,255,255,.05);overflow:hidden}
-.hvip-rp-rep-track span{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--green),var(--cyan),var(--gold));box-shadow:0 0 9px rgba(54,227,162,.20);transition:width .22s ease}
-.hvip-rp-dossier-foot{display:flex;align-items:center;justify-content:space-between;margin:0 14px 13px;padding:8px 10px;border-radius:10px;background:rgba(5,11,14,.28);border:1px solid rgba(255,255,255,.035);color:#687e85;font-size:7px;font-weight:800;letter-spacing:.45px}
-.hvip-rp-foot-seal{display:inline-flex;align-items:center;gap:5px;color:#7e989f}
-.hvip-rp-foot-seal:before{content:"◆";color:#4fbf9a;font-size:6px}
-@media(max-width:720px){.hvip-rp-dossier{right:8px;top:72px;width:292px}.hvip-rp-hero{grid-template-columns:110px 1fr}.hvip-rp-portrait{height:154px}}
+.hvip-rp-dossier.is-visible{opacity:1;pointer-events:auto;transform:translateX(0)}
+.hvip-rp-dossier-accent{display:none}
+.hvip-rp-dossier-head{display:flex;align-items:center;justify-content:space-between;height:28px;padding:0 2px 5px;margin-bottom:5px;border-bottom:1px solid rgba(255,255,255,.06)}
+.hvip-rp-eyebrow{display:block;color:#fff;font-size:12px;font-weight:700;letter-spacing:0;text-transform:none;text-shadow:0 1px 0 #000}
+.hvip-rp-live{display:none}
+.hvip-rp-dossier-close{display:grid;place-items:center;width:23px;height:23px;padding:0;border:0;background:transparent;color:#fff;font-size:20px;font-weight:900;line-height:20px;cursor:pointer;text-shadow:0 1px 0 #000}
+.hvip-rp-dossier-close:hover{color:#ff7575}
+.hvip-rp-identity{display:grid;grid-template-columns:86px 1fr;gap:8px;align-items:start}
+.hvip-rp-portrait{position:relative;height:118px;overflow:hidden;border-radius:3px;background:#3b444c;border:1px solid #3f4850;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.hvip-rp-portrait-grid,.hvip-rp-id-label{display:none}
+.hvip-rp-dossier-avatar{position:absolute;left:50%;bottom:3px;max-width:82px;max-height:112px;transform:translateX(-50%);image-rendering:pixelated;filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
+.hvip-rp-person{min-width:0;padding:1px 0 0}
+.hvip-rp-mini-label{display:none}
+.hvip-rp-dossier-name{display:flex;align-items:center;min-height:24px;color:#fff;font-size:13px;font-weight:800;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 #000}
+.hvip-rp-dossier-name:before{content:"";width:7px;height:7px;margin-right:5px;border-radius:50%;background:var(--green);box-shadow:0 0 0 2px rgba(56,217,150,.12)}
+.hvip-rp-dossier-sub{display:none}
+.hvip-rp-badge-box{margin-top:8px}
+.hvip-rp-badge-stage{display:flex;align-items:center;justify-content:center;width:62px;height:62px;margin:0;border:0;border-radius:3px;background:transparent}
+.hvip-rp-dossier-badge{max-width:50px;max-height:50px;image-rendering:pixelated;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.hvip-rp-badge-stage.is-empty:after{content:"—";color:#69747c}
+.hvip-rp-info-card{margin-top:8px;padding:0;border:0;background:transparent;box-shadow:none}
+.hvip-rp-role-line{display:flex;align-items:center;min-height:32px;padding:5px 8px;border-radius:3px;background:linear-gradient(180deg,#3a4147,#343a40);border:1px solid #40494f;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.hvip-rp-role-mark{display:grid;place-items:center;width:18px;height:18px;margin-right:6px;border:0;background:transparent;color:#fff;font-size:11px}
+.hvip-rp-dossier-role{min-width:0;color:#fff;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 #000}
+.hvip-rp-rep-card{margin-top:7px;padding:6px 7px 5px;border:0;border-top:1px solid #3a4248;border-radius:0;background:transparent;box-shadow:none}
+.hvip-rp-rep-top{display:flex;align-items:center;justify-content:flex-start;gap:4px}
+.hvip-rp-rep-top>div{display:flex;align-items:center;gap:4px}
+.hvip-rp-rep-top>div:before{content:"Réputation Récompenses:";color:#f0f0f0;font-size:10px;font-weight:700;text-shadow:0 1px 0 #000}
+.hvip-rp-dossier-reward{display:inline;margin:0;color:var(--gold);font-size:11px;line-height:1;font-weight:900}
+.hvip-rp-rep-grade,.hvip-rp-rep-track{display:none}
+.hvip-rp-dossier-foot{display:none}
+@media(max-width:720px){.hvip-rp-dossier{right:8px;top:88px;width:224px}}
