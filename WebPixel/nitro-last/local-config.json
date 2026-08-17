@@ -30,9 +30,9 @@
   "currency.asset.icon.url": "https://paradiserp.fr/swf_pz/V5-0-2/images/wallet/%type%.png",
   "camera.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/camera",
   "thumbnails.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/camera/thumbnails/%thumbnail%.png",
-  "url.prefix": "http://localhost/WebPixel",
-  "habbopages.url": "http://localhost/WebPixel/",
-  "group.homepage.url": "http://localhost/WebPixel/groups/%groupid%/id",
+  "url.prefix": "https://paradiserp.fr",
+  "habbopages.url": "https://paradiserp.fr/",
+  "group.homepage.url": "https://paradiserp.fr/groups/%groupid%/id",
   "roomenterad.habbohotel.enabled": false,
   "roomenterad.habblet.enabled": false,
   "system.log.debug": false,
@@ -41,5 +41,3 @@
   "system.log.events": false,
   "system.log.packets": false
 }
-
-
