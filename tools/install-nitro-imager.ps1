@@ -18,6 +18,7 @@ foreach ($file in $required) {
 
 if (!(Get-Command git -ErrorAction SilentlyContinue)) { throw 'Git est introuvable dans le PATH.' }
 if (!(Get-Command npm -ErrorAction SilentlyContinue)) { throw 'Node.js / npm est introuvable dans le PATH.' }
+if (!(Get-Command node -ErrorAction SilentlyContinue)) { throw 'Node.js est introuvable dans le PATH.' }
 
 New-Item -ItemType Directory -Force -Path (Split-Path $ServiceDir), $Cache | Out-Null
 
@@ -26,7 +27,12 @@ if (!(Test-Path (Join-Path $ServiceDir '.git'))) {
     git clone https://github.com/billsonnn/nitro-imager.git $ServiceDir
 } else {
     Push-Location $ServiceDir
-    try { git fetch origin; git reset --hard origin/main } finally { Pop-Location }
+    try {
+        git fetch origin
+        git reset --hard origin/main
+    } finally {
+        Pop-Location
+    }
 }
 
 $envText = @"
@@ -46,24 +52,36 @@ Push-Location $ServiceDir
 try {
     Write-Host '[1/3] Installation des dépendances...' -ForegroundColor Yellow
     npm install
+    if ($LASTEXITCODE -ne 0) { throw "npm install a échoué avec le code $LASTEXITCODE" }
+
     Write-Host '[2/3] Compilation...' -ForegroundColor Yellow
     npm run build
-} finally { Pop-Location }
+    if ($LASTEXITCODE -ne 0) { throw "npm run build a échoué avec le code $LASTEXITCODE" }
+} finally {
+    Pop-Location
+}
 
 $nodeExe = (Get-Command node).Source
 $startCmd = Join-Path $Root 'tools\start-nitro-imager.cmd'
-$cmdText = "@echo off`r`ncd /d C:\HVIP\services\nitro-imager`r`n\"$nodeExe\" dist\index.js >> C:\HVIP\cache\nitro-imager\service.log 2>&1`r`n"
-Set-Content -Path $startCmd -Value $cmdText -Encoding ASCII
+$cmdLines = @(
+    '@echo off',
+    'cd /d C:\HVIP\services\nitro-imager',
+    ('"{0}" dist\index.js >> "C:\HVIP\cache\nitro-imager\service.log" 2>&1' -f $nodeExe)
+)
+Set-Content -Path $startCmd -Value ($cmdLines -join "`r`n") -Encoding ASCII
 
 # Arrête uniquement le processus qui écoute déjà sur 3030.
 try {
     $existing = Get-NetTCPConnection -LocalPort 3030 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($existing) { Stop-Process -Id $existing.OwningProcess -Force -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 700 }
+    if ($existing) {
+        Stop-Process -Id $existing.OwningProcess -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Milliseconds 700
+    }
 } catch {}
 
 Write-Host '[3/3] Démarrage du renderer local...' -ForegroundColor Yellow
 Start-Process -FilePath $startCmd -WindowStyle Hidden
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 4
 
 $ok = $false
 try {
