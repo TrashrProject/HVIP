@@ -1,14 +1,14 @@
 {
-  "socket.url": "ws://127.0.0.1:2097/",
+  "socket.url": "wss://paradiserp.fr/nitro-ws/",
   "asset.url": "https://paradiserp.fr/swf_pz/V5-0-2/",
   "image.library.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/",
   "hof.furni.url": "https://paradiserp.fr/swf_pz/V5-0-2/dcr/hof_furni/",
   "images.url": "https://paradiserp.fr/swf_pz/V5-0-2/images",
   "gamedata.url": "https://paradiserp.fr/swf_pz/V5-0-2/gamedata",
-  "url.prefix": "http://localhost/WebPixel",
+  "url.prefix": "https://paradiserp.fr",
   "camera.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/camera",
   "thumbnails.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/camera/thumbnails/%thumbnail%.png",
-  "habbopages.url": "https://paradiserp.fr/swf_pz/V5-0-2/habbopages/",
+  "habbopages.url": "https://paradiserp.fr/",
   "badge.asset.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/album1584/%badgename%.gif",
   "hotelview": {
     "images": {
@@ -22,4 +22,3 @@
     }
   }
 }
-
