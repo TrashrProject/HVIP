@@ -13,6 +13,7 @@
     let lastNativeProgress = -1;
     let lastNativeChangeAt = performance.now();
     let noNativeProgressReads = 0;
+    let highProgressSince = 0;
     const startedAt = performance.now();
 
     const setStatus = value => {
@@ -32,9 +33,18 @@
       setStatus(rounded);
     };
 
+    const dismissNativeLoader = () => {
+      root.querySelectorAll('.nitro-loading,[class*="nitro-loading"]').forEach(el => {
+        el.style.setProperty('display', 'none', 'important');
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
+      });
+    };
+
     const hide = () => {
       if (hidden) return;
       hidden = true;
+      dismissNativeLoader();
       sessionStorage.setItem('paradise-client-loaded', '1');
       sessionStorage.removeItem('paradise-auto-retry');
       render(100);
@@ -52,7 +62,7 @@
 
     const hasReadyUi = () => {
       return !!root.querySelector(
-        '.nitro-room-view,[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"],.nitro-toolbar,[class*="toolbar"]'
+        '.nitro-room-view,[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"],.nitro-toolbar,[class*="toolbar"],canvas'
       );
     };
 
@@ -71,8 +81,22 @@
 
         render(Math.max(progress, Math.min(95, current)));
 
+        // Sur ce build Nitro la progression native peut rester à 90% alors que
+        // le websocket et le client sont déjà initialisés. Dans ce cas on enlève
+        // l'écran de chargement natif au lieu de bloquer l'utilisateur.
+        if (current >= 90) {
+          if (!highProgressSince) highProgressSince = performance.now();
+          if ((performance.now() - highProgressSince) > 2200 && hasReadyUi()) {
+            status.textContent = 'Ouverture de l’hôtel';
+            hide();
+            return;
+          }
+        } else {
+          highProgressSince = 0;
+        }
+
         const stalledFor = performance.now() - lastNativeChangeAt;
-        if (current >= 50 && current < 100 && stalledFor > 9000) {
+        if (current >= 50 && current < 90 && stalledFor > 9000) {
           const alreadyRetried = sessionStorage.getItem('paradise-auto-retry') === '1';
           if (!alreadyRetried) {
             sessionStorage.setItem('paradise-auto-retry', '1');
@@ -123,11 +147,11 @@
     requestAnimationFrame(tick);
     setInterval(inspect, 350);
 
-    // Le loader ParadiseRP reste affiché tant que le loader Nitro natif (canard + %)
-    // existe. Il disparaît uniquement quand Nitro a réellement quitté son écran de chargement.
+    // Fallback absolu : si Nitro a déjà monté son canvas mais garde son overlay
+    // de chargement, on libère le client au lieu de laisser ParadiseRP bloqué.
     setTimeout(() => {
-      if (!hidden && nativeProgress() === null && hasReadyUi()) hide();
-    }, 30000);
+      if (!hidden && hasReadyUi()) hide();
+    }, 18000);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
