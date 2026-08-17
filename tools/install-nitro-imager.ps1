@@ -11,6 +11,57 @@ $NodeZip = Join-Path $RuntimeRoot "$NodeFolderName.zip"
 $NodeDir = Join-Path $RuntimeRoot $NodeFolderName
 $NodeExe = Join-Path $NodeDir 'node.exe'
 $NpmCli = Join-Path $NodeDir 'node_modules\npm\bin\npm-cli.js'
+$TaskName = 'ParadiseRP Nitro Imager'
+
+function Stop-NitroImagerProcess {
+    Write-Host 'Arrêt d''une ancienne instance Nitro Imager...' -ForegroundColor DarkYellow
+
+    try {
+        $task = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
+        if ($task) { Stop-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue }
+    } catch {}
+
+    try {
+        $listeners = Get-NetTCPConnection -LocalPort 3030 -State Listen -ErrorAction SilentlyContinue
+        foreach ($listener in @($listeners)) {
+            if ($listener -and $listener.OwningProcess) {
+                Stop-Process -Id $listener.OwningProcess -Force -ErrorAction SilentlyContinue
+            }
+        }
+    } catch {}
+
+    # Ne tue PAS les autres services Node du VPS : uniquement les processus dont
+    # la ligne de commande pointe vers le dossier Nitro Imager / son runtime dédié.
+    try {
+        $processes = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue
+        foreach ($p in @($processes)) {
+            $cmd = [string]$p.CommandLine
+            $exe = [string]$p.ExecutablePath
+            if ($cmd -like '*C:\HVIP\services\nitro-imager*' -or
+                $cmd -like '*dist\index.js*' -or
+                $exe -ieq $NodeExe) {
+                Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
+            }
+        }
+    } catch {}
+
+    Start-Sleep -Seconds 2
+}
+
+function Remove-DirectoryWithRetry([string]$Path) {
+    if (!(Test-Path $Path)) { return }
+    for ($i = 1; $i -le 5; $i++) {
+        try {
+            Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction Stop
+            return
+        } catch {
+            if ($i -eq 5) { throw }
+            Write-Host "  Fichier encore verrouillé, nouvelle tentative $i/5..." -ForegroundColor DarkYellow
+            Stop-NitroImagerProcess
+            Start-Sleep -Seconds 2
+        }
+    }
+}
 
 Write-Host '=== ParadiseRP - Installation Nitro Imager ===' -ForegroundColor Cyan
 Write-Host 'Runtime dédié : Node.js 16.20.2 (compatibilité canvas 2.8)' -ForegroundColor DarkCyan
@@ -30,7 +81,7 @@ New-Item -ItemType Directory -Force -Path (Split-Path $ServiceDir), $Cache, $Run
 
 if (!(Test-Path $NodeExe) -or !(Test-Path $NpmCli)) {
     Write-Host '[0/6] Installation du runtime Node 16 portable...' -ForegroundColor Yellow
-    if (Test-Path $NodeDir) { Remove-Item -Recurse -Force $NodeDir }
+    if (Test-Path $NodeDir) { Remove-DirectoryWithRetry $NodeDir }
     if (Test-Path $NodeZip) { Remove-Item -Force $NodeZip }
 
     $nodeUrl = "https://nodejs.org/dist/v$NodeVersion/$NodeFolderName.zip"
@@ -52,8 +103,12 @@ $runtimeVersion = (& $NodeExe --version).Trim()
 Write-Host "Node utilisé par Nitro Imager : $runtimeVersion" -ForegroundColor Green
 Write-Host "node résolu dans PATH : $((& node --version).Trim())" -ForegroundColor Green
 
+# Important : l'ancien renderer peut garder canvas.node ouvert même si le test précédent a échoué.
+# On le coupe AVANT git/npm/node_modules afin d'éviter Access denied sur canvas.node.
+Stop-NitroImagerProcess
+
 if (!(Test-Path (Join-Path $ServiceDir '.git'))) {
-    if (Test-Path $ServiceDir) { Remove-Item -Recurse -Force $ServiceDir }
+    if (Test-Path $ServiceDir) { Remove-DirectoryWithRetry $ServiceDir }
     git clone https://github.com/billsonnn/nitro-imager.git $ServiceDir
     if ($LASTEXITCODE -ne 0) { throw "git clone a échoué avec le code $LASTEXITCODE" }
 } else {
@@ -85,7 +140,7 @@ Push-Location $ServiceDir
 try {
     if (Test-Path 'node_modules') {
         Write-Host 'Nettoyage de node_modules incompatible...' -ForegroundColor DarkYellow
-        Remove-Item -Recurse -Force 'node_modules'
+        Remove-DirectoryWithRetry (Join-Path $ServiceDir 'node_modules')
     }
 
     Write-Host '[1/6] Installation des dépendances avec Node 16...' -ForegroundColor Yellow
@@ -117,13 +172,7 @@ $cmdLines = @(
 )
 Set-Content -Path $startCmd -Value ($cmdLines -join "`r`n") -Encoding ASCII
 
-try {
-    $existing = Get-NetTCPConnection -LocalPort 3030 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($existing) {
-        Stop-Process -Id $existing.OwningProcess -Force -ErrorAction SilentlyContinue
-        Start-Sleep -Milliseconds 700
-    }
-} catch {}
+Stop-NitroImagerProcess
 
 $logFile = Join-Path $Cache 'service.log'
 Set-Content -Path $logFile -Value '' -Encoding ASCII
@@ -151,9 +200,7 @@ while ((Get-Date) -lt $deadline) {
     if (((Get-Date) - $lastMessageAt).TotalSeconds -ge 10) {
         $lastMessageAt = Get-Date
         $lastLine = ''
-        if (Test-Path $logFile) {
-            $lastLine = Get-Content $logFile -Tail 1 -ErrorAction SilentlyContinue
-        }
+        if (Test-Path $logFile) { $lastLine = Get-Content $logFile -Tail 1 -ErrorAction SilentlyContinue }
         if ($lastLine) { Write-Host ("  ... " + $lastLine) -ForegroundColor DarkGray }
         else { Write-Host '  ... initialisation en cours' -ForegroundColor DarkGray }
     }
@@ -196,7 +243,7 @@ if (!$ok) {
 try {
     $action = New-ScheduledTaskAction -Execute $startCmd
     $trigger = New-ScheduledTaskTrigger -AtLogOn
-    Register-ScheduledTask -TaskName 'ParadiseRP Nitro Imager' -Action $action -Trigger $trigger -Description 'Renderer avatar Nitro local ParadiseRP' -Force | Out-Null
+    Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Description 'Renderer avatar Nitro local ParadiseRP' -Force | Out-Null
     Write-Host 'Démarrage automatique Windows : OK' -ForegroundColor Green
 } catch {
     Write-Host 'Démarrage automatique non créé (non bloquant).' -ForegroundColor DarkYellow
