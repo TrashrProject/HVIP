@@ -53,9 +53,7 @@ namespace Plus.HabboRoleplay.Timers.Types
                     if (base.Client.GetRoomUser() != null)
                         base.Client.GetRoomUser().ApplyEffect(10);
                     
-
-                    //base.Client.SendWhisper("You really do smell! You better hurry up and take a shower!", 1);
-                    base.Client.SendMessage(new RoomNotificationComposer("hygiene_low_warning", "message", "Algo huele mal... ¿No? ¡Toma un baño urgentemente para mejorar tu Higiene!"));
+                    base.Client.SendMessage(new RoomNotificationComposer("hygiene_low_warning", "message", "Quelque chose sent mauvais... Tu devrais prendre une douche rapidement pour améliorer ton hygiène !"));
                     return;
                 }
 
@@ -71,8 +69,8 @@ namespace Plus.HabboRoleplay.Timers.Types
 
                 if (base.Client.GetRoomUser() != null)
                     base.Client.GetRoomUser().ApplyEffect(10);
-                //base.Client.SendWhisper("You start to really stink! You've got to do something about this smell!", 1);
-                base.Client.SendMessage(new RoomNotificationComposer("hygiene_low_warning", "message", "¡Estás comenzando a apestar! Toma un baño pronto para quitarte esas moscas."));
+
+                base.Client.SendMessage(new RoomNotificationComposer("hygiene_low_warning", "message", "Tu commences à sentir mauvais ! Prends une douche rapidement pour te débarrasser de ces mouches."));
             }
             catch (Exception e)
             {
