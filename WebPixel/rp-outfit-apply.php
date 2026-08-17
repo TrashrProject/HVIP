@@ -66,9 +66,8 @@ if (preg_match('/^job-(\d+)-rank-(\d+)$/', $outfitId, $m)) {
     fail_json(400, 'Tenue invalide');
 }
 
-$escapedFigure = mysqli_real_escape_string($DB->Connection, $figure);
-$escapedGender = mysqli_real_escape_string($DB->Connection, $gender);
-$result = $DB->Query("UPDATE users SET look='" . $escapedFigure . "', gender='" . $escapedGender . "' WHERE id='" . $uid . "' LIMIT 1");
+// figure est strictement limité à [a-z0-9.-] et gender à M/F ci-dessus.
+$result = $DB->Query("UPDATE users SET look='" . $figure . "', gender='" . $gender . "' WHERE id='" . $uid . "' LIMIT 1");
 if ($result === false) fail_json(500, 'Impossible de sauvegarder la tenue');
 
 echo json_encode(['ok' => true, 'id' => $outfitId, 'name' => $name, 'figure' => $figure, 'gender' => $gender, 'reload' => true], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
