@@ -67,7 +67,12 @@ $config = @'
   "convert.pet": "0"
 }
 '@
-Set-Content -Path (Join-Path $converterDir 'configuration.json') -Value $config -Encoding UTF8
+
+# PowerShell 5.1 écrit un BOM avec "-Encoding UTF8". Le convertisseur fait JSON.parse()
+# directement et plante sur ce BOM. On force donc un UTF-8 SANS BOM.
+$configPath = Join-Path $converterDir 'configuration.json'
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($configPath, $config, $utf8NoBom)
 
 Write-Host '[3/6] Installation/build du convertisseur...' -ForegroundColor Cyan
 Push-Location $converterDir
@@ -80,8 +85,18 @@ try {
         Remove-Item $convertedFigure -Recurse -Force
     }
 
+    # Nettoyage également des sorties gamedata précédentes pour éviter de réutiliser
+    # un résultat partiel après un échec.
+    $generatedGameData = Join-Path $converterDir 'assets\gamedata'
+    if (Test-Path $generatedGameData) {
+        Remove-Item $generatedGameData -Recurse -Force
+    }
+
     Write-Host '[4/6] Telechargement + conversion de TOUS les vêtements officiels Habbo actuels...' -ForegroundColor Cyan
     npm start
+    if ($LASTEXITCODE -ne 0) {
+        throw "nitro-converter a échoué avec le code $LASTEXITCODE"
+    }
 }
 finally {
     Pop-Location
@@ -95,7 +110,7 @@ foreach ($path in @($latestFD, $latestFM, $convertedFigure)) {
     if (-not (Test-Path $path)) { throw "Sortie du convertisseur introuvable: $path" }
 }
 
-$newNitros = Get-ChildItem $convertedFigure -Filter '*.nitro' -File
+$newNitros = @(Get-ChildItem $convertedFigure -Filter '*.nitro' -File)
 if ($newNitros.Count -eq 0) { throw 'Aucun vêtement .nitro converti.' }
 
 Write-Host "[5/6] Copie de $($newNitros.Count) bibliothèques vêtements vers ParadiseRP..." -ForegroundColor Cyan
@@ -106,6 +121,9 @@ foreach ($file in $newNitros) {
 $tmpFD = Join-Path $backupDir 'FigureData.merged.json'
 $tmpFM = Join-Path $backupDir 'FigureMap.merged.json'
 node $mergeScript $currentFD $currentFM $latestFD $latestFM $tmpFD $tmpFM
+if ($LASTEXITCODE -ne 0) {
+    throw "Fusion FigureData/FigureMap échouée avec le code $LASTEXITCODE"
+}
 Copy-Item $tmpFD $currentFD -Force
 Copy-Item $tmpFM $currentFM -Force
 
