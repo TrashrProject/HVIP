@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
-    <meta name="theme-color" content="#07141f" />
+    <meta name="theme-color" content="#06111c" />
     <base href="./">
     <title>ParadiseRP</title>
     <link rel="icon" href="./favicon.ico" />
@@ -13,7 +13,7 @@
     <link rel="manifest" crossorigin="use-credentials" href="./site.webmanifest">
     <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#000000">
     <link rel="stylesheet" href="./src/assets/index.css">
-    <link rel="stylesheet" href="./paradise-loader.css?v=6">
+    <link rel="stylesheet" href="./paradise-loader.css?v=7">
     <script>
       (function () {
         const TRANSPARENT_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==';
@@ -126,42 +126,45 @@
   </head>
   <body>
     <noscript>JavaScript doit être activé pour lancer le client.</noscript>
+
     <div id="paradise-loader" aria-live="polite" aria-label="Chargement de ParadiseRP">
-      <div class="pr-world">
-        <div class="pr-aurora"></div><div class="pr-stars"></div><div class="pr-skyline"></div><div class="pr-island"></div>
-        <div class="pr-float-card fc1"><i>🏛</i><span><b>INSTITUTIONS</b>Mairie • Justice • Services</span></div>
-        <div class="pr-float-card fc2"><i>💼</i><span><b>ÉCONOMIE RP</b>Métiers • Entreprises • Marché</span></div>
-        <div class="pr-float-card fc3"><i>🚓</i><span><b>VIE URBAINE</b>Police • Secours • Citoyens</span></div>
-        <div class="pr-float-card fc4"><i>◆</i><span><b>UNDERGROUND</b>Influence • Risque • Pouvoir</span></div>
-      </div>
+      <div class="pr-loader-grid"></div>
+      <div class="pr-loader-glow"></div>
+      <span class="pr-loader-orb o1"></span><span class="pr-loader-orb o2"></span><span class="pr-loader-orb o3"></span><span class="pr-loader-orb o4"></span>
       <section class="pr-loader-shell">
-        <div class="pr-loader-scene">
-          <div class="pr-scene-glow"></div>
-          <img class="pr-loader-logo" src="../Dynamics/img/logos/hv_logo_p.png" alt="ParadiseRP">
-          <div class="pr-scene-eyebrow">Serveur roleplay francophone</div>
-          <div class="pr-scene-copy">Votre personnage.<br><em>Votre ascension.</em><br>Votre Paradise.</div>
-          <p class="pr-scene-sub">Une ville vivante où chaque choix compte : carrière, réputation, alliances, institutions, business ou monde clandestin.</p>
-          <div class="pr-role-row">
-            <div class="pr-role"><strong>CITOYEN</strong><span>Travail • logement • réputation</span></div>
-            <div class="pr-role"><strong>ENTREPRENEUR</strong><span>Business • influence • richesse</span></div>
-            <div class="pr-role"><strong>HORS-LA-LOI</strong><span>Réseau • risque • territoire</span></div>
+        <div class="pr-loader-top">
+          <div class="pr-loader-brand">
+            <img class="pr-loader-logo" src="../Dynamics/img/logos/hv_logo_p.png" alt="ParadiseRP">
+            <div class="pr-loader-brandcopy">
+              <small>Paradise Roleplay</small>
+              <strong>Connexion au monde</strong>
+            </div>
+          </div>
+          <div class="pr-loader-badge"><span class="pr-loader-badge-dot"></span> Serveur en ligne</div>
+        </div>
+
+        <div class="pr-loader-main">
+          <p class="pr-loader-kicker">Chargement sécurisé</p>
+          <h1 class="pr-loader-title">Préparation de votre session</h1>
+          <p class="pr-loader-subtitle">ParadiseRP prépare les ressources, synchronise votre personnage et initialise votre environnement de jeu.</p>
+          <div class="pr-loader-progress-row">
+            <div class="pr-loader-track"><div class="pr-loader-bar"></div></div>
+            <div class="pr-loader-percent">0%</div>
+          </div>
+          <div class="pr-loader-status">
+            <span class="pr-loader-status-text"><i class="pr-loader-spinner"></i><span class="pr-loader-status-copy">Initialisation du client</span></span>
+            <span class="pr-loader-tip">Ne fermez pas cette page</span>
           </div>
         </div>
-        <div class="pr-loader-panel">
-          <div class="pr-loader-top">
-            <div class="pr-loader-brandcopy"><small>Paradise Network</small><strong>Connexion à la ville</strong></div>
-            <div class="pr-loader-badge"><span class="pr-loader-badge-dot"></span> Serveur opérationnel</div>
-          </div>
-          <p class="pr-loader-kicker">Initialisation de votre session</p>
-          <h1 class="pr-loader-title">Bienvenue à ParadiseRP</h1>
-          <p class="pr-loader-subtitle">Nous synchronisons votre personnage, vos données RP et les ressources du monde avant votre arrivée en ville.</p>
-          <div class="pr-loader-progress-row"><div class="pr-loader-track"><div class="pr-loader-bar"></div></div><div class="pr-loader-percent">0%</div></div>
-          <div class="pr-loader-status"><span class="pr-loader-status-text"><i class="pr-loader-spinner"></i><span class="pr-loader-status-copy">Ouverture de ParadiseRP</span></span><span class="pr-loader-tip">Accès automatique à l'hôtel</span></div>
-          <div class="pr-progress-steps"><div class="pr-step active"><b>01</b>Identité RP</div><div class="pr-step"><b>02</b>Ressources</div><div class="pr-step"><b>03</b>Connexion monde</div></div>
-          <div class="pr-loader-event"><div class="pr-loader-event-icon">◈</div><div><b>PARADISE CITY • SESSION EN COURS</b><span>Le monde continue de vivre pendant votre connexion.</span></div></div>
+
+        <div class="pr-loader-footer">
+          <div class="pr-loader-chip"><b>ROLEPLAY</b>Une expérience pensée pour durer.</div>
+          <div class="pr-loader-chip"><b>COMMUNAUTÉ</b>Votre personnage, votre histoire.</div>
+          <div class="pr-loader-chip"><b>PARADISERP</b>Le monde se charge derrière vous.</div>
         </div>
       </section>
     </div>
+
     <div id="root" class="w-100 h-100"></div>
     <script src="./paradise-loader.js?v=3"></script>
   </body>
