@@ -6,6 +6,8 @@ header('Cache-Control: no-store');
 function fail_json($code,$message){http_response_code($code);echo json_encode(['ok'=>false,'error'=>$message],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);exit;}
 function clean_figure($value){$value=trim((string)$value);if($value===''||stripos($value,'undefined')!==false)return '';return preg_match('/^[a-z0-9.\-]+$/i',$value)?$value:'';}
 function is_staff_name($name){return (bool)preg_match('/staff|fondateur|founder|gerant|gérant|developpeur|développeur|developer|administrat|owner/i',(string)$name);}
+function get_figure_part($look,$type){if(preg_match('/(?:^|\.)'.preg_quote($type,'/').'-\d+(?:-\d+)*/i',(string)$look,$m))return ltrim($m[0],'.');return '';}
+function set_figure_part($look,$type,$part){if($part==='')return $look;$pattern='/(^|\.)'.preg_quote($type,'/').'-\d+(?:-\d+)*/i';if(preg_match($pattern,$look)){return preg_replace_callback($pattern,function($m)use($part){return ($m[1]==='.'?'.':'').$part;},$look,1);}return $look===''?$part:($look.'.'.$part);}
 
 if(!$Session->Exist(Config::$SessionName)||!isset($UData['id']))fail_json(401,'Session expirée');
 
@@ -14,6 +16,7 @@ $outfitId=isset($data['id'])?(string)$data['id']:'';
 $uid=(int)$UData['id'];
 $gender=strtoupper((string)($UData['gender']??'M'))==='F'?'F':'M';
 $userRank=(int)($UData['rank']??1);
+$currentLook=clean_figure($UData['look']??'');
 $isManager=$userRank>=6;
 
 $staffQuery=$DB->Query("SELECT g.name FROM group_memberships gm INNER JOIN groups g ON g.id=gm.group_id WHERE gm.user_id='".$uid."'");
@@ -54,10 +57,19 @@ if(!$isManager){
 
 if($figure==='')fail_json(422,'Cette tenue n’est pas configurée pour ton genre');
 
+// Conserve l'identité visuelle du joueur : coupe/couleur de cheveux + tête/teint.
+// La tenue RP remplace les vêtements/accessoires, pas le visage choisi dans l'éditeur.
+$hairPart=get_figure_part($currentLook,'hr');
+$headPart=get_figure_part($currentLook,'hd');
+if($hairPart!=='')$figure=set_figure_part($figure,'hr',$hairPart);
+if($headPart!=='')$figure=set_figure_part($figure,'hd',$headPart);
+$figure=clean_figure($figure);
+if($figure==='')fail_json(422,'Look final invalide');
+
 $result=$DB->Query("UPDATE users SET look='".$figure."', gender='".$gender."' WHERE id='".$uid."' LIMIT 1");
 if($result===false)fail_json(500,'Impossible de sauvegarder la tenue');
 
 echo json_encode([
     'ok'=>true,'id'=>$outfitId,'name'=>$name,'job'=>$jobName,'rank'=>$rank,
-    'figure'=>$figure,'gender'=>$gender,'manager_override'=>$isManager,'reload'=>true
+    'figure'=>$figure,'gender'=>$gender,'manager_override'=>$isManager,'preserved_identity'=>true,'reload'=>true
 ],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
