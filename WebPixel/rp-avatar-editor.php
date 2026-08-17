@@ -27,6 +27,34 @@ function replace_part($look, $type, $setId, $colorId) {
     }
     return $look === '' ? $part : ($look . '.' . $part);
 }
+function find_set_groups_recursive($node, &$groups) {
+    if (!is_array($node)) return;
+    // FigureData existe sous plusieurs structures selon les packs. On cherche récursivement
+    // tout objet ayant un type (hr, hd, ch...) et une collection sets.
+    if (isset($node['type']) && isset($node['sets']) && is_array($node['sets'])) {
+        $type = strtolower((string)$node['type']);
+        if ($type !== '' && !isset($groups[$type])) $groups[$type] = $node;
+    }
+    foreach ($node as $child) if (is_array($child)) find_set_groups_recursive($child, $groups);
+}
+function find_palettes_recursive($node, &$palettes) {
+    if (!is_array($node)) return;
+    if (isset($node['id']) && isset($node['colors']) && is_array($node['colors'])) {
+        $id = (int)$node['id'];
+        if ($id > 0 && !isset($palettes[$id])) $palettes[$id] = $node['colors'];
+    }
+    foreach ($node as $child) if (is_array($child)) find_palettes_recursive($child, $palettes);
+}
+function flatten_sets($sets) {
+    $out = [];
+    foreach ($sets as $k => $set) {
+        if (!is_array($set)) continue;
+        // Certains exports utilisent un objet indexé par id plutôt qu'une liste.
+        if (!isset($set['id']) && is_numeric($k)) $set['id'] = (int)$k;
+        $out[] = $set;
+    }
+    return $out;
+}
 
 if (!$Session->Exist(Config::$SessionName) || !isset($UData['id'])) out_json(['ok'=>false,'error'=>'Session expirée'], 401);
 $uid = (int)$UData['id'];
@@ -38,64 +66,70 @@ $fig = json_decode(file_get_contents($figureFile), true);
 if (!is_array($fig)) out_json(['ok'=>false,'error'=>'FigureData.json invalide'], 503);
 
 $groups = [];
-foreach (($fig['sets'] ?? []) as $group) {
-    if (!isset($group['type'])) continue;
-    $groups[(string)$group['type']] = $group;
-}
+find_set_groups_recursive($fig, $groups);
 $paletteMap = [];
-foreach (($fig['palettes'] ?? []) as $palette) {
-    $paletteMap[(int)($palette['id'] ?? 0)] = $palette['colors'] ?? [];
-}
+find_palettes_recursive($fig, $paletteMap);
 
 $hairGroup = $groups['hr'] ?? null;
 $headGroup = $groups['hd'] ?? null;
-if (!$hairGroup || !$headGroup) out_json(['ok'=>false,'error'=>'Données avatar incomplètes'], 503);
+if (!$hairGroup || !$headGroup) {
+    out_json([
+        'ok'=>false,
+        'error'=>'Données avatar incomplètes',
+        'debug'=>['groups_detected'=>array_keys($groups), 'palettes_detected'=>array_keys($paletteMap)]
+    ], 503);
+}
 
 $validHairSets = [];
 $hairOptions = [];
-foreach (($hairGroup['sets'] ?? []) as $set) {
+foreach (flatten_sets($hairGroup['sets'] ?? []) as $set) {
     $id = (int)($set['id'] ?? 0);
-    if ($id <= 0 || isset($set['selectable']) && !$set['selectable']) continue;
+    if ($id <= 0) continue;
+    if (array_key_exists('selectable',$set) && !$set['selectable']) continue;
     $g = strtoupper((string)($set['gender'] ?? 'U'));
     if ($g !== 'U' && $g !== $gender) continue;
     $validHairSets[$id] = true;
     $hairOptions[] = ['id'=>$id, 'gender'=>$g];
 }
 usort($hairOptions, function($a,$b){ return $a['id'] <=> $b['id']; });
-if (count($hairOptions) > 220) $hairOptions = array_slice($hairOptions, 0, 220);
+if (count($hairOptions) > 300) $hairOptions = array_slice($hairOptions, 0, 300);
 
-$hairPaletteId = (int)($hairGroup['paletteid'] ?? $hairGroup['paletteId'] ?? 0);
+$hairPaletteId = (int)($hairGroup['paletteid'] ?? $hairGroup['paletteId'] ?? 2);
 $skinPaletteId = (int)($headGroup['paletteid'] ?? $headGroup['paletteId'] ?? 1);
 
 $hairColors = [];
 $validHairColors = [];
 foreach (($paletteMap[$hairPaletteId] ?? []) as $color) {
-    if (isset($color['selectable']) && !$color['selectable']) continue;
+    if (!is_array($color)) continue;
+    if (array_key_exists('selectable',$color) && !$color['selectable']) continue;
     $id = (int)($color['id'] ?? 0);
     if ($id <= 0) continue;
-    $hex = strtoupper(trim((string)($color['hexCode'] ?? '')));
+    $hex = strtoupper(trim((string)($color['hexCode'] ?? $color['hexcode'] ?? '')));
     if (!preg_match('/^[0-9A-F]{6}$/', $hex)) continue;
     $validHairColors[$id] = true;
     $hairColors[] = ['id'=>$id,'hex'=>$hex];
-    if (count($hairColors) >= 48) break;
+    if (count($hairColors) >= 64) break;
 }
 
 $skinColors = [];
 $validSkinColors = [];
 foreach (($paletteMap[$skinPaletteId] ?? []) as $color) {
-    if (isset($color['selectable']) && !$color['selectable']) continue;
+    if (!is_array($color)) continue;
+    if (array_key_exists('selectable',$color) && !$color['selectable']) continue;
     $id = (int)($color['id'] ?? 0);
     $index = (int)($color['index'] ?? 0);
-    if ($id <= 0 || $id > 2000) continue;
-    $hex = strtoupper(trim((string)($color['hexCode'] ?? '')));
+    if ($id <= 0) continue;
+    $hex = strtoupper(trim((string)($color['hexCode'] ?? $color['hexcode'] ?? '')));
     if (!preg_match('/^[0-9A-F]{6}$/', $hex)) continue;
-    // Garde les teintes de peau classiques/custom raisonnables et écarte les énormes palettes fantaisie.
-    if ($index > 100) continue;
+    // Palette 1 peut contenir des couleurs fantaisie customs. On conserve les 96 premières
+    // teintes ordonnées par index, ce qui correspond aux teintes visage réellement proposées.
     $validSkinColors[$id] = true;
     $skinColors[] = ['id'=>$id,'hex'=>$hex,'index'=>$index];
 }
 usort($skinColors, function($a,$b){ return $a['index'] <=> $b['index']; });
 if (count($skinColors) > 96) $skinColors = array_slice($skinColors, 0, 96);
+$validSkinColors = [];
+foreach ($skinColors as $c) $validSkinColors[(int)$c['id']] = true;
 
 $currentLook = clean_look($UData['look'] ?? '');
 $currentHair = get_part($currentLook, 'hr');
@@ -109,7 +143,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         'current'=>['hair_set'=>$currentHair['set'],'hair_color'=>$currentHair['color'],'skin_color'=>$currentHead['color']],
         'hair_sets'=>$hairOptions,
         'hair_colors'=>$hairColors,
-        'skin_colors'=>$skinColors
+        'skin_colors'=>$skinColors,
+        'debug'=>['hair_group_sets'=>count($hairOptions),'hair_palette'=>$hairPaletteId,'skin_palette'=>$skinPaletteId]
     ]);
 }
 
