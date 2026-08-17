@@ -29,7 +29,7 @@ if (!(Get-Command git -ErrorAction SilentlyContinue)) { throw 'Git est introuvab
 New-Item -ItemType Directory -Force -Path (Split-Path $ServiceDir), $Cache, $RuntimeRoot | Out-Null
 
 if (!(Test-Path $NodeExe) -or !(Test-Path $NpmCli)) {
-    Write-Host '[0/5] Installation du runtime Node 16 portable...' -ForegroundColor Yellow
+    Write-Host '[0/6] Installation du runtime Node 16 portable...' -ForegroundColor Yellow
     if (Test-Path $NodeDir) { Remove-Item -Recurse -Force $NodeDir }
     if (Test-Path $NodeZip) { Remove-Item -Force $NodeZip }
 
@@ -43,7 +43,6 @@ if (!(Test-Path $NodeExe) -or !(Test-Path $NpmCli)) {
 if (!(Test-Path $NodeExe)) { throw "Node portable introuvable : $NodeExe" }
 if (!(Test-Path $NpmCli)) { throw "npm portable introuvable : $NpmCli" }
 
-# Force tous les sous-processus npm/node-gyp/node-pre-gyp à utiliser Node 16 portable.
 $env:PATH = "$NodeDir;$env:PATH"
 $env:npm_config_node_gyp = Join-Path $NodeDir 'node_modules\npm\node_modules\node-gyp\bin\node-gyp.js'
 $env:npm_node_execpath = $NodeExe
@@ -89,13 +88,11 @@ try {
         Remove-Item -Recurse -Force 'node_modules'
     }
 
-    Write-Host '[1/5] Installation des dépendances avec Node 16...' -ForegroundColor Yellow
+    Write-Host '[1/6] Installation des dépendances avec Node 16...' -ForegroundColor Yellow
     & $NodeExe $NpmCli install --no-audit --no-fund
     if ($LASTEXITCODE -ne 0) { throw "npm install a échoué avec le code $LASTEXITCODE" }
 
-    # Le dépôt upstream a un conflit de types entre canvas 2.x et gifencoder.
-    # Runtime OK, mais TypeScript refuse CanvasRenderingContext2D. On caste uniquement cet argument en any.
-    Write-Host '[2/5] Patch compatibilité TypeScript canvas/gifencoder...' -ForegroundColor Yellow
+    Write-Host '[2/6] Patch compatibilité TypeScript canvas/gifencoder...' -ForegroundColor Yellow
     $routerFile = Join-Path $ServiceDir 'src\app\router\habbo-imaging\handlers\HabboImagingRouterGet.ts'
     if (!(Test-Path $routerFile)) { throw "Fichier Nitro Imager introuvable : $routerFile" }
     $router = Get-Content -Raw -Path $routerFile
@@ -105,7 +102,7 @@ try {
     }
     Set-Content -Path $routerFile -Value $patched -Encoding UTF8
 
-    Write-Host '[3/5] Compilation...' -ForegroundColor Yellow
+    Write-Host '[3/6] Compilation...' -ForegroundColor Yellow
     & $NodeExe $NpmCli run build
     if ($LASTEXITCODE -ne 0) { throw "npm run build a échoué avec le code $LASTEXITCODE" }
 } finally {
@@ -131,25 +128,66 @@ try {
 $logFile = Join-Path $Cache 'service.log'
 Set-Content -Path $logFile -Value '' -Encoding ASCII
 
-Write-Host '[4/5] Démarrage du renderer local...' -ForegroundColor Yellow
-Start-Process -FilePath $startCmd -WindowStyle Hidden
-Start-Sleep -Seconds 5
+Write-Host '[4/6] Démarrage du renderer local...' -ForegroundColor Yellow
+$process = Start-Process -FilePath $startCmd -WindowStyle Hidden -PassThru
 
-Write-Host '[5/5] Test du rendu avatar...' -ForegroundColor Yellow
+Write-Host '[5/6] Initialisation des assets Nitro (peut prendre 30-120 secondes au premier lancement)...' -ForegroundColor Yellow
+$serverReady = $false
+$deadline = (Get-Date).AddSeconds(120)
+$lastMessageAt = Get-Date
+while ((Get-Date) -lt $deadline) {
+    Start-Sleep -Seconds 2
+
+    if ($process.HasExited) {
+        Write-Host 'Le processus Nitro Imager s''est arrêté pendant l''initialisation.' -ForegroundColor Red
+        break
+    }
+
+    try {
+        $listener = Get-NetTCPConnection -LocalPort 3030 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($listener) { $serverReady = $true; break }
+    } catch {}
+
+    if (((Get-Date) - $lastMessageAt).TotalSeconds -ge 10) {
+        $lastMessageAt = Get-Date
+        $lastLine = ''
+        if (Test-Path $logFile) {
+            $lastLine = Get-Content $logFile -Tail 1 -ErrorAction SilentlyContinue
+        }
+        if ($lastLine) { Write-Host ("  ... " + $lastLine) -ForegroundColor DarkGray }
+        else { Write-Host '  ... initialisation en cours' -ForegroundColor DarkGray }
+    }
+}
+
+if (!$serverReady) {
+    Write-Host ''
+    Write-Host 'Le serveur n''a pas ouvert le port 3030 dans le délai imparti.' -ForegroundColor Red
+    Write-Host 'Dernières lignes du log :' -ForegroundColor Yellow
+    if (Test-Path $logFile) { Get-Content $logFile -Tail 80 }
+    Write-Host ''
+    Write-Host 'Log complet : C:\HVIP\cache\nitro-imager\service.log'
+    exit 1
+}
+
+Write-Host 'Port 3030 ouvert : OK' -ForegroundColor Green
+Write-Host '[6/6] Test du rendu avatar...' -ForegroundColor Yellow
 $ok = $false
-try {
-    $test = Invoke-WebRequest -UseBasicParsing -TimeoutSec 20 -Uri 'http://127.0.0.1:3030/?figure=hd-180-1.hr-100-40.ch-210-66.lg-270-82.sh-290-80&size=n&direction=2&head_direction=2'
-    $contentType = [string]$test.Headers['Content-Type']
-    $ok = $test.StatusCode -eq 200 -and $test.RawContentLength -gt 50 -and $contentType -match 'image'
-} catch {
-    Write-Host $_.Exception.Message -ForegroundColor DarkYellow
+for ($attempt = 1; $attempt -le 4 -and !$ok; $attempt++) {
+    try {
+        $test = Invoke-WebRequest -UseBasicParsing -TimeoutSec 30 -Uri 'http://127.0.0.1:3030/?figure=hd-180-1.hr-100-40.ch-210-66.lg-270-82.sh-290-80&size=n&direction=2&head_direction=2'
+        $contentType = [string]$test.Headers['Content-Type']
+        $ok = $test.StatusCode -eq 200 -and $test.RawContentLength -gt 50 -and $contentType -match 'image'
+    } catch {
+        Write-Host ("Tentative $attempt/4 : " + $_.Exception.Message) -ForegroundColor DarkYellow
+        Start-Sleep -Seconds 3
+    }
 }
 
 if (!$ok) {
     Write-Host ''
-    Write-Host 'Le service ne répond pas encore correctement.' -ForegroundColor Red
+    Write-Host 'Le port est ouvert mais le rendu avatar a échoué.' -ForegroundColor Red
     Write-Host 'Dernières lignes du log :' -ForegroundColor Yellow
-    if (Test-Path $logFile) { Get-Content $logFile -Tail 50 }
+    if (Test-Path $logFile) { Get-Content $logFile -Tail 80 }
     Write-Host ''
     Write-Host 'Log complet : C:\HVIP\cache\nitro-imager\service.log'
     exit 1
