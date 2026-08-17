@@ -11,71 +11,42 @@ if (!$Session->Exist(Config::$SessionName) || !isset($UData['id'])) {
 }
 
 $uid = (int)$UData['id'];
-$userRank = isset($UData['rank']) ? (int)$UData['rank'] : 1;
 
-$memberships = [];
-$sql = "SELECT gm.group_id, gm.rank AS member_rank, g.name, g.activity,
-               EXISTS(
-                   SELECT 1 FROM play_jobs_ranks pjr
-                   WHERE pjr.job = gm.group_id
-                   AND ((pjr.male_figure IS NOT NULL AND pjr.male_figure <> '')
-                     OR (pjr.female_figure IS NOT NULL AND pjr.female_figure <> ''))
-               ) AS has_job_outfits
+$jobs = [];
+$sql = "SELECT gm.group_id, gm.rank AS member_rank, g.name, g.activity
         FROM group_memberships gm
         INNER JOIN groups g ON g.id = gm.group_id
         WHERE gm.user_id = '" . $uid . "'
+          AND EXISTS(
+              SELECT 1 FROM play_jobs_ranks pjr
+              WHERE pjr.job = gm.group_id
+                AND ((pjr.male_figure IS NOT NULL AND pjr.male_figure <> '')
+                  OR (pjr.female_figure IS NOT NULL AND pjr.female_figure <> ''))
+          )
         ORDER BY gm.group_id ASC";
 $res = $DB->Query($sql);
 if ($res) {
     while ($row = mysqli_fetch_assoc($res)) {
-        $memberships[] = $row;
-    }
-}
+        $name = trim((string)$row['name']);
+        // Les groupes staff ne sont jamais considérés comme des métiers pour les tenues RP.
+        if (preg_match('/staff|fondateur|founder|gerant|gérant|developpeur|développeur|developer|administrat|owner/i', $name)) continue;
 
-$jobs = [];
-$staff = null;
-foreach ($memberships as $m) {
-    $groupId = (int)$m['group_id'];
-    $memberRank = (int)$m['member_rank'];
-    $name = trim((string)$m['name']);
-    $isStaffName = (bool)preg_match('/staff|fondateur|founder|gerant|gérant|developpeur|développeur|developer|administrat|owner/i', $name);
-
-    if ($isStaffName) {
-        $staff = [
-            'group_id' => $groupId,
-            'rank' => $memberRank,
-            'name' => $name ?: 'Staff ParadiseRP'
-        ];
-        continue;
-    }
-
-    if ((int)$m['has_job_outfits'] === 1) {
         $jobs[] = [
-            'group_id' => $groupId,
-            'rank' => $memberRank,
+            'group_id' => (int)$row['group_id'],
+            'rank' => (int)$row['member_rank'],
             'name' => $name,
-            'activity' => (string)$m['activity']
+            'activity' => (string)$row['activity']
         ];
     }
 }
 
-// Les hauts rangs staff du CMS restent autorisés même si leur groupe staff n'a pas été renommé.
-if ($staff === null && $userRank >= 6) {
-    $staff = [
-        'group_id' => 0,
-        'rank' => $userRank,
-        'name' => 'Staff ParadiseRP'
-    ];
-}
-
-$allowed = count($jobs) > 0 || $staff !== null;
-$primary = count($jobs) ? $jobs[0]['name'] : ($staff['name'] ?? '');
+$allowed = count($jobs) > 0;
+$primary = $allowed ? $jobs[0]['name'] : '';
 
 echo json_encode([
     'ok' => true,
     'allowed' => $allowed,
     'label' => $allowed ? ('Tenues RP' . ($primary !== '' ? ' • ' . $primary : '')) : '',
     'jobs' => $jobs,
-    'staff' => $staff,
-    'user_rank' => $userRank
+    'staff' => null
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
