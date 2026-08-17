@@ -1,0 +1,58 @@
+/* ParadiseRP VPS production fixes.
+   Keep browser-facing assets on paradiserp.fr/local CMS paths; never localhost. */
+
+/* Replace dead legacy HabboVIP/PeakRP asset hosts with files already shipped by the CMS. */
+.user-pz-banco {
+    background-image: url('../img/logos/icon/banque.png') !important;
+    background-size: 18px 18px !important;
+}
+.user-pz-dinero,
+.stats-pz-money {
+    background-image: url('../img/logos/icon/portefeuille.png') !important;
+    background-size: 18px 18px !important;
+}
+.user-pz-platinos {
+    background-image: url('../img/extras/platinos_icon_s.png') !important;
+}
+.user-pz-level {
+    background-image: url('../img/logos/icon/niveau.png') !important;
+    background-size: 18px 18px !important;
+}
+.stats-pz-users,
+.stats-pz-onlines {
+    background-image: url('../img/logos/icon/stat.png') !important;
+    background-size: 18px 18px !important;
+}
+.stats-pz-apts {
+    background-image: url('../img/extras/room_icon_2.gif') !important;
+    background-size: 16px 16px !important;
+}
+.stats-pz-gangs {
+    background-image: url('../img/logos/mafia.png') !important;
+    background-size: 18px 18px !important;
+}
+.stats-pz-business {
+    background-image: url('../img/logos/icon/banque.png') !important;
+    background-size: 18px 18px !important;
+}
+.stats-pz-build {
+    background-image: url('../img/logos/icon/speaker.png') !important;
+    background-size: 18px 18px !important;
+}
+.character-vip {
+    background-image: none !important;
+}
+
+/* A broken avatar must not collapse the navigation/dashboard layout. */
+.pixel-wrapper img,
+.dashboard-welcome img,
+.staff-member-avatar img,
+.post-avatar {
+    object-fit: contain;
+}
+
+/* Avoid visible broken-image glyphs while the official Habbo imager is unavailable. */
+img[src*="habbo-imaging/avatarimage"] {
+    min-width: 1px;
+    min-height: 1px;
+}
