@@ -34,11 +34,11 @@
     };
 
     const dismissNativeLoader = () => {
-      root.querySelectorAll('.nitro-loading,[class*="nitro-loading"]').forEach(el => {
+      document.querySelectorAll('.nitro-loading,[class*="nitro-loading"]').forEach(el => {
         el.style.setProperty('display', 'none', 'important');
         el.style.setProperty('visibility', 'hidden', 'important');
         el.style.setProperty('pointer-events', 'none', 'important');
-        el.remove();
+        try { el.remove(); } catch (_) {}
       });
     };
 
@@ -51,8 +51,8 @@
       render(100);
       status.textContent = 'Bienvenue sur ParadiseRP';
       loader.classList.add('is-ready');
-      setTimeout(() => loader.classList.add('is-hidden'), 80);
-      setTimeout(() => loader.remove(), 420);
+      setTimeout(() => loader.classList.add('is-hidden'), 40);
+      setTimeout(() => { try { loader.remove(); } catch (_) {} }, 280);
     };
 
     const nativeProgress = () => {
@@ -62,39 +62,33 @@
     };
 
     const hasClientSurface = () => {
-      return !!root.querySelector('canvas,.nitro-room-view,[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"],.nitro-toolbar,[class*="toolbar"]');
+      return !!document.querySelector('#root canvas,canvas,.nitro-room-view,[class*="room-view"],[class*="hotel-view"],[class*="room-container"],[class*="nitro-room"],.nitro-toolbar,[class*="toolbar"]');
     };
 
     const inspect = () => {
       if (hidden) return;
-      const current = nativeProgress();
+      if (hasClientSurface()) {
+        hide();
+        return;
+      }
 
+      const current = nativeProgress();
       if (current !== null) {
         noNativeProgressReads = 0;
         realProgress = Math.max(realProgress, current);
-
         if (current !== lastNativeProgress) {
           lastNativeProgress = current;
           lastNativeChangeAt = performance.now();
         }
-
         render(Math.max(progress, Math.min(95, current)));
 
-        // Ce build Nitro reste parfois figé à 90% alors que le WebSocket est déjà connecté.
-        // À 90% on ne dépend plus de la détection des classes internes du client :
-        // après un court délai on enlève l'overlay Nitro + le loader ParadiseRP.
         if (current >= 90) {
           if (!highProgressSince) highProgressSince = performance.now();
-          const highFor = performance.now() - highProgressSince;
-          if (highFor > 2600) {
-            status.textContent = 'Ouverture de l’hôtel';
-            dismissNativeLoader();
+          if (performance.now() - highProgressSince > 1800) {
             hide();
             return;
           }
-        } else {
-          highProgressSince = 0;
-        }
+        } else highProgressSince = 0;
 
         const stalledFor = performance.now() - lastNativeChangeAt;
         if (current >= 50 && current < 90 && stalledFor > 9000) {
@@ -104,33 +98,22 @@
             status.textContent = 'Reconnexion automatique au client';
             render(Math.max(progress, 88));
             setTimeout(() => location.reload(), 450);
-          } else {
-            status.textContent = 'Finalisation de la connexion';
           }
         }
         return;
       }
-
       noNativeProgressReads++;
-      if (hasClientSurface() && noNativeProgressReads >= 2) hide();
     };
 
     const observer = new MutationObserver(inspect);
-    observer.observe(root, { childList: true, subtree: true, characterData: true, attributes: true });
+    observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true, attributes: true });
 
-    const navigation = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-    if (navigation && navigation.type === 'reload') {
-      render(22);
-      status.textContent = 'Reconnexion à votre session';
-    } else {
-      render(4);
-    }
+    render(4);
 
     const tick = () => {
       if (hidden) return;
       inspect();
       if (hidden) return;
-
       const elapsed = performance.now() - startedAt;
       let target = 18;
       if (elapsed > 900) target = 34;
@@ -139,7 +122,6 @@
       if (elapsed > 4500) target = 80;
       if (elapsed > 6500) target = 90;
       if (realProgress > target) target = Math.min(95, realProgress);
-
       if (progress < target) progress += Math.max(0.18, (target - progress) * 0.055);
       render(progress);
       requestAnimationFrame(tick);
@@ -148,10 +130,8 @@
     requestAnimationFrame(tick);
     setInterval(inspect, 250);
 
-    // Dernier filet de sécurité : le loader ParadiseRP ne doit jamais emprisonner le client.
-    setTimeout(() => {
-      if (!hidden && (nativeProgress() >= 90 || hasClientSurface())) hide();
-    }, 12000);
+    // Filet de sécurité absolu : le loader ne doit jamais masquer un client déjà utilisable.
+    setTimeout(hide, 10000);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
