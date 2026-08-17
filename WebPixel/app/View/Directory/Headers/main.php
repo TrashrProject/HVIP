@@ -18,12 +18,13 @@
     <meta name="csrf-token" content="vDd2f87t7d1JiOyDc3VoJSZKT6tRbszQB1aEtSMv">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu:400,700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" crossorigin="anonymous">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="<?php echo CSS; ?>/pixelzone.css?<?php echo time(); ?>">
     <link rel="stylesheet" href="<?php echo CSS; ?>/dynamics.css?<?php echo time(); ?>">
     <link rel="stylesheet" href="<?php echo CSS; ?>/retro-cms.css?<?php echo time(); ?>">
+    <link rel="stylesheet" href="<?php echo CSS; ?>/vps-fixes.css?<?php echo time(); ?>">
     <!--<link rel="stylesheet" href="<?php echo CSS; ?>/pixelzone-ha.css?< ?php echo time(); ?>">-->
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-172931792-1"></script>
@@ -36,7 +37,7 @@
     </script>
 
     <?php if($PageName == "Tienda"): ?>
-        <script src="https://www.paypal.com/sdk/js?client-id=<?php echo (Config::$SandBox)? Config::$S_PAYPAL_API : Config::$PAYPAL_API; ?>&amp;disable-funding=credit,card"> // Required. Replace SB_CLIENT_ID with your sandbox client ID.
+        <script src="https://www.paypal.com/sdk/js?client-id=<?php echo (Config::$SandBox)? Config::$S_PAYPAL_API : Config::$PAYPAL_API; ?>&amp;disable-funding=credit,card">
         </script>
     <?php
     $StoreMG->GetStoreCSS();
@@ -45,19 +46,21 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
     <script>
-        // Render every CMS avatar with the local imager. It uses the hotel's
-        // own figure libraries, so recent hairs and clothes are not replaced
-        // by the defaults of the official Habbo imager.
+        // Never expose loopback URLs to visitors. Legacy imager URLs are
+        // normalized to the public HTTPS Habbo imager instead of 127.0.0.1.
         (function () {
             var legacyHost = 'https://nitro-imager.kubbo.ch/';
             var officialHost = 'https://www.habbo.es/habbo-imaging/avatarimage';
-            var avatarHost = 'http://127.0.0.1:5000/habbo-imaging/avatarimage';
+            var avatarHost = 'https://www.habbo.es/habbo-imaging/avatarimage';
 
             function fixAvatar(image) {
-                if (!image || !image.src ||
-                    (image.src.indexOf(legacyHost) === -1 && image.src.indexOf(officialHost) === -1)) return;
-                var query = image.src.substring(image.src.indexOf('?'));
-                image.src = avatarHost + query;
+                if (!image || !image.src || image.dataset.paradiseAvatarFixed === '1') return;
+                if (image.src.indexOf(legacyHost) === -1 && image.src.indexOf(officialHost) === -1) return;
+
+                image.dataset.paradiseAvatarFixed = '1';
+                var qPos = image.src.indexOf('?');
+                var query = qPos >= 0 ? image.src.substring(qPos) : '';
+                if (image.src.indexOf(legacyHost) !== -1) image.src = avatarHost + query;
             }
 
             document.addEventListener('DOMContentLoaded', function () {
