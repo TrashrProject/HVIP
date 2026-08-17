@@ -12,7 +12,7 @@
 <div class="navigation">
     <div class="container d-flex justify-content-center align-items-center">
         <a href="/" class="pixel-wrapper">
-            <img class="pixel" src="http://127.0.0.1:5000/habbo-imaging/avatarimage?figure=<?php echo rawurlencode($UData['look']); ?>&amp;size=l&amp;headonly=1&amp;direction=2&amp;head_direction=3&amp;gesture=sml" alt="<?php echo htmlspecialchars($UData['username'], ENT_QUOTES, 'UTF-8'); ?>">
+            <img class="pixel" src="https://www.habbo.es/habbo-imaging/avatarimage?figure=<?php echo rawurlencode($UData['look']); ?>&amp;size=l&amp;headonly=1&amp;direction=2&amp;head_direction=3&amp;gesture=sml" alt="<?php echo htmlspecialchars($UData['username'], ENT_QUOTES, 'UTF-8'); ?>">
         </a>
         <div class="nav-button dropdown">
             <a href="#">
