@@ -1,8 +1,17 @@
 (() => {
-  const STATE = { loaded: false, outfits: [], categories: [], active: 'all', panel: null, tab: null };
+  const STATE = { loaded: false, outfits: [], categories: [], active: 'all', panel: null, tab: null, accessLoaded: false, access: null };
 
   const textOf = el => (el && (el.textContent || '') || '').trim();
   const esc = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  async function loadAccess() {
+    if (STATE.accessLoaded) return STATE.access;
+    const response = await fetch('/rp-outfit-access.php?v=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' });
+    const data = await response.json().catch(() => ({}));
+    STATE.access = response.ok && data && data.ok ? data : { allowed: false };
+    STATE.accessLoaded = true;
+    return STATE.access;
+  }
 
   async function loadCatalog() {
     if (STATE.loaded) return;
@@ -77,18 +86,23 @@
 
   async function openPanel() {
     if (STATE.panel) return closePanel();
+    const access = await loadAccess();
+    if (!access || !access.allowed) return;
     if (STATE.tab) STATE.tab.classList.add('pr-rp-active');
 
     const panel = document.createElement('section');
     panel.id = 'paradise-rp-wardrobe-panel';
+    const jobs = Array.isArray(access.jobs) ? access.jobs.map(j => j.name).filter(Boolean) : [];
+    const staffName = access.staff && access.staff.name ? access.staff.name : '';
+    const context = jobs.length ? jobs.join(' · ') : (staffName || 'ParadiseRP');
     panel.innerHTML = `
       <div class="pr-rp-panel-head">
-        <div><b>Tenues RP</b><span>Paradise Roleplay</span></div>
+        <div><b>Tenues RP</b><span>${esc(context)}</span></div>
         <button type="button" class="pr-rp-close" aria-label="Fermer">×</button>
       </div>
       <div class="pr-rp-filters-safe"><button type="button" data-cat="all" class="is-active">Tous</button></div>
       <div class="pr-rp-grid-safe"><div class="pr-rp-loading">Chargement des tenues...</div></div>
-      <div class="pr-rp-note">Sélectionne une tenue. Le client se reconnectera automatiquement après l’équipement.</div>`;
+      <div class="pr-rp-note">Accès lié à ton métier ou à ton rôle staff.</div>`;
     document.body.appendChild(panel);
     STATE.panel = panel;
     panel.querySelector('.pr-rp-close').addEventListener('click', closePanel);
@@ -128,15 +142,22 @@
     }) || null;
   }
 
-  function installTab() {
+  async function installTab() {
     if (STATE.tab && document.contains(STATE.tab)) return;
+    const access = await loadAccess();
+    if (!access || !access.allowed) {
+      if (STATE.tab && document.contains(STATE.tab)) STATE.tab.remove();
+      STATE.tab = null;
+      return;
+    }
+
     const wardrobe = findWardrobeTab();
     if (!wardrobe || !wardrobe.parentElement) return;
 
     const tab = document.createElement(wardrobe.tagName.toLowerCase() === 'button' ? 'button' : 'div');
     if (tab.tagName === 'BUTTON') tab.type = 'button';
     tab.className = `${wardrobe.className || ''} pr-rp-tab-safe`;
-    tab.textContent = 'Tenues RP';
+    tab.textContent = access.label || 'Tenues RP';
     tab.setAttribute('data-paradise-rp-tab', '1');
     tab.addEventListener('click', event => {
       event.preventDefault();
