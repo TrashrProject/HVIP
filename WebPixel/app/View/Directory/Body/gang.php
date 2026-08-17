@@ -363,7 +363,7 @@
 
                                 <?php endwhile; ?>
                             </div>
-                            <?php else: echo "No hay usuarios en este rango"; endif; ?>
+                            <?php else: echo "Aucun citoyen ne possède ce rang"; endif; ?>
                         </div>
                     </div>
                 <?php endwhile; ?>
@@ -375,7 +375,7 @@
             <div class="modal" id="modal1" data-animation="slideInOutLeft">
               <div class="modal-dialog">
                 <header class="modal-header">
-                  Edita el emblema de tu Banda
+                  Modifier l’emblème de ton gang
                   <button class="close-modal" aria-label="close modal" data-close>
                     ✕  
                   </button>
@@ -383,7 +383,7 @@
                 <section class="modal-content" style="height: 88vh;max-height: 88vh; overflow:auto;">
 
                     <?php if ($UData['online'] == 1): ?>
-                        <p><strong style="color:red;text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">Debes estar offline para editar el emblema de tu Banda</strong></p>
+                        <p><strong style="color:red;text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">Tu dois être hors ligne pour modifier l’emblème de ton gang</strong></p>
                     <?php else: ?>
 
                         <p><center><strong id="ErrorMsg" style="color:red;text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;"></strong></center></p>

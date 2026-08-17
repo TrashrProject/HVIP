@@ -17,13 +17,22 @@
 
         <div class="corporation-index-grid">
 
-            <?php $Corporations = $DB->Query("SELECT * FROM groups WHERE type = '1' OR type = '2'");
+            <?php
+            // Group names are also used internally by the roleplay emulator.
+            // Keep those database keys unchanged and localise only their CMS label.
+            $FrenchCorporations = array(
+                1 => 'Hopital', 2 => 'Eboueurs', 3 => 'Garage mecanique', 4 => 'Armurerie',
+                6 => 'Routiers', 7 => 'Gardes du corps', 8 => 'Mineurs', 9 => 'Police',
+                10 => "McDonald's", 11 => 'Gouvernement central', 12 => 'Gouvernement federal',
+                13 => 'Cafeteria Bobba Ball', 14 => 'Subway', 15 => 'Glacier', 16 => 'Bubble Juice'
+            );
+            $Corporations = $DB->Query("SELECT * FROM groups WHERE type = '1' OR type = '2'");
             while ($Cor = mysqli_fetch_assoc($Corporations)):
                 $ECount = mysqli_num_rows($DB->Query("SELECT null FROM group_memberships WHERE group_id = ". $Cor['id'] ." "));
                 ?>
             <div class="corp">
                 <div class="content-box">
-                    <div class="title"><?php echo utf8_encode($Cor['name']); ?> <span class="title-small float-right"><small><?php echo $ECount; ?> Empleados</small></span></div>
+                    <div class="title"><?php echo isset($FrenchCorporations[(int)$Cor['id']]) ? $FrenchCorporations[(int)$Cor['id']] : utf8_encode($Cor['name']); ?> <span class="title-small float-right"><small><?php echo $ECount; ?> employ&eacute;(s)</small></span></div>
                     <div class="box-content d-flex justify-content-center align-items-center p-0">
                         <div class="" style="margin-left: -15px;">
                             <div class="manager-wrapper" style="display: block;overflow: hidden;width: 110px;margin-left: 50px; margin-top: 0px; height: 40px;">
@@ -34,7 +43,7 @@
 
                         </div>
                         <div class="pr-3 d-flex">
-                            <div class="mr-1"><a class="button blue pr-1" href="<?php echo Config::$URL; ?>/corporation/<?php echo $Cor['id']; ?>">Ver Negocio <i class="far fa-arrow-alt-circle-right"></i></a></div>
+                            <div class="mr-1"><a class="button blue pr-1" href="<?php echo Config::$URL; ?>/corporation/<?php echo $Cor['id']; ?>">Voir l'entreprise <i class="far fa-arrow-alt-circle-right"></i></a></div>
                         </div>
                     </div>
                 </div>

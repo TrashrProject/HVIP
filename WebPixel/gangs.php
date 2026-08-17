@@ -19,7 +19,7 @@ if(isset($_POST['gname'])):
         <div class="content-box">
             <div class="title">Oops!</div>
             <div class="box-content">
-                <center><b>No se han encontrado Bandas con ese nombre...</b></center>
+                <center><b>Aucun gang ne correspond à ce nom.</b></center>
             </div>
         </div>
 <?php

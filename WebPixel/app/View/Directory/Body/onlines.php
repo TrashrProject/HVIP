@@ -29,7 +29,7 @@ $T = mysqli_num_rows($R_);
         <div class="row">
             <div class="col">
                 <div class="content-box">
-                    <div class="title">Usuarios Conectados (<?php echo number_format($T); ?>)</div>
+                    <div class="title">Citoyens connect&eacute;s (<?php echo number_format($T); ?>)</div>
                     <div class="box-content">
                         <?php
                         if($T != 0): ?>
@@ -50,7 +50,7 @@ $T = mysqli_num_rows($R_);
 
                         </div>
                            <?php else: ?>
-                            <center><b>No Hay usuarios conectados en este momento...</b></center>
+                            <center><b>Aucun citoyen n'est connect&eacute; pour le moment...</b></center>
                         <?php endif; ?>
                     </div>
                 </div>

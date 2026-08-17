@@ -29,6 +29,13 @@ define('IMG', DY . '/img');
 define('JS', DY . '/js');
 define('URL', Config::$URL);
 
+// Runtime switches written from the secured staff CMS.
+$runtimeSettings = API . 'runtime-settings.json';
+if(is_file($runtimeSettings)) {
+    $runtimeData = json_decode((string) file_get_contents($runtimeSettings), true);
+    if(is_array($runtimeData) && array_key_exists('maintenance', $runtimeData)) Config::$_MANT = (bool)$runtimeData['maintenance'];
+}
+
 // Initialize DB Manager
 $DB = new DBManager();
 // Initialize Session Manager
@@ -41,6 +48,25 @@ require_once 'Modal/UserSessionMG.class.php';
 // Initialize Site Session
 $USession = new UserSessionMG($DB, $Session);
 
+// Small public preview used by the login form. It exposes only the avatar
+// figure already visible in the hotel, never an account/session detail.
+if(isset($_POST['preview_username'])):
+    header('Content-Type: application/json; charset=utf-8');
+    $previewName = trim((string) $_POST['preview_username']);
+    if(!preg_match('/^[A-Za-z0-9]{3,18}$/', $previewName)):
+        echo json_encode(array('found' => false));
+        exit;
+    endif;
+    $previewName = mysqli_real_escape_string($DB->Con(), $previewName);
+    $previewUser = $DB->Select('users', 'username, look', "username = '" . $previewName . "'");
+    echo json_encode(array(
+        'found' => $previewUser !== null,
+        'username' => $previewUser ? $previewUser['username'] : '',
+        'look' => $previewUser ? $previewUser['look'] : ''
+    ));
+    exit;
+endif;
+
 // If Login requested
 if(isset($_POST['login_username']) && isset($_POST['login_password'])):
     echo $USession->Login($_POST['login_username'], $_POST['login_password']);
@@ -49,6 +75,10 @@ endif;
 
 // If Registration requested
 if(isset($_POST['reg_username']) && isset($_POST['reg_password']) && isset($_POST['reg_mail'])):
+    if(Config::$_MANT):
+        echo json_encode(array('type' => 'error', 'text' => 'Les inscriptions sont indisponibles pendant la maintenance.'));
+        exit;
+    endif;
     echo $USession->Registration($_POST['reg_username'], $_POST['reg_password'], $_POST['reg_mail']);
     exit;
 endif;
@@ -61,13 +91,17 @@ if($Session->Exist(Config::$SessionName)):
     $UData = $User->UData;
     $UPData = $User->UPData;
 
-    if(Config::$_MANT && $UData['rank'] < 5 && $UData['username'] != "Tester"):
-        $Session->Delete(Config::$SessionName);
-        $Session->Destroy();
-        header("Location: /man.html");
+endif;
+
+// During maintenance, the public CMS is unavailable.  Staff accounts keep
+// access and the staff-login view remains reachable so they can authenticate.
+if(Config::$_MANT):
+    $staffAccess = isset($UData) && (int)$UData['rank'] >= 3;
+    $staffLoginView = isset($_GET['staff-login']);
+    if(!$staffAccess && !$staffLoginView):
+        header("Location: " . Config::$URL . "/man.html");
         exit;
     endif;
-
 endif;
 
 // Construct UserManager
@@ -91,11 +125,5 @@ if(isset($_GET['fb_login']) || isset($_GET['code'])):
     require_once 'Controller/FBManager.class.php';
     $FBManager = new FBManager($DB, $USession);
 endif;
-
-
-
-
-
-
 
 

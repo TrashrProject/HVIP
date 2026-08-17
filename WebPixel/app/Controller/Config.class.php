@@ -11,15 +11,15 @@ class Config
 
     ## Web Configuration ##
     public static $WName = "Velora RP";
-    public static $URL = "http://localhost/WebPixel";
-    public static $WEB_DY = "http://localhost/WebPixel/Dynamics";
+    public static $URL = "https://paradiserp.fr";
+public static $WEB_DY = "https://paradiserp.fr/Dynamics";
     public static $SessionName = "PZ_lOGIN";
     public static $MaxUsers = 4;
     public static $_MANT = false;
-    public static $SWF_MPUS = "http://localhost/swf_pz/v5-0-2/MPU/pz_v2_hween/image_loader.php";
+    public static $SWF_MPUS = "https://paradiserp.fr/swf_pz/v5-0-2/MPU/pz_v2_hween/image_loader.php";
 
     ## SWF Configuration ##
-    public static $SWF = "http://localhost/swf_pz/v5-0-2/";
+    public static $SWF = "https://paradiserp.fr/swf_pz/v5-0-2/";
 
     ## Client & Socket Configuration ##
     public static $TCP = "127.0.0.1";
@@ -41,7 +41,8 @@ class Config
     public static $FB_ASSOC_API_LINK = "";
     public static $FB_API_CLIENT = "";
     public static $FB_API_SECRET = "";
-    public static $FB_API_REDIRECT = "http://localhost/WebPixel/fb_login";
-    public static $FB_ASSOC_API_REDIRECT = "http://localhost/WebPixel/fb_assoc";
+    public static $FB_API_REDIRECT = "https://paradiserp.fr/fb_login";
+    public static $FB_ASSOC_API_REDIRECT = "https://paradiserp.fr/fb_assoc";
     public static $FB_API_REQUEST = "";
 }
+

@@ -13,7 +13,7 @@
     <title><?php echo Config::$WName; ?> - <?php echo $PageName; ?></title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=1140">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="<?php echo IMG; ?>/favicon.ico?v2" type="image/vnd.microsoft.icon">
     <meta name="csrf-token" content="vDd2f87t7d1JiOyDc3VoJSZKT6tRbszQB1aEtSMv">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu:400,700&amp;display=swap" rel="stylesheet">
@@ -23,6 +23,7 @@
 
     <link rel="stylesheet" href="<?php echo CSS; ?>/pixelzone.css?<?php echo time(); ?>">
     <link rel="stylesheet" href="<?php echo CSS; ?>/dynamics.css?<?php echo time(); ?>">
+    <link rel="stylesheet" href="<?php echo CSS; ?>/retro-cms.css?<?php echo time(); ?>">
     <!--<link rel="stylesheet" href="<?php echo CSS; ?>/pixelzone-ha.css?< ?php echo time(); ?>">-->
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-172931792-1"></script>
@@ -43,7 +44,36 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
-    <script data-ad-client="ca-pub-5384077970237124" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+        // Render every CMS avatar with the local imager. It uses the hotel's
+        // own figure libraries, so recent hairs and clothes are not replaced
+        // by the defaults of the official Habbo imager.
+        (function () {
+            var legacyHost = 'https://nitro-imager.kubbo.ch/';
+            var officialHost = 'https://www.habbo.es/habbo-imaging/avatarimage';
+            var avatarHost = 'http://127.0.0.1:5000/habbo-imaging/avatarimage';
+
+            function fixAvatar(image) {
+                if (!image || !image.src ||
+                    (image.src.indexOf(legacyHost) === -1 && image.src.indexOf(officialHost) === -1)) return;
+                var query = image.src.substring(image.src.indexOf('?'));
+                image.src = avatarHost + query;
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('img').forEach(fixAvatar);
+                new MutationObserver(function (mutations) {
+                    mutations.forEach(function (mutation) {
+                        mutation.addedNodes.forEach(function (node) {
+                            if (node.nodeType !== 1) return;
+                            if (node.tagName === 'IMG') fixAvatar(node);
+                            if (node.querySelectorAll) node.querySelectorAll('img').forEach(fixAvatar);
+                        });
+                    });
+                }).observe(document.body, { childList: true, subtree: true });
+            });
+        }());
+    </script>
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-55948081-2"></script>
@@ -90,10 +120,13 @@ src="https://www.facebook.com/tr?id=594002042232961&ev=PageView&noscript=1"
                 <div class="col d-flex align-items-center justify-content-center">
                     <div>
                         <a class="logo" href="<?php echo URL; ?>"></a>
+                        <form class="header-user-search" action="<?php echo Config::$URL; ?>/search_users" method="get" role="search">
+                            <input type="search" name="q" placeholder="Rechercher un citoyen" aria-label="Rechercher un citoyen" maxlength="18" autocomplete="off">
+                            <button type="submit" aria-label="Lancer la recherche"><i class="fas fa-search" aria-hidden="true"></i></button>
+                        </form>
                         <!--<div class="online d-flex align-items-center justify-content-center"><div class="online-users"><b>173</b> citizens <a class="no-link-styling" href="https://peakrp.com/online"><u>online!</u></a></div></div>-->
-                        <div class="enter-peak text-center"><a href="<?php echo Config::$URL; ?>/play" target="_blank" class="button green enter-apex no-link-styling">¡ENTRAR A ROLEAR!</a></div>
+                        <div class="enter-peak text-center"><a href="<?php echo Config::$URL; ?>/play" target="_blank" class="button green enter-apex no-link-styling">ENTRER DANS LE JEU</a></div>
                     </div>
                 </div>
             </div>
         </div>
-

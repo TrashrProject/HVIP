@@ -28,16 +28,16 @@
                         <div class="text-center p-2">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Empleados
+                                    Employés
                                     <span class="badge badge-secondary badge-pill peak"><?php echo $Corp->GetCorpEmployeesCount(); ?></span>
                                 </li>
                                 <?php if($Corp->CorpData['type'] == "1"): ?>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Valor Total
+                                    Valeur totale
                                     <span class="badge badge-secondary badge-pill peak">$<?php echo number_format($Corp->CorpData['bank']); ?></span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Turnos Completados
+                                    Services terminés
                                     <span class="badge badge-secondary badge-pill peak"><?php echo number_format($Corp->CorpData['shifts']); ?></span>
                                 </li>
 
@@ -77,7 +77,7 @@
                                 </div>
                             </a>
                             <?php endwhile; else: ?>
-                            <center><b>No hay usuarios en este cargo...</b></center>
+                            <center><b>Aucun citoyen n’occupe ce poste.</b></center>
                             <?php endif; ?>
 
 

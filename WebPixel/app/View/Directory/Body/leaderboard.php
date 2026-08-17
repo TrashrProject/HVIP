@@ -15,7 +15,7 @@
         <div class="leaderboard-grid">
             <!-- Richest Users -->
             <div class="content-box blue leaderboards mb-0">
-                <div class="title">Usuarios m&aacute;s Ricos</div>
+                <div class="title">Citoyens les plus riches</div>
                 <div class="box-content">
                     <?php
                     $R_ = $UserMG->GetLeaderBoard("richest_user");
@@ -67,7 +67,7 @@
 
             <!-- Richest (PL) Users -->
             <div class="content-box blue leaderboards mb-0">
-                <div class="title">M&aacute;s Platinos</div>
+                <div class="title">Plus de Platinos</div>
                 <div class="box-content">
                     <?php
                     $R_ = $UserMG->GetLeaderBoard("richest_pl_user");
@@ -93,7 +93,7 @@
 
             <!-- Earned PL the most Users -->
             <div class="content-box blue leaderboards mb-0">
-                <div class="title">M&aacute;s platinos ganados</div>
+                <div class="title">Plus de Platinos gagnés</div>
                 <div class="box-content">
                     <?php
                     $R_ = $UserMG->GetLeaderBoard("play_stats", "pl_earned");
@@ -479,7 +479,7 @@
 
             <!-- Most Shifts completed Users -->
             <div class="content-box blue leaderboards mb-0">
-                <div class="title">M&aacute;s turnos realizados (Empresas)</div>
+                <div class="title">Plus de services effectués (entreprises)</div>
                 <div class="box-content">
                     <?php
                     $R_ = $UserMG->GetLeaderBoard("play_stats", "total_shifts");
@@ -505,4 +505,3 @@
 
     </div>
 </div>
-

@@ -16,16 +16,16 @@
         <div class="container d-flex">
             <div class="col-3">
                 <div class="content-box">
-                    <div class="title">Buscar Usuarios</div>
+                    <div class="title">Rechercher des citoyens</div>
                     <div class="box-content">
                             <div class="form-group">
                                 <label></label>
-                               <center> <input type="text" placeholder="Escribir nombre a buscar" class="form-control" name="username-lookup" style="max-width: 85%;"></center>
+                               <center> <input type="text" placeholder="Saisir un pseudo" class="form-control" name="username-lookup" value="<?php echo htmlspecialchars(isset($_GET['q']) ? $_GET['q'] : '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="18" style="max-width: 85%;"></center>
                             </div>
                     </div>
                 </div>
                 <div class="content-box blue leaderboards mb-0">
-                    <div class="title">Usuarios al azar</div>
+                    <div class="title">Citoyens au hasard</div>
                     <div class="box-content">
                         <?php $US = $DB->Query("SELECT username, id, look, rank FROM users WHERE rank < 3 ORDER BY RAND() LIMIT 5");
                         if(mysqli_num_rows($US) >= 1):
@@ -33,17 +33,17 @@
                                 <a href="<?php echo Config::$URL .'/profile/'. $US_['id']; ?>" style="margin-bottom: 5px;" class="online-user no-link-styling <?php echo ($US_['rank_vip'] >= 1)? "online-user-vip" : "" ; echo ($US_['rank'] >= 3)? "online-user-staff" : "" ; ?> justify-content-center align-items-center">
                                     <div class="online-pixel"><img src="https://nitro-imager.kubbo.ch/?figure=<?php echo $US_['look']; ?>&amp;direction=3"></div>
                                     <div class="username mr-auto" style="white-space: nowrap; overflow: hidden;"><span><?php echo $US_['username']; ?></span></div></a>
-                            <?php endwhile; else: echo "No hay usuarios en esta categoria"; endif; ?>
+                            <?php endwhile; else: echo "Aucun citoyen dans cette cat&eacute;gorie"; endif; ?>
 
                     </div>
                 </div>
             </div>
             <div class="col-9">
                 <div class="content-box">
-                    <div class="title">Usuarios encontrados</div>
+                    <div class="title">Citoyens trouv&eacute;s</div>
                     <div class="box-content">
-                        <div class="online-grid" id="lookup-results">
-                            <center><b>Escribe el nombre del usuario para buscar...</b></center>
+                        <div class="online-grid" id="lookup-results" data-search-url="<?php echo Config::$URL; ?>/search_users">
+                            <center><b>Saisis un pseudo pour lancer la recherche...</b></center>
 
                         </div>
                     </div>
@@ -65,4 +65,3 @@
 
     </div>
 </div>
-

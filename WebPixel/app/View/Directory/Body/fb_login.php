@@ -17,7 +17,7 @@
     </div>
     <div class="login mt-4">
         <div class="alert alert-info" style="max-width: 380px;">
-            <strong><i class="fas fa-alert-circle"></i> ¡Perfecto! &nbsp;</strong> ¡Solo necesitas crear un nombre de usuario para jugar! Ingresa un nombre de usuario.
+            <strong><i class="fas fa-alert-circle"></i> Parfait ! &nbsp;</strong> Il ne te reste plus qu’à choisir un pseudo pour jouer.
         </div>
         <!--<div class="text-center mb-3"><b>254</b> citizens online</div>-->
         <div id="e-fb-message" class="alert alert-danger" style="display: none; max-width: 380px;">
@@ -27,14 +27,14 @@
             <strong><i class="fas fa-alert-circle"></i> ¡Perfecto! &nbsp;</strong> <div id="fb-msg"></div>
         </div>
             <div class="form-group">
-                <input id="pz-fb-uname" type="text" class="form-control username-input" name="pz-fb-uname" placeholder="Nombre de usuario" value="" required="true" autofocus="true" autocomplete="on">
+                <input id="pz-fb-uname" type="text" class="form-control username-input" name="pz-fb-uname" placeholder="Pseudo" value="" required="true" autofocus="true" autocomplete="on">
             </div>
             <input type="hidden" name="pz-fb-email" value="<?php echo $Data->email; ?>" />
             <input type="hidden" name="pz-fb-id" value="<?php echo $Data->id; ?>" />
             <input type="hidden" name="pz-fb-name" value="<?php echo $Data->name; ?>" />
 
             <div class="text-center mb-3"></div>
-            <button id="submit-fb-username" type="submit" class="button blue w-100">Registrar nombre de usuario</button>
+            <button id="submit-fb-username" type="submit" class="button blue w-100">Créer mon pseudo</button>
 
     </div>
 </div>
@@ -46,6 +46,5 @@
 <script src="<?php echo DY; ?>/js/fb_login.js?<?php echo time(); ?>" type="text/javascript"></script>
 
 </body>
-
 
 

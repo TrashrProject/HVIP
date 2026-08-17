@@ -15,7 +15,7 @@
         <div class="container d-flex">
             <div class="col-6">
                 <div class="content-box">
-                    <div class="title">Cambiar Contrase&ntilde;a</div>
+                    <div class="title">Modifier le mot de passe</div>
                     <div class="box-content">
                         <form role="form" method="POST" action="/account?chanpass" class="form-block p-2">
                             <?php
@@ -33,18 +33,18 @@
                                 unset($_SESSION['E']);
                                endif; ?>
                             <div class="form-group">
-                                <label for="current-password">Escribe tu contrase&ntilde;a actual para continuar</label>
-                                <input id="current-password" type="password" class="form-control" name="current_password" placeholder="Contrase&ntilde;a actual" required="true">
+                                <label for="current-password">Saisis ton mot de passe actuel pour continuer</label>
+                                <input id="current-password" type="password" class="form-control" name="current_password" placeholder="Mot de passe actuel" required="true">
                             </div>
                             <div class="form-group">
-                                <label for="current-password"><strong>Nueva Contrase&ntilde;a</strong><br>Por favor, ingresa una contrase&ntilde;a única y segura</label>
-                                <input id="new-password" type="password" class="form-control" name="new_password" placeholder="Nueva contrase&ntilde;a" required="true">
+                                <label for="current-password"><strong>Nouveau mot de passe</strong><br>Choisis un mot de passe unique et sécurisé</label>
+                                <input id="new-password" type="password" class="form-control" name="new_password" placeholder="Nouveau mot de passe" required="true">
                             </div>
                             <div class="form-group">
-                                <label for="current-password"><strong>Repite la Contrase&ntilde;a</strong><br>Vuelve a escribir la contraseña</label>
-                                <input id="new-password-confirm" type="password" class="form-control" name="new_password_confirmation" placeholder="Confirmar contrase&ntilde;a" required="true">
+                                <label for="current-password"><strong>Confirme le mot de passe</strong><br>Saisis-le une seconde fois</label>
+                                <input id="new-password-confirm" type="password" class="form-control" name="new_password_confirmation" placeholder="Confirmer le mot de passe" required="true">
                             </div>
-                            <div class="text-right"><button type="submit" class="button green d-inline">Cambiar Contrase&ntilde;a</button></div>
+                            <div class="text-right"><button type="submit" class="button green d-inline">Modifier le mot de passe</button></div>
                         </form>
                     </div>
                 </div>
@@ -77,4 +77,3 @@
 
     </div>
 </div>
-

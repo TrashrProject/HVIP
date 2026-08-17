@@ -54,7 +54,7 @@ $nitroParams = array('sso' => $ClientAUTH);
 if ($autoRoomId > 0) {
     $nitroParams = array('room' => $autoRoomId, 'sso' => $ClientAUTH);
 }
-$nitroSrc = '/WebPixel/nitro-last/index.html?' . http_build_query($nitroParams, '', '&', PHP_QUERY_RFC3986);
+$nitroSrc = '/nitro-last/index.html?' . http_build_query($nitroParams, '', '&', PHP_QUERY_RFC3986);
 $nitroSrcHtml = htmlspecialchars($nitroSrc, ENT_QUOTES, 'UTF-8');
 $forcedIframe = '<iframe id="RdpNitroFrame" src="' . $nitroSrcHtml . '" class="Nitro" allow="camera none; microphone *"></iframe>';
 
@@ -85,14 +85,14 @@ $html = str_ireplace(
         'http://dynamics.habbovip.us/img/extras/platinos_icon_s.png'
     ),
     array(
-        '/WebPixel/nitro-last',
-        '/WebPixel/nitro-last',
-        '/WebPixel/nitro-last',
-        '/WebPixel/nitro-last',
-        '/WebPixel/avatar-image.php?figure=',
-        '/WebPixel/avatar-image.php?figure=',
-        '/WebPixel/avatar-image.php?figure=',
-        '/WebPixel/avatar-image.php?figure=',
+        '/nitro-last',
+        '/nitro-last',
+        '/nitro-last',
+        '/nitro-last',
+        '/avatar-image.php?figure=',
+        '/avatar-image.php?figure=',
+        '/avatar-image.php?figure=',
+        '/avatar-image.php?figure=',
         'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==',
         'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg=='
     ),
@@ -100,9 +100,9 @@ $html = str_ireplace(
 );
 
 $localhostShim = <<<'HTML'
-<link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?v=12">
-<link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/phone-presence-toast.css?v=1">
-<link rel="stylesheet" href="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/phone-whatsapp-header-v2.css?v=4">
+<link rel="stylesheet" href="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?v=12">
+<link rel="stylesheet" href="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/phone-presence-toast.css?v=1">
+<link rel="stylesheet" href="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/phone-whatsapp-header-v2.css?v=4">
 <script>
 window.swfobject = window.swfobject || { embedSWF: function () {} };
 window.Swiper = window.Swiper || function(){ return { update:function(){}, slideTo:function(){}, destroy:function(){} }; };
@@ -128,9 +128,9 @@ window.onunhandledrejection = function(event) {
     function cleanMarkup(value) {
         value = String(value || '');
         return value
-            .replace(/https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\/\?figure=/gi, '/WebPixel/avatar-image.php?figure=')
+            .replace(/https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\/\?figure=/gi, '/avatar-image.php?figure=')
             .replace(/https?:\/\/dynamics\.habbovip\.us\/img\/extras\/platinos_icon_s\.png/gi, TRANSPARENT_PNG)
-            .replace(/(["'])\/?\?figure=/gi, '$1/WebPixel/avatar-image.php?figure=');
+            .replace(/(["'])\/?\?figure=/gi, '$1/avatar-image.php?figure=');
     }
 
     function cleanUrl(value) {
@@ -138,11 +138,11 @@ window.onunhandledrejection = function(event) {
         if (!value) return value;
         if (/^https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\//i.test(value)) {
             var q = value.indexOf('?');
-            return '/WebPixel/avatar-image.php' + (q >= 0 ? value.substring(q) : '');
+            return '/avatar-image.php' + (q >= 0 ? value.substring(q) : '');
         }
-        if (/^\/?\?figure=/i.test(value)) return '/WebPixel/avatar-image.php' + value.replace(/^\/?/, '');
+        if (/^\/?\?figure=/i.test(value)) return '/avatar-image.php' + value.replace(/^\/?/, '');
         if (/platinos(?:%20|\s|_)+icon(?:%20|\s|_)+s\.png/i.test(value)) return TRANSPARENT_PNG;
-        if (/(?:^|\/)styles\.[a-z0-9_-]+\.css(?:\?|$)/i.test(value)) return '/WebPixel/nitro-last/empty-legacy.css';
+        if (/(?:^|\/)styles\.[a-z0-9_-]+\.css(?:\?|$)/i.test(value)) return '/nitro-last/empty-legacy.css';
         return value;
     }
 
@@ -249,11 +249,11 @@ window.onunhandledrejection = function(event) {
 
 console.info('[RDP] RP shell + local Nitro boot active');
 </script>
-<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-presence-toast.js?v=1" defer></script>
-<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-send-v2.js?v=6" defer></script>
-<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-header-v2.js?v=9" defer></script>
-<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-state.js?v=2" defer></script>
-<script src="/WebPixel/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-global.js?v=3" defer></script>
+<script src="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-presence-toast.js?v=1" defer></script>
+<script src="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-send-v2.js?v=6" defer></script>
+<script src="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-header-v2.js?v=9" defer></script>
+<script src="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-state.js?v=2" defer></script>
+<script src="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-global.js?v=3" defer></script>
 <script>
 (function () {
     if (!window.WebSocket || window.__rdpLocalWsShim) return;
@@ -264,7 +264,7 @@ console.info('[RDP] RP shell + local Nitro boot active');
         construct(Target, args) {
             let isRdpSocket = false;
             if (typeof args[0] === 'string' && /^wss:\/\/(127\.0\.0\.1|localhost):2087\//i.test(args[0])) {
-                args[0] = args[0].replace(/^wss:/i, 'ws:');
+                args[0] = args[0].replace(/^wss:\/\/(127\.0\.0\.1|localhost):2087\//i, 'wss://paradiserp.fr/ws/');
                 isRdpSocket = true;
             }
 
@@ -309,3 +309,7 @@ HTML;
 $html = preg_replace('/<head\b([^>]*)>/i', '<head$1>' . $localhostShim, $html, 1);
 
 echo $html;
+
+
+
+

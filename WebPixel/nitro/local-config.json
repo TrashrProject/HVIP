@@ -1,24 +1,25 @@
 {
   "socket.url": "ws://127.0.0.1:2097/",
-  "asset.url": "http://localhost/swf_pz/V5-0-2/",
-  "image.library.url": "http://localhost/swf_pz/V5-0-2/c_images/",
-  "hof.furni.url": "http://localhost/swf_pz/V5-0-2/dcr/hof_furni/",
-  "images.url": "http://localhost/swf_pz/V5-0-2/images",
-  "gamedata.url": "http://localhost/swf_pz/V5-0-2/gamedata",
+  "asset.url": "https://paradiserp.fr/swf_pz/V5-0-2/",
+  "image.library.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/",
+  "hof.furni.url": "https://paradiserp.fr/swf_pz/V5-0-2/dcr/hof_furni/",
+  "images.url": "https://paradiserp.fr/swf_pz/V5-0-2/images",
+  "gamedata.url": "https://paradiserp.fr/swf_pz/V5-0-2/gamedata",
   "url.prefix": "http://localhost/WebPixel",
-  "camera.url": "http://localhost/swf_pz/V5-0-2/c_images/camera",
-  "thumbnails.url": "http://localhost/swf_pz/V5-0-2/c_images/camera/thumbnails/%thumbnail%.png",
-  "habbopages.url": "http://localhost/swf_pz/V5-0-2/habbopages/",
-  "badge.asset.url": "http://localhost/swf_pz/V5-0-2/c_images/album1584/%badgename%.gif",
+  "camera.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/camera",
+  "thumbnails.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/camera/thumbnails/%thumbnail%.png",
+  "habbopages.url": "https://paradiserp.fr/swf_pz/V5-0-2/habbopages/",
+  "badge.asset.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/album1584/%badgename%.gif",
   "hotelview": {
     "images": {
-      "background": "http://localhost/swf_pz/V5-0-2/images/reception/stretch_blue.png",
+      "background": "https://paradiserp.fr/swf_pz/V5-0-2/images/reception/stretch_blue.png",
       "background.colour": "#6eadc8",
-      "sun": "http://localhost/swf_pz/V5-0-2/images/reception/sun.png",
-      "drape": "http://localhost/swf_pz/V5-0-2/images/reception/drape.png",
-      "left": "http://localhost/swf_pz/V5-0-2/images/reception/US.png",
-      "right": "http://localhost/swf_pz/V5-0-2/images/reception/US_right.png",
-      "right.repeat": "http://localhost/swf_pz/V5-0-2/images/reception/US_top_right.png"
+      "sun": "https://paradiserp.fr/swf_pz/V5-0-2/images/reception/sun.png",
+      "drape": "https://paradiserp.fr/swf_pz/V5-0-2/images/reception/drape.png",
+      "left": "https://paradiserp.fr/swf_pz/V5-0-2/images/reception/US.png",
+      "right": "https://paradiserp.fr/swf_pz/V5-0-2/images/reception/US_right.png",
+      "right.repeat": "https://paradiserp.fr/swf_pz/V5-0-2/images/reception/US_top_right.png"
     }
   }
 }
+

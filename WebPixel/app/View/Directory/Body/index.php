@@ -1,10 +1,11 @@
 <?php
 /**
- * Velora RP - street RP landing / login / registration.
+ * ParadiseRP - street RP landing / login / registration.
  */
 
 $registeredUsers = '0';
 $onlineUsers = '0';
+$staffLoginOnly = isset($_GET['staff-login']);
 
 try {
     if (isset($UserMG)) {
@@ -63,9 +64,6 @@ try {
     <div class="street-tree tree-right"></div>
     <div class="sidewalk"></div>
     <div class="road"></div>
-    <div class="street-light-sweep"></div>
-    <div class="street-puddle puddle-a"></div>
-    <div class="street-puddle puddle-b"></div>
 
     <div class="street-avatar avatar-left">
         <img src="<?php echo IMG; ?>/male.gif" alt="">
@@ -77,18 +75,15 @@ try {
 
 <div class="landing-layer">
     <header class="minimal-topbar">
-        <a class="mini-brand" href="<?php echo URL; ?>/" aria-label="Velora RP">
-            <span class="mini-logo">V</span>
-            <span><strong>VELORA</strong><small>ROLEPLAY</small></span>
+        <a class="mini-brand" href="<?php echo URL; ?>/" aria-label="ParadiseRP">
+            <img class="mini-logo" src="<?php echo IMG; ?>/logos/hv_logo_p.png" alt="<?php echo htmlspecialchars(Config::$WName, ENT_QUOTES, 'UTF-8'); ?>">
+            <span><strong>PARADISE</strong><small>ROLEPLAY</small></span>
         </a>
 
-        <div class="topbar-right">
-            <span class="season-pill"><i class="fas fa-circle"></i> SAISON 01</span>
-            <div class="server-pill">
-                <span class="server-dot"></span>
-                <strong><?php echo htmlspecialchars($onlineUsers, ENT_QUOTES, 'UTF-8'); ?></strong>
-                <span>en ligne</span>
-            </div>
+        <div class="server-pill">
+            <span class="server-dot"></span>
+            <strong><?php echo htmlspecialchars($onlineUsers, ENT_QUOTES, 'UTF-8'); ?></strong>
+            <span>en ligne</span>
         </div>
     </header>
 
@@ -101,37 +96,14 @@ try {
             <span class="device-notch"></span>
             <span class="device-home"></span>
 
-            <div class="device-backplate" aria-hidden="true">
-                <div class="back-camera-cluster">
-                    <span class="back-camera camera-one"></span>
-                    <span class="back-camera camera-two"></span>
-                    <span class="back-flash"></span>
-                </div>
-                <div class="back-brand">
-                    <span class="back-logo">V</span>
-                    <strong>VELORA</strong>
-                    <small>CITY ACCESS DEVICE</small>
-                </div>
-                <span class="back-mark">RP · 01</span>
-            </div>
-
             <div class="device-screen">
-                <div class="device-statusbar" aria-hidden="true">
-                    <span id="device-clock">00:00</span>
-                    <div class="device-status-icons">
-                        <i class="fas fa-signal"></i>
-                        <i class="fas fa-wifi"></i>
-                        <span class="battery"><span></span></span>
-                    </div>
-                </div>
-
                 <div class="brand-zone">
                     <div class="brand-emblem">
                         <span class="emblem-city"></span>
                         <span class="emblem-label">RP</span>
                     </div>
 
-                    <div class="brand-title">VELORA</div>
+                    <div class="brand-title">PARADISERP</div>
                     <div class="brand-subtitle">HABBO ROLEPLAY</div>
 
                     <div class="online-badge">
@@ -145,43 +117,31 @@ try {
                         <div><strong>3</strong><span>QUARTIERS</span></div>
                     </div>
 
-                    <div class="life-chips" aria-label="Possibilités RP">
-                        <span><i class="fas fa-briefcase"></i> Jobs</span>
-                        <span><i class="fas fa-store"></i> Business</span>
-                        <span><i class="fas fa-shield-alt"></i> Police</span>
-                        <span><i class="fas fa-user-secret"></i> Crime</span>
-                    </div>
-
                     <p class="brand-pitch">
                         Fais ta vie. Trouve un métier. Monte ton business. Rejoins la police ou impose ton nom dans la rue.
                     </p>
-
-                    <div class="city-pulse" aria-live="polite">
-                        <span class="city-pulse-label"><i class="fas fa-circle"></i> VELORA LIVE</span>
-                        <strong id="city-pulse-text">La ville évolue avec les joueurs.</strong>
-                    </div>
                 </div>
 
                 <div class="auth-zone">
                     <div class="auth-head">
                         <div>
-                            <span class="auth-eyebrow">ESPACE CITOYEN</span>
-                            <h1 id="auth-title">Connexion</h1>
+                            <span class="auth-eyebrow"><?php echo $staffLoginOnly ? 'ESPACE STAFF' : 'ESPACE CITOYEN'; ?></span>
+                            <h1 id="auth-title"><?php echo $staffLoginOnly ? 'Connexion staff' : 'Connexion'; ?></h1>
                         </div>
                         <span class="secure-state"><i class="fas fa-shield-alt"></i> sécurisé</span>
                     </div>
 
+                    <?php if(!$staffLoginOnly): ?>
                     <div class="auth-tabs" role="tablist" aria-label="Connexion ou inscription">
                         <button type="button" class="auth-tab active" data-auth-tab="login">Connexion</button>
                         <button type="button" class="auth-tab" data-auth-tab="register">Inscription</button>
                     </div>
+                    <?php else: ?>
+                    <div class="auth-alert success"><i class="fas fa-shield-alt"></i><span>La connexion pendant la maintenance est r&eacute;serv&eacute;e aux membres du staff.</span></div>
+                    <?php endif; ?>
+                    <?php if($staffLoginOnly): ?><style>#register-box,[data-open-auth="register"]{display:none!important}</style><?php endif; ?>
 
                     <div id="login-box" class="auth-view active" data-auth-view="login">
-                        <div class="form-intro login-intro">
-                            <span class="intro-icon"><i class="fas fa-door-open"></i></span>
-                            <div><strong>Bon retour à Velora.</strong><small>Reprends directement là où ton histoire s'est arrêtée.</small></div>
-                        </div>
-
                         <div id="e-login-message" class="auth-alert error" style="display:none;">
                             <i class="fas fa-exclamation-circle"></i><span id="e-login-msg"></span>
                         </div>
@@ -194,8 +154,10 @@ try {
                         <?php endif; ?>
 
                         <label class="field-label" for="pz-login-uname">Pseudo</label>
-                        <div class="field-wrap">
-                            <i class="far fa-user"></i>
+                        <div class="field-wrap login-identity-field">
+                            <div id="login-avatar-preview" class="login-avatar-preview" aria-live="polite" aria-label="Aperçu du personnage">
+                                <i class="fas fa-user"></i>
+                            </div>
                             <input id="pz-login-uname" type="text" placeholder="Ton pseudo" autocomplete="username" maxlength="18">
                         </div>
 
@@ -206,14 +168,6 @@ try {
                             <button type="button" class="password-toggle" data-toggle-password="pz-login-pass" aria-label="Afficher ou masquer le mot de passe"><i class="fas fa-eye"></i></button>
                         </div>
 
-                        <div class="login-options">
-                            <label class="remember-line">
-                                <input id="remember-username" type="checkbox" value="1">
-                                <span>Se souvenir de mon pseudo</span>
-                            </label>
-                            <span id="caps-lock-hint" class="caps-hint"><i class="fas fa-arrow-up"></i> Verr. Maj activée</span>
-                        </div>
-
                         <button id="subrmit-login" type="button" class="auth-primary">
                             <span>Se connecter</span>
                         </button>
@@ -221,16 +175,9 @@ try {
                         <button type="button" class="auth-secondary" data-open-auth="register">
                             <span>Créer un compte</span>
                         </button>
-
-                        <div class="auth-footnote"><i class="fas fa-circle"></i> Serveur RP disponible · progression sauvegardée</div>
                     </div>
 
                     <div id="register-box" class="auth-view" data-auth-view="register">
-                        <div class="form-intro register-intro">
-                            <span class="intro-icon"><i class="fas fa-id-card"></i></span>
-                            <div><strong>Créer ton identité citoyenne.</strong><small>Ton pseudo sera le nom de ton personnage en ville.</small></div>
-                        </div>
-
                         <div id="e-register-message" class="auth-alert error" style="display:none;">
                             <i class="fas fa-exclamation-circle"></i><span id="e-register-msg"></span>
                         </div>
@@ -268,10 +215,6 @@ try {
                             </div>
                         </div>
 
-                        <div class="password-strength" aria-hidden="true"><span id="password-strength-fill"></span></div>
-                        <small id="password-strength-label" class="password-strength-label">Sécurité du mot de passe</small>
-                        <small id="password-match-label" class="password-match-label"></small>
-
                         <label class="rules-line">
                             <input id="rp-rules" type="checkbox" value="1">
                             <span>J'accepte les règles RP et le respect des autres joueurs.</span>
@@ -284,8 +227,6 @@ try {
                         <button type="button" class="auth-secondary" data-open-auth="login">
                             <span>J'ai déjà un compte</span>
                         </button>
-
-                        <div class="auth-footnote"><i class="fas fa-gift"></i> Identité RP + logement de départ après inscription</div>
                     </div>
                 </div>
             </div>

@@ -1,8 +1,8 @@
 {
-    "socket.url": "wss://ws.habbovip.us:2096/",
-    "asset.url": "https://swfs.habbovip.us/V5-0-2",
-    "image.library.url": "https://swf.habbovip.us/V5-0-2/c_images/",
-    "hof.furni.url": "https://swf.habbovip.us/V5-0-2/dcr/hof_furni",
+    "socket.url": "wss://paradiserp.fr/nitro-ws/",
+    "asset.url": "https://paradiserp.fr/swf_pz/V5-0-2",
+    "image.library.url": "https://paradiserp.fr/swf_pz/V5-0-2/c_images/",
+    "hof.furni.url": "https://paradiserp.fr/swf_pz/V5-0-2/dcr/hof_furni",
     "images.url": "${asset.url}/images",
     "gamedata.url": "${asset.url}/gamedata/json",
     "sounds.url": "${asset.url}/sounds/%sample%.mp3",
@@ -110,3 +110,4 @@
         "${images.url}/big_arrow.png"
     ]
 }
+

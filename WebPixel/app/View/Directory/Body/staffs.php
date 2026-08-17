@@ -19,9 +19,17 @@
                     <div class="staff-grid">
                         <?php
                         $R_ = $UserMG->GetStaffs();
+                        $CurrentStaffRank = null;
+                        $StaffRankNames = array(7 => 'Fondateurs', 6 => 'Développeurs', 5 => 'Administrateurs', 4 => 'Modérateurs', 3 => 'Assistants');
                         while($Row = mysqli_fetch_assoc($R_)): 
-                            if($Row['rank'] == 6): $Badge = "DEV"; elseif($Row['rank'] == 5): $Badge = "ADM"; elseif($Row['rank'] == 4): $Badge = "MOD"; elseif($Row['rank'] == 3): $Badge = "STAFF"; endif;
+                            if($Row['rank'] == 7): $Badge = "DEV"; elseif($Row['rank'] == 6): $Badge = "DEV"; elseif($Row['rank'] == 5): $Badge = "ADM"; elseif($Row['rank'] == 4): $Badge = "MOD"; elseif($Row['rank'] == 3): $Badge = "STAFF"; endif;
+                            $BadgeFile = ($Row['rank'] == 7) ? 'FOND.png' : $Badge . '.png';
+                            $BadgePath = dirname(__DIR__, 4) . '/Dynamics/img/staff/normalized/' . $BadgeFile;
+                            if($CurrentStaffRank !== (int)$Row['rank']):
+                                $CurrentStaffRank = (int)$Row['rank'];
                         ?>
+                        <div class="staff-rank-heading"><span><?php echo $StaffRankNames[$CurrentStaffRank]; ?></span></div>
+                        <?php endif; ?>
                         <a href="<?php echo Config::$URL; ?>/profile/<?php echo $Row['id']; ?>" class="content-box mb-0 no-link-styling" style="<?php echo ($Row['online'] == '1')? "border-bottom: 3px solid #1dc40e;" : "" ; ?>">
                             <div class="title d-flex align-items-center" style="">
                                 <div class="mr-auto" style="padding-left: 115px;"><?php echo $Row['username']; ?></div>
@@ -33,11 +41,11 @@
                                 </div>
                                 <div class="mr-auto">
                                     <div class="staff-role text-white">
-                                        <?php if($Row['rank'] == 6): echo "Desarrollador / Dueño"; elseif($Row['rank'] == 5): echo "Administrador"; elseif($Row['rank'] == 4): echo "Moderador"; elseif($Row['rank'] == 3): echo "Ayudante"; endif; ?>
+                                        <?php if($Row['rank'] == 7): echo "Fondateur"; elseif($Row['rank'] == 6): echo "D&eacute;veloppeur"; elseif($Row['rank'] == 5): echo "Administrateur"; elseif($Row['rank'] == 4): echo "Mod&eacute;rateur"; elseif($Row['rank'] == 3): echo "Assistant"; endif; ?>
 
                                     </div>
                                 </div>
-                                <div class="mr-3"><img src="<?php echo DY; ?>/img/staff/<?php echo $Badge; ?>.gif"></div>
+                                <div class="mr-3"><img class="staff-rank-badge" src="<?php echo DY; ?>/img/staff/normalized/<?php echo $BadgeFile; ?>?v=<?php echo is_file($BadgePath) ? filemtime($BadgePath) : time(); ?>" alt="<?php echo ($Row['rank'] == 7) ? 'Fondateur' : $Badge; ?>"></div>
                             </div>
                         </a>
 
@@ -48,14 +56,14 @@
                 <div class="col-4 pl-0">
                     <div class="help-grid">
                         <div class="content-box">
-                            <div class="title">¿Necesitas ayuda?</div>
+                            <div class="title">Besoin d'aide ?</div>
                             <div class="p-3">
-                                La manera más fácil de contactarnos es a través de nuestro discord official, ¡click <a href="<?php echo Config::$DiscordInvite; ?>" target="_blank"> AQU&Iacute; </a>para ingresar!<br>
-                                También puedes contactar a nuestro Equipo Staff para preguntas y pedidos de ayuda... No olvides que puedes usar el comando <b>:n [pregunta]</b> para mandar una duda general.
+                                Le moyen le plus simple de nous contacter est notre Discord officiel : clique <a href="<?php echo Config::$DiscordInvite; ?>" target="_blank">ICI</a> pour le rejoindre.<br>
+                                Tu peux aussi contacter l'&eacute;quipe staff pour tes questions. Utilise <b>:n [question]</b> pour envoyer une demande d'aide g&eacute;n&eacute;rale.
                                 <center><img class="pt-3" src="<?php echo IMG; ?>/extras/frank_signs.gif"></center>
                                 <hr>
 
-                                Si no puedes entrar a jugar, Por favor usa nuestro <a class="text-white font-weight-bold text-decoration-none" href="<?php echo Config::$DiscordInvite; ?>" target="_blank">Discord</a> para enviarnos un mensaje.
+                                Si tu ne peux pas entrer dans le jeu, utilise notre <a class="text-white font-weight-bold text-decoration-none" href="<?php echo Config::$DiscordInvite; ?>" target="_blank">Discord</a> pour nous envoyer un message.
                             </div>
                         </div>
                         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>

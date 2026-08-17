@@ -26,7 +26,7 @@ class UserSessionMG
 
         $Ban = $this->BanValidation("ip", AppFunctions::GetIP());
         if($Ban['banned']):
-            $Response['msg'] = '¡Vaya!, Usted ha sido baneado hasta ('. date('d/m/Y', $Ban['exp']) .'), por la razon ('. $Ban['reason'] .').';
+            $Response['msg'] = 'Votre compte est banni jusqu’au ('. date('d/m/Y', $Ban['exp']) .') pour le motif suivant : ('. $Ban['reason'] .').';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -34,22 +34,33 @@ class UserSessionMG
 
         $Ban = $this->BanValidation("user", $U);
         if($Ban['banned']):
-            $Response['msg'] = '¡Vaya!, Usted ha sido baneado hasta ('. date('d/m/Y', $Ban['exp']) .'), por la razon ('. $Ban['reason'] .').';
+            $Response['msg'] = 'Votre compte est banni jusqu’au ('. date('d/m/Y', $Ban['exp']) .') pour le motif suivant : ('. $Ban['reason'] .').';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
         endif;
         
         if($this->MatchPass($U, $P)):
+            // The password is valid at this point. During maintenance we do
+            // not create a session for regular players: only staff can work
+            // on the hotel through the CMS.
+            $Account = $this->DB->Select("users", "rank", "username = '" . $U . "'");
+            if(Config::$_MANT && (!$Account || (int)$Account['rank'] < 3)):
+                $Response['msg'] = 'L\'hôtel est actuellement en maintenance. Seuls les membres du staff peuvent se connecter.';
+                $Response['result'] = false;
+                $Response['maintenance'] = true;
+                return json_encode($Response);
+            endif;
+
             // Update last ip
             $this->DB->Update("users", "ip_last = '". AppFunctions::GetIP() ."'", "username = '". $U ."'");
             $this->Session->Save(Config::$SessionName, $U);
-            $Response['msg'] = "Has iniciado sesión correctamente, serás redireccionad@ en breve.";
+            $Response['msg'] = "Connexion réussie, vous allez être redirigé dans un instant.";
             $Response['result'] = true;
             return json_encode($Response);
         else:
             // Failed login
-            $Response['msg'] = 'Algo ha salido mal, revisa tu usuario y/o contraseña.';
+            $Response['msg'] = 'Une erreur est survenue : vérifie ton pseudo et ton mot de passe.';
             $Response['result'] = false;
             return json_encode($Response);
         endif;
@@ -65,7 +76,7 @@ class UserSessionMG
         $Ban = $this->BanValidation("ip", AppFunctions::GetIP());
 
         if($Ban['banned']):
-            $Response['msg'] = '¡Vaya!, Usted ha sido baneado hasta ('. date('d/m/Y', $Ban['exp']) .'), por la razon ('. $Ban['reason'] .').';
+            $Response['msg'] = 'Votre compte est banni jusqu’au ('. date('d/m/Y', $Ban['exp']) .') pour le motif suivant : ('. $Ban['reason'] .').';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -74,25 +85,25 @@ class UserSessionMG
         // Checks name validation
         if(strlen($U) < 3):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario debe ser mayor a 3 caracteres.';
+            $Response['msg'] = 'Le pseudo doit contenir au moins 3 caractères.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
         elseif(strlen($U) > 18):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario debe ser menor a 18 caracteres.';
+            $Response['msg'] = 'Le pseudo ne doit pas dépasser 18 caractères.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
         elseif(strlen($U) != strlen(str_replace(' ', '', $U))):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario no puede contener espacios.';
+            $Response['msg'] = 'Le pseudo ne peut pas contenir d’espace.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
         elseif(!AppFunctions::OnlyLetters($U)):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario solo debe contener letras y/o numeros.';
+            $Response['msg'] = 'Le pseudo ne peut contenir que des lettres et des chiffres.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -101,7 +112,7 @@ class UserSessionMG
         // Email Validation
       /*  if(!filter_var($E, FILTER_VALIDATE_EMAIL)):
             // Message for Email failed validation
-            $Response['msg'] = 'El email ingresado no es válido.';
+            $Response['msg'] = 'L’adresse e-mail renseignée n’est pas valide.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -110,7 +121,7 @@ class UserSessionMG
         // Password Validation
         if(strlen($P) < 6):
             // Message for Email failed validation
-            $Response['msg'] = 'La contraseña debe ser mayor a 6 caracteres.';
+            $Response['msg'] = 'Le mot de passe doit contenir au moins 6 caractères.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -122,13 +133,13 @@ class UserSessionMG
         if($Exists['result'] == false):
             if($Exists['type'] == "username"):
                 // Message for username taken
-                $Response['msg'] = 'El nombre de usuario ya está tomado.';
+                $Response['msg'] = 'Ce pseudo est déjà utilisé.';
                 $Response['result'] = false;
                 return json_encode($Response);
                 exit;
              /*else:
                 // Message for email taken
-                $Response['msg'] = 'Este correo ya está tomado.';
+                $Response['msg'] = 'Cette adresse e-mail est déjà utilisée.';
                 $Response['result'] = false;
                 return json_encode($Response);
                 exit;*/
@@ -139,7 +150,7 @@ class UserSessionMG
         $UsersCount = $this->DB->Count("users", "null", "ip_reg = '" . AppFunctions::GetIP() . "'");
         if($UsersCount >= Config::$MaxUsers):
             // Message for email taken
-            $Response['msg'] = 'Ya has llegado al límite de usuarios. Por favor inicia sesión.';
+            $Response['msg'] = 'Tu as atteint la limite de comptes autorisés. Connecte-toi à un compte existant.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -173,7 +184,7 @@ class UserSessionMG
 
         // Insert PlayStats for new user
         if($Row == null):
-            $Response['msg'] = "Algo ha salido mal al intentar crear tu cuenta, por favor inténtalo de nuevo.";
+            $Response['msg'] = "La création du compte a échoué. Réessaie dans quelques instants.";
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -188,7 +199,7 @@ class UserSessionMG
 
         // Idea, se pueden mandar MUS de feed para avisar que alguein nuevo se ha registrado
 
-        $Response['msg'] = "¡Felicitaciones y bienvenid@ a HabboVIP, serás redireccionad@ en 3 segundos!";
+        $Response['msg'] = "Bienvenue sur ParadiseRP ! Tu vas être redirigé(e) dans 3 secondes.";
         $Response['result'] = true;
         return json_encode($Response);
         exit;
@@ -198,37 +209,37 @@ class UserSessionMG
         // Checks name validation
         if(strlen($U) < 3):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario debe ser mayor a 3 caracteres.';
+            $Response['msg'] = 'Le pseudo doit contenir au moins 3 caractères.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
         elseif(strlen($U) > 18):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario debe ser menor a 18 caracteres.';
+            $Response['msg'] = 'Le pseudo ne doit pas dépasser 18 caractères.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
         elseif(strlen($U) != strlen(str_replace(' ', '', $U))):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario no puede contener espacios.';
+            $Response['msg'] = 'Le pseudo ne peut pas contenir d’espace.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
         elseif(!AppFunctions::OnlyLetters($U)):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario solo debe contener letras y/o numeros.';
+            $Response['msg'] = 'Le pseudo ne peut contenir que des lettres et des chiffres.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
         elseif($this->UsernameExists($U)):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario "' . $U .  '" ya esta en uso.';
+            $Response['msg'] = 'Le pseudo "' . $U .  '" est déjà utilisé.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
         else:
             // Message for username success validation
-            $Response['msg'] = 'Este nombre de usuarío está disponible.';
+            $Response['msg'] = 'Ce pseudo est disponible.';
             $Response['result'] = true;
             return json_encode($Response);
         endif;
@@ -313,7 +324,7 @@ class UserSessionMG
         // Checks for the Maximum accounts per IP
         $UsersCount = $this->DB->Count("users", "null", "ip_reg = '" . AppFunctions::GetIP() . "'");
         if($UsersCount >= Config::$MaxUsers):
-            $Response['msg'] = 'Ya tienes el máximo de cuentas permitidas.';
+            $Response['msg'] = 'Tu as déjà le nombre maximum de comptes autorisés.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -321,7 +332,7 @@ class UserSessionMG
 
         $Ban = $this->BanValidation("ip", AppFunctions::GetIP());
         if($Ban['banned']):
-            $Response['msg'] = '¡Vaya!, Usted ha sido baneado hasta ('. date('d/m/Y', $Ban['exp']) .'), por la razon ('. $Ban['reason'] .').';
+            $Response['msg'] = 'Votre compte est banni jusqu’au ('. date('d/m/Y', $Ban['exp']) .') pour le motif suivant : ('. $Ban['reason'] .').';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -329,13 +340,13 @@ class UserSessionMG
 
         if(strlen($U) != strlen(str_replace(' ', '', $U))):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario no puede contener espacios.';
+            $Response['msg'] = 'Le pseudo ne peut pas contenir d’espace.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
         elseif(!AppFunctions::OnlyLetters($U)):
             // Message for username failed validation
-            $Response['msg'] = 'El nombre de usuario solo debe contener letras y/o numeros.';
+            $Response['msg'] = 'Le pseudo ne peut contenir que des lettres et des chiffres.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -343,7 +354,7 @@ class UserSessionMG
 
         //If Username already exists
         if($this->UsernameExists($U)):
-            $Response['msg'] = 'Este nombre de usuario ya esta en uso.';
+            $Response['msg'] = 'Ce pseudo est déjà utilisé.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -352,7 +363,7 @@ class UserSessionMG
         // Email Validation
         if(!filter_var($E, FILTER_VALIDATE_EMAIL)):
             // Message for Email failed validation
-            $Response['msg'] = 'El email ingresado no es válido.';
+            $Response['msg'] = 'L’adresse e-mail renseignée n’est pas valide.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -388,7 +399,7 @@ class UserSessionMG
 
         // Insert PlayStats for new user
         if($Row == null):
-            $Response['msg'] = "Algo ha salido mal al intentar crear tu cuenta, por favor inténtalo de nuevo.";
+            $Response['msg'] = "La création du compte a échoué. Réessaie dans quelques instants.";
             $Response['result'] = false;
             return json_encode($Response);
             exit;
@@ -403,7 +414,7 @@ class UserSessionMG
 
         // Idea, se pueden mandar MUS de feed para avisar que alguein nuevo se ha registrado
 
-        $Response['msg'] = "¡Felicitaciones y bienvenid@ a HabboVIP, serás redireccionad@ en 1 segundos!";
+        $Response['msg'] = "Bienvenue sur ParadiseRP ! Tu vas être redirigé(e) dans une seconde.";
         $Response['result'] = true;
         return json_encode($Response);
         exit;

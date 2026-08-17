@@ -24,6 +24,7 @@ else:
     $SBusiness = $BusinessMG->GetUserSecondaryBusiness($UData['id']);
 
 endif;
+$FrenchBusiness = array(1 => 'Hopital', 2 => 'Eboueurs', 3 => 'Garage mecanique', 4 => 'Armurerie', 6 => 'Routiers', 7 => 'Gardes du corps', 8 => 'Mineurs', 9 => 'Police', 10 => "McDonald's", 11 => 'Gouvernement central', 12 => 'Gouvernement federal', 13 => 'Cafeteria Bobba Ball', 14 => 'Subway', 15 => 'Glacier', 16 => 'Bubble Juice');
 ?>
 <div class="content">
 
@@ -39,19 +40,19 @@ endif;
                     <div class="box-content p-2">
                         <div class="d-flex justify-content-center align-items-center text-center pb-3 profile-box">
                             <div class=""><img class="profile-pixel" src="https://nitro-imager.kubbo.ch/?figure=<?php echo $User_['look']; ?>&amp;direction=2&amp;gesture=sml&amp;size=l"></div>
-                            <div class="pr-4"><img src="<?php echo DY; ?>/img/extras/bio.gif"> <b>Rango</b> <br> <?php if($User_['rank'] == 6): echo "Desarrollador / Dueño"; elseif($User_['rank'] == 5): echo "Administrador(a)"; elseif($User_['rank'] == 4): echo "Moderador(a)"; elseif($User_['rank'] == 3): echo "Ayudante"; endif; ?></div>
+                            <div class="pr-4"><img src="<?php echo DY; ?>/img/extras/bio.gif"> <b>Rang</b> <br> <?php if($User_['rank'] == 7): echo "Fondateur"; elseif($User_['rank'] == 6): echo "D&eacute;veloppeur"; elseif($User_['rank'] == 5): echo "Administrateur"; elseif($User_['rank'] == 4): echo "Mod&eacute;rateur"; elseif($User_['rank'] == 3): echo "Assistant"; endif; ?></div>
                         </div>
                         <div class="d-flex justify-content-center align-items-center text-center">
-                            <div class="flex-fill p-2 mr-1 profile-level-box"><b><?php echo $User_['level']; ?></b><br>Nivel</div>
-                            <div class="flex-fill p-2 ml-2 profile-level-box"><b><?php echo $User_['curxp']; ?> / <?php echo $User_['needxp']; ?></b><br>Reputaci&oacute;n (XP)</div>
+                            <div class="flex-fill p-2 mr-1 profile-level-box"><b><?php echo $User_['level']; ?></b><br>Niveau</div>
+                            <div class="flex-fill p-2 ml-2 profile-level-box"><b><?php echo $User_['curxp']; ?> / <?php echo $User_['needxp']; ?></b><br>R&eacute;putation (XP)</div>
                         </div>
                         <hr>
-                        <div><span class="float-right font-weight-bold"><?php echo date('d/m/Y', $User_['account_created']); ?></span><img src="<?php echo DY; ?>/img/extras/account_created.gif"> Registro</div>
+                        <div><span class="float-right font-weight-bold"><?php echo date('d/m/Y', $User_['account_created']); ?></span><img src="<?php echo DY; ?>/img/extras/account_created.gif"> Inscription</div>
                         <div>
                             <img src="<?php echo DY; ?>/img/extras/logout.gif"> <span class="text-success font-weight-bold">&Uacute;ltima conexi&oacute;n</span>
                             <span class="float-right font-weight-bold"><?php echo AppFunctions::GetTime($User_['last_online']); ?></span>
                         </div>
-                        <div><span class="float-right font-weight-bold">$<?php echo number_format($User_['credits'] + $User_['bank']); ?></span><img src="<?php echo DY; ?>/img/extras/credit.png"> Valor de la cuenta</div>
+                        <div><span class="float-right font-weight-bold">$<?php echo number_format($User_['credits'] + $User_['bank']); ?></span><img src="<?php echo DY; ?>/img/extras/credit.png"> Valeur du compte</div>
                         <hr>
                     </div>
                 </div>
@@ -91,17 +92,17 @@ endif;
             <div class="col-4">
                 <div class="content-box mb-4">
                     <div class="title">
-                        <i class="fas fa-star text-warning"></i> Estad&iacute;sticas Criminales
+                        <i class="fas fa-star text-warning"></i> Statistiques criminelles
                     </div>
                     <div class="box-content p-2">
                         <ul class="list-group list-group-flush">
 
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                               Asesinatos
+                               Meurtres
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['kills']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Muertes
+                                Morts
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['deaths']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -109,51 +110,51 @@ endif;
                                 <span class="badge badge-secondary badge-pill peak"><?php $C_ = ($User_['deaths'] == 0)? $User_['kills'] : ($User_['kills'] / $User_['deaths']); echo number_format($C_, 2); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Golpes
+                                Coups
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['punches']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Asesinatos a Golpes
+                                Meurtres au corps &agrave; corps
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['hitkills']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Asesinatos con Armas
+                                Meurtres avec arme
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['gunkills']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Polic&iacute;as Asesinados
+                                Policiers tu&eacute;s
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['copkills']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Muerto por Pol&iacute;cias
+                                Mort par la police
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['copdeaths']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Arrestos (como Polic&iacute;a)
+                                Arrestations (police)
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['arrests']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Arrestad@
+                                Arr&ecirc;t&eacute;(e)
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['arrested']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Evasiones policiacas
+                                &Eacute;vasions de la police
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['evasions']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Coca&iacute;na conseguida
+                                Coca&iuml;ne obtenue
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['cocaine_taken']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Medicamentos conseguidos
+                                M&eacute;dicaments obtenus
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['medicines_taken']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Marihuana conseguida
+                                Marijuana obtenue
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['weed_taken']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Drogas consumidas
+                                Drogues consomm&eacute;es
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['drugs_taken']); ?></span>
                             </li>
                         </ul>
@@ -161,16 +162,16 @@ endif;
                 </div>
                 <div class="content-box mb-4">
                     <div class="title">
-                        <i class="fas fa-money-bill-wave text-warning"></i> Estad&iacute;sticas Econ&oacute;micas
+                        <i class="fas fa-money-bill-wave text-warning"></i> Statistiques &eacute;conomiques
                     </div>
                     <div class="box-content p-2">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Dinero ganado
+                                Argent gagn&eacute;
                                 <span class="badge badge-secondary badge-pill peak">$<?php echo number_format($User_['money_earned']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Platinos ganados
+                                Platines gagn&eacute;es
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['pl_earned']); ?> PL</span>
                             </li>
                         </ul>
@@ -180,14 +181,14 @@ endif;
             <div class="col-4">
                 <div class="content-box mb-4">
                     <div class="title">
-                        <i class="fas fa-user-md text-info"></i> Estad&iacute;sticas de Trabajo (Primario)                   </div>
+                        <i class="fas fa-user-md text-info"></i> Statistiques de travail (principal)                   </div>
                     <div class="box-content p-2">
                         <?php if($PBusiness == null): ?>
                         <div class="profile-corp d-flex align-items-center justify-content-center p-2">
                             <div class="corp-badge">
                                 <img src="<?php echo Config::$SWF;?>/habbo-imaging/corp/poor.gif">
                             </div>
-                            <div class="corp text-center ml-auto pr-2">Desempleado</div>
+                            <div class="corp text-center ml-auto pr-2">Sans emploi</div>
                         </div>
                         <?php else: ?>
                         <a href="<?php echo Config::$URL;?>/corporation/<?php echo $PBusiness['id']; ?>" target="" style="color:white;">
@@ -195,17 +196,17 @@ endif;
                             <div class="corp-badge">
                                 <img src="<?php echo Config::$SWF;?>/habbo-imaging/corp/<?php echo $PBusiness['badge']; ?>.gif">
                             </div>
-                            <div class="corp text-center ml-auto pr-2"><?php echo utf8_encode($PBusiness['name']); ?> (<?php echo utf8_encode($PBusiness['RankName']); ?>)</div>
+                            <div class="corp text-center ml-auto pr-2"><?php echo isset($FrenchBusiness[(int)$PBusiness['id']]) ? $FrenchBusiness[(int)$PBusiness['id']] : utf8_encode($PBusiness['name']); ?> (<?php echo utf8_encode($PBusiness['RankName']); ?>)</div>
                             </div>
                         </a>
                         <?php endif; ?>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Minutos trabajando
+                                Minutes travaill&eacute;es
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['time_worked']); ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Turnos completados (totales)
+                                Services termin&eacute;s (total)
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($User_['total_shifts']); ?></span>
                             </li>
                         </ul>
@@ -214,14 +215,14 @@ endif;
 
                 <div class="content-box mb-4">
                     <div class="title">
-                        <i class="fas fa-user-md text-info"></i> Estad&iacute;sticas de Trabajo (Secundario)                  </div>
+                        <i class="fas fa-user-md text-info"></i> Statistiques de travail (secondaire)                  </div>
                     <div class="box-content p-2">
                         <?php if($SBusiness == null): ?>
                             <div class="profile-corp d-flex align-items-center justify-content-center p-2">
                                 <div class="corp-badge">
                                     <img src="<?php echo Config::$SWF;?>/habbo-imaging/corp/poor.gif">
                                 </div>
-                                <div class="corp text-center ml-auto pr-2">Desempleado</div>
+                                <div class="corp text-center ml-auto pr-2">Sans emploi</div>
                             </div>
                         <?php else: ?>
                         <a href="<?php echo Config::$URL;?>/corporation/<?php echo $SBusiness['id']; ?>" target="" style="color:white;">
@@ -229,17 +230,17 @@ endif;
                                 <div class="corp-badge">
                                     <img src="<?php echo Config::$SWF;?>/habbo-imaging/corp/<?php echo $SBusiness['badge']; ?>.gif">
                                 </div>
-                                <div class="corp text-center ml-auto pr-2"><?php echo utf8_encode($SBusiness['name']); ?></div>
+                                <div class="corp text-center ml-auto pr-2"><?php echo isset($FrenchBusiness[(int)$SBusiness['id']]) ? $FrenchBusiness[(int)$SBusiness['id']] : utf8_encode($SBusiness['name']); ?></div>
                             </div>
                         </a>
                         <?php if($UserMG->GetUserSecondJobLvl($User_['id'], $SBusiness['id']) > 0): ?>
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Nivel
+                                    Niveau
                                     <span class="badge badge-secondary badge-pill peak"><?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], $SBusiness['id'])); ?></span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Habilidad
+                                    Comp&eacute;tence
                                     <span class="badge badge-secondary badge-pill peak"><?php echo number_format($UserMG->GetUserSecondJobXP($User_['id'], $SBusiness['id'])); ?> / 50</span>
                                 </li>
                             </ul>
@@ -250,32 +251,32 @@ endif;
 
                 <div class="content-box mb-4">
                     <div class="title">
-                        <i class="fa fa-trophy text-info"></i> Habilidades
+                        <i class="fa fa-trophy text-info"></i> Comp&eacute;tences
                     </div>
                     <div class="box-content p-2">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Basurero (Nivel <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 2)); ?>)
+                                Eboueur (Niveau <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 2)); ?>)
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($UserMG->GetUserSecondJobXP($User_['id'], 2)); ?> / 50</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Mec&aacute;nico (Nivel <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 3)); ?>)
+                                M&eacute;canicien (Niveau <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 3)); ?>)
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($UserMG->GetUserSecondJobXP($User_['id'], 3)); ?> / 50</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Fabricante de Armas (Nivel <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 4)); ?>)
+                                Armurier (Niveau <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 4)); ?>)
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($UserMG->GetUserSecondJobXP($User_['id'], 4)); ?> / 50</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Camionero (Nivel <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 6)); ?>)
+                                Routier (Niveau <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 6)); ?>)
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($UserMG->GetUserSecondJobXP($User_['id'], 6)); ?> / 50</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Minero (Nivel <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 8)); ?>)
+                                Mineur (Niveau <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 8)); ?>)
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($UserMG->GetUserSecondJobXP($User_['id'], 8)); ?> / 50</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Ladr&oacute;n (Nivel <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 0)); ?>)
+                                Voleur (Niveau <?php echo number_format($UserMG->GetUserSecondJobLvl($User_['id'], 0)); ?>)
                                 <span class="badge badge-secondary badge-pill peak"><?php echo number_format($UserMG->GetUserSecondJobXP($User_['id'], 0)); ?> / 50</span>
                             </li>
                         </ul>
@@ -287,4 +288,3 @@ endif;
 
     </div>
 </div>
-

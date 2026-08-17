@@ -16,10 +16,10 @@
             <div class="col-3">
                 <div class="nav flex-column nav-pills" id="store-tab" role="tablist" aria-orientation="vertical">
                     <a style="background-image: url('<?php echo DY; ?>/img/store/crates-gold.png');" class="nav-link active" id="store-keys-tab" data-toggle="pill" href="#store-keys" role="tab" aria-selected="false">
-                        <span class="store-item-name">Tienda de Platinos</span>
+                        <span class="store-item-name">Boutique de Platines</span>
                     </a>
                     <a style="background-image: url('<?php echo DY; ?>/img/store/vip.png');" class="nav-link" id="store-keys-tab" data-toggle="pill" href="#store-vip" role="tab" aria-selected="false">
-                        <span class="store-item-name">Comprar VIP</span>
+                        <span class="store-item-name">Acheter VIP</span>
                     </a>
                 </div>
 
@@ -35,7 +35,7 @@
                                         <div><div class="user-pz-dinero"></div></div>
                                     </div>
                                     <div class="post-info mr-auto ml-2">
-                                        <b>Cartera:</b> $<?php echo number_format($UData['credits']); ?>
+                                        <b>Portefeuille :</b> $<?php echo number_format($UData['credits']); ?>
                                     </div>
                                     <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
                                 </div>
@@ -47,7 +47,7 @@
                                         <div><div class="user-pz-banco"></div></div>
                                     </div>
                                     <div class="post-info mr-auto ml-2">
-                                        <b>Banco:</b> $<?php echo number_format($UPData['bank']); ?>
+                                        <b>Banque :</b> $<?php echo number_format($UPData['bank']); ?>
                                     </div>
                                     <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
                                 </div>
@@ -59,7 +59,7 @@
                                         <div><div class="user-pz-platinos"></div></div>
                                     </div>
                                     <div class="post-info mr-auto ml-2">
-                                        <b>Platinos:</b> <?php echo $UData['vip_points']; ?>
+                                        <b>Platinos :</b> <?php echo $UData['vip_points']; ?>
                                     </div>
                                     <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
                                 </div>
@@ -71,7 +71,7 @@
                                         <div><div class="user-pz-level"></div></div>
                                     </div>
                                     <div class="post-info mr-auto ml-2">
-                                        <b>Nivel:</b> <?php echo $UPData['level']; ?>
+                                        <b>Niveau :</b> <?php echo $UPData['level']; ?>
                                     </div>
                                     <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
                                 </div>
@@ -82,7 +82,7 @@
                 </div>
 
                 <div class="content-box blue leaderboards mb-3">
-                    <div class="title">Más Platinos</div>
+                    <div class="title">Plus de Platinos</div>
                     <div class="box-content">
                         <?php
                         $R_ = $UserMG->GetLeaderBoardPL();
@@ -110,13 +110,13 @@
 
                     <div class="tab-pane p-2 active show" id="store-keys" role="tabpanel">
                         <div id="purchase_loading" style="display: none;">
-                            <div id="fb-message" class="alert alert-info">Por favor, espera unos segundos mientras procesamos tu transacción...</div>
+                            <div id="fb-message" class="alert alert-info">Patiente quelques secondes pendant le traitement de ta transaction...</div>
                         </div>
                         <div id="purchase_result" >
 
                         </div>
                         <?php if($UData['online'] >= 1): ?>
-                        <div id="fb-message" class="alert alert-danger">Por favor desconectate del juego para poder hacer cualquier tipo de compra, si te conectas mientras la compra está siendo procesada, perderás lo que compraste y el dinero pagado por el mismo.</div>
+                        <div id="fb-message" class="alert alert-danger">D&eacute;connecte-toi du jeu avant tout achat. Si tu te reconnectes pendant le traitement, tu risques de perdre l'achat et le paiement associ&eacute;.</div>
                         <?php else: ?>
 
                         <div class="store-grid">
@@ -126,24 +126,24 @@
 
                         <div class="store-item-info p-2">
                             <div class="content-box">
-                                <div class="title">¿Qué son los Platinos?</div>
+                                <div class="title">Que sont les Platines ?</div>
                                 <div class="box-content">
                                     <div class="store-item-info p-2">
-                                        <p>Los Platinos de HabboVIP, son la moneda especial que te permitirá hacer compras de objetos especiales dentro del juego. Estas monedas se te otorgan dependiendo la donación que hagas en la tienda. Hay diferentes paquetes de compras que puedes ver en la sección de arriba.
+                                        <p>Les Platines sont la monnaie sp&eacute;ciale de HabboVIP. Elles permettent d'acheter des objets exclusifs dans le jeu et sont ajout&eacute;es selon le pack choisi dans la boutique.
                                         </p>
-                                        <p>Los platinos son transferibles dentro del juego. El precio del mismo dependerá del vendedor, sin embargo, es importante saber que el precio promedio actual de 1 PL es: <b>$10,000</b></p>
+                                        <p>Les Platines sont transf&eacute;rables dans le jeu. Leur prix d&eacute;pend du vendeur ; le prix moyen actuel d'une Platine est de <b>$10,000</b>.</p>
                                         <p>
                                             <br>
-                                            Cosas que puedes comprar con platinos:
+                                            Tu peux acheter avec des Platines :
                                         </p><ul>
-                                            <li> Rares exclusivos sin edición Limitada.</li>
-                                            <li> Cajas de almacenamiento de armas.</li>
-                                            <li> Membresía VIP1 o VIP2.</li>
-                                            <li> Vehículos exóticos.</li>
-                                            <li> Mansiones en las avenidas principales, las cuales puedes personalizar.</li>
-                                            <li> Floor editor en apartamentos y/o casas.</li>
+                                            <li> Rares exclusifs et &eacute;ditions limit&eacute;es.</li>
+                                            <li> Coffres de stockage d'armes.</li>
+                                            <li> Abonnement VIP1 ou VIP2.</li>
+                                            <li> V&eacute;hicules exotiques.</li>
+                                            <li> Mansions personnalisables sur les grandes avenues.</li>
+                                            <li> &Eacute;diteur de sol dans les appartements et maisons.</li>
                                         </ul><br>
-                                        ¡Entre otras cosas más mientras se van agregando actualizaciones!
+                                        Et bien d'autres choses &agrave; venir avec les mises &agrave; jour !
                                         <p></p>
                                     </div>
                                 </div>
@@ -151,16 +151,16 @@
                         </div>
                         <div class="store-item-info p-2">
                             <div class="content-box">
-                                <div class="title">¿Cómo comprar Platinos?</div>
+                                <div class="title">Comment acheter des Platines ?</div>
                                 <div class="box-content">
                                     <div class="store-item-info p-2">
-                                        <b>Es necesario estar desconectado del juego para relizar la transacción.</b>
+                                        <b>Tu dois &ecirc;tre d&eacute;connect&eacute; du jeu pour effectuer la transaction.</b>
                                         <br>
-                                        <p>Una vez hayas completado el pago del paquete que deseas, el sistema va a verificar la transacción automaticamente con PayPal, y te otorgará los platinos que seleccionaste.</p>
+                                        <p>Une fois le paiement termin&eacute;, le syst&egrave;me v&eacute;rifie automatiquement la transaction PayPal et ajoute les Platines choisies.</p>
                                         <p>
-                                        Ten en cuenta que, si te conectas al juego o sales de la página al realizar un pago y mientras que se te otorgan los platinos, puedes perder los platinos y la donación, a menos que tengas pruebas del pago con el número de transacción. Siempre espera el mensaje de confirmación antes de salir.</p>
+                                        Attention : ne te reconnecte pas et ne ferme pas cette page pendant le paiement. Conserve ton num&eacute;ro de transaction et attends le message de confirmation.</p>
                                         <p>
-                                        Al hacer la donación, el sistema durará menos de 30 segundos en darte la confirmación y los platinos automaticamente. <br><b>¡Por favor, No refresques ni salgas de la página de la Tienda, hasta que recibas la confirmación del pago!</b></p>
+                                        La confirmation et l'ajout des Platines prennent normalement moins de 30 secondes. <br><b>Ne recharge pas et ne quitte pas la boutique avant la confirmation du paiement.</b></p>
                                     </div>
                                 </div>
                             </div>
@@ -169,18 +169,18 @@
 
                     <div class="tab-pane p-2" id="store-vip" role="tabpanel">
                         <div id="purchase_loading" style="display: none;">
-                            <div id="fb-message" class="alert alert-info">Por favor, espera unos segundos mientras procesamos tu transacción...</div>
+                            <div id="fb-message" class="alert alert-info">Patiente quelques secondes pendant le traitement de ta transaction...</div>
                         </div>
                         <div id="purchase_result" >
 
                         </div>
                         <?php if($UData['online'] >= 1): ?>
-                        <div id="fb-message" class="alert alert-danger">Por favor desconectate de el cliente para poder hacer algún tipo de compra, si te conectas mientras la compra está siendo ejecutada, perderás lo que compraste y el dinero pagado por el mismo.</div>
+                        <div id="fb-message" class="alert alert-danger">D&eacute;connecte-toi du client avant tout achat. Si tu te reconnectes pendant le traitement, tu risques de perdre l'achat et le paiement associ&eacute;.</div>
                         <?php else: ?>
 
                         <div class="store-item-info p-2">
                             <div class="content-box">
-                                <div class="title">Comprar VIP</div>
+                                <div class="title">Acheter VIP</div>
                                 <div class="box-content">
                                     <div class="store-item-info p-2">
                                         <style type="text/css">
@@ -241,7 +241,7 @@
                                                     <td width="120" align="center" valign="middle" bgcolor="#efefef">4</td>
                                                 </tr>
                                                 <tr>
-                                                    <td width="313" height="30" valign="middle" bgcolor="#FBFBFB">&nbsp;- L&iacute;mite de intereses ganados en el banco</td>
+                                                    <td width="313" height="30" valign="middle" bgcolor="#FBFBFB">&nbsp;- Limite des intérêts gagnés à la banque</td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#FBFBFB">$1.000</td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#FBFBFB">$1.500</td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#efefef">$3.000</td>
@@ -259,7 +259,7 @@
                                                     <td width="120" align="center" valign="middle" bgcolor="#efefef">4</td>
                                                 </tr>-->
                                                 <tr>
-                                                    <td width="313" height="30" valign="middle" bgcolor="#FFFFFF">&nbsp;- Aumento en ganancia de habilidad trabajando</td>
+                                                    <td width="313" height="30" valign="middle" bgcolor="#FFFFFF">&nbsp;- Gain de compétence supplémentaire en travaillant</td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#FFFFFF"><img src="<?php echo DY; ?>/img/icons/no.png"></td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#FFFFFF"><img src="<?php echo DY; ?>/img/icons/si.png"></td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#efefef"><img src="<?php echo DY; ?>/img/icons/si.png"></td>
@@ -283,7 +283,7 @@
                                                     <td width="120" align="center" valign="middle" bgcolor="#efefef">Normal +20%</td>
                                                 </tr>
                                                 <tr>
-                                                    <td width="313" height="30" valign="middle" bgcolor="#FFFFFF">&nbsp;- Límite de cupos extras en Bandas</td>
+                                                    <td width="313" height="30" valign="middle" bgcolor="#FFFFFF">&nbsp;- Places supplémentaires dans les gangs</td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#FFFFFF">Normal</td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#FFFFFF">Normal +5</td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#efefef">Normal +10</td>
@@ -313,7 +313,7 @@
                                                     <td width="120" align="center" valign="middle" bgcolor="#efefef"><img src="<?php echo DY; ?>/img/icons/si.png"></td>
                                                 </tr>
                                                 <!--<tr>
-                                                    <td width="313" height="30" valign="middle" bgcolor="#FFFFFF">&nbsp;- Ganancia adicional trabajando de transportista</td>
+                                                    <td width="313" height="30" valign="middle" bgcolor="#FFFFFF">&nbsp;- Gain supplémentaire en travaillant comme transporteur</td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#FFFFFF"><img src="<\?php echo CDN; ?>/general/me/img/no.png"></td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#FFFFFF"><img src="<\?php echo CDN; ?>/general/me/img/no.png"></td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#efefef"><img src="<\?php echo CDN; ?>/general/me/img/si.png"></td>
@@ -352,10 +352,10 @@
                                                     <td width="313" height="44" valign="middle"></td>
                                                     <td width="120" align="center" valign="middle"></td>
                                                     <td width="120" align="center" valign="middle">
-                                                        <button name="BuyVIP" type="button" class="button green enter-apex no-link-styling" onclick="return BuyVIP(1)">Comprar</button>
+                                                        <button name="BuyVIP" type="button" class="button green enter-apex no-link-styling" onclick="return BuyVIP(1)">Acheter</button>
                                                     </td>
                                                     <td width="120" align="center" valign="middle" bgcolor="#efefef">
-                                                        <button name="BuyVIP" type="button" class="button green enter-apex no-link-styling" onclick="return BuyVIP(2)">Comprar</button>
+                                                        <button name="BuyVIP" type="button" class="button green enter-apex no-link-styling" onclick="return BuyVIP(2)">Acheter</button>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -369,7 +369,7 @@
                     </div>
 
 
-                    <div class="text-center text-white font-weight-bold pb-3"><small>Todas las compras se aplican automaticamente a su cuenta al confirmar el pago. Al usar esta tienda acepta nuestros términos y condiciones de uso, y acepta que ningunas de las compras tienen devolución <b>ATT: Administración de HabboVIP.</b></small></div>
+                    <div class="text-center text-white font-weight-bold pb-3"><small>Tous les achats sont appliqués automatiquement à votre compte après confirmation du paiement. En utilisant cette boutique, vous acceptez les conditions d’utilisation et reconnaissez qu’aucun achat ne peut être remboursé. <b>Administration ParadiseRP.</b></small></div>
                 </div>
             </div>
         </div>

@@ -1,16 +1,16 @@
 RewriteEngine On
-RewriteBase /WebPixel/
+RewriteBase /
 
-# Keep real files/folders untouched
+# Laisser passer les vrais fichiers/dossiers
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Pretty URLs -> matching PHP files
-RewriteCond %{DOCUMENT_ROOT}/WebPixel/$1.php -f
+# URLs propres -> fichiers PHP correspondants
+RewriteCond %{DOCUMENT_ROOT}/$1.php -f
 RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 
-# Specific legacy routes
+# Routes legacy
 RewriteRule ^profile/(.+)$ profile.php?id=$1 [L,QSA]
 RewriteRule ^corporation/(.+)$ corporation.php?id=$1 [L,QSA]
 RewriteRule ^gang/(.+)$ gang.php?gang_id=$1 [L,QSA]

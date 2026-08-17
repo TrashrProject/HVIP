@@ -17,10 +17,10 @@
             RDPCms <?php echo Config::$V; ?>
         </div>
         <div class="footer-links mr-auto ml-auto">
-            <a href="<?php echo Config::$URL; ?>/rules" class="footer-link no-link-styling">Reglas</a>
-            <a href="<?php echo Config::$DiscordInvite; ?>" target="_blank" class="footer-link no-link-styling">Discord Oficial</a>
-            <a href="<?php echo Config::$FB_PAGE_LINK ; ?>" target="_blank" class="footer-link no-link-styling">Facebook Oficial</a>
-            <a href="<?php echo Config::$URL; ?>/play" target="_blank" class="footer-link no-link-styling">¡Entrar a Rolear!</a>
+            <a href="<?php echo Config::$URL; ?>/rules" class="footer-link no-link-styling">R&egrave;gles</a>
+            <a href="<?php echo Config::$DiscordInvite; ?>" target="_blank" class="footer-link no-link-styling">Discord officiel</a>
+            <a href="<?php echo Config::$FB_PAGE_LINK ; ?>" target="_blank" class="footer-link no-link-styling">Facebook officiel</a>
+            <a href="<?php echo Config::$URL; ?>/play" target="_blank" class="footer-link no-link-styling">Entrer dans le jeu</a>
         </div>
         <div class="footer-logo">
             <?php echo Config::$WName; ?> © 2016-<?php echo date("Y"); ?>
@@ -34,6 +34,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous" type="text/javascript"></script>
 
 <script src="<?php echo DY; ?>/js/rdp_main.js?<?php echo time(); ?>"  type="text/javascript"></script>
+<script src="<?php echo DY; ?>/js/cms-fr.js?<?php echo time(); ?>" type="text/javascript"></script>
 
 <script type="text/javascript">
     $(function () {
@@ -75,4 +76,3 @@ endif;
 
 </body>
 </html>
-

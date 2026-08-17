@@ -24,23 +24,30 @@ class UserManager
     // GetTop3Users
     public function GetTopThree($TopType = "money")
     {
-        //Find right type
-        if($TopType == "money"):
-            $R = $this->DB->Query("SELECT * FROM play_stats, users WHERE play_stats.id = users.id AND rank < 3 AND users.username != 'Tester' AND users.username NOT IN (SELECT value FROM bans WHERE expire >= '".time()."') ORDER BY play_stats.bank + users.credits DESC LIMIT 3");
-            if(mysqli_num_rows($R) <= 2):
-                return null;
-            else:
-                return $R;
-            endif;
-        endif;
+        if ($TopType !== "money") {
+            return false;
+        }
+
+        // A fresh hotel can have fewer than three users and does not necessarily
+        // include the optional bans table. Neither case should crash the CMS.
+        $R = $this->DB->Query("SELECT users.username, users.look, users.credits, play_stats.bank
+            FROM users
+            INNER JOIN play_stats ON play_stats.id = users.id
+            WHERE users.username != 'Tester'
+            ORDER BY play_stats.bank + users.credits DESC
+            LIMIT 3");
+
+        return ($R instanceof mysqli_result) ? $R : false;
 
     }
 
     // Generates a Token for client
     public function GenerateAUTH($I){
         $T = AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(12) . '-RDP';
-        if($I !== 0):
-            $this->DB->Update("users", "rdpticket = '". $T ."'", "id = ". $I);
+        // The database uses ID 0 for the initial account. It is a valid user,
+        // not a missing value, and must receive an SSO ticket too.
+        if($I !== null && is_numeric($I) && (int)$I >= 0):
+            $this->DB->Update("users", "rdpticket = '". $T ."'", "id = ". (int)$I);
             return $T;
         else:
             return "";
@@ -108,7 +115,7 @@ class UserManager
 
     // Gets Stats
     public function GetStaffs(){
-        $R = $this->DB->Query("SELECT username, look, online, rank, id FROM users WHERE rank > 2 AND rank < 7 AND username != 'Jeihden' ORDER BY rank DESC");
+        $R = $this->DB->Query("SELECT username, look, online, rank, id FROM users WHERE rank > 2 AND rank < 8 AND username != 'Jeihden' ORDER BY rank DESC");
         return $R;
     }
 

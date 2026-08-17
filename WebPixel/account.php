@@ -28,7 +28,7 @@ if(isset($_GET['chanpass'])):
             $_SESSION['M'] = $R->msg;
         else:
             $_SESSION['E'] = false;
-            $_SESSION['M'] = "Las contraseñas no coinciden.";
+            $_SESSION['M'] = "Les mots de passe ne correspondent pas.";
         endif;
     endif;
 
@@ -42,5 +42,4 @@ require_once HEADER . 'main.php';
 require_once NAVBAR . 'navbar.php';
 require_once BODY . 'profile_settings.php';
 require_once FOOTER . 'main.php';
-
 

@@ -41,14 +41,19 @@ $(document).ready(function(){
     // Verify Username
     $('input[name=\"username-lookup\"]').keyup(function(){
         var U = $("input[name=\"username-lookup\"]").val();
-        $.post("/search_users",
+        var results = $('#lookup-results');
+        var searchUrl = results.data('search-url') || '/WebPixel/search_users';
+        $.post(searchUrl,
             {
                 uname: '' + U
             },
             function(data){
-                $('#lookup-results').html(data);
+                results.html(data);
             });
     });
+    if ($('input[name=\"username-lookup\"]').val().trim().length) {
+        $('input[name=\"username-lookup\"]').trigger('keyup');
+    }
 });
 
 // Gangs Look Up
@@ -65,4 +70,3 @@ $(document).ready(function(){
             });
     });
 });
-

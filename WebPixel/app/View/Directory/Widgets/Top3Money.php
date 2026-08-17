@@ -14,24 +14,25 @@ $C = 1;
 ?>
 <div class="content-box mb-2">
     <div class="title">
-        <i class="fas fa-star text-warning"></i> Ciudadanos m&aacute;s ricos
+        <img class="title-custom-icon" src="<?php echo DY; ?>/img/logos/icon/niveau.png" alt=""> Citoyens les plus riches
     </div>
     <div class="box-content">
         <div class="current-potw p-2 text-center">
-            Estos ciudadanos son los que m&aacute;s dinero tienen en la ciudad. Trabaja duro, roba, y haz buenos negocios para poder llegar aqu&iacute;.
+            Ces citoyens poss&egrave;dent le plus d'argent en ville. Travaille et d&eacute;veloppe tes affaires pour atteindre le sommet.
 
-            <div class="mt-2 text-center font-weight-bold">Top 3 m&aacute;s Ricos</div>
+            <div class="mt-2 text-center font-weight-bold">Top 3 des plus riches</div>
 
             <div class="d-flex justify-content-center align-items-center text-center">
 
                 <?php
                 $Top = $UserMG->GetTopThree();
 
+                if ($Top instanceof mysqli_result && mysqli_num_rows($Top) > 0):
                 while($Row = mysqli_fetch_assoc($Top)): ?>
                     <div class="flex-fill m-1" style="border-bottom: 2px solid <?php if($C == 1): echo "gold"; elseif($C == 2): echo "silver";  else: echo "#cd7f32;"; endif; ?>">
                         <div class="d-flex justify-content-center align-items-center pb-2">
                             <div>
-                                <img src="https://nitro-imager.kubbo.ch/?figure=<?php echo $Row['look']; ?>&amp;direction=2&amp;gesture=sml&amp;head_direction=3&amp;action=wav">
+                                <img src="https://www.habbo.es/habbo-imaging/avatarimage?figure=<?php echo rawurlencode($Row['look']); ?>&amp;direction=2&amp;gesture=sml&amp;head_direction=3&amp;action=wav" alt="<?php echo htmlspecialchars($Row['username'], ENT_QUOTES, 'UTF-8'); ?>">
                             </div>
                             <div class="mr-auto">
 
@@ -41,9 +42,10 @@ $C = 1;
                             </div>
                         </div>
                     </div>
-                <?php $C++; endwhile; ?>
+                <?php $C++; endwhile; else: ?>
+                    <p class="mb-0 text-muted">Aucun citoyen n'est encore class&eacute;.</p>
+                <?php endif; ?>
             </div>
         </div>
     </div>
 </div>
-
