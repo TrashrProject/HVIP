@@ -65,9 +65,8 @@ namespace Plus.HabboRoleplay.Timers.Types
                 }
                 else
                 {
-                    //base.Client.SendWhisper("You have lost 5 HP as you have not ate in days! Replenish your hunger to avoid losing more health!", 1);
-                    //base.Client.SendMessage(new RoomNotificationComposer("hunger_high_warning", "message", "¡Estás muy hambrient@! Come algo antes de que pierdas toda tu salud hasta parar en el Hospital."));
                     base.Client.GetPlay().CurHealth -= 5;
+                    base.Client.SendMessage(new RoomNotificationComposer("hunger_high_warning", "message", "Ta santé a diminué parce que tu as faim. [" + base.Client.GetPlay().CurHealth + "/" + base.Client.GetPlay().MaxHealth + "] ! Mange quelque chose avant de perdre toute ta santé !"));
                 }
 
                 base.Client.GetPlay().RefreshStatDialogue();
