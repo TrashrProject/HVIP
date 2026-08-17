@@ -29,7 +29,7 @@ if (!(Get-Command git -ErrorAction SilentlyContinue)) { throw 'Git est introuvab
 New-Item -ItemType Directory -Force -Path (Split-Path $ServiceDir), $Cache, $RuntimeRoot | Out-Null
 
 if (!(Test-Path $NodeExe) -or !(Test-Path $NpmCli)) {
-    Write-Host '[0/4] Installation du runtime Node 16 portable...' -ForegroundColor Yellow
+    Write-Host '[0/5] Installation du runtime Node 16 portable...' -ForegroundColor Yellow
     if (Test-Path $NodeDir) { Remove-Item -Recurse -Force $NodeDir }
     if (Test-Path $NodeZip) { Remove-Item -Force $NodeZip }
 
@@ -43,8 +43,15 @@ if (!(Test-Path $NodeExe) -or !(Test-Path $NpmCli)) {
 if (!(Test-Path $NodeExe)) { throw "Node portable introuvable : $NodeExe" }
 if (!(Test-Path $NpmCli)) { throw "npm portable introuvable : $NpmCli" }
 
+# Force tous les sous-processus npm/node-gyp/node-pre-gyp à utiliser Node 16 portable.
+$env:PATH = "$NodeDir;$env:PATH"
+$env:npm_config_node_gyp = Join-Path $NodeDir 'node_modules\npm\node_modules\node-gyp\bin\node-gyp.js'
+$env:npm_node_execpath = $NodeExe
+$env:node = $NodeExe
+
 $runtimeVersion = (& $NodeExe --version).Trim()
 Write-Host "Node utilisé par Nitro Imager : $runtimeVersion" -ForegroundColor Green
+Write-Host "node résolu dans PATH : $((& node --version).Trim())" -ForegroundColor Green
 
 if (!(Test-Path (Join-Path $ServiceDir '.git'))) {
     if (Test-Path $ServiceDir) { Remove-Item -Recurse -Force $ServiceDir }
@@ -75,42 +82,34 @@ AVATAR_ASSET_EFFECT_URL=C:/HVIP/swf_pz/V5-0-2/effect/%libname%.nitro
 "@
 Set-Content -Path (Join-Path $ServiceDir '.env') -Value $envText -Encoding ASCII
 
-# IMPORTANT : node-pre-gyp / node-gyp lancent parfois simplement `node`.
-# On met donc le Node 16 portable EN PREMIER dans PATH afin qu'aucun sous-processus
-# ne retombe sur C:\Program Files\nodejs\node.exe (Node 24).
-$OldPath = $env:PATH
-$OldNode = $env:NODE
-$OldNpmNodeExecPath = $env:npm_node_execpath
-$env:PATH = "$NodeDir;$env:PATH"
-$env:NODE = $NodeExe
-$env:npm_node_execpath = $NodeExe
-$env:npm_config_node_gyp = Join-Path $NodeDir 'node_modules\npm\node_modules\node-gyp\bin\node-gyp.js'
-
 Push-Location $ServiceDir
 try {
     if (Test-Path 'node_modules') {
         Write-Host 'Nettoyage de node_modules incompatible...' -ForegroundColor DarkYellow
         Remove-Item -Recurse -Force 'node_modules'
     }
-    if (Test-Path 'package-lock.json') {
-        Write-Host 'Suppression du package-lock généré avec un autre runtime...' -ForegroundColor DarkYellow
-        Remove-Item -Force 'package-lock.json'
-    }
 
-    Write-Host '[1/4] Installation des dépendances avec Node 16 forcé...' -ForegroundColor Yellow
-    Write-Host ('node résolu dans PATH : ' + (& node --version)) -ForegroundColor DarkGray
+    Write-Host '[1/5] Installation des dépendances avec Node 16...' -ForegroundColor Yellow
     & $NodeExe $NpmCli install --no-audit --no-fund
     if ($LASTEXITCODE -ne 0) { throw "npm install a échoué avec le code $LASTEXITCODE" }
 
-    Write-Host '[2/4] Compilation...' -ForegroundColor Yellow
+    # Le dépôt upstream a un conflit de types entre canvas 2.x et gifencoder.
+    # Runtime OK, mais TypeScript refuse CanvasRenderingContext2D. On caste uniquement cet argument en any.
+    Write-Host '[2/5] Patch compatibilité TypeScript canvas/gifencoder...' -ForegroundColor Yellow
+    $routerFile = Join-Path $ServiceDir 'src\app\router\habbo-imaging\handlers\HabboImagingRouterGet.ts'
+    if (!(Test-Path $routerFile)) { throw "Fichier Nitro Imager introuvable : $routerFile" }
+    $router = Get-Content -Raw -Path $routerFile
+    $patched = $router -replace 'encoder\.addFrame\(tempCtx\);', 'encoder.addFrame(tempCtx as any);'
+    if ($patched -eq $router -and $router -notmatch 'encoder\.addFrame\(tempCtx as any\);') {
+        throw 'Impossible d''appliquer le patch TypeScript canvas/gifencoder.'
+    }
+    Set-Content -Path $routerFile -Value $patched -Encoding UTF8
+
+    Write-Host '[3/5] Compilation...' -ForegroundColor Yellow
     & $NodeExe $NpmCli run build
     if ($LASTEXITCODE -ne 0) { throw "npm run build a échoué avec le code $LASTEXITCODE" }
 } finally {
     Pop-Location
-    $env:PATH = $OldPath
-    if ($null -eq $OldNode) { Remove-Item Env:NODE -ErrorAction SilentlyContinue } else { $env:NODE = $OldNode }
-    if ($null -eq $OldNpmNodeExecPath) { Remove-Item Env:npm_node_execpath -ErrorAction SilentlyContinue } else { $env:npm_node_execpath = $OldNpmNodeExecPath }
-    Remove-Item Env:npm_config_node_gyp -ErrorAction SilentlyContinue
 }
 
 $startCmd = Join-Path $Root 'tools\start-nitro-imager.cmd'
@@ -132,11 +131,11 @@ try {
 $logFile = Join-Path $Cache 'service.log'
 Set-Content -Path $logFile -Value '' -Encoding ASCII
 
-Write-Host '[3/4] Démarrage du renderer local...' -ForegroundColor Yellow
+Write-Host '[4/5] Démarrage du renderer local...' -ForegroundColor Yellow
 Start-Process -FilePath $startCmd -WindowStyle Hidden
 Start-Sleep -Seconds 5
 
-Write-Host '[4/4] Test du rendu avatar...' -ForegroundColor Yellow
+Write-Host '[5/5] Test du rendu avatar...' -ForegroundColor Yellow
 $ok = $false
 try {
     $test = Invoke-WebRequest -UseBasicParsing -TimeoutSec 20 -Uri 'http://127.0.0.1:3030/?figure=hd-180-1.hr-100-40.ch-210-66.lg-270-82.sh-290-80&size=n&direction=2&head_direction=2'
@@ -150,7 +149,7 @@ if (!$ok) {
     Write-Host ''
     Write-Host 'Le service ne répond pas encore correctement.' -ForegroundColor Red
     Write-Host 'Dernières lignes du log :' -ForegroundColor Yellow
-    if (Test-Path $logFile) { Get-Content $logFile -Tail 35 }
+    if (Test-Path $logFile) { Get-Content $logFile -Tail 50 }
     Write-Host ''
     Write-Host 'Log complet : C:\HVIP\cache\nitro-imager\service.log'
     exit 1
