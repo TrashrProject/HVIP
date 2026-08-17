@@ -21,36 +21,25 @@ if (!$Session->Exist(Config::$SessionName) || !isset($UData['id'])) fail_json(40
 
 $uid = (int)$UData['id'];
 $gender = strtoupper((string)($UData['gender'] ?? 'M')) === 'F' ? 'F' : 'M';
-$userRank = (int)($UData['rank'] ?? 1);
 
-$memberships = [];
+$jobMemberships = [];
 $sql = "SELECT gm.group_id, gm.rank AS member_rank, g.name, g.activity
         FROM group_memberships gm
         INNER JOIN groups g ON g.id = gm.group_id
         WHERE gm.user_id = '" . $uid . "'
         ORDER BY gm.group_id ASC";
 $res = $DB->Query($sql);
-if ($res) while ($row = mysqli_fetch_assoc($res)) $memberships[] = $row;
-
-$isStaff = false;
-$staffName = '';
-$jobMemberships = [];
-foreach ($memberships as $m) {
-    $name = trim((string)$m['name']);
-    if (preg_match('/staff|fondateur|founder|gerant|gérant|developpeur|développeur|developer|administrat|owner/i', $name)) {
-        $isStaff = true;
-        if ($staffName === '') $staffName = $name;
-        continue;
+if ($res) {
+    while ($m = mysqli_fetch_assoc($res)) {
+        $name = trim((string)$m['name']);
+        // Pas de tenues RP pour les groupes staff/fondateur/gérant/développeur/admin.
+        if (preg_match('/staff|fondateur|founder|gerant|gérant|developpeur|développeur|developer|administrat|owner/i', $name)) continue;
+        $jobMemberships[(int)$m['group_id']] = [
+            'rank' => (int)$m['member_rank'],
+            'name' => $name,
+            'activity' => (string)$m['activity']
+        ];
     }
-    $jobMemberships[(int)$m['group_id']] = [
-        'rank' => (int)$m['member_rank'],
-        'name' => $name,
-        'activity' => (string)$m['activity']
-    ];
-}
-if (!$isStaff && $userRank >= 6) {
-    $isStaff = true;
-    $staffName = 'Staff ParadiseRP';
 }
 
 $outfits = [];
@@ -90,44 +79,13 @@ foreach ($jobMemberships as $jobId => $membership) {
     }
 }
 
-// Les membres du staff disposent aussi des presets RP génériques générés sur le serveur.
-if ($isStaff) {
-    $file = __DIR__ . '/nitro-last/rp-outfits.json';
-    if (is_file($file)) {
-        $catalog = json_decode(file_get_contents($file), true);
-        $staffCount = 0;
-        foreach (($catalog['outfits'] ?? []) as $o) {
-            $oGender = strtoupper((string)($o['gender'] ?? 'M')) === 'F' ? 'F' : 'M';
-            if ($oGender !== $gender) continue;
-            $figure = clean_figure($o['figure'] ?? '');
-            if ($figure === '') continue;
-            $id = (string)($o['id'] ?? '');
-            if (!preg_match('/^rp-\d+$/', $id)) continue;
-            $outfits[] = [
-                'id' => 'staff-' . $id,
-                'kind' => 'staff',
-                'name' => (string)($o['name'] ?? 'Tenue staff'),
-                'category' => 'staff',
-                'categoryLabel' => $staffName ?: 'Staff ParadiseRP',
-                'icon' => '⭐',
-                'gender' => $gender,
-                'figure' => $figure,
-                'source' => (string)($o['categoryLabel'] ?? 'Preset RP')
-            ];
-            $staffCount++;
-            if ($staffCount >= 40) break;
-        }
-        if ($staffCount > 0) $categories[] = ['id' => 'staff', 'label' => $staffName ?: 'Staff ParadiseRP', 'icon' => '⭐', 'count' => $staffCount];
-    }
-}
-
 $allowed = count($outfits) > 0;
 echo json_encode([
     'ok' => true,
     'allowed' => $allowed,
     'gender' => $gender,
-    'staff' => $isStaff,
-    'staff_name' => $staffName,
+    'staff' => false,
+    'staff_name' => '',
     'total' => count($outfits),
     'categories' => $categories,
     'outfits' => $outfits
