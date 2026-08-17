@@ -33,3 +33,13 @@ Thumbs.db
 secrets.*
 *.key
 '@ | Set-Content -Path ".gitignore" -Encoding UTF8
+
+# Emulator local/runtime files
+/RDP EMU header change/bin/
+/RDP EMU header change/obj/
+/RDP EMU header change/.vs/
+/RDP EMU header change/config.ini
+/RDP EMU header change/**/*.log
+/RDP EMU header change/**/*.pdb
+/RDP EMU header change/**/*.user
+/RDP EMU header change/**/*.suo
