@@ -1,11 +1,11 @@
 (() => {
   'use strict';
 
-  const VERSION = '10.0.0';
+  const VERSION = '11.0.0';
   const HUD_ID = 'paradise-rp-hud';
   const STYLE_ID = 'paradise-rp-hud-css';
   const DATA_URL = '../rp-hud-data.php';
-  const CSS_URL = './paradise-rp-hud.css?v=10';
+  const CSS_URL = './paradise-rp-hud.css?v=11';
 
   const DEFAULT_DATA = {
     ok: false,
@@ -18,7 +18,7 @@
     energy: { current: 31, max: 100 },
     money: { credits: 789, pixels: 5000, cash: 1789, diamonds: 224 },
     city: 'Paradise City',
-    time: '17:43'
+    time: '17:47'
   };
 
   const dockItems = [
@@ -55,7 +55,7 @@
   const ensureCss = () => {
     let link = document.getElementById(STYLE_ID);
     if (link) {
-      if (!link.href.includes('v=10')) link.href = CSS_URL;
+      if (!link.href.includes('v=11')) link.href = CSS_URL;
       return;
     }
     link = document.createElement('link');
@@ -65,9 +65,20 @@
     document.head.appendChild(link);
   };
 
-  const bringToFront = () => {
-    const hud = document.getElementById(HUD_ID);
-    if (hud) document.body.appendChild(hud);
+  const removeOldMasks = () => {
+    document.querySelectorAll('#paradise-rp-hard-masks, .pr-mask, .prhud-cover').forEach(el => {
+      try { el.remove(); } catch (_) {}
+    });
+  };
+
+  const hasLargeGameCanvas = el => {
+    if (!el || !el.querySelectorAll) return false;
+    const canvases = el.querySelectorAll('canvas');
+    for (const canvas of canvases) {
+      const r = canvas.getBoundingClientRect();
+      if (r.width > window.innerWidth * 0.38 && r.height > window.innerHeight * 0.38) return true;
+    }
+    return false;
   };
 
   const isOwnElement = el => {
@@ -80,32 +91,43 @@
   const inLegacyZone = rect => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const topLeft = rect.left < 330 && rect.top < 155;
-    const leftRail = rect.left < 112 && rect.top > 82 && rect.top < vh - 100;
-    const bottomLeft = rect.left < 270 && rect.bottom > vh - 245 && rect.bottom < vh - 80;
-    const bottomChat = rect.left < 530 && rect.bottom > vh - 125;
-    const bottomRight = rect.right > vw - 88 && rect.bottom > vh - 95;
-    const topRight = rect.right > vw - 292 && rect.top < 90;
-    return topLeft || leftRail || bottomLeft || bottomChat || bottomRight || topRight;
+    const topLeft = rect.left < 330 && rect.top < 155 && rect.width < 335 && rect.height < 160;
+    const leftIcons = rect.left < 115 && rect.top > 65 && rect.top < vh - 92 && rect.width < 125 && rect.height < vh - 145;
+    const bottomLeft = rect.left < 470 && rect.bottom > vh - 125 && rect.width < 500 && rect.height < 125;
+    const bottomPhone = rect.right > vw - 92 && rect.bottom > vh - 100 && rect.width < 110 && rect.height < 110;
+    const oldTopRight = rect.right > vw - 300 && rect.top < 85 && rect.width < 310 && rect.height < 90;
+    return topLeft || leftIcons || bottomLeft || bottomPhone || oldTopRight;
   };
 
-  const killLegacyDomInZones = () => {
-    document.querySelectorAll('body *').forEach(el => {
-      if (isOwnElement(el)) return;
-      if (el.id === 'root' || el.tagName === 'CANVAS') return;
-      if (el.querySelector && el.querySelector('canvas')) return;
+  const hideNode = el => {
+    el.classList.add('prhud-native-kill');
+    el.setAttribute('data-prhud-killed', '1');
+    el.style.setProperty('display', 'none', 'important');
+    el.style.setProperty('visibility', 'hidden', 'important');
+    el.style.setProperty('opacity', '0', 'important');
+    el.style.setProperty('pointer-events', 'none', 'important');
+  };
+
+  const killLegacyHud = () => {
+    removeOldMasks();
+    const nodes = Array.from(document.querySelectorAll('body *'));
+    for (const el of nodes) {
+      if (isOwnElement(el)) continue;
+      if (el.id === 'root' || el.tagName === 'CANVAS') continue;
+
       const rect = el.getBoundingClientRect();
-      if (!rect || rect.width <= 2 || rect.height <= 2) return;
-      if (rect.width > window.innerWidth * 0.82 || rect.height > window.innerHeight * 0.82) return;
-      if (!inLegacyZone(rect)) return;
-      el.classList.add('prhud-native-kill');
-      el.setAttribute('data-prhud-killed', '1');
-    });
+      if (!rect || rect.width <= 2 || rect.height <= 2) continue;
+      if (rect.width > window.innerWidth * 0.65 || rect.height > window.innerHeight * 0.75) continue;
+      if (!inLegacyZone(rect)) continue;
+      if (hasLargeGameCanvas(el)) continue;
+
+      hideNode(el);
+    }
   };
 
   const findNativeChatInput = () => {
     const inputs = [...document.querySelectorAll('input[type="text"], input:not([type]), textarea')]
-      .filter(el => !el.closest(`#${HUD_ID}`) && !el.disabled && !el.readOnly && !el.classList.contains('prhud-native-kill'));
+      .filter(el => !el.closest(`#${HUD_ID}`) && !el.disabled && !el.readOnly);
     if (!inputs.length) return null;
     return inputs
       .map(el => ({ el, rect: el.getBoundingClientRect(), ph: String(el.getAttribute('placeholder') || '') }))
@@ -246,8 +268,14 @@
     }
   };
 
+  const bringToFront = () => {
+    const hud = document.getElementById(HUD_ID);
+    if (hud) document.body.appendChild(hud);
+  };
+
   const mount = async () => {
     ensureCss();
+    removeOldMasks();
     document.getElementById(HUD_ID)?.remove();
 
     const hud = document.createElement('div');
@@ -257,20 +285,21 @@
     document.body.appendChild(hud);
     hydrate(hud);
     bringToFront();
-    killLegacyDomInZones();
+    killLegacyHud();
 
     const data = await loadData();
     if (!document.body.contains(hud)) return;
     hud.innerHTML = build(data && typeof data === 'object' ? data : DEFAULT_DATA);
     hydrate(hud);
     bringToFront();
-    killLegacyDomInZones();
+    killLegacyHud();
 
     if (window.__paradiseHudCleaner) clearInterval(window.__paradiseHudCleaner);
     window.__paradiseHudCleaner = setInterval(() => {
+      removeOldMasks();
       bringToFront();
-      killLegacyDomInZones();
-    }, 250);
+      killLegacyHud();
+    }, 180);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(mount, 150));
