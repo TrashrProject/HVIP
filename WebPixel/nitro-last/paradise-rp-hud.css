@@ -1,4 +1,4 @@
-/* ParadiseRP HUD overlay v9 - hard masks + compact HUD. */
+/* ParadiseRP HUD overlay v10 - compact HUD + legacy cleanup, no visible masks. */
 :root {
   --prhud-bg: #050a10;
   --prhud-bg2: #09131e;
@@ -13,17 +13,12 @@
   --prhud-muted: #a8b3c3;
 }
 
-#paradise-rp-hard-masks,
 #paradise-rp-hud {
   position: fixed !important;
   inset: 0 !important;
+  z-index: 2147483647 !important;
   pointer-events: none !important;
   isolation: isolate !important;
-}
-
-#paradise-rp-hard-masks { z-index: 2147483647 !important; }
-#paradise-rp-hud {
-  z-index: 2147483647 !important;
   color: var(--prhud-text);
   font-family: Inter, "Segoe UI", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -42,20 +37,6 @@
   visibility: hidden !important;
   pointer-events: none !important;
 }
-
-#paradise-rp-hard-masks .pr-mask {
-  position: fixed !important;
-  display: block !important;
-  background: var(--prhud-bg) !important;
-  pointer-events: none !important;
-  z-index: 1 !important;
-}
-.pr-mask-top-left { left: 0 !important; top: 0 !important; width: 360px !important; height: 166px !important; }
-.pr-mask-left-icons { left: 0 !important; top: 86px !important; width: 115px !important; height: calc(100vh - 178px) !important; }
-.pr-mask-left-label { left: 0 !important; bottom: 128px !important; width: 270px !important; height: 118px !important; }
-.pr-mask-bottom-left { left: 0 !important; bottom: 0 !important; width: 520px !important; height: 116px !important; }
-.pr-mask-bottom-right { right: 0 !important; bottom: 0 !important; width: 84px !important; height: 84px !important; }
-.pr-mask-top-right { right: 0 !important; top: 0 !important; width: 300px !important; height: 92px !important; }
 
 .prhud-panel {
   background:
