@@ -101,3 +101,18 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();
+
+// ParadiseRP HUD external overlay loader. This keeps the Nitro bundle untouched.
+(() => {
+  const load = () => {
+    if (document.querySelector('script[data-paradise-rp-hud="1"]')) return;
+    const script = document.createElement('script');
+    script.src = './paradise-rp-hud.js?v=1';
+    script.defer = true;
+    script.dataset.paradiseRpHud = '1';
+    document.body.appendChild(script);
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);
+  else load();
+})();
