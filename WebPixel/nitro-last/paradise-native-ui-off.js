@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '5.0.0-safe-bottom-left';
+  const VERSION = '6.0.0-safe-legacy-labels';
   const STYLE_ID = 'paradise-native-ui-off-style';
   window.__PARADISE_NATIVE_UI_OFF_LOCK__ = VERSION;
 
@@ -126,6 +126,26 @@
     '[class*="habbo-toolbar"]', '[class*="chatinput"]', '[class*="chat-input"]'
   ];
 
+  const getText = el => {
+    try {
+      return String((el.innerText || el.textContent || el.getAttribute?.('placeholder') || el.getAttribute?.('title') || el.getAttribute?.('aria-label') || '')).trim();
+    } catch (_) {
+      return '';
+    }
+  };
+
+  const isLegacyText = text => /\[(CALLE|INT|SALA|ROOM)\]|Haz clic|chatear|HabboVIP|Que hay|Qué hay|What'?s new|proposito|propósito|seguridad|sitio web|Bubble/i.test(text || '');
+
+  const isSmallVisibleBox = el => {
+    if (isProtected(el) || hasLargeCanvas(el)) return false;
+    let r;
+    try { r = el.getBoundingClientRect(); } catch (_) { return false; }
+    if (!r || r.width <= 2 || r.height <= 2) return false;
+    if (r.width > Math.min(520, window.innerWidth * 0.42)) return false;
+    if (r.height > Math.min(170, window.innerHeight * 0.22)) return false;
+    return true;
+  };
+
   const isNativeChatField = el => {
     if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return false;
     if (el.id === 'prhud-chat-input' || (el.closest && el.closest('#paradise-rp-hud'))) return false;
@@ -134,21 +154,37 @@
   };
 
   const isBottomLeftLegacy = el => {
-    if (isProtected(el)) return false;
+    if (!isSmallVisibleBox(el)) return false;
     let r;
     try { r = el.getBoundingClientRect(); } catch (_) { return false; }
-    if (!r || r.width <= 2 || r.height <= 2) return false;
-    if (r.width > window.innerWidth * 0.38 || r.height > window.innerHeight * 0.35) return false;
 
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const text = getText(el);
 
-    const oldChatBar = r.left < 460 && r.top > vh - 125 && r.width < 460 && r.height < 90;
-    const oldBottomIcons = r.left < 245 && r.top > vh - 120 && r.width < 260 && r.height < 115;
-    const oldLowerLeftRail = r.left < 48 && r.top > vh - 285 && r.width < 56 && r.height < 285;
-    const oldPhone = r.right > vw - 80 && r.bottom > vh - 95 && r.width < 80 && r.height < 95;
+    const oldChatBar = r.left < 470 && r.top > vh - 145 && r.width < 470 && r.height < 95;
+    const oldRoomLabel = r.left < 280 && r.top > vh - 300 && r.width < 300 && r.height < 105 && isLegacyText(text);
+    const oldBottomIcons = r.left < 260 && r.top > vh - 135 && r.width < 280 && r.height < 125;
+    const oldLowerLeftRail = r.left < 55 && r.top > vh - 315 && r.width < 65 && r.height < 315;
+    const oldPhone = r.right > vw - 85 && r.bottom > vh - 100 && r.width < 85 && r.height < 100;
+    const oldTopRightToast = r.right > vw - 360 && r.top < 95 && r.width < 360 && r.height < 95 && isLegacyText(text);
 
-    return oldChatBar || oldBottomIcons || oldLowerLeftRail || oldPhone;
+    return oldChatBar || oldRoomLabel || oldBottomIcons || oldLowerLeftRail || oldPhone || oldTopRightToast;
+  };
+
+  const killLegacyTextBlocks = () => {
+    try {
+      document.querySelectorAll('div, span, p, section, aside, label, button').forEach(el => {
+        if (!isSmallVisibleBox(el)) return;
+        const text = getText(el);
+        if (!isLegacyText(text)) return;
+        hideElement(el);
+        let parent = el.parentElement;
+        for (let i = 0; parent && i < 3; i += 1, parent = parent.parentElement) {
+          if (isSmallVisibleBox(parent) && (isBottomLeftLegacy(parent) || isLegacyText(getText(parent)))) hideElement(parent);
+        }
+      });
+    } catch (_) {}
   };
 
   const killOnlyKnownButtons = () => {
@@ -178,10 +214,12 @@
     } catch (_) {}
 
     try {
-      document.querySelectorAll('button, img, input, textarea, div, span, i').forEach(el => {
+      document.querySelectorAll('button, img, input, textarea, div, span, i, p, section, aside').forEach(el => {
         if (isBottomLeftLegacy(el)) hideElement(el);
       });
     } catch (_) {}
+
+    killLegacyTextBlocks();
   };
 
   const boot = () => {
@@ -189,7 +227,7 @@
     killOnlyKnownButtons();
     [0, 50, 120, 250, 500, 900, 1400, 2200, 4000, 7000].forEach(ms => setTimeout(killOnlyKnownButtons, ms));
     if (window.__paradiseNativeUiOffSafeInterval) clearInterval(window.__paradiseNativeUiOffSafeInterval);
-    window.__paradiseNativeUiOffSafeInterval = setInterval(killOnlyKnownButtons, 450);
+    window.__paradiseNativeUiOffSafeInterval = setInterval(killOnlyKnownButtons, 400);
   };
 
   window.__paradiseNativeUiOffScan = killOnlyKnownButtons;
