@@ -1,12 +1,12 @@
 (() => {
   'use strict';
 
-  const NATIVE_OFF_SRC = './paradise-native-ui-off.js?v=2';
-  const HUD_SRC = './paradise-rp-hud.js?v=15';
+  const NATIVE_OFF_SRC = './paradise-native-ui-off.js?v=3';
+  const HUD_SRC = './paradise-rp-hud.js?v=18';
   const KILLER_SRC = './paradise-hard-ui-killer.js?v=4';
-  const HUD_CSS_SRC = './paradise-rp-hud.css?v=15';
-  const SOFT_HIDE_MS = 1500;
-  const HARD_HIDE_MS = 2450;
+  const HUD_CSS_SRC = './paradise-rp-hud.css?v=18';
+  const SOFT_HIDE_MS = 1350;
+  const HARD_HIDE_MS = 2350;
 
   const forceHudCss = () => {
     let link = document.getElementById('paradise-rp-hud-css');
@@ -16,7 +16,7 @@
       link.rel = 'stylesheet';
       (document.head || document.documentElement).appendChild(link);
     }
-    if (!String(link.getAttribute('href') || '').includes('v=15')) link.href = HUD_CSS_SRC;
+    if (!String(link.getAttribute('href') || '').includes('v=18')) link.href = HUD_CSS_SRC;
   };
 
   const loadScript = (src, attr) => {
@@ -29,19 +29,16 @@
   };
 
   const loadNativeOff = () => loadScript(NATIVE_OFF_SRC, 'data-paradise-native-ui-off');
-  const loadHud = () => {
-    forceHudCss();
-    loadScript(HUD_SRC, 'data-paradise-rp-hud');
-    [80, 260, 700, 1400, 2600, 4200].forEach(ms => window.setTimeout(forceHudCss, ms));
-  };
+  const loadHud = () => { forceHudCss(); loadScript(HUD_SRC, 'data-paradise-rp-hud'); };
   const loadKiller = () => loadScript(KILLER_SRC, 'data-paradise-rp-killer');
+  const rescanNative = () => { try { window.__paradiseNativeUiOffScan?.(); } catch (_) {} };
 
   const boot = () => {
     loadNativeOff();
     loadHud();
 
-    const cssKeeper = window.setInterval(forceHudCss, 300);
-    window.setTimeout(() => window.clearInterval(cssKeeper), 6000);
+    const cssKeeper = window.setInterval(() => { forceHudCss(); rescanNative(); }, 250);
+    window.setTimeout(() => window.clearInterval(cssKeeper), 9000);
 
     const loader = document.getElementById('paradise-loader');
     const bar = document.querySelector('.pr-loader-bar');
@@ -59,12 +56,7 @@
     };
 
     if (!loader) {
-      window.setTimeout(() => {
-        hideNativeBlueLoader();
-        loadNativeOff();
-        loadHud();
-        loadKiller();
-      }, 400);
+      window.setTimeout(() => { hideNativeBlueLoader(); loadNativeOff(); loadHud(); loadKiller(); rescanNative(); }, 350);
       return;
     }
 
@@ -89,7 +81,7 @@
       const root = document.getElementById('root');
       if (!root) return false;
       if (root.querySelector('canvas')) return true;
-      return root.childElementCount > 0 && performance.now() - started > 1400;
+      return root.childElementCount > 0 && performance.now() - started > 1200;
     };
 
     const hide = () => {
@@ -97,57 +89,40 @@
       hidden = true;
       render(100);
       hideNativeBlueLoader();
-
       loader.style.setProperty('opacity', '0', 'important');
       loader.style.setProperty('visibility', 'hidden', 'important');
       loader.style.setProperty('pointer-events', 'none', 'important');
       loader.classList.add('is-hidden');
 
-      window.setTimeout(() => {
+      const after = delay => window.setTimeout(() => {
         try { loader.remove(); } catch (_) {}
-        loadNativeOff();
-        loadHud();
-      }, 120);
-
-      window.setTimeout(() => {
         hideNativeBlueLoader();
         loadNativeOff();
         loadHud();
         loadKiller();
-      }, 650);
-
-      window.setTimeout(() => {
-        hideNativeBlueLoader();
-        loadNativeOff();
-        loadHud();
-        loadKiller();
-      }, 1400);
+        rescanNative();
+      }, delay);
+      after(120); after(650); after(1350); after(2600);
     };
 
     const tick = () => {
       if (hidden) return;
-
       const elapsed = performance.now() - started;
       let target = 18;
-      if (elapsed > 250) target = 34;
-      if (elapsed > 550) target = 52;
-      if (elapsed > 900) target = 74;
-      if (elapsed > 1250) target = 92;
-      if (elapsed > 1550) target = 99;
-
-      render(shown + Math.max(1, (target - shown) * 0.22));
-
-      if ((elapsed > SOFT_HIDE_MS && hasGameSurface()) || elapsed > HARD_HIDE_MS) {
-        hide();
-        return;
-      }
-
+      if (elapsed > 240) target = 34;
+      if (elapsed > 520) target = 55;
+      if (elapsed > 850) target = 76;
+      if (elapsed > 1180) target = 92;
+      if (elapsed > 1500) target = 99;
+      render(shown + Math.max(1, (target - shown) * .24));
+      if ((elapsed > SOFT_HIDE_MS && hasGameSurface()) || elapsed > HARD_HIDE_MS) return hide();
       window.requestAnimationFrame(tick);
     };
 
     try {
       new MutationObserver(() => {
         if (!hidden && performance.now() - started > SOFT_HIDE_MS && hasGameSurface()) hide();
+        else rescanNative();
       }).observe(document.body, { childList: true, subtree: true });
     } catch (_) {}
 
@@ -161,7 +136,6 @@
     else boot();
   } catch (_) {
     try { document.getElementById('paradise-loader')?.remove(); } catch (__) {}
-    try { loadNativeOff(); } catch (__) {}
-    try { loadHud(); } catch (__) {}
+    try { loadNativeOff(); loadHud(); loadKiller(); } catch (__) {}
   }
 })();
