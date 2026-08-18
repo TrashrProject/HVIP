@@ -1,10 +1,11 @@
 (() => {
   'use strict';
 
-  const HUD_SRC = './paradise-rp-hud.js?v=12';
-  const KILLER_SRC = './paradise-hard-ui-killer.js?v=2';
-  const SOFT_HIDE_MS = 1700;
-  const HARD_HIDE_MS = 2600;
+  const NATIVE_OFF_SRC = './paradise-native-ui-off.js?v=1';
+  const HUD_SRC = './paradise-rp-hud.js?v=13';
+  const KILLER_SRC = './paradise-hard-ui-killer.js?v=3';
+  const SOFT_HIDE_MS = 1500;
+  const HARD_HIDE_MS = 2450;
 
   const loadScript = (src, attr) => {
     document.querySelectorAll(`script[${attr}="1"]`).forEach(script => script.remove());
@@ -15,10 +16,12 @@
     document.body.appendChild(script);
   };
 
+  const loadNativeOff = () => loadScript(NATIVE_OFF_SRC, 'data-paradise-native-ui-off');
   const loadHud = () => loadScript(HUD_SRC, 'data-paradise-rp-hud');
   const loadKiller = () => loadScript(KILLER_SRC, 'data-paradise-rp-killer');
 
   const boot = () => {
+    loadNativeOff();
     loadHud();
 
     const loader = document.getElementById('paradise-loader');
@@ -39,9 +42,10 @@
     if (!loader) {
       window.setTimeout(() => {
         hideNativeBlueLoader();
+        loadNativeOff();
         loadHud();
         loadKiller();
-      }, 400);
+      }, 350);
       return;
     }
 
@@ -66,7 +70,7 @@
       const root = document.getElementById('root');
       if (!root) return false;
       if (root.querySelector('canvas')) return true;
-      return root.childElementCount > 0 && performance.now() - started > 1400;
+      return root.childElementCount > 0 && performance.now() - started > 1200;
     };
 
     const hide = () => {
@@ -82,20 +86,23 @@
 
       window.setTimeout(() => {
         try { loader.remove(); } catch (_) {}
+        loadNativeOff();
         loadHud();
-      }, 120);
+      }, 90);
 
       window.setTimeout(() => {
         hideNativeBlueLoader();
+        loadNativeOff();
         loadHud();
         loadKiller();
-      }, 650);
+      }, 520);
 
       window.setTimeout(() => {
         hideNativeBlueLoader();
+        loadNativeOff();
         loadHud();
         loadKiller();
-      }, 1400);
+      }, 1250);
     };
 
     const tick = () => {
@@ -103,13 +110,13 @@
 
       const elapsed = performance.now() - started;
       let target = 18;
-      if (elapsed > 250) target = 34;
-      if (elapsed > 550) target = 52;
-      if (elapsed > 900) target = 74;
-      if (elapsed > 1250) target = 92;
-      if (elapsed > 1550) target = 99;
+      if (elapsed > 220) target = 34;
+      if (elapsed > 500) target = 52;
+      if (elapsed > 820) target = 74;
+      if (elapsed > 1150) target = 92;
+      if (elapsed > 1450) target = 99;
 
-      render(shown + Math.max(1, (target - shown) * 0.22));
+      render(shown + Math.max(1, (target - shown) * 0.24));
 
       if ((elapsed > SOFT_HIDE_MS && hasGameSurface()) || elapsed > HARD_HIDE_MS) {
         hide();
@@ -125,7 +132,7 @@
       }).observe(document.body, { childList: true, subtree: true });
     } catch (_) {}
 
-    window.setTimeout(hide, HARD_HIDE_MS + 250);
+    window.setTimeout(hide, HARD_HIDE_MS + 180);
     render(shown);
     window.requestAnimationFrame(tick);
   };
@@ -135,6 +142,6 @@
     else boot();
   } catch (_) {
     try { document.getElementById('paradise-loader')?.remove(); } catch (__) {}
-    try { loadHud(); } catch (__) {}
+    try { loadNativeOff(); loadHud(); } catch (__) {}
   }
 })();
