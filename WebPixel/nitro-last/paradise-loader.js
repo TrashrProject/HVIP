@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const HUD_SRC = './paradise-rp-hud.js?v=4';
+  const HUD_SRC = './paradise-rp-hud.js?v=5';
   const MAX_BLOCK_MS = 2600;
   const HARD_KILL_MS = 4200;
 
@@ -88,8 +88,6 @@
       if (shown < target) shown += Math.max(0.8, (target - shown) * 0.16);
       render(shown);
 
-      // Le loader ne doit JAMAIS bloquer le jeu : dès qu'une surface existe,
-      // ou après quelques secondes maximum, on l'enlève.
       if ((elapsed > 900 && hasGameSurface()) || elapsed > MAX_BLOCK_MS) return hide();
 
       requestAnimationFrame(tick);
