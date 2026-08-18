@@ -1,16 +1,16 @@
-/* ParadiseRP HUD overlay v2
-   Externe et safe : aucun patch du bundle Nitro. */
+/* ParadiseRP HUD overlay v5 - compact, opaque, non-destructive. */
 :root {
-  --prhud-bg: rgba(5, 10, 16, .86);
-  --prhud-bg2: rgba(11, 20, 31, .82);
-  --prhud-line: rgba(255, 190, 57, .36);
-  --prhud-line2: rgba(48, 210, 255, .24);
-  --prhud-gold: #ffc332;
-  --prhud-cyan: #23d9ff;
-  --prhud-blue: #1e86da;
-  --prhud-red: #eb354c;
-  --prhud-text: #f6fbff;
-  --prhud-muted: #a9b7c8;
+  --prhud-bg: #050a10;
+  --prhud-bg2: #09131e;
+  --prhud-bg3: #101c29;
+  --prhud-line: rgba(255, 194, 55, .42);
+  --prhud-blue-line: rgba(40, 188, 245, .27);
+  --prhud-gold: #ffc52f;
+  --prhud-cyan: #24d8ff;
+  --prhud-green: #46ee77;
+  --prhud-red: #ea3146;
+  --prhud-text: #f7fbff;
+  --prhud-muted: #a8b3c3;
 }
 
 #paradise-rp-hud {
@@ -29,446 +29,294 @@
 #paradise-rp-hud input,
 #paradise-rp-hud select { font: inherit; }
 
-.prhud-native-hidden {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  filter: opacity(0) !important;
+.prhud-cover {
+  position: fixed;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--prhud-bg);
 }
+.prhud-cover-top-left { left: 0; top: 0; width: 326px; height: 150px; }
+.prhud-cover-left-edge { left: 0; top: 90px; width: 48px; bottom: 92px; }
+.prhud-cover-bottom-left { left: 0; bottom: 0; width: 440px; height: 92px; }
+.prhud-cover-bottom-right { right: 0; bottom: 0; width: 70px; height: 70px; }
 
 .prhud-panel {
   background:
-    linear-gradient(180deg, rgba(11, 20, 31, .91), rgba(4, 8, 13, .88)),
-    radial-gradient(circle at 50% 0%, rgba(35, 217, 255, .09), transparent 56%);
+    linear-gradient(180deg, rgba(14, 24, 36, .98), rgba(4, 8, 13, .98)),
+    radial-gradient(circle at 20% 0%, rgba(36, 216, 255, .08), transparent 42%);
   border: 1px solid var(--prhud-line);
-  box-shadow: 0 15px 34px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.065);
-  backdrop-filter: blur(9px);
+  box-shadow: 0 13px 30px rgba(0,0,0,.46), inset 0 1px 0 rgba(255,255,255,.07);
+  backdrop-filter: blur(8px);
 }
 
-/* PLAYER CARD - compact */
+/* top-left player */
 .prhud-player {
   position: absolute;
-  left: 14px;
-  top: 14px;
-  width: 288px;
-  height: 126px;
+  z-index: 3;
+  left: 12px;
+  top: 12px;
+  width: 292px;
+  height: 124px;
   border-radius: 13px;
-  padding: 11px 12px 10px 96px;
+  padding: 10px 12px 31px 92px;
   pointer-events: auto;
+  overflow: hidden;
 }
-
 .prhud-avatar {
   position: absolute;
-  left: 11px;
+  left: 10px;
   top: 10px;
   width: 72px;
-  height: 90px;
+  height: 82px;
   border-radius: 10px;
+  display: grid;
+  place-items: center;
   overflow: hidden;
-  display: grid;
-  place-items: center;
-  background: rgba(13, 31, 48, .65);
-  border: 1px solid rgba(35, 217, 255, .28);
+  background: #0c1b29;
+  border: 1px solid rgba(36,216,255,.42);
 }
-
-.prhud-avatar img {
-  max-width: 86px;
-  max-height: 114px;
-  image-rendering: pixelated;
-  transform: translateY(7px);
-}
-
-.prhud-avatar-fallback {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-weight: 950;
-  font-size: 22px;
-  color: var(--prhud-gold);
-  background: rgba(35,217,255,.1);
-}
-
-.prhud-level {
+.prhud-avatar img { max-width: 92px; max-height: 116px; image-rendering: pixelated; transform: translateY(8px); }
+.prhud-avatar-fallback { width: 42px; height: 42px; border-radius: 50%; display:grid; place-items:center; font-weight:900; background:#10283a; color:var(--prhud-gold); }
+.prhud-avatar b {
   position: absolute;
-  left: 50px;
-  bottom: -14px;
-  width: 36px;
-  height: 36px;
+  right: -5px;
+  bottom: -5px;
+  width: 31px;
+  height: 31px;
   border-radius: 50%;
   display: grid;
   place-items: center;
+  background: #07111b;
   color: #fff;
-  font-weight: 950;
-  font-size: 16px;
-  background: linear-gradient(180deg, #172232, #060b12);
   border: 2px solid var(--prhud-gold);
-  box-shadow: 0 0 16px rgba(255,195,50,.22);
-}
-
-.prhud-player-main { min-width: 0; }
-.prhud-player-name {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1.05;
-}
-.prhud-player-name i {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #2df36c;
-  box-shadow: 0 0 10px rgba(45,243,108,.7);
-}
-.prhud-role {
-  margin-top: 3px;
-  color: var(--prhud-muted);
   font-size: 13px;
-  font-weight: 650;
 }
-.prhud-bars {
-  margin-top: 10px;
-  display: grid;
-  gap: 7px;
-}
-.prhud-stat {
-  display: grid;
-  grid-template-columns: 20px 1fr 64px;
-  align-items: center;
-  gap: 7px;
-  min-width: 0;
-}
-.prhud-stat b {
-  font-size: 17px;
-  line-height: 1;
-  color: var(--prhud-red);
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,.45));
-}
-.prhud-stat.energy b { color: var(--prhud-cyan); }
-.prhud-stat span {
-  height: 15px;
-  border-radius: 6px;
-  background: rgba(0,0,0,.56);
-  border: 1px solid rgba(255,255,255,.08);
-  overflow: hidden;
-  box-shadow: inset 0 2px 7px rgba(0,0,0,.42);
-}
-.prhud-stat i {
-  display: block;
-  height: 100%;
-  min-width: 6px;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #cd243c, #ff5568);
-}
-.prhud-stat.energy i { background: linear-gradient(90deg, #0d91d4, #38d8ff); }
-.prhud-stat em {
-  font-style: normal;
-  font-size: 12px;
-  font-weight: 850;
-  text-align: right;
-  color: #fff;
-}
-
-/* TOP META */
-.prhud-topmeta {
+.prhud-player-main strong { display: block; font-size: 17px; line-height: 1; font-weight: 900; }
+.prhud-player-main span { display: block; margin-top: 3px; color: var(--prhud-muted); font-size: 12px; font-weight: 700; }
+.prhud-stat { display: grid; grid-template-columns: 18px 1fr 70px; gap: 6px; align-items: center; margin-top: 8px; }
+.prhud-stat i { font-style: normal; font-weight: 900; font-size: 14px; line-height: 1; }
+.prhud-stat.red i { color: var(--prhud-red); }
+.prhud-stat.blue i { color: var(--prhud-cyan); }
+.prhud-stat em { height: 15px; border-radius: 5px; background: rgba(0,0,0,.62); border: 1px solid rgba(255,255,255,.08); overflow: hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,.45); }
+.prhud-stat u { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #c91e34, #f34b61); }
+.prhud-stat.blue u { background: linear-gradient(90deg, #168ddb, #36d7ff); }
+.prhud-stat small { color: #fff; font-size: 11px; font-weight: 850; text-align: right; }
+.prhud-player-money {
   position: absolute;
-  left: 348px;
-  top: 20px;
+  left: 12px;
+  right: 12px;
+  bottom: 7px;
+  height: 20px;
   display: flex;
-  gap: 6px;
+  gap: 16px;
+  align-items: center;
+  padding-left: 2px;
+  color: #fff;
+  border-top: 1px solid rgba(255,255,255,.07);
+  font-size: 13px;
+  font-weight: 900;
+}
+.prhud-player-money span:first-child { color: var(--prhud-green); }
+.prhud-player-money span:last-child { color: var(--prhud-cyan); }
+
+/* top meta */
+.prhud-meta {
+  position: absolute;
+  z-index: 3;
+  left: 350px;
+  top: 21px;
+  display: flex;
+  gap: 7px;
   pointer-events: auto;
 }
-.prhud-topmeta .prhud-panel {
-  height: 42px;
-  min-width: 108px;
-  padding: 0 15px;
+.prhud-chip {
+  height: 41px;
+  min-width: 112px;
+  padding: 0 16px;
   border-radius: 11px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-weight: 850;
   font-size: 15px;
-  white-space: nowrap;
+  font-weight: 900;
 }
-.prhud-topmeta span { color: var(--prhud-gold); }
 
-/* MONEY RIGHT - smaller, cleaner */
+/* top-right money */
 .prhud-money {
   position: absolute;
-  top: 16px;
-  right: 64px;
+  z-index: 3;
+  right: 18px;
+  top: 15px;
   display: flex;
+  gap: 8px;
   align-items: center;
-  gap: 9px;
   pointer-events: auto;
 }
 .prhud-money-card {
-  width: 154px;
+  width: 158px;
   height: 48px;
-  border-radius: 13px;
+  border-radius: 12px;
   display: grid;
-  grid-template-columns: 34px 1fr 30px;
-  grid-template-areas: "ico amount plus" "ico label plus";
-  column-gap: 8px;
+  grid-template-columns: 34px 1fr 28px;
+  grid-template-rows: 25px 15px;
+  grid-template-areas: "icon number plus" "icon label plus";
+  gap: 0 8px;
   align-items: center;
-  padding: 7px 8px;
+  padding: 6px 8px;
 }
-.prhud-money-ico {
-  grid-area: ico;
-  width: 32px;
-  height: 32px;
+.prhud-money-card i {
+  grid-area: icon;
+  width: 31px;
+  height: 31px;
   border-radius: 9px;
   display: grid;
   place-items: center;
+  font-style: normal;
   font-weight: 950;
-  font-size: 17px;
-  color: #07101a;
-  background: linear-gradient(180deg, #74ff72, #168436);
-  box-shadow: inset 0 2px 0 rgba(255,255,255,.25), 0 8px 14px rgba(0,0,0,.28);
+  background: linear-gradient(180deg, #6aff75, #118638);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
 }
-.prhud-money-card.pixels .prhud-money-ico { background: linear-gradient(180deg, #ffd76d, #d58a0d); }
-.prhud-money-card strong {
-  grid-area: amount;
-  font-size: 20px;
-  line-height: 1;
-  font-weight: 950;
-  color: #52f56d;
-}
+.prhud-money-card.pixels i { background: linear-gradient(180deg, #ffd044, #b67313); }
+.prhud-money-card strong { grid-area: number; color: var(--prhud-green); font-size: 20px; line-height: 1; font-weight: 950; }
 .prhud-money-card.pixels strong { color: var(--prhud-gold); }
-.prhud-money-card small {
-  grid-area: label;
-  align-self: start;
-  margin-top: 2px;
-  color: #f7fbff;
-  opacity: .94;
-  text-transform: uppercase;
-  letter-spacing: .03em;
-  font-size: 10px;
-  font-weight: 850;
-}
+.prhud-money-card span { grid-area: label; color: #fff; font-size: 10px; font-weight: 850; text-transform: uppercase; opacity: .92; }
 .prhud-money-card button,
-.prhud-menu {
-  appearance: none;
-  border: 1px solid rgba(35,217,255,.34);
-  background: rgba(3,8,14,.68);
-  color: var(--prhud-cyan);
-  cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-}
-.prhud-money-card button {
-  grid-area: plus;
-  width: 29px;
-  height: 29px;
-  border-radius: 8px;
-  font-size: 19px;
-  font-weight: 900;
-  line-height: 1;
-}
-.prhud-money-card.pixels button { color: var(--prhud-gold); border-color: rgba(255,195,50,.36); }
-.prhud-menu {
-  width: 48px;
-  height: 48px;
-  border-radius: 13px;
-  color: #fff;
-  font-size: 22px;
-  pointer-events: auto;
-}
+.prhud-menu { appearance: none; border: 1px solid rgba(36,216,255,.32); background:#09131e; color:var(--prhud-cyan); cursor:pointer; }
+.prhud-money-card button { grid-area: plus; width: 28px; height: 28px; border-radius: 8px; font-size: 18px; font-weight: 950; }
+.prhud-money-card.pixels button { color: var(--prhud-gold); border-color: rgba(255,197,47,.36); }
+.prhud-menu { width: 45px; height: 48px; border-radius: 12px; color:#fff; font-size:21px; }
 
-/* LEFT RAIL - thinner */
+/* left rail */
 .prhud-rail {
   position: absolute;
+  z-index: 3;
   left: 14px;
-  top: 188px;
-  width: 82px;
-  border-radius: 15px;
-  padding: 7px;
+  top: 190px;
+  width: 80px;
+  border-radius: 14px;
+  padding: 6px;
   display: grid;
   gap: 4px;
   pointer-events: auto;
 }
 .prhud-rail button,
 .prhud-dock button,
-.prhud-chat button {
-  appearance: none;
-  border: 0;
-  background: transparent;
-}
+.prhud-chat button { appearance: none; border: 0; background: transparent; }
 .prhud-rail-btn {
   width: 100%;
-  height: 68px;
-  border-radius: 12px;
-  color: rgba(255,255,255,.82);
+  height: 63px;
+  border-radius: 11px;
   display: grid;
   place-items: center;
-  grid-template-rows: 28px 15px;
-  gap: 2px;
+  grid-template-rows: 25px 14px;
+  color: rgba(255,255,255,.84);
   cursor: pointer;
-  border-bottom: 1px solid rgba(255,255,255,.055) !important;
 }
-.prhud-rail-btn:last-child { border-bottom: 0 !important; }
-.prhud-rail-btn.active {
-  color: #fff;
-  background: linear-gradient(180deg, rgba(255,195,50,.14), rgba(0,0,0,.12));
-  box-shadow: inset 0 0 0 1px rgba(255,195,50,.44), 0 0 18px rgba(255,195,50,.09);
-}
-.prhud-rail-btn span { font-size: 27px; line-height: 1; filter: drop-shadow(0 3px 2px rgba(0,0,0,.44)); }
-.prhud-rail-btn small { font-size: 10px; font-weight: 900; text-transform: uppercase; }
+.prhud-rail-btn.is-active { color: #fff; background: rgba(255,197,47,.1); box-shadow: inset 0 0 0 1px rgba(255,197,47,.5); }
+.prhud-rail-btn span { font-size: 25px; line-height: 1; filter: drop-shadow(0 3px 2px rgba(0,0,0,.42)); }
+.prhud-rail-btn small { font-size: 9.5px; font-weight: 900; text-transform: uppercase; }
 
-/* QUESTS - compact */
+/* quests */
 .prhud-quests {
   position: absolute;
-  right: 20px;
-  top: 110px;
-  width: 250px;
-  border-radius: 14px;
+  z-index: 3;
+  right: 18px;
+  top: 112px;
+  width: 248px;
+  border-radius: 13px;
   padding: 13px 15px;
   pointer-events: auto;
 }
-.prhud-quests h3 {
-  margin: 0 0 10px;
-  font-size: 13px;
-  text-transform: uppercase;
-  font-weight: 950;
-  letter-spacing: .02em;
-}
-.prhud-quests p {
-  margin: 0;
-  height: 36px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  border-top: 1px solid rgba(255,255,255,.055);
-  font-size: 13px;
-  font-weight: 720;
-}
+.prhud-quests h3 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; font-weight: 950; letter-spacing: .02em; }
+.prhud-quests p { margin: 0; height: 34px; display: grid; grid-template-columns: 1fr auto; align-items: center; border-top: 1px solid rgba(255,255,255,.06); font-size: 12.5px; font-weight: 730; }
 .prhud-quests p:first-of-type { border-top: 0; }
 .prhud-quests b { color: var(--prhud-gold); font-size: 13px; }
-.prhud-quests p:first-of-type b { color: #39f17b; }
+.prhud-quests p:first-of-type b { color: var(--prhud-green); }
 
-/* CHAT - centered above dock */
+/* chat */
 .prhud-chat {
   position: absolute;
+  z-index: 3;
   left: 50%;
-  bottom: 92px;
+  bottom: 82px;
   transform: translateX(-50%);
-  width: clamp(460px, 36vw, 650px);
-  height: 45px;
+  width: clamp(500px, 36vw, 660px);
+  height: 44px;
   border-radius: 14px;
   padding: 5px;
   display: grid;
-  grid-template-columns: 136px 1fr 36px 40px;
-  gap: 5px;
+  grid-template-columns: 36px 150px 1fr 35px 42px;
+  gap: 6px;
   align-items: center;
   pointer-events: auto;
 }
-.prhud-chat select,
-.prhud-chat input {
-  width: 100%;
-  height: 35px;
-  outline: none;
+.prhud-chat-bubble,
+.prhud-chat-emoji,
+.prhud-chat-send { height: 34px; border-radius: 9px; color:#fff; border:1px solid rgba(255,255,255,.08) !important; cursor:pointer; }
+.prhud-chat-bubble,
+.prhud-chat-emoji { background:#0a141f; }
+.prhud-chat-send { background:linear-gradient(180deg,#239ef1,#0d579a); border-color:rgba(36,216,255,.45) !important; font-size:23px; font-weight:950; }
+.prhud-chat-channel,
+.prhud-chat-input {
+  height: 34px;
   border-radius: 9px;
-  border: 1px solid rgba(255,255,255,.075);
-  background: rgba(0,0,0,.28);
-  color: #f8fbff;
-}
-.prhud-chat select { padding: 0 9px; font-size: 12px; font-weight: 750; }
-.prhud-chat input { padding: 0 12px; font-size: 13px; }
-.prhud-chat input:focus { border-color: rgba(255,195,50,.5); box-shadow: 0 0 0 2px rgba(255,195,50,.08); }
-.prhud-chat button {
-  height: 35px;
-  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.09);
+  background: #07111b;
   color: #fff;
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,.09) !important;
+  outline: none;
 }
-.prhud-chat .emoji { background: rgba(0,0,0,.28); color: var(--prhud-gold); font-size: 17px; }
-.prhud-chat .send {
-  background: linear-gradient(180deg, #168bd4, #0a3c73);
-  border-color: rgba(35,217,255,.42) !important;
-  color: #fff;
-  font-size: 24px;
-  font-weight: 950;
-  box-shadow: 0 0 16px rgba(35,217,255,.14);
-}
+.prhud-chat-channel { padding: 0 9px; font-size: 12px; font-weight: 760; }
+.prhud-chat-input { min-width: 0; padding: 0 12px; font-size: 13px; }
+.prhud-chat-input:focus { border-color: rgba(255,197,47,.48); box-shadow: 0 0 0 2px rgba(255,197,47,.08); }
 
-/* BOTTOM DOCK - reduced */
+/* dock */
 .prhud-dock {
   position: absolute;
+  z-index: 3;
   left: 50%;
-  bottom: 20px;
+  bottom: 14px;
   transform: translateX(-50%);
-  width: clamp(640px, 48vw, 820px);
+  width: min(910px, calc(100vw - 280px));
   height: 58px;
-  border-radius: 16px;
+  border-radius: 15px;
   padding: 5px 8px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr) 92px repeat(3, 1fr);
-  gap: 0;
+  grid-template-columns: repeat(4, 1fr) 84px repeat(3, 1fr);
   pointer-events: auto;
 }
 .prhud-dock-btn {
-  position: relative;
-  height: 48px;
   min-width: 0;
-  border-left: 1px solid rgba(255,255,255,.055) !important;
+  height: 48px;
   border-radius: 11px;
-  color: rgba(255,255,255,.78);
-  cursor: pointer;
+  color: rgba(255,255,255,.82);
   display: grid;
   place-items: center;
-  grid-template-rows: 25px 13px;
-  gap: 2px;
+  grid-template-rows: 25px 14px;
+  cursor: pointer;
+  border-left: 1px solid rgba(255,255,255,.055) !important;
 }
 .prhud-dock-btn:first-child { border-left: 0 !important; }
+.prhud-dock-icon { font-size: 22px; line-height: 1; filter: drop-shadow(0 3px 2px rgba(0,0,0,.45)); }
+.prhud-dock-btn small { font-size: 10px; font-weight: 900; text-transform: uppercase; }
 .prhud-dock-btn:hover,
-.prhud-dock-btn.active {
-  color: #fff;
-  background: linear-gradient(180deg, rgba(255,195,50,.11), rgba(0,0,0,.13));
-}
-.prhud-dock-btn.active::after {
-  content: '';
-  position: absolute;
-  left: 24%;
-  right: 24%;
-  bottom: 4px;
-  height: 2px;
-  border-radius: 99px;
-  background: var(--prhud-gold);
-  box-shadow: 0 0 12px rgba(255,195,50,.7);
-}
-.prhud-dock-ico {
-  font-size: 22px;
-  line-height: 1;
-  filter: drop-shadow(0 3px 2px rgba(0,0,0,.4));
-}
-.prhud-dock-btn span:last-child {
-  font-size: 10.5px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .01em;
-  white-space: nowrap;
-}
-.prhud-dock-btn.home {
-  height: 66px;
-  margin-top: -14px;
-  border-radius: 18px;
-  background: radial-gradient(circle at 50% 18%, rgba(255,195,50,.34), rgba(11,20,31,.88) 66%);
-  border: 1px solid rgba(255,195,50,.5) !important;
-  box-shadow: 0 0 24px rgba(255,195,50,.2), inset 0 1px 0 rgba(255,255,255,.08);
+.prhud-dock-btn.is-active { color:#fff; background: rgba(255,197,47,.08); }
+.prhud-dock-btn.is-home {
+  height: 58px;
+  margin-top: -10px;
+  border-radius: 16px;
   color: var(--prhud-gold);
+  background: radial-gradient(circle at 50% 12%, rgba(255,197,47,.3), rgba(255,197,47,.08) 42%, rgba(0,0,0,.16));
+  border: 1px solid rgba(255,197,47,.55) !important;
+  box-shadow: 0 0 24px rgba(255,197,47,.18), inset 0 1px 0 rgba(255,255,255,.08);
 }
-.prhud-dock-btn.home .prhud-dock-ico { font-size: 34px; }
-.prhud-dock-btn.home span:last-child { font-size: 12px; color: var(--prhud-gold); }
+.prhud-dock-btn.is-home .prhud-dock-icon { font-size: 31px; }
+.prhud-dock-btn.is-home small { color: var(--prhud-gold); font-size: 11px; }
 
-@media (max-width: 1280px) {
+@media (max-width: 1300px) {
   .prhud-player { transform: scale(.9); transform-origin: top left; }
-  .prhud-topmeta { left: 320px; transform: scale(.9); transform-origin: top left; }
+  .prhud-meta { left: 300px; }
   .prhud-money { transform: scale(.9); transform-origin: top right; }
   .prhud-quests { transform: scale(.9); transform-origin: top right; }
-  .prhud-rail { transform: scale(.9); transform-origin: top left; }
-  .prhud-chat { width: clamp(390px, 44vw, 560px); bottom: 84px; }
-  .prhud-dock { width: clamp(560px, 62vw, 720px); bottom: 16px; }
+  .prhud-dock { width: min(830px, calc(100vw - 170px)); }
 }
