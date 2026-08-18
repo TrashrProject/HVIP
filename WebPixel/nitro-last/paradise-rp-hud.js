@@ -1,11 +1,11 @@
 (() => {
   'use strict';
 
-  const VERSION = '29.0.0';
+  const VERSION = '30.0.0-chat-bridge';
   const HUD_ID = 'paradise-rp-hud';
   const STYLE_ID = 'paradise-rp-hud-css';
   const DATA_URL = '../rp-hud-data.php';
-  const CSS_URL = './paradise-rp-hud.css?v=29';
+  const CSS_URL = './paradise-rp-hud.css?v=30';
 
   const DEFAULT_DATA = {
     ok: false,
@@ -84,7 +84,7 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    if (!String(link.getAttribute('href') || '').includes('v=29')) link.href = CSS_URL;
+    if (!String(link.getAttribute('href') || '').includes('v=30')) link.href = CSS_URL;
   };
 
   const getAvatarUrl = data => {
@@ -95,20 +95,88 @@
     return data.avatar_url ? String(data.avatar_url) : '';
   };
 
-  const nativeInputs = () => [...document.querySelectorAll('input[type="text"], input:not([type]), textarea')]
-    .filter(el => !el.closest(`#${HUD_ID}`) && !el.disabled && !el.readOnly);
+  const getAccessibleDocuments = () => {
+    const docs = [document];
+    try {
+      document.querySelectorAll('iframe').forEach(frame => {
+        try {
+          const doc = frame.contentDocument || frame.contentWindow?.document;
+          if (doc && !docs.includes(doc)) docs.push(doc);
+        } catch (_) {}
+      });
+    } catch (_) {}
+    return docs;
+  };
+
+  const nativeInputs = () => {
+    const inputs = [];
+    for (const doc of getAccessibleDocuments()) {
+      try {
+        doc.querySelectorAll('input[type="text"], input:not([type]), textarea').forEach(el => {
+          if (!el || el.disabled || el.readOnly) return;
+          if (el.id === 'prhud-chat-input' || el.closest?.(`#${HUD_ID}`)) return;
+          inputs.push(el);
+        });
+      } catch (_) {}
+    }
+    return inputs.sort((a, b) => {
+      const score = el => {
+        let r = { left: 0, top: 0, width: 0, height: 0, bottom: 0 };
+        try { r = el.getBoundingClientRect(); } catch (_) {}
+        const hint = `${el.getAttribute('placeholder') || ''} ${el.className || ''} ${el.id || ''}`;
+        let s = 0;
+        if (/haz|chatear|chat|parler|message/i.test(hint)) s += 1000;
+        if (el.getAttribute('data-pr-native-chat-parked') === '1') s += 800;
+        if (r.bottom > 0) s += Math.round(r.bottom);
+        if (r.width > 10 && r.height > 10) s += 100;
+        return s;
+      };
+      return score(b) - score(a);
+    });
+  };
+
+  const setNativeValue = (input, value) => {
+    const win = input.ownerDocument?.defaultView || window;
+    const proto = input instanceof win.HTMLTextAreaElement ? win.HTMLTextAreaElement.prototype : win.HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (setter) setter.call(input, value); else input.value = value;
+  };
+
+  const fireEnter = input => {
+    const doc = input.ownerDocument || document;
+    const win = doc.defaultView || window;
+    const opts = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true, composed: true };
+    ['keydown', 'keypress', 'keyup'].forEach(type => {
+      const event = new win.KeyboardEvent(type, opts);
+      input.dispatchEvent(event);
+      doc.dispatchEvent(new win.KeyboardEvent(type, opts));
+      win.dispatchEvent(new win.KeyboardEvent(type, opts));
+    });
+  };
 
   const sendToNativeChat = text => {
-    const input = nativeInputs().sort((a, b) => b.getBoundingClientRect().bottom - a.getBoundingClientRect().bottom)[0];
-    if (!input) return false;
-    const proto = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
-    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
-    input.focus();
-    if (setter) setter.call(input, text); else input.value = text;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
-    input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
-    return true;
+    const clean = String(text || '').trim();
+    if (!clean) return false;
+
+    const candidates = nativeInputs();
+    for (const input of candidates) {
+      try {
+        const doc = input.ownerDocument || document;
+        const win = doc.defaultView || window;
+        input.style.setProperty('display', 'block', 'important');
+        input.style.setProperty('visibility', 'visible', 'important');
+        input.style.setProperty('pointer-events', 'auto', 'important');
+        input.focus({ preventScroll: true });
+        setNativeValue(input, clean);
+        input.dispatchEvent(new win.Event('input', { bubbles: true, composed: true }));
+        input.dispatchEvent(new win.Event('change', { bubbles: true, composed: true }));
+        try { input.setSelectionRange(clean.length, clean.length); } catch (_) {}
+        fireEnter(input);
+        input.blur();
+        return true;
+      } catch (_) {}
+    }
+    return false;
   };
 
   const focusChat = value => {
@@ -201,8 +269,10 @@
       event.preventDefault();
       const text = input?.value?.trim() || '';
       if (!text) return;
-      sendToNativeChat(text);
-      input.value = '';
+      const sent = sendToNativeChat(text);
+      if (sent) input.value = '';
+      else input.classList.add('is-error');
+      window.setTimeout(() => input?.classList?.remove('is-error'), 450);
       input.focus();
     });
   };
