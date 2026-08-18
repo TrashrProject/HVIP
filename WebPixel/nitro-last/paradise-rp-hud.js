@@ -1,11 +1,11 @@
 (() => {
   'use strict';
 
-  const VERSION = '22.0.0';
+  const VERSION = '25.0.0';
   const HUD_ID = 'paradise-rp-hud';
   const STYLE_ID = 'paradise-rp-hud-css';
   const DATA_URL = '../rp-hud-data.php';
-  const CSS_URL = './paradise-rp-hud.css?v=22';
+  const CSS_URL = './paradise-rp-hud.css?v=25';
 
   const DEFAULT_DATA = {
     ok: false,
@@ -84,12 +84,12 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    if (!String(link.getAttribute('href') || '').includes('v=22')) link.href = CSS_URL;
+    if (!String(link.getAttribute('href') || '').includes('v=25')) link.href = CSS_URL;
   };
 
   const getAvatarUrl = data => {
     if (data.avatar_url) return String(data.avatar_url);
-    if (data.look) return `../avatar-image.php?figure=${encodeURIComponent(data.look)}&direction=2&head_direction=2&gesture=sml&size=l`;
+    if (data.look) return `../avatar-image.php?figure=${encodeURIComponent(data.look)}&direction=2&head_direction=2&gesture=sml&size=m`;
     return '';
   };
 
