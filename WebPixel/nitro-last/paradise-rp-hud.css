@@ -1,10 +1,10 @@
-/* ParadiseRP HUD overlay v7 - compact, high z-index, legacy UI hidden. */
+/* ParadiseRP HUD overlay v8 - non destructive, highest layer, old UI covered. */
 :root {
   --prhud-bg: #050a10;
   --prhud-bg2: #09131e;
-  --prhud-bg3: #111e2c;
-  --prhud-line: rgba(255, 194, 55, .48);
-  --prhud-blue-line: rgba(40, 188, 245, .26);
+  --prhud-bg3: #101c29;
+  --prhud-line: rgba(255, 194, 55, .46);
+  --prhud-blue-line: rgba(40, 188, 245, .3);
   --prhud-gold: #ffc52f;
   --prhud-cyan: #24d8ff;
   --prhud-green: #46ee77;
@@ -14,10 +14,11 @@
 }
 
 #paradise-rp-hud {
-  position: fixed;
-  inset: 0;
-  z-index: 2147483646;
-  pointer-events: none;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  isolation: isolate !important;
+  pointer-events: none !important;
   color: var(--prhud-text);
   font-family: Inter, "Segoe UI", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -29,57 +30,57 @@
 #paradise-rp-hud input,
 #paradise-rp-hud select { font: inherit; }
 
-.prhud-legacy-hidden {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
 .prhud-mask {
-  position: fixed;
-  z-index: 10;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(5,10,16,.99), rgba(5,10,16,.96));
+  position: fixed !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  background: #050a10 !important;
+  border: 0 !important;
 }
-.prhud-mask-player { left: 0; top: 0; width: 340px; height: 158px; }
-.prhud-mask-edge { left: 0; top: 72px; width: 48px; bottom: 84px; }
-.prhud-mask-phone { right: 0; bottom: 0; width: 68px; height: 72px; }
-.prhud-mask-topright { right: 0; top: 0; width: 265px; height: 82px; background: rgba(5,10,16,.95); }
+.prhud-mask-top-left { left: 0; top: 0; width: 332px; height: 154px; }
+.prhud-mask-left { left: 0; top: 92px; width: 102px; height: calc(100vh - 162px); }
+.prhud-mask-bottom-left { left: 0; bottom: 0; width: 460px; height: 86px; }
+.prhud-mask-bottom-right { right: 0; bottom: 0; width: 70px; height: 72px; }
 
 .prhud-panel {
-  background:
-    linear-gradient(180deg, rgba(14, 24, 36, .98), rgba(4, 8, 13, .98)),
-    radial-gradient(circle at 18% 0%, rgba(36,216,255,.08), transparent 45%);
-  border: 1px solid var(--prhud-line);
-  box-shadow: 0 12px 28px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.07);
-  backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, #101b28 0%, #060b12 100%) !important;
+  border: 1px solid var(--prhud-line) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.07) !important;
+  backdrop-filter: none !important;
 }
+
+.prhud-player,
+.prhud-meta,
+.prhud-money,
+.prhud-rail,
+.prhud-quests,
+.prhud-chat,
+.prhud-dock { z-index: 5 !important; }
 
 /* top-left player */
 .prhud-player {
-  position: absolute;
-  z-index: 30;
+  position: fixed !important;
   left: 12px;
   top: 12px;
   width: 292px;
-  height: 122px;
+  height: 124px;
   border-radius: 13px;
-  padding: 10px 12px 29px 90px;
-  pointer-events: auto;
+  padding: 10px 12px 31px 92px;
+  pointer-events: auto !important;
   overflow: hidden;
 }
 .prhud-avatar {
   position: absolute;
   left: 10px;
   top: 10px;
-  width: 70px;
-  height: 80px;
+  width: 72px;
+  height: 82px;
   border-radius: 10px;
   display: grid;
   place-items: center;
   overflow: hidden;
   background: #0c1b29;
-  border: 1px solid rgba(36,216,255,.46);
+  border: 1px solid rgba(36,216,255,.42);
 }
 .prhud-avatar img { max-width: 92px; max-height: 116px; image-rendering: pixelated; transform: translateY(8px); }
 .prhud-avatar-fallback { width: 42px; height: 42px; border-radius: 50%; display:grid; place-items:center; font-weight:900; background:#10283a; color:var(--prhud-gold); }
@@ -97,14 +98,13 @@
   border: 2px solid var(--prhud-gold);
   font-size: 13px;
 }
-.prhud-player-title { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-.prhud-player-main strong { display: block; font-size: 17px; line-height: 1; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.prhud-player-main span { color: var(--prhud-muted); font-size: 11px; font-weight: 750; }
-.prhud-stat { display: grid; grid-template-columns: 18px 1fr 68px; gap: 6px; align-items: center; margin-top: 8px; }
+.prhud-player-main strong { display: block; font-size: 17px; line-height: 1; font-weight: 900; }
+.prhud-player-main span { display: block; margin-top: 3px; color: var(--prhud-muted); font-size: 12px; font-weight: 700; }
+.prhud-stat { display: grid; grid-template-columns: 18px 1fr 70px; gap: 6px; align-items: center; margin-top: 8px; }
 .prhud-stat i { font-style: normal; font-weight: 900; font-size: 14px; line-height: 1; }
 .prhud-stat.red i { color: var(--prhud-red); }
 .prhud-stat.blue i { color: var(--prhud-cyan); }
-.prhud-stat em { height: 14px; border-radius: 5px; background: rgba(0,0,0,.62); border: 1px solid rgba(255,255,255,.08); overflow: hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,.45); }
+.prhud-stat em { height: 15px; border-radius: 5px; background: rgba(0,0,0,.68); border: 1px solid rgba(255,255,255,.08); overflow: hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,.45); }
 .prhud-stat u { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #c91e34, #f34b61); }
 .prhud-stat.blue u { background: linear-gradient(90deg, #168ddb, #36d7ff); }
 .prhud-stat small { color: #fff; font-size: 11px; font-weight: 850; text-align: right; }
@@ -113,13 +113,14 @@
   left: 12px;
   right: 12px;
   bottom: 7px;
-  height: 19px;
+  height: 20px;
   display: flex;
   gap: 16px;
   align-items: center;
   padding-left: 2px;
+  color: #fff;
   border-top: 1px solid rgba(255,255,255,.07);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 900;
 }
 .prhud-player-money span:first-child { color: var(--prhud-green); }
@@ -127,16 +128,15 @@
 
 /* top meta */
 .prhud-meta {
-  position: absolute;
-  z-index: 30;
+  position: fixed !important;
   left: 350px;
-  top: 20px;
+  top: 21px;
   display: flex;
   gap: 7px;
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 .prhud-chip {
-  height: 40px;
+  height: 41px;
   min-width: 112px;
   padding: 0 16px;
   border-radius: 11px;
@@ -150,14 +150,13 @@
 
 /* top-right money */
 .prhud-money {
-  position: absolute;
-  z-index: 30;
-  right: 16px;
-  top: 14px;
+  position: fixed !important;
+  right: 18px;
+  top: 15px;
   display: flex;
   gap: 8px;
   align-items: center;
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 .prhud-money-card {
   width: 158px;
@@ -195,44 +194,42 @@
 
 /* left rail */
 .prhud-rail {
-  position: absolute;
-  z-index: 30;
-  left: 14px;
-  top: 176px;
+  position: fixed !important;
+  left: 10px;
+  top: 174px;
   width: 80px;
   border-radius: 14px;
   padding: 6px;
   display: grid;
   gap: 4px;
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 .prhud-rail button,
 .prhud-dock button,
 .prhud-chat button { appearance: none; border: 0; background: transparent; }
 .prhud-rail-btn {
   width: 100%;
-  height: 61px;
+  height: 63px;
   border-radius: 11px;
   display: grid;
   place-items: center;
-  grid-template-rows: 24px 14px;
+  grid-template-rows: 25px 14px;
   color: rgba(255,255,255,.84);
   cursor: pointer;
 }
 .prhud-rail-btn.is-active { color: #fff; background: rgba(255,197,47,.1); box-shadow: inset 0 0 0 1px rgba(255,197,47,.5); }
-.prhud-rail-btn span { font-size: 24px; line-height: 1; filter: drop-shadow(0 3px 2px rgba(0,0,0,.42)); }
+.prhud-rail-btn span { font-size: 25px; line-height: 1; filter: drop-shadow(0 3px 2px rgba(0,0,0,.42)); }
 .prhud-rail-btn small { font-size: 9.5px; font-weight: 900; text-transform: uppercase; }
 
 /* quests */
 .prhud-quests {
-  position: absolute;
-  z-index: 30;
+  position: fixed !important;
   right: 18px;
-  top: 104px;
+  top: 112px;
   width: 248px;
   border-radius: 13px;
   padding: 13px 15px;
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 .prhud-quests h3 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; font-weight: 950; letter-spacing: .02em; }
 .prhud-quests p { margin: 0; height: 34px; display: grid; grid-template-columns: 1fr auto; align-items: center; border-top: 1px solid rgba(255,255,255,.06); font-size: 12.5px; font-weight: 730; }
@@ -242,30 +239,29 @@
 
 /* chat */
 .prhud-chat {
-  position: absolute;
-  z-index: 30;
+  position: fixed !important;
   left: 50%;
   bottom: 82px;
   transform: translateX(-50%);
   width: clamp(500px, 36vw, 660px);
-  height: 43px;
+  height: 44px;
   border-radius: 14px;
   padding: 5px;
   display: grid;
-  grid-template-columns: 34px 150px 1fr 35px 42px;
+  grid-template-columns: 36px 150px 1fr 35px 42px;
   gap: 6px;
   align-items: center;
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 .prhud-chat-bubble,
 .prhud-chat-emoji,
-.prhud-chat-send { height: 33px; border-radius: 9px; color:#fff; border:1px solid rgba(255,255,255,.08) !important; cursor:pointer; }
+.prhud-chat-send { height: 34px; border-radius: 9px; color:#fff; border:1px solid rgba(255,255,255,.08) !important; cursor:pointer; }
 .prhud-chat-bubble,
 .prhud-chat-emoji { background:#0a141f; }
 .prhud-chat-send { background:linear-gradient(180deg,#239ef1,#0d579a); border-color:rgba(36,216,255,.45) !important; font-size:23px; font-weight:950; }
 .prhud-chat-channel,
 .prhud-chat-input {
-  height: 33px;
+  height: 34px;
   border-radius: 9px;
   border: 1px solid rgba(255,255,255,.09);
   background: #07111b;
@@ -278,18 +274,17 @@
 
 /* dock */
 .prhud-dock {
-  position: absolute;
-  z-index: 30;
+  position: fixed !important;
   left: 50%;
   bottom: 14px;
   transform: translateX(-50%);
-  width: min(900px, calc(100vw - 300px));
+  width: min(910px, calc(100vw - 280px));
   height: 58px;
   border-radius: 15px;
   padding: 5px 8px;
   display: grid;
   grid-template-columns: repeat(4, 1fr) 84px repeat(3, 1fr);
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 .prhud-dock-btn {
   min-width: 0;
@@ -324,12 +319,13 @@
   .prhud-meta { left: 300px; }
   .prhud-money { transform: scale(.9); transform-origin: top right; }
   .prhud-quests { transform: scale(.9); transform-origin: top right; }
-  .prhud-dock { width: min(800px, calc(100vw - 260px)); }
-  .prhud-chat { width: clamp(480px, 42vw, 620px); }
+  .prhud-dock { width: min(830px, calc(100vw - 170px)); }
 }
 
 @media (max-height: 760px) {
-  .prhud-rail { top: 160px; transform: scale(.88); transform-origin: top left; }
-  .prhud-chat { bottom: 73px; transform: translateX(-50%) scale(.92); transform-origin: bottom center; }
-  .prhud-dock { bottom: 8px; transform: translateX(-50%) scale(.92); transform-origin: bottom center; }
+  .prhud-player, .prhud-money, .prhud-meta, .prhud-quests { transform: scale(.88); transform-origin: top left; }
+  .prhud-money, .prhud-quests { transform-origin: top right; }
+  .prhud-rail { transform: scale(.88); transform-origin: top left; }
+  .prhud-chat { bottom: 72px; }
+  .prhud-dock { bottom: 8px; height: 54px; }
 }
