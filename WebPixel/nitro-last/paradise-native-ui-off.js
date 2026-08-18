@@ -1,13 +1,13 @@
 (() => {
   'use strict';
 
-  const VERSION = '8.0.0-chat-bridge-safe';
+  const VERSION = '9.0.0-native-chat-visible';
   const STYLE_ID = 'paradise-native-ui-off-style';
   window.__PARADISE_NATIVE_UI_OFF_LOCK__ = VERSION;
 
   const css = `
     /* ParadiseRP native UI off - safe mode.
-       On cache l'ancien UI, mais le vrai champ de chat Nitro reste utilisable par le HUD. */
+       Le vrai champ chat Nitro reste visible et fonctionnel. */
     #CombatMode,
     #PSVMode,
     #TicketMode,
@@ -22,25 +22,71 @@
     .button-3IzmP_0.menuButton-yNbz6_0,
     [class*="menuButton-yNbz6"],
     [class*="button-3IzmP"],
-    [data-pr-native-ui-killed="1"]:not([data-pr-native-chat-parked="1"]):not([data-pr-chat-bridge-active="1"]) {
+    [data-pr-native-ui-killed="1"]:not([data-pr-native-chat-live="1"]):not([data-pr-native-chat-host="1"]) {
       display: none !important;
       visibility: hidden !important;
       opacity: 0 !important;
       pointer-events: none !important;
     }
 
-    [data-pr-native-chat-parked="1"]:not([data-pr-chat-bridge-active="1"]) {
-      position: fixed !important;
-      left: -99999px !important;
-      top: auto !important;
-      bottom: auto !important;
-      width: 1px !important;
-      height: 1px !important;
-      min-width: 1px !important;
-      min-height: 1px !important;
+    #paradise-rp-hud .prhud-chat {
+      display: none !important;
+      visibility: hidden !important;
       opacity: 0 !important;
       pointer-events: none !important;
-      z-index: -1 !important;
+    }
+
+    [data-pr-native-chat-host="1"] {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: none !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+    }
+
+    [data-pr-native-chat-live="1"],
+    #root input[placeholder*="Haz" i]:not(#prhud-chat-input),
+    #root input[placeholder*="chatear" i]:not(#prhud-chat-input),
+    #root input[placeholder*="chat" i]:not(#prhud-chat-input),
+    #root textarea[placeholder*="Haz" i]:not(#prhud-chat-input),
+    #root textarea[placeholder*="chatear" i]:not(#prhud-chat-input),
+    #root textarea[placeholder*="chat" i]:not(#prhud-chat-input) {
+      position: fixed !important;
+      left: 50% !important;
+      bottom: 64px !important;
+      transform: translateX(-50%) !important;
+      width: 610px !important;
+      height: 44px !important;
+      min-width: 610px !important;
+      min-height: 44px !important;
+      max-width: calc(100vw - 620px) !important;
+      max-height: 44px !important;
+      z-index: 2147483646 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      color: #dce8f3 !important;
+      caret-color: #38ddff !important;
+      background: linear-gradient(180deg, rgba(8,24,37,.972), rgba(2,8,14,.992)) !important;
+      border: 1px solid rgba(39,200,255,.48) !important;
+      border-radius: 14px !important;
+      box-shadow: 0 14px 28px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.10) !important;
+      padding: 0 52px 0 18px !important;
+      outline: 0 !important;
+      font: 800 13px/44px Inter, "Segoe UI", Arial, sans-serif !important;
+      text-align: left !important;
+    }
+
+    [data-pr-native-chat-live="1"]::placeholder,
+    #root input[placeholder*="Haz" i]:not(#prhud-chat-input)::placeholder,
+    #root input[placeholder*="chatear" i]:not(#prhud-chat-input)::placeholder,
+    #root input[placeholder*="chat" i]:not(#prhud-chat-input)::placeholder {
+      color: #7d8d9f !important;
+      opacity: 1 !important;
     }
 
     #paradise-rp-hard-sidewall,
@@ -85,10 +131,11 @@
   };
 
   const hideElement = el => {
-    if (window.__paradiseChatBridgeActive) return;
     if (isProtected(el) || hasLargeCanvas(el)) return;
+    if (el.querySelector?.('[data-pr-native-chat-live="1"]') || el.getAttribute?.('data-pr-native-chat-live') === '1') return;
     try {
-      el.removeAttribute('data-pr-native-chat-parked');
+      el.removeAttribute('data-pr-native-chat-live');
+      el.removeAttribute('data-pr-native-chat-host');
       el.setAttribute('data-pr-native-ui-killed', '1');
       el.style.setProperty('display', 'none', 'important');
       el.style.setProperty('visibility', 'hidden', 'important');
@@ -97,23 +144,56 @@
     } catch (_) {}
   };
 
-  const parkChatElement = el => {
-    if (window.__paradiseChatBridgeActive) return;
-    if (!el || isProtected(el)) return;
+  const getText = el => {
     try {
-      el.removeAttribute('data-pr-native-ui-killed');
-      el.setAttribute('data-pr-native-chat-parked', '1');
-      el.style.setProperty('position', 'fixed', 'important');
-      el.style.setProperty('left', '-99999px', 'important');
-      el.style.setProperty('top', 'auto', 'important');
-      el.style.setProperty('bottom', 'auto', 'important');
-      el.style.setProperty('width', '1px', 'important');
-      el.style.setProperty('height', '1px', 'important');
-      el.style.setProperty('min-width', '1px', 'important');
-      el.style.setProperty('min-height', '1px', 'important');
-      el.style.setProperty('opacity', '0', 'important');
-      el.style.setProperty('pointer-events', 'none', 'important');
-      el.style.setProperty('z-index', '-1', 'important');
+      return String((el.innerText || el.textContent || el.getAttribute?.('placeholder') || el.getAttribute?.('title') || el.getAttribute?.('aria-label') || '')).trim();
+    } catch (_) {
+      return '';
+    }
+  };
+
+  const isNativeChatField = el => {
+    if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return false;
+    if (el.id === 'prhud-chat-input' || el.closest?.('#paradise-rp-hud')) return false;
+    const text = `${el.getAttribute('placeholder') || ''} ${el.className || ''} ${el.id || ''} ${el.value || ''}`;
+    return /haz|chatear|chat|parler|message|say/i.test(text);
+  };
+
+  const restoreNativeChat = () => {
+    try {
+      document.querySelectorAll('input, textarea').forEach(input => {
+        if (!isNativeChatField(input)) return;
+
+        input.removeAttribute('data-pr-native-ui-killed');
+        input.removeAttribute('data-pr-native-chat-parked');
+        input.setAttribute('data-pr-native-chat-live', '1');
+        if (/haz|chatear/i.test(input.getAttribute('placeholder') || '')) input.setAttribute('placeholder', 'Clique ici pour chatter...');
+
+        try {
+          input.style.setProperty('display', 'block', 'important');
+          input.style.setProperty('visibility', 'visible', 'important');
+          input.style.setProperty('opacity', '1', 'important');
+          input.style.setProperty('pointer-events', 'auto', 'important');
+        } catch (_) {}
+
+        let parent = input.parentElement;
+        for (let i = 0; parent && i < 5; i += 1, parent = parent.parentElement) {
+          if (isProtected(parent) || hasLargeCanvas(parent)) break;
+          try {
+            parent.removeAttribute('data-pr-native-ui-killed');
+            parent.removeAttribute('data-pr-native-chat-parked');
+            parent.setAttribute('data-pr-native-chat-host', '1');
+            parent.style.setProperty('display', 'block', 'important');
+            parent.style.setProperty('visibility', 'visible', 'important');
+            parent.style.setProperty('opacity', '1', 'important');
+            parent.style.setProperty('pointer-events', 'none', 'important');
+            parent.style.setProperty('background', 'transparent', 'important');
+            parent.style.setProperty('border', '0', 'important');
+            parent.style.setProperty('box-shadow', 'none', 'important');
+            parent.style.setProperty('overflow', 'visible', 'important');
+          } catch (_) {}
+        }
+      });
     } catch (_) {}
   };
 
@@ -125,18 +205,11 @@
     '[class*="habbo-toolbar"]'
   ];
 
-  const getText = el => {
-    try {
-      return String((el.innerText || el.textContent || el.getAttribute?.('placeholder') || el.getAttribute?.('title') || el.getAttribute?.('aria-label') || '')).trim();
-    } catch (_) {
-      return '';
-    }
-  };
-
-  const isLegacyText = text => /\[(CALLE|INT|SALA|ROOM)\]|Haz clic|chatear|HabboVIP|Que hay|Qué hay|What'?s new|proposito|propósito|seguridad|sitio web|Bubble/i.test(text || '');
+  const isLegacyText = text => /\[(CALLE|INT|SALA|ROOM)\]|HabboVIP|Que hay|Qué hay|What'?s new|proposito|propósito|seguridad|sitio web|Bubble/i.test(text || '');
 
   const isSmallVisibleBox = el => {
     if (isProtected(el) || hasLargeCanvas(el)) return false;
+    if (el.querySelector?.('[data-pr-native-chat-live="1"]') || el.getAttribute?.('data-pr-native-chat-live') === '1') return false;
     let r;
     try { r = el.getBoundingClientRect(); } catch (_) { return false; }
     if (!r || r.width <= 2 || r.height <= 2) return false;
@@ -145,14 +218,8 @@
     return true;
   };
 
-  const isNativeChatField = el => {
-    if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return false;
-    if (el.id === 'prhud-chat-input' || (el.closest && el.closest('#paradise-rp-hud'))) return false;
-    const text = `${el.getAttribute('placeholder') || ''} ${el.className || ''} ${el.id || ''} ${el.value || ''}`;
-    return /haz|chatear|chat|parler|message/i.test(text);
-  };
-
   const isBottomLeftLegacy = el => {
+    if (el.querySelector?.('[data-pr-native-chat-live="1"]') || el.getAttribute?.('data-pr-native-chat-live') === '1') return false;
     if (!isSmallVisibleBox(el)) return false;
     let r;
     try { r = el.getBoundingClientRect(); } catch (_) { return false; }
@@ -161,58 +228,35 @@
     const vh = window.innerHeight;
     const text = getText(el);
 
-    const oldChatBar = r.left < 470 && r.top > vh - 145 && r.width < 470 && r.height < 95;
     const oldRoomLabel = r.left < 280 && r.top > vh - 300 && r.width < 300 && r.height < 105 && isLegacyText(text);
     const oldBottomIcons = r.left < 260 && r.top > vh - 135 && r.width < 280 && r.height < 125;
     const oldLowerLeftRail = r.left < 55 && r.top > vh - 315 && r.width < 65 && r.height < 315;
     const oldPhone = r.right > vw - 85 && r.bottom > vh - 100 && r.width < 85 && r.height < 100;
     const oldTopRightToast = r.right > vw - 360 && r.top < 95 && r.width < 360 && r.height < 95 && isLegacyText(text);
 
-    return oldChatBar || oldRoomLabel || oldBottomIcons || oldLowerLeftRail || oldPhone || oldTopRightToast;
+    return oldRoomLabel || oldBottomIcons || oldLowerLeftRail || oldPhone || oldTopRightToast;
   };
 
   const killLegacyTextBlocks = () => {
-    if (window.__paradiseChatBridgeActive) return;
     try {
       document.querySelectorAll('div, span, p, section, aside, label, button').forEach(el => {
         if (!isSmallVisibleBox(el)) return;
-        if (el.querySelector?.('[data-pr-native-chat-parked="1"]')) return;
         const text = getText(el);
         if (!isLegacyText(text)) return;
         hideElement(el);
-        let parent = el.parentElement;
-        for (let i = 0; parent && i < 3; i += 1, parent = parent.parentElement) {
-          if (parent.querySelector?.('[data-pr-native-chat-parked="1"]')) continue;
-          if (isSmallVisibleBox(parent) && (isBottomLeftLegacy(parent) || isLegacyText(getText(parent)))) hideElement(parent);
-        }
-      });
-    } catch (_) {}
-  };
-
-  const parkNativeChat = () => {
-    if (window.__paradiseChatBridgeActive) return;
-    try {
-      document.querySelectorAll('input, textarea').forEach(el => {
-        if (!isNativeChatField(el)) return;
-        parkChatElement(el);
-        let parent = el.parentElement;
-        for (let i = 0; parent && i < 3; i += 1, parent = parent.parentElement) {
-          if (isBottomLeftLegacy(parent)) parkChatElement(parent);
-        }
       });
     } catch (_) {}
   };
 
   const killOnlyKnownButtons = () => {
     installCss();
-    if (window.__paradiseChatBridgeActive) return;
-    parkNativeChat();
+    restoreNativeChat();
 
     for (const selector of selectors) {
       try {
         document.querySelectorAll(selector).forEach(el => {
           if (isProtected(el)) return;
-          if (el.querySelector?.('[data-pr-native-chat-parked="1"]')) return;
+          if (el.querySelector?.('[data-pr-native-chat-live="1"]')) return;
           const r = el.getBoundingClientRect();
           if (r.width > window.innerWidth * 0.55 || r.height > window.innerHeight * 0.55) return;
           hideElement(el);
@@ -222,13 +266,12 @@
 
     try {
       document.querySelectorAll('button, img, div, span, i, p, section, aside').forEach(el => {
-        if (el.querySelector?.('[data-pr-native-chat-parked="1"]')) return;
         if (isBottomLeftLegacy(el)) hideElement(el);
       });
     } catch (_) {}
 
     killLegacyTextBlocks();
-    parkNativeChat();
+    restoreNativeChat();
   };
 
   const boot = () => {
@@ -236,7 +279,7 @@
     killOnlyKnownButtons();
     [0, 50, 120, 250, 500, 900, 1400, 2200, 4000, 7000].forEach(ms => setTimeout(killOnlyKnownButtons, ms));
     if (window.__paradiseNativeUiOffSafeInterval) clearInterval(window.__paradiseNativeUiOffSafeInterval);
-    window.__paradiseNativeUiOffSafeInterval = setInterval(killOnlyKnownButtons, 400);
+    window.__paradiseNativeUiOffSafeInterval = setInterval(killOnlyKnownButtons, 700);
   };
 
   window.__paradiseNativeUiOffScan = killOnlyKnownButtons;
