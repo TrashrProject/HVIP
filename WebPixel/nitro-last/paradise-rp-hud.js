@@ -1,12 +1,11 @@
 (() => {
   'use strict';
 
-  const VERSION = '9.0.0';
+  const VERSION = '10.0.0';
   const HUD_ID = 'paradise-rp-hud';
-  const MASK_ID = 'paradise-rp-hard-masks';
   const STYLE_ID = 'paradise-rp-hud-css';
   const DATA_URL = '../rp-hud-data.php';
-  const CSS_URL = './paradise-rp-hud.css?v=9';
+  const CSS_URL = './paradise-rp-hud.css?v=10';
 
   const DEFAULT_DATA = {
     ok: false,
@@ -19,7 +18,7 @@
     energy: { current: 31, max: 100 },
     money: { credits: 789, pixels: 5000, cash: 1789, diamonds: 224 },
     city: 'Paradise City',
-    time: '17:38'
+    time: '17:43'
   };
 
   const dockItems = [
@@ -56,7 +55,7 @@
   const ensureCss = () => {
     let link = document.getElementById(STYLE_ID);
     if (link) {
-      if (!link.href.includes('v=9')) link.href = CSS_URL;
+      if (!link.href.includes('v=10')) link.href = CSS_URL;
       return;
     }
     link = document.createElement('link');
@@ -66,34 +65,14 @@
     document.head.appendChild(link);
   };
 
-  const ensureMasks = () => {
-    let masks = document.getElementById(MASK_ID);
-    if (!masks) {
-      masks = document.createElement('div');
-      masks.id = MASK_ID;
-      masks.setAttribute('aria-hidden', 'true');
-      masks.innerHTML = `
-        <i class="pr-mask pr-mask-top-left"></i>
-        <i class="pr-mask pr-mask-left-icons"></i>
-        <i class="pr-mask pr-mask-left-label"></i>
-        <i class="pr-mask pr-mask-bottom-left"></i>
-        <i class="pr-mask pr-mask-bottom-right"></i>
-        <i class="pr-mask pr-mask-top-right"></i>`;
-      document.body.appendChild(masks);
-    }
-    return masks;
-  };
-
   const bringToFront = () => {
-    const masks = document.getElementById(MASK_ID);
     const hud = document.getElementById(HUD_ID);
-    if (masks) document.body.appendChild(masks);
     if (hud) document.body.appendChild(hud);
   };
 
   const isOwnElement = el => {
     if (!el || el === document.documentElement || el === document.body) return true;
-    if (el.closest(`#${HUD_ID}, #${MASK_ID}, #paradise-loader`)) return true;
+    if (el.closest(`#${HUD_ID}, #paradise-loader`)) return true;
     if (['SCRIPT', 'STYLE', 'LINK', 'META', 'TITLE', 'BASE', 'NOSCRIPT'].includes(el.tagName)) return true;
     return false;
   };
@@ -101,18 +80,17 @@
   const inLegacyZone = rect => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    if (rect.left < 350 && rect.top < 165) return true;
-    if (rect.left < 118 && rect.top > 80 && rect.top < vh - 90) return true;
-    if (rect.left < 270 && rect.bottom > vh - 285 && rect.bottom < vh - 85) return true;
-    if (rect.left < 520 && rect.bottom > vh - 130) return true;
-    if (rect.right > vw - 90 && rect.bottom > vh - 95) return true;
-    if (rect.right > vw - 295 && rect.top < 95) return true;
-    return false;
+    const topLeft = rect.left < 330 && rect.top < 155;
+    const leftRail = rect.left < 112 && rect.top > 82 && rect.top < vh - 100;
+    const bottomLeft = rect.left < 270 && rect.bottom > vh - 245 && rect.bottom < vh - 80;
+    const bottomChat = rect.left < 530 && rect.bottom > vh - 125;
+    const bottomRight = rect.right > vw - 88 && rect.bottom > vh - 95;
+    const topRight = rect.right > vw - 292 && rect.top < 90;
+    return topLeft || leftRail || bottomLeft || bottomChat || bottomRight || topRight;
   };
 
   const killLegacyDomInZones = () => {
-    const nodes = document.querySelectorAll('body *');
-    nodes.forEach(el => {
+    document.querySelectorAll('body *').forEach(el => {
       if (isOwnElement(el)) return;
       if (el.id === 'root' || el.tagName === 'CANVAS') return;
       if (el.querySelector && el.querySelector('canvas')) return;
@@ -270,7 +248,6 @@
 
   const mount = async () => {
     ensureCss();
-    ensureMasks();
     document.getElementById(HUD_ID)?.remove();
 
     const hud = document.createElement('div');
@@ -291,7 +268,6 @@
 
     if (window.__paradiseHudCleaner) clearInterval(window.__paradiseHudCleaner);
     window.__paradiseHudCleaner = setInterval(() => {
-      ensureMasks();
       bringToFront();
       killLegacyDomInZones();
     }, 250);
