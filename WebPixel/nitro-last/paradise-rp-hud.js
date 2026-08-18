@@ -1,11 +1,12 @@
 (() => {
   'use strict';
 
-  const VERSION = '8.0.0';
+  const VERSION = '9.0.0';
   const HUD_ID = 'paradise-rp-hud';
+  const MASK_ID = 'paradise-rp-hard-masks';
   const STYLE_ID = 'paradise-rp-hud-css';
   const DATA_URL = '../rp-hud-data.php';
-  const CSS_URL = './paradise-rp-hud.css?v=8';
+  const CSS_URL = './paradise-rp-hud.css?v=9';
 
   const DEFAULT_DATA = {
     ok: false,
@@ -18,23 +19,23 @@
     energy: { current: 31, max: 100 },
     money: { credits: 789, pixels: 5000, cash: 1789, diamonds: 224 },
     city: 'Paradise City',
-    time: '17:30'
+    time: '17:38'
   };
 
   const dockItems = [
-    { key: 'player', label: 'Joueur', icon: '👤', command: '' },
-    { key: 'phone', label: 'Téléphone', icon: '📱', command: ':tel' },
-    { key: 'id', label: 'Carte ID', icon: '🪪', command: ':id' },
-    { key: 'job', label: 'Métier', icon: '💼', command: ':trabajar' },
+    { key: 'player', label: 'Joueur', icon: '♟', command: '' },
+    { key: 'phone', label: 'Téléphone', icon: '▯', command: ':tel' },
+    { key: 'id', label: 'Carte ID', icon: '▤', command: ':id' },
+    { key: 'job', label: 'Métier', icon: '▣', command: ':trabajar' },
     { key: 'home', label: 'Accueil', icon: '⌂', command: '' },
-    { key: 'shop', label: 'Boutique', icon: '🛒', command: '' },
-    { key: 'bag', label: 'Inventaire', icon: '🎒', command: '' },
+    { key: 'shop', label: 'Boutique', icon: '▥', command: '' },
+    { key: 'bag', label: 'Inventaire', icon: '▢', command: '' },
     { key: 'cmd', label: 'Commandes', icon: '>_', command: ':commands' }
   ];
 
   const railItems = [
     { key: 'home', label: 'Accueil', icon: '⌂', command: '' },
-    { key: 'bag', label: 'Inventaire', icon: '▣', command: '' },
+    { key: 'bag', label: 'Inventaire', icon: '▢', command: '' },
     { key: 'job', label: 'Métier', icon: '▤', command: ':trabajar' },
     { key: 'map', label: 'Carte', icon: '⌖', command: '' },
     { key: 'shop', label: 'Boutique', icon: '▥', command: '' }
@@ -55,7 +56,7 @@
   const ensureCss = () => {
     let link = document.getElementById(STYLE_ID);
     if (link) {
-      link.href = CSS_URL;
+      if (!link.href.includes('v=9')) link.href = CSS_URL;
       return;
     }
     link = document.createElement('link');
@@ -65,9 +66,68 @@
     document.head.appendChild(link);
   };
 
+  const ensureMasks = () => {
+    let masks = document.getElementById(MASK_ID);
+    if (!masks) {
+      masks = document.createElement('div');
+      masks.id = MASK_ID;
+      masks.setAttribute('aria-hidden', 'true');
+      masks.innerHTML = `
+        <i class="pr-mask pr-mask-top-left"></i>
+        <i class="pr-mask pr-mask-left-icons"></i>
+        <i class="pr-mask pr-mask-left-label"></i>
+        <i class="pr-mask pr-mask-bottom-left"></i>
+        <i class="pr-mask pr-mask-bottom-right"></i>
+        <i class="pr-mask pr-mask-top-right"></i>`;
+      document.body.appendChild(masks);
+    }
+    return masks;
+  };
+
+  const bringToFront = () => {
+    const masks = document.getElementById(MASK_ID);
+    const hud = document.getElementById(HUD_ID);
+    if (masks) document.body.appendChild(masks);
+    if (hud) document.body.appendChild(hud);
+  };
+
+  const isOwnElement = el => {
+    if (!el || el === document.documentElement || el === document.body) return true;
+    if (el.closest(`#${HUD_ID}, #${MASK_ID}, #paradise-loader`)) return true;
+    if (['SCRIPT', 'STYLE', 'LINK', 'META', 'TITLE', 'BASE', 'NOSCRIPT'].includes(el.tagName)) return true;
+    return false;
+  };
+
+  const inLegacyZone = rect => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    if (rect.left < 350 && rect.top < 165) return true;
+    if (rect.left < 118 && rect.top > 80 && rect.top < vh - 90) return true;
+    if (rect.left < 270 && rect.bottom > vh - 285 && rect.bottom < vh - 85) return true;
+    if (rect.left < 520 && rect.bottom > vh - 130) return true;
+    if (rect.right > vw - 90 && rect.bottom > vh - 95) return true;
+    if (rect.right > vw - 295 && rect.top < 95) return true;
+    return false;
+  };
+
+  const killLegacyDomInZones = () => {
+    const nodes = document.querySelectorAll('body *');
+    nodes.forEach(el => {
+      if (isOwnElement(el)) return;
+      if (el.id === 'root' || el.tagName === 'CANVAS') return;
+      if (el.querySelector && el.querySelector('canvas')) return;
+      const rect = el.getBoundingClientRect();
+      if (!rect || rect.width <= 2 || rect.height <= 2) return;
+      if (rect.width > window.innerWidth * 0.82 || rect.height > window.innerHeight * 0.82) return;
+      if (!inLegacyZone(rect)) return;
+      el.classList.add('prhud-native-kill');
+      el.setAttribute('data-prhud-killed', '1');
+    });
+  };
+
   const findNativeChatInput = () => {
     const inputs = [...document.querySelectorAll('input[type="text"], input:not([type]), textarea')]
-      .filter(el => !el.closest(`#${HUD_ID}`) && !el.disabled && !el.readOnly);
+      .filter(el => !el.closest(`#${HUD_ID}`) && !el.disabled && !el.readOnly && !el.classList.contains('prhud-native-kill'));
     if (!inputs.length) return null;
     return inputs
       .map(el => ({ el, rect: el.getBoundingClientRect(), ph: String(el.getAttribute('placeholder') || '') }))
@@ -101,19 +161,12 @@
       input.focus();
       if (text) input.select?.();
     }
-    if (text) {
-      const native = findNativeChatInput();
-      if (native) {
-        native.focus();
-        setNativeValue(native, text);
-      }
-    }
   };
 
   const runAction = item => {
     if (!item) return;
     if (item.command) return focusChat(item.command);
-    focusChat('');
+    return focusChat('');
   };
 
   const build = raw => {
@@ -126,28 +179,23 @@
     };
 
     const avatar = data.avatar_url
-      ? `<img src="${safe(data.avatar_url)}" alt="${safe(data.username)}" draggable="false">`
+      ? `<img src="${safe(data.avatar_url)}" alt="${safe(data.username)}" draggable="false" onerror="this.style.display='none'">`
       : `<div class="prhud-avatar-fallback">${safe(String(data.username || 'P').slice(0, 1).toUpperCase())}</div>`;
 
     const dock = dockItems.map(item => `
-      <button class="prhud-dock-btn ${item.key === 'home' ? 'is-home is-active' : ''}" data-pr-action="${safe(item.key)}" type="button" aria-label="${safe(item.label)}">
+      <button class="prhud-dock-btn ${item.key === 'home' ? 'is-home is-active' : ''}" data-pr-action="${safe(item.key)}" type="button">
         <span class="prhud-dock-icon">${safe(item.icon)}</span>
         <small>${safe(item.label)}</small>
       </button>`).join('');
 
     const rail = railItems.map((item, index) => `
-      <button class="prhud-rail-btn ${index === 0 ? 'is-active' : ''}" data-pr-rail="${safe(item.key)}" type="button" aria-label="${safe(item.label)}">
+      <button class="prhud-rail-btn ${index === 0 ? 'is-active' : ''}" data-pr-rail="${safe(item.key)}" type="button">
         <span>${safe(item.icon)}</span>
         <small>${safe(item.label)}</small>
       </button>`).join('');
 
     return `
-      <div class="prhud-mask prhud-mask-top-left" aria-hidden="true"></div>
-      <div class="prhud-mask prhud-mask-left" aria-hidden="true"></div>
-      <div class="prhud-mask prhud-mask-bottom-left" aria-hidden="true"></div>
-      <div class="prhud-mask prhud-mask-bottom-right" aria-hidden="true"></div>
-
-      <section class="prhud-panel prhud-player" aria-label="Joueur">
+      <section class="prhud-panel prhud-player">
         <div class="prhud-avatar">${avatar}<b>${safe(data.level)}</b></div>
         <div class="prhud-player-main">
           <strong>${safe(data.username)}</strong>
@@ -155,23 +203,23 @@
           <div class="prhud-stat red"><i>❤</i><em><u style="width:${pct(data.health.current, data.health.max)}"></u></em><small>${safe(data.health.current)} / ${safe(data.health.max)}</small></div>
           <div class="prhud-stat blue"><i>ϟ</i><em><u style="width:${pct(data.energy.current, data.energy.max)}"></u></em><small>${safe(data.energy.current)} / ${safe(data.energy.max)}</small></div>
         </div>
-        <div class="prhud-player-money"><span>$ ${fmt(data.money.cash ?? data.money.credits)}</span><span>♦ ${fmt(data.money.diamonds ?? data.money.pixels)}</span></div>
+        <div class="prhud-player-money"><span>$ ${fmt(data.money.cash ?? data.money.credits)}</span><span>◆ ${fmt(data.money.diamonds ?? data.money.pixels)}</span></div>
       </section>
 
       <div class="prhud-meta">
         <div class="prhud-panel prhud-chip">◷ ${safe(data.time)}</div>
-        <div class="prhud-panel prhud-chip">⌖ ${safe(data.city)}</div>
+        <div class="prhud-panel prhud-chip">✦ ${safe(data.city)}</div>
       </div>
 
-      <section class="prhud-money" aria-label="Monnaies">
+      <section class="prhud-money">
         <div class="prhud-panel prhud-money-card credits"><i>▰</i><strong>${fmt(data.money.credits)}</strong><span>Crédits</span><button type="button">+</button></div>
         <div class="prhud-panel prhud-money-card pixels"><i>H</i><strong>${fmt(data.money.pixels)}</strong><span>Pixels</span><button type="button">+</button></div>
-        <button class="prhud-panel prhud-menu" type="button" aria-label="Menu">☰</button>
+        <button class="prhud-panel prhud-menu" type="button">☰</button>
       </section>
 
-      <nav class="prhud-panel prhud-rail" aria-label="Navigation gauche">${rail}</nav>
+      <nav class="prhud-panel prhud-rail">${rail}</nav>
 
-      <section class="prhud-panel prhud-quests" aria-label="Quêtes quotidiennes">
+      <section class="prhud-panel prhud-quests">
         <h3>Quêtes quotidiennes</h3>
         <p><span>Se connecter</span><b>1/1</b></p>
         <p><span>Parler à 3 joueurs</span><b>2/3</b></p>
@@ -179,14 +227,14 @@
       </section>
 
       <form class="prhud-panel prhud-chat" id="prhud-chat-form" autocomplete="off">
-        <button class="prhud-chat-bubble" type="button" aria-label="Chat">•</button>
-        <select class="prhud-chat-channel" aria-label="Canal"><option>Discussion générale</option><option>Chuchoter</option><option>Crier</option></select>
+        <button class="prhud-chat-bubble" type="button">●</button>
+        <select class="prhud-chat-channel"><option>Discussion générale</option><option>Chuchoter</option><option>Crier</option></select>
         <input id="prhud-chat-input" class="prhud-chat-input" type="text" placeholder="Clique ici pour chatter..." autocomplete="off">
-        <button class="prhud-chat-emoji" type="button" aria-label="Emoji">☺</button>
-        <button class="prhud-chat-send" type="submit" aria-label="Envoyer">›</button>
+        <button class="prhud-chat-emoji" type="button">☺</button>
+        <button class="prhud-chat-send" type="submit">›</button>
       </form>
 
-      <nav class="prhud-panel prhud-dock" aria-label="Barre principale RP">${dock}</nav>
+      <nav class="prhud-panel prhud-dock">${dock}</nav>
     `;
   };
 
@@ -199,6 +247,7 @@
       const item = railItems.find(x => x.key === btn.dataset.prRail);
       btn.addEventListener('click', () => runAction(item));
     });
+
     const form = hud.querySelector('#prhud-chat-form');
     const input = hud.querySelector('#prhud-chat-input');
     form?.addEventListener('submit', event => {
@@ -219,37 +268,35 @@
     }
   };
 
-  const liftHud = hud => {
-    hud.style.setProperty('z-index', '2147483647', 'important');
-    hud.style.setProperty('position', 'fixed', 'important');
-    hud.style.setProperty('isolation', 'isolate', 'important');
-  };
-
   const mount = async () => {
     ensureCss();
+    ensureMasks();
     document.getElementById(HUD_ID)?.remove();
+
     const hud = document.createElement('div');
     hud.id = HUD_ID;
     hud.dataset.version = VERSION;
     hud.innerHTML = build(DEFAULT_DATA);
     document.body.appendChild(hud);
-    liftHud(hud);
     hydrate(hud);
-
-    const keepOnTop = () => {
-      if (!document.body.contains(hud)) return;
-      liftHud(hud);
-      if (document.body.lastElementChild !== hud) document.body.appendChild(hud);
-    };
-    setInterval(keepOnTop, 750);
+    bringToFront();
+    killLegacyDomInZones();
 
     const data = await loadData();
     if (!document.body.contains(hud)) return;
     hud.innerHTML = build(data && typeof data === 'object' ? data : DEFAULT_DATA);
-    liftHud(hud);
     hydrate(hud);
+    bringToFront();
+    killLegacyDomInZones();
+
+    if (window.__paradiseHudCleaner) clearInterval(window.__paradiseHudCleaner);
+    window.__paradiseHudCleaner = setInterval(() => {
+      ensureMasks();
+      bringToFront();
+      killLegacyDomInZones();
+    }, 250);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(mount, 250));
-  else setTimeout(mount, 250);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(mount, 150));
+  else setTimeout(mount, 150);
 })();
