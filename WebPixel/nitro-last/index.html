@@ -81,17 +81,19 @@
         });
       })();
       const query = new URLSearchParams(window.location.search);
+      const paradiseRoomId = Number.parseInt(query.get("room") || "0", 10) || 0;
+      window.__PARADISE_ROOM_ID__ = paradiseRoomId;
       window.NitroConfig = {
         "config.urls": [ "./local-config.json", "./renderer-config.json", "./ui-config.json" ],
         "sso.ticket": query.get("sso") || null,
-        "forward.type": query.get("room") ? 2 : -1,
-        "forward.id": query.get("room") || 0,
-        "friend.id": query.get("friend") || 0,
+        "forward.type": paradiseRoomId > 0 ? 2 : -1,
+        "forward.id": paradiseRoomId,
+        "friend.id": Number.parseInt(query.get("friend") || "0", 10) || 0,
         "roomenterad.habbohotel.enabled": false,
         "roomenterad.habblet.enabled": false
       };
     </script>
-    <script src="./paradise-native-ui-off.js?v=8"></script>
+    <script src="./paradise-native-ui-off.js?v=9"></script>
     <script type="module" crossorigin src="./assets/index-9f9954ad.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/vendor-0a5897c2.js">
     <link rel="modulepreload" crossorigin href="./assets/nitro-renderer-1dc7b8c5.js">
@@ -100,7 +102,6 @@
     <noscript>JavaScript doit être activé pour lancer le client.</noscript>
     <div id="root" class="w-100 h-100"></div>
     <script src="./paradise-rp-hud.js?v=30" defer></script>
-    <script src="./paradise-chat-bridge.js?v=2" defer></script>
     <script>
       window.setTimeout(function () {
         try { window.__paradiseNativeUiOffScan && window.__paradiseNativeUiOffScan(); } catch (_) {}
