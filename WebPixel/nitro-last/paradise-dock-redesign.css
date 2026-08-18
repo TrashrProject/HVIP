@@ -1,18 +1,26 @@
-/* ParadiseRP Dock Redesign v3
-   Nouvelle DA complète : dock RP papier/stone, sans néon IA, sans barre blanche. */
+/* ParadiseRP Dock Redesign v4
+   DA Habbo RP : barre séparée en slots pixel/bevel, sombre, compacte, sans style IA ni beige. */
 
-/* Nettoyage de la ligne blanche introduite par l'ancien conteneur chat Nitro */
+/* Nettoyage strict de la ligne blanche du vrai chat Nitro */
+#root [data-pr-native-chat-host="1"],
+#root [data-pr-native-chat-host="1"] *,
 #root [data-pr-native-chat-host="1"]::before,
 #root [data-pr-native-chat-host="1"]::after,
-#root [data-pr-native-chat-host="1"] *:not([data-pr-native-chat-live="1"])::before,
-#root [data-pr-native-chat-host="1"] *:not([data-pr-native-chat-live="1"])::after{
-  display:none!important;
-  content:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
+#root [data-pr-native-chat-host="1"] *::before,
+#root [data-pr-native-chat-host="1"] *::after{
+  border-color:transparent!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background-color:transparent!important;
 }
-
 #root [data-pr-native-chat-host="1"] hr,
+#root [data-pr-native-chat-host="1"] [class*="line" i],
+#root [data-pr-native-chat-host="1"] [class*="divider" i],
+#root [data-pr-native-chat-host="1"] [class*="separator" i]{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+}
 #root [data-pr-native-chat-host="1"] > *:not([data-pr-native-chat-live="1"]){
   border:0!important;
   outline:0!important;
@@ -20,42 +28,49 @@
   background:transparent!important;
 }
 
+/* Vrai chat Nitro, gardé fonctionnel mais restylé pour suivre le dock */
 #root [data-pr-native-chat-live="1"]{
-  bottom:74px!important;
-  width:min(620px,calc(100vw - 520px))!important;
+  bottom:78px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  width:min(520px,calc(100vw - 520px))!important;
   min-width:360px!important;
-  max-width:620px!important;
-  height:38px!important;
-  min-height:38px!important;
-  max-height:38px!important;
-  padding:0 18px!important;
-  border-radius:10px!important;
-  color:#1d2730!important;
-  caret-color:#6b4a19!important;
-  background:linear-gradient(180deg,#fff8e8,#e6d7bc)!important;
-  border:2px solid #4d3a22!important;
-  box-shadow:0 4px 0 rgba(29,22,14,.55),0 12px 22px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.65)!important;
-  font:900 13px/38px Inter,"Segoe UI",Arial,sans-serif!important;
+  max-width:520px!important;
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
+  padding:0 16px!important;
+  color:#edf7ff!important;
+  caret-color:#42d8ff!important;
+  background:linear-gradient(180deg,#11283a 0%,#07131e 100%)!important;
+  border:2px solid #0a0f14!important;
+  border-radius:8px!important;
+  box-shadow:
+    0 0 0 1px rgba(90,190,230,.28),
+    0 3px 0 #02060a,
+    0 10px 18px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -2px 0 rgba(0,0,0,.30)!important;
+  font:850 12px/34px Inter,"Segoe UI",Arial,sans-serif!important;
 }
-
 #root [data-pr-native-chat-live="1"]::placeholder{
-  color:#6f6a60!important;
+  color:#8ca5b8!important;
   opacity:1!important;
 }
 
-/* Dock totalement redessiné : plus de grosse capsule noire/bleue. */
+/* Dock : vrai style Habbo RP, slots séparés, pas une barre IA. */
 #paradise-rp-hud .prhud-dock{
   position:absolute!important;
   left:50%!important;
-  bottom:10px!important;
+  bottom:12px!important;
   transform:translateX(-50%)!important;
-  width:min(870px,calc(100vw - 420px))!important;
-  height:58px!important;
+  width:min(770px,calc(100vw - 430px))!important;
+  height:54px!important;
   padding:0!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
-  gap:8px!important;
+  gap:7px!important;
   overflow:visible!important;
   pointer-events:auto!important;
   border:0!important;
@@ -64,159 +79,187 @@
   box-shadow:none!important;
   backdrop-filter:none!important;
 }
-
 #paradise-rp-hud .prhud-dock:before,
 #paradise-rp-hud .prhud-dock:after{
   display:none!important;
   content:none!important;
 }
 
+/* Chaque entrée devient un vrai bouton pixel/bevel */
 #paradise-rp-hud .prhud-dock-btn{
   position:relative!important;
   flex:1 1 0!important;
-  min-width:86px!important;
-  max-width:112px!important;
+  min-width:72px!important;
+  max-width:94px!important;
   height:48px!important;
   margin:0!important;
-  padding:6px 7px 5px!important;
-  border-radius:8px!important;
-  border:2px solid #3d2d1b!important;
+  padding:5px 5px 4px!important;
   display:grid!important;
   grid-template-rows:22px 12px!important;
   place-items:center!important;
   gap:2px!important;
-  color:#2b3540!important;
-  background:linear-gradient(180deg,#f5ead3 0%,#d8c19a 100%)!important;
-  box-shadow:0 4px 0 #1d1510,0 9px 18px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.65)!important;
+  color:#d9e7f0!important;
+  background:
+    linear-gradient(180deg,#172c3c 0%,#0b1825 52%,#061019 100%)!important;
+  border:2px solid #061018!important;
+  border-radius:7px!important;
+  box-shadow:
+    0 0 0 1px rgba(91,178,213,.22),
+    0 3px 0 #02060a,
+    0 9px 15px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -2px 0 rgba(0,0,0,.32)!important;
   cursor:pointer!important;
   transform:none!important;
-  transition:transform .08s ease,filter .08s ease,background .08s ease!important;
+  transition:transform .08s ease,filter .08s ease,background .08s ease,color .08s ease!important;
 }
-
 #paradise-rp-hud .prhud-dock-btn:not(:last-child){
-  border-right:2px solid #3d2d1b!important;
+  border-right:2px solid #061018!important;
+}
+#paradise-rp-hud .prhud-dock-btn:before{
+  content:""!important;
+  position:absolute!important;
+  inset:3px!important;
+  border-radius:4px!important;
+  border:1px solid rgba(255,255,255,.045)!important;
+  pointer-events:none!important;
 }
 
 #paradise-rp-hud .prhud-dock-btn .prhud-icon{
-  width:22px!important;
-  height:22px!important;
+  width:21px!important;
+  height:21px!important;
   padding:0!important;
-  color:#2b3540!important;
+  color:#dcebf4!important;
   background:transparent!important;
-  filter:none!important;
+  filter:drop-shadow(0 1px 0 #000)!important;
 }
-
 #paradise-rp-hud .prhud-dock-btn .prhud-icon svg{
-  width:22px!important;
-  height:22px!important;
-  stroke-width:2.35!important;
+  width:21px!important;
+  height:21px!important;
+  stroke-width:2.25!important;
 }
-
 #paradise-rp-hud .prhud-dock-btn small{
   max-width:100%!important;
   overflow:hidden!important;
   text-overflow:ellipsis!important;
   white-space:nowrap!important;
-  color:#2b3540!important;
-  font-size:8.7px!important;
+  color:#dcebf4!important;
+  font-size:8.1px!important;
   line-height:1!important;
   font-weight:950!important;
-  letter-spacing:.01em!important;
+  letter-spacing:0!important;
   text-transform:uppercase!important;
-  text-shadow:none!important;
+  text-shadow:0 1px 0 #000!important;
 }
 
 #paradise-rp-hud .prhud-dock-btn:hover{
-  color:#141b22!important;
-  background:linear-gradient(180deg,#fff4dc 0%,#e3c996 100%)!important;
-  filter:brightness(1.04)!important;
+  background:linear-gradient(180deg,#203d51 0%,#102536 52%,#091622 100%)!important;
+  filter:brightness(1.06)!important;
   transform:translateY(-2px)!important;
 }
-
 #paradise-rp-hud .prhud-dock-btn:active{
   transform:translateY(2px)!important;
-  box-shadow:0 2px 0 #1d1510,0 5px 10px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.50)!important;
+  box-shadow:
+    0 0 0 1px rgba(91,178,213,.16),
+    0 1px 0 #02060a,
+    0 5px 9px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(0,0,0,.32)!important;
 }
 
+/* Accueil actif : sélection Habbo, pas grosse capsule jaune */
 #paradise-rp-hud .prhud-dock-btn.is-home,
 #paradise-rp-hud .prhud-dock-btn.is-active{
-  height:54px!important;
-  margin-top:-6px!important;
-  color:#f6e8c8!important;
-  background:linear-gradient(180deg,#4b3a24 0%,#21170f 100%)!important;
-  border-color:#f0c34c!important;
-  box-shadow:0 5px 0 #17100b,0 13px 22px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.16)!important;
+  height:50px!important;
+  margin-top:-2px!important;
+  color:#ffd64d!important;
+  background:
+    linear-gradient(180deg,#263d4c 0%,#122536 48%,#09141f 100%)!important;
+  border-color:#0a0f14!important;
+  box-shadow:
+    0 0 0 1px rgba(255,212,72,.62),
+    0 4px 0 #02060a,
+    0 11px 18px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -3px 0 rgba(255,196,45,.22)!important;
 }
-
+#paradise-rp-hud .prhud-dock-btn.is-home:before,
+#paradise-rp-hud .prhud-dock-btn.is-active:before{
+  border-color:rgba(255,214,77,.22)!important;
+}
+#paradise-rp-hud .prhud-dock-btn.is-home:after,
+#paradise-rp-hud .prhud-dock-btn.is-active:after{
+  content:""!important;
+  position:absolute!important;
+  left:12px!important;
+  right:12px!important;
+  bottom:4px!important;
+  height:3px!important;
+  border-radius:1px!important;
+  background:#ffd64d!important;
+  box-shadow:0 1px 0 #070707!important;
+}
 #paradise-rp-hud .prhud-dock-btn.is-home .prhud-icon,
 #paradise-rp-hud .prhud-dock-btn.is-active .prhud-icon,
 #paradise-rp-hud .prhud-dock-btn.is-home small,
 #paradise-rp-hud .prhud-dock-btn.is-active small{
-  color:#f0c34c!important;
+  color:#ffd64d!important;
 }
 
-#paradise-rp-hud .prhud-dock-btn.is-home:before,
-#paradise-rp-hud .prhud-dock-btn.is-active:before{
-  content:""!important;
-  position:absolute!important;
-  left:10px!important;
-  right:10px!important;
-  top:-7px!important;
-  height:5px!important;
-  border-radius:999px!important;
-  background:#f0c34c!important;
-  box-shadow:0 2px 0 #3d2d1b!important;
-}
-
-#paradise-rp-hud .prhud-dock-btn.is-home:after,
-#paradise-rp-hud .prhud-dock-btn.is-active:after{
-  display:none!important;
-  content:none!important;
-}
+/* Petits codes couleur façon slots Habbo, très légers */
+#paradise-rp-hud .prhud-dock-btn:nth-child(1){box-shadow:0 0 0 1px rgba(116,202,255,.20),0 3px 0 #02060a,0 9px 15px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.16),inset 0 -2px 0 rgba(0,0,0,.32)!important;}
+#paradise-rp-hud .prhud-dock-btn:nth-child(2){box-shadow:0 0 0 1px rgba(85,230,190,.18),0 3px 0 #02060a,0 9px 15px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.16),inset 0 -2px 0 rgba(0,0,0,.32)!important;}
+#paradise-rp-hud .prhud-dock-btn:nth-child(4){box-shadow:0 0 0 1px rgba(255,202,84,.18),0 3px 0 #02060a,0 9px 15px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.16),inset 0 -2px 0 rgba(0,0,0,.32)!important;}
 
 @media (max-width:1280px){
   #root [data-pr-native-chat-live="1"]{
-    width:min(580px,calc(100vw - 340px))!important;
-    bottom:72px!important;
+    width:min(500px,calc(100vw - 330px))!important;
+    min-width:320px!important;
+    bottom:76px!important;
   }
   #paradise-rp-hud .prhud-dock{
-    width:min(760px,calc(100vw - 260px))!important;
-    gap:6px!important;
+    width:min(720px,calc(100vw - 260px))!important;
+    gap:5px!important;
   }
   #paradise-rp-hud .prhud-dock-btn{
-    min-width:72px!important;
+    min-width:62px!important;
+    max-width:88px!important;
   }
   #paradise-rp-hud .prhud-dock-btn small{
-    font-size:8px!important;
+    font-size:7.4px!important;
   }
 }
-
 @media (max-width:900px){
   #root [data-pr-native-chat-live="1"]{
-    width:calc(100vw - 26px)!important;
+    width:calc(100vw - 24px)!important;
     min-width:0!important;
-    bottom:72px!important;
+    bottom:76px!important;
   }
   #paradise-rp-hud .prhud-dock{
     left:8px!important;
     right:8px!important;
-    bottom:8px!important;
+    bottom:10px!important;
     transform:none!important;
     width:auto!important;
-    height:58px!important;
+    height:54px!important;
     gap:4px!important;
   }
   #paradise-rp-hud .prhud-dock-btn{
     min-width:0!important;
     max-width:none!important;
-    height:48px!important;
-    padding-left:4px!important;
-    padding-right:4px!important;
+    height:47px!important;
+    padding-left:3px!important;
+    padding-right:3px!important;
   }
   #paradise-rp-hud .prhud-dock-btn:nth-child(n+5){
     display:grid!important;
   }
   #paradise-rp-hud .prhud-dock-btn small{
-    font-size:7px!important;
+    font-size:6.7px!important;
+  }
+  #paradise-rp-hud .prhud-dock-btn .prhud-icon,
+  #paradise-rp-hud .prhud-dock-btn .prhud-icon svg{
+    width:18px!important;
+    height:18px!important;
   }
 }
