@@ -1,17 +1,17 @@
 (() => {
   'use strict';
 
-  const VERSION = '30.0.0-chat-bridge';
+  const VERSION = '31.0.0-complete-layout';
   const HUD_ID = 'paradise-rp-hud';
   const STYLE_ID = 'paradise-rp-hud-css';
   const DATA_URL = '../rp-hud-data.php';
-  const CSS_URL = './paradise-rp-hud.css?v=30';
+  const CSS_URL = './paradise-rp-hud.css?v=31';
 
   const DEFAULT_DATA = {
     ok: false,
     username: 'ParadiseRP',
     role: 'Citoyen',
-    level: 7,
+    level: 1,
     look: '',
     avatar_url: '',
     health: { current: 315, max: 500 },
@@ -51,29 +51,29 @@
     credit: '<svg viewBox="0 0 24 24"><rect x="3.8" y="6" width="16.4" height="12" rx="2"/><path d="M3.8 10h16.4"/></svg>',
     star: '<svg viewBox="0 0 24 24"><path d="m12 3 2.5 5.3 5.8.8-4.2 4.1 1 5.8-5.1-2.8L6.9 19l1-5.8-4.2-4.1 5.8-.8L12 3Z"/></svg>',
     group: '<svg viewBox="0 0 24 24"><path d="M9.7 11.3a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2Z"/><path d="M3.8 20c.7-4.4 2.7-6.5 5.9-6.5s5.2 2.1 5.9 6.5"/><path d="M16.3 12.2a3 3 0 1 0-1.1-5.8M15.8 14c2.2.3 3.7 2 4.4 5"/></svg>',
-    chat: '<svg viewBox="0 0 24 24"><path d="M4 6.5A3.5 3.5 0 0 1 7.5 3h9A3.5 3.5 0 0 1 20 6.5v4A3.5 3.5 0 0 1 16.5 14H11l-4.2 4.2V14A3.5 3.5 0 0 1 4 10.5v-4Z"/></svg>',
+    map: '<svg viewBox="0 0 24 24"><path d="m4 6 5-2 6 2 5-2v14l-5 2-6-2-5 2V6Z"/><path d="M9 4v14M15 6v14"/></svg>',
+    shield: '<svg viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 4.6-3 7.2-8 9-5-1.8-8-4.4-8-9V6l8-3Z"/></svg>',
     send: '<svg viewBox="0 0 24 24"><path d="M3.5 20.5 21 12 3.5 3.5 6.4 11H14l-7.6 2-2.9 7.5Z"/></svg>'
   };
 
-  const icon = name => `<span class="prhud-icon prhud-icon-${safe(name)}">${svg[name] || svg.home}</span>`;
+  const icon = name => `<span class="prv2-icon prv2-icon-${safe(name)}">${svg[name] || svg.home}</span>`;
 
-  const dockItems = [
-    { key: 'player', label: 'Joueur', icon: 'user', command: '' },
+  const commands = [
+    { key: 'home', label: 'Accueil', icon: 'home', command: '' },
     { key: 'phone', label: 'Téléphone', icon: 'phone', command: ':tel' },
     { key: 'id', label: 'Carte ID', icon: 'id', command: ':id' },
     { key: 'job', label: 'Métier', icon: 'briefcase', command: ':trabajar' },
-    { key: 'home', label: 'Accueil', icon: 'home', command: '' },
-    { key: 'shop', label: 'Boutique', icon: 'cart', command: '' },
-    { key: 'bag', label: 'Inventaire', icon: 'bag', command: '' },
+    { key: 'bag', label: 'Sac', icon: 'bag', command: '' },
+    { key: 'shop', label: 'Shop', icon: 'cart', command: '' },
+    { key: 'map', label: 'Carte', icon: 'map', command: '' },
     { key: 'cmd', label: 'Commandes', icon: 'terminal', command: ':commands' }
   ];
 
-  const railItems = [
-    { key: 'home', label: 'Accueil', icon: 'home', command: '' },
-    { key: 'bag', label: 'Inventaire', icon: 'bag', command: '' },
-    { key: 'job', label: 'Métier', icon: 'briefcase', command: ':trabajar' },
-    { key: 'map', label: 'Carte', icon: 'pin', command: '' },
-    { key: 'shop', label: 'Boutique', icon: 'cart', command: '' }
+  const rail = [
+    { key: 'citizen', label: 'Citoyen', icon: 'user', command: '' },
+    { key: 'security', label: 'Sécurité', icon: 'shield', command: '' },
+    { key: 'work', label: 'Travail', icon: 'briefcase', command: ':trabajar' },
+    { key: 'map', label: 'Ville', icon: 'pin', command: '' }
   ];
 
   const ensureCss = () => {
@@ -84,112 +84,49 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    if (!String(link.getAttribute('href') || '').includes('v=30')) link.href = CSS_URL;
+    if (!String(link.getAttribute('href') || '').includes('v=31')) link.href = CSS_URL;
   };
 
-  const getAvatarUrl = data => {
+  const avatarUrl = data => {
     const look = String(data?.look || '').trim();
     if (look && /^[a-z0-9.\-]+$/i.test(look)) {
-      return `../avatar-image.php?figure=${encodeURIComponent(look)}&direction=2&head_direction=3&gesture=sml&action=std&size=l&headonly=1&hud=1`;
+      return `../avatar-image.php?figure=${encodeURIComponent(look)}&direction=2&head_direction=3&gesture=sml&action=std&size=l&headonly=1&hud=2`;
     }
     return data.avatar_url ? String(data.avatar_url) : '';
   };
 
-  const getAccessibleDocuments = () => {
-    const docs = [document];
+  const nativeChat = () => {
+    const candidates = document.querySelectorAll('#root [data-pr-native-chat-live="1"], #root input[placeholder*="chat" i], #root input[placeholder*="chatter" i], #root input[placeholder*="chatear" i]');
+    return [...candidates].find(el => el && el.id !== 'prhud-chat-input' && !el.disabled && !el.readOnly) || null;
+  };
+
+  const setNativeChatValue = value => {
+    const input = nativeChat();
+    if (!input) return false;
+    const text = String(value || '');
     try {
-      document.querySelectorAll('iframe').forEach(frame => {
-        try {
-          const doc = frame.contentDocument || frame.contentWindow?.document;
-          if (doc && !docs.includes(doc)) docs.push(doc);
-        } catch (_) {}
-      });
-    } catch (_) {}
-    return docs;
-  };
-
-  const nativeInputs = () => {
-    const inputs = [];
-    for (const doc of getAccessibleDocuments()) {
-      try {
-        doc.querySelectorAll('input[type="text"], input:not([type]), textarea').forEach(el => {
-          if (!el || el.disabled || el.readOnly) return;
-          if (el.id === 'prhud-chat-input' || el.closest?.(`#${HUD_ID}`)) return;
-          inputs.push(el);
-        });
-      } catch (_) {}
+      input.focus({ preventScroll: true });
+      const win = input.ownerDocument?.defaultView || window;
+      const proto = input instanceof win.HTMLTextAreaElement ? win.HTMLTextAreaElement.prototype : win.HTMLInputElement.prototype;
+      const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+      if (setter) setter.call(input, text); else input.value = text;
+      input.dispatchEvent(new win.Event('input', { bubbles: true, composed: true }));
+      input.dispatchEvent(new win.Event('change', { bubbles: true, composed: true }));
+      input.setSelectionRange?.(text.length, text.length);
+      return true;
+    } catch (_) {
+      return false;
     }
-    return inputs.sort((a, b) => {
-      const score = el => {
-        let r = { left: 0, top: 0, width: 0, height: 0, bottom: 0 };
-        try { r = el.getBoundingClientRect(); } catch (_) {}
-        const hint = `${el.getAttribute('placeholder') || ''} ${el.className || ''} ${el.id || ''}`;
-        let s = 0;
-        if (/haz|chatear|chat|parler|message/i.test(hint)) s += 1000;
-        if (el.getAttribute('data-pr-native-chat-parked') === '1') s += 800;
-        if (r.bottom > 0) s += Math.round(r.bottom);
-        if (r.width > 10 && r.height > 10) s += 100;
-        return s;
-      };
-      return score(b) - score(a);
-    });
   };
 
-  const setNativeValue = (input, value) => {
-    const win = input.ownerDocument?.defaultView || window;
-    const proto = input instanceof win.HTMLTextAreaElement ? win.HTMLTextAreaElement.prototype : win.HTMLInputElement.prototype;
-    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
-    if (setter) setter.call(input, value); else input.value = value;
-  };
-
-  const fireEnter = input => {
-    const doc = input.ownerDocument || document;
-    const win = doc.defaultView || window;
-    const opts = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true, composed: true };
-    ['keydown', 'keypress', 'keyup'].forEach(type => {
-      const event = new win.KeyboardEvent(type, opts);
-      input.dispatchEvent(event);
-      doc.dispatchEvent(new win.KeyboardEvent(type, opts));
-      win.dispatchEvent(new win.KeyboardEvent(type, opts));
-    });
-  };
-
-  const sendToNativeChat = text => {
-    const clean = String(text || '').trim();
-    if (!clean) return false;
-
-    const candidates = nativeInputs();
-    for (const input of candidates) {
-      try {
-        const doc = input.ownerDocument || document;
-        const win = doc.defaultView || window;
-        input.style.setProperty('display', 'block', 'important');
-        input.style.setProperty('visibility', 'visible', 'important');
-        input.style.setProperty('pointer-events', 'auto', 'important');
-        input.focus({ preventScroll: true });
-        setNativeValue(input, clean);
-        input.dispatchEvent(new win.Event('input', { bubbles: true, composed: true }));
-        input.dispatchEvent(new win.Event('change', { bubbles: true, composed: true }));
-        try { input.setSelectionRange(clean.length, clean.length); } catch (_) {}
-        fireEnter(input);
-        input.blur();
-        return true;
-      } catch (_) {}
-    }
-    return false;
-  };
-
-  const focusChat = value => {
-    const input = document.querySelector('#prhud-chat-input');
-    if (!input) return;
-    input.value = value || '';
-    input.focus();
-    if (value) input.select?.();
-  };
-
-  const runAction = item => {
+  const action = item => {
     if (!item) return;
-    focusChat(item.command || '');
+    document.querySelectorAll(`#${HUD_ID} [data-prv2-key]`).forEach(btn => btn.classList.toggle('is-active', btn.getAttribute('data-prv2-key') === item.key));
+    if (item.command) setNativeChatValue(item.command);
+    else {
+      const input = nativeChat();
+      if (input) input.focus({ preventScroll: true });
+    }
   };
 
   const build = raw => {
@@ -200,80 +137,62 @@
       energy: { ...DEFAULT_DATA.energy, ...(raw?.energy || {}) },
       money: { ...DEFAULT_DATA.money, ...(raw?.money || {}) }
     };
-    const avatarUrl = getAvatarUrl(data);
+    const ava = avatarUrl(data);
     const time = data.time || currentTime();
 
     return `
-      <section class="prhud-player prhud-panel" aria-label="Joueur">
-        <span class="prhud-player-glow"></span>
-        <div class="prhud-avatar">
-          ${avatarUrl ? `<img src="${safe(avatarUrl)}" alt="${safe(data.username)}">` : `<span class="prhud-avatar-fallback">RP</span>`}
-          <b>${safe(data.level || 1)}</b>
+      <div class="prv2-shell" data-version="${safe(VERSION)}">
+        <section class="prv2-idcard" aria-label="Carte joueur">
+          <div class="prv2-avatarbox">${ava ? `<img src="${safe(ava)}" alt="${safe(data.username)}">` : '<b>RP</b>'}<span>${safe(data.level || 1)}</span></div>
+          <div class="prv2-ident">
+            <div class="prv2-name"><strong>${safe(data.username)}</strong><em>${safe(data.role || 'Citoyen')}</em></div>
+            <div class="prv2-bars">
+              <p class="life">${icon('heart')}<i><u style="width:${pct(data.health.current, data.health.max)}"></u></i><small>${fmt(data.health.current)}</small></p>
+              <p class="energy">${icon('bolt')}<i><u style="width:${pct(data.energy.current, data.energy.max)}"></u></i><small>${fmt(data.energy.current)}</small></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="prv2-topline" aria-label="Statut ville">
+          <span>${icon('clock')}<b>${safe(time)}</b></span>
+          <strong>${safe(data.city || 'Paradise City')}</strong>
+          <span>${icon('group')}<b>RP actif</b></span>
+        </section>
+
+        <section class="prv2-wallet" aria-label="Monnaies">
+          <div><small>Crédits</small><strong>${fmt(data.money.credits)}</strong></div>
+          <div><small>Pixels</small><strong>${fmt(data.money.pixels)}</strong></div>
+          <button type="button" aria-label="Portefeuille">+</button>
+        </section>
+
+        <nav class="prv2-rail" aria-label="Actions rapides">
+          ${rail.map(item => `<button type="button" data-prv2-key="${safe(item.key)}" title="${safe(item.label)}">${icon(item.icon)}<small>${safe(item.label)}</small></button>`).join('')}
+        </nav>
+
+        <aside class="prv2-agenda" aria-label="Objectifs RP">
+          <header><span>${icon('star')}</span><b>Agenda RP</b></header>
+          <p><span>Présence ville</span><b>OK</b></p>
+          <p><span>Interaction RP</span><b>2/3</b></p>
+          <p><span>Service métier</span><b>0/30</b></p>
+        </aside>
+
+        <div class="prv2-pocket" aria-label="Argent rapide">
+          <span>${icon('credit')} $ ${fmt(data.money.cash)}</span>
+          <span>${icon('gem')} ${fmt(data.money.diamonds)}</span>
         </div>
-        <div class="prhud-player-main">
-          <strong>${safe(data.username)}</strong>
-          <span>${safe(data.role || 'Citoyen')}</span>
-          <div class="prhud-stat red">${icon('heart')}<em><u style="width:${pct(data.health.current, data.health.max)}"></u></em><small>${fmt(data.health.current)} / ${fmt(data.health.max)}</small></div>
-          <div class="prhud-stat blue">${icon('bolt')}<em><u style="width:${pct(data.energy.current, data.energy.max)}"></u></em><small>${fmt(data.energy.current)} / ${fmt(data.energy.max)}</small></div>
-        </div>
-        <div class="prhud-player-money"><span>${icon('credit')}$ ${fmt(data.money.cash)}</span><span>${icon('gem')}${fmt(data.money.diamonds)}</span></div>
-      </section>
 
-      <section class="prhud-meta">
-        <div class="prhud-chip prhud-panel">${icon('clock')}<b>${safe(time)}</b></div>
-        <div class="prhud-chip prhud-panel">${icon('pin')}<b>${safe(data.city || 'Paradise City')}</b></div>
-      </section>
-
-      <section class="prhud-money">
-        <div class="prhud-money-card prhud-panel credits">${icon('credit')}<strong>${fmt(data.money.credits)}</strong><span>Crédits</span><button type="button" data-prhud-action="credits">+</button></div>
-        <div class="prhud-money-card prhud-panel pixels"><i>H</i><strong>${fmt(data.money.pixels)}</strong><span>Pixels</span><button type="button" data-prhud-action="pixels">+</button></div>
-        <button class="prhud-menu" type="button" aria-label="Menu">≡</button>
-      </section>
-
-      <nav class="prhud-rail prhud-panel" aria-label="Navigation RP">
-        ${railItems.map(item => `<button type="button" class="prhud-rail-btn ${item.key === 'home' ? 'is-active' : ''}" data-prhud-key="${safe(item.key)}">${icon(item.icon)}<small>${safe(item.label)}</small></button>`).join('')}
-      </nav>
-
-      <section class="prhud-quests prhud-panel" aria-label="Quêtes quotidiennes">
-        <h3>${icon('star')}Quêtes quotidiennes</h3>
-        <p>${icon('user')}<span>Se connecter</span><b>1/1</b></p>
-        <p>${icon('group')}<span>Parler à 3 joueurs</span><b>2/3</b></p>
-        <p>${icon('briefcase')}<span>Travailler 30 min</span><b>0/30</b></p>
-      </section>
-
-      <form class="prhud-chat prhud-panel" id="prhud-chat-form">
-        <button class="prhud-chat-bubble" type="button" aria-label="Chat">${icon('chat')}</button>
-        <select class="prhud-chat-channel" aria-label="Canal"><option>Discussion générale</option><option>Chuchoter</option><option>Crier</option></select>
-        <input id="prhud-chat-input" class="prhud-chat-input" autocomplete="off" placeholder="Clique ici pour chatter...">
-        <button class="prhud-chat-emoji" type="button" aria-label="Emote">☻</button>
-        <button class="prhud-chat-send" type="submit" aria-label="Envoyer">${icon('send')}</button>
-      </form>
-
-      <nav class="prhud-dock prhud-panel" aria-label="Actions RP">
-        ${dockItems.map(item => `<button type="button" class="prhud-dock-btn ${item.key === 'home' ? 'is-home' : ''}" data-prhud-key="${safe(item.key)}">${icon(item.icon)}<small>${safe(item.label)}</small></button>`).join('')}
-      </nav>`;
+        <nav class="prv2-belt" aria-label="Menu principal">
+          ${commands.map(item => `<button type="button" class="${item.key === 'home' ? 'is-active' : ''}" data-prv2-key="${safe(item.key)}">${icon(item.icon)}<small>${safe(item.label)}</small></button>`).join('')}
+        </nav>
+      </div>`;
   };
 
   const bind = root => {
-    root.querySelectorAll('[data-prhud-key]').forEach(button => {
+    root.querySelectorAll('[data-prv2-key]').forEach(button => {
       button.addEventListener('click', () => {
-        const key = button.getAttribute('data-prhud-key');
-        const item = dockItems.find(x => x.key === key) || railItems.find(x => x.key === key);
-        runAction(item);
+        const key = button.getAttribute('data-prv2-key');
+        action(commands.find(x => x.key === key) || rail.find(x => x.key === key));
       });
-    });
-
-    const form = root.querySelector('#prhud-chat-form');
-    const input = root.querySelector('#prhud-chat-input');
-    form?.addEventListener('submit', event => {
-      event.preventDefault();
-      const text = input?.value?.trim() || '';
-      if (!text) return;
-      const sent = sendToNativeChat(text);
-      if (sent) input.value = '';
-      else input.classList.add('is-error');
-      window.setTimeout(() => input?.classList?.remove('is-error'), 450);
-      input.focus();
     });
   };
 
@@ -284,7 +203,6 @@
     if (!root) {
       root = document.createElement('div');
       root.id = HUD_ID;
-      root.setAttribute('data-version', VERSION);
       document.body.appendChild(root);
     }
     root.innerHTML = build(data);
@@ -308,15 +226,9 @@
     render(DEFAULT_DATA);
     loadData();
     setInterval(loadData, 5000);
-    setInterval(() => {
-      try { window.__paradiseNativeUiOffScan?.(); } catch (_) {}
-    }, 1500);
+    setInterval(() => { try { window.__paradiseNativeUiOffScan?.(); } catch (_) {} }, 1600);
   };
 
-  try {
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-    else boot();
-  } catch (error) {
-    console.error('[ParadiseRP HUD] boot failed', error);
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })();
