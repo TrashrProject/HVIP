@@ -1,58 +1,44 @@
 (() => {
   'use strict';
 
-  const NATIVE_OFF_SRC = './paradise-native-ui-off.js?v=3';
-  const HUD_SRC = './paradise-rp-hud.js?v=18';
-  const KILLER_SRC = './paradise-hard-ui-killer.js?v=4';
-  const HUD_CSS_SRC = './paradise-rp-hud.css?v=18';
-  const MAX_LOADER_MS = 1900;
+  const NATIVE_OFF_SRC = './paradise-native-ui-off.js?v=4';
+  const HUD_SRC = './paradise-rp-hud.js?v=19';
+  const HUD_CSS_SRC = './paradise-rp-hud.css?v=19';
+  const MAX_LOADER_MS = 900;
 
-  const forceHudCss = () => {
-    let link = document.getElementById('paradise-rp-hud-css');
-    if (!link) {
-      link = document.createElement('link');
-      link.id = 'paradise-rp-hud-css';
-      link.rel = 'stylesheet';
-      (document.head || document.documentElement).appendChild(link);
-    }
-    if (!String(link.getAttribute('href') || '').includes('v=18')) link.href = HUD_CSS_SRC;
-  };
-
-  const loadScript = (src, attr) => {
+  const addScript = (src, marker) => {
     try {
-      document.querySelectorAll(`script[${attr}="1"]`).forEach(script => script.remove());
+      document.querySelectorAll(`script[${marker}="1"]`).forEach(el => el.remove());
       const script = document.createElement('script');
       script.src = src;
       script.defer = true;
-      script.setAttribute(attr, '1');
+      script.setAttribute(marker, '1');
       (document.body || document.documentElement).appendChild(script);
       return script;
-    } catch (_) {
-      return null;
-    }
+    } catch (_) { return null; }
   };
 
-  const loadNativeOff = () => loadScript(NATIVE_OFF_SRC, 'data-paradise-native-ui-off');
-  const loadHud = () => {
+  const forceHudCss = () => {
+    try {
+      let link = document.getElementById('paradise-rp-hud-css');
+      if (!link) {
+        link = document.createElement('link');
+        link.id = 'paradise-rp-hud-css';
+        link.rel = 'stylesheet';
+        (document.head || document.documentElement).appendChild(link);
+      }
+      if (!String(link.getAttribute('href') || '').includes('v=19')) link.href = HUD_CSS_SRC;
+    } catch (_) {}
+  };
+
+  const loadEverything = () => {
     forceHudCss();
-    loadScript(HUD_SRC, 'data-paradise-rp-hud');
-  };
-  const loadKiller = () => loadScript(KILLER_SRC, 'data-paradise-rp-killer');
-  const rescanNative = () => { try { window.__paradiseNativeUiOffScan?.(); } catch (_) {} };
-
-  const setProgress = value => {
-    const v = Math.max(0, Math.min(100, Math.round(value)));
-    const bar = document.querySelector('.pr-loader-bar');
-    const percent = document.querySelector('.pr-loader-percent');
-    const status = document.querySelector('.pr-loader-status-copy');
-    if (bar) bar.style.width = `${v}%`;
-    if (percent) percent.textContent = `${v}%`;
-    if (status) {
-      if (v < 35) status.textContent = 'Ouverture de ParadiseRP';
-      else if (v < 70) status.textContent = 'Chargement du monde';
-      else if (v < 98) status.textContent = 'Préparation du HUD RP';
-      else status.textContent = 'Bienvenue sur ParadiseRP';
-    }
+    addScript(NATIVE_OFF_SRC, 'data-paradise-native-ui-off');
+    addScript(HUD_SRC, 'data-paradise-rp-hud');
+    setTimeout(() => { try { window.__paradiseNativeUiOffScan?.(); } catch (_) {} }, 80);
+    setTimeout(forceHudCss, 160);
+    setTimeout(forceHudCss, 550);
+    setTimeout(forceHudCss, 1300);
   };
 
   const hideNativeBlueLoader = () => {
@@ -60,72 +46,58 @@
       document.querySelectorAll('.nitro-loading,[class*="nitro-loading" i]').forEach(el => {
         if (el.id === 'paradise-loader' || el.closest?.('#paradise-loader')) return;
         el.style.setProperty('display', 'none', 'important');
-        el.style.setProperty('opacity', '0', 'important');
         el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('opacity', '0', 'important');
         el.style.setProperty('pointer-events', 'none', 'important');
       });
     } catch (_) {}
   };
 
-  const removeLoaderNow = () => {
+  const removeParadiseLoader = () => {
     try {
       const loader = document.getElementById('paradise-loader');
       if (!loader) return;
       loader.style.setProperty('display', 'none', 'important');
-      loader.style.setProperty('opacity', '0', 'important');
       loader.style.setProperty('visibility', 'hidden', 'important');
+      loader.style.setProperty('opacity', '0', 'important');
       loader.style.setProperty('pointer-events', 'none', 'important');
-      loader.classList.add('is-hidden');
       loader.remove();
     } catch (_) {}
   };
 
-  const finalBoot = () => {
-    removeLoaderNow();
+  const setProgress = value => {
+    try {
+      const v = Math.round(Math.max(0, Math.min(100, value)));
+      const bar = document.querySelector('.pr-loader-bar');
+      const percent = document.querySelector('.pr-loader-percent');
+      const status = document.querySelector('.pr-loader-status-copy');
+      if (bar) bar.style.width = `${v}%`;
+      if (percent) percent.textContent = `${v}%`;
+      if (status) status.textContent = v >= 100 ? 'Bienvenue sur ParadiseRP' : 'Chargement du client';
+    } catch (_) {}
+  };
+
+  const release = () => {
+    setProgress(100);
+    removeParadiseLoader();
     hideNativeBlueLoader();
-    loadNativeOff();
-    loadHud();
-    window.setTimeout(loadKiller, 120);
-    [80, 220, 480, 900, 1500, 2600, 4200, 6500].forEach(ms => {
-      window.setTimeout(() => {
-        forceHudCss();
-        hideNativeBlueLoader();
-        rescanNative();
-      }, ms);
-    });
+    loadEverything();
   };
 
   const boot = () => {
-    // On charge le HUD tout de suite, mais on ne laisse plus jamais le loader décider tout seul.
-    forceHudCss();
-    loadHud();
-
+    loadEverything();
     const started = performance.now();
-    let done = false;
-
-    const finish = () => {
-      if (done) return;
-      done = true;
-      setProgress(100);
-      finalBoot();
-    };
-
     const tick = () => {
-      if (done) return;
       const elapsed = performance.now() - started;
-      const progress = Math.min(99, 12 + elapsed / MAX_LOADER_MS * 88);
-      setProgress(progress);
-      if (elapsed >= MAX_LOADER_MS) return finish();
-      window.requestAnimationFrame(tick);
+      setProgress(Math.min(99, 15 + elapsed / MAX_LOADER_MS * 84));
+      if (elapsed >= MAX_LOADER_MS) return release();
+      requestAnimationFrame(tick);
     };
-
-    // Double sécurité : même si une erreur visuelle arrive, le loader disparaît.
-    window.setTimeout(finish, MAX_LOADER_MS + 120);
-    window.setTimeout(finalBoot, MAX_LOADER_MS + 650);
-    window.setTimeout(finalBoot, MAX_LOADER_MS + 1800);
-    window.addEventListener('error', () => window.setTimeout(finalBoot, 60));
-    window.addEventListener('unhandledrejection', () => window.setTimeout(finalBoot, 60));
-
+    setTimeout(release, MAX_LOADER_MS + 120);
+    setTimeout(release, MAX_LOADER_MS + 700);
+    setTimeout(release, MAX_LOADER_MS + 1800);
+    window.addEventListener('error', () => setTimeout(release, 60));
+    window.addEventListener('unhandledrejection', () => setTimeout(release, 60));
     tick();
   };
 
@@ -133,6 +105,6 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
     else boot();
   } catch (_) {
-    finalBoot();
+    release();
   }
 })();
