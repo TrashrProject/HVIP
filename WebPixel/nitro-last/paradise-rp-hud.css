@@ -1,20 +1,20 @@
-/* ParadiseRP HUD overlay v16 - HUD STYLE ONLY. Native UI lock untouched. */
+/* ParadiseRP HUD overlay v17 - HUD STYLE ONLY. Legacy Nitro lock untouched. */
 :root {
-  --prhud-bg: rgba(3, 8, 13, .90);
-  --prhud-bg2: rgba(7, 18, 29, .93);
-  --prhud-bg3: rgba(12, 30, 45, .84);
-  --prhud-border: rgba(58, 170, 230, .50);
-  --prhud-border-soft: rgba(255, 255, 255, .085);
-  --prhud-gold: #ffd237;
-  --prhud-gold2: #ffad22;
-  --prhud-cyan: #28d6ff;
-  --prhud-blue: #2e97ff;
-  --prhud-green: #39f27b;
-  --prhud-red: #ff4560;
+  --prhud-bg: #03080d;
+  --prhud-bg2: #071421;
+  --prhud-bg3: #0b1d2e;
+  --prhud-border: rgba(46, 168, 234, .58);
+  --prhud-border-soft: rgba(255,255,255,.085);
+  --prhud-gold: #ffd234;
+  --prhud-gold2: #ffab18;
+  --prhud-cyan: #29d9ff;
+  --prhud-blue: #2e9bff;
+  --prhud-green: #36f27b;
+  --prhud-red: #ff405d;
   --prhud-white: #f8fbff;
   --prhud-muted: #9baabd;
-  --prhud-panel-shadow: 0 18px 34px rgba(0,0,0,.42), 0 6px 14px rgba(0,0,0,.28);
-  --prhud-tight-shadow: 0 10px 22px rgba(0,0,0,.36);
+  --prhud-shadow: 0 18px 34px rgba(0,0,0,.42), 0 7px 16px rgba(0,0,0,.30);
+  --prhud-shadow-soft: 0 10px 22px rgba(0,0,0,.36);
 }
 
 #paradise-rp-hard-masks,
@@ -37,6 +37,32 @@
 #paradise-rp-hud input,
 #paradise-rp-hud select { font: inherit; }
 
+/* Ces deux voiles sont dans le HUD, pas dans le verrou : ils cachent les anciens dessins canvas sans bloc gris. */
+#paradise-rp-hud::before {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  left: 0;
+  top: 0;
+  width: 372px;
+  height: 178px;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(3,8,13,.99) 0 330px, rgba(3,8,13,0)),
+    linear-gradient(180deg, rgba(3,8,13,.99) 0 142px, rgba(3,8,13,0));
+}
+#paradise-rp-hud::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  left: 0;
+  top: 154px;
+  bottom: 0;
+  width: 120px;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(3,8,13,.99) 0 98px, rgba(3,8,13,0));
+}
+
 .prhud-native-kill,
 [data-prhud-killed="1"] {
   display: none !important;
@@ -48,11 +74,11 @@
 .prhud-panel {
   position: relative;
   background:
-    linear-gradient(180deg, rgba(11, 25, 39, .96), rgba(3, 8, 13, .95)),
-    radial-gradient(circle at 15% 0%, rgba(40,216,255,.14), transparent 42%);
+    linear-gradient(180deg, rgba(8,21,34,.985), rgba(3,8,13,.985)),
+    radial-gradient(circle at 14% 0%, rgba(41,217,255,.12), transparent 44%);
   border: 1px solid var(--prhud-border);
-  box-shadow: var(--prhud-panel-shadow), inset 0 1px 0 rgba(255,255,255,.10);
-  backdrop-filter: blur(8px) saturate(128%);
+  box-shadow: var(--prhud-shadow), inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter: blur(8px) saturate(125%);
 }
 .prhud-panel::before {
   content: "";
@@ -79,29 +105,31 @@
   stroke-linejoin: round;
 }
 
-/* PLAYER CARD */
 .prhud-player {
   position: absolute;
-  z-index: 5;
+  z-index: 10;
   left: 16px;
   top: 16px;
   width: 330px;
   height: 148px;
-  border-radius: 14px;
+  border-radius: 15px;
   padding: 13px 14px 34px 108px;
   pointer-events: auto;
   overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(9,22,35,.995), rgba(3,8,13,.995)),
+    radial-gradient(circle at 8% 0%, rgba(41,217,255,.18), transparent 42%) !important;
 }
 .prhud-player::after {
   content: "";
   position: absolute;
   left: 0;
-  top: 12px;
-  bottom: 12px;
+  top: 13px;
+  bottom: 13px;
   width: 3px;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 5px 5px 0;
   background: linear-gradient(180deg, var(--prhud-cyan), var(--prhud-gold));
-  box-shadow: 0 0 14px rgba(40,216,255,.38);
+  box-shadow: 0 0 14px rgba(41,217,255,.36);
 }
 .prhud-player-glow {
   position: absolute;
@@ -109,7 +137,7 @@
   top: -92px;
   width: 210px;
   height: 210px;
-  background: radial-gradient(circle, rgba(40,216,255,.22), transparent 64%);
+  background: radial-gradient(circle, rgba(41,217,255,.20), transparent 64%);
   pointer-events: none;
 }
 .prhud-avatar {
@@ -123,10 +151,10 @@
   place-items: center;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(13,35,53,.88), rgba(4,12,20,.96)),
-    radial-gradient(circle at 50% 10%, rgba(255,210,55,.12), transparent 50%);
-  border: 1px solid rgba(40,216,255,.58);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 0 18px rgba(40,216,255,.14);
+    linear-gradient(180deg, rgba(13,35,53,.92), rgba(4,12,20,.98)),
+    radial-gradient(circle at 50% 10%, rgba(255,210,52,.12), transparent 50%);
+  border: 1px solid rgba(41,217,255,.58);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 0 18px rgba(41,217,255,.14);
 }
 .prhud-avatar img {
   max-width: 108px;
@@ -156,7 +184,7 @@
   background: #050b12;
   color: #fff;
   border: 2px solid var(--prhud-gold);
-  box-shadow: 0 0 14px rgba(255,210,55,.28);
+  box-shadow: 0 0 14px rgba(255,210,52,.28);
   font-size: 13px;
   font-weight: 950;
 }
@@ -188,21 +216,21 @@
 .prhud-stat em {
   height: 9px;
   border-radius: 999px;
-  background: rgba(0,0,0,.58);
+  background: rgba(0,0,0,.72);
   border: 1px solid rgba(255,255,255,.08);
   overflow: hidden;
-  box-shadow: inset 0 2px 7px rgba(0,0,0,.45);
+  box-shadow: inset 0 2px 7px rgba(0,0,0,.48);
 }
 .prhud-stat u {
   display: block;
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, #ff3350, #ff6680);
-  box-shadow: 0 0 10px rgba(255,67,93,.36);
+  box-shadow: 0 0 10px rgba(255,64,93,.36);
 }
 .prhud-stat.blue u {
   background: linear-gradient(90deg, #23b4ff, #4ce2ff);
-  box-shadow: 0 0 10px rgba(40,216,255,.34);
+  box-shadow: 0 0 10px rgba(41,217,255,.34);
 }
 .prhud-stat small {
   color: #fff;
@@ -233,10 +261,9 @@
 .prhud-player-money span:last-child { color: var(--prhud-cyan); }
 .prhud-player-money .prhud-icon { width: 15px; height: 15px; }
 
-/* TIME / CITY */
 .prhud-meta {
   position: absolute;
-  z-index: 5;
+  z-index: 10;
   left: 382px;
   top: 23px;
   display: flex;
@@ -247,21 +274,21 @@
   height: 43px;
   min-width: 124px;
   padding: 0 18px;
-  border-radius: 11px;
+  border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   font-size: 15px;
   font-weight: 950;
-  box-shadow: var(--prhud-tight-shadow), inset 0 1px 0 rgba(255,255,255,.10);
+  background: linear-gradient(180deg, rgba(8,21,34,.98), rgba(3,8,13,.98)) !important;
+  box-shadow: var(--prhud-shadow-soft), inset 0 1px 0 rgba(255,255,255,.10);
 }
 .prhud-chip .prhud-icon { width: 19px; height: 19px; color: #d9eefb; }
 
-/* MONEY */
 .prhud-money {
   position: absolute;
-  z-index: 5;
+  z-index: 10;
   right: 18px;
   top: 14px;
   display: flex;
@@ -272,7 +299,7 @@
 .prhud-money-card {
   width: 160px;
   height: 51px;
-  border-radius: 12px;
+  border-radius: 13px;
   display: grid;
   grid-template-columns: 36px 1fr 29px;
   grid-template-rows: 26px 15px;
@@ -280,24 +307,25 @@
   gap: 0 8px;
   align-items: center;
   padding: 6px 9px;
+  background: linear-gradient(180deg, rgba(8,21,34,.985), rgba(3,8,13,.985)) !important;
 }
 .prhud-money-card > .prhud-icon,
 .prhud-money-card > i {
   grid-area: icon;
   width: 33px;
   height: 33px;
-  border-radius: 9px;
+  border-radius: 10px;
   display: grid;
   place-items: center;
   font-style: normal;
   font-weight: 950;
   background: linear-gradient(180deg, #6aff7a, #108941);
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 0 14px rgba(56,244,125,.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 0 14px rgba(54,242,123,.20);
 }
 .prhud-money-card.pixels > i {
   background: linear-gradient(180deg, #ffd957, #b47711);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 0 14px rgba(255,210,55,.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 0 14px rgba(255,210,52,.20);
 }
 .prhud-money-card > .prhud-icon svg { width: 21px; height: 21px; stroke-width: 2.4; }
 .prhud-money-card strong {
@@ -320,10 +348,10 @@
 .prhud-money-card button,
 .prhud-menu {
   appearance: none;
-  background: rgba(4,12,20,.78);
+  background: rgba(4,12,20,.86);
   color: var(--prhud-cyan);
   cursor: pointer;
-  border: 1px solid rgba(40,216,255,.35);
+  border: 1px solid rgba(41,217,255,.35);
 }
 .prhud-money-card button {
   grid-area: plus;
@@ -333,20 +361,19 @@
   font-size: 18px;
   font-weight: 950;
 }
-.prhud-money-card.pixels button { color: var(--prhud-gold); border-color: rgba(255,210,55,.40); }
+.prhud-money-card.pixels button { color: var(--prhud-gold); border-color: rgba(255,210,52,.40); }
 .prhud-menu {
   width: 50px;
   height: 51px;
-  border-radius: 12px;
+  border-radius: 13px;
   color: #fff;
   font-size: 22px;
-  box-shadow: var(--prhud-tight-shadow), inset 0 1px 0 rgba(255,255,255,.10);
+  box-shadow: var(--prhud-shadow-soft), inset 0 1px 0 rgba(255,255,255,.10);
 }
 
-/* LEFT RAIL */
 .prhud-rail {
   position: absolute;
-  z-index: 5;
+  z-index: 10;
   left: 16px;
   top: 196px;
   width: 90px;
@@ -356,6 +383,7 @@
   gap: 3px;
   pointer-events: auto;
   overflow: hidden;
+  background: linear-gradient(180deg, rgba(8,21,34,.99), rgba(3,8,13,.99)) !important;
 }
 .prhud-rail::after {
   content: "";
@@ -408,38 +436,40 @@
 }
 .prhud-rail-btn.is-active {
   color: var(--prhud-gold);
-  background: linear-gradient(180deg, rgba(255,210,55,.16), rgba(255,210,55,.04));
-  box-shadow: inset 0 0 0 1px rgba(255,210,55,.55), 0 0 17px rgba(255,210,55,.12);
+  background: linear-gradient(180deg, rgba(255,210,52,.16), rgba(255,210,52,.04));
+  box-shadow: inset 0 0 0 1px rgba(255,210,52,.55), 0 0 17px rgba(255,210,52,.12);
 }
 .prhud-rail-btn:hover { background: rgba(255,255,255,.035); color: #fff; }
 
-/* QUESTS */
 .prhud-quests {
   position: absolute;
-  z-index: 5;
+  z-index: 10;
   right: 28px;
   top: 124px;
-  width: 298px;
-  border-radius: 15px;
-  padding: 16px 17px 14px;
+  width: 276px;
+  border-radius: 16px;
+  padding: 15px 16px 14px;
   pointer-events: auto;
+  background: linear-gradient(180deg, rgba(8,21,34,.985), rgba(3,8,13,.985)) !important;
 }
 .prhud-quests h3 {
-  margin: 0 0 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  height: 27px;
   display: flex;
   align-items: center;
   gap: 9px;
+  margin: 0 0 8px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  color: #fff;
   font-size: 14px;
   text-transform: uppercase;
   font-weight: 950;
-  letter-spacing: .01em;
+  letter-spacing: -.01em;
 }
-.prhud-quests h3 .prhud-icon { width: 19px; height: 19px; color: var(--prhud-gold); }
+.prhud-quests h3 .prhud-icon { width: 20px; height: 20px; color: var(--prhud-gold); }
 .prhud-quests p {
   margin: 0;
-  min-height: 49px;
+  min-height: 45px;
   display: grid;
   grid-template-columns: 34px 1fr auto;
   align-items: center;
@@ -450,179 +480,161 @@
 }
 .prhud-quests p:first-of-type { border-top: 0; }
 .prhud-quests p .prhud-icon {
-  width: 31px;
-  height: 31px;
+  width: 30px;
+  height: 30px;
   padding: 7px;
-  border-radius: 9px;
-  color: #d9e8f4;
+  border-radius: 10px;
+  color: rgba(255,255,255,.86);
   background: rgba(255,255,255,.045);
-  border: 1px solid rgba(255,255,255,.075);
+  border: 1px solid rgba(255,255,255,.07);
 }
-.prhud-quests b {
-  color: var(--prhud-gold);
-  font-size: 16px;
-  font-weight: 950;
-}
+.prhud-quests b { color: var(--prhud-gold); font-size: 15px; font-weight: 950; }
 .prhud-quests p:first-of-type b { color: var(--prhud-green); }
 
-/* CHAT */
 .prhud-chat {
   position: absolute;
-  z-index: 5;
+  z-index: 10;
   left: 50%;
-  bottom: 86px;
+  bottom: 82px;
   transform: translateX(-50%);
-  width: clamp(620px, 40vw, 740px);
+  width: clamp(560px, 39vw, 700px);
   height: 48px;
-  border-radius: 15px;
-  padding: 6px;
+  border-radius: 14px;
+  padding: 5px;
   display: grid;
-  grid-template-columns: 42px 160px 1fr 38px 45px;
-  gap: 7px;
+  grid-template-columns: 39px 154px 1fr 38px 46px;
+  gap: 6px;
   align-items: center;
   pointer-events: auto;
-  box-shadow: 0 16px 30px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.10);
+  background: linear-gradient(180deg, rgba(8,21,34,.985), rgba(3,8,13,.985)) !important;
 }
 .prhud-chat-bubble,
 .prhud-chat-emoji,
 .prhud-chat-send {
-  height: 36px;
-  border-radius: 10px;
+  height: 38px;
+  border-radius: 11px;
   color: #fff;
+  border: 1px solid rgba(255,255,255,.08) !important;
   cursor: pointer;
-  border: 1px solid rgba(255,255,255,.10) !important;
+  display: grid;
+  place-items: center;
 }
 .prhud-chat-bubble,
-.prhud-chat-emoji { background: rgba(6,15,25,.86); }
-.prhud-chat-bubble { color: var(--prhud-cyan); }
+.prhud-chat-emoji { background: rgba(7,18,29,.98); color: var(--prhud-cyan); }
+.prhud-chat-bubble .prhud-icon { width: 20px; height: 20px; }
 .prhud-chat-send {
-  background: linear-gradient(180deg, rgba(255,210,55,.18), rgba(255,210,55,.06));
-  border-color: rgba(255,210,55,.62) !important;
   color: var(--prhud-gold);
-  box-shadow: 0 0 17px rgba(255,210,55,.15), inset 0 1px 0 rgba(255,255,255,.09);
+  background: linear-gradient(180deg, rgba(255,210,52,.14), rgba(255,210,52,.04));
+  border-color: rgba(255,210,52,.55) !important;
+  box-shadow: 0 0 14px rgba(255,210,52,.10), inset 0 1px 0 rgba(255,255,255,.08);
 }
-.prhud-chat-send .prhud-icon { width: 24px; height: 24px; }
+.prhud-chat-send .prhud-icon { width: 25px; height: 25px; }
 .prhud-chat-channel,
 .prhud-chat-input {
-  height: 36px;
+  height: 38px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.09);
-  background: rgba(3,8,13,.72);
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(2,8,14,.96);
   color: #fff;
   outline: none;
 }
 .prhud-chat-channel {
-  appearance: none;
-  padding: 0 32px 0 13px;
+  padding: 0 11px;
   font-size: 13px;
   font-weight: 850;
-  background-image: linear-gradient(45deg, transparent 50%, #fff 50%), linear-gradient(135deg, #fff 50%, transparent 50%);
-  background-position: calc(100% - 18px) 15px, calc(100% - 12px) 15px;
-  background-size: 6px 6px, 6px 6px;
-  background-repeat: no-repeat;
 }
 .prhud-chat-input {
   min-width: 0;
-  padding: 0 14px;
-  font-size: 14px;
+  padding: 0 13px;
+  font-size: 13px;
 }
-.prhud-chat-input::placeholder { color: rgba(207,224,238,.56); }
+.prhud-chat-input::placeholder { color: rgba(180,195,210,.66); }
 .prhud-chat-input:focus {
-  border-color: rgba(40,216,255,.45);
-  box-shadow: 0 0 0 2px rgba(40,216,255,.075);
+  border-color: rgba(255,210,52,.52);
+  box-shadow: 0 0 0 2px rgba(255,210,52,.08);
 }
 
-/* BOTTOM DOCK */
 .prhud-dock {
   position: absolute;
-  z-index: 5;
+  z-index: 10;
   left: 50%;
-  bottom: 16px;
+  bottom: 14px;
   transform: translateX(-50%);
-  width: min(990px, calc(100vw - 440px));
-  height: 63px;
+  width: min(1020px, calc(100vw - 340px));
+  height: 60px;
   border-radius: 16px;
-  padding: 6px 9px;
+  padding: 5px 10px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr) 96px repeat(3, 1fr);
-  align-items: center;
+  grid-template-columns: repeat(4, 1fr) 92px repeat(3, 1fr);
   pointer-events: auto;
+  overflow: visible;
+  background: linear-gradient(180deg, rgba(8,21,34,.99), rgba(3,8,13,.99)) !important;
 }
 .prhud-dock::after {
   content: "";
   position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(40,216,255,.48), rgba(255,210,55,.38), transparent);
+  left: 18px;
+  right: 18px;
+  bottom: 5px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(41,217,255,.35), rgba(255,210,52,.65), rgba(41,217,255,.35), transparent);
+  opacity: .55;
 }
 .prhud-dock-btn {
+  position: relative;
   min-width: 0;
-  height: 51px;
+  height: 50px;
   border-radius: 12px;
-  color: rgba(255,255,255,.80);
+  color: rgba(255,255,255,.82);
   display: grid;
   place-items: center;
-  grid-template-rows: 27px 16px;
+  grid-template-rows: 25px 15px;
   gap: 1px;
   cursor: pointer;
-  border-left: 1px solid rgba(255,255,255,.065) !important;
+  border-left: 1px solid rgba(255,255,255,.055) !important;
 }
 .prhud-dock-btn:first-child { border-left: 0 !important; }
-.prhud-dock-btn .prhud-icon {
-  width: 26px;
-  height: 26px;
-  filter: drop-shadow(0 3px 2px rgba(0,0,0,.42));
-}
+.prhud-dock-btn .prhud-icon { width: 24px; height: 24px; }
 .prhud-dock-btn small {
   font-size: 10.5px;
   line-height: 1;
   font-weight: 950;
   text-transform: uppercase;
 }
-.prhud-dock-btn:hover {
-  color: #fff;
-  background: rgba(255,255,255,.035);
-}
+.prhud-dock-btn:hover { color: #fff; background: rgba(255,255,255,.035); }
 .prhud-dock-btn.is-home {
-  height: 70px;
-  margin-top: -16px;
+  height: 66px;
+  margin-top: -14px;
   border-radius: 17px;
   color: var(--prhud-gold);
   background:
-    radial-gradient(circle at 50% 15%, rgba(255,210,55,.32), rgba(255,210,55,.08) 47%, rgba(4,8,13,.20)),
-    linear-gradient(180deg, rgba(20,26,20,.92), rgba(5,8,12,.94));
-  border: 1px solid rgba(255,210,55,.64) !important;
-  box-shadow: 0 0 24px rgba(255,210,55,.18), inset 0 1px 0 rgba(255,255,255,.11);
+    radial-gradient(circle at 50% 8%, rgba(255,210,52,.28), rgba(255,210,52,.08) 45%, rgba(3,8,13,.98)),
+    linear-gradient(180deg, rgba(18,23,19,.98), rgba(4,10,14,.98)) !important;
+  border: 1px solid rgba(255,210,52,.62) !important;
+  box-shadow: 0 0 24px rgba(255,210,52,.18), inset 0 1px 0 rgba(255,255,255,.10);
 }
-.prhud-dock-btn.is-home .prhud-icon { width: 33px; height: 33px; }
+.prhud-dock-btn.is-home .prhud-icon { width: 30px; height: 30px; }
 .prhud-dock-btn.is-home small { color: var(--prhud-gold); font-size: 11px; }
 .prhud-dock-btn.is-home::after {
   content: "";
   position: absolute;
+  left: 26px;
+  right: 26px;
   bottom: 7px;
-  left: 22px;
-  right: 22px;
   height: 4px;
   border-radius: 999px;
   background: var(--prhud-gold);
-  box-shadow: 0 0 14px rgba(255,210,55,.45);
+  box-shadow: 0 0 15px rgba(255,210,52,.48);
 }
 
-@media (max-width: 1450px) {
-  .prhud-player { transform: scale(.92); transform-origin: top left; }
-  .prhud-meta { left: 330px; transform: scale(.92); transform-origin: top left; }
-  .prhud-money,
-  .prhud-quests { transform: scale(.92); transform-origin: top right; }
+@media (max-width: 1300px) {
+  #paradise-rp-hud::before { width: 330px; height: 164px; }
+  #paradise-rp-hud::after { width: 108px; top: 150px; }
+  .prhud-player { transform: scale(.9); transform-origin: top left; }
+  .prhud-meta { left: 322px; }
+  .prhud-money, .prhud-quests { transform: scale(.9); transform-origin: top right; }
   .prhud-rail { transform: scale(.92); transform-origin: top left; }
-  .prhud-dock { width: min(860px, calc(100vw - 300px)); }
-  .prhud-chat { width: min(640px, calc(100vw - 420px)); }
-}
-
-@media (max-width: 1180px) {
-  .prhud-quests { display: none; }
-  .prhud-money-card { width: 132px; }
-  .prhud-dock { width: calc(100vw - 220px); }
-  .prhud-chat { width: calc(100vw - 360px); }
+  .prhud-dock { width: min(900px, calc(100vw - 220px)); }
+  .prhud-chat { width: min(660px, calc(100vw - 320px)); }
 }
