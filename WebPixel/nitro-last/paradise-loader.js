@@ -5,8 +5,7 @@
   const HUD_SRC = './paradise-rp-hud.js?v=18';
   const KILLER_SRC = './paradise-hard-ui-killer.js?v=4';
   const HUD_CSS_SRC = './paradise-rp-hud.css?v=18';
-  const SOFT_HIDE_MS = 1350;
-  const HARD_HIDE_MS = 2350;
+  const MAX_LOADER_MS = 1900;
 
   const forceHudCss = () => {
     let link = document.getElementById('paradise-rp-hud-css');
@@ -20,122 +19,120 @@
   };
 
   const loadScript = (src, attr) => {
-    document.querySelectorAll(`script[${attr}="1"]`).forEach(script => script.remove());
-    const script = document.createElement('script');
-    script.src = src;
-    script.defer = true;
-    script.setAttribute(attr, '1');
-    document.body.appendChild(script);
+    try {
+      document.querySelectorAll(`script[${attr}="1"]`).forEach(script => script.remove());
+      const script = document.createElement('script');
+      script.src = src;
+      script.defer = true;
+      script.setAttribute(attr, '1');
+      (document.body || document.documentElement).appendChild(script);
+      return script;
+    } catch (_) {
+      return null;
+    }
   };
 
   const loadNativeOff = () => loadScript(NATIVE_OFF_SRC, 'data-paradise-native-ui-off');
-  const loadHud = () => { forceHudCss(); loadScript(HUD_SRC, 'data-paradise-rp-hud'); };
+  const loadHud = () => {
+    forceHudCss();
+    loadScript(HUD_SRC, 'data-paradise-rp-hud');
+  };
   const loadKiller = () => loadScript(KILLER_SRC, 'data-paradise-rp-killer');
   const rescanNative = () => { try { window.__paradiseNativeUiOffScan?.(); } catch (_) {} };
 
-  const boot = () => {
-    loadNativeOff();
-    loadHud();
-
-    const cssKeeper = window.setInterval(() => { forceHudCss(); rescanNative(); }, 250);
-    window.setTimeout(() => window.clearInterval(cssKeeper), 9000);
-
-    const loader = document.getElementById('paradise-loader');
+  const setProgress = value => {
+    const v = Math.max(0, Math.min(100, Math.round(value)));
     const bar = document.querySelector('.pr-loader-bar');
     const percent = document.querySelector('.pr-loader-percent');
     const status = document.querySelector('.pr-loader-status-copy');
+    if (bar) bar.style.width = `${v}%`;
+    if (percent) percent.textContent = `${v}%`;
+    if (status) {
+      if (v < 35) status.textContent = 'Ouverture de ParadiseRP';
+      else if (v < 70) status.textContent = 'Chargement du monde';
+      else if (v < 98) status.textContent = 'Préparation du HUD RP';
+      else status.textContent = 'Bienvenue sur ParadiseRP';
+    }
+  };
 
-    const hideNativeBlueLoader = () => {
-      document.querySelectorAll('.nitro-loading,[class*="nitro-loading"]').forEach(el => {
-        if (el === loader || loader?.contains(el)) return;
+  const hideNativeBlueLoader = () => {
+    try {
+      document.querySelectorAll('.nitro-loading,[class*="nitro-loading" i]').forEach(el => {
+        if (el.id === 'paradise-loader' || el.closest?.('#paradise-loader')) return;
         el.style.setProperty('display', 'none', 'important');
         el.style.setProperty('opacity', '0', 'important');
         el.style.setProperty('visibility', 'hidden', 'important');
         el.style.setProperty('pointer-events', 'none', 'important');
       });
-    };
+    } catch (_) {}
+  };
 
-    if (!loader) {
-      window.setTimeout(() => { hideNativeBlueLoader(); loadNativeOff(); loadHud(); loadKiller(); rescanNative(); }, 350);
-      return;
-    }
-
-    let hidden = false;
-    const started = performance.now();
-    let shown = 8;
-
-    const render = value => {
-      shown = Math.max(shown, Math.min(100, value));
-      const v = Math.round(shown);
-      if (bar) bar.style.width = `${v}%`;
-      if (percent) percent.textContent = `${v}%`;
-      if (status) {
-        if (v < 35) status.textContent = 'Ouverture de ParadiseRP';
-        else if (v < 65) status.textContent = 'Chargement du monde';
-        else if (v < 92) status.textContent = 'Préparation du HUD RP';
-        else status.textContent = 'Bienvenue sur ParadiseRP';
-      }
-    };
-
-    const hasGameSurface = () => {
-      const root = document.getElementById('root');
-      if (!root) return false;
-      if (root.querySelector('canvas')) return true;
-      return root.childElementCount > 0 && performance.now() - started > 1200;
-    };
-
-    const hide = () => {
-      if (hidden) return;
-      hidden = true;
-      render(100);
-      hideNativeBlueLoader();
+  const removeLoaderNow = () => {
+    try {
+      const loader = document.getElementById('paradise-loader');
+      if (!loader) return;
+      loader.style.setProperty('display', 'none', 'important');
       loader.style.setProperty('opacity', '0', 'important');
       loader.style.setProperty('visibility', 'hidden', 'important');
       loader.style.setProperty('pointer-events', 'none', 'important');
       loader.classList.add('is-hidden');
+      loader.remove();
+    } catch (_) {}
+  };
 
-      const after = delay => window.setTimeout(() => {
-        try { loader.remove(); } catch (_) {}
+  const finalBoot = () => {
+    removeLoaderNow();
+    hideNativeBlueLoader();
+    loadNativeOff();
+    loadHud();
+    window.setTimeout(loadKiller, 120);
+    [80, 220, 480, 900, 1500, 2600, 4200, 6500].forEach(ms => {
+      window.setTimeout(() => {
+        forceHudCss();
         hideNativeBlueLoader();
-        loadNativeOff();
-        loadHud();
-        loadKiller();
         rescanNative();
-      }, delay);
-      after(120); after(650); after(1350); after(2600);
+      }, ms);
+    });
+  };
+
+  const boot = () => {
+    // On charge le HUD tout de suite, mais on ne laisse plus jamais le loader décider tout seul.
+    forceHudCss();
+    loadHud();
+
+    const started = performance.now();
+    let done = false;
+
+    const finish = () => {
+      if (done) return;
+      done = true;
+      setProgress(100);
+      finalBoot();
     };
 
     const tick = () => {
-      if (hidden) return;
+      if (done) return;
       const elapsed = performance.now() - started;
-      let target = 18;
-      if (elapsed > 240) target = 34;
-      if (elapsed > 520) target = 55;
-      if (elapsed > 850) target = 76;
-      if (elapsed > 1180) target = 92;
-      if (elapsed > 1500) target = 99;
-      render(shown + Math.max(1, (target - shown) * .24));
-      if ((elapsed > SOFT_HIDE_MS && hasGameSurface()) || elapsed > HARD_HIDE_MS) return hide();
+      const progress = Math.min(99, 12 + elapsed / MAX_LOADER_MS * 88);
+      setProgress(progress);
+      if (elapsed >= MAX_LOADER_MS) return finish();
       window.requestAnimationFrame(tick);
     };
 
-    try {
-      new MutationObserver(() => {
-        if (!hidden && performance.now() - started > SOFT_HIDE_MS && hasGameSurface()) hide();
-        else rescanNative();
-      }).observe(document.body, { childList: true, subtree: true });
-    } catch (_) {}
+    // Double sécurité : même si une erreur visuelle arrive, le loader disparaît.
+    window.setTimeout(finish, MAX_LOADER_MS + 120);
+    window.setTimeout(finalBoot, MAX_LOADER_MS + 650);
+    window.setTimeout(finalBoot, MAX_LOADER_MS + 1800);
+    window.addEventListener('error', () => window.setTimeout(finalBoot, 60));
+    window.addEventListener('unhandledrejection', () => window.setTimeout(finalBoot, 60));
 
-    window.setTimeout(hide, HARD_HIDE_MS + 250);
-    render(shown);
-    window.requestAnimationFrame(tick);
+    tick();
   };
 
   try {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
     else boot();
   } catch (_) {
-    try { document.getElementById('paradise-loader')?.remove(); } catch (__) {}
-    try { loadNativeOff(); loadHud(); loadKiller(); } catch (__) {}
+    finalBoot();
   }
 })();
