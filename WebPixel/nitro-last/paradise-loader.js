@@ -1,18 +1,22 @@
 (() => {
   'use strict';
 
+  const KILLER_SRC = './paradise-hard-ui-killer.js?v=1';
   const HUD_SRC = './paradise-rp-hud.js?v=11';
   const MAX_BLOCK_MS = 2600;
   const HARD_KILL_MS = 4200;
 
-  const loadHud = () => {
-    document.querySelectorAll('script[data-paradise-rp-hud="1"]').forEach(script => script.remove());
+  const loadScriptOnce = (src, flagName) => {
+    document.querySelectorAll(`script[data-${flagName}="1"]`).forEach(script => script.remove());
     const script = document.createElement('script');
-    script.src = HUD_SRC;
+    script.src = src;
     script.defer = true;
-    script.dataset.paradiseRpHud = '1';
+    script.dataset[flagName.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = '1';
     document.body.appendChild(script);
   };
+
+  const loadKiller = () => loadScriptOnce(KILLER_SRC, 'paradise-rp-killer');
+  const loadHud = () => loadScriptOnce(HUD_SRC, 'paradise-rp-hud');
 
   const boot = () => {
     const loader = document.getElementById('paradise-loader');
@@ -20,6 +24,7 @@
     const percent = document.querySelector('.pr-loader-percent');
     const status = document.querySelector('.pr-loader-status-copy');
 
+    loadKiller();
     loadHud();
 
     if (!loader) return;
@@ -62,6 +67,7 @@
       loader.style.setProperty('pointer-events', 'none', 'important');
       window.setTimeout(() => {
         try { loader.remove(); } catch (_) {}
+        loadKiller();
         loadHud();
       }, 350);
     };
