@@ -1,4 +1,4 @@
-/* ParadiseRP HUD overlay v10 - compact HUD + legacy cleanup, no visible masks. */
+/* ParadiseRP HUD overlay v11 - clean HUD, no visible masks. */
 :root {
   --prhud-bg: #050a10;
   --prhud-bg2: #09131e;
@@ -13,18 +13,17 @@
   --prhud-muted: #a8b3c3;
 }
 
+#paradise-rp-hard-masks { display: none !important; }
 #paradise-rp-hud {
   position: fixed !important;
   inset: 0 !important;
   z-index: 2147483647 !important;
   pointer-events: none !important;
-  isolation: isolate !important;
   color: var(--prhud-text);
   font-family: Inter, "Segoe UI", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
 }
-
 #paradise-rp-hud * { box-sizing: border-box; }
 #paradise-rp-hud button,
 #paradise-rp-hud input,
@@ -40,7 +39,7 @@
 
 .prhud-panel {
   background:
-    linear-gradient(180deg, rgba(14, 24, 36, .99), rgba(4, 8, 13, .99)),
+    linear-gradient(180deg, rgba(14, 24, 36, .985), rgba(4, 8, 13, .985)),
     radial-gradient(circle at 20% 0%, rgba(36, 216, 255, .08), transparent 42%);
   border: 1px solid var(--prhud-line);
   box-shadow: 0 13px 30px rgba(0,0,0,.46), inset 0 1px 0 rgba(255,255,255,.07);
