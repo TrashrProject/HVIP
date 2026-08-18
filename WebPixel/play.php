@@ -1,7 +1,7 @@
 <?php
 /**
- * PixelZone / RDP localhost client entry point.
- * Preserve the RP shell/phone exactly as-is and only force the local Nitro client.
+ * ParadiseRP / local Nitro client entry point.
+ * The old RDP wrapper UI is disabled here at the parent page level.
  */
 
 require_once "app/init.pz.php";
@@ -43,6 +43,8 @@ ob_start();
 require CLIENT . 'client.php';
 $html = ob_get_clean();
 
+// The old client page was originally a Flash/RDP shell. Keep the page boot,
+// but remove the Flash bootstrap and force our local Nitro iframe.
 $html = preg_replace(
     '/\s*swfobject\.embedSWF\([^;]*\);/is',
     "\n        // Legacy Flash bootstrap disabled for local Nitro.",
@@ -54,6 +56,7 @@ $nitroParams = array('sso' => $ClientAUTH);
 if ($autoRoomId > 0) {
     $nitroParams = array('room' => $autoRoomId, 'sso' => $ClientAUTH);
 }
+
 $nitroSrc = '/nitro-last/index.html?' . http_build_query($nitroParams, '', '&', PHP_QUERY_RFC3986);
 $nitroSrcHtml = htmlspecialchars($nitroSrc, ENT_QUOTES, 'UTF-8');
 $forcedIframe = '<iframe id="RdpNitroFrame" src="' . $nitroSrcHtml . '" class="Nitro" allow="camera none; microphone *"></iframe>';
@@ -100,216 +103,169 @@ $html = str_ireplace(
 );
 
 $localhostShim = <<<'HTML'
-<link rel="stylesheet" href="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/hvip-phone-modern.css?v=12">
-<link rel="stylesheet" href="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/phone-presence-toast.css?v=1">
-<link rel="stylesheet" href="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/css/phone-whatsapp-header-v2.css?v=4">
+<style id="paradise-parent-ui-off-css">
+html, body {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #000 !important;
+}
+iframe.Nitro,
+#RdpNitroFrame {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    border: 0 !important;
+    z-index: 1 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+/* Parent RDP/HabboVIP legacy UI. This is outside the Nitro iframe, so it must be killed here, not inside nitro-last. */
+#app,
+#CombatMode,
+#PSVMode,
+#TicketMode,
+#NavigatorMode,
+#FriendsMode,
+#SettingsMode,
+#MessengerMode,
+#InventoryMode,
+#CatalogMode,
+#RoomInfoMode,
+#HotelViewMode,
+#HelpMode,
+.menuButton-yNbz6_0,
+.button-3IzmP_0,
+[class*="menuButton-yNbz6_0"],
+[class*="button-3IzmP_0"],
+[class*="leftMenu"],
+[class*="legacy"],
+[class*="RDP"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+body > div:not(#root):not(#paradise-rp-hud):not(#paradise-loader):not(#RdpNitroFrame),
+body > aside,
+body > nav {
+    pointer-events: none !important;
+}
+</style>
+<script id="paradise-parent-ui-off-js">
+(function () {
+    'use strict';
+    window.__PARADISE_PARENT_RDP_UI_OFF__ = '1.0.0';
+
+    var selectors = [
+        '#app',
+        '#CombatMode', '#PSVMode', '#TicketMode', '#NavigatorMode', '#FriendsMode', '#SettingsMode',
+        '#MessengerMode', '#InventoryMode', '#CatalogMode', '#RoomInfoMode', '#HotelViewMode', '#HelpMode',
+        '.menuButton-yNbz6_0', '.button-3IzmP_0',
+        '[class*="menuButton-yNbz6_0"]', '[class*="button-3IzmP_0"]',
+        '[class*="leftMenu"]', '[class*="habbo-toolbar"]', '[class*="nitro-toolbar"]'
+    ];
+
+    function protect(el) {
+        if (!el) return true;
+        if (el.id === 'RdpNitroFrame') return true;
+        if (el.id === 'paradise-loader') return true;
+        if (el.id === 'paradise-rp-hud') return true;
+        if (el.closest && (el.closest('#RdpNitroFrame') || el.closest('#paradise-loader') || el.closest('#paradise-rp-hud'))) return true;
+        if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE' || el.tagName === 'LINK' || el.tagName === 'META' || el.tagName === 'HEAD') return true;
+        return false;
+    }
+
+    function hideElement(el) {
+        if (protect(el)) return;
+        try {
+            el.setAttribute('data-paradise-parent-ui-killed', '1');
+            el.style.setProperty('display', 'none', 'important');
+            el.style.setProperty('visibility', 'hidden', 'important');
+            el.style.setProperty('opacity', '0', 'important');
+            el.style.setProperty('pointer-events', 'none', 'important');
+            if (el.id === 'app' || /menuButton-yNbz6_0|button-3IzmP_0/i.test(String(el.className || ''))) {
+                el.remove();
+            }
+        } catch (_) {}
+    }
+
+    function fixFrame() {
+        var frame = document.getElementById('RdpNitroFrame') || document.querySelector('iframe.Nitro');
+        if (!frame) return;
+        frame.id = 'RdpNitroFrame';
+        frame.classList.add('Nitro');
+        frame.style.setProperty('position', 'fixed', 'important');
+        frame.style.setProperty('inset', '0', 'important');
+        frame.style.setProperty('width', '100vw', 'important');
+        frame.style.setProperty('height', '100vh', 'important');
+        frame.style.setProperty('border', '0', 'important');
+        frame.style.setProperty('z-index', '1', 'important');
+        frame.style.setProperty('display', 'block', 'important');
+        frame.style.setProperty('visibility', 'visible', 'important');
+        frame.style.setProperty('opacity', '1', 'important');
+    }
+
+    function killLegacy() {
+        fixFrame();
+        selectors.forEach(function (selector) {
+            try { document.querySelectorAll(selector).forEach(hideElement); } catch (_) {}
+        });
+    }
+
+    function boot() {
+        killLegacy();
+        try {
+            new MutationObserver(killLegacy).observe(document.documentElement, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['id', 'class', 'style']
+            });
+        } catch (_) {}
+        [0, 40, 100, 220, 420, 800, 1400, 2400, 4200, 7000].forEach(function (ms) {
+            window.setTimeout(killLegacy, ms);
+        });
+        window.setInterval(killLegacy, 650);
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+    else boot();
+})();
+</script>
 <script>
 window.swfobject = window.swfobject || { embedSWF: function () {} };
 window.Swiper = window.Swiper || function(){ return { update:function(){}, slideTo:function(){}, destroy:function(){} }; };
-
-function rdpIgnoreOptionalPromise(event) {
+window.addEventListener('unhandledrejection', function(event) {
     var reason = event && event.reason;
     var text = '';
     try { text = String(reason && (reason.message || reason) || ''); } catch (_) {}
-    if ((reason && reason.constructor && reason.constructor.name === 'Event') || /Element not found/i.test(text)) {
-        event.preventDefault();
-        if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-        return false;
-    }
-}
-window.addEventListener('unhandledrejection', rdpIgnoreOptionalPromise, true);
-window.onunhandledrejection = function(event) {
-    if (rdpIgnoreOptionalPromise(event) === false) return true;
-};
-
-(function () {
-    var TRANSPARENT_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==';
-
-    function cleanMarkup(value) {
-        value = String(value || '');
-        return value
-            .replace(/https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\/\?figure=/gi, '/avatar-image.php?figure=')
-            .replace(/https?:\/\/dynamics\.habbovip\.us\/img\/extras\/platinos_icon_s\.png/gi, TRANSPARENT_PNG)
-            .replace(/(["'])\/?\?figure=/gi, '$1/avatar-image.php?figure=');
-    }
-
-    function cleanUrl(value) {
-        value = String(value || '');
-        if (!value) return value;
-        if (/^https?:\/\/nitro-imager\.kubbo\.(?:city|ch)\//i.test(value)) {
-            var q = value.indexOf('?');
-            return '/avatar-image.php' + (q >= 0 ? value.substring(q) : '');
-        }
-        if (/^\/?\?figure=/i.test(value)) return '/avatar-image.php' + value.replace(/^\/?/, '');
-        if (/platinos(?:%20|\s|_)+icon(?:%20|\s|_)+s\.png/i.test(value)) return TRANSPARENT_PNG;
-        if (/(?:^|\/)styles\.[a-z0-9_-]+\.css(?:\?|$)/i.test(value)) return '/nitro-last/empty-legacy.css';
-        return value;
-    }
-
-    function cleanStyle(value) { return cleanMarkup(value); }
-
-    function patchProperty(proto, prop) {
-        var desc = Object.getOwnPropertyDescriptor(proto, prop);
-        if (!desc || !desc.set) return;
-        Object.defineProperty(proto, prop, {
-            get: desc.get,
-            set: function(value) { return desc.set.call(this, cleanUrl(value)); },
-            configurable: true,
-            enumerable: desc.enumerable
-        });
-    }
-
-    patchProperty(HTMLImageElement.prototype, 'src');
-    patchProperty(HTMLSourceElement.prototype, 'src');
-    patchProperty(HTMLLinkElement.prototype, 'href');
-
-    // jQuery .css() and direct style.backgroundImage assignments bypass src/innerHTML.
-    // Intercept CSS values before the browser can resolve the dead Kubbo hostname.
-    try {
-        ['backgroundImage', 'background'].forEach(function(prop) {
-            var cssDesc = Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, prop);
-            if (!cssDesc || !cssDesc.set) return;
-            Object.defineProperty(CSSStyleDeclaration.prototype, prop, {
-                get: cssDesc.get,
-                set: function(value) { return cssDesc.set.call(this, cleanStyle(value)); },
-                configurable: true,
-                enumerable: cssDesc.enumerable
-            });
-        });
-        var nativeCssSetProperty = CSSStyleDeclaration.prototype.setProperty;
-        CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
-            if (/^(?:background|background-image)$/i.test(String(name || ''))) value = cleanStyle(value);
-            return nativeCssSetProperty.call(this, name, value, priority);
-        };
-    } catch (_) {}
-
-    try {
-        var innerHTMLDesc = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
-        if (innerHTMLDesc && innerHTMLDesc.set) {
-            Object.defineProperty(Element.prototype, 'innerHTML', {
-                get: innerHTMLDesc.get,
-                set: function(value) { return innerHTMLDesc.set.call(this, cleanMarkup(value)); },
-                configurable: true,
-                enumerable: innerHTMLDesc.enumerable
-            });
-        }
-    } catch (_) {}
-
-    var nativeSetAttribute = Element.prototype.setAttribute;
-    Element.prototype.setAttribute = function(name, value) {
-        var n = String(name).toLowerCase();
-        if (n === 'src' || n === 'href') value = cleanUrl(value);
-        if (n === 'style') value = cleanStyle(value);
-        return nativeSetAttribute.call(this, name, value);
-    };
-
-    var nativeInsertAdjacentHTML = Element.prototype.insertAdjacentHTML;
-    Element.prototype.insertAdjacentHTML = function(position, html) {
-        return nativeInsertAdjacentHTML.call(this, position, cleanMarkup(html));
-    };
-
-    if (window.DOMParser && DOMParser.prototype.parseFromString) {
-        var nativeParseFromString = DOMParser.prototype.parseFromString;
-        DOMParser.prototype.parseFromString = function(str, type) {
-            if (/html|xml/i.test(String(type || ''))) str = cleanMarkup(str);
-            return nativeParseFromString.call(this, str, type);
-        };
-    }
-
-    function repairNode(node) {
-        if (!(node instanceof Element)) return;
-        ['src', 'href'].forEach(function(attr) {
-            if (!node.hasAttribute(attr)) return;
-            var raw = node.getAttribute(attr);
-            var next = cleanUrl(raw);
-            if (next !== raw) nativeSetAttribute.call(node, attr, next);
-        });
-        if (node.hasAttribute('style')) {
-            var rawStyle = node.getAttribute('style') || '';
-            var nextStyle = cleanStyle(rawStyle);
-            if (nextStyle !== rawStyle) nativeSetAttribute.call(node, 'style', nextStyle);
-        }
-    }
-
-    new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes') repairNode(mutation.target);
-            Array.prototype.forEach.call(mutation.addedNodes || [], function(node) {
-                repairNode(node);
-                if (node.querySelectorAll) node.querySelectorAll('[src],[href],[style]').forEach(repairNode);
-            });
-        });
-    }).observe(document.documentElement, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['src','href','style']
-    });
-})();
-
-console.info('[RDP] RP shell + local Nitro boot active');
-</script>
-<script src="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-presence-toast.js?v=1" defer></script>
-<script src="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-send-v2.js?v=6" defer></script>
-<script src="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-header-v2.js?v=9" defer></script>
-<script src="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-state.js?v=2" defer></script>
-<script src="/app/View/Directory/Client/websockets/ws_overlays/Phones/iPhone/resources/js/phone-whatsapp-global.js?v=3" defer></script>
-<script>
+    if ((reason && reason.constructor && reason.constructor.name === 'Event') || /Element not found/i.test(text)) event.preventDefault();
+}, true);
 (function () {
     if (!window.WebSocket || window.__rdpLocalWsShim) return;
     window.__rdpLocalWsShim = true;
-
-    const NativeWebSocket = window.WebSocket;
+    var NativeWebSocket = window.WebSocket;
     window.WebSocket = new Proxy(NativeWebSocket, {
-        construct(Target, args) {
-            let isRdpSocket = false;
+        construct: function(Target, args) {
             if (typeof args[0] === 'string' && /^wss:\/\/(127\.0\.0\.1|localhost):2087\//i.test(args[0])) {
                 args[0] = args[0].replace(/^wss:\/\/(127\.0\.0\.1|localhost):2087\//i, 'wss://paradiserp.fr/ws/');
-                isRdpSocket = true;
             }
-
-            const socket = Reflect.construct(Target, args);
-            if (isRdpSocket) {
-                window.__rdpPhoneSocket = socket;
-                try {
-                    const u = new URL(args[0]);
-                    window.__rdpPhoneUserId = (u.pathname || '').replace(/^\/+/, '').split('/')[0] || null;
-                } catch (_) {}
-                socket.addEventListener('open', function () {
-                    window.__rdpPhoneSocket = socket;
-                    console.info('[RDP] Phone WebSocket ready', window.__rdpPhoneUserId || '');
-                });
-                socket.addEventListener('message', function (event) {
-                    if (typeof event.data !== 'string' || !/^compose_loader\|/i.test(event.data)) return;
-                    event.stopImmediatePropagation();
-                    const parts = event.data.split('|');
-                    const amount = parseInt(parts[1], 10);
-                    if (Number.isFinite(amount) && typeof window.SumLoader === 'function') {
-                        try { window.SumLoader(amount, 800); } catch (_) {}
-                    }
-                });
-            }
-            return socket;
+            return Reflect.construct(Target, args);
         }
     });
 })();
-
 document.addEventListener('DOMContentLoaded', function () {
-    const frame = document.getElementById('RdpNitroFrame') || document.querySelector('iframe.Nitro');
-    if (frame) console.info('[RDP] Nitro iframe:', frame.getAttribute('src'));
+    var frame = document.getElementById('RdpNitroFrame') || document.querySelector('iframe.Nitro');
+    if (frame) console.info('[ParadiseRP] Nitro iframe:', frame.getAttribute('src'));
 });
 </script>
-<style>
-html, body { width:100%!important; height:100%!important; margin:0!important; overflow:hidden!important; background:#000!important; }
-iframe.Nitro, #RdpNitroFrame { position:fixed!important; inset:0!important; width:100vw!important; height:100vh!important; border:0!important; z-index:1!important; display:block!important; }
-#app { position:relative!important; z-index:20!important; }
-</style>
 HTML;
 
 $html = preg_replace('/<head\b([^>]*)>/i', '<head$1>' . $localhostShim, $html, 1);
 
 echo $html;
-
-
-
-
