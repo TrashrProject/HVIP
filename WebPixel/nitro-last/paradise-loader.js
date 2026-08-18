@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const HUD_SRC = './paradise-rp-hud.js?v=8';
+  const HUD_SRC = './paradise-rp-hud.js?v=9';
   const MAX_BLOCK_MS = 2600;
   const HARD_KILL_MS = 4200;
 
