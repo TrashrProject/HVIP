@@ -1,11 +1,11 @@
 (() => {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '2.0.0';
   const HUD_ID = 'paradise-rp-hud';
   const STYLE_ID = 'paradise-rp-hud-css';
   const DATA_URL = '../rp-hud-data.php';
-  const CSS_URL = './paradise-rp-hud.css?v=1';
+  const CSS_URL = './paradise-rp-hud.css?v=2';
 
   const DEFAULT_DATA = {
     ok: false,
@@ -18,11 +18,11 @@
     energy: { current: 31, max: 100 },
     money: { credits: 319, pixels: 224 },
     city: 'Paradise City',
-    time: '21:45'
+    time: '16:45'
   };
 
-  const nav = [
-    { key: 'player', label: 'Joueur', icon: '🧑', command: '' },
+  const dockItems = [
+    { key: 'player', label: 'Joueur', icon: '👤', command: '' },
     { key: 'phone', label: 'Téléphone', icon: '📱', command: ':tel' },
     { key: 'id', label: 'Carte ID', icon: '🪪', command: ':id' },
     { key: 'job', label: 'Métier', icon: '💼', command: ':trabajar' },
@@ -32,12 +32,12 @@
     { key: 'cmd', label: 'Commandes', icon: '>_', command: ':commands' }
   ];
 
-  const rail = [
+  const railItems = [
     { key: 'home', label: 'Accueil', icon: '⌂', command: '' },
-    { key: 'inventory', label: 'Inventaire', icon: '▣', command: '' },
-    { key: 'job', label: 'Métier', icon: '▣', command: ':trabajar' },
+    { key: 'bag', label: 'Inventaire', icon: '▣', command: '' },
+    { key: 'job', label: 'Métier', icon: '▤', command: ':trabajar' },
     { key: 'map', label: 'Carte', icon: '⌖', command: '' },
-    { key: 'shop', label: 'Boutique', icon: '⌗', command: '' }
+    { key: 'shop', label: 'Boutique', icon: '▥', command: '' }
   ];
 
   const safe = (value) => String(value ?? '')
@@ -52,12 +52,88 @@
   const pct = (cur, max) => `${clamp((Number(cur) / Math.max(1, Number(max))) * 100, 0, 100)}%`;
 
   const ensureCss = () => {
-    if (document.getElementById(STYLE_ID)) return;
-    const link = document.createElement('link');
-    link.id = STYLE_ID;
-    link.rel = 'stylesheet';
+    let link = document.getElementById(STYLE_ID);
+    if (!link) {
+      link = document.createElement('link');
+      link.id = STYLE_ID;
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
     link.href = CSS_URL;
-    document.head.appendChild(link);
+  };
+
+  const isInsideHud = (el) => !!el.closest?.(`#${HUD_ID}, #paradise-loader`);
+
+  const hideElement = (el) => {
+    if (!el || isInsideHud(el) || el.id === 'root' || el.tagName === 'CANVAS') return;
+    el.classList?.add('prhud-native-hidden');
+  };
+
+  const hideBySelectors = () => {
+    const root = document.getElementById('root');
+    if (!root) return;
+
+    const selectors = [
+      '[class*="nitro-toolbar"]',
+      '[class*="toolbar"]',
+      '[class*="nitro-chat-input"]',
+      '[class*="chat-input"]',
+      '[class*="chat-widget"]',
+      '[class*="avatar-info"]',
+      '[class*="infostand"]',
+      '[class*="purse"]',
+      '[class*="currency"]',
+      '[class*="wallet"]',
+      '[class*="side-bar"]',
+      '[class*="sidebar"]'
+    ];
+
+    selectors.forEach(selector => {
+      root.querySelectorAll(selector).forEach(hideElement);
+    });
+  };
+
+  const hideByScreenZones = () => {
+    const root = document.getElementById('root');
+    if (!root) return;
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const nodes = root.querySelectorAll('div, section, nav, aside, form, input, textarea, button, img, span');
+
+    nodes.forEach(el => {
+      if (isInsideHud(el) || el.id === 'root' || el.tagName === 'CANVAS') return;
+      const rect = el.getBoundingClientRect();
+      if (!rect || rect.width <= 2 || rect.height <= 2) return;
+      if (rect.width > vw * 0.72 || rect.height > vh * 0.72) return;
+
+      const style = window.getComputedStyle(el);
+      const positioned = style.position === 'absolute' || style.position === 'fixed' || style.position === 'sticky';
+      const looksInteractive = /button|input|textarea|select|img/i.test(el.tagName) || el.getAttribute('role') === 'button' || el.onclick || el.className;
+      if (!positioned && !looksInteractive) return;
+
+      const legacyTopLeft = rect.left < 325 && rect.top < 170 && rect.width < 340 && rect.height < 170;
+      const legacyLeftRail = rect.left < 55 && rect.top > 85 && rect.bottom < vh - 80 && rect.width < 90;
+      const legacyBottomLeft = rect.bottom > vh - 92 && rect.left < 430 && rect.width < 460 && rect.height < 95;
+      const legacyBottomRight = rect.right > vw - 70 && rect.bottom > vh - 98 && rect.width < 96 && rect.height < 96;
+      const legacyTinyEdge = rect.left < 26 && rect.width < 42 && rect.height < 70;
+
+      if (legacyTopLeft || legacyLeftRail || legacyBottomLeft || legacyBottomRight || legacyTinyEdge) {
+        hideElement(el);
+        const parent = el.parentElement;
+        if (parent && parent !== root && !isInsideHud(parent)) {
+          const p = parent.getBoundingClientRect();
+          if (p.width < 520 && p.height < 180) hideElement(parent);
+        }
+      }
+    });
+  };
+
+  const hideLegacyHud = () => {
+    try {
+      hideBySelectors();
+      hideByScreenZones();
+    } catch (_) {}
   };
 
   const findNativeChatInput = () => {
@@ -66,8 +142,8 @@
 
     if (!inputs.length) return null;
     return inputs
-      .map(el => ({ el, rect: el.getBoundingClientRect() }))
-      .filter(x => x.rect.width > 80 && x.rect.height > 15)
+      .map(el => ({ el, rect: el.getBoundingClientRect(), ph: String(el.getAttribute('placeholder') || '') }))
+      .filter(x => (x.rect.width > 80 && x.rect.height > 15) || /chat|chatear|parler/i.test(x.ph))
       .sort((a, b) => b.rect.bottom - a.rect.bottom)[0]?.el || null;
   };
 
@@ -88,33 +164,62 @@
     setNativeValue(native, text);
     native.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
     native.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
+    hideLegacyHud();
     return true;
   };
 
-  const focusNativeWith = (text = '') => {
+  const focusOverlayWith = (text = '') => {
     const overlayInput = document.querySelector('#prhud-chat-input');
-    if (overlayInput) {
-      overlayInput.value = text;
-      overlayInput.focus();
-      overlayInput.select?.();
-    }
-
-    const native = findNativeChatInput();
-    if (native && text) {
-      native.focus();
-      setNativeValue(native, text);
-    }
+    if (!overlayInput) return;
+    overlayInput.value = text;
+    overlayInput.focus();
+    overlayInput.select?.();
   };
 
   const action = (item) => {
     if (!item) return;
-    if (item.command) return focusNativeWith(item.command);
-    if (item.key === 'home') return window.dispatchEvent(new CustomEvent('paradise:home'));
-    focusNativeWith('');
+    if (item.command) return focusOverlayWith(item.command);
+    focusOverlayWith('');
   };
 
+  const playerMarkup = (data) => {
+    const avatar = data.avatar_url
+      ? `<img src="${safe(data.avatar_url)}" alt="${safe(data.username)}" draggable="false">`
+      : `<div class="prhud-avatar-fallback">${safe(String(data.username || 'P').charAt(0).toUpperCase())}</div>`;
+
+    return `
+      <section class="prhud-panel prhud-player" aria-label="Statut joueur">
+        <div class="prhud-avatar">${avatar}<div class="prhud-level">${safe(data.level)}</div></div>
+        <div class="prhud-player-main">
+          <div class="prhud-player-name"><span>${safe(data.username)}</span><i></i></div>
+          <div class="prhud-role">${safe(data.role)}</div>
+          <div class="prhud-bars">
+            <div class="prhud-stat"><b>❤</b><span><i style="width:${pct(data.health.current, data.health.max)}"></i></span><em>${safe(data.health.current)} / ${safe(data.health.max)}</em></div>
+            <div class="prhud-stat energy"><b>ϟ</b><span><i style="width:${pct(data.energy.current, data.energy.max)}"></i></span><em>${safe(data.energy.current)} / ${safe(data.energy.max)}</em></div>
+          </div>
+        </div>
+      </section>`;
+  };
+
+  const moneyMarkup = (data) => `
+    <section class="prhud-money" aria-label="Monnaies">
+      <div class="prhud-panel prhud-money-card credits"><span class="prhud-money-ico">▰</span><strong>${fmt(data.money.credits)}</strong><small>Crédits</small><button type="button">+</button></div>
+      <div class="prhud-panel prhud-money-card pixels"><span class="prhud-money-ico">H</span><strong>${fmt(data.money.pixels)}</strong><small>Pixels</small><button type="button">+</button></div>
+      <button class="prhud-panel prhud-menu" type="button" aria-label="Menu">☰</button>
+    </section>`;
+
+  const dockMarkup = () => dockItems.map(item => `
+    <button class="prhud-dock-btn ${item.key === 'home' ? 'home active' : ''}" data-pr-action="${safe(item.key)}" type="button" aria-label="${safe(item.label)}">
+      <span class="prhud-dock-ico">${safe(item.icon)}</span><span>${safe(item.label)}</span>
+    </button>`).join('');
+
+  const railMarkup = () => railItems.map((item, index) => `
+    <button class="prhud-rail-btn ${index === 0 ? 'active' : ''}" data-pr-rail="${safe(item.key)}" type="button" aria-label="${safe(item.label)}">
+      <span>${safe(item.icon)}</span><small>${safe(item.label)}</small>
+    </button>`).join('');
+
   const build = (data) => {
-    const merged = {
+    const d = {
       ...DEFAULT_DATA,
       ...data,
       health: { ...DEFAULT_DATA.health, ...(data.health || {}) },
@@ -122,92 +227,23 @@
       money: { ...DEFAULT_DATA.money, ...(data.money || {}) }
     };
 
-    const avatar = merged.avatar_url
-      ? `<img src="${safe(merged.avatar_url)}" alt="${safe(merged.username)}" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'prhud-avatar-fallback', textContent: '${safe(String(merged.username || 'P').charAt(0).toUpperCase())}' }))">`
-      : `<div class="prhud-avatar-fallback">${safe(String(merged.username || 'P').charAt(0).toUpperCase())}</div>`;
-
-    const dock = nav.map(item => `
-      <button class="prhud-dock-btn ${item.key === 'home' ? 'home active' : ''}" data-pr-action="${safe(item.key)}" type="button" aria-label="${safe(item.label)}">
-        <span class="prhud-dock-ico">${safe(item.icon)}</span>
-        <span class="prhud-dock-label">${safe(item.label)}</span>
-      </button>`).join('');
-
-    const railItems = rail.map((item, index) => `
-      <button class="prhud-rail-btn ${index === 0 ? 'active' : ''}" data-pr-rail="${safe(item.key)}" type="button" aria-label="${safe(item.label)}">
-        <span class="prhud-rail-ico">${safe(item.icon)}</span>
-        <span class="prhud-rail-label">${safe(item.label)}</span>
-      </button>`).join('');
-
     return `
-      <section class="prhud-panel prhud-player" aria-label="Statut joueur">
-        <div class="prhud-avatar">${avatar}<div class="prhud-level">${safe(merged.level)}</div></div>
-        <div class="prhud-player-name"><span>${safe(merged.username)}</span><i class="prhud-online-dot"></i></div>
-        <div class="prhud-role">${safe(merged.role)}</div>
-        <div class="prhud-bars">
-          <div class="prhud-stat">
-            <span class="prhud-stat-icon">❤</span>
-            <span class="prhud-stat-track"><i class="prhud-stat-fill" style="width:${pct(merged.health.current, merged.health.max)}"></i></span>
-            <span class="prhud-stat-value">${safe(merged.health.current)} / ${safe(merged.health.max)}</span>
-          </div>
-          <div class="prhud-stat">
-            <span class="prhud-stat-icon">⚡</span>
-            <span class="prhud-stat-track"><i class="prhud-stat-fill energy" style="width:${pct(merged.energy.current, merged.energy.max)}"></i></span>
-            <span class="prhud-stat-value">${safe(merged.energy.current)} / ${safe(merged.energy.max)}</span>
-          </div>
-        </div>
-      </section>
-
-      <div class="prhud-meta">
-        <div class="prhud-panel prhud-meta-chip">${safe(merged.time)} <span>☀</span></div>
-        <div class="prhud-panel prhud-meta-chip"><span>⌖</span> ${safe(merged.city)}</div>
-      </div>
-
-      <section class="prhud-money" aria-label="Monnaies">
-        <div class="prhud-panel prhud-money-card credits">
-          <span class="prhud-money-icon">▰</span>
-          <span><strong class="prhud-money-number">${fmt(merged.money.credits)}</strong><small class="prhud-money-label">Crédits</small></span>
-          <button class="prhud-money-plus" type="button" aria-label="Acheter des crédits">+</button>
-        </div>
-        <div class="prhud-panel prhud-money-card pixels">
-          <span class="prhud-money-icon">H</span>
-          <span><strong class="prhud-money-number">${fmt(merged.money.pixels)}</strong><small class="prhud-money-label">Pixels</small></span>
-          <button class="prhud-money-plus" type="button" aria-label="Acheter des pixels">+</button>
-        </div>
-        <button class="prhud-panel prhud-menu-btn" type="button" aria-label="Menu">☰</button>
-      </section>
-
-      <nav class="prhud-panel prhud-rail" aria-label="Navigation rapide gauche">${railItems}</nav>
-
-      <section class="prhud-panel prhud-quests" aria-label="Quêtes quotidiennes">
-        <h3>QUÊTES QUOTIDIENNES</h3>
-        <div class="prhud-quest-row"><span>Se connecter</span><b class="prhud-quest-progress done">1/1 ●</b></div>
-        <div class="prhud-quest-row"><span>Parler à 3 joueurs</span><b class="prhud-quest-progress">2/3 ○</b></div>
-        <div class="prhud-quest-row"><span>Travailler 30 min</span><b class="prhud-quest-progress">0/30 ○</b></div>
-      </section>
-
-      <form class="prhud-panel prhud-chat" id="prhud-chat-form" autocomplete="off">
-        <select class="prhud-chat-channel" aria-label="Canal de discussion">
-          <option>Discussion générale</option>
-          <option>Chuchoter</option>
-          <option>Crier</option>
-        </select>
-        <input id="prhud-chat-input" class="prhud-chat-input" type="text" placeholder="Clique ici pour chatter..." autocomplete="off">
-        <button class="prhud-chat-emoji" type="button" aria-label="Emojis">☺</button>
-        <button class="prhud-chat-send" type="submit" aria-label="Envoyer">›</button>
-      </form>
-
-      <nav class="prhud-panel prhud-dock" aria-label="Barre RP principale">${dock}</nav>
-    `;
+      ${playerMarkup(d)}
+      <div class="prhud-topmeta"><div class="prhud-panel">${safe(d.time)} <span>☀</span></div><div class="prhud-panel"><span>⌖</span>${safe(d.city)}</div></div>
+      ${moneyMarkup(d)}
+      <nav class="prhud-panel prhud-rail" aria-label="Navigation rapide">${railMarkup()}</nav>
+      <section class="prhud-panel prhud-quests" aria-label="Quêtes quotidiennes"><h3>Quêtes quotidiennes</h3><p><span>Se connecter</span><b>1/1</b></p><p><span>Parler à 3 joueurs</span><b>2/3</b></p><p><span>Travailler 30 min</span><b>0/30</b></p></section>
+      <form class="prhud-panel prhud-chat" id="prhud-chat-form" autocomplete="off"><select aria-label="Canal"><option>Discussion générale</option><option>Chuchoter</option><option>Crier</option></select><input id="prhud-chat-input" type="text" placeholder="Clique ici pour chatter..." autocomplete="off"><button class="emoji" type="button" aria-label="Emoji">☺</button><button class="send" type="submit" aria-label="Envoyer">›</button></form>
+      <nav class="prhud-panel prhud-dock" aria-label="Barre RP principale">${dockMarkup()}</nav>`;
   };
 
   const hydrate = (hud) => {
     hud.querySelectorAll('[data-pr-action]').forEach(btn => {
-      const item = nav.find(x => x.key === btn.dataset.prAction);
+      const item = dockItems.find(x => x.key === btn.dataset.prAction);
       btn.addEventListener('click', () => action(item));
     });
-
     hud.querySelectorAll('[data-pr-rail]').forEach(btn => {
-      const item = rail.find(x => x.key === btn.dataset.prRail);
+      const item = railItems.find(x => x.key === btn.dataset.prRail);
       btn.addEventListener('click', () => action(item));
     });
 
@@ -219,11 +255,6 @@
       if (!text) return;
       if (sendToNativeChat(text)) input.value = '';
     });
-
-    input?.addEventListener('focus', () => {
-      const native = findNativeChatInput();
-      if (native && !input.value) native.focus();
-    });
   };
 
   const loadData = async () => {
@@ -232,31 +263,36 @@
       if (!res.ok) throw new Error(`HUD data ${res.status}`);
       return await res.json();
     } catch (error) {
-      console.warn('[ParadiseHUD] données indisponibles, fallback visuel utilisé', error);
+      console.warn('[ParadiseHUD] fallback data', error);
       return DEFAULT_DATA;
     }
   };
 
-  const mount = async () => {
-    if (document.getElementById(HUD_ID)) return;
+  const remount = async () => {
     ensureCss();
-
-    const hud = document.createElement('div');
-    hud.id = HUD_ID;
+    let hud = document.getElementById(HUD_ID);
+    if (!hud) {
+      hud = document.createElement('div');
+      hud.id = HUD_ID;
+      document.body.appendChild(hud);
+    }
     hud.dataset.version = VERSION;
     hud.innerHTML = build(DEFAULT_DATA);
-    document.body.appendChild(hud);
     hydrate(hud);
+    hideLegacyHud();
 
     const data = await loadData();
     if (!document.body.contains(hud)) return;
     hud.innerHTML = build(data && typeof data === 'object' ? data : DEFAULT_DATA);
     hydrate(hud);
+    hideLegacyHud();
   };
 
   const boot = () => {
-    // Petit délai volontaire : laisse Nitro créer son canvas avant l'overlay.
-    window.setTimeout(mount, 900);
+    window.setTimeout(remount, 750);
+    window.setInterval(hideLegacyHud, 350);
+    new MutationObserver(hideLegacyHud).observe(document.body, { childList: true, subtree: true, attributes: true });
+    window.addEventListener('resize', hideLegacyHud);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
