@@ -1,45 +1,57 @@
 (() => {
   'use strict';
 
-  const OWN_SELECTORS = '#paradise-rp-hud,#paradise-loader,#paradise-rp-hard-ui-killer-style,#paradise-rp-hard-sidewall';
+  const STYLE_ID = 'paradise-rp-hard-ui-killer-style';
+  const WALL_ID = 'paradise-rp-hard-sidewall';
   const KILL_CLASS = 'prhud-native-hard-kill';
+  const OWN = '#paradise-rp-hud,#paradise-loader,#paradise-rp-hard-ui-killer-style,#paradise-rp-hard-sidewall';
+
+  const css = `
+    .${KILL_CLASS},[data-prhud-hard-kill="1"]{
+      display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;
+    }
+    #${WALL_ID}{
+      position:fixed!important;left:0!important;top:130px!important;bottom:0!important;width:104px!important;
+      z-index:2147483646!important;pointer-events:none!important;
+      background:linear-gradient(90deg,rgba(4,8,13,.98),rgba(4,8,13,.94) 86px,rgba(4,8,13,0))!important;
+      box-shadow:18px 0 34px rgba(0,0,0,.22)!important;
+    }
+    #${WALL_ID}:before{
+      content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+      background:linear-gradient(180deg,#25d9ff,#ffc52f 45%,#25d9ff);opacity:.75;
+    }
+  `;
 
   const installStyle = () => {
-    if (document.getElementById('paradise-rp-hard-ui-killer-style')) return;
-    const style = document.createElement('style');
-    style.id = 'paradise-rp-hard-ui-killer-style';
-    style.textContent = `
-      .${KILL_CLASS},[data-prhud-hard-kill="1"]{
-        display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;
-      }
-      #paradise-rp-hard-sidewall{
-        position:fixed!important;left:0!important;top:0!important;bottom:0!important;width:112px!important;
-        z-index:2147483646!important;pointer-events:none!important;
-        background:linear-gradient(90deg,rgba(3,8,13,.98) 0,rgba(3,8,13,.98) 88px,rgba(3,8,13,.82) 96px,rgba(3,8,13,0) 112px)!important;
-        box-shadow:18px 0 34px rgba(0,0,0,.22)!important;
-      }
-      #paradise-rp-hard-sidewall:before{
-        content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#25d9ff,#ffc52f 45%,#25d9ff);
-        opacity:.75;box-shadow:0 0 18px rgba(36,216,255,.28);
-      }
-    `;
-    document.head.appendChild(style);
+    let style = document.getElementById(STYLE_ID);
+    if (!style) {
+      style = document.createElement('style');
+      style.id = STYLE_ID;
+      document.head.appendChild(style);
+    }
+    style.textContent = css;
   };
 
-  const installSidewall = () => {
-    let wall = document.getElementById('paradise-rp-hard-sidewall');
+  const installWall = () => {
+    let wall = document.getElementById(WALL_ID);
     if (!wall) {
       wall = document.createElement('div');
-      wall.id = 'paradise-rp-hard-sidewall';
+      wall.id = WALL_ID;
       wall.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(wall);
     }
     document.body.appendChild(wall);
   };
 
+  const hasRootCanvas = () => {
+    const canvas = document.querySelector('#root canvas');
+    if (!canvas) return false;
+    const r = canvas.getBoundingClientRect();
+    return r.width > window.innerWidth * .35 && r.height > window.innerHeight * .35;
+  };
+
   const isOwn = el => {
     if (!el || el === document.body || el === document.documentElement) return true;
-    if (el.matches?.(OWN_SELECTORS) || el.closest?.(OWN_SELECTORS)) return true;
+    if (el.matches?.(OWN) || el.closest?.(OWN)) return true;
     return ['SCRIPT','STYLE','LINK','META','TITLE','BASE','NOSCRIPT'].includes(el.tagName);
   };
 
@@ -47,7 +59,7 @@
     if (!el || !el.querySelectorAll) return false;
     for (const canvas of el.querySelectorAll('canvas')) {
       const r = canvas.getBoundingClientRect();
-      if (r.width > window.innerWidth * .42 && r.height > window.innerHeight * .42) return true;
+      if (r.width > window.innerWidth * .35 && r.height > window.innerHeight * .35) return true;
     }
     return false;
   };
@@ -63,50 +75,46 @@
     } catch (_) {}
   };
 
-  const inNativeUiZone = (el, r) => {
+  const isNativeUi = (el, r) => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const text = (el.innerText || el.textContent || '').trim();
 
-    const leftNativeIcons = r.left < 112 && r.top > 42 && r.bottom < vh - 42 && r.width < 130 && r.height < vh - 120;
-    const topLeftOldCard = r.left < 326 && r.top < 152 && r.width < 340 && r.height < 160;
-    const bottomLeftOldBar = r.left < 520 && r.bottom > vh - 122 && r.width < 540 && r.height < 130;
-    const bottomRightPhone = r.right > vw - 95 && r.bottom > vh - 95 && r.width < 110 && r.height < 110;
-    const topRightOldWallet = r.right > vw - 355 && r.top < 90 && r.width < 360 && r.height < 96;
-    const topHotelText = r.top < 82 && r.left > 245 && r.right < vw - 245 && r.height < 70 && r.width < 980;
-    const hotelPromoText = /landing\.view|que hay|qué hay|promo|header|body/i.test(text);
+    const nativeLeftRail = r.left < 104 && r.top > 40 && r.bottom < vh - 42 && r.width < 118 && r.height < vh - 100;
+    const nativeTopLeft = r.left < 326 && r.top < 142 && r.width < 330 && r.height < 150;
+    const nativeBottomLeft = r.left < 455 && r.bottom > vh - 116 && r.width < 485 && r.height < 125;
+    const nativePhone = r.right > vw - 90 && r.bottom > vh - 92 && r.width < 105 && r.height < 105;
+    const nativeTopRight = r.right > vw - 350 && r.top < 86 && r.width < 350 && r.height < 90;
+    const hotelPromoText = r.top < 82 && r.left > 230 && r.right < vw - 230 && r.height < 70 && /landing\.view|que hay|qué hay|promo|header|body/i.test(text);
 
-    return leftNativeIcons || topLeftOldCard || bottomLeftOldBar || bottomRightPhone || topRightOldWallet || (topHotelText && (hotelPromoText || text.length > 0));
+    return nativeLeftRail || nativeTopLeft || nativeBottomLeft || nativePhone || nativeTopRight || hotelPromoText;
   };
 
   const pass = () => {
-    installStyle();
-    installSidewall();
+    if (!hasRootCanvas() && performance.now() < 4500) return;
 
-    const all = Array.from(document.querySelectorAll('body *'));
-    for (const el of all) {
+    installStyle();
+    installWall();
+
+    for (const el of Array.from(document.querySelectorAll('body *'))) {
       if (isOwn(el)) continue;
       if (el.id === 'root' || el.tagName === 'CANVAS') continue;
+
       const r = el.getBoundingClientRect();
       if (!r || r.width <= 2 || r.height <= 2) continue;
-      if (r.width > window.innerWidth * .86 || r.height > window.innerHeight * .86) continue;
-      if (!inNativeUiZone(el, r)) continue;
+      if (r.width > window.innerWidth * .70 || r.height > window.innerHeight * .78) continue;
+      if (!isNativeUi(el, r)) continue;
       if (hasLargeCanvas(el)) continue;
+
       hardKill(el);
     }
   };
 
-  const start = () => {
-    pass();
-    let fastCount = 0;
-    const fast = setInterval(() => {
-      pass();
-      if (++fastCount > 260) clearInterval(fast);
-    }, 75);
-    setInterval(pass, 500);
-    new MutationObserver(pass).observe(document.body, { childList: true, subtree: true, attributes: true });
-  };
+  installStyle();
+  window.setTimeout(pass, 600);
+  window.setTimeout(pass, 1200);
+  window.setTimeout(pass, 2200);
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
-  else start();
+  if (window.__paradiseHardUiKiller) clearInterval(window.__paradiseHardUiKiller);
+  window.__paradiseHardUiKiller = window.setInterval(pass, 260);
 })();
