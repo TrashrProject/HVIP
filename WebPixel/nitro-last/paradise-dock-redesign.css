@@ -1,0 +1,151 @@
+/* ParadiseRP Dock Redesign v1
+   Barre du bas sobre, moins IA, style RP propre. */
+
+#paradise-rp-hud .prhud-dock{
+  position:absolute!important;
+  left:50%!important;
+  bottom:10px!important;
+  transform:translateX(-50%)!important;
+  width:min(900px,calc(100vw - 440px))!important;
+  height:58px!important;
+  padding:5px!important;
+  display:flex!important;
+  align-items:stretch!important;
+  gap:5px!important;
+  overflow:hidden!important;
+  pointer-events:auto!important;
+  border-radius:14px!important;
+  background:rgba(7,15,24,.94)!important;
+  border:1px solid rgba(135,169,194,.30)!important;
+  box-shadow:0 10px 24px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.05)!important;
+  backdrop-filter:blur(5px)!important;
+}
+
+#paradise-rp-hud .prhud-dock:before,
+#paradise-rp-hud .prhud-dock:after{
+  display:none!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn{
+  position:relative!important;
+  flex:1 1 0!important;
+  min-width:0!important;
+  height:auto!important;
+  margin:0!important;
+  padding:7px 8px 6px!important;
+  border:1px solid rgba(255,255,255,.045)!important;
+  border-radius:10px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:4px!important;
+  color:#d6e1eb!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.06))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+  cursor:pointer!important;
+  transform:none!important;
+  transition:background .12s ease,color .12s ease,border-color .12s ease,box-shadow .12s ease!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn:not(:last-child){
+  border-right:1px solid rgba(255,255,255,.045)!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn .prhud-icon{
+  width:21px!important;
+  height:21px!important;
+  color:rgba(222,233,242,.92)!important;
+  filter:none!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn .prhud-icon svg{
+  stroke-width:2.05!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn small{
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  color:rgba(230,239,247,.88)!important;
+  font-size:9.4px!important;
+  line-height:1!important;
+  font-weight:850!important;
+  letter-spacing:.015em!important;
+  text-transform:uppercase!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn:hover{
+  color:#fff!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025))!important;
+  border-color:rgba(158,194,219,.22)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important;
+  transform:none!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn.is-home,
+#paradise-rp-hud .prhud-dock-btn.is-active{
+  height:auto!important;
+  margin:0!important;
+  color:#f4d46a!important;
+  background:linear-gradient(180deg,rgba(219,167,47,.16),rgba(219,167,47,.045))!important;
+  border-color:rgba(219,167,47,.38)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -1px 0 rgba(219,167,47,.16)!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn.is-home .prhud-icon,
+#paradise-rp-hud .prhud-dock-btn.is-active .prhud-icon,
+#paradise-rp-hud .prhud-dock-btn.is-home small,
+#paradise-rp-hud .prhud-dock-btn.is-active small{
+  color:#f4d46a!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn.is-home:before,
+#paradise-rp-hud .prhud-dock-btn.is-active:before{
+  content:""!important;
+  position:absolute!important;
+  left:14px!important;
+  right:14px!important;
+  bottom:4px!important;
+  height:2px!important;
+  border-radius:999px!important;
+  background:#d7ad3a!important;
+  box-shadow:none!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn.is-home:after,
+#paradise-rp-hud .prhud-dock-btn.is-active:after{
+  display:none!important;
+}
+
+#paradise-rp-hud .prhud-dock-btn:active{
+  background:rgba(255,255,255,.05)!important;
+}
+
+@media (max-width:1280px){
+  #paradise-rp-hud .prhud-dock{
+    width:min(820px,calc(100vw - 280px))!important;
+    height:56px!important;
+  }
+  #paradise-rp-hud .prhud-dock-btn small{
+    font-size:8.8px!important;
+  }
+}
+
+@media (max-width:900px){
+  #paradise-rp-hud .prhud-dock{
+    left:10px!important;
+    right:10px!important;
+    bottom:8px!important;
+    transform:none!important;
+    width:auto!important;
+    height:56px!important;
+  }
+  #paradise-rp-hud .prhud-dock-btn:nth-child(n+5){
+    display:flex!important;
+  }
+  #paradise-rp-hud .prhud-dock-btn small{
+    font-size:7.8px!important;
+  }
+}
