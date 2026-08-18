@@ -1,11 +1,23 @@
 (() => {
   'use strict';
 
-  const NATIVE_OFF_SRC = './paradise-native-ui-off.js?v=1';
-  const HUD_SRC = './paradise-rp-hud.js?v=14';
-  const KILLER_SRC = './paradise-hard-ui-killer.js?v=3';
+  const NATIVE_OFF_SRC = './paradise-native-ui-off.js?v=2';
+  const HUD_SRC = './paradise-rp-hud.js?v=15';
+  const KILLER_SRC = './paradise-hard-ui-killer.js?v=4';
+  const HUD_CSS_SRC = './paradise-rp-hud.css?v=15';
   const SOFT_HIDE_MS = 1500;
   const HARD_HIDE_MS = 2450;
+
+  const forceHudCss = () => {
+    let link = document.getElementById('paradise-rp-hud-css');
+    if (!link) {
+      link = document.createElement('link');
+      link.id = 'paradise-rp-hud-css';
+      link.rel = 'stylesheet';
+      (document.head || document.documentElement).appendChild(link);
+    }
+    if (!String(link.getAttribute('href') || '').includes('v=15')) link.href = HUD_CSS_SRC;
+  };
 
   const loadScript = (src, attr) => {
     document.querySelectorAll(`script[${attr}="1"]`).forEach(script => script.remove());
@@ -17,12 +29,19 @@
   };
 
   const loadNativeOff = () => loadScript(NATIVE_OFF_SRC, 'data-paradise-native-ui-off');
-  const loadHud = () => loadScript(HUD_SRC, 'data-paradise-rp-hud');
+  const loadHud = () => {
+    forceHudCss();
+    loadScript(HUD_SRC, 'data-paradise-rp-hud');
+    [80, 260, 700, 1400, 2600, 4200].forEach(ms => window.setTimeout(forceHudCss, ms));
+  };
   const loadKiller = () => loadScript(KILLER_SRC, 'data-paradise-rp-killer');
 
   const boot = () => {
     loadNativeOff();
     loadHud();
+
+    const cssKeeper = window.setInterval(forceHudCss, 300);
+    window.setTimeout(() => window.clearInterval(cssKeeper), 6000);
 
     const loader = document.getElementById('paradise-loader');
     const bar = document.querySelector('.pr-loader-bar');
