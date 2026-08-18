@@ -1,30 +1,27 @@
-/* ParadiseRP HUD overlay
-   Safe external CSS: no Nitro bundle patch. */
+/* ParadiseRP HUD overlay v2
+   Externe et safe : aucun patch du bundle Nitro. */
 :root {
-  --pr-bg: rgba(5, 11, 18, .88);
-  --pr-bg-soft: rgba(9, 18, 28, .76);
-  --pr-line: rgba(255, 199, 88, .45);
-  --pr-line-blue: rgba(54, 212, 255, .34);
-  --pr-gold: #ffca48;
-  --pr-gold-2: #f2a91b;
-  --pr-cyan: #2fdcff;
-  --pr-blue: #238cf3;
-  --pr-red: #e93248;
-  --pr-green: #42e671;
-  --pr-text: #f8fbff;
-  --pr-muted: #a8b6c8;
-  --pr-shadow: 0 18px 45px rgba(0, 0, 0, .48);
+  --prhud-bg: rgba(5, 10, 16, .86);
+  --prhud-bg2: rgba(11, 20, 31, .82);
+  --prhud-line: rgba(255, 190, 57, .36);
+  --prhud-line2: rgba(48, 210, 255, .24);
+  --prhud-gold: #ffc332;
+  --prhud-cyan: #23d9ff;
+  --prhud-blue: #1e86da;
+  --prhud-red: #eb354c;
+  --prhud-text: #f6fbff;
+  --prhud-muted: #a9b7c8;
 }
 
 #paradise-rp-hud {
   position: fixed;
   inset: 0;
-  z-index: 2147482000;
+  z-index: 2147482600;
   pointer-events: none;
-  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-  color: var(--pr-text);
-  text-rendering: geometricPrecision;
+  color: var(--prhud-text);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 #paradise-rp-hud * { box-sizing: border-box; }
@@ -32,221 +29,264 @@
 #paradise-rp-hud input,
 #paradise-rp-hud select { font: inherit; }
 
-.prhud-panel {
-  background:
-    linear-gradient(180deg, rgba(14, 29, 43, .92), rgba(5, 11, 18, .88)),
-    radial-gradient(circle at 20% 0%, rgba(48, 220, 255, .12), transparent 42%);
-  border: 1px solid rgba(255, 201, 77, .28);
-  box-shadow: var(--pr-shadow), inset 0 1px 0 rgba(255, 255, 255, .08);
-  backdrop-filter: blur(10px);
+.prhud-native-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  filter: opacity(0) !important;
 }
 
-/* PLAYER */
+.prhud-panel {
+  background:
+    linear-gradient(180deg, rgba(11, 20, 31, .91), rgba(4, 8, 13, .88)),
+    radial-gradient(circle at 50% 0%, rgba(35, 217, 255, .09), transparent 56%);
+  border: 1px solid var(--prhud-line);
+  box-shadow: 0 15px 34px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.065);
+  backdrop-filter: blur(9px);
+}
+
+/* PLAYER CARD - compact */
 .prhud-player {
   position: absolute;
-  left: 16px;
+  left: 14px;
   top: 14px;
-  width: 315px;
-  min-height: 150px;
-  border-radius: 14px;
-  padding: 12px 14px 12px 108px;
+  width: 288px;
+  height: 126px;
+  border-radius: 13px;
+  padding: 11px 12px 10px 96px;
   pointer-events: auto;
 }
 
 .prhud-avatar {
   position: absolute;
-  left: 12px;
-  top: 12px;
-  width: 78px;
-  height: 104px;
+  left: 11px;
+  top: 10px;
+  width: 72px;
+  height: 90px;
   border-radius: 10px;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(47, 220, 255, .18), rgba(0, 0, 0, .24));
-  border: 1px solid rgba(47, 220, 255, .38);
   display: grid;
   place-items: center;
+  background: rgba(13, 31, 48, .65);
+  border: 1px solid rgba(35, 217, 255, .28);
 }
 
 .prhud-avatar img {
-  max-width: 96px;
-  max-height: 128px;
+  max-width: 86px;
+  max-height: 114px;
   image-rendering: pixelated;
-  transform: translateY(8px);
+  transform: translateY(7px);
 }
 
 .prhud-avatar-fallback {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: rgba(47, 220, 255, .12);
-  color: var(--pr-gold);
-  font-weight: 900;
-  font-size: 25px;
+  font-weight: 950;
+  font-size: 22px;
+  color: var(--prhud-gold);
+  background: rgba(35,217,255,.1);
 }
 
 .prhud-level {
   position: absolute;
-  left: 53px;
-  bottom: -12px;
-  width: 40px;
-  height: 40px;
+  left: 50px;
+  bottom: -14px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-weight: 900;
-  font-size: 18px;
   color: #fff;
-  background: linear-gradient(180deg, #182333, #06101b);
-  border: 2px solid var(--pr-gold-2);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, .35), 0 0 18px rgba(255, 190, 51, .24);
+  font-weight: 950;
+  font-size: 16px;
+  background: linear-gradient(180deg, #172232, #060b12);
+  border: 2px solid var(--prhud-gold);
+  box-shadow: 0 0 16px rgba(255,195,50,.22);
 }
 
+.prhud-player-main { min-width: 0; }
 .prhud-player-name {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 21px;
-  line-height: 1;
+  gap: 7px;
+  font-size: 20px;
   font-weight: 900;
-  letter-spacing: -.02em;
+  line-height: 1.05;
 }
-.prhud-online-dot {
+.prhud-player-name i {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--pr-green);
-  box-shadow: 0 0 10px rgba(66, 230, 113, .8);
+  background: #2df36c;
+  box-shadow: 0 0 10px rgba(45,243,108,.7);
 }
 .prhud-role {
-  margin-top: 6px;
-  color: var(--pr-muted);
-  font-size: 14px;
-  font-weight: 700;
+  margin-top: 3px;
+  color: var(--prhud-muted);
+  font-size: 13px;
+  font-weight: 650;
 }
-
-.prhud-bars { margin-top: 13px; display: grid; gap: 9px; }
+.prhud-bars {
+  margin-top: 10px;
+  display: grid;
+  gap: 7px;
+}
 .prhud-stat {
   display: grid;
-  grid-template-columns: 24px 1fr 74px;
-  gap: 7px;
+  grid-template-columns: 20px 1fr 64px;
   align-items: center;
+  gap: 7px;
+  min-width: 0;
 }
-.prhud-stat-icon { font-size: 18px; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,.45)); }
-.prhud-stat-track {
-  height: 18px;
+.prhud-stat b {
+  font-size: 17px;
+  line-height: 1;
+  color: var(--prhud-red);
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.45));
+}
+.prhud-stat.energy b { color: var(--prhud-cyan); }
+.prhud-stat span {
+  height: 15px;
   border-radius: 6px;
-  background: rgba(0, 0, 0, .55);
-  border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(0,0,0,.56);
+  border: 1px solid rgba(255,255,255,.08);
   overflow: hidden;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,.55);
+  box-shadow: inset 0 2px 7px rgba(0,0,0,.42);
 }
-.prhud-stat-fill {
+.prhud-stat i {
+  display: block;
   height: 100%;
-  min-width: 7px;
+  min-width: 6px;
   border-radius: inherit;
-  background: linear-gradient(90deg, #df253b, #ff5265);
-  box-shadow: 0 0 12px rgba(255, 58, 80, .35);
+  background: linear-gradient(90deg, #cd243c, #ff5568);
 }
-.prhud-stat-fill.energy {
-  background: linear-gradient(90deg, #08a9f4, #54d7ff);
-  box-shadow: 0 0 12px rgba(47, 220, 255, .35);
+.prhud-stat.energy i { background: linear-gradient(90deg, #0d91d4, #38d8ff); }
+.prhud-stat em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 850;
+  text-align: right;
+  color: #fff;
 }
-.prhud-stat-value { font-size: 13px; color: #fff; font-weight: 800; text-align: right; }
 
 /* TOP META */
-.prhud-meta {
+.prhud-topmeta {
   position: absolute;
-  left: 365px;
-  top: 22px;
-  height: 45px;
+  left: 348px;
+  top: 20px;
   display: flex;
   gap: 6px;
   pointer-events: auto;
 }
-.prhud-meta-chip {
-  min-width: 112px;
-  height: 100%;
-  padding: 0 17px;
+.prhud-topmeta .prhud-panel {
+  height: 42px;
+  min-width: 108px;
+  padding: 0 15px;
   border-radius: 11px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  font-size: 17px;
+  gap: 8px;
   font-weight: 850;
-  color: #fff;
+  font-size: 15px;
+  white-space: nowrap;
 }
-.prhud-meta-chip span { color: var(--pr-gold); }
+.prhud-topmeta span { color: var(--prhud-gold); }
 
-/* MONEY */
+/* MONEY RIGHT - smaller, cleaner */
 .prhud-money {
   position: absolute;
+  top: 16px;
   right: 64px;
-  top: 18px;
   display: flex;
-  gap: 10px;
-  align-items: stretch;
+  align-items: center;
+  gap: 9px;
   pointer-events: auto;
 }
 .prhud-money-card {
-  height: 54px;
-  min-width: 184px;
+  width: 154px;
+  height: 48px;
   border-radius: 13px;
   display: grid;
-  grid-template-columns: 42px 1fr 38px;
+  grid-template-columns: 34px 1fr 30px;
+  grid-template-areas: "ico amount plus" "ico label plus";
+  column-gap: 8px;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
+  padding: 7px 8px;
 }
-.prhud-money-icon {
-  width: 37px;
-  height: 37px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  font-weight: 950;
-  font-size: 20px;
-  background: linear-gradient(180deg, #ffc73d, #ba7116);
-  box-shadow: inset 0 2px 0 rgba(255,255,255,.28), 0 8px 18px rgba(0,0,0,.34);
-}
-.prhud-money-card.credits .prhud-money-icon { background: linear-gradient(180deg, #6cff71, #138833); }
-.prhud-money-number { font-size: 22px; font-weight: 950; line-height: 1; color: var(--pr-gold); letter-spacing: .02em; }
-.prhud-money-card.credits .prhud-money-number { color: #50f06a; }
-.prhud-money-label { margin-top: 3px; color: #fff; font-size: 11px; font-weight: 850; text-transform: uppercase; letter-spacing: .05em; opacity: .92; }
-.prhud-money-plus,
-.prhud-menu-btn {
-  width: 34px;
-  height: 34px;
+.prhud-money-ico {
+  grid-area: ico;
+  width: 32px;
+  height: 32px;
   border-radius: 9px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(255, 202, 72, .44);
-  background: rgba(11, 20, 31, .88);
-  color: var(--pr-gold);
-  cursor: pointer;
-  font-size: 22px;
+  font-weight: 950;
+  font-size: 17px;
+  color: #07101a;
+  background: linear-gradient(180deg, #74ff72, #168436);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.25), 0 8px 14px rgba(0,0,0,.28);
+}
+.prhud-money-card.pixels .prhud-money-ico { background: linear-gradient(180deg, #ffd76d, #d58a0d); }
+.prhud-money-card strong {
+  grid-area: amount;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 950;
+  color: #52f56d;
+}
+.prhud-money-card.pixels strong { color: var(--prhud-gold); }
+.prhud-money-card small {
+  grid-area: label;
+  align-self: start;
+  margin-top: 2px;
+  color: #f7fbff;
+  opacity: .94;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  font-size: 10px;
   font-weight: 850;
+}
+.prhud-money-card button,
+.prhud-menu {
+  appearance: none;
+  border: 1px solid rgba(35,217,255,.34);
+  background: rgba(3,8,14,.68);
+  color: var(--prhud-cyan);
+  cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
 }
-.prhud-money-card.credits .prhud-money-plus { border-color: rgba(55, 220, 255, .42); color: var(--pr-cyan); }
-.prhud-menu-btn {
-  width: 54px;
-  height: 54px;
-  border-color: rgba(47, 220, 255, .32);
+.prhud-money-card button {
+  grid-area: plus;
+  width: 29px;
+  height: 29px;
+  border-radius: 8px;
+  font-size: 19px;
+  font-weight: 900;
+  line-height: 1;
+}
+.prhud-money-card.pixels button { color: var(--prhud-gold); border-color: rgba(255,195,50,.36); }
+.prhud-menu {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
   color: #fff;
-  font-size: 24px;
+  font-size: 22px;
+  pointer-events: auto;
 }
 
-/* LEFT RAIL */
+/* LEFT RAIL - thinner */
 .prhud-rail {
   position: absolute;
-  left: 16px;
-  top: 205px;
-  width: 118px;
-  border-radius: 16px;
-  padding: 8px;
+  left: 14px;
+  top: 188px;
+  width: 82px;
+  border-radius: 15px;
+  padding: 7px;
+  display: grid;
+  gap: 4px;
   pointer-events: auto;
 }
 .prhud-rail button,
@@ -254,195 +294,181 @@
 .prhud-chat button {
   appearance: none;
   border: 0;
+  background: transparent;
 }
 .prhud-rail-btn {
   width: 100%;
-  min-height: 84px;
-  padding: 10px 6px;
-  border-radius: 13px;
-  color: rgba(255,255,255,.86);
-  background: transparent;
+  height: 68px;
+  border-radius: 12px;
+  color: rgba(255,255,255,.82);
   display: grid;
   place-items: center;
-  gap: 5px;
+  grid-template-rows: 28px 15px;
+  gap: 2px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, .06);
+  border-bottom: 1px solid rgba(255,255,255,.055) !important;
 }
-.prhud-rail-btn:last-child { border-bottom: 0; }
+.prhud-rail-btn:last-child { border-bottom: 0 !important; }
 .prhud-rail-btn.active {
-  background: linear-gradient(180deg, rgba(255, 202, 72, .15), rgba(6, 12, 18, .35));
-  box-shadow: inset 0 0 0 1px rgba(255, 202, 72, .48), 0 0 20px rgba(255, 202, 72, .12);
   color: #fff;
+  background: linear-gradient(180deg, rgba(255,195,50,.14), rgba(0,0,0,.12));
+  box-shadow: inset 0 0 0 1px rgba(255,195,50,.44), 0 0 18px rgba(255,195,50,.09);
 }
-.prhud-rail-ico { font-size: 31px; line-height: 1; filter: drop-shadow(0 3px 2px rgba(0,0,0,.45)); }
-.prhud-rail-label { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .02em; }
+.prhud-rail-btn span { font-size: 27px; line-height: 1; filter: drop-shadow(0 3px 2px rgba(0,0,0,.44)); }
+.prhud-rail-btn small { font-size: 10px; font-weight: 900; text-transform: uppercase; }
 
-/* RIGHT QUESTS */
+/* QUESTS - compact */
 .prhud-quests {
   position: absolute;
   right: 20px;
-  top: 118px;
-  width: 286px;
+  top: 110px;
+  width: 250px;
   border-radius: 14px;
-  padding: 16px 17px;
+  padding: 13px 15px;
   pointer-events: auto;
 }
 .prhud-quests h3 {
-  margin: 0 0 14px;
-  font-size: 15px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  text-transform: uppercase;
   font-weight: 950;
   letter-spacing: .02em;
 }
-.prhud-quest-row {
+.prhud-quests p {
+  margin: 0;
+  height: 36px;
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 12px;
-  min-height: 42px;
-  border-top: 1px solid rgba(255,255,255,.06);
-  color: #fff;
+  border-top: 1px solid rgba(255,255,255,.055);
+  font-size: 13px;
   font-weight: 720;
-  font-size: 14px;
 }
-.prhud-quest-row:first-of-type { border-top: 0; }
-.prhud-quest-progress { font-size: 14px; font-weight: 950; color: var(--pr-gold); }
-.prhud-quest-progress.done { color: var(--pr-green); }
+.prhud-quests p:first-of-type { border-top: 0; }
+.prhud-quests b { color: var(--prhud-gold); font-size: 13px; }
+.prhud-quests p:first-of-type b { color: #39f17b; }
 
-/* CHAT */
+/* CHAT - centered above dock */
 .prhud-chat {
   position: absolute;
   left: 50%;
-  bottom: 94px;
+  bottom: 92px;
   transform: translateX(-50%);
-  width: min(720px, calc(100vw - 340px));
-  height: 56px;
-  border-radius: 16px;
-  padding: 7px;
+  width: clamp(460px, 36vw, 650px);
+  height: 45px;
+  border-radius: 14px;
+  padding: 5px;
   display: grid;
-  grid-template-columns: 156px 1fr 44px 48px;
-  gap: 7px;
+  grid-template-columns: 136px 1fr 36px 40px;
+  gap: 5px;
   align-items: center;
   pointer-events: auto;
 }
-.prhud-chat-channel {
-  height: 42px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.1);
-  background: rgba(0,0,0,.28);
-  color: #fff;
-  padding: 0 11px;
-  font-size: 13px;
-  font-weight: 760;
-  outline: none;
-}
-.prhud-chat-input {
+.prhud-chat select,
+.prhud-chat input {
   width: 100%;
-  height: 42px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, .09);
-  background: rgba(0, 0, 0, .26);
-  color: #f6fbff;
-  padding: 0 15px;
+  height: 35px;
   outline: none;
-  font-size: 15px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.075);
+  background: rgba(0,0,0,.28);
+  color: #f8fbff;
 }
-.prhud-chat-input:focus { border-color: rgba(255, 202, 72, .52); box-shadow: 0 0 0 2px rgba(255, 202, 72, .09); }
-.prhud-chat-emoji,
-.prhud-chat-send {
-  height: 42px;
-  border-radius: 11px;
-  background: rgba(0,0,0,.32);
+.prhud-chat select { padding: 0 9px; font-size: 12px; font-weight: 750; }
+.prhud-chat input { padding: 0 12px; font-size: 13px; }
+.prhud-chat input:focus { border-color: rgba(255,195,50,.5); box-shadow: 0 0 0 2px rgba(255,195,50,.08); }
+.prhud-chat button {
+  height: 35px;
+  border-radius: 10px;
   color: #fff;
   cursor: pointer;
-  border: 1px solid rgba(255,255,255,.1) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
 }
-.prhud-chat-send {
-  background: linear-gradient(180deg, #1e9df1, #0d4f92);
-  border-color: rgba(47, 220, 255, .52) !important;
+.prhud-chat .emoji { background: rgba(0,0,0,.28); color: var(--prhud-gold); font-size: 17px; }
+.prhud-chat .send {
+  background: linear-gradient(180deg, #168bd4, #0a3c73);
+  border-color: rgba(35,217,255,.42) !important;
   color: #fff;
   font-size: 24px;
   font-weight: 950;
-  box-shadow: 0 0 18px rgba(47, 220, 255, .18);
+  box-shadow: 0 0 16px rgba(35,217,255,.14);
 }
 
-/* BOTTOM DOCK */
+/* BOTTOM DOCK - reduced */
 .prhud-dock {
   position: absolute;
   left: 50%;
-  bottom: 14px;
+  bottom: 20px;
   transform: translateX(-50%);
-  width: min(940px, calc(100vw - 150px));
-  height: 72px;
-  border-radius: 18px;
-  padding: 6px 10px;
+  width: clamp(640px, 48vw, 820px);
+  height: 58px;
+  border-radius: 16px;
+  padding: 5px 8px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr) 108px repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr) 92px repeat(3, 1fr);
   gap: 0;
   pointer-events: auto;
 }
 .prhud-dock-btn {
+  position: relative;
+  height: 48px;
   min-width: 0;
-  height: 60px;
-  border-radius: 13px;
-  background: transparent;
-  color: rgba(255,255,255,.82);
+  border-left: 1px solid rgba(255,255,255,.055) !important;
+  border-radius: 11px;
+  color: rgba(255,255,255,.78);
+  cursor: pointer;
   display: grid;
   place-items: center;
-  grid-template-rows: 31px 18px;
+  grid-template-rows: 25px 13px;
   gap: 2px;
-  cursor: pointer;
-  position: relative;
-  border-left: 1px solid rgba(255,255,255,.055) !important;
 }
 .prhud-dock-btn:first-child { border-left: 0 !important; }
 .prhud-dock-btn:hover,
 .prhud-dock-btn.active {
   color: #fff;
-  background: rgba(255, 202, 72, .07);
+  background: linear-gradient(180deg, rgba(255,195,50,.11), rgba(0,0,0,.13));
 }
 .prhud-dock-btn.active::after {
-  content: "";
+  content: '';
   position: absolute;
-  left: 22px;
-  right: 22px;
-  bottom: 2px;
+  left: 24%;
+  right: 24%;
+  bottom: 4px;
   height: 2px;
-  background: var(--pr-gold);
-  box-shadow: 0 0 10px rgba(255, 202, 72, .68);
+  border-radius: 99px;
+  background: var(--prhud-gold);
+  box-shadow: 0 0 12px rgba(255,195,50,.7);
+}
+.prhud-dock-ico {
+  font-size: 22px;
+  line-height: 1;
+  filter: drop-shadow(0 3px 2px rgba(0,0,0,.4));
+}
+.prhud-dock-btn span:last-child {
+  font-size: 10.5px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  white-space: nowrap;
 }
 .prhud-dock-btn.home {
-  height: 72px;
-  margin-top: -20px;
-  border-radius: 19px;
-  background: radial-gradient(circle at 50% 15%, rgba(255, 218, 86, .34), rgba(9, 16, 24, .88) 62%);
-  border: 1px solid rgba(255, 202, 72, .58) !important;
-  box-shadow: 0 0 26px rgba(255, 202, 72, .2), inset 0 1px 0 rgba(255,255,255,.12);
-  color: var(--pr-gold);
+  height: 66px;
+  margin-top: -14px;
+  border-radius: 18px;
+  background: radial-gradient(circle at 50% 18%, rgba(255,195,50,.34), rgba(11,20,31,.88) 66%);
+  border: 1px solid rgba(255,195,50,.5) !important;
+  box-shadow: 0 0 24px rgba(255,195,50,.2), inset 0 1px 0 rgba(255,255,255,.08);
+  color: var(--prhud-gold);
 }
-.prhud-dock-ico { font-size: 26px; line-height: 1; filter: drop-shadow(0 3px 2px rgba(0,0,0,.45)); }
 .prhud-dock-btn.home .prhud-dock-ico { font-size: 34px; }
-.prhud-dock-label { font-size: 12px; font-weight: 850; text-transform: uppercase; letter-spacing: .01em; }
+.prhud-dock-btn.home span:last-child { font-size: 12px; color: var(--prhud-gold); }
 
-/* SOFT MASKS: covers some default client corners without touching game canvas. */
-.prhud-corner-mask {
-  position: absolute;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgba(1,6,11,.12), rgba(1,6,11,0));
-}
-
-@media (max-width: 1350px) {
-  .prhud-quests { display: none; }
-  .prhud-chat { width: min(630px, calc(100vw - 270px)); }
-  .prhud-dock { width: min(840px, calc(100vw - 130px)); }
-}
-
-@media (max-width: 980px) {
-  .prhud-player { transform: scale(.86); transform-origin: top left; }
-  .prhud-money { transform: scale(.88); transform-origin: top right; right: 12px; }
-  .prhud-meta { display: none; }
-  .prhud-rail { transform: scale(.86); transform-origin: left center; }
-  .prhud-chat { left: 58%; width: min(560px, calc(100vw - 180px)); grid-template-columns: 1fr 44px 48px; }
-  .prhud-chat-channel { display: none; }
-  .prhud-dock { width: calc(100vw - 30px); }
-  .prhud-dock-label { display: none; }
+@media (max-width: 1280px) {
+  .prhud-player { transform: scale(.9); transform-origin: top left; }
+  .prhud-topmeta { left: 320px; transform: scale(.9); transform-origin: top left; }
+  .prhud-money { transform: scale(.9); transform-origin: top right; }
+  .prhud-quests { transform: scale(.9); transform-origin: top right; }
+  .prhud-rail { transform: scale(.9); transform-origin: top left; }
+  .prhud-chat { width: clamp(390px, 44vw, 560px); bottom: 84px; }
+  .prhud-dock { width: clamp(560px, 62vw, 720px); bottom: 16px; }
 }
