@@ -105,9 +105,9 @@
 // ParadiseRP HUD external overlay loader. This keeps the Nitro bundle untouched.
 (() => {
   const load = () => {
-    if (document.querySelector('script[data-paradise-rp-hud="1"]')) return;
+    document.querySelectorAll('script[data-paradise-rp-hud="1"]').forEach(script => script.remove());
     const script = document.createElement('script');
-    script.src = './paradise-rp-hud.js?v=1';
+    script.src = './paradise-rp-hud.js?v=2';
     script.defer = true;
     script.dataset.paradiseRpHud = '1';
     document.body.appendChild(script);
