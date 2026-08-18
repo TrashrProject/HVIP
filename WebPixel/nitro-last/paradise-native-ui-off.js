@@ -1,17 +1,30 @@
 (() => {
   'use strict';
 
+  const VERSION = '2.0.0-lock';
   const STYLE_ID = 'paradise-native-ui-off-style';
   const KILL_ATTR = 'data-pr-native-ui-killed';
   const KILL_CLASS = 'pr-native-ui-killed';
-  const OWN = '#paradise-rp-hud,#paradise-loader,#paradise-native-ui-off-style,#paradise-rp-hard-ui-killer-style,#paradise-rp-hard-sidewall';
-  const START = performance.now();
+  const OWN_SELECTOR = '#paradise-rp-hud,#paradise-loader,#paradise-native-ui-off-style,#paradise-rp-hard-ui-killer-style,#paradise-rp-hard-sidewall,#paradise-rp-hard-masks';
 
   document.documentElement.setAttribute('data-pr-native-ui-off', '1');
+  window.__PARADISE_NATIVE_UI_OFF_LOCK__ = VERSION;
 
   const css = `
     .${KILL_CLASS},[${KILL_ATTR}="1"]{
-      display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;
+      display:none!important;
+      visibility:hidden!important;
+      opacity:0!important;
+      pointer-events:none!important;
+    }
+    #paradise-rp-hard-sidewall,
+    #paradise-rp-hard-masks,
+    .pr-mask,
+    .prhud-cover{
+      display:none!important;
+      visibility:hidden!important;
+      opacity:0!important;
+      pointer-events:none!important;
     }
     html[data-pr-native-ui-off="1"] .nitro-toolbar,
     html[data-pr-native-ui-off="1"] [class*="nitro-toolbar" i],
@@ -28,7 +41,10 @@
     html[data-pr-native-ui-off="1"] [class*="me-menu" i],
     html[data-pr-native-ui-off="1"] [class*="friend-bar" i],
     html[data-pr-native-ui-off="1"] [class*="navigation-bar" i]{
-      display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;
+      display:none!important;
+      visibility:hidden!important;
+      opacity:0!important;
+      pointer-events:none!important;
     }
   `;
 
@@ -42,43 +58,53 @@
     if (style.textContent !== css) style.textContent = css;
   };
 
-  const isOwn = el => {
+  const textOf = el => String(el?.innerText || el?.textContent || '').trim();
+  const clsOf = el => String(el?.className || '').replace(/_/g, '-');
+
+  const isProtected = el => {
     if (!el || el === document.documentElement || el === document.body) return true;
-    if (el.matches?.(OWN) || el.closest?.(OWN)) return true;
-    return ['SCRIPT','STYLE','LINK','META','TITLE','BASE','NOSCRIPT'].includes(el.tagName);
+    if (el.matches?.(OWN_SELECTOR) || el.closest?.(OWN_SELECTOR)) return true;
+    if (['SCRIPT','STYLE','LINK','META','TITLE','BASE','NOSCRIPT','HEAD'].includes(el.tagName)) return true;
+    if (el.id === 'root' || el.tagName === 'CANVAS') return true;
+    return false;
   };
 
   const hasLargeCanvas = el => {
     if (!el || !el.querySelectorAll) return false;
     for (const canvas of el.querySelectorAll('canvas')) {
       const r = canvas.getBoundingClientRect();
-      if (r.width > window.innerWidth * .34 && r.height > window.innerHeight * .34) return true;
+      if (r.width > window.innerWidth * .30 && r.height > window.innerHeight * .30) return true;
     }
     return false;
   };
 
-  const textOf = el => String(el?.innerText || el?.textContent || '').trim();
-  const textLooksNative = text => /HabboVIP|habbovip|landing\.view|Qué hay|Que hay|¿Qué hay|Haz clic|chatear|Skate Urbano|Comprar uno|Dueñ|Dueno|Créditos|Credits|Pixels|Inventaire|Inventory|Boutique|Shop|Métier|Carte|Accueil|Purse|Wallet/i.test(text);
-  const classLooksNative = el => /(^|\s)(nitro-toolbar|toolbar|purse|currency|wallet|infostand|info-stand|furni-infostand|avatar-info|user-profile|me-menu|friend-bar|navigation-bar)(\s|$)/i.test(String(el.className || '').replace(/_/g, '-'));
+  const nativeText = text => /HabboVIP|habbovip|landing\.view|Promo|Qué hay|Que hay|¿Qué hay|Haz clic|chatear|Skate Urbano|Comprar uno|Dueñ|Dueno|Crédits|Credits|Pixels|Inventaire|Inventory|Boutique|Shop|Métier|Metier|Carte|Accueil|Purse|Wallet/i.test(text || '');
+  const nativeClass = el => /(nitro-toolbar|toolbar-view|toolbarview|toolbar|purse|currency|wallet|infostand|info-stand|furni-infostand|avatar-info|user-profile|me-menu|friend-bar|navigation-bar|habbo-toolbar|navigation)/i.test(clsOf(el));
 
-  const inNativeZone = (el, r) => {
+  const looksNativeByZone = (el, r) => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const text = textOf(el);
 
-    const topLeft = r.left < 330 && r.top < 150 && r.width < 340 && r.height < 160;
-    const leftRail = r.left < 112 && r.top > 42 && r.bottom < vh - 38 && r.width < 128 && r.height < vh - 95;
-    const bottomLeft = r.left < 520 && r.bottom > vh - 128 && r.width < 560 && r.height < 135;
-    const bottomPhone = r.right > vw - 98 && r.bottom > vh - 100 && r.width < 112 && r.height < 112;
-    const topRight = r.right > vw - 365 && r.top < 92 && r.width < 365 && r.height < 98;
-    const rightPopup = r.right > vw - 380 && r.bottom > vh - 320 && r.width < 385 && r.height < 280;
-    const hotelPromo = r.top < 90 && r.left > 210 && r.right < vw - 210 && r.height < 82 && textLooksNative(text);
+    const topLeftProfile = r.left < 345 && r.top < 160 && r.width < 350 && r.height < 170;
+    const leftRail = r.left < 118 && r.top > 40 && r.top < vh - 85 && r.width < 135 && r.height < vh - 90;
+    const bottomLeftOldChat = r.left < 545 && r.bottom > vh - 132 && r.width < 585 && r.height < 140;
+    const bottomRightPhone = r.right > vw - 105 && r.bottom > vh - 105 && r.width < 120 && r.height < 120;
+    const topRightPurse = r.right > vw - 375 && r.top < 98 && r.width < 380 && r.height < 105;
+    const rightObjectPopup = r.right > vw - 395 && r.bottom > vh - 340 && r.width < 405 && r.height < 320;
+    const hotelPromoText = r.top < 95 && r.left > 200 && r.right < vw - 200 && r.height < 90 && nativeText(text);
 
-    return topLeft || leftRail || bottomLeft || bottomPhone || topRight || rightPopup || hotelPromo || classLooksNative(el);
+    return topLeftProfile || leftRail || bottomLeftOldChat || bottomRightPhone || topRightPurse || rightObjectPopup || hotelPromoText;
+  };
+
+  const isNativeCandidate = (el, r) => {
+    if (nativeClass(el)) return true;
+    if (nativeText(textOf(el))) return true;
+    return looksNativeByZone(el, r);
   };
 
   const kill = el => {
-    if (!el || isOwn(el) || el.id === 'root' || el.tagName === 'CANVAS' || hasLargeCanvas(el)) return;
+    if (isProtected(el) || hasLargeCanvas(el)) return;
     try {
       el.classList.add(KILL_CLASS);
       el.setAttribute(KILL_ATTR, '1');
@@ -92,13 +118,13 @@
   const bestTarget = el => {
     let target = el;
     let current = el;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       const parent = current?.parentElement;
-      if (!parent || parent.id === 'root' || parent === document.body || isOwn(parent) || hasLargeCanvas(parent)) break;
+      if (!parent || isProtected(parent) || hasLargeCanvas(parent)) break;
       const r = parent.getBoundingClientRect();
       if (!r || r.width <= 2 || r.height <= 2) break;
-      if (r.width > window.innerWidth * .72 || r.height > window.innerHeight * .72) break;
-      if (!inNativeZone(parent, r) && !textLooksNative(textOf(parent))) break;
+      if (r.width > window.innerWidth * .76 || r.height > window.innerHeight * .84) break;
+      if (!isNativeCandidate(parent, r)) break;
       target = parent;
       current = parent;
     }
@@ -107,55 +133,64 @@
 
   const scan = () => {
     installCss();
+    document.getElementById('paradise-rp-hard-sidewall')?.remove();
+    document.getElementById('paradise-rp-hard-masks')?.remove();
+
     if (!document.body) return;
     const nodes = Array.from(document.body.querySelectorAll('*'));
     for (const el of nodes) {
-      if (isOwn(el)) continue;
-      if (el.id === 'root' || el.tagName === 'CANVAS') continue;
-      if (el.hasAttribute(KILL_ATTR)) continue;
+      if (isProtected(el) || el.hasAttribute(KILL_ATTR) || el.hasAttribute('data-prhud-hard-kill')) continue;
       const r = el.getBoundingClientRect();
       if (!r || r.width <= 2 || r.height <= 2) continue;
-      if (r.width > window.innerWidth * .76 || r.height > window.innerHeight * .82) continue;
+      if (r.width > window.innerWidth * .78 || r.height > window.innerHeight * .86) continue;
       if (hasLargeCanvas(el)) continue;
-      if (!inNativeZone(el, r) && !textLooksNative(textOf(el))) continue;
+      if (!isNativeCandidate(el, r)) continue;
       kill(bestTarget(el));
     }
   };
 
   const scheduleScan = () => {
-    requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
       scan();
-      setTimeout(scan, 40);
+      window.setTimeout(scan, 35);
     });
   };
 
-  const patchInsertion = (name) => {
+  const patchInsertion = name => {
     const native = Element.prototype[name];
-    if (!native || native.__paradisePatched) return;
+    if (!native || native.__paradiseNativeOffPatched) return;
     const patched = function(...args) {
       const result = native.apply(this, args);
       scheduleScan();
       return result;
     };
-    patched.__paradisePatched = true;
+    patched.__paradiseNativeOffPatched = true;
     Element.prototype[name] = patched;
   };
 
-  installCss();
-  patchInsertion('appendChild');
-  patchInsertion('insertBefore');
-  patchInsertion('replaceChild');
-
   const boot = () => {
-    scan();
+    installCss();
+    patchInsertion('appendChild');
+    patchInsertion('insertBefore');
+    patchInsertion('replaceChild');
+
     try {
-      new MutationObserver(scheduleScan).observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
+      new MutationObserver(scheduleScan).observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        characterData: true
+      });
     } catch (_) {}
-    [80,180,360,700,1100,1700,2600,3800,5200].forEach(ms => setTimeout(scan, ms));
-    if (window.__paradiseNativeUiOff) clearInterval(window.__paradiseNativeUiOff);
-    window.__paradiseNativeUiOff = setInterval(scan, 220);
-    setTimeout(() => { if (performance.now() - START > 9000) clearInterval(window.__paradiseNativeUiOff); }, 12000);
+
+    [0, 60, 140, 260, 420, 700, 1100, 1700, 2600, 3900, 5600].forEach(ms => window.setTimeout(scan, ms));
+
+    if (window.__paradiseNativeUiOffInterval) clearInterval(window.__paradiseNativeUiOffInterval);
+    window.__paradiseNativeUiOffInterval = window.setInterval(scan, 320);
   };
+
+  window.__paradiseNativeUiOffScan = scan;
+  window.__paradiseNativeUiOffVersion = VERSION;
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
