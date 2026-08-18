@@ -2,23 +2,13 @@
   'use strict';
 
   const STYLE_ID = 'paradise-rp-hard-ui-killer-style';
-  const WALL_ID = 'paradise-rp-hard-sidewall';
   const KILL_CLASS = 'prhud-native-hard-kill';
-  const OWN = '#paradise-rp-hud,#paradise-loader,#paradise-rp-hard-ui-killer-style,#paradise-rp-hard-sidewall';
+  const KILL_ATTR = 'data-prhud-hard-kill';
+  const OWN = '#paradise-rp-hud,#paradise-loader,#paradise-native-ui-off-style,#paradise-rp-hard-ui-killer-style';
 
   const css = `
-    .${KILL_CLASS},[data-prhud-hard-kill="1"]{
+    .${KILL_CLASS},[${KILL_ATTR}="1"]{
       display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;
-    }
-    #${WALL_ID}{
-      position:fixed!important;left:0!important;top:130px!important;bottom:0!important;width:104px!important;
-      z-index:2147483646!important;pointer-events:none!important;
-      background:linear-gradient(90deg,rgba(4,8,13,.98),rgba(4,8,13,.94) 86px,rgba(4,8,13,0))!important;
-      box-shadow:18px 0 34px rgba(0,0,0,.22)!important;
-    }
-    #${WALL_ID}:before{
-      content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
-      background:linear-gradient(180deg,#25d9ff,#ffc52f 45%,#25d9ff);opacity:.75;
     }
   `;
 
@@ -29,24 +19,15 @@
       style.id = STYLE_ID;
       document.head.appendChild(style);
     }
-    style.textContent = css;
-  };
-
-  const installWall = () => {
-    let wall = document.getElementById(WALL_ID);
-    if (!wall) {
-      wall = document.createElement('div');
-      wall.id = WALL_ID;
-      wall.setAttribute('aria-hidden', 'true');
-    }
-    document.body.appendChild(wall);
+    if (style.textContent !== css) style.textContent = css;
+    document.getElementById('paradise-rp-hard-sidewall')?.remove();
   };
 
   const hasRootCanvas = () => {
     const canvas = document.querySelector('#root canvas');
     if (!canvas) return false;
     const r = canvas.getBoundingClientRect();
-    return r.width > window.innerWidth * .35 && r.height > window.innerHeight * .35;
+    return r.width > window.innerWidth * .30 && r.height > window.innerHeight * .30;
   };
 
   const isOwn = el => {
@@ -59,15 +40,36 @@
     if (!el || !el.querySelectorAll) return false;
     for (const canvas of el.querySelectorAll('canvas')) {
       const r = canvas.getBoundingClientRect();
-      if (r.width > window.innerWidth * .35 && r.height > window.innerHeight * .35) return true;
+      if (r.width > window.innerWidth * .30 && r.height > window.innerHeight * .30) return true;
     }
     return false;
   };
 
+  const textOf = el => String(el?.innerText || el?.textContent || '').trim();
+  const nativeText = text => /HabboVIP|habbovip|landing\.view|Qué hay|Que hay|¿Qué hay|Haz clic|chatear|Skate Urbano|Comprar uno|Dueñ|Dueno|Créditos|Credits|Pixels|Inventaire|Inventory|Boutique|Shop|Métier|Carte|Accueil|Purse|Wallet/i.test(text);
+  const nativeClass = el => /(toolbar|toolbarview|purse|currency|wallet|infostand|info-stand|furni-infostand|avatar-info|user-profile|me-menu|friend-bar|navigation-bar|nitro-toolbar)/i.test(String(el.className || '').replace(/_/g, '-'));
+
+  const isNativeUi = (el, r) => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const text = textOf(el);
+
+    const topLeft = r.left < 330 && r.top < 150 && r.width < 340 && r.height < 160;
+    const leftRail = r.left < 112 && r.top > 42 && r.bottom < vh - 40 && r.width < 130 && r.height < vh - 95;
+    const bottomLeft = r.left < 520 && r.bottom > vh - 128 && r.width < 560 && r.height < 135;
+    const bottomPhone = r.right > vw - 98 && r.bottom > vh - 100 && r.width < 112 && r.height < 112;
+    const topRight = r.right > vw - 365 && r.top < 92 && r.width < 365 && r.height < 98;
+    const rightPopup = r.right > vw - 385 && r.bottom > vh - 330 && r.width < 390 && r.height < 300;
+    const hotelPromo = r.top < 90 && r.left > 210 && r.right < vw - 210 && r.height < 84 && nativeText(text);
+
+    return nativeClass(el) || nativeText(text) || topLeft || leftRail || bottomLeft || bottomPhone || topRight || rightPopup || hotelPromo;
+  };
+
   const hardKill = el => {
+    if (!el || isOwn(el) || el.id === 'root' || el.tagName === 'CANVAS' || hasLargeCanvas(el)) return;
     try {
       el.classList.add(KILL_CLASS);
-      el.setAttribute('data-prhud-hard-kill', '1');
+      el.setAttribute(KILL_ATTR, '1');
       el.style.setProperty('display', 'none', 'important');
       el.style.setProperty('visibility', 'hidden', 'important');
       el.style.setProperty('opacity', '0', 'important');
@@ -75,46 +77,45 @@
     } catch (_) {}
   };
 
-  const isNativeUi = (el, r) => {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const text = (el.innerText || el.textContent || '').trim();
-
-    const nativeLeftRail = r.left < 104 && r.top > 40 && r.bottom < vh - 42 && r.width < 118 && r.height < vh - 100;
-    const nativeTopLeft = r.left < 326 && r.top < 142 && r.width < 330 && r.height < 150;
-    const nativeBottomLeft = r.left < 455 && r.bottom > vh - 116 && r.width < 485 && r.height < 125;
-    const nativePhone = r.right > vw - 90 && r.bottom > vh - 92 && r.width < 105 && r.height < 105;
-    const nativeTopRight = r.right > vw - 350 && r.top < 86 && r.width < 350 && r.height < 90;
-    const hotelPromoText = r.top < 82 && r.left > 230 && r.right < vw - 230 && r.height < 70 && /landing\.view|que hay|qué hay|promo|header|body/i.test(text);
-
-    return nativeLeftRail || nativeTopLeft || nativeBottomLeft || nativePhone || nativeTopRight || hotelPromoText;
+  const bestTarget = el => {
+    let target = el;
+    let current = el;
+    for (let i = 0; i < 5; i++) {
+      const parent = current?.parentElement;
+      if (!parent || parent === document.body || parent.id === 'root' || isOwn(parent) || hasLargeCanvas(parent)) break;
+      const r = parent.getBoundingClientRect();
+      if (!r || r.width <= 2 || r.height <= 2) break;
+      if (r.width > window.innerWidth * .74 || r.height > window.innerHeight * .80) break;
+      if (!isNativeUi(parent, r)) break;
+      target = parent;
+      current = parent;
+    }
+    return target;
   };
 
   const pass = () => {
-    if (!hasRootCanvas() && performance.now() < 4500) return;
-
+    if (!hasRootCanvas() && performance.now() < 3600) return;
     installStyle();
-    installWall();
 
     for (const el of Array.from(document.querySelectorAll('body *'))) {
       if (isOwn(el)) continue;
       if (el.id === 'root' || el.tagName === 'CANVAS') continue;
+      if (el.hasAttribute(KILL_ATTR) || el.hasAttribute('data-pr-native-ui-killed')) continue;
 
       const r = el.getBoundingClientRect();
       if (!r || r.width <= 2 || r.height <= 2) continue;
-      if (r.width > window.innerWidth * .70 || r.height > window.innerHeight * .78) continue;
-      if (!isNativeUi(el, r)) continue;
+      if (r.width > window.innerWidth * .76 || r.height > window.innerHeight * .82) continue;
       if (hasLargeCanvas(el)) continue;
+      if (!isNativeUi(el, r)) continue;
 
-      hardKill(el);
+      hardKill(bestTarget(el));
     }
   };
 
   installStyle();
-  window.setTimeout(pass, 600);
-  window.setTimeout(pass, 1200);
-  window.setTimeout(pass, 2200);
+  [250,600,1000,1600,2400,3600].forEach(ms => window.setTimeout(pass, ms));
 
   if (window.__paradiseHardUiKiller) clearInterval(window.__paradiseHardUiKiller);
-  window.__paradiseHardUiKiller = window.setInterval(pass, 260);
+  window.__paradiseHardUiKiller = window.setInterval(pass, 180);
+  window.setTimeout(() => clearInterval(window.__paradiseHardUiKiller), 16000);
 })();
