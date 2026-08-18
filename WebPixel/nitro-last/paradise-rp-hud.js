@@ -1,11 +1,11 @@
 (() => {
   'use strict';
 
-  const VERSION = '5.0.0';
+  const VERSION = '6.0.0';
   const HUD_ID = 'paradise-rp-hud';
   const STYLE_ID = 'paradise-rp-hud-css';
   const DATA_URL = '../rp-hud-data.php';
-  const CSS_URL = './paradise-rp-hud.css?v=5';
+  const CSS_URL = './paradise-rp-hud.css?v=6';
 
   const DEFAULT_DATA = {
     ok: false,
@@ -18,26 +18,26 @@
     energy: { current: 31, max: 100 },
     money: { credits: 789, pixels: 5000, cash: 1789, diamonds: 224 },
     city: 'Paradise City',
-    time: '17:05'
+    time: '17:16'
   };
 
   const dockItems = [
-    { key: 'player', label: 'Joueur', icon: '👤', command: '' },
-    { key: 'phone', label: 'Téléphone', icon: '📱', command: ':tel' },
-    { key: 'id', label: 'Carte ID', icon: '🪪', command: ':id' },
-    { key: 'job', label: 'Métier', icon: '💼', command: ':trabajar' },
+    { key: 'player', label: 'Joueur', icon: '♟', command: '' },
+    { key: 'phone', label: 'Téléphone', icon: '▯', command: ':tel' },
+    { key: 'id', label: 'Carte ID', icon: '▤', command: ':id' },
+    { key: 'job', label: 'Métier', icon: '▣', command: ':trabajar' },
     { key: 'home', label: 'Accueil', icon: '⌂', command: '' },
-    { key: 'shop', label: 'Boutique', icon: '🛒', command: '' },
-    { key: 'bag', label: 'Inventaire', icon: '🎒', command: '' },
+    { key: 'shop', label: 'Boutique', icon: '⌑', command: '' },
+    { key: 'bag', label: 'Inventaire', icon: '◰', command: '' },
     { key: 'cmd', label: 'Commandes', icon: '>_', command: ':commands' }
   ];
 
   const railItems = [
     { key: 'home', label: 'Accueil', icon: '⌂', command: '' },
-    { key: 'bag', label: 'Inventaire', icon: '▢', command: '' },
+    { key: 'bag', label: 'Inventaire', icon: '□', command: '' },
     { key: 'job', label: 'Métier', icon: '▤', command: ':trabajar' },
     { key: 'map', label: 'Carte', icon: '⌖', command: '' },
-    { key: 'shop', label: 'Boutique', icon: '▥', command: '' }
+    { key: 'shop', label: 'Boutique', icon: '▦', command: '' }
   ];
 
   const safe = value => String(value ?? '')
@@ -55,7 +55,7 @@
   const ensureCss = () => {
     let link = document.getElementById(STYLE_ID);
     if (link) {
-      if (!link.href.includes('v=5')) link.href = CSS_URL;
+      if (!link.href.includes('v=6')) link.href = CSS_URL;
       return;
     }
     link = document.createElement('link');
@@ -63,6 +63,63 @@
     link.rel = 'stylesheet';
     link.href = CSS_URL;
     document.head.appendChild(link);
+  };
+
+  const isHudNode = el => !!(el && (el.closest?.(`#${HUD_ID}`) || el.closest?.('#paradise-loader')));
+
+  const hideLegacyElement = el => {
+    if (!el || isHudNode(el) || el.id === 'root' || el.tagName === 'CANVAS') return;
+    if (el.querySelector?.('canvas')) return;
+    el.classList?.add('prhud-legacy-hidden');
+    el.style.setProperty('opacity', '0', 'important');
+    el.style.setProperty('visibility', 'hidden', 'important');
+    el.style.setProperty('pointer-events', 'none', 'important');
+  };
+
+  const shouldHideLegacy = el => {
+    if (!el || isHudNode(el) || el.id === HUD_ID || el.id === 'root' || el.tagName === 'CANVAS') return false;
+    if (el.querySelector?.('canvas')) return false;
+
+    const rect = el.getBoundingClientRect?.();
+    if (!rect || rect.width <= 3 || rect.height <= 3) return false;
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    if (rect.width > vw * 0.55 || rect.height > vh * 0.55) return false;
+
+    const style = getComputedStyle(el);
+    if (style.display === 'none' || Number(style.opacity || 1) <= 0.02) return false;
+
+    const topLeftHud = rect.left < 330 && rect.top < 155 && rect.width < 330 && rect.height < 155;
+    const leftIconStack = rect.left < 52 && rect.top > 70 && rect.top < vh - 90 && rect.width < 58 && rect.height < 420;
+    const leftRailHud = rect.left < 112 && rect.top > 150 && rect.top < 560 && rect.width < 125 && rect.height < 410;
+    const bottomNativeChat = rect.bottom > vh - 92 && rect.left < 450 && rect.width < 470 && rect.height < 94;
+    const bottomPhone = rect.right > vw - 75 && rect.bottom > vh - 105 && rect.width < 90 && rect.height < 105;
+    const oldCurrencyTopLeft = rect.left < 190 && rect.top < 132 && rect.width < 190 && rect.height < 80;
+
+    return topLeftHud || leftIconStack || leftRailHud || bottomNativeChat || bottomPhone || oldCurrencyTopLeft;
+  };
+
+  const hideLegacyHud = () => {
+    try {
+      document.querySelectorAll('body *').forEach(el => {
+        if (shouldHideLegacy(el)) hideLegacyElement(el);
+      });
+    } catch (_) {}
+  };
+
+  const startLegacyCleaner = () => {
+    hideLegacyHud();
+    let runs = 0;
+    const timer = setInterval(() => {
+      runs += 1;
+      hideLegacyHud();
+      if (runs > 80) clearInterval(timer);
+    }, 250);
+
+    const observer = new MutationObserver(hideLegacyHud);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    setTimeout(() => observer.disconnect(), 30000);
   };
 
   const findNativeChatInput = () => {
@@ -142,10 +199,9 @@
       </button>`).join('');
 
     return `
-      <div class="prhud-cover prhud-cover-top-left" aria-hidden="true"></div>
-      <div class="prhud-cover prhud-cover-left-edge" aria-hidden="true"></div>
-      <div class="prhud-cover prhud-cover-bottom-left" aria-hidden="true"></div>
-      <div class="prhud-cover prhud-cover-bottom-right" aria-hidden="true"></div>
+      <div class="prhud-mask prhud-mask-top-left" aria-hidden="true"></div>
+      <div class="prhud-mask prhud-mask-left-edge" aria-hidden="true"></div>
+      <div class="prhud-mask prhud-mask-bottom-right" aria-hidden="true"></div>
 
       <section class="prhud-panel prhud-player" aria-label="Joueur">
         <div class="prhud-avatar">${avatar}<b>${safe(data.level)}</b></div>
@@ -155,7 +211,7 @@
           <div class="prhud-stat red"><i>❤</i><em><u style="width:${pct(data.health.current, data.health.max)}"></u></em><small>${safe(data.health.current)} / ${safe(data.health.max)}</small></div>
           <div class="prhud-stat blue"><i>ϟ</i><em><u style="width:${pct(data.energy.current, data.energy.max)}"></u></em><small>${safe(data.energy.current)} / ${safe(data.energy.max)}</small></div>
         </div>
-        <div class="prhud-player-money"><span>💵 ${fmt(data.money.cash ?? data.money.credits)}</span><span>💎 ${fmt(data.money.diamonds ?? data.money.pixels)}</span></div>
+        <div class="prhud-player-money"><span>$ ${fmt(data.money.cash ?? data.money.credits)}</span><span>♦ ${fmt(data.money.diamonds ?? data.money.pixels)}</span></div>
       </section>
 
       <div class="prhud-meta">
@@ -179,7 +235,7 @@
       </section>
 
       <form class="prhud-panel prhud-chat" id="prhud-chat-form" autocomplete="off">
-        <button class="prhud-chat-bubble" type="button" aria-label="Chat">💬</button>
+        <button class="prhud-chat-bubble" type="button" aria-label="Chat">●</button>
         <select class="prhud-chat-channel" aria-label="Canal"><option>Discussion générale</option><option>Chuchoter</option><option>Crier</option></select>
         <input id="prhud-chat-input" class="prhud-chat-input" type="text" placeholder="Clique ici pour chatter..." autocomplete="off">
         <button class="prhud-chat-emoji" type="button" aria-label="Emoji">☺</button>
@@ -229,11 +285,13 @@
     hud.innerHTML = build(DEFAULT_DATA);
     document.body.appendChild(hud);
     hydrate(hud);
+    startLegacyCleaner();
 
     const data = await loadData();
     if (!document.body.contains(hud)) return;
     hud.innerHTML = build(data && typeof data === 'object' ? data : DEFAULT_DATA);
     hydrate(hud);
+    startLegacyCleaner();
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(mount, 250));
