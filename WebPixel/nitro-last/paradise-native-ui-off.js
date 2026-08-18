@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '7.0.0-chat-park-safe';
+  const VERSION = '8.0.0-chat-bridge-safe';
   const STYLE_ID = 'paradise-native-ui-off-style';
   window.__PARADISE_NATIVE_UI_OFF_LOCK__ = VERSION;
 
@@ -22,14 +22,14 @@
     .button-3IzmP_0.menuButton-yNbz6_0,
     [class*="menuButton-yNbz6"],
     [class*="button-3IzmP"],
-    [data-pr-native-ui-killed="1"]:not([data-pr-native-chat-parked="1"]) {
+    [data-pr-native-ui-killed="1"]:not([data-pr-native-chat-parked="1"]):not([data-pr-chat-bridge-active="1"]) {
       display: none !important;
       visibility: hidden !important;
       opacity: 0 !important;
       pointer-events: none !important;
     }
 
-    [data-pr-native-chat-parked="1"] {
+    [data-pr-native-chat-parked="1"]:not([data-pr-chat-bridge-active="1"]) {
       position: fixed !important;
       left: -99999px !important;
       top: auto !important;
@@ -85,6 +85,7 @@
   };
 
   const hideElement = el => {
+    if (window.__paradiseChatBridgeActive) return;
     if (isProtected(el) || hasLargeCanvas(el)) return;
     try {
       el.removeAttribute('data-pr-native-chat-parked');
@@ -97,6 +98,7 @@
   };
 
   const parkChatElement = el => {
+    if (window.__paradiseChatBridgeActive) return;
     if (!el || isProtected(el)) return;
     try {
       el.removeAttribute('data-pr-native-ui-killed');
@@ -170,6 +172,7 @@
   };
 
   const killLegacyTextBlocks = () => {
+    if (window.__paradiseChatBridgeActive) return;
     try {
       document.querySelectorAll('div, span, p, section, aside, label, button').forEach(el => {
         if (!isSmallVisibleBox(el)) return;
@@ -187,6 +190,7 @@
   };
 
   const parkNativeChat = () => {
+    if (window.__paradiseChatBridgeActive) return;
     try {
       document.querySelectorAll('input, textarea').forEach(el => {
         if (!isNativeChatField(el)) return;
@@ -201,6 +205,7 @@
 
   const killOnlyKnownButtons = () => {
     installCss();
+    if (window.__paradiseChatBridgeActive) return;
     parkNativeChat();
 
     for (const selector of selectors) {
