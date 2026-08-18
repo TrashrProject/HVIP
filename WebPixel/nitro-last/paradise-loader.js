@@ -2,7 +2,7 @@
   'use strict';
 
   const NATIVE_OFF_SRC = './paradise-native-ui-off.js?v=1';
-  const HUD_SRC = './paradise-rp-hud.js?v=13';
+  const HUD_SRC = './paradise-rp-hud.js?v=14';
   const KILLER_SRC = './paradise-hard-ui-killer.js?v=3';
   const SOFT_HIDE_MS = 1500;
   const HARD_HIDE_MS = 2450;
@@ -45,7 +45,7 @@
         loadNativeOff();
         loadHud();
         loadKiller();
-      }, 350);
+      }, 400);
       return;
     }
 
@@ -70,7 +70,7 @@
       const root = document.getElementById('root');
       if (!root) return false;
       if (root.querySelector('canvas')) return true;
-      return root.childElementCount > 0 && performance.now() - started > 1200;
+      return root.childElementCount > 0 && performance.now() - started > 1400;
     };
 
     const hide = () => {
@@ -88,21 +88,21 @@
         try { loader.remove(); } catch (_) {}
         loadNativeOff();
         loadHud();
-      }, 90);
+      }, 120);
 
       window.setTimeout(() => {
         hideNativeBlueLoader();
         loadNativeOff();
         loadHud();
         loadKiller();
-      }, 520);
+      }, 650);
 
       window.setTimeout(() => {
         hideNativeBlueLoader();
         loadNativeOff();
         loadHud();
         loadKiller();
-      }, 1250);
+      }, 1400);
     };
 
     const tick = () => {
@@ -110,13 +110,13 @@
 
       const elapsed = performance.now() - started;
       let target = 18;
-      if (elapsed > 220) target = 34;
-      if (elapsed > 500) target = 52;
-      if (elapsed > 820) target = 74;
-      if (elapsed > 1150) target = 92;
-      if (elapsed > 1450) target = 99;
+      if (elapsed > 250) target = 34;
+      if (elapsed > 550) target = 52;
+      if (elapsed > 900) target = 74;
+      if (elapsed > 1250) target = 92;
+      if (elapsed > 1550) target = 99;
 
-      render(shown + Math.max(1, (target - shown) * 0.24));
+      render(shown + Math.max(1, (target - shown) * 0.22));
 
       if ((elapsed > SOFT_HIDE_MS && hasGameSurface()) || elapsed > HARD_HIDE_MS) {
         hide();
@@ -132,7 +132,7 @@
       }).observe(document.body, { childList: true, subtree: true });
     } catch (_) {}
 
-    window.setTimeout(hide, HARD_HIDE_MS + 180);
+    window.setTimeout(hide, HARD_HIDE_MS + 250);
     render(shown);
     window.requestAnimationFrame(tick);
   };
@@ -142,6 +142,7 @@
     else boot();
   } catch (_) {
     try { document.getElementById('paradise-loader')?.remove(); } catch (__) {}
-    try { loadNativeOff(); loadHud(); } catch (__) {}
+    try { loadNativeOff(); } catch (__) {}
+    try { loadHud(); } catch (__) {}
   }
 })();
