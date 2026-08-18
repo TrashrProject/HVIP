@@ -1,13 +1,13 @@
 (() => {
   'use strict';
 
-  const VERSION = '6.0.0-safe-legacy-labels';
+  const VERSION = '7.0.0-chat-park-safe';
   const STYLE_ID = 'paradise-native-ui-off-style';
   window.__PARADISE_NATIVE_UI_OFF_LOCK__ = VERSION;
 
   const css = `
-    /* ParadiseRP native UI off - SAFE MODE
-       Aucun parent large, iframe, canvas ou root n'est supprimé. */
+    /* ParadiseRP native UI off - safe mode.
+       On cache l'ancien UI, mais le vrai champ de chat Nitro reste utilisable par le HUD. */
     #CombatMode,
     #PSVMode,
     #TicketMode,
@@ -22,32 +22,25 @@
     .button-3IzmP_0.menuButton-yNbz6_0,
     [class*="menuButton-yNbz6"],
     [class*="button-3IzmP"],
-    [data-pr-native-ui-killed="1"] {
+    [data-pr-native-ui-killed="1"]:not([data-pr-native-chat-parked="1"]) {
       display: none !important;
       visibility: hidden !important;
       opacity: 0 !important;
       pointer-events: none !important;
     }
 
-    #root input[placeholder*="Haz" i],
-    #root input[placeholder*="chatear" i],
-    #root input[placeholder*="chat" i],
-    #root textarea[placeholder*="Haz" i],
-    #root textarea[placeholder*="chatear" i],
-    #root textarea[placeholder*="chat" i],
-    body input[placeholder*="Haz" i]:not(#prhud-chat-input),
-    body input[placeholder*="chatear" i]:not(#prhud-chat-input),
-    body textarea[placeholder*="Haz" i]:not(#prhud-chat-input),
-    body textarea[placeholder*="chatear" i]:not(#prhud-chat-input) {
+    [data-pr-native-chat-parked="1"] {
       position: fixed !important;
       left: -99999px !important;
       top: auto !important;
       bottom: auto !important;
       width: 1px !important;
       height: 1px !important;
+      min-width: 1px !important;
+      min-height: 1px !important;
       opacity: 0 !important;
       pointer-events: none !important;
-      visibility: hidden !important;
+      z-index: -1 !important;
     }
 
     #paradise-rp-hard-sidewall,
@@ -94,6 +87,7 @@
   const hideElement = el => {
     if (isProtected(el) || hasLargeCanvas(el)) return;
     try {
+      el.removeAttribute('data-pr-native-chat-parked');
       el.setAttribute('data-pr-native-ui-killed', '1');
       el.style.setProperty('display', 'none', 'important');
       el.style.setProperty('visibility', 'hidden', 'important');
@@ -102,19 +96,22 @@
     } catch (_) {}
   };
 
-  const moveNativeChatAway = el => {
-    if (isProtected(el)) return;
+  const parkChatElement = el => {
+    if (!el || isProtected(el)) return;
     try {
-      el.setAttribute('data-pr-native-ui-killed', '1');
+      el.removeAttribute('data-pr-native-ui-killed');
+      el.setAttribute('data-pr-native-chat-parked', '1');
       el.style.setProperty('position', 'fixed', 'important');
       el.style.setProperty('left', '-99999px', 'important');
       el.style.setProperty('top', 'auto', 'important');
       el.style.setProperty('bottom', 'auto', 'important');
       el.style.setProperty('width', '1px', 'important');
       el.style.setProperty('height', '1px', 'important');
+      el.style.setProperty('min-width', '1px', 'important');
+      el.style.setProperty('min-height', '1px', 'important');
       el.style.setProperty('opacity', '0', 'important');
       el.style.setProperty('pointer-events', 'none', 'important');
-      el.style.setProperty('visibility', 'hidden', 'important');
+      el.style.setProperty('z-index', '-1', 'important');
     } catch (_) {}
   };
 
@@ -123,7 +120,7 @@
     '#PhoneMode', '#CatalogMode', '#InventoryMode', '#RoomInfoMode',
     '.menuButton-yNbz6_0', '[class*="menuButton-yNbz6"]', '[class*="button-3IzmP"]',
     '[class*="nitro-toolbar"]', '[class*="toolbar"]', '[class*="toolbar-item"]',
-    '[class*="habbo-toolbar"]', '[class*="chatinput"]', '[class*="chat-input"]'
+    '[class*="habbo-toolbar"]'
   ];
 
   const getText = el => {
@@ -149,8 +146,8 @@
   const isNativeChatField = el => {
     if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return false;
     if (el.id === 'prhud-chat-input' || (el.closest && el.closest('#paradise-rp-hud'))) return false;
-    const text = String(el.getAttribute('placeholder') || el.value || '');
-    return /haz|chatear|chat|parler/i.test(text);
+    const text = `${el.getAttribute('placeholder') || ''} ${el.className || ''} ${el.id || ''} ${el.value || ''}`;
+    return /haz|chatear|chat|parler|message/i.test(text);
   };
 
   const isBottomLeftLegacy = el => {
@@ -176,12 +173,27 @@
     try {
       document.querySelectorAll('div, span, p, section, aside, label, button').forEach(el => {
         if (!isSmallVisibleBox(el)) return;
+        if (el.querySelector?.('[data-pr-native-chat-parked="1"]')) return;
         const text = getText(el);
         if (!isLegacyText(text)) return;
         hideElement(el);
         let parent = el.parentElement;
         for (let i = 0; parent && i < 3; i += 1, parent = parent.parentElement) {
+          if (parent.querySelector?.('[data-pr-native-chat-parked="1"]')) continue;
           if (isSmallVisibleBox(parent) && (isBottomLeftLegacy(parent) || isLegacyText(getText(parent)))) hideElement(parent);
+        }
+      });
+    } catch (_) {}
+  };
+
+  const parkNativeChat = () => {
+    try {
+      document.querySelectorAll('input, textarea').forEach(el => {
+        if (!isNativeChatField(el)) return;
+        parkChatElement(el);
+        let parent = el.parentElement;
+        for (let i = 0; parent && i < 3; i += 1, parent = parent.parentElement) {
+          if (isBottomLeftLegacy(parent)) parkChatElement(parent);
         }
       });
     } catch (_) {}
@@ -189,11 +201,13 @@
 
   const killOnlyKnownButtons = () => {
     installCss();
+    parkNativeChat();
 
     for (const selector of selectors) {
       try {
         document.querySelectorAll(selector).forEach(el => {
           if (isProtected(el)) return;
+          if (el.querySelector?.('[data-pr-native-chat-parked="1"]')) return;
           const r = el.getBoundingClientRect();
           if (r.width > window.innerWidth * 0.55 || r.height > window.innerHeight * 0.55) return;
           hideElement(el);
@@ -202,24 +216,14 @@
     }
 
     try {
-      document.querySelectorAll('input, textarea').forEach(el => {
-        if (isNativeChatField(el)) {
-          moveNativeChatAway(el);
-          let parent = el.parentElement;
-          for (let i = 0; parent && i < 3; i += 1, parent = parent.parentElement) {
-            if (isBottomLeftLegacy(parent)) hideElement(parent);
-          }
-        }
-      });
-    } catch (_) {}
-
-    try {
-      document.querySelectorAll('button, img, input, textarea, div, span, i, p, section, aside').forEach(el => {
+      document.querySelectorAll('button, img, div, span, i, p, section, aside').forEach(el => {
+        if (el.querySelector?.('[data-pr-native-chat-parked="1"]')) return;
         if (isBottomLeftLegacy(el)) hideElement(el);
       });
     } catch (_) {}
 
     killLegacyTextBlocks();
+    parkNativeChat();
   };
 
   const boot = () => {
