@@ -10,15 +10,17 @@ namespace Plus.Core
     public class ConfigurationData
     {
         public Dictionary<string, string> data;
+        public string FilePath { get; private set; }
 
         public ConfigurationData(string filePath, bool maynotexist = false)
         {
             data = new Dictionary<string, string>();
+            FilePath = filePath;
 
             if (!File.Exists(filePath))
             {
                 if (!maynotexist)
-                    throw new ArgumentException("Unable to locate configuration file at '" + filePath + "'.");
+                    throw new ArgumentException("[CONFIG ERROR] Unable to locate configuration file.\nFile: " + filePath);
                 else
                     return;
             }
@@ -28,22 +30,37 @@ namespace Plus.Core
                 using (var stream = new StreamReader(filePath))
                 {
                     string line = "";
+                    int lineNumber = 0;
 
                     while ((line = stream.ReadLine()) != null)
                     {
-                        if (line.Length < 1 || line.StartsWith("#"))
+                        lineNumber++;
+                        string cleanLine = line.Trim();
+
+                        if (cleanLine.Length < 1 || cleanLine.StartsWith("#"))
                         {
                             continue;
                         }
 
-                        int delimiterIndex = line.IndexOf('=');
+                        int delimiterIndex = cleanLine.IndexOf('=');
 
                         if (delimiterIndex != -1)
                         {
-                            string key = line.Substring(0, delimiterIndex);
-                            string val = line.Substring(delimiterIndex + 1);
+                            string key = cleanLine.Substring(0, delimiterIndex).Trim();
+                            string val = cleanLine.Substring(delimiterIndex + 1).Trim();
 
-                            data.Add(key, val);
+                            if (String.IsNullOrWhiteSpace(key))
+                                continue;
+
+                            if (data.ContainsKey(key))
+                            {
+                                Console.WriteLine("[CONFIG WARNING] Duplicate key '" + key + "' in " + filePath + " at line " + lineNumber + ". Last value wins.");
+                                data[key] = val;
+                            }
+                            else
+                            {
+                                data.Add(key, val);
+                            }
                         }
                     }
                 }
@@ -51,8 +68,40 @@ namespace Plus.Core
 
             catch (Exception e)
             {
-                throw new ArgumentException("Could not process configuration file: " + e.Message);
+                throw new ArgumentException("[CONFIG ERROR] Could not process configuration file.\nFile: " + filePath + "\nReason: " + e.Message);
             }
+        }
+
+        public bool TryGetValue(string key, out string value)
+        {
+            value = null;
+
+            if (String.IsNullOrWhiteSpace(key))
+                return false;
+
+            return data.TryGetValue(key, out value);
+        }
+
+        public string GetOptionalValue(string key, string defaultValue)
+        {
+            string value;
+
+            if (!TryGetValue(key, out value))
+                return defaultValue;
+
+            return value;
+        }
+
+        public string GetRequiredValue(string key, string requiredBy)
+        {
+            string value;
+
+            if (!TryGetValue(key, out value))
+            {
+                throw new InvalidOperationException("[CONFIG ERROR] Missing required key: " + key + "\nFile: " + FilePath + "\nRequired by: " + requiredBy);
+            }
+
+            return value;
         }
     }
 
