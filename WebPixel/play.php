@@ -54,9 +54,7 @@ function pr_play_first_valid_room(mysqli $con, string $sql): int {
     if (!$res) return 0;
     while ($row = mysqli_fetch_assoc($res)) {
         foreach ($row as $value) {
-            if (is_numeric($value) && (int)$value > 0 && pr_play_room_exists($con, (int)$value)) {
-                return (int)$value;
-            }
+            if (is_numeric($value) && (int)$value > 0 && pr_play_room_exists($con, (int)$value)) return (int)$value;
         }
     }
     return 0;
@@ -99,9 +97,7 @@ function pr_play_resolve_room(mysqli $con, int $userId, string $username): int {
             }
 
             $order = [];
-            foreach (['users_now', 'users', 'score'] as $candidate) {
-                if (isset($cols[$candidate])) $order[] = '`' . $cols[$candidate] . '` DESC';
-            }
+            foreach (['users_now', 'users', 'score'] as $candidate) if (isset($cols[$candidate])) $order[] = '`' . $cols[$candidate] . '` DESC';
             $order[] = '`' . $idCol . '` ASC';
             $roomId = pr_play_first_valid_room($con, "SELECT `" . $idCol . "` FROM `rooms` WHERE `" . $idCol . "` > 0 ORDER BY " . implode(',', $order) . " LIMIT 20");
             if ($roomId > 0) return $roomId;
@@ -118,16 +114,14 @@ function pr_play_resolve_room(mysqli $con, int $userId, string $username): int {
 
 function pr_play_ticket_columns(mysqli $con): array {
     $cols = pr_play_columns($con, 'users');
-    $candidates = ['auth_ticket', 'sso_ticket', 'sso', 'ticket', 'login_ticket', 'client_ticket', 'auth_token'];
+    $candidates = ['rdpticket', 'auth_ticket', 'sso_ticket', 'sso', 'ticket', 'login_ticket', 'client_ticket', 'auth_token'];
     $found = [];
-    foreach ($candidates as $candidate) {
-        if (isset($cols[$candidate])) $found[] = $cols[$candidate];
-    }
+    foreach ($candidates as $candidate) if (isset($cols[$candidate])) $found[] = $cols[$candidate];
     return array_values(array_unique($found));
 }
 
 function pr_play_read_ticket(mysqli $con, int $userId): string {
-    if ($userId <= 0 || !pr_play_table_exists($con, 'users')) return '';
+    if ($userId < 0 || !pr_play_table_exists($con, 'users')) return '';
     $cols = pr_play_ticket_columns($con);
     if (!$cols) return '';
     $select = implode(',', array_map(fn($c) => '`' . $c . '`', $cols));
@@ -143,28 +137,29 @@ function pr_play_read_ticket(mysqli $con, int $userId): string {
 }
 
 function pr_play_store_ticket(mysqli $con, int $userId, string $ticket): bool {
-    if ($userId <= 0 || $ticket === '' || !pr_play_table_exists($con, 'users')) return false;
+    if ($userId < 0 || $ticket === '' || !pr_play_table_exists($con, 'users')) return false;
     $cols = pr_play_ticket_columns($con);
     if (!$cols) return false;
     $safeTicket = mysqli_real_escape_string($con, $ticket);
     $sets = [];
     foreach ($cols as $col) $sets[] = '`' . $col . "` = '" . $safeTicket . "'";
+
+    $userCols = pr_play_columns($con, 'users');
+    if (isset($userCols['online'])) $sets[] = '`' . $userCols['online'] . "` = '0'";
+
     $sql = "UPDATE `users` SET " . implode(', ', $sets) . " WHERE `id` = '" . $userId . "' LIMIT 1";
     return (bool) @mysqli_query($con, $sql);
 }
 
 function pr_play_fresh_ticket(): string {
-    try {
-        return 'PRP-' . bin2hex(random_bytes(16));
-    } catch (Throwable $e) {
-        return 'PRP-' . sha1(uniqid('', true) . mt_rand());
-    }
+    try { return AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(12) . '-RDP'; }
+    catch (Throwable $e) { return 'PRP-' . sha1(uniqid('', true) . mt_rand()) . '-RDP'; }
 }
 
 function pr_play_generate_ticket(mysqli $con, int $userId, $UserMG): string {
     $ticket = '';
 
-    if (isset($UserMG) && method_exists($UserMG, 'GenerateAUTH') && $userId > 0) {
+    if (isset($UserMG) && method_exists($UserMG, 'GenerateAUTH') && $userId >= 0) {
         try { $ticket = trim((string)$UserMG->GenerateAUTH($userId)); }
         catch (Throwable $e) {
             try { $ticket = trim((string)$UserMG->GenerateAUTH()); }
@@ -178,7 +173,7 @@ function pr_play_generate_ticket(mysqli $con, int $userId, $UserMG): string {
 
     pr_play_store_ticket($con, $userId, $ticket);
 
-    if (isset($UserMG) && $userId > 0) {
+    if (isset($UserMG) && $userId >= 0) {
         try { if (method_exists($UserMG, 'GenerateMachineId')) $UserMG->GenerateMachineId($userId); } catch (Throwable $e) {}
         try { if (method_exists($UserMG, 'CheckVIPStatus')) $UserMG->CheckVIPStatus($userId); } catch (Throwable $e) {}
     }
@@ -186,10 +181,30 @@ function pr_play_generate_ticket(mysqli $con, int $userId, $UserMG): string {
     return $ticket;
 }
 
+function pr_play_auth_debug(mysqli $con, int $userId, string $ticket): array {
+    $result = ['userId' => $userId, 'ticketLength' => strlen($ticket), 'ticketSuffix' => substr($ticket, -4), 'columns' => [], 'rdpticketMatches' => false, 'online' => null];
+    if ($userId < 0 || $ticket === '' || !pr_play_table_exists($con, 'users')) return $result;
+    $cols = pr_play_columns($con, 'users');
+    $select = [];
+    foreach (['rdpticket', 'auth_ticket', 'sso_ticket', 'sso', 'ticket', 'online'] as $candidate) if (isset($cols[$candidate])) $select[] = '`' . $cols[$candidate] . '`';
+    if (!$select) return $result;
+    $res = @mysqli_query($con, "SELECT " . implode(',', $select) . " FROM `users` WHERE `id` = '" . $userId . "' LIMIT 1");
+    $row = $res ? mysqli_fetch_assoc($res) : null;
+    if (!$row) return $result;
+    foreach ($row as $key => $value) {
+        if (strtolower($key) === 'online') { $result['online'] = (string)$value; continue; }
+        $value = (string)$value;
+        $matches = hash_equals($ticket, $value);
+        $result['columns'][$key] = ['present' => $value !== '', 'length' => strlen($value), 'matchesSentTicket' => $matches];
+        if (strtolower($key) === 'rdpticket') $result['rdpticketMatches'] = $matches;
+    }
+    return $result;
+}
+
 $con = $DB->Con();
-$userId = isset($UData['id']) ? (int)$UData['id'] : 0;
+$userId = isset($UData['id']) ? (int)$UData['id'] : -1;
 $username = isset($UData['username']) ? (string)$UData['username'] : '';
-$autoRoomId = $userId > 0 ? pr_play_resolve_room($con, $userId, $username) : 0;
+$autoRoomId = $userId >= 0 ? pr_play_resolve_room($con, $userId, $username) : 0;
 if ($autoRoomId > 0) $_SESSION['paradise_last_room_id'] = $autoRoomId;
 
 $currentRoom = (isset($_GET['room']) && is_numeric($_GET['room'])) ? (int)$_GET['room'] : 0;
@@ -208,7 +223,10 @@ if ($ticket === '') {
     try { require CLIENT . 'client.php'; } catch (Throwable $e) {}
     ob_end_clean();
     $ticket = isset($ClientAUTH) ? (string)$ClientAUTH : '';
+    if ($ticket !== '') pr_play_store_ticket($con, $userId, $ticket);
 }
+
+$authDebug = pr_play_auth_debug($con, $userId, $ticket);
 
 $bootNonce = time() . '-' . mt_rand(1000, 9999);
 $nitroParams = ['sso' => $ticket, '_boot' => $bootNonce];
@@ -219,6 +237,7 @@ $nitroSrc = '/nitro-last/index.html?' . http_build_query($nitroParams, '', '&', 
 $nitroSrcHtml = htmlspecialchars($nitroSrc, ENT_QUOTES, 'UTF-8');
 $autoRoomJs = (int)$autoRoomId;
 $ticketJs = json_encode($ticket, JSON_UNESCAPED_SLASHES);
+$authDebugJs = json_encode($authDebug, JSON_UNESCAPED_SLASHES);
 ?>
 <!doctype html>
 <html lang="fr">
@@ -242,16 +261,18 @@ $ticketJs = json_encode($ticket, JSON_UNESCAPED_SLASHES);
     <div id="ParadiseBootNotice">Reconnexion à l'appart...</div>
     <script>
     (function () {
+        window.__PARADISE_PLAY_AUTH__ = <?php echo $authDebugJs; ?>;
+
         const frame = document.getElementById('RdpNitroFrame');
         const notice = document.getElementById('ParadiseBootNotice');
         const autoRoomId = <?php echo $autoRoomJs; ?>;
         const ticket = <?php echo $ticketJs; ?>;
-        const recoverKey = 'paradise_play_room_recover_v4_' + autoRoomId;
+        const recoverKey = 'paradise_play_room_recover_v5_' + autoRoomId;
         const debug = new URLSearchParams(window.location.search).get('prdebug') === '1';
 
-        const getState = () => {
-            try { return JSON.parse(sessionStorage.getItem(recoverKey) || '{}') || {}; } catch (_) { return {}; }
-        };
+        if (debug) console.log('[ParadiseRP:play-auth]', window.__PARADISE_PLAY_AUTH__);
+
+        const getState = () => { try { return JSON.parse(sessionStorage.getItem(recoverKey) || '{}') || {}; } catch (_) { return {}; } };
         const setState = value => { try { sessionStorage.setItem(recoverKey, JSON.stringify(value)); } catch (_) {} };
 
         const forceFrameRoom = reason => {
