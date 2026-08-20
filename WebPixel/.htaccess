@@ -4,15 +4,15 @@ RewriteBase /
 # Favicon racine : le navigateur demande souvent /favicon.ico même quand Nitro est dans /nitro-last/.
 RewriteRule ^favicon\.ico$ nitro-last/favicon.ico [L,QSA,NC]
 
-# Laisser passer les vrais fichiers/dossiers
+# Laisser passer les vrais fichiers/dossiers.
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Fallback propre pour assets Nitro/SWF manquants : si le fichier demandé n'existe pas
-# à l'emplacement exact, on cherche une vraie copie locale via asset-resolver.php.
-# Ne crée pas de faux fichiers, ne masque pas les erreurs hors assets.
-RewriteRule ^((?:swf_pz|SWF)/.*\.(?:png|gif|jpe?g|webp|svg|ico|nitro|json|mp3|ogg|wav|ttf|otf|woff2?|eot))$ asset-resolver.php?u=/$1 [L,QSA,NC]
+# Fallback propre pour les assets Nitro/SWF manquants.
+# Important : ce rewrite passe uniquement pour les fichiers inexistants,
+# donc un vrai asset local garde toujours la priorité.
+RewriteRule ^(.+\.(?:png|gif|jpe?g|webp|svg|ico|nitro|json|mp3|ogg|wav|ttf|otf|woff2?|eot))$ asset-resolver.php?u=/$1 [L,QSA,NC,B]
 
 # URLs propres -> fichiers PHP correspondants
 RewriteCond %{DOCUMENT_ROOT}/$1.php -f
