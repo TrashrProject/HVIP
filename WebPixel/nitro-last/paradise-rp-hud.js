@@ -1,39 +1,24 @@
 (() => {
   'use strict';
 
-  const VERSION = '40.0.0-paradise-ui-system';
+  const VERSION = '30.0.0-chat-bridge';
   const HUD_ID = 'paradise-rp-hud';
-  const CORE_CSS_ID = 'paradise-rp-hud-css';
-  const COMPAT_CSS_ID = 'paradise-rp-dock-css';
-  const CORE_CSS_URL = './paradise-rp-hud.css?v=40';
-  const COMPAT_CSS_URL = './paradise-dock-redesign.css?v=10';
+  const STYLE_ID = 'paradise-rp-hud-css';
   const DATA_URL = '../rp-hud-data.php';
+  const CSS_URL = './paradise-rp-hud.css?v=30';
 
   const DEFAULT_DATA = {
     ok: false,
     username: 'ParadiseRP',
     role: 'Citoyen',
-    level: 1,
+    level: 7,
     look: '',
     avatar_url: '',
-    city: 'Paradise City',
-    district: 'Marina District',
-    organization: 'Aucune organisation',
-    reputation: 42,
-    playtime: '0h',
-    citizen_id: 'PR-0001',
     health: { current: 315, max: 500 },
     energy: { current: 31, max: 100 },
-    money: { credits: 789, pixels: 5000, cash: 1789, bank: 3420, savings: 12500, diamonds: 224 }
-  };
-
-  const state = {
-    data: DEFAULT_DATA,
-    active: null,
-    activeDock: 'home',
-    notices: [
-      { id: 'welcome', type: 'success', title: 'ParadiseRP', text: 'Nouvelle interface chargée.' }
-    ]
+    money: { credits: 789, pixels: 5000, cash: 1789, diamonds: 224 },
+    city: 'Paradise City',
+    time: ''
   };
 
   const safe = value => String(value ?? '')
@@ -43,381 +28,266 @@
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 
-  const n = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-  const fmt = value => new Intl.NumberFormat('fr-FR').format(n(value));
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, n(value)));
-  const percent = (current, max) => `${clamp((n(current) / Math.max(1, n(max))) * 100, 0, 100).toFixed(0)}%`;
-  const now = () => new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const number = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, number(value)));
+  const fmt = value => new Intl.NumberFormat('fr-FR').format(number(value));
+  const pct = (cur, max) => `${clamp(number(cur) / Math.max(1, number(max)) * 100, 0, 100)}%`;
+  const currentTime = () => new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-  const icons = {
-    user: '<svg viewBox="0 0 24 24"><path d="M12 12.2a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4Z"/><path d="M4.5 20c.8-4.1 3.3-6.2 7.5-6.2s6.7 2.1 7.5 6.2"/></svg>',
-    phone: '<svg viewBox="0 0 24 24"><rect x="7" y="2.7" width="10" height="18.6" rx="2.4"/><path d="M10.3 5.1h3.4M11 18h2"/></svg>',
-    bag: '<svg viewBox="0 0 24 24"><path d="M6.2 8.2h11.6l1 12H5.2l1-12Z"/><path d="M9 8.2V6a3 3 0 0 1 6 0v2.2"/></svg>',
-    bank: '<svg viewBox="0 0 24 24"><path d="M4 10h16L12 4 4 10Z"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8M4 20h16"/></svg>',
-    work: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 7V5.4c0-.8.5-1.4 1.4-1.4h3.2c.9 0 1.4.6 1.4 1.4V7M3 12h18M12 11v2"/></svg>',
+  const svg = {
+    user: '<svg viewBox="0 0 24 24"><path d="M12 12.2a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4Z"/><path d="M4.7 20.2c.8-4.1 3.2-6.1 7.3-6.1s6.5 2 7.3 6.1"/></svg>',
+    phone: '<svg viewBox="0 0 24 24"><rect x="7" y="2.7" width="10" height="18.6" rx="2.2"/><path d="M10.4 5h3.2M11 18.1h2"/></svg>',
+    id: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h4M7 14h5.5M15 10h2.7M15 14h2.7"/></svg>',
+    briefcase: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 7V5.3c0-.8.5-1.3 1.3-1.3h3.4c.8 0 1.3.5 1.3 1.3V7M3 12h18M12 11v2"/></svg>',
     home: '<svg viewBox="0 0 24 24"><path d="M3.8 11.2 12 4.2l8.2 7"/><path d="M6.2 10.4v9h11.6v-9"/><path d="M10 19.4v-5.1h4v5.1"/></svg>',
-    id: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M7 10h4M7 14h5.5M15 10h2.5M15 14h2.5"/></svg>',
-    cmd: '<svg viewBox="0 0 24 24"><path d="m5 7 5 5-5 5M12 17h7"/></svg>',
-    map: '<svg viewBox="0 0 24 24"><path d="m4 6 5-2 6 2 5-2v14l-5 2-6-2-5 2V6Z"/><path d="M9 4v14M15 6v14"/></svg>',
+    cart: '<svg viewBox="0 0 24 24"><path d="M4 5h2l1.5 9.3h9.7l2-6.4H7"/><circle cx="10" cy="19" r="1.3"/><circle cx="17" cy="19" r="1.3"/></svg>',
+    bag: '<svg viewBox="0 0 24 24"><path d="M6.2 8.2h11.6l1 12H5.2l1-12Z"/><path d="M9 8.2V6a3 3 0 0 1 6 0v2.2"/></svg>',
+    terminal: '<svg viewBox="0 0 24 24"><path d="m5 7 5 5-5 5M12 17h7"/></svg>',
+    pin: '<svg viewBox="0 0 24 24"><path d="M12 21s6-5.3 6-11a6 6 0 0 0-12 0c0 5.7 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>',
+    clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.6 2"/></svg>',
     heart: '<svg viewBox="0 0 24 24"><path d="M12 20s-7.4-4.3-8.6-9.2C2.6 7.4 4.6 5 7.4 5c1.7 0 3 1 4.6 2.8C13.6 6 14.9 5 16.6 5c2.8 0 4.8 2.4 4 5.8C19.4 15.7 12 20 12 20Z"/></svg>',
-    energy: '<svg viewBox="0 0 24 24"><path d="m13.2 2.8-8 11.1h6.2L10.8 21l8-11.1h-6.2l.6-7.1Z"/></svg>',
-    close: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
-    search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>',
-    send: '<svg viewBox="0 0 24 24"><path d="M3.5 20.5 21 12 3.5 3.5 6.4 11H14l-7.6 2-2.9 7.5Z"/></svg>',
-    bell: '<svg viewBox="0 0 24 24"><path d="M6.5 10.5a5.5 5.5 0 0 1 11 0v4.2l2 2.3h-15l2-2.3v-4.2Z"/><path d="M10 20h4"/></svg>'
+    bolt: '<svg viewBox="0 0 24 24"><path d="m13.2 2.8-8 11.1h6.2L10.8 21l8-11.1h-6.2l.6-7.1Z"/></svg>',
+    gem: '<svg viewBox="0 0 24 24"><path d="M6.8 4h10.4l3.3 4.7L12 20 3.5 8.7 6.8 4Z"/><path d="M4 8.7h16M8.5 4 12 20 15.5 4"/></svg>',
+    credit: '<svg viewBox="0 0 24 24"><rect x="3.8" y="6" width="16.4" height="12" rx="2"/><path d="M3.8 10h16.4"/></svg>',
+    star: '<svg viewBox="0 0 24 24"><path d="m12 3 2.5 5.3 5.8.8-4.2 4.1 1 5.8-5.1-2.8L6.9 19l1-5.8-4.2-4.1 5.8-.8L12 3Z"/></svg>',
+    group: '<svg viewBox="0 0 24 24"><path d="M9.7 11.3a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2Z"/><path d="M3.8 20c.7-4.4 2.7-6.5 5.9-6.5s5.2 2.1 5.9 6.5"/><path d="M16.3 12.2a3 3 0 1 0-1.1-5.8M15.8 14c2.2.3 3.7 2 4.4 5"/></svg>',
+    chat: '<svg viewBox="0 0 24 24"><path d="M4 6.5A3.5 3.5 0 0 1 7.5 3h9A3.5 3.5 0 0 1 20 6.5v4A3.5 3.5 0 0 1 16.5 14H11l-4.2 4.2V14A3.5 3.5 0 0 1 4 10.5v-4Z"/></svg>',
+    send: '<svg viewBox="0 0 24 24"><path d="M3.5 20.5 21 12 3.5 3.5 6.4 11H14l-7.6 2-2.9 7.5Z"/></svg>'
   };
 
-  const icon = name => `<span class="prp-icon prp-icon-${safe(name)}">${icons[name] || icons.home}</span>`;
+  const icon = name => `<span class="prhud-icon prhud-icon-${safe(name)}">${svg[name] || svg.home}</span>`;
 
-  const dock = [
-    { key: 'home', label: 'Accueil', icon: 'home', open: null },
-    { key: 'phone', label: 'Phone', icon: 'phone', open: 'phone', command: ':tel' },
-    { key: 'inventory', label: 'Inventaire', icon: 'bag', open: 'inventory' },
-    { key: 'bank', label: 'Banque', icon: 'bank', open: 'bank' },
-    { key: 'jobs', label: 'Métiers', icon: 'work', open: 'jobs', command: ':trabajar' },
-    { key: 'documents', label: 'Docs', icon: 'id', open: 'documents', command: ':id' },
-    { key: 'map', label: 'Ville', icon: 'map', open: 'city' },
-    { key: 'commands', label: 'Commandes', icon: 'cmd', open: 'commands', command: ':commands' }
+  const dockItems = [
+    { key: 'player', label: 'Joueur', icon: 'user', command: '' },
+    { key: 'phone', label: 'Téléphone', icon: 'phone', command: ':tel' },
+    { key: 'id', label: 'Carte ID', icon: 'id', command: ':id' },
+    { key: 'job', label: 'Métier', icon: 'briefcase', command: ':trabajar' },
+    { key: 'home', label: 'Accueil', icon: 'home', command: '' },
+    { key: 'shop', label: 'Boutique', icon: 'cart', command: '' },
+    { key: 'bag', label: 'Inventaire', icon: 'bag', command: '' },
+    { key: 'cmd', label: 'Commandes', icon: 'terminal', command: ':commands' }
   ];
 
-  const quickActions = [
-    { key: 'interact', label: 'Interagir', icon: 'user' },
-    { key: 'identity', label: 'Carte ID', icon: 'id', command: ':id' },
-    { key: 'work', label: 'Travail', icon: 'work', command: ':trabajar' },
-    { key: 'phone', label: 'Phone', icon: 'phone', command: ':tel' }
+  const railItems = [
+    { key: 'home', label: 'Accueil', icon: 'home', command: '' },
+    { key: 'bag', label: 'Inventaire', icon: 'bag', command: '' },
+    { key: 'job', label: 'Métier', icon: 'briefcase', command: ':trabajar' },
+    { key: 'map', label: 'Carte', icon: 'pin', command: '' },
+    { key: 'shop', label: 'Boutique', icon: 'cart', command: '' }
   ];
 
-  const commands = [
-    ['Général', ':commands', 'Ouvre ce menu des commandes.', ':commands'],
-    ['RP', ':me', 'Décrit une action RP visible en room.', ':me sort sa carte bancaire'],
-    ['Social', ':pay', 'Donner de l’argent à un joueur proche.', ':pay Nathan 250'],
-    ['Travail', ':trabajar', 'Afficher les actions métier disponibles.', ':trabajar'],
-    ['Documents', ':id', 'Afficher sa carte citoyenne.', ':id'],
-    ['Téléphone', ':tel', 'Ouvrir le ParadisePhone.', ':tel'],
-    ['Inventaire', ':give', 'Donner un objet à un joueur.', ':give eau Nathan 1']
-  ];
-
-  const jobs = [
-    ['Police', 'Sécurité publique', '650 $', 'Ouvert', 'Patrouille, amendes, enquêtes, interventions.'],
-    ['EMS', 'Urgences médicales', '590 $', 'Recrute', 'Soins, réanimation, transport hôpital.'],
-    ['Taxi', 'Mobilité ville', '420 $', 'Ouvert', 'Courses rapides dans Paradise City.'],
-    ['Restaurant', 'Commerce social', '380 $', '2 places', 'Service, cuisine, événements RP.'],
-    ['Immobilier', 'Villas & apparts', '520 $', 'Bientôt', 'Visites, contrats, locations.']
-  ];
-
-  const items = [
-    ['Clé Villa', 'documents', 'Accès Palm District', 1],
-    ['Burger', 'food', 'Restaure l’énergie', 3],
-    ['Bandage', 'care', 'Premier soin rapide', 2],
-    ['Radio Pro', 'tool', 'Communication métier', 1],
-    ['Carte SIM', 'tech', 'ParadisePhone', 1],
-    ['Contrat', 'documents', 'Document RP', 1]
-  ];
-
-  const ensureLink = (id, href) => {
-    let link = document.getElementById(id);
+  const ensureCss = () => {
+    let link = document.getElementById(STYLE_ID);
     if (!link) {
       link = document.createElement('link');
-      link.id = id;
+      link.id = STYLE_ID;
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    if (link.getAttribute('href') !== href) link.setAttribute('href', href);
+    if (!String(link.getAttribute('href') || '').includes('v=30')) link.href = CSS_URL;
   };
 
-  const ensureCss = () => {
-    ensureLink(CORE_CSS_ID, CORE_CSS_URL);
-    ensureLink(COMPAT_CSS_ID, COMPAT_CSS_URL);
-  };
-
-  const mergeData = raw => ({
-    ...DEFAULT_DATA,
-    ...(raw || {}),
-    health: { ...DEFAULT_DATA.health, ...(raw?.health || {}) },
-    energy: { ...DEFAULT_DATA.energy, ...(raw?.energy || {}) },
-    money: { ...DEFAULT_DATA.money, ...(raw?.money || {}) }
-  });
-
-  const avatarUrl = data => {
+  const getAvatarUrl = data => {
     const look = String(data?.look || '').trim();
-    if (look && /^[a-z0-9.\-]+$/i.test(look)) return `../avatar-image.php?figure=${encodeURIComponent(look)}&direction=2&head_direction=3&gesture=sml&action=std&size=l&headonly=1&hud=40`;
-    return String(data.avatar_url || '');
+    if (look && /^[a-z0-9.\-]+$/i.test(look)) {
+      return `../avatar-image.php?figure=${encodeURIComponent(look)}&direction=2&head_direction=3&gesture=sml&action=std&size=l&headonly=1&hud=1`;
+    }
+    return data.avatar_url ? String(data.avatar_url) : '';
   };
 
-  const nativeChat = () => {
-    const candidates = document.querySelectorAll('#root [data-pr-native-chat-live="1"], #root input[placeholder*="chat" i], #root textarea[placeholder*="chat" i], #root input[placeholder*="chatter" i], #root input[placeholder*="chatear" i]');
-    return [...candidates].find(el => el && el.id !== 'prhud-chat-input' && !el.disabled && !el.readOnly) || null;
-  };
-
-  const setNativeChatValue = value => {
-    const input = nativeChat();
-    if (!input) return false;
-    const text = String(value || '');
+  const getAccessibleDocuments = () => {
+    const docs = [document];
     try {
-      input.focus({ preventScroll: true });
-      const win = input.ownerDocument?.defaultView || window;
-      const proto = input instanceof win.HTMLTextAreaElement ? win.HTMLTextAreaElement.prototype : win.HTMLInputElement.prototype;
-      const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
-      if (setter) setter.call(input, text); else input.value = text;
-      input.dispatchEvent(new win.Event('input', { bubbles: true, composed: true }));
-      input.dispatchEvent(new win.Event('change', { bubbles: true, composed: true }));
-      input.setSelectionRange?.(text.length, text.length);
-      return true;
-    } catch (_) { return false; }
-  };
-
-  const notify = (type, title, text) => {
-    state.notices = [{ id: `${Date.now()}-${Math.random()}`, type, title, text }, ...state.notices].slice(0, 3);
-    render();
-    window.setTimeout(() => {
-      state.notices = state.notices.slice(0, 2);
-      render();
-    }, 3600);
-  };
-
-  const money = () => state.data.money || DEFAULT_DATA.money;
-
-  const statLine = (label, value, current, max, type) => `
-    <div class="prp-stat prp-stat-${safe(type)}">
-      <span>${safe(label)}</span><b>${safe(value)}</b>
-      <i><u style="width:${percent(current, max)}"></u></i>
-    </div>`;
-
-  const playerCard = () => {
-    const d = state.data;
-    const ava = avatarUrl(d);
-    return `
-      <section class="prp-player-card prp-card prp-float" aria-label="Personnage">
-        <div class="prp-avatar-scene">
-          <div class="prp-pixel-room"><span></span><i></i></div>
-          ${ava ? `<img src="${safe(ava)}" alt="${safe(d.username)}">` : '<strong>PR</strong>'}
-          <em>Niv. ${safe(d.level)}</em>
-        </div>
-        <div class="prp-player-info">
-          <div class="prp-player-head">
-            <span>Citoyen #${safe(d.citizen_id || 'PR-0001')}</span>
-            <strong>${safe(d.username)}</strong>
-            <small>${safe(d.role || 'Citoyen')} · ${safe(d.organization || 'Indépendant')}</small>
-          </div>
-          <div class="prp-stats">
-            ${statLine('Vie', `${fmt(d.health.current)}/${fmt(d.health.max)}`, d.health.current, d.health.max, 'health')}
-            ${statLine('Énergie', `${fmt(d.energy.current)}%`, d.energy.current, d.energy.max, 'energy')}
-          </div>
-        </div>
-      </section>`;
-  };
-
-  const topBar = () => `
-    <section class="prp-citybar prp-card" aria-label="Ville">
-      <span>${icon('map')} ${safe(state.data.city || 'Paradise City')}</span>
-      <b>${safe(state.data.district || 'Marina District')}</b>
-      <span>${now()}</span>
-    </section>`;
-
-  const wallet = () => `
-    <section class="prp-wallet" aria-label="Portefeuille">
-      <button type="button" data-open="bank"><small>Banque</small><b>${fmt(money().bank)}</b></button>
-      <button type="button" data-open="inventory"><small>Liquide</small><b>${fmt(money().cash)}</b></button>
-      <button type="button" data-open="bank" class="is-accent">+</button>
-    </section>`;
-
-  const quickBar = () => `
-    <nav class="prp-quickbar" aria-label="Actions rapides">
-      ${quickActions.map(a => `<button type="button" title="${safe(a.label)}" data-rp-action="${safe(a.key)}" ${a.command ? `data-command="${safe(a.command)}"` : ''}>${icon(a.icon)}<small>${safe(a.label)}</small></button>`).join('')}
-    </nav>`;
-
-  const objectives = () => `
-    <aside class="prp-objectives prp-card" aria-label="Progression RP">
-      <header><span>Agenda RP</span><b>Aujourd’hui</b></header>
-      <div><span>Présence en ville</span><i><u style="width:100%"></u></i><b>OK</b></div>
-      <div><span>Interactions RP</span><i><u style="width:66%"></u></i><b>2/3</b></div>
-      <div><span>Service métier</span><i><u style="width:18%"></u></i><b>6m</b></div>
-    </aside>`;
-
-  const dockBar = () => `
-    <nav class="prp-dock" aria-label="Menu principal">
-      ${dock.map(item => `<button type="button" class="${state.activeDock === item.key ? 'is-active' : ''}" data-dock="${safe(item.key)}" ${item.open ? `data-open="${safe(item.open)}"` : ''} ${item.command ? `data-command="${safe(item.command)}"` : ''}>${icon(item.icon)}<span>${safe(item.label)}</span></button>`).join('')}
-    </nav>`;
-
-  const notices = () => `
-    <div class="prp-notices" aria-live="polite">
-      ${state.notices.map(n => `<article class="prp-notice is-${safe(n.type)}"><b>${safe(n.title)}</b><span>${safe(n.text)}</span><i></i></article>`).join('')}
-    </div>`;
-
-  const phoneWindow = () => `
-    <div class="prp-phone">
-      <div class="prp-phone-status"><span>Paradise</span><b>${now()}</b><span>98%</span></div>
-      <div class="prp-phone-hero"><small>ParadisePhone</small><strong>Marina en ligne</strong><span>3 nouvelles activités RP proches</span></div>
-      <div class="prp-app-grid">
-        ${[
-          ['Messages','phone'], ['Banque','bank'], ['GPS','map'], ['Taxi','map'], ['Emploi','jobs'], ['Immo','city'], ['Social','user'], ['Réglages','cmd']
-        ].map(([label, open]) => `<button type="button" data-open="${safe(open)}"><i>${safe(label[0])}</i><span>${safe(label)}</span></button>`).join('')}
-      </div>
-    </div>`;
-
-  const bankWindow = () => `
-    <div class="prp-bank-grid">
-      <section class="prp-balance-card"><small>Solde principal</small><strong>${fmt(money().bank)} $</strong><span>IBAN RP · PR-${safe(state.data.citizen_id || '0001')}</span></section>
-      <section class="prp-balance-card is-savings"><small>Épargne</small><strong>${fmt(money().savings)} $</strong><span>Objectif Villa Paradise Bay</span></section>
-      <div class="prp-actions-row"><button data-rp-action="transfer">Envoyer</button><button data-rp-action="receive">Recevoir</button><button data-rp-action="history">Historique</button></div>
-      <section class="prp-list">
-        ${[
-          ['Restaurant Paradise','-42 $','neg'], ['Salaire Police','+650 $','pos'], ['Location appartement','-350 $','neg'], ['Prime activité RP','+125 $','pos']
-        ].map(t => `<p><span>${safe(t[0])}</span><b class="${safe(t[2])}">${safe(t[1])}</b></p>`).join('')}
-      </section>
-    </div>`;
-
-  const inventoryWindow = () => `
-    <div class="prp-inventory-grid">
-      <aside class="prp-inv-character"><div class="prp-mini-room"></div><strong>${safe(state.data.username)}</strong><span>Poids 8.4 / 25 kg</span></aside>
-      <section class="prp-items">
-        ${items.map((item, index) => `<button type="button" class="prp-item" data-item="${index}"><i>${safe(item[0].slice(0, 2).toUpperCase())}</i><b>${safe(item[0])}</b><small>x${safe(item[3])}</small></button>`).join('')}
-      </section>
-      <aside class="prp-item-info"><small>Objet sélectionné</small><strong>Clé Villa</strong><p>Accès Palm District. Utilisable devant une propriété liée.</p><button data-rp-action="use-item">Utiliser</button><button data-rp-action="give-item">Donner</button><button class="ghost" data-rp-action="drop-item">Jeter</button></aside>
-    </div>`;
-
-  const jobsWindow = () => `
-    <div class="prp-job-grid">
-      ${jobs.map(j => `<article class="prp-job-card"><div class="prp-job-scene"></div><small>${safe(j[1])}</small><strong>${safe(j[0])}</strong><p>${safe(j[4])}</p><footer><span>${safe(j[2])}</span><b>${safe(j[3])}</b></footer><button data-rp-action="apply-job">Postuler</button></article>`).join('')}
-    </div>`;
-
-  const documentsWindow = () => `
-    <div class="prp-docs-grid">
-      ${[
-        ['Carte citoyenne', state.data.citizen_id || 'PR-0001', state.data.username],
-        ['Permis conduire', 'VALIDE', 'Catégorie B'],
-        ['Badge métier', state.data.role || 'Citoyen', state.data.organization || 'Indépendant']
-      ].map(d => `<article class="prp-doc-card"><span>ParadiseRP</span><strong>${safe(d[0])}</strong><b>${safe(d[1])}</b><small>${safe(d[2])}</small></article>`).join('')}
-    </div>`;
-
-  const commandsWindow = () => `
-    <div class="prp-commands">
-      <label class="prp-search">${icon('search')}<input type="search" placeholder="Rechercher une commande, catégorie, exemple..."></label>
-      <section class="prp-command-list">
-        ${commands.map(c => `<article data-command-row="${safe(c.join(' ').toLowerCase())}"><small>${safe(c[0])}</small><button type="button" data-command="${safe(c[1])}">${safe(c[1])}</button><span>${safe(c[2])}</span><code>${safe(c[3])}</code></article>`).join('')}
-      </section>
-    </div>`;
-
-  const cityWindow = () => `
-    <div class="prp-city-grid">
-      ${[
-        ['Paradise Bay', 'Quartier riche · villas · marina'],
-        ['Downtown', 'Commerces · banque · mairie'],
-        ['Palm District', 'Résidentiel · agences · taxis'],
-        ['South Beach', 'Quartier populaire · business RP']
-      ].map(c => `<article><div class="prp-district-scene"></div><strong>${safe(c[0])}</strong><p>${safe(c[1])}</p><button data-rp-action="gps">Marquer GPS</button></article>`).join('')}
-    </div>`;
-
-  const profileWindow = () => `
-    <div class="prp-profile-grid">
-      <section class="prp-profile-main"><div class="prp-mini-room"></div><strong>${safe(state.data.username)}</strong><span>${safe(state.data.role)} · Réputation ${fmt(state.data.reputation)}</span></section>
-      <section class="prp-profile-stats"><p><span>ID citoyen</span><b>${safe(state.data.citizen_id)}</b></p><p><span>Organisation</span><b>${safe(state.data.organization)}</b></p><p><span>Temps de jeu</span><b>${safe(state.data.playtime)}</b></p><p><span>Banque</span><b>${fmt(money().bank)} $</b></p></section>
-    </div>`;
-
-  const windowBody = key => ({
-    phone: phoneWindow,
-    bank: bankWindow,
-    inventory: inventoryWindow,
-    jobs: jobsWindow,
-    documents: documentsWindow,
-    commands: commandsWindow,
-    city: cityWindow,
-    profile: profileWindow
-  }[key] || profileWindow)();
-
-  const windowTitle = key => ({
-    phone: ['ParadisePhone', 'Applications RP et services ville', 'phone'],
-    bank: ['Paradise Bank', 'Comptes personnels et transactions', 'bank'],
-    inventory: ['Inventaire', 'Objets, documents et actions rapides', 'bag'],
-    jobs: ['Métiers', 'Carrières, salaires et candidatures', 'work'],
-    documents: ['Documents RP', 'Identité, permis et badges', 'id'],
-    commands: ['Commandes', 'Recherche et exemples utilisables', 'cmd'],
-    city: ['Carte ville', 'Quartiers, GPS et zones RP', 'map'],
-    profile: ['Personnage', 'Identité citoyenne et progression', 'user']
-  }[key] || ['ParadiseRP', 'Interface RP', 'home']);
-
-  const windowLayer = () => {
-    if (!state.active) return '<div class="prp-window-layer"></div>';
-    const [title, subtitle, iconName] = windowTitle(state.active);
-    return `
-      <div class="prp-window-layer is-open">
-        <section class="prp-window ${state.active === 'phone' ? 'is-phone-window' : ''}" role="dialog" aria-label="${safe(title)}">
-          <header class="prp-window-head">
-            <div>${icon(iconName)}<span><b>${safe(title)}</b><small>${safe(subtitle)}</small></span></div>
-            <button type="button" data-close aria-label="Fermer">${icon('close')}</button>
-          </header>
-          <main>${windowBody(state.active)}</main>
-        </section>
-      </div>`;
-  };
-
-  const build = () => `
-    <div class="prp-shell" data-version="${safe(VERSION)}">
-      <div class="prp-skyline" aria-hidden="true"><span></span><i></i><b></b></div>
-      ${playerCard()}
-      ${topBar()}
-      ${wallet()}
-      ${quickBar()}
-      ${objectives()}
-      <section class="prp-pocket"><span>Cash <b>${fmt(money().cash)} $</b></span><span>Pixels <b>${fmt(money().pixels)}</b></span></section>
-      ${dockBar()}
-      <button class="prp-floating-profile" type="button" data-open="profile">${icon('user')} Profil</button>
-      ${windowLayer()}
-      ${notices()}
-    </div>`;
-
-  const attachCommandSearch = root => {
-    const input = root.querySelector('.prp-commands input');
-    if (!input) return;
-    input.addEventListener('input', () => {
-      const q = input.value.trim().toLowerCase();
-      root.querySelectorAll('[data-command-row]').forEach(row => {
-        row.hidden = q && !row.getAttribute('data-command-row').includes(q);
+      document.querySelectorAll('iframe').forEach(frame => {
+        try {
+          const doc = frame.contentDocument || frame.contentWindow?.document;
+          if (doc && !docs.includes(doc)) docs.push(doc);
+        } catch (_) {}
       });
+    } catch (_) {}
+    return docs;
+  };
+
+  const nativeInputs = () => {
+    const inputs = [];
+    for (const doc of getAccessibleDocuments()) {
+      try {
+        doc.querySelectorAll('input[type="text"], input:not([type]), textarea').forEach(el => {
+          if (!el || el.disabled || el.readOnly) return;
+          if (el.id === 'prhud-chat-input' || el.closest?.(`#${HUD_ID}`)) return;
+          inputs.push(el);
+        });
+      } catch (_) {}
+    }
+    return inputs.sort((a, b) => {
+      const score = el => {
+        let r = { left: 0, top: 0, width: 0, height: 0, bottom: 0 };
+        try { r = el.getBoundingClientRect(); } catch (_) {}
+        const hint = `${el.getAttribute('placeholder') || ''} ${el.className || ''} ${el.id || ''}`;
+        let s = 0;
+        if (/haz|chatear|chat|parler|message/i.test(hint)) s += 1000;
+        if (el.getAttribute('data-pr-native-chat-parked') === '1') s += 800;
+        if (r.bottom > 0) s += Math.round(r.bottom);
+        if (r.width > 10 && r.height > 10) s += 100;
+        return s;
+      };
+      return score(b) - score(a);
     });
+  };
+
+  const setNativeValue = (input, value) => {
+    const win = input.ownerDocument?.defaultView || window;
+    const proto = input instanceof win.HTMLTextAreaElement ? win.HTMLTextAreaElement.prototype : win.HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (setter) setter.call(input, value); else input.value = value;
+  };
+
+  const fireEnter = input => {
+    const doc = input.ownerDocument || document;
+    const win = doc.defaultView || window;
+    const opts = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true, composed: true };
+    ['keydown', 'keypress', 'keyup'].forEach(type => {
+      const event = new win.KeyboardEvent(type, opts);
+      input.dispatchEvent(event);
+      doc.dispatchEvent(new win.KeyboardEvent(type, opts));
+      win.dispatchEvent(new win.KeyboardEvent(type, opts));
+    });
+  };
+
+  const sendToNativeChat = text => {
+    const clean = String(text || '').trim();
+    if (!clean) return false;
+
+    const candidates = nativeInputs();
+    for (const input of candidates) {
+      try {
+        const doc = input.ownerDocument || document;
+        const win = doc.defaultView || window;
+        input.style.setProperty('display', 'block', 'important');
+        input.style.setProperty('visibility', 'visible', 'important');
+        input.style.setProperty('pointer-events', 'auto', 'important');
+        input.focus({ preventScroll: true });
+        setNativeValue(input, clean);
+        input.dispatchEvent(new win.Event('input', { bubbles: true, composed: true }));
+        input.dispatchEvent(new win.Event('change', { bubbles: true, composed: true }));
+        try { input.setSelectionRange(clean.length, clean.length); } catch (_) {}
+        fireEnter(input);
+        input.blur();
+        return true;
+      } catch (_) {}
+    }
+    return false;
+  };
+
+  const focusChat = value => {
+    const input = document.querySelector('#prhud-chat-input');
+    if (!input) return;
+    input.value = value || '';
+    input.focus();
+    if (value) input.select?.();
+  };
+
+  const runAction = item => {
+    if (!item) return;
+    focusChat(item.command || '');
+  };
+
+  const build = raw => {
+    const data = {
+      ...DEFAULT_DATA,
+      ...(raw || {}),
+      health: { ...DEFAULT_DATA.health, ...(raw?.health || {}) },
+      energy: { ...DEFAULT_DATA.energy, ...(raw?.energy || {}) },
+      money: { ...DEFAULT_DATA.money, ...(raw?.money || {}) }
+    };
+    const avatarUrl = getAvatarUrl(data);
+    const time = data.time || currentTime();
+
+    return `
+      <section class="prhud-player prhud-panel" aria-label="Joueur">
+        <span class="prhud-player-glow"></span>
+        <div class="prhud-avatar">
+          ${avatarUrl ? `<img src="${safe(avatarUrl)}" alt="${safe(data.username)}">` : `<span class="prhud-avatar-fallback">RP</span>`}
+          <b>${safe(data.level || 1)}</b>
+        </div>
+        <div class="prhud-player-main">
+          <strong>${safe(data.username)}</strong>
+          <span>${safe(data.role || 'Citoyen')}</span>
+          <div class="prhud-stat red">${icon('heart')}<em><u style="width:${pct(data.health.current, data.health.max)}"></u></em><small>${fmt(data.health.current)} / ${fmt(data.health.max)}</small></div>
+          <div class="prhud-stat blue">${icon('bolt')}<em><u style="width:${pct(data.energy.current, data.energy.max)}"></u></em><small>${fmt(data.energy.current)} / ${fmt(data.energy.max)}</small></div>
+        </div>
+        <div class="prhud-player-money"><span>${icon('credit')}$ ${fmt(data.money.cash)}</span><span>${icon('gem')}${fmt(data.money.diamonds)}</span></div>
+      </section>
+
+      <section class="prhud-meta">
+        <div class="prhud-chip prhud-panel">${icon('clock')}<b>${safe(time)}</b></div>
+        <div class="prhud-chip prhud-panel">${icon('pin')}<b>${safe(data.city || 'Paradise City')}</b></div>
+      </section>
+
+      <section class="prhud-money">
+        <div class="prhud-money-card prhud-panel credits">${icon('credit')}<strong>${fmt(data.money.credits)}</strong><span>Crédits</span><button type="button" data-prhud-action="credits">+</button></div>
+        <div class="prhud-money-card prhud-panel pixels"><i>H</i><strong>${fmt(data.money.pixels)}</strong><span>Pixels</span><button type="button" data-prhud-action="pixels">+</button></div>
+        <button class="prhud-menu" type="button" aria-label="Menu">≡</button>
+      </section>
+
+      <nav class="prhud-rail prhud-panel" aria-label="Navigation RP">
+        ${railItems.map(item => `<button type="button" class="prhud-rail-btn ${item.key === 'home' ? 'is-active' : ''}" data-prhud-key="${safe(item.key)}">${icon(item.icon)}<small>${safe(item.label)}</small></button>`).join('')}
+      </nav>
+
+      <section class="prhud-quests prhud-panel" aria-label="Quêtes quotidiennes">
+        <h3>${icon('star')}Quêtes quotidiennes</h3>
+        <p>${icon('user')}<span>Se connecter</span><b>1/1</b></p>
+        <p>${icon('group')}<span>Parler à 3 joueurs</span><b>2/3</b></p>
+        <p>${icon('briefcase')}<span>Travailler 30 min</span><b>0/30</b></p>
+      </section>
+
+      <form class="prhud-chat prhud-panel" id="prhud-chat-form">
+        <button class="prhud-chat-bubble" type="button" aria-label="Chat">${icon('chat')}</button>
+        <select class="prhud-chat-channel" aria-label="Canal"><option>Discussion générale</option><option>Chuchoter</option><option>Crier</option></select>
+        <input id="prhud-chat-input" class="prhud-chat-input" autocomplete="off" placeholder="Clique ici pour chatter...">
+        <button class="prhud-chat-emoji" type="button" aria-label="Emote">☻</button>
+        <button class="prhud-chat-send" type="submit" aria-label="Envoyer">${icon('send')}</button>
+      </form>
+
+      <nav class="prhud-dock prhud-panel" aria-label="Actions RP">
+        ${dockItems.map(item => `<button type="button" class="prhud-dock-btn ${item.key === 'home' ? 'is-home' : ''}" data-prhud-key="${safe(item.key)}">${icon(item.icon)}<small>${safe(item.label)}</small></button>`).join('')}
+      </nav>`;
   };
 
   const bind = root => {
-    root.querySelectorAll('[data-open]').forEach(el => {
-      el.addEventListener('click', event => {
-        event.preventDefault();
-        const key = el.getAttribute('data-open');
-        state.active = key;
-        const dockItem = dock.find(item => item.open === key);
-        if (dockItem) state.activeDock = dockItem.key;
-        render();
+    root.querySelectorAll('[data-prhud-key]').forEach(button => {
+      button.addEventListener('click', () => {
+        const key = button.getAttribute('data-prhud-key');
+        const item = dockItems.find(x => x.key === key) || railItems.find(x => x.key === key);
+        runAction(item);
       });
     });
-    root.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', () => { state.active = null; render(); }));
-    root.querySelectorAll('[data-command]').forEach(el => {
-      el.addEventListener('click', event => {
-        const command = el.getAttribute('data-command');
-        if (!command) return;
-        event.preventDefault();
-        setNativeChatValue(command);
-        notify('info', 'Commande prête', `${command} est placé dans le chat.`);
-      });
+
+    const form = root.querySelector('#prhud-chat-form');
+    const input = root.querySelector('#prhud-chat-input');
+    form?.addEventListener('submit', event => {
+      event.preventDefault();
+      const text = input?.value?.trim() || '';
+      if (!text) return;
+      const sent = sendToNativeChat(text);
+      if (sent) input.value = '';
+      else input.classList.add('is-error');
+      window.setTimeout(() => input?.classList?.remove('is-error'), 450);
+      input.focus();
     });
-    root.querySelectorAll('[data-dock]').forEach(el => {
-      el.addEventListener('click', () => {
-        state.activeDock = el.getAttribute('data-dock') || 'home';
-        if (state.activeDock === 'home') state.active = null;
-      });
-    });
-    root.querySelectorAll('[data-rp-action]').forEach(el => el.addEventListener('click', () => notify('success', 'Action RP', 'Action enregistrée côté interface.')));
-    attachCommandSearch(root);
   };
 
-  let root;
-  const render = () => {
+  let lastData = null;
+  const render = data => {
     ensureCss();
-    root = document.getElementById(HUD_ID);
+    let root = document.getElementById(HUD_ID);
     if (!root) {
       root = document.createElement('div');
       root.id = HUD_ID;
+      root.setAttribute('data-version', VERSION);
       document.body.appendChild(root);
     }
-    root.innerHTML = build();
+    root.innerHTML = build(data);
     bind(root);
   };
 
@@ -426,27 +296,27 @@
       const response = await fetch(`${DATA_URL}?_=${Date.now()}`, { cache: 'no-store', credentials: 'same-origin' });
       if (!response.ok) throw new Error(String(response.status));
       const json = await response.json();
-      if (json && typeof json === 'object') state.data = mergeData(json);
+      lastData = json && typeof json === 'object' ? json : DEFAULT_DATA;
     } catch (_) {
-      state.data = mergeData(state.data || DEFAULT_DATA);
+      lastData = lastData || DEFAULT_DATA;
     }
-    render();
+    render(lastData);
   };
 
   const boot = () => {
     ensureCss();
-    state.data = mergeData(DEFAULT_DATA);
-    render();
+    render(DEFAULT_DATA);
     loadData();
-    setInterval(loadData, 6000);
-    setInterval(() => { try { window.__paradiseNativeUiOffScan?.(); } catch (_) {} }, 1600);
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && state.active) { state.active = null; render(); }
-      if (event.key === 'F2') { event.preventDefault(); state.active = 'phone'; state.activeDock = 'phone'; render(); }
-      if (event.key === 'F3') { event.preventDefault(); state.active = 'inventory'; state.activeDock = 'inventory'; render(); }
-    });
+    setInterval(loadData, 5000);
+    setInterval(() => {
+      try { window.__paradiseNativeUiOffScan?.(); } catch (_) {}
+    }, 1500);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-  else boot();
+  try {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+    else boot();
+  } catch (error) {
+    console.error('[ParadiseRP HUD] boot failed', error);
+  }
 })();
