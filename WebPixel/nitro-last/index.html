@@ -87,10 +87,12 @@
       })();
       const query = new URLSearchParams(window.location.search);
       const paradiseRoomId = Number.parseInt(query.get("room") || "0", 10) || 0;
+      const paradiseSsoTicket = query.get("sso") || query.get("ticket") || query.get("auth") || query.get("s") || query.get("client") || null;
       window.__PARADISE_ROOM_ID__ = paradiseRoomId;
+      window.__PARADISE_SSO_PRESENT__ = !!paradiseSsoTicket;
       window.NitroConfig = {
         "config.urls": [ "./local-config.json", "./renderer-config.json", "./ui-config.json" ],
-        "sso.ticket": query.get("sso") || null,
+        "sso.ticket": paradiseSsoTicket,
         "forward.type": paradiseRoomId > 0 ? 2 : -1,
         "forward.id": paradiseRoomId,
         "friend.id": Number.parseInt(query.get("friend") || "0", 10) || 0,
@@ -98,6 +100,7 @@
         "roomenterad.habblet.enabled": false
       };
     </script>
+    <script src="./paradise-boot-auth-fix.js?v=86"></script>
     <script src="./paradise-nitro-stability.js?v=85"></script>
     <script src="./paradise-native-ui-off.js?v=9"></script>
     <script type="module" crossorigin src="./assets/index-9f9954ad.js"></script>
