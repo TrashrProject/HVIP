@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="./src/assets/index.css">
     <link rel="stylesheet" href="./paradise-rp-hud.css?v=80" id="paradise-rp-hud-css">
     <link rel="stylesheet" href="./paradise-dock-redesign.css?v=82" id="paradise-rp-polish-css">
+    <link rel="stylesheet" href="./paradise-chat-fix.css?v=83" id="paradise-rp-chat-fix-css">
     <style>
       html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #000; }
       #paradise-loader, .nitro-loading, [class*="nitro-loading" i] { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
@@ -104,9 +105,11 @@
     <div id="root" class="w-100 h-100"></div>
     <script src="./paradise-rp-hud.js?v=80" defer></script>
     <script src="./paradise-ui-polish.js?v=82" defer></script>
+    <script src="./paradise-chat-fix.js?v=83" defer></script>
     <script>
       window.setTimeout(function () {
         try { window.__paradiseNativeUiOffScan && window.__paradiseNativeUiOffScan(); } catch (_) {}
+        try { window.__ParadiseRPChatFix && window.__ParadiseRPChatFix.scan && window.__ParadiseRPChatFix.scan(); } catch (_) {}
       }, 300);
     </script>
   </body>
