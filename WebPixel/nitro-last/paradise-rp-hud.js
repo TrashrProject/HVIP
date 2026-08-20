@@ -1,82 +1,106 @@
 (() => {
   'use strict';
 
-  const VERSION = '30.0.0-chat-bridge';
+  const VERSION = '50.0.0-paradise-design-system';
   const HUD_ID = 'paradise-rp-hud';
   const STYLE_ID = 'paradise-rp-hud-css';
+  const CSS_URL = './paradise-rp-hud.css?v=50';
   const DATA_URL = '../rp-hud-data.php';
-  const CSS_URL = './paradise-rp-hud.css?v=30';
 
   const DEFAULT_DATA = {
     ok: false,
+    id: 0,
+    citizen_id: 'PR-00000',
     username: 'ParadiseRP',
     role: 'Citoyen',
-    level: 7,
+    motto: '',
+    level: 1,
     look: '',
     avatar_url: '',
-    health: { current: 315, max: 500 },
-    energy: { current: 31, max: 100 },
-    money: { credits: 789, pixels: 5000, cash: 1789, diamonds: 224 },
+    health: { current: 100, max: 100 },
+    energy: { current: 100, max: 100 },
+    money: { credits: 0, pixels: 0 },
     city: 'Paradise City',
     time: ''
   };
 
-  const safe = value => String(value ?? '')
+  const state = {
+    data: DEFAULT_DATA,
+    open: null,
+    phoneApp: 'home',
+    inventoryCategory: 'all',
+    commandQuery: '',
+    toast: null
+  };
+
+  const esc = value => String(value ?? '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 
-  const number = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, number(value)));
-  const fmt = value => new Intl.NumberFormat('fr-FR').format(number(value));
-  const pct = (cur, max) => `${clamp(number(cur) / Math.max(1, number(max)) * 100, 0, 100)}%`;
-  const currentTime = () => new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+  const fmt = value => new Intl.NumberFormat('fr-FR').format(num(value));
+  const now = () => new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-  const svg = {
-    user: '<svg viewBox="0 0 24 24"><path d="M12 12.2a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4Z"/><path d="M4.7 20.2c.8-4.1 3.2-6.1 7.3-6.1s6.5 2 7.3 6.1"/></svg>',
-    phone: '<svg viewBox="0 0 24 24"><rect x="7" y="2.7" width="10" height="18.6" rx="2.2"/><path d="M10.4 5h3.2M11 18.1h2"/></svg>',
-    id: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h4M7 14h5.5M15 10h2.7M15 14h2.7"/></svg>',
-    briefcase: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 7V5.3c0-.8.5-1.3 1.3-1.3h3.4c.8 0 1.3.5 1.3 1.3V7M3 12h18M12 11v2"/></svg>',
-    home: '<svg viewBox="0 0 24 24"><path d="M3.8 11.2 12 4.2l8.2 7"/><path d="M6.2 10.4v9h11.6v-9"/><path d="M10 19.4v-5.1h4v5.1"/></svg>',
-    cart: '<svg viewBox="0 0 24 24"><path d="M4 5h2l1.5 9.3h9.7l2-6.4H7"/><circle cx="10" cy="19" r="1.3"/><circle cx="17" cy="19" r="1.3"/></svg>',
-    bag: '<svg viewBox="0 0 24 24"><path d="M6.2 8.2h11.6l1 12H5.2l1-12Z"/><path d="M9 8.2V6a3 3 0 0 1 6 0v2.2"/></svg>',
-    terminal: '<svg viewBox="0 0 24 24"><path d="m5 7 5 5-5 5M12 17h7"/></svg>',
-    pin: '<svg viewBox="0 0 24 24"><path d="M12 21s6-5.3 6-11a6 6 0 0 0-12 0c0 5.7 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>',
-    clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.6 2"/></svg>',
-    heart: '<svg viewBox="0 0 24 24"><path d="M12 20s-7.4-4.3-8.6-9.2C2.6 7.4 4.6 5 7.4 5c1.7 0 3 1 4.6 2.8C13.6 6 14.9 5 16.6 5c2.8 0 4.8 2.4 4 5.8C19.4 15.7 12 20 12 20Z"/></svg>',
-    bolt: '<svg viewBox="0 0 24 24"><path d="m13.2 2.8-8 11.1h6.2L10.8 21l8-11.1h-6.2l.6-7.1Z"/></svg>',
-    gem: '<svg viewBox="0 0 24 24"><path d="M6.8 4h10.4l3.3 4.7L12 20 3.5 8.7 6.8 4Z"/><path d="M4 8.7h16M8.5 4 12 20 15.5 4"/></svg>',
-    credit: '<svg viewBox="0 0 24 24"><rect x="3.8" y="6" width="16.4" height="12" rx="2"/><path d="M3.8 10h16.4"/></svg>',
-    star: '<svg viewBox="0 0 24 24"><path d="m12 3 2.5 5.3 5.8.8-4.2 4.1 1 5.8-5.1-2.8L6.9 19l1-5.8-4.2-4.1 5.8-.8L12 3Z"/></svg>',
-    group: '<svg viewBox="0 0 24 24"><path d="M9.7 11.3a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2Z"/><path d="M3.8 20c.7-4.4 2.7-6.5 5.9-6.5s5.2 2.1 5.9 6.5"/><path d="M16.3 12.2a3 3 0 1 0-1.1-5.8M15.8 14c2.2.3 3.7 2 4.4 5"/></svg>',
-    chat: '<svg viewBox="0 0 24 24"><path d="M4 6.5A3.5 3.5 0 0 1 7.5 3h9A3.5 3.5 0 0 1 20 6.5v4A3.5 3.5 0 0 1 16.5 14H11l-4.2 4.2V14A3.5 3.5 0 0 1 4 10.5v-4Z"/></svg>',
-    send: '<svg viewBox="0 0 24 24"><path d="M3.5 20.5 21 12 3.5 3.5 6.4 11H14l-7.6 2-2.9 7.5Z"/></svg>'
+  const ICONS = {
+    user: '<path d="M12 12.1a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M4.8 20c.7-4 3.1-6 7.2-6s6.5 2 7.2 6"/>',
+    phone: '<rect x="7" y="2.8" width="10" height="18.4" rx="2.2"/><path d="M10.3 5.2h3.4M11 18.3h2"/>',
+    bag: '<path d="M6 8h12l1 12H5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+    wallet: '<path d="M4 6.5h14a2 2 0 0 1 2 2V18H5.5A2.5 2.5 0 0 1 3 15.5v-9A2.5 2.5 0 0 1 5.5 4H18"/><path d="M15 11h5v4h-5a2 2 0 0 1 0-4Z"/>',
+    briefcase: '<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12h18"/>',
+    command: '<path d="m5 7 5 5-5 5M12 17h7"/>',
+    id: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M5.7 15c.5-1.5 1.3-2.2 2.3-2.2s1.8.7 2.3 2.2M13 9h5M13 13h5"/>',
+    close: '<path d="m6 6 12 12M18 6 6 18"/>',
+    chevron: '<path d="m9 5 7 7-7 7"/>',
+    search: '<circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/>',
+    message: '<path d="M4 5h16v11H9l-5 4V5Z"/>',
+    contacts: '<circle cx="9" cy="9" r="3"/><path d="M3.5 19c.5-3.5 2.3-5.2 5.5-5.2s5 1.7 5.5 5.2M16 8h5M18.5 5.5v5"/>',
+    taxi: '<path d="M5 9h14l2 4v5H3v-5l2-4Z"/><path d="m7 9 1.5-4h7L17 9M6 18v2M18 18v2"/><circle cx="7" cy="14" r="1"/><circle cx="17" cy="14" r="1"/>',
+    home: '<path d="m3.5 11 8.5-7 8.5 7"/><path d="M6 10v10h12V10M10 20v-6h4v6"/>',
+    social: '<circle cx="12" cy="12" r="8"/><path d="M8 13.5c1 1.2 2.3 1.8 4 1.8s3-.6 4-1.8M9 9h.01M15 9h.01"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 0 0 .4 2l.1.1-2.8 2.8-.1-.1a1.8 1.8 0 0 0-2-.4 1.8 1.8 0 0 0-1.1 1.6v.2H10V21a1.8 1.8 0 0 0-1.1-1.6 1.8 1.8 0 0 0-2 .4l-.1.1L4 17.1l.1-.1a1.8 1.8 0 0 0 .4-2A1.8 1.8 0 0 0 3 13.9h-.2V10H3a1.8 1.8 0 0 0 1.5-1.1 1.8 1.8 0 0 0-.4-2L4 6.8 6.8 4l.1.1a1.8 1.8 0 0 0 2 .4A1.8 1.8 0 0 0 10 3V2.8h3.9V3a1.8 1.8 0 0 0 1.1 1.5 1.8 1.8 0 0 0 2-.4l.1-.1L20 6.8l-.1.1a1.8 1.8 0 0 0-.4 2A1.8 1.8 0 0 0 21 10h.2v3.9H21a1.8 1.8 0 0 0-1.6 1.1Z"/>',
+    map: '<path d="m4 6 5-2 6 2 5-2v14l-5 2-6-2-5 2V6Z"/><path d="M9 4v14M15 6v14"/>',
+    building: '<path d="M5 20V5h10v15M15 9h4v11M8 8h2M8 12h2M8 16h2"/>',
+    car: '<path d="M5 9h14l2 4v5H3v-5l2-4Z"/><path d="m7 9 1.5-4h7L17 9"/>',
+    shirt: '<path d="m8 4 4 2 4-2 4 3-3 4v9H7v-9L4 7l4-3Z"/>',
+    doc: '<path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h5M9 12h6M9 16h6"/>',
+    send: '<path d="M3 20 21 12 3 4l3 7h8l-8 2-3 7Z"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    check: '<path d="m5 12 4 4L19 6"/>',
+    alert: '<path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17h.01"/>',
+    spark: '<path d="m12 3 1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3ZM18.5 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/>'
   };
 
-  const icon = name => `<span class="prhud-icon prhud-icon-${safe(name)}">${svg[name] || svg.home}</span>`;
+  const icon = (name, cls = '') => `<span class="prx-icon ${cls}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ICONS.spark}</svg></span>`;
 
-  const dockItems = [
-    { key: 'player', label: 'Joueur', icon: 'user', command: '' },
-    { key: 'phone', label: 'Téléphone', icon: 'phone', command: ':tel' },
-    { key: 'id', label: 'Carte ID', icon: 'id', command: ':id' },
-    { key: 'job', label: 'Métier', icon: 'briefcase', command: ':trabajar' },
-    { key: 'home', label: 'Accueil', icon: 'home', command: '' },
-    { key: 'shop', label: 'Boutique', icon: 'cart', command: '' },
-    { key: 'bag', label: 'Inventaire', icon: 'bag', command: '' },
-    { key: 'cmd', label: 'Commandes', icon: 'terminal', command: ':commands' }
+  const APPS = [
+    ['messages', 'Messages', 'message'], ['contacts', 'Contacts', 'contacts'], ['bank', 'Banque', 'wallet'],
+    ['taxi', 'Taxi', 'taxi'], ['jobs', 'Emplois', 'briefcase'], ['housing', 'Immobilier', 'home'],
+    ['social', 'Paradise Social', 'social'], ['settings', 'Paramètres', 'settings']
   ];
 
-  const railItems = [
-    { key: 'home', label: 'Accueil', icon: 'home', command: '' },
-    { key: 'bag', label: 'Inventaire', icon: 'bag', command: '' },
-    { key: 'job', label: 'Métier', icon: 'briefcase', command: ':trabajar' },
-    { key: 'map', label: 'Carte', icon: 'pin', command: '' },
-    { key: 'shop', label: 'Boutique', icon: 'cart', command: '' }
+  const COMMANDS = [
+    { name: ':me', cat: 'RP', desc: 'Afficher une action RP.', syntax: ':me action' },
+    { name: ':give', cat: 'RP', desc: 'Donner un objet à un joueur.', syntax: ':give joueur objet' },
+    { name: ':pay', cat: 'Social', desc: "Donner de l'argent à un joueur.", syntax: ':pay joueur montant' },
+    { name: ':tel', cat: 'Général', desc: 'Ouvrir le téléphone.', syntax: ':tel' },
+    { name: ':id', cat: 'Général', desc: "Afficher votre carte d'identité.", syntax: ':id' },
+    { name: ':trabajar', cat: 'Travail', desc: 'Accéder aux actions de métier.', syntax: ':trabajar' },
+    { name: ':commands', cat: 'Général', desc: 'Ouvrir cette liste de commandes.', syntax: ':commands' }
   ];
 
-  const ensureCss = () => {
+  const JOBS = [
+    ['Police', 'Sécurité publique et interventions.', 'Service public'],
+    ['EMS', 'Soins, urgences et assistance médicale.', 'Service public'],
+    ['Taxi', 'Transport des citoyens dans Paradise City.', 'Ouvert'],
+    ['Restaurant', 'Service, cuisine et gestion commerciale.', 'Ouvert'],
+    ['Mécanicien', 'Entretien et assistance véhicules.', 'Ouvert'],
+    ['Immobilier', 'Vente, location et visites de biens.', 'Ouvert']
+  ];
+
+  function ensureCss() {
     let link = document.getElementById(STYLE_ID);
     if (!link) {
       link = document.createElement('link');
@@ -84,239 +108,331 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    if (!String(link.getAttribute('href') || '').includes('v=30')) link.href = CSS_URL;
-  };
+    if (!String(link.href || '').includes('v=50')) link.href = CSS_URL;
+  }
 
-  const getAvatarUrl = data => {
-    const look = String(data?.look || '').trim();
+  function avatarUrl(data = state.data) {
+    const look = String(data.look || '').trim();
     if (look && /^[a-z0-9.\-]+$/i.test(look)) {
-      return `../avatar-image.php?figure=${encodeURIComponent(look)}&direction=2&head_direction=3&gesture=sml&action=std&size=l&headonly=1&hud=1`;
+      return `../avatar-image.php?figure=${encodeURIComponent(look)}&direction=2&head_direction=3&gesture=sml&action=std&size=l&headonly=1&hud=50`;
     }
-    return data.avatar_url ? String(data.avatar_url) : '';
-  };
+    return String(data.avatar_url || '');
+  }
 
-  const getAccessibleDocuments = () => {
-    const docs = [document];
+  function nativeChat() {
     try {
-      document.querySelectorAll('iframe').forEach(frame => {
-        try {
-          const doc = frame.contentDocument || frame.contentWindow?.document;
-          if (doc && !docs.includes(doc)) docs.push(doc);
-        } catch (_) {}
-      });
-    } catch (_) {}
-    return docs;
-  };
+      return [...document.querySelectorAll('#root [data-pr-native-chat-live="1"], #root input[placeholder*="chat" i], #root textarea[placeholder*="chat" i]')]
+        .find(el => el && !el.disabled && !el.readOnly && !el.closest(`#${HUD_ID}`)) || null;
+    } catch (_) { return null; }
+  }
 
-  const nativeInputs = () => {
-    const inputs = [];
-    for (const doc of getAccessibleDocuments()) {
-      try {
-        doc.querySelectorAll('input[type="text"], input:not([type]), textarea').forEach(el => {
-          if (!el || el.disabled || el.readOnly) return;
-          if (el.id === 'prhud-chat-input' || el.closest?.(`#${HUD_ID}`)) return;
-          inputs.push(el);
-        });
-      } catch (_) {}
-    }
-    return inputs.sort((a, b) => {
-      const score = el => {
-        let r = { left: 0, top: 0, width: 0, height: 0, bottom: 0 };
-        try { r = el.getBoundingClientRect(); } catch (_) {}
-        const hint = `${el.getAttribute('placeholder') || ''} ${el.className || ''} ${el.id || ''}`;
-        let s = 0;
-        if (/haz|chatear|chat|parler|message/i.test(hint)) s += 1000;
-        if (el.getAttribute('data-pr-native-chat-parked') === '1') s += 800;
-        if (r.bottom > 0) s += Math.round(r.bottom);
-        if (r.width > 10 && r.height > 10) s += 100;
-        return s;
-      };
-      return score(b) - score(a);
+  function setNativeChat(text, focus = true) {
+    const input = nativeChat();
+    if (!input) return false;
+    try {
+      const win = input.ownerDocument?.defaultView || window;
+      const proto = input instanceof win.HTMLTextAreaElement ? win.HTMLTextAreaElement.prototype : win.HTMLInputElement.prototype;
+      const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+      if (setter) setter.call(input, String(text || '')); else input.value = String(text || '');
+      input.dispatchEvent(new win.Event('input', { bubbles: true, composed: true }));
+      input.dispatchEvent(new win.Event('change', { bubbles: true, composed: true }));
+      if (focus) input.focus({ preventScroll: true });
+      input.setSelectionRange?.(input.value.length, input.value.length);
+      return true;
+    } catch (_) { return false; }
+  }
+
+  function toast(title, body = '', tone = 'info') {
+    state.toast = { title, body, tone };
+    render();
+    window.clearTimeout(window.__prxToastTimer);
+    window.__prxToastTimer = window.setTimeout(() => { state.toast = null; render(); }, 3200);
+  }
+
+  const button = (label, iconName, action, variant = 'secondary', extra = '') =>
+    `<button type="button" class="prx-btn prx-btn-${variant}" data-prx-action="${esc(action)}" ${extra}>${iconName ? icon(iconName) : ''}<span>${esc(label)}</span></button>`;
+
+  function windowShell({ key, title, subtitle = '', iconName = 'spark', body, footer = '', cls = '' }) {
+    return `<section class="prx-window ${esc(cls)}" data-prx-window="${esc(key)}" role="dialog" aria-label="${esc(title)}">
+      <header class="prx-window-head">
+        <div class="prx-window-title">${icon(iconName)}<div><strong>${esc(title)}</strong>${subtitle ? `<small>${esc(subtitle)}</small>` : ''}</div></div>
+        <button type="button" class="prx-icon-btn" data-prx-action="close" aria-label="Fermer">${icon('close')}</button>
+      </header>
+      <div class="prx-window-body">${body}</div>
+      ${footer ? `<footer class="prx-window-foot">${footer}</footer>` : ''}
+    </section>`;
+  }
+
+  function profileView() {
+    const d = state.data;
+    const ava = avatarUrl(d);
+    const citizen = d.citizen_id || `PR-${String(num(d.id)).padStart(5, '0')}`;
+    return windowShell({
+      key: 'profile', title: 'Profil citoyen', subtitle: 'Informations publiques', iconName: 'user', cls: 'prx-window-profile',
+      body: `<div class="prx-profile-layout">
+        <div class="prx-avatar-stage"><span class="prx-pixel-sun"></span>${ava ? `<img src="${esc(ava)}" alt="${esc(d.username)}">` : '<b>RP</b>'}<small>Niveau ${fmt(d.level)}</small></div>
+        <div class="prx-profile-main">
+          <div class="prx-profile-name"><span><strong>${esc(d.username)}</strong><small>${esc(d.motto || 'Citoyen de Paradise City')}</small></span><em>${esc(d.role || 'Citoyen')}</em></div>
+          <div class="prx-info-list">
+            <p><span>Identité citoyenne</span><b>${esc(citizen)}</b></p>
+            <p><span>Statut</span><b>${esc(d.role || 'Citoyen')}</b></p>
+            <p><span>Réputation</span><b>Niveau ${fmt(d.level)}</b></p>
+            <p><span>Ville</span><b>${esc(d.city || 'Paradise City')}</b></p>
+          </div>
+        </div>
+      </div>`,
+      footer: `${button("Carte d'identité", 'id', 'command::id', 'secondary')}${button('Fermer', '', 'close', 'ghost')}`
     });
-  };
+  }
 
-  const setNativeValue = (input, value) => {
-    const win = input.ownerDocument?.defaultView || window;
-    const proto = input instanceof win.HTMLTextAreaElement ? win.HTMLTextAreaElement.prototype : win.HTMLInputElement.prototype;
-    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
-    if (setter) setter.call(input, value); else input.value = value;
-  };
-
-  const fireEnter = input => {
-    const doc = input.ownerDocument || document;
-    const win = doc.defaultView || window;
-    const opts = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true, composed: true };
-    ['keydown', 'keypress', 'keyup'].forEach(type => {
-      const event = new win.KeyboardEvent(type, opts);
-      input.dispatchEvent(event);
-      doc.dispatchEvent(new win.KeyboardEvent(type, opts));
-      win.dispatchEvent(new win.KeyboardEvent(type, opts));
+  function bankView() {
+    const d = state.data;
+    const citizen = d.citizen_id || `PR-${String(num(d.id)).padStart(5, '0')}`;
+    return windowShell({
+      key: 'bank', title: 'Paradise Bank', subtitle: 'Compte personnel', iconName: 'wallet', cls: 'prx-window-bank',
+      body: `<div class="prx-bank-hero"><small>Solde disponible</small><strong>${fmt(d.money?.credits)} $</strong><span>${esc(citizen)}</span></div>
+        <div class="prx-segment"><button class="is-active">Envoyer</button><button>Recevoir</button><button>Historique</button></div>
+        <form class="prx-transfer" data-prx-form="transfer">
+          <label><span>Destinataire</span><input name="player" autocomplete="off" placeholder="Nom du joueur"></label>
+          <label><span>Montant</span><input name="amount" inputmode="numeric" autocomplete="off" placeholder="250"></label>
+          <button class="prx-btn prx-btn-primary" type="submit">${icon('send')}<span>Préparer le paiement</span></button>
+        </form>
+        <div class="prx-note">Le paiement est préparé dans le chat pour vous laisser confirmer la commande en jeu.</div>`
     });
-  };
+  }
 
-  const sendToNativeChat = text => {
-    const clean = String(text || '').trim();
-    if (!clean) return false;
+  function inventoryView() {
+    const categories = [['all','Tout'],['food','Nourriture'],['clothes','Vêtements'],['tools','Outils'],['docs','Documents'],['keys','Clés']];
+    return windowShell({
+      key: 'inventory', title: 'Inventaire', subtitle: 'Vos objets', iconName: 'bag', cls: 'prx-window-inventory',
+      body: `<div class="prx-inventory-tabs">${categories.map(([k,l]) => `<button type="button" class="${state.inventoryCategory === k ? 'is-active' : ''}" data-prx-category="${k}">${esc(l)}</button>`).join('')}</div>
+        <div class="prx-inventory-grid">
+          <button class="prx-item is-featured" type="button"><span class="prx-item-sprite">🥤</span><b>Eau fraîche</b><small>x2</small></button>
+          <button class="prx-item" type="button"><span class="prx-item-sprite">🪪</span><b>Carte ID</b><small>Document</small></button>
+          <button class="prx-item" type="button"><span class="prx-item-sprite">🔑</span><b>Clés</b><small>x1</small></button>
+          <button class="prx-item prx-item-empty" type="button" disabled><span>+</span></button>
+          <button class="prx-item prx-item-empty" type="button" disabled><span>+</span></button>
+          <button class="prx-item prx-item-empty" type="button" disabled><span>+</span></button>
+        </div>
+        <div class="prx-item-detail"><div><strong>Sélectionnez un objet</strong><small>Les actions apparaîtront ici.</small></div><div class="prx-item-actions"><button disabled>Utiliser</button><button disabled>Donner</button><button disabled>Jeter</button></div></div>`
+    });
+  }
 
-    const candidates = nativeInputs();
-    for (const input of candidates) {
-      try {
-        const doc = input.ownerDocument || document;
-        const win = doc.defaultView || window;
-        input.style.setProperty('display', 'block', 'important');
-        input.style.setProperty('visibility', 'visible', 'important');
-        input.style.setProperty('pointer-events', 'auto', 'important');
-        input.focus({ preventScroll: true });
-        setNativeValue(input, clean);
-        input.dispatchEvent(new win.Event('input', { bubbles: true, composed: true }));
-        input.dispatchEvent(new win.Event('change', { bubbles: true, composed: true }));
-        try { input.setSelectionRange(clean.length, clean.length); } catch (_) {}
-        fireEnter(input);
-        input.blur();
-        return true;
-      } catch (_) {}
-    }
-    return false;
-  };
+  function jobsView() {
+    return windowShell({
+      key: 'jobs', title: 'Métiers', subtitle: 'Trouver une activité à Paradise City', iconName: 'briefcase', cls: 'prx-window-jobs',
+      body: `<div class="prx-job-list">${JOBS.map((j, i) => `<article class="prx-job-row"><div class="prx-job-art"><span>${['🚓','🚑','🚕','🍕','🔧','🏠'][i]}</span></div><div><strong>${esc(j[0])}</strong><p>${esc(j[1])}</p><small>${esc(j[2])}</small></div><button type="button" data-prx-action="command::trabajar">Voir</button></article>`).join('')}</div>`
+    });
+  }
 
-  const focusChat = value => {
-    const input = document.querySelector('#prhud-chat-input');
-    if (!input) return;
-    input.value = value || '';
-    input.focus();
-    if (value) input.select?.();
-  };
+  function commandsView() {
+    const q = state.commandQuery.trim().toLowerCase();
+    const list = COMMANDS.filter(c => !q || `${c.name} ${c.cat} ${c.desc}`.toLowerCase().includes(q));
+    return windowShell({
+      key: 'commands', title: 'Commandes', subtitle: 'Rechercher puis utiliser une commande', iconName: 'command', cls: 'prx-window-commands',
+      body: `<label class="prx-search">${icon('search')}<input data-prx-command-search autocomplete="off" placeholder="Rechercher une commande..." value="${esc(state.commandQuery)}"></label>
+        <div class="prx-command-list">${list.length ? list.map(c => `<button type="button" class="prx-command-row" data-prx-command="${esc(c.name)}"><code>${esc(c.name)}</code><span><strong>${esc(c.desc)}</strong><small>${esc(c.syntax)} · ${esc(c.cat)}</small></span>${icon('chevron')}</button>`).join('') : `<div class="prx-empty"><span>⌕</span><strong>Aucun résultat</strong><small>Essayez un autre mot-clé.</small></div>`}</div>`
+    });
+  }
 
-  const runAction = item => {
-    if (!item) return;
-    focusChat(item.command || '');
-  };
+  function docsView() {
+    const d = state.data;
+    const ava = avatarUrl(d);
+    const citizen = d.citizen_id || `PR-${String(num(d.id)).padStart(5, '0')}`;
+    return windowShell({
+      key: 'documents', title: 'Documents', subtitle: 'Identité et licences', iconName: 'doc', cls: 'prx-window-docs',
+      body: `<div class="prx-id-doc"><div class="prx-id-brand"><span class="prx-id-mark">P</span><div><b>PARADISE CITY</b><small>CARTE CITOYENNE</small></div></div><div class="prx-id-content">${ava ? `<img src="${esc(ava)}" alt="">` : '<span class="prx-id-avatar">RP</span>'}<div><strong>${esc(d.username)}</strong><p>${esc(citizen)}</p><small>${esc(d.role || 'Citoyen')}</small></div></div><div class="prx-id-footer">Valide · ParadiseRP</div></div>
+        <div class="prx-doc-list"><button>${icon('id')}<span><b>Carte citoyenne</b><small>Disponible</small></span>${icon('chevron')}</button><button disabled>${icon('car')}<span><b>Permis de conduire</b><small>Aucune donnée synchronisée</small></span></button><button disabled>${icon('briefcase')}<span><b>Licence professionnelle</b><small>Aucune donnée synchronisée</small></span></button></div>`
+    });
+  }
 
-  const build = raw => {
-    const data = {
-      ...DEFAULT_DATA,
-      ...(raw || {}),
-      health: { ...DEFAULT_DATA.health, ...(raw?.health || {}) },
-      energy: { ...DEFAULT_DATA.energy, ...(raw?.energy || {}) },
-      money: { ...DEFAULT_DATA.money, ...(raw?.money || {}) }
+  function simpleView(key) {
+    const views = {
+      housing: ['Immobilier', 'Trouvez votre prochain logement sans quitter votre room.', 'home', 'Aucun bien synchronisé', 'Les propriétés disponibles apparaîtront ici.'],
+      garage: ['Garage', 'Vos véhicules personnels.', 'car', 'Aucun véhicule synchronisé', 'Vos véhicules apparaîtront ici.'],
+      business: ['Entreprise', 'Gestion simple de votre activité.', 'building', 'Aucune entreprise liée', 'Rejoignez ou créez une entreprise pour accéder à cet espace.'],
+      wardrobe: ['Dressing', 'Votre style, sans catalogue surchargé.', 'shirt', 'Aucune tenue chargée', 'Les vêtements synchronisés apparaîtront ici.']
     };
-    const avatarUrl = getAvatarUrl(data);
-    const time = data.time || currentTime();
+    const v = views[key] || views.business;
+    return windowShell({ key, title: v[0], subtitle: v[1], iconName: v[2], body: `<div class="prx-empty prx-empty-large"><span>${icon(v[2])}</span><strong>${esc(v[3])}</strong><small>${esc(v[4])}</small></div>` });
+  }
 
-    return `
-      <section class="prhud-player prhud-panel" aria-label="Joueur">
-        <span class="prhud-player-glow"></span>
-        <div class="prhud-avatar">
-          ${avatarUrl ? `<img src="${safe(avatarUrl)}" alt="${safe(data.username)}">` : `<span class="prhud-avatar-fallback">RP</span>`}
-          <b>${safe(data.level || 1)}</b>
-        </div>
-        <div class="prhud-player-main">
-          <strong>${safe(data.username)}</strong>
-          <span>${safe(data.role || 'Citoyen')}</span>
-          <div class="prhud-stat red">${icon('heart')}<em><u style="width:${pct(data.health.current, data.health.max)}"></u></em><small>${fmt(data.health.current)} / ${fmt(data.health.max)}</small></div>
-          <div class="prhud-stat blue">${icon('bolt')}<em><u style="width:${pct(data.energy.current, data.energy.max)}"></u></em><small>${fmt(data.energy.current)} / ${fmt(data.energy.max)}</small></div>
-        </div>
-        <div class="prhud-player-money"><span>${icon('credit')}$ ${fmt(data.money.cash)}</span><span>${icon('gem')}${fmt(data.money.diamonds)}</span></div>
-      </section>
+  function phoneView() {
+    const d = state.data;
+    const app = state.phoneApp;
+    const appContent = app === 'home' ? `<div class="prx-phone-time"><strong>${esc(d.time || now())}</strong><small>Paradise City</small></div><div class="prx-phone-widget"><span>Solde</span><strong>${fmt(d.money?.credits)} $</strong></div><div class="prx-phone-apps">${APPS.map(a => `<button type="button" data-prx-phone-app="${a[0]}"><span>${icon(a[2])}</span><small>${esc(a[1])}</small></button>`).join('')}</div>` : `<div class="prx-phone-sub"><button type="button" data-prx-phone-app="home">‹ Accueil</button><div class="prx-empty"><span>${icon(APPS.find(a => a[0] === app)?.[2] || 'spark')}</span><strong>${esc(APPS.find(a => a[0] === app)?.[1] || 'Application')}</strong><small>${app === 'bank' ? `Solde actuel : ${fmt(d.money?.credits)} $` : 'Cette application utilise la nouvelle interface ParadiseRP.'}</small>${app === 'bank' ? button('Ouvrir la banque', 'wallet', 'open:bank', 'primary') : ''}${app === 'jobs' ? button('Voir les métiers', 'briefcase', 'open:jobs', 'primary') : ''}${app === 'housing' ? button('Voir les biens', 'home', 'open:housing', 'primary') : ''}</div></div>`;
+    return `<section class="prx-phone" role="dialog" aria-label="ParadisePhone"><div class="prx-phone-frame"><header><span>${esc(d.time || now())}</span><i></i><button type="button" data-prx-action="close">${icon('close')}</button></header><main>${appContent}</main><footer><button type="button" data-prx-phone-app="home"><span></span></button></footer></div></section>`;
+  }
 
-      <section class="prhud-meta">
-        <div class="prhud-chip prhud-panel">${icon('clock')}<b>${safe(time)}</b></div>
-        <div class="prhud-chip prhud-panel">${icon('pin')}<b>${safe(data.city || 'Paradise City')}</b></div>
-      </section>
+  function activeWindow() {
+    if (!state.open) return '';
+    if (state.open === 'phone') return phoneView();
+    if (state.open === 'profile') return profileView();
+    if (state.open === 'bank') return bankView();
+    if (state.open === 'inventory') return inventoryView();
+    if (state.open === 'jobs') return jobsView();
+    if (state.open === 'commands') return commandsView();
+    if (state.open === 'documents') return docsView();
+    return simpleView(state.open);
+  }
 
-      <section class="prhud-money">
-        <div class="prhud-money-card prhud-panel credits">${icon('credit')}<strong>${fmt(data.money.credits)}</strong><span>Crédits</span><button type="button" data-prhud-action="credits">+</button></div>
-        <div class="prhud-money-card prhud-panel pixels"><i>H</i><strong>${fmt(data.money.pixels)}</strong><span>Pixels</span><button type="button" data-prhud-action="pixels">+</button></div>
-        <button class="prhud-menu" type="button" aria-label="Menu">≡</button>
-      </section>
+  function hud() {
+    const d = state.data;
+    const ava = avatarUrl(d);
+    return `<div class="prx-shell" data-prx-version="${VERSION}">
+      <div class="prx-hud-top">
+        <button type="button" class="prx-player-pill" data-prx-action="open:profile">${ava ? `<img src="${esc(ava)}" alt="${esc(d.username)}">` : '<span class="prx-avatar-fallback">RP</span>'}<span><strong>${esc(d.username)}</strong><small>${esc(d.role || 'Citoyen')}</small></span>${icon('chevron')}</button>
+        <div class="prx-hud-status"><button type="button" data-prx-action="open:bank"><small>Solde</small><strong>${fmt(d.money?.credits)} $</strong></button><button type="button" data-prx-action="open:jobs"><small>Statut</small><strong>${esc(d.role || 'Citoyen')}</strong></button></div>
+      </div>
 
-      <nav class="prhud-rail prhud-panel" aria-label="Navigation RP">
-        ${railItems.map(item => `<button type="button" class="prhud-rail-btn ${item.key === 'home' ? 'is-active' : ''}" data-prhud-key="${safe(item.key)}">${icon(item.icon)}<small>${safe(item.label)}</small></button>`).join('')}
+      <nav class="prx-quickbar" aria-label="Actions rapides">
+        <button type="button" data-prx-action="open:phone" data-tip="Téléphone · F2">${icon('phone')}<small>Téléphone</small></button>
+        <button type="button" data-prx-action="open:inventory" data-tip="Inventaire · F3">${icon('bag')}<small>Inventaire</small></button>
+        <button type="button" class="prx-quick-main" data-prx-action="open:profile" data-tip="Profil · F4">${ava ? `<img src="${esc(ava)}" alt="">` : icon('user')}<small>Profil</small></button>
+        <button type="button" data-prx-action="open:jobs" data-tip="Métiers">${icon('briefcase')}<small>Métiers</small></button>
+        <button type="button" data-prx-action="open:commands" data-tip="Commandes · Ctrl+K">${icon('command')}<small>Commandes</small></button>
       </nav>
 
-      <section class="prhud-quests prhud-panel" aria-label="Quêtes quotidiennes">
-        <h3>${icon('star')}Quêtes quotidiennes</h3>
-        <p>${icon('user')}<span>Se connecter</span><b>1/1</b></p>
-        <p>${icon('group')}<span>Parler à 3 joueurs</span><b>2/3</b></p>
-        <p>${icon('briefcase')}<span>Travailler 30 min</span><b>0/30</b></p>
-      </section>
+      <button type="button" class="prx-more" data-prx-action="toggle-more" aria-label="Plus d'actions">${icon('plus')}</button>
+      <div class="prx-more-menu" hidden>
+        ${button('Banque', 'wallet', 'open:bank', 'ghost')}${button('Documents', 'doc', 'open:documents', 'ghost')}${button('Immobilier', 'home', 'open:housing', 'ghost')}${button('Garage', 'car', 'open:garage', 'ghost')}${button('Entreprise', 'building', 'open:business', 'ghost')}${button('Dressing', 'shirt', 'open:wardrobe', 'ghost')}
+      </div>
 
-      <form class="prhud-chat prhud-panel" id="prhud-chat-form">
-        <button class="prhud-chat-bubble" type="button" aria-label="Chat">${icon('chat')}</button>
-        <select class="prhud-chat-channel" aria-label="Canal"><option>Discussion générale</option><option>Chuchoter</option><option>Crier</option></select>
-        <input id="prhud-chat-input" class="prhud-chat-input" autocomplete="off" placeholder="Clique ici pour chatter...">
-        <button class="prhud-chat-emoji" type="button" aria-label="Emote">☻</button>
-        <button class="prhud-chat-send" type="submit" aria-label="Envoyer">${icon('send')}</button>
-      </form>
+      <div class="prx-layer ${state.open ? 'is-open' : ''}">${activeWindow()}</div>
+      ${state.toast ? `<div class="prx-toast prx-toast-${esc(state.toast.tone)}">${icon(state.toast.tone === 'success' ? 'check' : state.toast.tone === 'danger' ? 'alert' : 'spark')}<div><strong>${esc(state.toast.title)}</strong>${state.toast.body ? `<small>${esc(state.toast.body)}</small>` : ''}</div><i></i></div>` : ''}
+    </div>`;
+  }
 
-      <nav class="prhud-dock prhud-panel" aria-label="Actions RP">
-        ${dockItems.map(item => `<button type="button" class="prhud-dock-btn ${item.key === 'home' ? 'is-home' : ''}" data-prhud-key="${safe(item.key)}">${icon(item.icon)}<small>${safe(item.label)}</small></button>`).join('')}
-      </nav>`;
-  };
-
-  const bind = root => {
-    root.querySelectorAll('[data-prhud-key]').forEach(button => {
-      button.addEventListener('click', () => {
-        const key = button.getAttribute('data-prhud-key');
-        const item = dockItems.find(x => x.key === key) || railItems.find(x => x.key === key);
-        runAction(item);
-      });
-    });
-
-    const form = root.querySelector('#prhud-chat-form');
-    const input = root.querySelector('#prhud-chat-input');
-    form?.addEventListener('submit', event => {
-      event.preventDefault();
-      const text = input?.value?.trim() || '';
-      if (!text) return;
-      const sent = sendToNativeChat(text);
-      if (sent) input.value = '';
-      else input.classList.add('is-error');
-      window.setTimeout(() => input?.classList?.remove('is-error'), 450);
-      input.focus();
-    });
-  };
-
-  let lastData = null;
-  const render = data => {
+  function render() {
     ensureCss();
     let root = document.getElementById(HUD_ID);
     if (!root) {
       root = document.createElement('div');
       root.id = HUD_ID;
-      root.setAttribute('data-version', VERSION);
       document.body.appendChild(root);
     }
-    root.innerHTML = build(data);
-    bind(root);
-  };
+    root.innerHTML = hud();
+    bindRoot(root);
+    window.setTimeout(() => document.querySelector(`#${HUD_ID} [data-prx-command-search]`)?.focus(), state.open === 'commands' ? 40 : 0);
+  }
 
-  const loadData = async () => {
+  function open(key) {
+    state.open = key;
+    if (key === 'phone') state.phoneApp = 'home';
+    render();
+  }
+
+  function actionFrom(value, root) {
+    if (!value) return;
+    if (value === 'close') { state.open = null; render(); return; }
+    if (value.startsWith('open:')) { open(value.slice(5)); return; }
+    if (value.startsWith('command:')) {
+      const command = value.slice(8);
+      state.open = null;
+      render();
+      if (setNativeChat(command)) toast('Commande prête', 'Appuyez sur Entrée pour confirmer.', 'success');
+      else toast('Chat indisponible', "Le champ de discussion n'a pas été trouvé.", 'danger');
+      return;
+    }
+    if (value === 'toggle-more') {
+      const menu = root.querySelector('.prx-more-menu');
+      if (menu) menu.hidden = !menu.hidden;
+    }
+  }
+
+  function bindRoot(root) {
+    root.onclick = event => {
+      const actionButton = event.target.closest('[data-prx-action]');
+      if (actionButton) { actionFrom(actionButton.getAttribute('data-prx-action'), root); return; }
+      const appButton = event.target.closest('[data-prx-phone-app]');
+      if (appButton) { state.phoneApp = appButton.getAttribute('data-prx-phone-app') || 'home'; render(); return; }
+      const categoryButton = event.target.closest('[data-prx-category]');
+      if (categoryButton) { state.inventoryCategory = categoryButton.getAttribute('data-prx-category') || 'all'; render(); return; }
+      const commandButton = event.target.closest('[data-prx-command]');
+      if (commandButton) {
+        const command = commandButton.getAttribute('data-prx-command') || '';
+        state.open = null; render();
+        if (setNativeChat(command)) toast('Commande prête', command, 'success');
+        return;
+      }
+      if (event.target.classList.contains('prx-layer') && state.open && state.open !== 'phone') { state.open = null; render(); }
+    };
+
+    root.oninput = event => {
+      if (event.target.matches('[data-prx-command-search]')) {
+        state.commandQuery = event.target.value || '';
+        const list = root.querySelector('.prx-command-list');
+        if (!list) return;
+        const q = state.commandQuery.trim().toLowerCase();
+        const filtered = COMMANDS.filter(c => !q || `${c.name} ${c.cat} ${c.desc}`.toLowerCase().includes(q));
+        list.innerHTML = filtered.length ? filtered.map(c => `<button type="button" class="prx-command-row" data-prx-command="${esc(c.name)}"><code>${esc(c.name)}</code><span><strong>${esc(c.desc)}</strong><small>${esc(c.syntax)} · ${esc(c.cat)}</small></span>${icon('chevron')}</button>`).join('') : `<div class="prx-empty"><span>⌕</span><strong>Aucun résultat</strong><small>Essayez un autre mot-clé.</small></div>`;
+      }
+    };
+
+    root.onsubmit = event => {
+      const form = event.target.closest('[data-prx-form="transfer"]');
+      if (!form) return;
+      event.preventDefault();
+      const fd = new FormData(form);
+      const player = String(fd.get('player') || '').trim();
+      const amount = String(fd.get('amount') || '').replace(/[^0-9]/g, '');
+      if (!player || !amount || Number(amount) <= 0) { toast('Paiement incomplet', 'Renseignez un joueur et un montant.', 'danger'); return; }
+      state.open = null; render();
+      const command = `:pay ${player} ${amount}`;
+      if (setNativeChat(command)) toast('Paiement préparé', command, 'success');
+      else toast('Chat indisponible', 'Impossible de préparer le paiement.', 'danger');
+    };
+  }
+
+  function keyboard(event) {
+    if (event.key === 'Escape' && state.open) { event.preventDefault(); state.open = null; render(); return; }
+    if (event.key === 'F2') { event.preventDefault(); open('phone'); return; }
+    if (event.key === 'F3') { event.preventDefault(); open('inventory'); return; }
+    if (event.key === 'F4') { event.preventDefault(); open('profile'); return; }
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); open('commands'); return; }
+
+    const target = event.target;
+    if (event.key !== 'Enter' || !target || (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA')) return;
+    if (target.closest?.(`#${HUD_ID}`)) return;
+    const value = String(target.value || '').trim().toLowerCase();
+    const local = { ':commands': 'commands', ':tel': 'phone', ':phone': 'phone' }[value];
+    if (!local) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    setNativeChat('', false);
+    open(local);
+  }
+
+  async function loadData(first = false) {
     try {
       const response = await fetch(`${DATA_URL}?_=${Date.now()}`, { cache: 'no-store', credentials: 'same-origin' });
       if (!response.ok) throw new Error(String(response.status));
       const json = await response.json();
-      lastData = json && typeof json === 'object' ? json : DEFAULT_DATA;
+      state.data = {
+        ...DEFAULT_DATA,
+        ...(json || {}),
+        health: { ...DEFAULT_DATA.health, ...(json?.health || {}) },
+        energy: { ...DEFAULT_DATA.energy, ...(json?.energy || {}) },
+        money: { ...DEFAULT_DATA.money, ...(json?.money || {}) }
+      };
     } catch (_) {
-      lastData = lastData || DEFAULT_DATA;
+      if (first) state.data = DEFAULT_DATA;
     }
-    render(lastData);
-  };
-
-  const boot = () => {
-    ensureCss();
-    render(DEFAULT_DATA);
-    loadData();
-    setInterval(loadData, 5000);
-    setInterval(() => {
-      try { window.__paradiseNativeUiOffScan?.(); } catch (_) {}
-    }, 1500);
-  };
-
-  try {
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-    else boot();
-  } catch (error) {
-    console.error('[ParadiseRP HUD] boot failed', error);
+    const active = document.activeElement;
+    const typingWindow = active && active.closest?.(`#${HUD_ID} .prx-window, #${HUD_ID} .prx-phone`);
+    if (!typingWindow) render();
   }
+
+  function boot() {
+    ensureCss();
+    render();
+    loadData(true);
+    window.addEventListener('keydown', keyboard, true);
+    window.setInterval(() => loadData(false), 10000);
+    window.setInterval(() => { try { window.__paradiseNativeUiOffScan?.(); } catch (_) {} }, 1800);
+    window.__ParadiseRPUI = { open, toast, version: VERSION };
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })();
