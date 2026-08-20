@@ -1,0 +1,161 @@
+/* ParadiseRP chat cleanup v83
+   Correction ciblée : supprime la barre blanche native et empêche le double rendu du chat. */
+
+/* La fausse coque HUD reste uniquement un repère de layout invisible : le vrai input Nitro devient l'unique barre visible. */
+#paradise-rp-hud .pr4-chat-module,
+#paradise-rp-hud .pr4-polish-chat{
+  opacity:0!important;
+  visibility:hidden!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  pointer-events:auto!important;
+}
+#paradise-rp-hud .pr4-chat-module *,
+#paradise-rp-hud .pr4-polish-chat *{
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+/* Nettoyage agressif mais ciblé des wrappers Nitro qui créaient la ligne blanche horizontale. */
+html body #root [data-pr-native-chat-host="1"]{
+  background:transparent!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  backdrop-filter:none!important;
+  overflow:visible!important;
+  pointer-events:none!important;
+}
+html body #root [data-pr-native-chat-host="1"]::before,
+html body #root [data-pr-native-chat-host="1"]::after,
+html body #root [data-pr-native-chat-host="1"] *::before,
+html body #root [data-pr-native-chat-host="1"] *::after{
+  content:none!important;
+  display:none!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+html body #root [data-pr-native-chat-chrome="1"],
+html body #root [data-pr-native-chat-line="1"]{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+/* Le vrai champ Nitro est maintenant la seule barre de chat visible. */
+html body #root [data-pr-native-chat-live="1"],
+html body #root [data-pr-paradise-chat-input="1"],
+html body #root input[placeholder*="chat" i]:not(#prhud-chat-input),
+html body #root textarea[placeholder*="chat" i]:not(#prhud-chat-input),
+html body #root input[placeholder*="chatter" i]:not(#prhud-chat-input){
+  position:fixed!important;
+  left:50%!important;
+  bottom:25px!important;
+  transform:translateX(-50%)!important;
+  width:min(560px,calc(100vw - 830px))!important;
+  min-width:430px!important;
+  max-width:610px!important;
+  height:48px!important;
+  min-height:48px!important;
+  max-height:48px!important;
+  padding:0 52px 0 84px!important;
+  border-radius:14px!important;
+  border:1px solid rgba(255,255,255,.72)!important;
+  background:linear-gradient(180deg,rgba(248,250,244,.96),rgba(226,238,235,.94))!important;
+  box-shadow:0 16px 34px rgba(18,34,40,.22),inset 0 1px 0 rgba(255,255,255,.85)!important;
+  outline:none!important;
+  color:#17272d!important;
+  caret-color:var(--pr4-aqua,#65d7c5)!important;
+  font:850 13px/48px Inter,"Segoe UI",Arial,sans-serif!important;
+  z-index:2147483647!important;
+  pointer-events:auto!important;
+  opacity:1!important;
+  visibility:visible!important;
+  backdrop-filter:blur(10px)!important;
+}
+html body #root [data-pr-native-chat-live="1"]:focus,
+html body #root [data-pr-paradise-chat-input="1"]:focus,
+html body #root input[placeholder*="chat" i]:not(#prhud-chat-input):focus,
+html body #root textarea[placeholder*="chat" i]:not(#prhud-chat-input):focus,
+html body #root input[placeholder*="chatter" i]:not(#prhud-chat-input):focus{
+  width:min(610px,calc(100vw - 790px))!important;
+  border-color:rgba(101,215,197,.72)!important;
+  background:#fff!important;
+  box-shadow:0 18px 38px rgba(18,34,40,.25),0 0 0 3px rgba(101,215,197,.20)!important;
+}
+html body #root [data-pr-native-chat-live="1"]::placeholder,
+html body #root [data-pr-paradise-chat-input="1"]::placeholder,
+html body #root input[placeholder*="chat" i]:not(#prhud-chat-input)::placeholder,
+html body #root textarea[placeholder*="chat" i]:not(#prhud-chat-input)::placeholder,
+html body #root input[placeholder*="chatter" i]:not(#prhud-chat-input)::placeholder{
+  color:#6f858b!important;
+  opacity:1!important;
+}
+
+/* Badge LOCAL et icône dessinés une seule fois autour du vrai input. */
+#paradise-rp-hud .pr4-bottom::before{
+  content:"LOCAL"!important;
+  position:fixed!important;
+  left:calc(50% - min(280px, calc((100vw - 830px) / 2)) + 13px)!important;
+  bottom:34px!important;
+  width:56px!important;
+  height:30px!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:9px!important;
+  background:rgba(101,215,197,.22)!important;
+  color:#19796f!important;
+  font:950 10px/1 Inter,"Segoe UI",Arial,sans-serif!important;
+  letter-spacing:.04em!important;
+  z-index:2147483647!important;
+  pointer-events:none!important;
+}
+#paradise-rp-hud .pr4-bottom::after{
+  content:""!important;
+  position:fixed!important;
+  right:calc(50% - min(280px, calc((100vw - 830px) / 2)) + 14px)!important;
+  bottom:35px!important;
+  width:28px!important;
+  height:28px!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.72)!important;
+  box-shadow:inset 0 0 0 1px rgba(23,39,45,.06)!important;
+  z-index:2147483647!important;
+  pointer-events:none!important;
+}
+
+@media (max-width:1450px){
+  html body #root [data-pr-native-chat-live="1"],
+  html body #root [data-pr-paradise-chat-input="1"],
+  html body #root input[placeholder*="chat" i]:not(#prhud-chat-input){
+    width:470px!important;
+    min-width:370px!important;
+    padding-left:82px!important;
+  }
+  #paradise-rp-hud .pr4-bottom::before{left:calc(50% - 235px + 13px)!important;}
+  #paradise-rp-hud .pr4-bottom::after{right:calc(50% - 235px + 14px)!important;}
+}
+@media (max-width:1100px){
+  #paradise-rp-hud .pr4-bottom::before,
+  #paradise-rp-hud .pr4-bottom::after{display:none!important;}
+  html body #root [data-pr-native-chat-live="1"],
+  html body #root [data-pr-paradise-chat-input="1"],
+  html body #root input[placeholder*="chat" i]:not(#prhud-chat-input),
+  html body #root textarea[placeholder*="chat" i]:not(#prhud-chat-input){
+    left:10px!important;
+    right:10px!important;
+    bottom:90px!important;
+    transform:none!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    padding:0 14px!important;
+  }
+}
