@@ -1,12 +1,14 @@
 (() => {
   'use strict';
 
-  const VERSION = '85.0.0-debug-dump-fix';
+  const VERSION = '86.0.0-ws-close-diagnostics';
   const DEBUG = /(?:^|[?&])prdebug=1(?:&|$)/.test(location.search) || localStorage.getItem('pr_nitro_debug') === '1';
-  const MAX_ITEMS = 120;
+  const MAX_ITEMS = 160;
   const packets = [];
   const assetErrors = [];
   const roomEvents = [];
+  const socketCloses = [];
+  const socketErrors = [];
 
   const now = () => Math.round(performance.now());
   const push = (list, item) => {
@@ -18,11 +20,27 @@
   const warn = (scope, ...args) => console.warn(`[ParadiseRP:${scope}]`, ...args);
 
   function makeDump() {
+    const canvas = document.querySelector('#root canvas');
+    const root = document.querySelector('#root');
+    const rootText = String(root?.innerText || root?.textContent || '').slice(0, 500);
     return {
       version: VERSION,
       href: location.href,
       debug: DEBUG,
+      bootAuth: window.__PARADISE_BOOT_AUTH__ || null,
+      nitroConfig: {
+        room: window.NitroConfig?.['forward.id'] ?? null,
+        forwardType: window.NitroConfig?.['forward.type'] ?? null,
+        hasSso: !!window.NitroConfig?.['sso.ticket'],
+        ssoLength: window.NitroConfig?.['sso.ticket'] ? String(window.NitroConfig['sso.ticket']).length : 0,
+        socketUrl: window.NitroConfig?.['socket.url'] || null
+      },
+      canvas: canvas ? { width: canvas.width, height: canvas.height, clientWidth: canvas.clientWidth, clientHeight: canvas.clientHeight } : null,
+      rootChildren: root?.children?.length || 0,
+      rootText,
       packets: packets.slice(),
+      socketCloses: socketCloses.slice(),
+      socketErrors: socketErrors.slice(),
       assetErrors: assetErrors.slice(),
       roomEvents: roomEvents.slice(),
       lastDataViewReport: window.__ParadiseLastDataViewReport || null
@@ -36,16 +54,20 @@
       disable() { localStorage.removeItem('pr_nitro_debug'); location.reload(); },
       dump() {
         const report = makeDump();
-        try { console.table(report.packets.slice(-30)); } catch (error) { console.warn('[ParadiseRP] console.table failed', error); }
+        try { console.table(report.packets.slice(-40)); } catch (error) { console.warn('[ParadiseRP] console.table packets failed', error); }
+        try { console.table(report.socketCloses.slice(-10)); } catch (error) { console.warn('[ParadiseRP] console.table closes failed', error); }
         console.log('[ParadiseRP] Nitro debug dump', report);
         return report;
       },
       packets,
       assetErrors,
-      roomEvents
+      roomEvents,
+      socketCloses,
+      socketErrors
     };
     window.__ParadiseNitroDebug = api;
     window.__ParadiseRPDebug = api;
+    window.__ParadiseDebug = api;
     return api;
   }
 
@@ -99,8 +121,24 @@
       };
 
       socket.addEventListener('open', () => debugLog('ws', 'open', socket.__paradiseUrl));
-      socket.addEventListener('close', event => warn('ws-close', { code: event.code, reason: event.reason, wasClean: event.wasClean }));
-      socket.addEventListener('error', event => warn('ws-error', event));
+      socket.addEventListener('close', event => {
+        const item = {
+          at: now(),
+          url: socket.__paradiseUrl,
+          code: event.code,
+          reason: event.reason || '',
+          wasClean: event.wasClean,
+          packetsBeforeClose: packets.slice(-12),
+          bootAuth: window.__PARADISE_BOOT_AUTH__ || null
+        };
+        push(socketCloses, item);
+        warn('ws-close', item);
+      });
+      socket.addEventListener('error', event => {
+        const item = { at: now(), url: socket.__paradiseUrl, type: event.type || 'error' };
+        push(socketErrors, item);
+        warn('ws-error', item);
+      });
       return socket;
     }
 
@@ -152,10 +190,7 @@
         let next = value;
         try {
           const url = new URL(String(value || ''), location.href);
-          if (url.origin === location.origin && /\/(swf_pz|SWF|c_images)\//i.test(url.pathname)) {
-            // Keep the original URL first. If it fails, the error listener records it and the .htaccess resolver handles retry by path.
-            next = url.href;
-          }
+          if (url.origin === location.origin && /\/(swf_pz|SWF|c_images)\//i.test(url.pathname)) next = url.href;
         } catch (error) {
           warn('image-src-normalize-failed', error);
         }
@@ -191,6 +226,7 @@
         message: text,
         stack,
         lastPackets: packets.slice(-30),
+        socketCloses: socketCloses.slice(-10),
         assets404: assetErrors.slice(-30),
         roomEvents: roomEvents.slice(-30)
       };
@@ -232,5 +268,5 @@
   monitorRoomState();
 
   api.ready = true;
-  api.dump();
+  if (DEBUG) api.dump();
 })();
