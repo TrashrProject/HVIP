@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '86.0.0-ws-close-diagnostics';
+  const VERSION = '86.1.0-ab-native-websocket';
   const DEBUG = /(?:^|[?&])prdebug=1(?:&|$)/.test(location.search) || localStorage.getItem('pr_nitro_debug') === '1';
   const MAX_ITEMS = 160;
   const packets = [];
@@ -27,6 +27,7 @@
       version: VERSION,
       href: location.href,
       debug: DEBUG,
+      websocketMode: 'native-unpatched',
       bootAuth: window.__PARADISE_BOOT_AUTH__ || null,
       nitroConfig: {
         room: window.NitroConfig?.['forward.id'] ?? null,
@@ -50,6 +51,7 @@
   function installApi() {
     const api = {
       version: VERSION,
+      websocketMode: 'native-unpatched',
       enable() { localStorage.setItem('pr_nitro_debug', '1'); location.reload(); },
       disable() { localStorage.removeItem('pr_nitro_debug'); location.reload(); },
       dump() {
@@ -104,6 +106,8 @@
     return null;
   }
 
+  // IMPORTANT: intentionally retained for diffability, but NEVER invoked in this A/B build.
+  // Nitro must receive the browser-native WebSocket constructor and native send() method.
   function patchWebSocket() {
     if (!window.WebSocket || window.WebSocket.__paradisePatched) return;
     const NativeWebSocket = window.WebSocket;
@@ -152,7 +156,6 @@
     });
     ParadiseWebSocket.__paradisePatched = true;
     window.WebSocket = ParadiseWebSocket;
-    debugLog('ws', 'patched');
   }
 
   function patchFetchForAssets() {
@@ -260,7 +263,9 @@
     window.setInterval(tick, DEBUG ? 2000 : 6000);
   }
 
-  try { patchWebSocket(); } catch (error) { warn('ws-patch-failed', error); }
+  // A/B CONFIG B: DO NOT call patchWebSocket().
+  // This is the only intentional behavior change in this test build.
+  debugLog('ws', 'native WebSocket preserved; Paradise wrapper disabled');
   try { patchFetchForAssets(); } catch (error) { warn('fetch-patch-failed', error); }
   try { patchImageSources(); } catch (error) { warn('image-patch-failed', error); }
   listenForAssetErrors();
