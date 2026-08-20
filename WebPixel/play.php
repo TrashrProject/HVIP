@@ -75,13 +75,11 @@ function pr_play_resolve_room(mysqli $con, int $userId, string $username): int {
         unset($_SESSION['paradise_last_room_id']);
     }
 
-    // Personal apartment mapping from the RDP RP tables, validated against rooms when possible.
     if (pr_play_table_exists($con, 'play_apartments_owned')) {
         $roomId = pr_play_first_valid_room($con, "SELECT room_id FROM `play_apartments_owned` WHERE owner = '" . $userId . "' AND room_id > 0 ORDER BY id ASC LIMIT 10");
         if ($roomId > 0) return $roomId;
     }
 
-    // Fallback: try common owner columns from the real rooms table.
     if (pr_play_table_exists($con, 'rooms')) {
         $cols = pr_play_columns($con, 'rooms');
         $idCol = $cols['id'] ?? '';
@@ -110,7 +108,6 @@ function pr_play_resolve_room(mysqli $con, int $userId, string $username): int {
         }
     }
 
-    // Last fallback only if no rooms table exists.
     if (pr_play_table_exists($con, 'play_apartments_owned')) {
         $roomId = pr_play_first_valid_room($con, "SELECT room_id FROM `play_apartments_owned` WHERE room_id > 0 ORDER BY id ASC LIMIT 20");
         if ($roomId > 0) return $roomId;
@@ -119,31 +116,92 @@ function pr_play_resolve_room(mysqli $con, int $userId, string $username): int {
     return 0;
 }
 
+function pr_play_ticket_columns(mysqli $con): array {
+    $cols = pr_play_columns($con, 'users');
+    $candidates = ['auth_ticket', 'sso_ticket', 'sso', 'ticket', 'login_ticket', 'client_ticket', 'auth_token'];
+    $found = [];
+    foreach ($candidates as $candidate) {
+        if (isset($cols[$candidate])) $found[] = $cols[$candidate];
+    }
+    return array_values(array_unique($found));
+}
+
+function pr_play_read_ticket(mysqli $con, int $userId): string {
+    if ($userId <= 0 || !pr_play_table_exists($con, 'users')) return '';
+    $cols = pr_play_ticket_columns($con);
+    if (!$cols) return '';
+    $select = implode(',', array_map(fn($c) => '`' . $c . '`', $cols));
+    $res = @mysqli_query($con, "SELECT " . $select . " FROM `users` WHERE `id` = '" . $userId . "' LIMIT 1");
+    if (!$res) return '';
+    $row = mysqli_fetch_assoc($res);
+    if (!$row) return '';
+    foreach ($cols as $col) {
+        $value = trim((string)($row[$col] ?? ''));
+        if ($value !== '') return $value;
+    }
+    return '';
+}
+
+function pr_play_store_ticket(mysqli $con, int $userId, string $ticket): bool {
+    if ($userId <= 0 || $ticket === '' || !pr_play_table_exists($con, 'users')) return false;
+    $cols = pr_play_ticket_columns($con);
+    if (!$cols) return false;
+    $safeTicket = mysqli_real_escape_string($con, $ticket);
+    $sets = [];
+    foreach ($cols as $col) $sets[] = '`' . $col . "` = '" . $safeTicket . "'";
+    $sql = "UPDATE `users` SET " . implode(', ', $sets) . " WHERE `id` = '" . $userId . "' LIMIT 1";
+    return (bool) @mysqli_query($con, $sql);
+}
+
+function pr_play_fresh_ticket(): string {
+    try {
+        return 'PRP-' . bin2hex(random_bytes(16));
+    } catch (Throwable $e) {
+        return 'PRP-' . sha1(uniqid('', true) . mt_rand());
+    }
+}
+
+function pr_play_generate_ticket(mysqli $con, int $userId, $UserMG): string {
+    $ticket = '';
+
+    if (isset($UserMG) && method_exists($UserMG, 'GenerateAUTH') && $userId > 0) {
+        try { $ticket = trim((string)$UserMG->GenerateAUTH($userId)); }
+        catch (Throwable $e) {
+            try { $ticket = trim((string)$UserMG->GenerateAUTH()); }
+            catch (Throwable $ignored) { $ticket = ''; }
+        }
+    }
+
+    $dbTicket = pr_play_read_ticket($con, $userId);
+    if ($ticket === '' && $dbTicket !== '') $ticket = $dbTicket;
+    if ($ticket === '') $ticket = pr_play_fresh_ticket();
+
+    pr_play_store_ticket($con, $userId, $ticket);
+
+    if (isset($UserMG) && $userId > 0) {
+        try { if (method_exists($UserMG, 'GenerateMachineId')) $UserMG->GenerateMachineId($userId); } catch (Throwable $e) {}
+        try { if (method_exists($UserMG, 'CheckVIPStatus')) $UserMG->CheckVIPStatus($userId); } catch (Throwable $e) {}
+    }
+
+    return $ticket;
+}
+
 $con = $DB->Con();
 $userId = isset($UData['id']) ? (int)$UData['id'] : 0;
 $username = isset($UData['username']) ? (string)$UData['username'] : '';
 $autoRoomId = $userId > 0 ? pr_play_resolve_room($con, $userId, $username) : 0;
 if ($autoRoomId > 0) $_SESSION['paradise_last_room_id'] = $autoRoomId;
 
-// Important: /play must have an explicit room in the URL. Refreshing /play without room
-// was the main cause of the hotel view / screen without apartment.
 $currentRoom = (isset($_GET['room']) && is_numeric($_GET['room'])) ? (int)$_GET['room'] : 0;
 if ($autoRoomId > 0 && $currentRoom !== $autoRoomId) {
-    $target = rtrim(Config::$URL, '/') . '/play?room=' . $autoRoomId . '&_=' . time();
+    $target = rtrim(Config::$URL, '/') . '/play?room=' . $autoRoomId;
+    if (isset($_GET['prdebug']) && $_GET['prdebug'] === '1') $target .= '&prdebug=1';
+    $target .= '&_=' . time();
     header('Location: ' . $target, true, 302);
     exit;
 }
 
-$ticket = '';
-try {
-    if (isset($UserMG) && method_exists($UserMG, 'GenerateAUTH') && $userId > 0) {
-        $ticket = (string)$UserMG->GenerateAUTH($userId);
-        if (method_exists($UserMG, 'GenerateMachineId')) $UserMG->GenerateMachineId($userId);
-        if (method_exists($UserMG, 'CheckVIPStatus')) $UserMG->CheckVIPStatus($userId);
-    }
-} catch (Throwable $e) {
-    $ticket = '';
-}
+$ticket = pr_play_generate_ticket($con, $userId, $UserMG ?? null);
 
 if ($ticket === '') {
     ob_start();
@@ -155,10 +213,12 @@ if ($ticket === '') {
 $bootNonce = time() . '-' . mt_rand(1000, 9999);
 $nitroParams = ['sso' => $ticket, '_boot' => $bootNonce];
 if ($autoRoomId > 0) $nitroParams = ['room' => $autoRoomId, 'sso' => $ticket, '_boot' => $bootNonce];
+if (isset($_GET['prdebug']) && $_GET['prdebug'] === '1') $nitroParams['prdebug'] = '1';
 
 $nitroSrc = '/nitro-last/index.html?' . http_build_query($nitroParams, '', '&', PHP_QUERY_RFC3986);
 $nitroSrcHtml = htmlspecialchars($nitroSrc, ENT_QUOTES, 'UTF-8');
 $autoRoomJs = (int)$autoRoomId;
+$ticketJs = json_encode($ticket, JSON_UNESCAPED_SLASHES);
 ?>
 <!doctype html>
 <html lang="fr">
@@ -185,7 +245,9 @@ $autoRoomJs = (int)$autoRoomId;
         const frame = document.getElementById('RdpNitroFrame');
         const notice = document.getElementById('ParadiseBootNotice');
         const autoRoomId = <?php echo $autoRoomJs; ?>;
-        const recoverKey = 'paradise_play_room_recover_v3_' + autoRoomId;
+        const ticket = <?php echo $ticketJs; ?>;
+        const recoverKey = 'paradise_play_room_recover_v4_' + autoRoomId;
+        const debug = new URLSearchParams(window.location.search).get('prdebug') === '1';
 
         const getState = () => {
             try { return JSON.parse(sessionStorage.getItem(recoverKey) || '{}') || {}; } catch (_) { return {}; }
@@ -204,9 +266,10 @@ $autoRoomJs = (int)$autoRoomId;
             if (notice) notice.style.display = 'block';
             const next = new URL('/nitro-last/index.html', window.location.origin);
             next.searchParams.set('room', String(autoRoomId));
-            next.searchParams.set('sso', <?php echo json_encode($ticket, JSON_UNESCAPED_SLASHES); ?>);
+            next.searchParams.set('sso', ticket || '');
             next.searchParams.set('_boot', String(now));
             next.searchParams.set('force_room', String(state.count));
+            if (debug) next.searchParams.set('prdebug', '1');
             frame.src = next.toString();
         };
 
@@ -227,6 +290,7 @@ $autoRoomJs = (int)$autoRoomId;
                 try {
                     const url = new URL(frame.contentWindow.location.href);
                     if (url.searchParams.get('room') !== String(autoRoomId)) forceFrameRoom('missing_room_param');
+                    if (!url.searchParams.get('sso')) forceFrameRoom('missing_sso_param');
                 } catch (_) {}
             }, 1200);
             window.setTimeout(() => { const bad = inspect(); if (bad === 'hotel_view') forceFrameRoom(bad); }, 6500);
