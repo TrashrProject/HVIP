@@ -22,6 +22,10 @@
           DestinationFiles="$(TargetDir)extra\figuredata.xml"
           SkipUnchangedFiles="true"
           Condition="Exists('$(MSBuildThisFileDirectory)extra\figuredata.xml')" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)extra\taxibot.csv"
+          DestinationFiles="$(TargetDir)extra\taxibot.csv"
+          SkipUnchangedFiles="true"
+          Condition="Exists('$(MSBuildThisFileDirectory)extra\taxibot.csv')" />
     <Copy SourceFiles="$(MSBuildThisFileDirectory)config.example.ini"
           DestinationFiles="$(TargetDir)config.example.ini"
           SkipUnchangedFiles="true"
