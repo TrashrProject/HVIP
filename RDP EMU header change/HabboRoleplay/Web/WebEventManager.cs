@@ -98,22 +98,70 @@ namespace Plus.HabboHotel.Roleplay.Web
         /// </summary>
         private ConcurrentDictionary<string, IWebEvent> _webEvents;
 
-        string SSLProt = PlusEnvironment.GetConfig().data["ws.certificate.protocol"];
-        string SSLCer = PlusEnvironment.GetConfig().data["ws.certificate.pfx"];
-        string SSLCerPassword = PlusEnvironment.GetConfig().data["ws.certificate.password"];
+        private string SSLProt;
+        private string SSLCer;
+        private string SSLCerPassword;
+
+        private static string ReadWebConfig(string key, string defaultValue)
+        {
+            string value;
+
+            if (PlusEnvironment.GetConfig() == null || !PlusEnvironment.GetConfig().TryGetValue(key, out value))
+            {
+                Logging.WriteLine("[CONFIG WARNING] Missing optional key: " + key + " | Required by: WebEventManager | Using default: " + defaultValue, ConsoleColor.Yellow);
+                return defaultValue;
+            }
+
+            return value;
+        }
+
+        private static int ReadWebConfigInt(string key, int defaultValue)
+        {
+            string raw = ReadWebConfig(key, defaultValue.ToString());
+            int parsed;
+
+            if (!int.TryParse(raw, out parsed))
+            {
+                throw new InvalidOperationException("[CONFIG ERROR] Invalid integer for key: " + key + "\nFile: config.ini\nRequired by: WebEventManager\nValue: " + raw);
+            }
+
+            return parsed;
+        }
+
+        private static string RequireWebConfig(string key, string value)
+        {
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidOperationException("[CONFIG ERROR] Missing required key: " + key + "\nFile: config.ini\nRequired by: WebEventManager");
+            }
+
+            return value;
+        }
+
         /// <summary>
         /// WebEventManager function.
         /// </summary>
         public WebEventManager()
         {
-            string IP = PlusEnvironment.GetConfig().data["ws.tcp.bindip"];
-            int Port = int.Parse(PlusEnvironment.GetConfig().data["ws.tcp.port"]);
+            SSLProt = ReadWebConfig("ws.certificate.protocol", "ws").Trim().ToLower();
+            SSLCer = ReadWebConfig("ws.certificate.pfx", "").Trim();
+            SSLCerPassword = ReadWebConfig("ws.certificate.password", "").Trim();
+
+            if (SSLProt != "ws" && SSLProt != "wss")
+            {
+                throw new InvalidOperationException("[CONFIG ERROR] Invalid value for key: ws.certificate.protocol\nFile: config.ini\nRequired by: WebEventManager\nExpected: ws or wss\nValue: " + SSLProt);
+            }
+
+            string IP = ReadWebConfig("ws.tcp.bindip", "127.0.0.1").Trim();
+            int Port = ReadWebConfigInt("ws.tcp.port", 2087);
 
             this._webSocketServer = new WebSocketServer(SSLProt + "://" + IP + ":" + Port);
             this._webSockets = new ConcurrentDictionary<IWebSocketConnection, WebSocketUser>();
             this._webEvents = new ConcurrentDictionary<string, IWebEvent>();
             this.RegisterIncoming();
             this.RegisterOutgoing();
+
+            Logging.WriteLine("[BOOT] WebEventManager -> CONFIG OK (" + SSLProt + "://" + IP + ":" + Port + ")", ConsoleColor.Green);
         }
 
         /// <summary>
@@ -123,7 +171,17 @@ namespace Plus.HabboHotel.Roleplay.Web
         {
             if (SSLProt == "wss")
             {
-                this._webSocketServer.Certificate = new X509Certificate2(SSLCer, File.ReadAllText(SSLCerPassword));
+                RequireWebConfig("ws.certificate.pfx", SSLCer);
+                RequireWebConfig("ws.certificate.password", SSLCerPassword);
+
+                string certificatePassword = File.Exists(SSLCerPassword) ? File.ReadAllText(SSLCerPassword).Trim() : SSLCerPassword;
+
+                if (!File.Exists(SSLCer))
+                {
+                    throw new FileNotFoundException("[CONFIG ERROR] WebEvent SSL certificate not found.\nKey: ws.certificate.pfx\nFile: config.ini\nPath: " + SSLCer);
+                }
+
+                this._webSocketServer.Certificate = new X509Certificate2(SSLCer, certificatePassword);
                 this._webSocketServer.EnabledSslProtocols = SslProtocols.Tls12;
             }
 
