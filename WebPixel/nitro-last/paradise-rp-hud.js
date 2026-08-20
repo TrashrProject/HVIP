@@ -1,36 +1,41 @@
 (() => {
   'use strict';
 
-  const VERSION = '50.0.0-paradise-design-system';
+  const VERSION = '60.0.0-paradise-visual-v2';
   const HUD_ID = 'paradise-rp-hud';
   const STYLE_ID = 'paradise-rp-hud-css';
-  const CSS_URL = './paradise-rp-hud.css?v=50';
+  const CSS_URL = './paradise-rp-hud.css?v=60';
   const DATA_URL = '../rp-hud-data.php';
 
   const DEFAULT_DATA = {
     ok: false,
-    id: 0,
-    citizen_id: 'PR-00000',
-    username: 'ParadiseRP',
-    role: 'Citoyen',
-    motto: '',
-    level: 1,
+    id: 1024,
+    citizen_id: 'PR-01024',
+    username: 'Luiz',
+    role: 'Staff',
+    motto: 'Paradise City',
+    level: 7,
     look: '',
     avatar_url: '',
     health: { current: 100, max: 100 },
-    energy: { current: 100, max: 100 },
-    money: { credits: 0, pixels: 0 },
+    energy: { current: 82, max: 100 },
+    money: { credits: 500, pixels: 0, cash: 500, diamonds: 0 },
     city: 'Paradise City',
+    district: 'Downtown Marina',
     time: ''
   };
 
   const state = {
     data: DEFAULT_DATA,
     open: null,
+    more: false,
     phoneApp: 'home',
     inventoryCategory: 'all',
     commandQuery: '',
-    toast: null
+    commandCat: 'Toutes',
+    toast: null,
+    selectedItem: 'Téléphone Paradise',
+    notificationCenter: false
   };
 
   const esc = value => String(value ?? '')
@@ -42,7 +47,9 @@
 
   const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
   const fmt = value => new Intl.NumberFormat('fr-FR').format(num(value));
+  const pct = (cur, max) => `${Math.max(0, Math.min(100, (num(cur) / Math.max(1, num(max))) * 100))}%`;
   const now = () => new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const today = () => new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' });
 
   const ICONS = {
     user: '<path d="M12 12.1a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M4.8 20c.7-4 3.1-6 7.2-6s6.5 2 7.2 6"/>',
@@ -68,36 +75,57 @@
     doc: '<path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h5M9 12h6M9 16h6"/>',
     send: '<path d="M3 20 21 12 3 4l3 7h8l-8 2-3 7Z"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
+    bell: '<path d="M18 9a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/>',
     check: '<path d="m5 12 4 4L19 6"/>',
     alert: '<path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17h.01"/>',
-    spark: '<path d="m12 3 1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3ZM18.5 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/>'
+    spark: '<path d="m12 3 1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3ZM18.5 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/>',
+    heart: '<path d="M12 20s-7-4.4-8.3-9A4.8 4.8 0 0 1 12 6.7 4.8 4.8 0 0 1 20.3 11C19 15.6 12 20 12 20Z"/>',
+    bolt: '<path d="m13 2-8 12h6l-1 8 9-13h-6l1-7Z"/>',
+    copy: '<rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/>'
   };
 
   const icon = (name, cls = '') => `<span class="prx-icon ${cls}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ICONS.spark}</svg></span>`;
 
-  const APPS = [
-    ['messages', 'Messages', 'message'], ['contacts', 'Contacts', 'contacts'], ['bank', 'Banque', 'wallet'],
-    ['taxi', 'Taxi', 'taxi'], ['jobs', 'Emplois', 'briefcase'], ['housing', 'Immobilier', 'home'],
-    ['social', 'Paradise Social', 'social'], ['settings', 'Paramètres', 'settings']
+  const DOCK = [
+    { key: 'phone', label: 'Téléphone', icon: 'phone', action: 'open:phone', tone: 'aqua', keycap: 'F2' },
+    { key: 'inventory', label: 'Inventaire', icon: 'bag', action: 'open:inventory', tone: 'violet', keycap: 'F3' },
+    { key: 'profile', label: 'Profil', icon: 'user', action: 'open:profile', tone: 'lagoon', keycap: 'F4' },
+    { key: 'jobs', label: 'Métiers', icon: 'briefcase', action: 'open:jobs', tone: 'gold', keycap: 'M' },
+    { key: 'commands', label: 'Commandes', icon: 'command', action: 'open:commands', tone: 'blue', keycap: 'Ctrl K' }
+  ];
+
+  const PHONE_APPS = [
+    ['messages', 'Messages', 'message', 'blue', '3'], ['contacts', 'Contacts', 'contacts', 'aqua', ''], ['bank', 'Banque', 'wallet', 'green', ''],
+    ['taxi', 'Taxi', 'taxi', 'gold', ''], ['jobs', 'Jobs', 'briefcase', 'violet', ''], ['housing', 'Logements', 'home', 'coral', ''],
+    ['social', 'Social', 'social', 'pink', '1'], ['news', 'News', 'spark', 'red', ''], ['settings', 'Réglages', 'settings', 'gray', '']
   ];
 
   const COMMANDS = [
-    { name: ':me', cat: 'RP', desc: 'Afficher une action RP.', syntax: ':me action' },
-    { name: ':give', cat: 'RP', desc: 'Donner un objet à un joueur.', syntax: ':give joueur objet' },
-    { name: ':pay', cat: 'Social', desc: "Donner de l'argent à un joueur.", syntax: ':pay joueur montant' },
-    { name: ':tel', cat: 'Général', desc: 'Ouvrir le téléphone.', syntax: ':tel' },
-    { name: ':id', cat: 'Général', desc: "Afficher votre carte d'identité.", syntax: ':id' },
-    { name: ':trabajar', cat: 'Travail', desc: 'Accéder aux actions de métier.', syntax: ':trabajar' },
-    { name: ':commands', cat: 'Général', desc: 'Ouvrir cette liste de commandes.', syntax: ':commands' }
+    { name: ':me', cat: 'RP', title: 'Action RP', desc: 'Afficher une action autour de votre personnage.', syntax: ':me sort son badge' },
+    { name: ':pay', cat: 'Social', title: 'Payer un joueur', desc: "Préparer un paiement RP vers un joueur.", syntax: ':pay Luiz 500' },
+    { name: ':give', cat: 'RP', title: 'Donner un objet', desc: 'Transférer un objet à un autre citoyen.', syntax: ':give Luiz téléphone' },
+    { name: ':tel', cat: 'Général', title: 'Téléphone', desc: 'Ouvrir le ParadisePhone.', syntax: ':tel' },
+    { name: ':id', cat: 'Général', title: 'Carte identité', desc: 'Afficher la Paradise ID.', syntax: ':id' },
+    { name: ':trabajar', cat: 'Travail', title: 'Actions métier', desc: 'Ouvrir les interactions liées au métier.', syntax: ':trabajar' },
+    { name: ':commands', cat: 'Général', title: 'Command Center', desc: 'Ouvrir la liste des commandes.', syntax: ':commands' }
   ];
 
   const JOBS = [
-    ['Police', 'Sécurité publique et interventions.', 'Service public'],
-    ['EMS', 'Soins, urgences et assistance médicale.', 'Service public'],
-    ['Taxi', 'Transport des citoyens dans Paradise City.', 'Ouvert'],
-    ['Restaurant', 'Service, cuisine et gestion commerciale.', 'Ouvert'],
-    ['Mécanicien', 'Entretien et assistance véhicules.', 'Ouvert'],
-    ['Immobilier', 'Vente, location et visites de biens.', 'Ouvert']
+    ['Police', 'Police de Paradise', "Maintenez l'ordre et protégez les citoyens.", '650 $ / service', 'blue', '🚓'],
+    ['EMS', 'Paradise Medical', 'Soins, urgences et assistance médicale.', '620 $ / service', 'coral', '🚑'],
+    ['Taxi', 'Paradise Taxi', "Transport rapide dans toute l'île.", 'À la course', 'gold', '🚕'],
+    ['Restaurant', 'La Perle', 'Cuisine, service et business social.', 'Pourboires + salaire', 'green', '🍕'],
+    ['Mécano', 'Marina Garage', 'Réparations, tuning et dépannage.', 'À la mission', 'orange', '🔧'],
+    ['Immobilier', 'Paradise Realty', 'Villas, studios et quartiers premium.', 'Commission', 'aqua', '🏠']
+  ];
+
+  const ITEMS = [
+    ['Téléphone Paradise', 'Outil principal pour contacter les citoyens.', '📱', 'Équipement', 'x1'],
+    ['Carte ID', 'Document officiel Paradise City.', '🪪', 'Document', 'x1'],
+    ['Eau fraîche', 'Restaure un peu votre énergie.', '🥤', 'Nourriture', 'x2'],
+    ['Clés Villa', 'Accès propriété privée.', '🔑', 'Clés', 'x1'],
+    ['Badge Staff', 'Accréditation interne.', '🛡️', 'Badge', 'x1'],
+    ['Ticket Taxi', 'Course prioritaire.', '🎫', 'Divers', 'x3']
   ];
 
   function ensureCss() {
@@ -108,20 +136,20 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    if (!String(link.href || '').includes('v=50')) link.href = CSS_URL;
+    if (!String(link.href || '').includes('v=60')) link.href = CSS_URL;
   }
 
   function avatarUrl(data = state.data) {
     const look = String(data.look || '').trim();
     if (look && /^[a-z0-9.\-]+$/i.test(look)) {
-      return `../avatar-image.php?figure=${encodeURIComponent(look)}&direction=2&head_direction=3&gesture=sml&action=std&size=l&headonly=1&hud=50`;
+      return `../avatar-image.php?figure=${encodeURIComponent(look)}&direction=2&head_direction=3&gesture=sml&action=std&size=l&headonly=1&hud=60`;
     }
     return String(data.avatar_url || '');
   }
 
   function nativeChat() {
     try {
-      return [...document.querySelectorAll('#root [data-pr-native-chat-live="1"], #root input[placeholder*="chat" i], #root textarea[placeholder*="chat" i]')]
+      return [...document.querySelectorAll('#root [data-pr-native-chat-live="1"], #root input[placeholder*="chat" i], #root input[placeholder*="chatter" i], #root textarea[placeholder*="chat" i]')]
         .find(el => el && !el.disabled && !el.readOnly && !el.closest(`#${HUD_ID}`)) || null;
     } catch (_) { return null; }
   }
@@ -146,16 +174,16 @@
     state.toast = { title, body, tone };
     render();
     window.clearTimeout(window.__prxToastTimer);
-    window.__prxToastTimer = window.setTimeout(() => { state.toast = null; render(); }, 3200);
+    window.__prxToastTimer = window.setTimeout(() => { state.toast = null; render(); }, 3600);
   }
 
-  const button = (label, iconName, action, variant = 'secondary', extra = '') =>
-    `<button type="button" class="prx-btn prx-btn-${variant}" data-prx-action="${esc(action)}" ${extra}>${iconName ? icon(iconName) : ''}<span>${esc(label)}</span></button>`;
+  const btn = (label, iconName, action, variant = 'secondary', attrs = '') =>
+    `<button type="button" class="prx-btn prx-btn-${variant}" data-prx-action="${esc(action)}" ${attrs}>${iconName ? icon(iconName) : ''}<span>${esc(label)}</span></button>`;
 
-  function windowShell({ key, title, subtitle = '', iconName = 'spark', body, footer = '', cls = '' }) {
-    return `<section class="prx-window ${esc(cls)}" data-prx-window="${esc(key)}" role="dialog" aria-label="${esc(title)}">
+  function windowShell({ key, title, subtitle = '', iconName = 'spark', body, footer = '', cls = '', tone = 'aqua' }) {
+    return `<section class="prx-window prx-tone-${esc(tone)} ${esc(cls)}" data-prx-window="${esc(key)}" role="dialog" aria-label="${esc(title)}">
       <header class="prx-window-head">
-        <div class="prx-window-title">${icon(iconName)}<div><strong>${esc(title)}</strong>${subtitle ? `<small>${esc(subtitle)}</small>` : ''}</div></div>
+        <div class="prx-window-title"><span class="prx-window-icon">${icon(iconName)}</span><div><strong>${esc(title)}</strong>${subtitle ? `<small>${esc(subtitle)}</small>` : ''}</div></div>
         <button type="button" class="prx-icon-btn" data-prx-action="close" aria-label="Fermer">${icon('close')}</button>
       </header>
       <div class="prx-window-body">${body}</div>
@@ -168,20 +196,22 @@
     const ava = avatarUrl(d);
     const citizen = d.citizen_id || `PR-${String(num(d.id)).padStart(5, '0')}`;
     return windowShell({
-      key: 'profile', title: 'Profil citoyen', subtitle: 'Informations publiques', iconName: 'user', cls: 'prx-window-profile',
-      body: `<div class="prx-profile-layout">
-        <div class="prx-avatar-stage"><span class="prx-pixel-sun"></span>${ava ? `<img src="${esc(ava)}" alt="${esc(d.username)}">` : '<b>RP</b>'}<small>Niveau ${fmt(d.level)}</small></div>
-        <div class="prx-profile-main">
-          <div class="prx-profile-name"><span><strong>${esc(d.username)}</strong><small>${esc(d.motto || 'Citoyen de Paradise City')}</small></span><em>${esc(d.role || 'Citoyen')}</em></div>
-          <div class="prx-info-list">
-            <p><span>Identité citoyenne</span><b>${esc(citizen)}</b></p>
-            <p><span>Statut</span><b>${esc(d.role || 'Citoyen')}</b></p>
-            <p><span>Réputation</span><b>Niveau ${fmt(d.level)}</b></p>
-            <p><span>Ville</span><b>${esc(d.city || 'Paradise City')}</b></p>
+      key: 'profile', title: 'Profil Paradise', subtitle: 'Identité citoyenne et progression', iconName: 'user', tone: 'aqua', cls: 'prx-window-profile',
+      body: `<div class="prx-profile-v2">
+        <div class="prx-profile-stage"><div class="prx-mini-room"><span></span><i></i><b></b></div>${ava ? `<img src="${esc(ava)}" alt="${esc(d.username)}">` : '<strong>RP</strong>'}<em>Niv. ${fmt(d.level)}</em></div>
+        <div class="prx-profile-info">
+          <div class="prx-profile-heading"><div><strong>${esc(d.username)}</strong><small>@${esc(d.username)}</small></div><span>${icon('spark')} ${esc(d.role || 'Citoyen')}</span></div>
+          <div class="prx-profile-tabs"><button class="is-active">Identité</button><button>Documents</button><button>Badges</button></div>
+          <div class="prx-stat-grid">
+            <article><small>Citoyen</small><b>${esc(citizen)}</b></article>
+            <article><small>Métier</small><b>${esc(d.role || 'Citoyen')}</b></article>
+            <article><small>Solde</small><b>${fmt(d.money?.credits)} $</b></article>
+            <article><small>Réputation</small><b>${fmt(d.level)} étoiles</b></article>
           </div>
+          <div class="prx-badges"><span>🏝️ Paradise</span><span>🛡️ Staff</span><span>💬 Social</span></div>
         </div>
       </div>`,
-      footer: `${button("Carte d'identité", 'id', 'command::id', 'secondary')}${button('Fermer', '', 'close', 'ghost')}`
+      footer: `${btn('Documents', 'doc', 'open:documents', 'secondary')}${btn('Carte ID', 'id', 'command::id', 'primary')}`
     });
   }
 
@@ -189,49 +219,45 @@
     const d = state.data;
     const citizen = d.citizen_id || `PR-${String(num(d.id)).padStart(5, '0')}`;
     return windowShell({
-      key: 'bank', title: 'Paradise Bank', subtitle: 'Compte personnel', iconName: 'wallet', cls: 'prx-window-bank',
-      body: `<div class="prx-bank-hero"><small>Solde disponible</small><strong>${fmt(d.money?.credits)} $</strong><span>${esc(citizen)}</span></div>
-        <div class="prx-segment"><button class="is-active">Envoyer</button><button>Recevoir</button><button>Historique</button></div>
-        <form class="prx-transfer" data-prx-form="transfer">
-          <label><span>Destinataire</span><input name="player" autocomplete="off" placeholder="Nom du joueur"></label>
-          <label><span>Montant</span><input name="amount" inputmode="numeric" autocomplete="off" placeholder="250"></label>
-          <button class="prx-btn prx-btn-primary" type="submit">${icon('send')}<span>Préparer le paiement</span></button>
-        </form>
-        <div class="prx-note">Le paiement est préparé dans le chat pour vous laisser confirmer la commande en jeu.</div>`
+      key: 'bank', title: 'Paradise Bank', subtitle: 'Compte personnel sécurisé', iconName: 'wallet', tone: 'green', cls: 'prx-window-bank',
+      body: `<div class="prx-bank-layout">
+        <section class="prx-paradise-card"><small>Compte principal</small><strong>${fmt(d.money?.credits)} $</strong><span>${esc(citizen)}</span><i>Paradise Card</i></section>
+        <section class="prx-bank-actions"><button class="is-active">Envoyer</button><button>Recevoir</button><button>Historique</button></section>
+        <form class="prx-transfer" data-prx-form="transfer"><label><span>Joueur</span><input name="player" autocomplete="off" placeholder="Luiz"></label><label><span>Montant</span><input name="amount" inputmode="numeric" autocomplete="off" placeholder="500"></label><button class="prx-btn prx-btn-success" type="submit">${icon('send')}<span>Préparer</span></button></form>
+        <div class="prx-transactions"><p><span>Restaurant Paradise</span><b>-42 $</b></p><p><span>Salaire Staff</span><b class="plus">+500 $</b></p><p><span>Location appartement</span><b>-120 $</b></p></div>
+      </div>`
     });
   }
 
   function inventoryView() {
-    const categories = [['all','Tout'],['food','Nourriture'],['clothes','Vêtements'],['tools','Outils'],['docs','Documents'],['keys','Clés']];
+    const cats = [['all','Tout','bag'],['food','Nourriture','spark'],['clothes','Vêtements','shirt'],['tools','Outils','settings'],['docs','Docs','doc'],['keys','Clés','id']];
+    const selected = ITEMS.find(i => i[0] === state.selectedItem) || ITEMS[0];
     return windowShell({
-      key: 'inventory', title: 'Inventaire', subtitle: 'Vos objets', iconName: 'bag', cls: 'prx-window-inventory',
-      body: `<div class="prx-inventory-tabs">${categories.map(([k,l]) => `<button type="button" class="${state.inventoryCategory === k ? 'is-active' : ''}" data-prx-category="${k}">${esc(l)}</button>`).join('')}</div>
-        <div class="prx-inventory-grid">
-          <button class="prx-item is-featured" type="button"><span class="prx-item-sprite">🥤</span><b>Eau fraîche</b><small>x2</small></button>
-          <button class="prx-item" type="button"><span class="prx-item-sprite">🪪</span><b>Carte ID</b><small>Document</small></button>
-          <button class="prx-item" type="button"><span class="prx-item-sprite">🔑</span><b>Clés</b><small>x1</small></button>
-          <button class="prx-item prx-item-empty" type="button" disabled><span>+</span></button>
-          <button class="prx-item prx-item-empty" type="button" disabled><span>+</span></button>
-          <button class="prx-item prx-item-empty" type="button" disabled><span>+</span></button>
-        </div>
-        <div class="prx-item-detail"><div><strong>Sélectionnez un objet</strong><small>Les actions apparaîtront ici.</small></div><div class="prx-item-actions"><button disabled>Utiliser</button><button disabled>Donner</button><button disabled>Jeter</button></div></div>`
+      key: 'inventory', title: 'Inventaire', subtitle: '28 / 50 kg · organisation rapide', iconName: 'bag', tone: 'violet', cls: 'prx-window-inventory',
+      body: `<div class="prx-inv-layout">
+        <aside class="prx-inv-cats">${cats.map(c => `<button type="button" class="${state.inventoryCategory === c[0] ? 'is-active' : ''}" data-prx-category="${c[0]}">${icon(c[2])}<span>${esc(c[1])}</span></button>`).join('')}</aside>
+        <main class="prx-inv-main"><label class="prx-search prx-search-inv">${icon('search')}<input placeholder="Rechercher un objet..."></label><div class="prx-inv-grid">${ITEMS.map(item => `<button type="button" class="prx-item ${item[0] === selected[0] ? 'is-selected' : ''}" data-prx-item="${esc(item[0])}"><span>${item[2]}</span><b>${esc(item[0])}</b><small>${esc(item[4])}</small></button>`).join('')}</div></main>
+        <aside class="prx-item-panel"><div class="prx-big-sprite">${selected[2]}</div><strong>${esc(selected[0])}</strong><small>${esc(selected[3])}</small><p>${esc(selected[1])}</p><button>UTILISER</button><button>DONNER</button><button class="danger">JETER</button></aside>
+      </div>`
     });
   }
 
   function jobsView() {
     return windowShell({
-      key: 'jobs', title: 'Métiers', subtitle: 'Trouver une activité à Paradise City', iconName: 'briefcase', cls: 'prx-window-jobs',
-      body: `<div class="prx-job-list">${JOBS.map((j, i) => `<article class="prx-job-row"><div class="prx-job-art"><span>${['🚓','🚑','🚕','🍕','🔧','🏠'][i]}</span></div><div><strong>${esc(j[0])}</strong><p>${esc(j[1])}</p><small>${esc(j[2])}</small></div><button type="button" data-prx-action="command::trabajar">Voir</button></article>`).join('')}</div>`
+      key: 'jobs', title: 'Métiers Paradise', subtitle: 'Choisissez votre rôle dans la ville', iconName: 'briefcase', tone: 'gold', cls: 'prx-window-jobs',
+      body: `<div class="prx-jobs-grid">${JOBS.map(j => `<article class="prx-job-card prx-job-${esc(j[4])}"><div class="prx-job-scene"><span>${j[5]}</span><i></i></div><small>${esc(j[1])}</small><strong>${esc(j[0])}</strong><p>${esc(j[2])}</p><footer><b>${esc(j[3])}</b><button type="button" data-prx-action="command::trabajar">Découvrir →</button></footer></article>`).join('')}</div>`
     });
   }
 
   function commandsView() {
     const q = state.commandQuery.trim().toLowerCase();
-    const list = COMMANDS.filter(c => !q || `${c.name} ${c.cat} ${c.desc}`.toLowerCase().includes(q));
+    const cats = ['Toutes', 'Général', 'RP', 'Social', 'Travail', 'Admin'];
+    const list = COMMANDS.filter(c => (state.commandCat === 'Toutes' || c.cat === state.commandCat) && (!q || `${c.name} ${c.title} ${c.desc}`.toLowerCase().includes(q)));
     return windowShell({
-      key: 'commands', title: 'Commandes', subtitle: 'Rechercher puis utiliser une commande', iconName: 'command', cls: 'prx-window-commands',
-      body: `<label class="prx-search">${icon('search')}<input data-prx-command-search autocomplete="off" placeholder="Rechercher une commande..." value="${esc(state.commandQuery)}"></label>
-        <div class="prx-command-list">${list.length ? list.map(c => `<button type="button" class="prx-command-row" data-prx-command="${esc(c.name)}"><code>${esc(c.name)}</code><span><strong>${esc(c.desc)}</strong><small>${esc(c.syntax)} · ${esc(c.cat)}</small></span>${icon('chevron')}</button>`).join('') : `<div class="prx-empty"><span>⌕</span><strong>Aucun résultat</strong><small>Essayez un autre mot-clé.</small></div>`}</div>`
+      key: 'commands', title: 'Command Center', subtitle: 'Recherche rapide des commandes RP', iconName: 'command', tone: 'blue', cls: 'prx-window-commands',
+      body: `<label class="prx-command-search">${icon('search')}<input data-prx-command-search autocomplete="off" placeholder="Rechercher : :pay, téléphone, métier..." value="${esc(state.commandQuery)}"></label>
+        <div class="prx-command-tabs">${cats.map(c => `<button type="button" class="${state.commandCat === c ? 'is-active' : ''}" data-prx-command-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+        <div class="prx-command-list">${list.length ? list.map(c => `<article class="prx-command-row"><code>${esc(c.name)}</code><div><strong>${esc(c.title)}</strong><p>${esc(c.desc)}</p><small>${esc(c.syntax)} · ${esc(c.cat)}</small></div><button type="button" data-prx-command="${esc(c.name)}">${icon('copy')} Copier</button></article>`).join('') : `<div class="prx-empty"><span>⌕</span><strong>Aucun résultat</strong><small>Essayez une autre catégorie ou un autre mot-clé.</small></div>`}</div>`
     });
   }
 
@@ -240,28 +266,31 @@
     const ava = avatarUrl(d);
     const citizen = d.citizen_id || `PR-${String(num(d.id)).padStart(5, '0')}`;
     return windowShell({
-      key: 'documents', title: 'Documents', subtitle: 'Identité et licences', iconName: 'doc', cls: 'prx-window-docs',
-      body: `<div class="prx-id-doc"><div class="prx-id-brand"><span class="prx-id-mark">P</span><div><b>PARADISE CITY</b><small>CARTE CITOYENNE</small></div></div><div class="prx-id-content">${ava ? `<img src="${esc(ava)}" alt="">` : '<span class="prx-id-avatar">RP</span>'}<div><strong>${esc(d.username)}</strong><p>${esc(citizen)}</p><small>${esc(d.role || 'Citoyen')}</small></div></div><div class="prx-id-footer">Valide · ParadiseRP</div></div>
-        <div class="prx-doc-list"><button>${icon('id')}<span><b>Carte citoyenne</b><small>Disponible</small></span>${icon('chevron')}</button><button disabled>${icon('car')}<span><b>Permis de conduire</b><small>Aucune donnée synchronisée</small></span></button><button disabled>${icon('briefcase')}<span><b>Licence professionnelle</b><small>Aucune donnée synchronisée</small></span></button></div>`
+      key: 'documents', title: 'Documents RP', subtitle: 'Paradise ID, permis et badges', iconName: 'doc', tone: 'aqua', cls: 'prx-window-docs',
+      body: `<div class="prx-id-card"><header><b>PARADISE ID</b><span>${icon('spark')}</span></header><main>${ava ? `<img src="${esc(ava)}" alt="">` : '<i>RP</i>'}<div><strong>${esc(d.username)}</strong><p>${esc(citizen)}</p><small>${esc(d.role || 'Citoyen')}</small></div></main><footer>Valide · Paradise City</footer></div>
+        <div class="prx-docs-list"><button>${icon('id')}<span><b>Carte citoyenne</b><small>Disponible</small></span></button><button>${icon('car')}<span><b>Permis véhicule</b><small>Non synchronisé</small></span></button><button>${icon('briefcase')}<span><b>Badge professionnel</b><small>${esc(d.role || 'Citoyen')}</small></span></button></div>`
     });
   }
 
   function simpleView(key) {
     const views = {
-      housing: ['Immobilier', 'Trouvez votre prochain logement sans quitter votre room.', 'home', 'Aucun bien synchronisé', 'Les propriétés disponibles apparaîtront ici.'],
-      garage: ['Garage', 'Vos véhicules personnels.', 'car', 'Aucun véhicule synchronisé', 'Vos véhicules apparaîtront ici.'],
-      business: ['Entreprise', 'Gestion simple de votre activité.', 'building', 'Aucune entreprise liée', 'Rejoignez ou créez une entreprise pour accéder à cet espace.'],
-      wardrobe: ['Dressing', 'Votre style, sans catalogue surchargé.', 'shirt', 'Aucune tenue chargée', 'Les vêtements synchronisés apparaîtront ici.']
+      housing: ['Immobilier', 'Villas, appartements et studios Paradise.', 'home', '🏠', 'Aucun bien synchronisé'],
+      garage: ['Garage', 'Véhicules personnels et clés.', 'car', '🚗', 'Aucun véhicule synchronisé'],
+      business: ['Entreprise', 'Gestion de société et employés.', 'building', '🏢', 'Aucune entreprise liée'],
+      wardrobe: ['Dressing', 'Tenues et identité visuelle.', 'shirt', '👕', 'Aucune tenue synchronisée'],
+      notifications: ['Notifications', 'Historique des alertes Paradise.', 'bell', '🔔', 'Aucune notification récente']
     };
-    const v = views[key] || views.business;
-    return windowShell({ key, title: v[0], subtitle: v[1], iconName: v[2], body: `<div class="prx-empty prx-empty-large"><span>${icon(v[2])}</span><strong>${esc(v[3])}</strong><small>${esc(v[4])}</small></div>` });
+    const v = views[key] || views.housing;
+    return windowShell({ key, title: v[0], subtitle: v[1], iconName: v[2], tone: 'aqua', body: `<div class="prx-empty prx-empty-rich"><span>${v[3]}</span><strong>${esc(v[4])}</strong><small>Cette section est prête côté UI et attend les données serveur.</small></div>` });
   }
 
   function phoneView() {
     const d = state.data;
     const app = state.phoneApp;
-    const appContent = app === 'home' ? `<div class="prx-phone-time"><strong>${esc(d.time || now())}</strong><small>Paradise City</small></div><div class="prx-phone-widget"><span>Solde</span><strong>${fmt(d.money?.credits)} $</strong></div><div class="prx-phone-apps">${APPS.map(a => `<button type="button" data-prx-phone-app="${a[0]}"><span>${icon(a[2])}</span><small>${esc(a[1])}</small></button>`).join('')}</div>` : `<div class="prx-phone-sub"><button type="button" data-prx-phone-app="home">‹ Accueil</button><div class="prx-empty"><span>${icon(APPS.find(a => a[0] === app)?.[2] || 'spark')}</span><strong>${esc(APPS.find(a => a[0] === app)?.[1] || 'Application')}</strong><small>${app === 'bank' ? `Solde actuel : ${fmt(d.money?.credits)} $` : 'Cette application utilise la nouvelle interface ParadiseRP.'}</small>${app === 'bank' ? button('Ouvrir la banque', 'wallet', 'open:bank', 'primary') : ''}${app === 'jobs' ? button('Voir les métiers', 'briefcase', 'open:jobs', 'primary') : ''}${app === 'housing' ? button('Voir les biens', 'home', 'open:housing', 'primary') : ''}</div></div>`;
-    return `<section class="prx-phone" role="dialog" aria-label="ParadisePhone"><div class="prx-phone-frame"><header><span>${esc(d.time || now())}</span><i></i><button type="button" data-prx-action="close">${icon('close')}</button></header><main>${appContent}</main><footer><button type="button" data-prx-phone-app="home"><span></span></button></footer></div></section>`;
+    const content = app === 'home'
+      ? `<div class="prx-phone-wallpaper"><strong>${esc(d.time || now())}</strong><small>${esc(today())}</small><div><span>☀️ Paradise</span><b>${fmt(d.money?.credits)} $</b></div></div><div class="prx-phone-apps">${PHONE_APPS.map(a => `<button type="button" class="phone-${a[3]}" data-prx-phone-app="${a[0]}"><span>${icon(a[2])}${a[4] ? `<b>${a[4]}</b>` : ''}</span><small>${esc(a[1])}</small></button>`).join('')}</div>`
+      : `<div class="prx-phone-sub"><button type="button" data-prx-phone-app="home">‹ Accueil</button><div class="prx-empty"><span>${icon(PHONE_APPS.find(a => a[0] === app)?.[2] || 'spark')}</span><strong>${esc(PHONE_APPS.find(a => a[0] === app)?.[1] || 'Application')}</strong><small>${app === 'bank' ? `Solde actuel : ${fmt(d.money?.credits)} $` : 'Application prête pour les données serveur.'}</small>${app === 'bank' ? btn('Ouvrir banque', 'wallet', 'open:bank', 'success') : ''}${app === 'jobs' ? btn('Voir métiers', 'briefcase', 'open:jobs', 'warning') : ''}${app === 'housing' ? btn('Voir logements', 'home', 'open:housing', 'primary') : ''}</div></div>`;
+    return `<section class="prx-phone" role="dialog" aria-label="ParadisePhone"><div class="prx-phone-frame"><span class="prx-phone-side"></span><header><span>${esc(d.time || now())}</span><i></i><button type="button" data-prx-action="close">${icon('close')}</button></header><main>${content}</main><footer><button type="button" data-prx-phone-app="home"><span></span></button></footer></div></section>`;
   }
 
   function activeWindow() {
@@ -279,25 +308,29 @@
   function hud() {
     const d = state.data;
     const ava = avatarUrl(d);
+    const active = state.open || 'profile';
     return `<div class="prx-shell" data-prx-version="${VERSION}">
-      <div class="prx-hud-top">
-        <button type="button" class="prx-player-pill" data-prx-action="open:profile">${ava ? `<img src="${esc(ava)}" alt="${esc(d.username)}">` : '<span class="prx-avatar-fallback">RP</span>'}<span><strong>${esc(d.username)}</strong><small>${esc(d.role || 'Citoyen')}</small></span>${icon('chevron')}</button>
-        <div class="prx-hud-status"><button type="button" data-prx-action="open:bank"><small>Solde</small><strong>${fmt(d.money?.credits)} $</strong></button><button type="button" data-prx-action="open:jobs"><small>Statut</small><strong>${esc(d.role || 'Citoyen')}</strong></button></div>
-      </div>
+      <section class="prx-player-card" data-prx-action="open:profile">
+        <div class="prx-avatar-ring">${ava ? `<img src="${esc(ava)}" alt="${esc(d.username)}">` : '<b>RP</b>'}<i></i></div>
+        <div class="prx-player-content"><div class="prx-player-name"><strong>${esc(d.username)}</strong><span>${icon('spark')} ${esc(d.role || 'Citoyen')}</span></div><small>● En ligne · ${esc(d.district || d.city || 'Paradise')}</small><div class="prx-health"><em style="width:${pct(d.health?.current, d.health?.max)}"></em></div></div>
+        <button type="button">${icon('chevron')}</button>
+      </section>
 
-      <nav class="prx-quickbar" aria-label="Actions rapides">
-        <button type="button" data-prx-action="open:phone" data-tip="Téléphone · F2">${icon('phone')}<small>Téléphone</small></button>
-        <button type="button" data-prx-action="open:inventory" data-tip="Inventaire · F3">${icon('bag')}<small>Inventaire</small></button>
-        <button type="button" class="prx-quick-main" data-prx-action="open:profile" data-tip="Profil · F4">${ava ? `<img src="${esc(ava)}" alt="">` : icon('user')}<small>Profil</small></button>
-        <button type="button" data-prx-action="open:jobs" data-tip="Métiers">${icon('briefcase')}<small>Métiers</small></button>
-        <button type="button" data-prx-action="open:commands" data-tip="Commandes · Ctrl+K">${icon('command')}<small>Commandes</small></button>
+      <section class="prx-zone-chip"><span>🌴</span><strong>${esc(d.district || 'Paradise Downtown')}</strong></section>
+
+      <section class="prx-status-bar"><button type="button" class="money" data-prx-action="open:bank"><span>💵</span><small>Solde</small><strong>${fmt(d.money?.credits ?? d.money?.cash)} $</strong></button><button type="button" class="role" data-prx-action="open:jobs"><span>🛡️</span><small>Statut</small><strong>${esc(d.role || 'Citoyen')}</strong></button><button type="button" class="time"><span>☀️</span><small>Heure</small><strong>${esc(d.time || now())}</strong></button><button type="button" class="notif" data-prx-action="open:notifications">${icon('bell')}<b>2</b></button></section>
+
+      <nav class="prx-dock" aria-label="Dock ParadiseRP">
+        ${DOCK.map(item => `<button type="button" class="prx-dock-btn prx-${item.tone} ${active === item.key ? 'is-active' : ''}" data-prx-action="${esc(item.action)}" data-tip="${esc(item.label)} · ${esc(item.keycap)}"><span>${icon(item.icon)}<i></i></span><strong>${esc(item.label)}</strong><small>${esc(item.keycap)}</small></button>`).join('')}
       </nav>
 
-      <button type="button" class="prx-more" data-prx-action="toggle-more" aria-label="Plus d'actions">${icon('plus')}</button>
-      <div class="prx-more-menu" hidden>
-        ${button('Banque', 'wallet', 'open:bank', 'ghost')}${button('Documents', 'doc', 'open:documents', 'ghost')}${button('Immobilier', 'home', 'open:housing', 'ghost')}${button('Garage', 'car', 'open:garage', 'ghost')}${button('Entreprise', 'building', 'open:business', 'ghost')}${button('Dressing', 'shirt', 'open:wardrobe', 'ghost')}
+      <button type="button" class="prx-action-orb ${state.more ? 'is-open' : ''}" data-prx-action="toggle-more" aria-label="Actions rapides"><span>${icon('plus')}</span><small>Actions</small></button>
+      <div class="prx-action-menu ${state.more ? 'is-open' : ''}">
+        <header><strong>Actions rapides</strong><small>RP contextuel</small></header>
+        ${btn('Payer un joueur', 'wallet', 'open:bank', 'ghost')}${btn('Donner un objet', 'bag', 'open:inventory', 'ghost')}${btn('Appeler taxi', 'taxi', 'open:phone', 'ghost')}${btn('Mes véhicules', 'car', 'open:garage', 'ghost')}${btn('Mes propriétés', 'home', 'open:housing', 'ghost')}${btn('Documents', 'doc', 'open:documents', 'ghost')}
       </div>
 
+      <div class="prx-context-card"><span>⌁</span><div><strong>Paradise Market</strong><small><kbd>E</kbd> Interagir</small></div></div>
       <div class="prx-layer ${state.open ? 'is-open' : ''}">${activeWindow()}</div>
       ${state.toast ? `<div class="prx-toast prx-toast-${esc(state.toast.tone)}">${icon(state.toast.tone === 'success' ? 'check' : state.toast.tone === 'danger' ? 'alert' : 'spark')}<div><strong>${esc(state.toast.title)}</strong>${state.toast.body ? `<small>${esc(state.toast.body)}</small>` : ''}</div><i></i></div>` : ''}
     </div>`;
@@ -313,62 +346,50 @@
     }
     root.innerHTML = hud();
     bindRoot(root);
-    window.setTimeout(() => document.querySelector(`#${HUD_ID} [data-prx-command-search]`)?.focus(), state.open === 'commands' ? 40 : 0);
+    if (state.open === 'commands') window.setTimeout(() => document.querySelector(`#${HUD_ID} [data-prx-command-search]`)?.focus(), 40);
   }
 
   function open(key) {
     state.open = key;
+    state.more = false;
     if (key === 'phone') state.phoneApp = 'home';
     render();
   }
 
   function actionFrom(value, root) {
     if (!value) return;
-    if (value === 'close') { state.open = null; render(); return; }
+    if (value === 'close') { state.open = null; state.more = false; render(); return; }
+    if (value === 'toggle-more') { state.more = !state.more; render(); return; }
     if (value.startsWith('open:')) { open(value.slice(5)); return; }
     if (value.startsWith('command:')) {
       const command = value.slice(8);
       state.open = null;
+      state.more = false;
       render();
-      if (setNativeChat(command)) toast('Commande prête', 'Appuyez sur Entrée pour confirmer.', 'success');
-      else toast('Chat indisponible', "Le champ de discussion n'a pas été trouvé.", 'danger');
-      return;
-    }
-    if (value === 'toggle-more') {
-      const menu = root.querySelector('.prx-more-menu');
-      if (menu) menu.hidden = !menu.hidden;
+      if (setNativeChat(command)) toast('Commande prête', command, 'success');
+      else toast('Chat introuvable', 'Le champ Nitro natif est indisponible.', 'danger');
     }
   }
 
   function bindRoot(root) {
     root.onclick = event => {
-      const actionButton = event.target.closest('[data-prx-action]');
+      const itemButton = event.target.closest('[data-prx-item]');
+      if (itemButton) { state.selectedItem = itemButton.getAttribute('data-prx-item') || state.selectedItem; render(); return; }
+      const cmdButton = event.target.closest('[data-prx-command]');
+      if (cmdButton) { const c = cmdButton.getAttribute('data-prx-command') || ''; state.open = null; render(); if (setNativeChat(c)) toast('Commande copiée dans le chat', c, 'success'); return; }
+      const catButton = event.target.closest('[data-prx-category]');
+      if (catButton) { state.inventoryCategory = catButton.getAttribute('data-prx-category') || 'all'; render(); return; }
+      const cmdCat = event.target.closest('[data-prx-command-cat]');
+      if (cmdCat) { state.commandCat = cmdCat.getAttribute('data-prx-command-cat') || 'Toutes'; render(); return; }
+      const phoneApp = event.target.closest('[data-prx-phone-app]');
+      if (phoneApp) { state.phoneApp = phoneApp.getAttribute('data-prx-phone-app') || 'home'; render(); return; }
+      const actionButton = event.target.closest('[data-prx-action], .prx-player-card');
       if (actionButton) { actionFrom(actionButton.getAttribute('data-prx-action'), root); return; }
-      const appButton = event.target.closest('[data-prx-phone-app]');
-      if (appButton) { state.phoneApp = appButton.getAttribute('data-prx-phone-app') || 'home'; render(); return; }
-      const categoryButton = event.target.closest('[data-prx-category]');
-      if (categoryButton) { state.inventoryCategory = categoryButton.getAttribute('data-prx-category') || 'all'; render(); return; }
-      const commandButton = event.target.closest('[data-prx-command]');
-      if (commandButton) {
-        const command = commandButton.getAttribute('data-prx-command') || '';
-        state.open = null; render();
-        if (setNativeChat(command)) toast('Commande prête', command, 'success');
-        return;
-      }
       if (event.target.classList.contains('prx-layer') && state.open && state.open !== 'phone') { state.open = null; render(); }
     };
-
     root.oninput = event => {
-      if (event.target.matches('[data-prx-command-search]')) {
-        state.commandQuery = event.target.value || '';
-        const list = root.querySelector('.prx-command-list');
-        if (!list) return;
-        const q = state.commandQuery.trim().toLowerCase();
-        const filtered = COMMANDS.filter(c => !q || `${c.name} ${c.cat} ${c.desc}`.toLowerCase().includes(q));
-        list.innerHTML = filtered.length ? filtered.map(c => `<button type="button" class="prx-command-row" data-prx-command="${esc(c.name)}"><code>${esc(c.name)}</code><span><strong>${esc(c.desc)}</strong><small>${esc(c.syntax)} · ${esc(c.cat)}</small></span>${icon('chevron')}</button>`).join('') : `<div class="prx-empty"><span>⌕</span><strong>Aucun résultat</strong><small>Essayez un autre mot-clé.</small></div>`;
-      }
+      if (event.target.matches('[data-prx-command-search]')) { state.commandQuery = event.target.value || ''; render(); }
     };
-
     root.onsubmit = event => {
       const form = event.target.closest('[data-prx-form="transfer"]');
       if (!form) return;
@@ -376,19 +397,20 @@
       const fd = new FormData(form);
       const player = String(fd.get('player') || '').trim();
       const amount = String(fd.get('amount') || '').replace(/[^0-9]/g, '');
-      if (!player || !amount || Number(amount) <= 0) { toast('Paiement incomplet', 'Renseignez un joueur et un montant.', 'danger'); return; }
+      if (!player || !amount || Number(amount) <= 0) { toast('Paiement incomplet', 'Ajoutez un joueur et un montant.', 'danger'); return; }
       state.open = null; render();
       const command = `:pay ${player} ${amount}`;
       if (setNativeChat(command)) toast('Paiement préparé', command, 'success');
-      else toast('Chat indisponible', 'Impossible de préparer le paiement.', 'danger');
+      else toast('Chat indisponible', 'Impossible de préparer la commande.', 'danger');
     };
   }
 
   function keyboard(event) {
-    if (event.key === 'Escape' && state.open) { event.preventDefault(); state.open = null; render(); return; }
+    if (event.key === 'Escape' && (state.open || state.more)) { event.preventDefault(); state.open = null; state.more = false; render(); return; }
     if (event.key === 'F2') { event.preventDefault(); open('phone'); return; }
     if (event.key === 'F3') { event.preventDefault(); open('inventory'); return; }
     if (event.key === 'F4') { event.preventDefault(); open('profile'); return; }
+    if (!event.ctrlKey && !event.metaKey && event.key.toLowerCase() === 'm') { event.preventDefault(); open('jobs'); return; }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); open('commands'); return; }
 
     const target = event.target;
@@ -419,8 +441,8 @@
       if (first) state.data = DEFAULT_DATA;
     }
     const active = document.activeElement;
-    const typingWindow = active && active.closest?.(`#${HUD_ID} .prx-window, #${HUD_ID} .prx-phone`);
-    if (!typingWindow) render();
+    const typing = active && active.closest?.(`#${HUD_ID} .prx-window, #${HUD_ID} .prx-phone`);
+    if (!typing) render();
   }
 
   function boot() {
