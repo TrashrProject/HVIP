@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '86.1.0-single-room-forward-debug';
+  const VERSION = '86.2.0-neutral-room-forward-debug';
   const query = new URLSearchParams(window.location.search || '');
   const token =
     query.get('sso') ||
@@ -22,17 +22,20 @@
     window.NitroConfig['sso.ticket'] = token;
   }
 
-  // The emulator already sends RoomForwardComposer(home_room) after a
-  // successful SSO authentication. During room-stability debugging, do not
-  // also bootstrap Nitro with forward.id/forward.type: that produced two
-  // identical GetGuestRoom + OpenFlatConnection sequences and initialized the
-  // same room twice. Keep the requested room id separately for diagnostics.
+  // The emulator already sends RoomForwardComposer after successful SSO.
+  // Nitro treats forward.type === -1 as an instruction to use roomIdToEnter,
+  // which creates another room session in parallel with the emulator's
+  // RoomForward path. Use a neutral value (0) during this debug so neither
+  // forward.id nor roomIdToEnter auto-entry is triggered by the client.
+  // The emulator RoomForward is then the sole room-session creator.
   if (debugSingleForward && room && room !== '0') {
     window.__PARADISE_REQUESTED_ROOM_ID__ = Number.parseInt(room, 10) || 0;
-    window.NitroConfig['forward.type'] = -1;
+    window.NitroConfig['forward.type'] = 0;
     window.NitroConfig['forward.id'] = 0;
-    console.warn('[ParadiseRP:BOOT] Debug single-room-forward active; waiting for emulator RoomForward.', {
-      requestedRoom: window.__PARADISE_REQUESTED_ROOM_ID__
+    console.warn('[ParadiseRP:BOOT] Neutral room-forward debug active; waiting only for emulator RoomForward.', {
+      requestedRoom: window.__PARADISE_REQUESTED_ROOM_ID__,
+      forwardType: window.NitroConfig['forward.type'],
+      forwardId: window.NitroConfig['forward.id']
     });
   }
 
@@ -42,6 +45,7 @@
     hasToken: !!window.NitroConfig['sso.ticket'],
     tokenParam: token ? 'present' : 'missing',
     singleForwardDebug: debugSingleForward,
+    neutralForward: debugSingleForward,
     sourceKeys: Array.from(query.keys())
   };
 
