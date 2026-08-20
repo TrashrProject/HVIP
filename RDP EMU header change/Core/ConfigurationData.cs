@@ -64,12 +64,55 @@ namespace Plus.Core
                         }
                     }
                 }
+
+                ValidateCoreBootKeys();
             }
 
             catch (Exception e)
             {
                 throw new ArgumentException("[CONFIG ERROR] Could not process configuration file.\nFile: " + filePath + "\nReason: " + e.Message);
             }
+        }
+
+        private void ValidateCoreBootKeys()
+        {
+            if (!Path.GetFileName(FilePath).Equals("config.ini", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            string[] requiredKeys = new string[]
+            {
+                "db.hostname",
+                "db.port",
+                "db.username",
+                "db.password",
+                "db.name",
+                "db.pool.minsize",
+                "db.pool.maxsize",
+                "mus.tcp.bindip",
+                "mus.tcp.port",
+                "mus.tcp.allowedaddr",
+                "game.tcp.port",
+                "game.tcp.conlimit",
+                "game.tcp.conperip",
+                "game.tcp.enablenagles"
+            };
+
+            List<string> missing = new List<string>();
+            foreach (string key in requiredKeys)
+            {
+                if (!data.ContainsKey(key))
+                    missing.Add(key);
+            }
+
+            if (missing.Count > 0)
+            {
+                throw new InvalidOperationException("[CONFIG ERROR] Missing required key(s): " + String.Join(", ", missing.ToArray()) + "\nFile: " + FilePath + "\nRequired by: Emulator boot");
+            }
+
+            Console.WriteLine("[CONFIG] Checking configuration...");
+            Console.WriteLine("[CONFIG] Database configuration OK");
+            Console.WriteLine("[CONFIG] MUS configuration OK");
+            Console.WriteLine("[CONFIG] Game socket configuration OK");
         }
 
         public bool TryGetValue(string key, out string value)
