@@ -1,15 +1,269 @@
-/* ParadiseRP compatibility layer v10
-   The complete live UI system now lives in paradise-rp-hud.css v40 and paradise-rp-hud.js v40.
-   This file is intentionally kept light because index.html still loads it after older tests. */
-#paradise-rp-hud .prhud-player,
-#paradise-rp-hud .prhud-meta,
-#paradise-rp-hud .prhud-money,
-#paradise-rp-hud .prhud-rail,
-#paradise-rp-hud .prhud-quests,
-#paradise-rp-hud .prhud-chat,
-#paradise-rp-hud .prhud-dock{
+/* ParadiseRP UI V4 — polish ciblé
+   Objectif : conserver la DA actuelle, corriger chat, ligne parasite, côté gauche et profil. */
+
+/* Nettoyage de la zone chat Nitro : supprime les traits / séparateurs hérités sans toucher au moteur. */
+#root [data-pr-native-chat-host="1"],
+#root [data-pr-native-chat-host="1"] *,
+#root [data-pr-native-chat-host="1"]::before,
+#root [data-pr-native-chat-host="1"]::after,
+#root [data-pr-native-chat-host="1"] *::before,
+#root [data-pr-native-chat-host="1"] *::after{
+  border-color:transparent!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background-color:transparent!important;
+}
+#root [data-pr-native-chat-host="1"] hr,
+#root [data-pr-native-chat-host="1"] [class*="line" i],
+#root [data-pr-native-chat-host="1"] [class*="divider" i],
+#root [data-pr-native-chat-host="1"] [class*="separator" i]{
   display:none!important;
   visibility:hidden!important;
   opacity:0!important;
-  pointer-events:none!important;
+}
+
+/* Côté gauche : profil + room deviennent un vrai ensemble, plus lisible et plus premium. */
+#paradise-rp-hud .pr4-player-card{
+  left:22px!important;
+  top:18px!important;
+  width:354px!important;
+  min-height:108px!important;
+  grid-template-columns:92px 1fr!important;
+  gap:16px!important;
+  padding:12px 18px 12px 12px!important;
+  border-radius:16px!important;
+  background:
+    radial-gradient(circle at 86% 18%,rgba(101,215,197,.26),transparent 28%),
+    linear-gradient(145deg,#fff8e8 0%,var(--pr4-warm) 48%,#e9f4f0 100%)!important;
+  border:1px solid rgba(255,255,255,.70)!important;
+  box-shadow:0 18px 42px rgba(18,34,40,.22),0 7px 18px rgba(18,34,40,.12)!important;
+}
+#paradise-rp-hud .pr4-player-card::before{
+  top:18px!important;
+  bottom:18px!important;
+  width:5px!important;
+  background:linear-gradient(180deg,var(--pr4-aqua),var(--pr4-sun))!important;
+  box-shadow:0 0 18px rgba(101,215,197,.25)!important;
+}
+#paradise-rp-hud .pr4-player-card:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:0 22px 48px rgba(18,34,40,.24),0 9px 22px rgba(18,34,40,.14)!important;
+}
+#paradise-rp-hud .pr4-player-avatar{
+  width:92px!important;
+  height:92px!important;
+  border-radius:15px!important;
+  background:linear-gradient(180deg,#bdf2e9 0 46%,#f0deb0 47% 100%)!important;
+  border:1px solid rgba(23,39,45,.13)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 10px 18px rgba(40,66,72,.16)!important;
+}
+#paradise-rp-hud .pr4-player-avatar::before{
+  right:10px!important;
+  top:10px!important;
+  width:20px!important;
+  height:20px!important;
+  border-radius:6px!important;
+}
+#paradise-rp-hud .pr4-player-avatar img{
+  width:96px!important;
+  height:112px!important;
+  transform:translateY(9px)!important;
+}
+#paradise-rp-hud .pr4-player-avatar i{
+  right:9px!important;
+  bottom:9px!important;
+  width:12px!important;
+  height:12px!important;
+  border-width:2px!important;
+}
+#paradise-rp-hud .pr4-player-text strong{
+  font-size:24px!important;
+  letter-spacing:-.045em!important;
+  max-width:220px!important;
+}
+#paradise-rp-hud .pr4-player-text em{
+  margin-top:9px!important;
+  padding:6px 10px!important;
+  border-radius:9px!important;
+  font-size:11px!important;
+  box-shadow:0 5px 12px rgba(177,128,26,.16)!important;
+}
+#paradise-rp-hud .pr4-player-text small{
+  margin-top:8px!important;
+  font-size:13px!important;
+  line-height:1.2!important;
+  color:#536b72!important;
+}
+
+#paradise-rp-hud .pr4-room{
+  left:22px!important;
+  top:138px!important;
+  width:354px!important;
+  height:58px!important;
+  justify-content:flex-start!important;
+  padding:0 16px!important;
+  border-radius:15px!important;
+  background:rgba(244,243,236,.92)!important;
+  border:1px solid rgba(255,255,255,.62)!important;
+  box-shadow:0 13px 30px rgba(18,34,40,.16)!important;
+}
+#paradise-rp-hud .pr4-room>.pr4-icon{
+  width:23px!important;
+  height:23px!important;
+  color:var(--pr4-aqua)!important;
+}
+#paradise-rp-hud .pr4-room strong{
+  font-size:15px!important;
+}
+#paradise-rp-hud .pr4-room small{
+  margin-top:5px!important;
+  font-size:11px!important;
+}
+
+/* Dock : garde les 3 modules, mais nettoie le centre pour éviter les superpositions. */
+#paradise-rp-hud .pr4-bottom{
+  bottom:18px!important;
+  height:70px!important;
+  grid-template-columns:minmax(384px,438px) clamp(500px,32vw,620px) minmax(216px,268px)!important;
+  gap:16px!important;
+  align-items:end!important;
+}
+#paradise-rp-hud .pr4-dock,
+#paradise-rp-hud .pr4-chat-module{
+  height:66px!important;
+  border-radius:16px!important;
+  box-shadow:0 16px 36px rgba(18,34,40,.18),0 5px 14px rgba(18,34,40,.10)!important;
+}
+#paradise-rp-hud .pr4-chat-module{
+  position:relative!important;
+  width:100%!important;
+  padding:8px 12px!important;
+  grid-template-columns:72px 34px 1fr 34px!important;
+  background:rgba(244,243,236,.90)!important;
+  border:1px solid rgba(255,255,255,.62)!important;
+  overflow:hidden!important;
+}
+#paradise-rp-hud .pr4-chat-module::after{
+  content:""!important;
+  width:30px!important;
+  height:30px!important;
+  justify-self:end!important;
+  border-radius:10px!important;
+  background:rgba(101,215,197,.16)!important;
+  box-shadow:inset 0 0 0 1px rgba(101,215,197,.18)!important;
+}
+#paradise-rp-hud .pr4-chat-module span{
+  height:34px!important;
+  border-radius:10px!important;
+  background:linear-gradient(180deg,rgba(101,215,197,.22),rgba(101,215,197,.12))!important;
+  color:#19776d!important;
+  font-size:10px!important;
+}
+#paradise-rp-hud .pr4-chat-module i{
+  color:#5f7980!important;
+}
+#paradise-rp-hud .pr4-chat-module small{
+  visibility:hidden!important;
+}
+
+/* Le vrai input Nitro devient la seule couche texte du chat. */
+html body #root [data-pr-native-chat-live="1"],
+html body #root input[placeholder*="chat" i]:not(#prhud-chat-input),
+html body #root textarea[placeholder*="chat" i]:not(#prhud-chat-input),
+html body #root input[placeholder*="chatter" i]:not(#prhud-chat-input){
+  position:fixed!important;
+  left:50%!important;
+  bottom:27px!important;
+  transform:translateX(-50%)!important;
+  width:clamp(500px,32vw,620px)!important;
+  min-width:0!important;
+  max-width:620px!important;
+  height:50px!important;
+  min-height:50px!important;
+  max-height:50px!important;
+  padding:0 58px 0 116px!important;
+  border:0!important;
+  border-radius:14px!important;
+  background:transparent!important;
+  color:#17272d!important;
+  caret-color:var(--pr4-aqua)!important;
+  box-shadow:none!important;
+  outline:none!important;
+  font:850 13px/50px Inter,"Segoe UI",Arial,sans-serif!important;
+  z-index:2147483647!important;
+  backdrop-filter:none!important;
+}
+html body #root [data-pr-native-chat-live="1"]:focus,
+html body #root input[placeholder*="chat" i]:not(#prhud-chat-input):focus,
+html body #root textarea[placeholder*="chat" i]:not(#prhud-chat-input):focus,
+html body #root input[placeholder*="chatter" i]:not(#prhud-chat-input):focus{
+  width:clamp(540px,36vw,660px)!important;
+  background:rgba(255,255,255,.34)!important;
+  box-shadow:0 0 0 3px rgba(101,215,197,.20)!important;
+}
+html body #root [data-pr-native-chat-live="1"]::placeholder,
+html body #root input[placeholder*="chat" i]:not(#prhud-chat-input)::placeholder,
+html body #root textarea[placeholder*="chat" i]:not(#prhud-chat-input)::placeholder,
+html body #root input[placeholder*="chatter" i]:not(#prhud-chat-input)::placeholder{
+  color:#657c82!important;
+  opacity:1!important;
+}
+
+/* Petits ajustements d'équilibre autour du bas. */
+#paradise-rp-hud .pr4-dock button{
+  border-radius:11px!important;
+}
+#paradise-rp-hud .pr4-dock .app{
+  height:52px!important;
+}
+#paradise-rp-hud .pr4-dock-left .avatar{
+  width:52px!important;
+  height:52px!important;
+}
+#paradise-rp-hud .pr4-object-card{
+  bottom:108px!important;
+}
+
+@media (max-width:1450px){
+  #paradise-rp-hud .pr4-player-card{width:320px!important;grid-template-columns:80px 1fr!important;}
+  #paradise-rp-hud .pr4-player-avatar{width:80px!important;height:80px!important;}
+  #paradise-rp-hud .pr4-player-avatar img{width:84px!important;height:98px!important;}
+  #paradise-rp-hud .pr4-player-text strong{font-size:21px!important;}
+  #paradise-rp-hud .pr4-room{width:320px!important;top:128px!important;}
+  #paradise-rp-hud .pr4-bottom{grid-template-columns:minmax(330px,380px) clamp(430px,34vw,540px) minmax(190px,230px)!important;gap:10px!important;}
+  html body #root [data-pr-native-chat-live="1"],
+  html body #root input[placeholder*="chat" i]:not(#prhud-chat-input),
+  html body #root textarea[placeholder*="chat" i]:not(#prhud-chat-input),
+  html body #root input[placeholder*="chatter" i]:not(#prhud-chat-input){
+    width:clamp(430px,34vw,540px)!important;
+    padding-left:112px!important;
+  }
+}
+
+@media (max-width:1100px){
+  #paradise-rp-hud .pr4-player-card{width:250px!important;min-height:72px!important;grid-template-columns:58px 1fr!important;padding:8px 12px 8px 8px!important;}
+  #paradise-rp-hud .pr4-player-avatar{width:58px!important;height:58px!important;}
+  #paradise-rp-hud .pr4-player-avatar img{width:64px!important;height:76px!important;transform:translateY(7px)!important;}
+  #paradise-rp-hud .pr4-player-text strong{font-size:17px!important;}
+  #paradise-rp-hud .pr4-player-text em{padding:4px 7px!important;font-size:9px!important;}
+  #paradise-rp-hud .pr4-player-text small{font-size:11px!important;}
+  html body #root [data-pr-native-chat-live="1"],
+  html body #root input[placeholder*="chat" i]:not(#prhud-chat-input),
+  html body #root textarea[placeholder*="chat" i]:not(#prhud-chat-input),
+  html body #root input[placeholder*="chatter" i]:not(#prhud-chat-input){
+    left:10px!important;
+    right:10px!important;
+    bottom:90px!important;
+    transform:none!important;
+    width:auto!important;
+    max-width:none!important;
+    padding:0 14px!important;
+    background:rgba(244,243,236,.94)!important;
+    border:1px solid rgba(255,255,255,.58)!important;
+    box-shadow:0 12px 26px rgba(18,34,40,.16)!important;
+  }
+}
+
+@media (max-width:720px){
+  #paradise-rp-hud .pr4-player-card{left:10px!important;top:10px!important;width:214px!important;}
 }
