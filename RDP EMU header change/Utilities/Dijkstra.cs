@@ -3,9 +3,6 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using log4net;
-using System.Runtime.CompilerServices;
-using Plus.Communication.Packets.Outgoing.Alfas;
-using System.Net.NetworkInformation;
 using Plus.HabboRoleplay.Misc;
 using System.IO;
 
@@ -24,135 +21,18 @@ namespace Plus.Utilities
         int columna;
         CGrafo miGrafo;
 
-        #region OLD OFF 
+        private string[,] _taxiMatrix;
+        private string _taxiCsvPath;
+        private bool _usingFallbackMatrix;
+        private bool _reportedFallback;
+
+        #region OLD OFF
         /*
         private int rango = 0;
-        private int[,] L;   // Matriz de adyacencia
-        private int[] C;    // Arreglo de nodos
-        private int[] D;    // Arreglo de distancias
+        private int[,] L;
+        private int[] C;
+        private int[] D;
         private int trango = 0;
-
-        public Dijkstra()
-        {
-        }
-
-        public Dijkstra(int paramRango, int[,] paramArreglo)
-        {
-            L = new int[paramRango, paramRango];
-            C = new int[paramRango];
-            D = new int[paramRango];
-            rango = paramRango;
-
-            // Llenado de matriz
-            for(int i = 0; i<rango; i++)
-            {
-                for(int j = 0; j<rango; j++)
-                {
-                    L[i, j] = paramArreglo[i, j];
-                }
-            }
-
-            // Llenado de nodos
-            for(int i = 0; i <rango; i++)
-            {
-                C[i] = i;
-            }
-
-            C[0] = -1;
-
-            for (int i = 1; i < rango; i++)
-                D[i] = L[0, i];
-        }
-
-        // Rutina de solución
-        public void SolDijkstra()
-        {
-            int minValor = Int32.MaxValue;
-            int minNodo = 0;
-
-            for(int i = 0; i<rango; i++)
-            {
-                if (C[i] == -1)
-                    continue;
-
-                if(D[i] > 0 && D[i] < minValor)
-                {
-                    minValor = D[i];
-                    minNodo = i;
-                }
-            }
-
-            C[minNodo] = -1;
-
-            for(int i = 0; i<rango; i++)
-            {
-                if (L[minNodo, i] < 0) // Si no existe arco
-                    continue;
-
-                if(D[i] < 0) // Si no hay un peso asignado
-                {
-                    D[i] = minValor + L[minNodo, i];
-                    continue;
-                }
-
-                if ((D[minNodo] + L[minNodo, i]) < D[i])
-                    D[i] = minValor + L[minNodo, i];
-            }
-        }
-
-        // Función de implementación del algoritmo
-        public void CorrerDijkstra()
-        {
-            for(trango = 1; trango < rango; trango++)
-            {
-                SolDijkstra();
-                Console.WriteLine("Iteración No. " + trango);
-                Console.WriteLine("Matriz de distancias: ");
-
-                for (int i = 0; i < rango; i++)
-                    Console.WriteLine(i + " ");
-
-                Console.WriteLine("");
-
-                for (int i = 0; i<rango; i++)
-                    Console.Write(D[i] + "");
-
-                Console.WriteLine("");
-                Console.WriteLine("");
-            }
-        }
-
-        public void Init()
-        {
-            // Definición de la matriz de adyacencia
-            int[,] L =
-            {
-                {-1, 10, 18, -1, -1, -1, -1},
-                {-1, -1, 6, -1, 3, -1, -1},
-                {-1, -1, -1, 3, -1, 20, -1},
-                {-1, -1, 2, -1, -1, -1, 2},
-                {-1, -1, -1, 6, -1, -1, 10},
-                {-1, -1, -1, -1, -1, -1, -1},
-                {-1, -1, 10, -1, -1, 5, -1}
-            };
-
-            Dijkstra prueba = new Dijkstra((int)Math.Sqrt(L.Length), L);
-            prueba.CorrerDijkstra();
-
-            Console.WriteLine("La solución de la ruta más corta tomando como nodo inicial el NODO 1 es: ");
-
-            int nodo = 1;
-            foreach(int i in prueba.D)
-            {
-                Console.Write("Distancia mínima a nodo "+nodo+" es ");
-                Console.WriteLine(i);
-                nodo++;
-            }
-
-            Console.WriteLine();
-
-            log.Info("Loaded Dijkstra Algorithm");
-        }
         */
         #endregion
 
@@ -162,109 +42,207 @@ namespace Plus.Utilities
             final = 0;
             distancia = 0;
             n = 0;
-            cantNodos = (LoadCsv(RoleplayManager.TaxiBotCSV).GetLength(0) - 1);
             actual = 0;
             columna = 0;
+
+            _taxiMatrix = LoadCsv(RoleplayManager.TaxiBotCSV);
+            cantNodos = Math.Max(0, Math.Min(_taxiMatrix.GetLength(0), _taxiMatrix.GetLength(1)) - 1);
+
+            if (cantNodos <= 0)
+            {
+                log.Error("[TAXIBOT ERROR] taxibot.csv did not contain a valid adjacency matrix. Using the emergency direct-route graph.");
+                _taxiMatrix = BuildFallbackMatrix(16);
+                cantNodos = Math.Max(0, Math.Min(_taxiMatrix.GetLength(0), _taxiMatrix.GetLength(1)) - 1);
+                _usingFallbackMatrix = true;
+            }
+
             miGrafo = new CGrafo(cantNodos);
+        }
+
+        private string ResolveTaxiCsvPath(string filename)
+        {
+            string requested = string.IsNullOrWhiteSpace(filename) ? "extra/taxibot.csv" : filename.Trim();
+
+            if (Path.IsPathRooted(requested) && File.Exists(requested))
+                return Path.GetFullPath(requested);
+
+            List<string> candidates = new List<string>();
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            candidates.Add(Path.Combine(baseDirectory, requested));
+            candidates.Add(Path.Combine(baseDirectory, "extra", "taxibot.csv"));
+
+            DirectoryInfo cursor = new DirectoryInfo(baseDirectory);
+            for (int i = 0; i < 6 && cursor != null; i++)
+            {
+                candidates.Add(Path.Combine(cursor.FullName, requested));
+                candidates.Add(Path.Combine(cursor.FullName, "extra", "taxibot.csv"));
+                cursor = cursor.Parent;
+            }
+
+            foreach (string candidate in candidates.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (File.Exists(candidate))
+                    return Path.GetFullPath(candidate);
+            }
+
+            return Path.GetFullPath(Path.Combine(baseDirectory, requested));
         }
 
         private string[,] LoadCsv(string filename)
         {
-            // Get the file's text.
-            string whole_file = System.IO.File.ReadAllText(filename);
+            string resolvedPath = ResolveTaxiCsvPath(filename);
+            _taxiCsvPath = resolvedPath;
 
-            // Split into lines.
-            whole_file = whole_file.Replace('\n', '\r');
-            string[] lines = whole_file.Split(new char[] { '\r' },
-                StringSplitOptions.RemoveEmptyEntries);
-
-            // See how many rows and columns there are.
-            int num_rows = lines.Length;
-            int num_cols = lines[0].Split(',').Length;
-
-            // Allocate the data array.
-            string[,] values = new string[num_rows, num_cols];
-
-            // Load the array.
-            for (int r = 0; r < num_rows; r++)
+            if (!File.Exists(resolvedPath))
             {
-                string[] line_r = lines[r].Split(',');
-                for (int c = 0; c < num_cols; c++)
+                _usingFallbackMatrix = true;
+                log.Error("[TAXIBOT ERROR] taxibot.csv not found. Expected path: " + resolvedPath + ". Required by: Plus.Utilities.Dijkstra. The emulator will continue with a direct-route fallback graph until the real CSV is restored.");
+                return BuildFallbackMatrix(16);
+            }
+
+            try
+            {
+                string wholeFile = File.ReadAllText(resolvedPath, Encoding.UTF8);
+                wholeFile = wholeFile.Replace("\r\n", "\n").Replace('\r', '\n');
+                string[] lines = wholeFile.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (lines.Length < 2)
+                    throw new InvalidDataException("The file must contain a header row and at least one node row.");
+
+                int numRows = lines.Length;
+                int numCols = lines.Max(line => line.Split(',').Length);
+
+                if (numCols < 2)
+                    throw new InvalidDataException("The file must contain at least two columns.");
+
+                string[,] values = new string[numRows, numCols];
+
+                for (int r = 0; r < numRows; r++)
                 {
-                    values[r, c] = line_r[c];
+                    string[] lineValues = lines[r].Split(',');
+                    for (int c = 0; c < numCols; c++)
+                    {
+                        values[r, c] = c < lineValues.Length ? lineValues[c].Trim() : "0";
+                    }
+                }
+
+                _usingFallbackMatrix = false;
+                return values;
+            }
+            catch (Exception ex)
+            {
+                _usingFallbackMatrix = true;
+                log.Error("[TAXIBOT ERROR] taxibot.csv could not be read correctly. File: " + resolvedPath + ". Required by: Plus.Utilities.Dijkstra. Reason: " + ex.Message + ". The emulator will continue with a direct-route fallback graph.");
+                return BuildFallbackMatrix(16);
+            }
+        }
+
+        private string[,] BuildFallbackMatrix(int nodeCount)
+        {
+            int safeNodes = Math.Max(2, nodeCount);
+            string[,] values = new string[safeNodes + 1, safeNodes + 1];
+            values[0, 0] = "node";
+
+            for (int i = 1; i <= safeNodes; i++)
+            {
+                values[0, i] = (i - 1).ToString();
+                values[i, 0] = (i - 1).ToString();
+
+                for (int j = 1; j <= safeNodes; j++)
+                {
+                    values[i, j] = i == j ? "0" : "1";
                 }
             }
 
-            // Return the values.
             return values;
         }
 
         public void Init()
         {
-            // Cargamos la matriz de adyacencia desde el CSV
-            for (int i = 1; i < LoadCsv(RoleplayManager.TaxiBotCSV).GetLength(0); i++)
+            if (_taxiMatrix == null)
+                _taxiMatrix = LoadCsv(RoleplayManager.TaxiBotCSV);
+
+            int matrixNodes = Math.Max(0, Math.Min(_taxiMatrix.GetLength(0), _taxiMatrix.GetLength(1)) - 1);
+            if (matrixNodes <= 0 || miGrafo == null)
             {
-                for(int j = 1; j < LoadCsv(RoleplayManager.TaxiBotCSV).GetLength(0); j++)
+                log.Error("[TAXIBOT ERROR] Dijkstra graph could not be initialized because the taxi matrix is empty.");
+                return;
+            }
+
+            for (int i = 1; i <= matrixNodes; i++)
+            {
+                for (int j = 1; j <= matrixNodes; j++)
                 {
-                    miGrafo.AdicionaArista((i - 1), (j - 1), Convert.ToInt32(LoadCsv(RoleplayManager.TaxiBotCSV)[i, j]));
+                    int weight;
+                    string rawValue = _taxiMatrix[i, j];
+
+                    if (!int.TryParse(rawValue, out weight))
+                    {
+                        if (!string.IsNullOrWhiteSpace(rawValue))
+                            log.Warn("[TAXIBOT WARN] Invalid weight in taxibot.csv at row " + i + ", column " + j + ": '" + rawValue + "'. Using 0.");
+
+                        weight = 0;
+                    }
+
+                    miGrafo.AdicionaArista(i - 1, j - 1, weight);
                 }
             }
 
-            //miGrafo.MuestraAdyacencia();
-            log.Info("Loaded Dijkstra Algorithm");
+            string source = _usingFallbackMatrix ? "fallback direct-route matrix" : _taxiCsvPath;
+            log.Info("Loaded Dijkstra Algorithm (" + matrixNodes + " taxi nodes, source: " + source + ")");
         }
 
-        // Obtenemos list con los nodos de la ruta solución
         public List<int> RunDijkstra(int origen, int destino)
         {
             inicio = origen;
             final = destino;
 
-            // Creamos la tabla
-            // 0 - Visitado
-            // 1 - Distancia
-            // 2 - Previo
+            if (cantNodos <= 0 || miGrafo == null)
+            {
+                LogFallbackRoute(origen, destino, "graph not initialized");
+                return BuildDirectRoute(origen, destino);
+            }
+
+            if (origen < 0 || destino < 0 || origen >= cantNodos || destino >= cantNodos)
+            {
+                LogFallbackRoute(origen, destino, "route outside taxibot.csv bounds. Matrix nodes: " + cantNodos);
+                return BuildDirectRoute(origen, destino);
+            }
+
+            if (origen == destino)
+                return new List<int> { origen };
+
             int[,] tabla = new int[cantNodos, 3];
 
-            // Inicializamos la tabla
             for (n = 0; n < cantNodos; n++)
             {
                 tabla[n, 0] = 0;
                 tabla[n, 1] = int.MaxValue;
-                tabla[n, 2] = 0;
+                tabla[n, 2] = -1;
             }
 
             tabla[inicio, 1] = 0;
-
-            //MostrarTabla(tabla);
-
-            // Inicio Dijkstra
             actual = inicio;
+
             do
             {
-                // Marcar nodo como visitado
                 tabla[actual, 0] = 1;
 
                 for (columna = 0; columna < cantNodos; columna++)
                 {
-                    // Buscamos a quién se dirige
-                    if (miGrafo.ObtenAdyacencia(actual, columna) != 0)
+                    int edgeWeight = miGrafo.ObtenAdyacencia(actual, columna);
+                    if (edgeWeight == 0 || tabla[actual, 1] == int.MaxValue)
+                        continue;
+
+                    distancia = edgeWeight + tabla[actual, 1];
+
+                    if (distancia < tabla[columna, 1])
                     {
-                        // Calculamos la distancia
-                        distancia = miGrafo.ObtenAdyacencia(actual, columna) + tabla[actual, 1];
-
-                        // Colocamos las distancias
-                        if (distancia < tabla[columna, 1])
-                        {
-                            tabla[columna, 1] = distancia;
-
-                            // Colocamos la información de padre
-                            tabla[columna, 2] = actual;
-                        }
+                        tabla[columna, 1] = distancia;
+                        tabla[columna, 2] = actual;
                     }
                 }
 
-                // El nuevo actual es el nodo con la menor distancia que no ha sido visitado
                 int indiceMenor = -1;
                 int distanciaMenor = int.MaxValue;
 
@@ -281,30 +259,55 @@ namespace Plus.Utilities
 
             } while (actual != -1);
 
-            //MostrarTabla(tabla);
+            if (tabla[final, 1] == int.MaxValue)
+            {
+                LogFallbackRoute(origen, destino, "no route found in taxibot.csv");
+                return BuildDirectRoute(origen, destino);
+            }
 
-            // Obtenemos la ruta            
             List<int> ruta = new List<int>();
             int nodo = final;
+            int guard = 0;
 
             while (nodo != inicio)
             {
+                if (nodo < 0 || nodo >= cantNodos || guard++ > cantNodos)
+                {
+                    LogFallbackRoute(origen, destino, "route reconstruction failed");
+                    return BuildDirectRoute(origen, destino);
+                }
+
                 ruta.Add(nodo);
                 nodo = tabla[nodo, 2];
             }
 
             ruta.Add(inicio);
             ruta.Reverse();
-
-            //foreach (int posicion in ruta)
-            //  Console.Write("{0}->", posicion);
-
             return ruta;
+        }
+
+        private List<int> BuildDirectRoute(int origen, int destino)
+        {
+            List<int> route = new List<int>();
+            if (origen >= 0)
+                route.Add(origen);
+            if (destino >= 0 && destino != origen)
+                route.Add(destino);
+            return route;
+        }
+
+        private void LogFallbackRoute(int origen, int destino, string reason)
+        {
+            if (_reportedFallback)
+                return;
+
+            _reportedFallback = true;
+            log.Warn("[TAXIBOT WARN] Using direct route fallback for taxi path " + origen + " -> " + destino + ". Reason: " + reason + ".");
         }
 
         public static void MostrarTabla(int[,] pTabla)
         {
-            for(int n = 0; n < pTabla.GetLength(0); n++)
+            for (int n = 0; n < pTabla.GetLength(0); n++)
             {
                 Console.WriteLine("{0}-> {1}\t{2}\t{3}", n, pTabla[n, 0], pTabla[n, 1], pTabla[n, 2]);
             }
