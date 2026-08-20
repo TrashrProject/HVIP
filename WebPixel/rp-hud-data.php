@@ -1,7 +1,7 @@
 <?php
 /**
- * ParadiseRP in-game HUD data endpoint.
- * Small JSON endpoint used by the external HUD overlay.
+ * ParadiseRP in-game UI data endpoint.
+ * Keeps the payload intentionally small and backward compatible.
  */
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -16,14 +16,17 @@ function pr_hud_json(array $data, int $code = 200): void {
 function pr_hud_default(): array {
     return [
         'ok' => false,
+        'id' => 0,
+        'citizen_id' => 'PR-00000',
         'username' => 'ParadiseRP',
         'role' => 'Citoyen',
-        'level' => 7,
+        'motto' => '',
+        'level' => 1,
         'look' => '',
         'avatar_url' => '',
-        'health' => ['current' => 315, 'max' => 500],
-        'energy' => ['current' => 31, 'max' => 100],
-        'money' => ['credits' => 319, 'pixels' => 224],
+        'health' => ['current' => 100, 'max' => 100],
+        'energy' => ['current' => 100, 'max' => 100],
+        'money' => ['credits' => 0, 'pixels' => 0],
         'city' => 'Paradise City',
         'time' => date('H:i')
     ];
@@ -62,8 +65,8 @@ try {
         pr_hud_json(pr_hud_default());
     }
 
-    $credits = 0;
-    if (isset($user['credits'])) $credits = (int) $user['credits'];
+    $id = isset($user['id']) ? max(0, (int) $user['id']) : 0;
+    $credits = isset($user['credits']) ? (int) $user['credits'] : 0;
 
     $pixels = 0;
     if (isset($user['pixels'])) $pixels = (int) $user['pixels'];
@@ -76,10 +79,11 @@ try {
     elseif ($rank >= 6) $role = 'Staff';
     elseif ($rank >= 3) $role = 'Équipe';
 
-    $level = 7;
+    $level = 1;
     if (isset($user['level']) && is_numeric($user['level'])) $level = max(1, (int) $user['level']);
 
     $look = (string) ($user['look'] ?? '');
+    $motto = trim((string) ($user['motto'] ?? ''));
     $avatarUrl = '';
     if ($look !== '' && preg_match('/^[a-z0-9.\-]+$/i', $look)) {
         $avatarUrl = '/avatar-image.php?' . http_build_query([
@@ -94,13 +98,16 @@ try {
 
     pr_hud_json([
         'ok' => true,
+        'id' => $id,
+        'citizen_id' => 'PR-' . str_pad((string) $id, 5, '0', STR_PAD_LEFT),
         'username' => (string) ($user['username'] ?? $username),
         'role' => $role,
+        'motto' => $motto,
         'level' => $level,
         'look' => $look,
         'avatar_url' => $avatarUrl,
-        'health' => ['current' => 315, 'max' => 500],
-        'energy' => ['current' => 31, 'max' => 100],
+        'health' => ['current' => 100, 'max' => 100],
+        'energy' => ['current' => 100, 'max' => 100],
         'money' => ['credits' => $credits, 'pixels' => $pixels],
         'city' => 'Paradise City',
         'time' => date('H:i')
