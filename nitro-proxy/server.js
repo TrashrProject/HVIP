@@ -6,7 +6,8 @@ const WS_PORT = Number(process.env.NITRO_WS_PORT || 2097);
 const TCP_HOST = process.env.EMU_HOST || '127.0.0.1';
 const TCP_PORT = Number(process.env.EMU_PORT || 2021);
 
-// RDP/Nitro packet framing confirmed in GamePacketParser.cs:
+// RDP/Nitro packet framing confirmed in GamePacketParser.cs and Nitro's
+// EvaWire codec:
 // [4-byte signed big-endian content length][2-byte packet header][payload]
 // The 4-byte prefix is NOT included in the announced length.
 const LENGTH_PREFIX_BYTES = 4;
@@ -28,6 +29,22 @@ function framingLog(message) {
   if (DEBUG_FRAMING) console.log(message);
 }
 
+function fnv1a32(buffer) {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < buffer.length; i += 1) {
+    hash ^= buffer[i];
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, '0');
+}
+
+function edgeHex(buffer, fromStart) {
+  const count = Math.min(32, buffer.length);
+  if (!count) return '';
+  const slice = fromStart ? buffer.subarray(0, count) : buffer.subarray(buffer.length - count);
+  return slice.toString('hex').match(/.{1,2}/g)?.join(' ') || '';
+}
+
 wss.on('connection', (ws, req) => {
   const remote = req.socket.remoteAddress || 'unknown';
   console.log(`[NitroProxy] WebSocket connected from ${remote}`);
@@ -35,6 +52,7 @@ wss.on('connection', (ws, req) => {
   const tcp = net.createConnection({ host: TCP_HOST, port: TCP_PORT, noDelay: true });
   let tcpReady = false;
   let tcpBuffer = Buffer.alloc(0);
+  let outSequence = 0;
   const pending = [];
 
   const closeForFramingError = (reason) => {
@@ -80,12 +98,39 @@ wss.on('connection', (ws, req) => {
         ? Buffer.from(tcpBuffer.subarray(totalLength))
         : Buffer.alloc(0);
 
+      const frameId = ++outSequence;
+      const actualWsPayloadLength = frame.byteLength;
+      const packetHeader = frame.length >= 6 ? frame.readUInt16BE(4) : null;
+      const hash = fnv1a32(frame);
+      const first32 = edgeHex(frame, true);
+      const last32 = edgeHex(frame, false);
+      const timestamp = new Date().toISOString();
+      const lengthInvariant = contentLength + LENGTH_PREFIX_BYTES === actualWsPayloadLength;
+
       framingLog(
         `[WS PROXY FRAME] contentLength=${contentLength} totalLength=${totalLength} remainingBuffer=${tcpBuffer.length}`
       );
+      framingLog(
+        `[WS → NITRO #${frameId}] timestamp=${timestamp} ` +
+        `declaredContentLength=${contentLength} totalTcpPacketLength=${totalLength} ` +
+        `actualWsPayloadLength=${actualWsPayloadLength} headerBE=${packetHeader} ` +
+        `byteOffset=${frame.byteOffset} byteLength=${frame.byteLength} ` +
+        `underlyingArrayBufferLength=${frame.buffer.byteLength} ` +
+        `lengthInvariant=${lengthInvariant} fnv1a32=${hash} ` +
+        `first32=${first32} last32=${last32}`
+      );
 
+      // Important: send the Buffer VIEW itself, never frame.buffer. A Node
+      // Buffer can use a larger pooled backing ArrayBuffer. ws.send(frame)
+      // sends only frame.byteOffset..frame.byteOffset+frame.byteLength.
       ws.send(frame, { binary: true }, (err) => {
-        if (err) console.error('[NitroProxy] WebSocket send error:', err.message);
+        if (err) {
+          console.error(`[NitroProxy] WebSocket send error OUT #${frameId}:`, err.message);
+          return;
+        }
+        framingLog(
+          `[WS → NITRO #${frameId} SENT] actualWsPayloadLength=${actualWsPayloadLength} fnv1a32=${hash}`
+        );
       });
     }
 
