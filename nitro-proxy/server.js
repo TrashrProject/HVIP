@@ -6,11 +6,27 @@ const WS_PORT = Number(process.env.NITRO_WS_PORT || 2097);
 const TCP_HOST = process.env.EMU_HOST || '127.0.0.1';
 const TCP_PORT = Number(process.env.EMU_PORT || 2021);
 
+// RDP/Nitro packet framing confirmed in GamePacketParser.cs:
+// [4-byte signed big-endian content length][2-byte packet header][payload]
+// The 4-byte prefix is NOT included in the announced length.
+const LENGTH_PREFIX_BYTES = 4;
+const MIN_CONTENT_LENGTH = 2;
+// Server -> client room payloads can be much larger than the emulator's old
+// client -> server 5120-byte guard, so keep a corruption guard without
+// imposing that legacy incoming limit on outgoing packets.
+const MAX_CONTENT_LENGTH = 16 * 1024 * 1024;
+const DEBUG_FRAMING = process.env.NITRO_PROXY_DEBUG !== '0';
+
 const wss = new WebSocketServer({ host: WS_HOST, port: WS_PORT, perMessageDeflate: false });
 
 console.log(`[NitroProxy] Listening on ws://${WS_HOST}:${WS_PORT}/`);
 console.log(`[NitroProxy] Forwarding to tcp://${TCP_HOST}:${TCP_PORT}`);
-console.log('[NitroProxy] Raw transport enabled');
+console.log('[NitroProxy] Packet-aware TCP -> WebSocket transport enabled');
+console.log(`[NitroProxy] Framing: ${LENGTH_PREFIX_BYTES}-byte BE length prefix, max content ${MAX_CONTENT_LENGTH} bytes`);
+
+function framingLog(message) {
+  if (DEBUG_FRAMING) console.log(message);
+}
 
 wss.on('connection', (ws, req) => {
   const remote = req.socket.remoteAddress || 'unknown';
@@ -18,7 +34,65 @@ wss.on('connection', (ws, req) => {
 
   const tcp = net.createConnection({ host: TCP_HOST, port: TCP_PORT, noDelay: true });
   let tcpReady = false;
+  let tcpBuffer = Buffer.alloc(0);
   const pending = [];
+
+  const closeForFramingError = (reason) => {
+    console.error(`[WS PROXY] ${reason}`);
+    tcpBuffer = Buffer.alloc(0);
+    try {
+      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+        ws.close(1002, 'Invalid Nitro packet framing');
+      }
+    } catch (_) {}
+    try { tcp.destroy(); } catch (_) {}
+  };
+
+  const flushTcpFramesToWebSocket = () => {
+    while (tcpBuffer.length >= LENGTH_PREFIX_BYTES) {
+      const contentLength = tcpBuffer.readInt32BE(0);
+
+      if (contentLength < MIN_CONTENT_LENGTH || contentLength > MAX_CONTENT_LENGTH) {
+        const prefix = tcpBuffer.subarray(0, Math.min(16, tcpBuffer.length)).toString('hex');
+        closeForFramingError(
+          `Invalid Nitro packet length: ${contentLength}; available=${tcpBuffer.length}; prefix=${prefix}; at=${new Date().toISOString()}`
+        );
+        return;
+      }
+
+      const totalLength = LENGTH_PREFIX_BYTES + contentLength;
+
+      if (tcpBuffer.length < totalLength) {
+        framingLog(`[WS PROXY WAIT] need=${totalLength} available=${tcpBuffer.length}`);
+        return;
+      }
+
+      if (ws.readyState !== WebSocket.OPEN) {
+        try { tcp.destroy(); } catch (_) {}
+        return;
+      }
+
+      // Copy exactly one complete Nitro packet. No header, length or payload
+      // bytes are altered; only TCP stream boundaries are reconstructed.
+      const frame = Buffer.from(tcpBuffer.subarray(0, totalLength));
+      const remainingLength = tcpBuffer.length - totalLength;
+      tcpBuffer = remainingLength > 0
+        ? Buffer.from(tcpBuffer.subarray(totalLength))
+        : Buffer.alloc(0);
+
+      framingLog(
+        `[WS PROXY FRAME] contentLength=${contentLength} totalLength=${totalLength} remainingBuffer=${tcpBuffer.length}`
+      );
+
+      ws.send(frame, { binary: true }, (err) => {
+        if (err) console.error('[NitroProxy] WebSocket send error:', err.message);
+      });
+    }
+
+    if (tcpBuffer.length > 0) {
+      framingLog(`[WS PROXY WAIT] needHeader=${LENGTH_PREFIX_BYTES} available=${tcpBuffer.length}`);
+    }
+  };
 
   tcp.on('connect', () => {
     tcpReady = true;
@@ -26,10 +100,18 @@ wss.on('connection', (ws, req) => {
     while (pending.length) tcp.write(pending.shift());
   });
 
-  ws.on('message', (data) => {
+  // Browser -> emulator: keep the WebSocket message bytes unchanged.
+  // GamePacketParser on the emulator already owns the TCP stream reassembly
+  // and can parse one packet, multiple packets, or fragmented TCP writes.
+  ws.on('message', (data, isBinary) => {
     try {
-      const buffer = Buffer.isBuffer(data) ? Buffer.from(data) : Buffer.from(data);
+      const buffer = Buffer.from(data);
       if (!buffer.length) return;
+
+      framingLog(
+        `[WS PROXY TX] wsFrame=${buffer.length} binary=${Boolean(isBinary)} tcpReady=${tcpReady}`
+      );
+
       if (tcpReady) tcp.write(buffer);
       else pending.push(buffer);
     } catch (err) {
@@ -37,13 +119,27 @@ wss.on('connection', (ws, req) => {
     }
   });
 
+  // Emulator -> browser: TCP is a byte stream, so a data event is NOT a
+  // packet boundary. Accumulate bytes and emit one WebSocket message per
+  // complete Nitro packet.
   tcp.on('data', (chunk) => {
     try {
-      if (ws.readyState === WebSocket.OPEN && chunk && chunk.length) {
-        ws.send(Buffer.from(chunk), { binary: true });
-      }
+      if (!chunk || !chunk.length) return;
+
+      const bufferBefore = tcpBuffer.length;
+      tcpBuffer = bufferBefore > 0
+        ? Buffer.concat([tcpBuffer, chunk], bufferBefore + chunk.length)
+        : Buffer.from(chunk);
+
+      framingLog(
+        `[WS PROXY RX] tcpChunk=${chunk.length} bufferBefore=${bufferBefore} bufferAfter=${tcpBuffer.length}`
+      );
+
+      flushTcpFramesToWebSocket();
     } catch (err) {
-      console.error('[NitroProxy] TCP -> WS error:', err.message);
+      console.error('[NitroProxy] TCP -> WS framing error:', err.message);
+      try { ws.close(1011, 'Nitro packet framing error'); } catch (_) {}
+      try { tcp.destroy(); } catch (_) {}
     }
   });
 
@@ -56,12 +152,16 @@ wss.on('connection', (ws, req) => {
     console.error('[NitroProxy] WebSocket error:', err.message);
   });
 
-  ws.on('close', () => {
-    console.log('[NitroProxy] WebSocket closed');
+  ws.on('close', (code, reason) => {
+    console.log(`[NitroProxy] WebSocket closed code=${code} reason=${reason?.toString?.() || ''}`);
+    tcpBuffer = Buffer.alloc(0);
     try { tcp.destroy(); } catch (_) {}
   });
 
   tcp.on('close', () => {
+    if (tcpBuffer.length > 0) {
+      console.warn(`[WS PROXY] TCP closed with ${tcpBuffer.length} unconsumed byte(s) in framing buffer`);
+    }
     if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
       try { ws.close(); } catch (_) {}
     }
