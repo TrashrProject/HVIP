@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ParadiseRP — UI Preview</title>
+  <link rel="stylesheet" href="./paradise-ui-preview.css?v=1">
+</head>
+<body>
+  <main class="prp" id="prpApp" aria-label="Maquette UI ParadiseRP">
+    <div class="prp-world" aria-hidden="true">
+      <div class="prp-skyline"></div>
+      <div class="prp-map">
+        <div class="road road-a"></div>
+        <div class="road road-b"></div>
+        <div class="pavement"></div>
+        <div class="building cafe"><span>Café Marina</span></div>
+        <div class="building police"><span>Police</span></div>
+        <div class="building shop"><span>Paradise Shop</span></div>
+        <div class="palm p1"></div><div class="palm p2"></div><div class="palm p3"></div>
+        <div class="car car-blue"></div><div class="car car-yellow"></div>
+        <div class="avatar-world aw1"></div><div class="avatar-world aw2"></div><div class="avatar-world aw3"></div>
+        <div class="bubble b1">Service ouvert ?</div>
+        <div class="bubble b2">Rdv au port</div>
+      </div>
+    </div>
+
+    <section class="citizen-card glass pop-in" aria-label="Carte joueur">
+      <div class="citizen-scene">
+        <div class="avatar-pixel big"></div>
+        <span class="level-coin">24</span>
+      </div>
+      <div class="citizen-body">
+        <div class="citizen-title">
+          <div>
+            <strong>Elmayor</strong>
+            <small>ID #22068 · Paradise Bay</small>
+          </div>
+          <span class="badge staff">STAFF</span>
+        </div>
+        <div class="role-line"><span>💼 Fondateur</span><span>⭐ Réputation 82</span></div>
+        <div class="bars">
+          <label><span>❤️ Santé</span><b>315/500</b><i><u style="width:63%"></u></i></label>
+          <label><span>⚡ Énergie</span><b>285/400</b><i><u class="energy" style="width:71%"></u></i></label>
+          <label><span>🌴 Social</span><b>31/100</b><i><u class="social" style="width:31%"></u></i></label>
+        </div>
+      </div>
+    </section>
+
+    <header class="city-bar pop-in" aria-label="Informations ville">
+      <button class="city-chip"><span>🕘</span><b id="clock">21:30</b></button>
+      <button class="city-chip wide"><span>📍</span><b>Paradise City</b><small>Marina District</small></button>
+      <button class="city-chip"><span>☀️</span><b>26°</b></button>
+    </header>
+
+    <section class="wallet-stack pop-in" aria-label="Monnaies">
+      <button class="money-pill cash"><span>$</span><b>1 789</b><small>liquide</small></button>
+      <button class="money-pill bank"><span>▣</span><b>12 500</b><small>banque</small></button>
+      <button class="money-pill pixel"><span>H</span><b>5 000</b><small>pixels</small></button>
+    </section>
+
+    <nav class="side-rail glass pop-in" aria-label="Navigation principale">
+      <button class="rail-logo" data-screen="home" aria-label="Accueil"><span>PR</span></button>
+      <button class="rail-item active" data-screen="phone"><span>📱</span><b>Téléphone</b></button>
+      <button class="rail-item" data-screen="inventory"><span>🎒</span><b>Inventaire</b></button>
+      <button class="rail-item" data-screen="bank"><span>🏦</span><b>Banque</b></button>
+      <button class="rail-item" data-screen="jobs"><span>💼</span><b>Métiers</b></button>
+      <button class="rail-item" data-screen="commands"><span>⌘</span><b>Commandes</b></button>
+      <button class="rail-item" data-screen="identity"><span>🪪</span><b>Identité</b></button>
+    </nav>
+
+    <aside class="quest-board glass pop-in" aria-label="Quêtes quotidiennes">
+      <div class="panel-head">
+        <span class="head-icon">✦</span>
+        <div><strong>Agenda RP</strong><small>Quêtes quotidiennes</small></div>
+        <button class="icon-btn tiny">⌄</button>
+      </div>
+      <article class="quest done"><span>👋</span><div><b>Se connecter</b><i>Visiter Paradise City</i></div><em>1/1</em></article>
+      <article class="quest"><span>💬</span><div><b>Parler à 3 joueurs</b><i>Socialise en ville</i></div><em>2/3</em></article>
+      <article class="quest"><span>💼</span><div><b>Travailler 30 min</b><i>Gagner ton salaire</i></div><em>0/30</em></article>
+      <div class="reward-strip"><span>Récompense</span><b>💎 50</b><b>💵 500</b></div>
+    </aside>
+
+    <section class="quickbelt glass pop-in" aria-label="Actions rapides">
+      <button data-screen="identity"><span>🧍</span><b>Joueur</b><small>Profil</small></button>
+      <button data-screen="phone" class="active"><span>📱</span><b>Phone</b><small>Apps</small></button>
+      <button data-screen="bank"><span>💳</span><b>Banque</b><small>Solde</small></button>
+      <button data-screen="inventory"><span>🎒</span><b>Sac</b><small>28/60</small></button>
+      <button data-screen="jobs"><span>💼</span><b>Métier</b><small>Shift</small></button>
+      <button data-screen="commands"><span>⌘</span><b>Commandes</b><small>RP</small></button>
+    </section>
+
+    <form class="chat-console glass pop-in" aria-label="Chat RP">
+      <button type="button" class="chat-mode">Parler ▾</button>
+      <input placeholder="Clique ici pour discuter...">
+      <button type="button" class="emoji">☺</button>
+      <button type="submit" class="send">➤</button>
+    </form>
+
+    <section class="phone-panel screen-panel active" data-panel="phone" aria-label="ParadisePhone">
+      <div class="phone-shell">
+        <div class="phone-status"><span>Paradise 5G</span><b>21:30</b><span>84%</span></div>
+        <div class="phone-hero">
+          <small>ParadisePhone</small>
+          <strong>Bonsoir, Elmayor</strong>
+          <span>Marina District · 26°</span>
+        </div>
+        <div class="phone-widget">
+          <b>Banque</b><strong>12 500 $</strong><small>+650 $ dernier salaire</small>
+        </div>
+        <div class="app-grid">
+          <button data-screen="messages"><span>💬</span><b>Messages</b><em>3</em></button>
+          <button data-screen="bank"><span>🏦</span><b>Banque</b></button>
+          <button><span>🗺️</span><b>GPS</b></button>
+          <button><span>🚕</span><b>Taxi</b></button>
+          <button><span>🏠</span><b>Immo</b></button>
+          <button data-screen="jobs"><span>💼</span><b>Emploi</b></button>
+          <button><span>📰</span><b>News</b></button>
+          <button><span>📸</span><b>Social</b></button>
+          <button><span>⚙️</span><b>Réglages</b></button>
+        </div>
+        <div class="phone-homebar"></div>
+      </div>
+    </section>
+
+    <section class="window-panel screen-panel" data-panel="inventory" aria-label="Inventaire">
+      <div class="window glass large">
+        <div class="window-head"><div><strong>Inventaire</strong><small>Objets transportés · 28/60 kg</small></div><button class="icon-btn close-screen">×</button></div>
+        <div class="inventory-layout">
+          <aside class="avatar-preview"><div class="mini-room"><div class="avatar-pixel"></div></div><b>Elmayor</b><small>Tenue actuelle</small></aside>
+          <div class="inventory-grid" id="inventoryGrid"></div>
+          <aside class="item-detail"><span class="item-large">🪪</span><strong>Carte citoyenne</strong><p>Document officiel Paradise City. Peut être présenté aux services publics.</p><div class="actions"><button class="btn primary">Utiliser</button><button class="btn ghost">Donner</button><button class="btn danger">Jeter</button></div></aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="window-panel screen-panel" data-panel="bank" aria-label="Banque Paradise">
+      <div class="window glass bank-window">
+        <div class="window-head"><div><strong>Paradise Bank</strong><small>Compte personnel · IBAN PR-22068</small></div><button class="icon-btn close-screen">×</button></div>
+        <div class="bank-layout">
+          <div class="balance-card"><small>Solde disponible</small><strong>3 420 $</strong><span>Épargne · 12 500 $</span></div>
+          <div class="transfer-card"><b>Virement rapide</b><input placeholder="ID citoyen ou nom"><input placeholder="Montant"><button class="btn primary">Envoyer</button></div>
+          <div class="transactions"><b>Dernières transactions</b><p><span>Restaurant Paradise</span><em class="neg">-42 $</em></p><p><span>Salaire Police</span><em class="pos">+650 $</em></p><p><span>Location appartement</span><em class="neg">-350 $</em></p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="window-panel screen-panel" data-panel="jobs" aria-label="Métiers ParadiseRP">
+      <div class="window glass jobs-window">
+        <div class="window-head"><div><strong>Métiers</strong><small>Choisir une carrière RP</small></div><button class="icon-btn close-screen">×</button></div>
+        <div class="job-grid">
+          <article class="job-card police"><span>👮</span><b>Police</b><p>Maintiens l'ordre à Paradise City.</p><em>Salaire 650 $ · 4 places</em><button class="btn secondary">Postuler</button></article>
+          <article class="job-card"><span>🚑</span><b>EMS</b><p>Soigne les citoyens et réponds aux urgences.</p><em>Salaire 580 $ · 2 places</em><button class="btn secondary">Postuler</button></article>
+          <article class="job-card"><span>🚕</span><b>Taxi</b><p>Déplace les joueurs entre les quartiers.</p><em>Salaire variable · 7 places</em><button class="btn secondary">Postuler</button></article>
+          <article class="job-card"><span>🍔</span><b>Restaurant</b><p>Service, cuisine, gestion des stocks.</p><em>Salaire 420 $ · 5 places</em><button class="btn secondary">Postuler</button></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="window-panel screen-panel" data-panel="commands" aria-label="Commandes RP">
+      <div class="window glass commands-window">
+        <div class="window-head"><div><strong>Commandes</strong><small>Raccourcis RP et gameplay</small></div><button class="icon-btn close-screen">×</button></div>
+        <div class="command-search"><input id="commandSearch" placeholder="Rechercher une commande..." value=""></div>
+        <div class="command-tabs"><button class="active">Général</button><button>RP</button><button>Travail</button><button>Police</button><button>Admin</button></div>
+        <div class="command-list" id="commandList"></div>
+      </div>
+    </section>
+
+    <section class="window-panel screen-panel" data-panel="identity" aria-label="Documents RP">
+      <div class="document-card glass">
+        <div class="doc-top"><span>🪪</span><div><strong>Carte Citoyenne</strong><small>Paradise City · République insulaire</small></div></div>
+        <div class="doc-body"><div class="avatar-pixel"></div><div><b>Elmayor</b><p>ID citoyen : PR-22068</p><p>Métier : Fondateur</p><p>Permis : B · Taxi · Commerce</p></div></div>
+        <div class="doc-foot"><span>Émise le 20/08/2026</span><b>VALIDE</b></div>
+      </div>
+    </section>
+
+    <div class="context-menu glass pop-in" aria-label="Interaction joueur">
+      <button>👋 Interagir</button><button>💬 Parler</button><button>💵 Payer</button><button>🎁 Donner objet</button><button>👤 Voir profil</button>
+    </div>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  </main>
+  <script src="./paradise-ui-preview.js?v=1"></script>
+</body>
+</html>
