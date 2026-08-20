@@ -1,92 +1,117 @@
 <?php
 /**
- * Localhost asset fallback for the legacy Habbo/RDP pack.
+ * ParadiseRP asset resolver.
  *
- * Nitro and the old UI reference thousands of historical image paths. The
- * files are present in swf_pz, but some legacy configs point to a different
- * subdirectory. This endpoint resolves a missing asset by filename and serves
- * the best matching local copy.
+ * Used only when a requested Nitro/SWF asset is missing at its exact URL.
+ * It serves a real matching file from the local asset packs, including case,
+ * space/underscore and legacy folder differences. It never creates fake images.
  */
 
-$htdocs = dirname(__DIR__);
-$root = realpath($htdocs . DIRECTORY_SEPARATOR . 'swf_pz');
-
-if ($root === false || !is_dir($root)) {
-    http_response_code(404);
-    exit('swf_pz not found');
+function pr_fail(int $code, string $message): void {
+    http_response_code($code);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo $message;
+    exit;
 }
+
+$webRoot = __DIR__;
+$projectRoot = dirname(__DIR__);
+$roots = [];
+foreach ([
+    $webRoot . DIRECTORY_SEPARATOR . 'swf_pz',
+    $projectRoot . DIRECTORY_SEPARATOR . 'swf_pz',
+    $webRoot . DIRECTORY_SEPARATOR . 'SWF',
+    $projectRoot . DIRECTORY_SEPARATOR . 'SWF',
+] as $candidateRoot) {
+    $real = realpath($candidateRoot);
+    if ($real !== false && is_dir($real)) $roots[] = $real;
+}
+$roots = array_values(array_unique($roots));
+if (!$roots) pr_fail(404, 'asset roots not found');
 
 $requested = isset($_GET['u']) ? (string) $_GET['u'] : '';
 $requestedPath = parse_url($requested, PHP_URL_PATH);
-if (!is_string($requestedPath) || $requestedPath === '') {
-    $requestedPath = $requested;
-}
-
-$requestedPath = str_replace('\\', '/', $requestedPath);
+if (!is_string($requestedPath) || $requestedPath === '') $requestedPath = $requested;
+$requestedPath = rawurldecode(str_replace('\\', '/', $requestedPath));
 $filename = basename($requestedPath);
 
-if ($filename === '' || $filename === '.' || $filename === '..') {
-    http_response_code(400);
-    exit('invalid asset');
-}
+if ($filename === '' || $filename === '.' || $filename === '..') pr_fail(400, 'invalid asset');
 
 $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-$allowed = array('png','gif','jpg','jpeg','webp','svg','ico','nitro','json','mp3','ogg','wav');
-if (!in_array($extension, $allowed, true)) {
-    http_response_code(404);
-    exit('unsupported asset');
+$allowed = ['png','gif','jpg','jpeg','webp','svg','ico','nitro','json','mp3','ogg','wav','ttf','otf','woff','woff2','eot'];
+if (!in_array($extension, $allowed, true)) pr_fail(404, 'unsupported asset');
+
+function pr_key(string $name): string {
+    return strtolower($name);
 }
 
-// Keep the index outside the web root. Rebuild it when swf_pz changes or when
-// the cache is older than a day. The index contains only relative paths.
-$cacheFile = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'hvip_swf_asset_index_v2.json';
-$rootMtime = @filemtime($root);
+function pr_normalized_key(string $name): string {
+    $name = strtolower(rawurldecode($name));
+    $name = preg_replace('/[\s\-]+/', '_', $name);
+    $name = preg_replace('/_+/', '_', $name);
+    return $name ?: '';
+}
+
+$mtime = 0;
+foreach ($roots as $root) $mtime = max($mtime, (int) @filemtime($root));
+$cacheFile = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'paradiserp_asset_index_v4.json';
 $index = null;
 
-if (is_file($cacheFile) && (time() - @filemtime($cacheFile) < 86400)) {
-    $decoded = json_decode(@file_get_contents($cacheFile), true);
-    if (is_array($decoded) && isset($decoded['_root_mtime'], $decoded['files']) && (int)$decoded['_root_mtime'] === (int)$rootMtime) {
+if (is_file($cacheFile) && (time() - (int) @filemtime($cacheFile) < 86400)) {
+    $decoded = json_decode((string) @file_get_contents($cacheFile), true);
+    if (is_array($decoded) && (int) ($decoded['_mtime'] ?? 0) === $mtime && is_array($decoded['files'] ?? null)) {
         $index = $decoded['files'];
     }
 }
 
 if (!is_array($index)) {
-    $index = array();
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)
-    );
+    $index = [];
+    foreach ($roots as $rootIndex => $root) {
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
+        foreach ($iterator as $fileInfo) {
+            if (!$fileInfo->isFile()) continue;
+            $ext = strtolower($fileInfo->getExtension());
+            if (!in_array($ext, $allowed, true)) continue;
 
-    foreach ($iterator as $fileInfo) {
-        if (!$fileInfo->isFile()) continue;
-        $name = strtolower($fileInfo->getFilename());
-        $ext = strtolower($fileInfo->getExtension());
-        if (!in_array($ext, $allowed, true)) continue;
+            $absolute = $fileInfo->getPathname();
+            $relative = ltrim(str_replace('\\', '/', substr($absolute, strlen($root))), '/');
+            $entry = ['root' => $rootIndex, 'path' => $relative];
 
-        $absolute = $fileInfo->getPathname();
-        $relative = ltrim(str_replace('\\', '/', substr($absolute, strlen($root))), '/');
-        if (!isset($index[$name])) $index[$name] = array();
-        $index[$name][] = $relative;
+            foreach (array_unique([
+                pr_key($fileInfo->getFilename()),
+                pr_normalized_key($fileInfo->getFilename())
+            ]) as $key) {
+                if ($key === '') continue;
+                if (!isset($index[$key])) $index[$key] = [];
+                $index[$key][] = $entry;
+            }
+        }
     }
-
-    @file_put_contents($cacheFile, json_encode(array(
-        '_root_mtime' => (int)$rootMtime,
-        'files' => $index
-    ), JSON_UNESCAPED_SLASHES));
+    @file_put_contents($cacheFile, json_encode(['_mtime' => $mtime, 'files' => $index], JSON_UNESCAPED_SLASHES));
 }
 
-$key = strtolower($filename);
-if (!isset($index[$key]) || !is_array($index[$key]) || count($index[$key]) === 0) {
-    http_response_code(404);
-    exit('asset not found');
+$lookupKeys = array_values(array_unique([
+    pr_key($filename),
+    pr_normalized_key($filename),
+    pr_key(str_replace(' ', '_', $filename)),
+    pr_key(str_replace('_', ' ', $filename))
+]));
+
+$candidates = [];
+foreach ($lookupKeys as $key) {
+    if (isset($index[$key]) && is_array($index[$key])) {
+        foreach ($index[$key] as $entry) $candidates[] = $entry;
+    }
 }
 
-// Score duplicate filenames by how many path segments match the original URL.
+if (!$candidates) pr_fail(404, 'asset not found');
+
 $wantedSegments = array_values(array_filter(explode('/', strtolower($requestedPath)), 'strlen'));
 $best = null;
 $bestScore = -1;
-foreach ($index[$key] as $candidate) {
-    $candidateLower = strtolower(str_replace('\\', '/', $candidate));
-    $candidateSegments = array_values(array_filter(explode('/', $candidateLower), 'strlen'));
+foreach ($candidates as $entry) {
+    $candidate = strtolower(str_replace('\\', '/', (string) ($entry['path'] ?? '')));
+    $candidateSegments = array_values(array_filter(explode('/', $candidate), 'strlen'));
     $score = 0;
 
     foreach ($wantedSegments as $segment) {
@@ -95,34 +120,32 @@ foreach ($index[$key] as $candidate) {
     }
 
     $wantedTail = implode('/', array_slice($wantedSegments, -3));
-    if ($wantedTail !== '' && substr($candidateLower, -strlen($wantedTail)) === $wantedTail) $score += 20;
+    if ($wantedTail !== '' && substr($candidate, -strlen($wantedTail)) === $wantedTail) $score += 30;
+
+    // Prefer exact case-insensitive filename before normalized matches.
+    if (basename($candidate) === strtolower($filename)) $score += 10;
 
     if ($score > $bestScore) {
         $bestScore = $score;
-        $best = $candidate;
+        $best = $entry;
     }
 }
 
-if ($best === null) {
-    http_response_code(404);
-    exit('asset not found');
-}
+if ($best === null || !isset($roots[(int) $best['root']])) pr_fail(404, 'asset not found');
+$root = $roots[(int) $best['root']];
+$file = realpath($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, (string) $best['path']));
+if ($file === false || strpos(strtolower($file), strtolower($root)) !== 0 || !is_file($file)) pr_fail(404, 'asset not found');
 
-$file = realpath($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $best));
-if ($file === false || strpos(strtolower($file), strtolower($root)) !== 0 || !is_file($file)) {
-    http_response_code(404);
-    exit('asset not found');
-}
-
-$mimeMap = array(
+$mimeMap = [
     'png' => 'image/png', 'gif' => 'image/gif', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg',
     'webp' => 'image/webp', 'svg' => 'image/svg+xml', 'ico' => 'image/x-icon',
-    'json' => 'application/json', 'mp3' => 'audio/mpeg', 'ogg' => 'audio/ogg', 'wav' => 'audio/wav',
+    'json' => 'application/json; charset=utf-8', 'mp3' => 'audio/mpeg', 'ogg' => 'audio/ogg', 'wav' => 'audio/wav',
+    'ttf' => 'font/ttf', 'otf' => 'font/otf', 'woff' => 'font/woff', 'woff2' => 'font/woff2', 'eot' => 'application/vnd.ms-fontobject',
     'nitro' => 'application/octet-stream'
-);
+];
 
-header('Content-Type: ' . (isset($mimeMap[$extension]) ? $mimeMap[$extension] : 'application/octet-stream'));
+header('Content-Type: ' . ($mimeMap[$extension] ?? 'application/octet-stream'));
 header('Content-Length: ' . filesize($file));
 header('Cache-Control: public, max-age=86400');
-header('X-HVIP-Asset-Fallback: ' . str_replace(array("\r", "\n"), '', $best));
+header('X-Paradise-Asset-Fallback: ' . str_replace(["\r", "\n"], '', (string) $best['path']));
 readfile($file);
