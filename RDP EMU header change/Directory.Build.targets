@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="PrepareParadiseCompileGeneratedFiles" BeforeTargets="CoreCompile">
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <WriteLinesToFile
+      File="$(IntermediateOutputPath)TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs"
+      Lines="// Auto-generated compatibility stub required by legacy MSBuild/CoreCompile."
+      Overwrite="false" />
+    <WriteLinesToFile
+      File="$(IntermediateOutputPath)TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs"
+      Lines="// Auto-generated compatibility stub required by legacy MSBuild/CoreCompile."
+      Overwrite="false" />
+    <WriteLinesToFile
+      File="$(IntermediateOutputPath)TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs"
+      Lines="// Auto-generated compatibility stub required by legacy MSBuild/CoreCompile."
+      Overwrite="false" />
+  </Target>
+
   <Target Name="PrepareParadiseRuntimeFiles" AfterTargets="Build">
     <MakeDir Directories="$(TargetDir)extra" />
     <Copy SourceFiles="$(MSBuildThisFileDirectory)extra\figuredata.xml"
