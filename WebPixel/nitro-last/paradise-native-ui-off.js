@@ -1,13 +1,14 @@
 (() => {
   'use strict';
 
-  const VERSION = '9.0.0-native-chat-visible';
+  const VERSION = '10.0.0-renderer-safe-cleanup';
   const STYLE_ID = 'paradise-native-ui-off-style';
+  const HUD_ID = 'paradise-rp-hud';
   window.__PARADISE_NATIVE_UI_OFF_LOCK__ = VERSION;
 
   const css = `
-    /* ParadiseRP native UI off - safe mode.
-       Le vrai champ chat Nitro reste visible et fonctionnel. */
+    /* ParadiseRP native UI cleanup — renderer safe mode.
+       Ne masque jamais les containers qui portent le canvas / Pixi. */
     #CombatMode,
     #PSVMode,
     #TicketMode,
@@ -21,19 +22,34 @@
     .menuButton-yNbz6_0,
     .button-3IzmP_0.menuButton-yNbz6_0,
     [class*="menuButton-yNbz6"],
-    [class*="button-3IzmP"],
-    [data-pr-native-ui-killed="1"]:not([data-pr-native-chat-live="1"]):not([data-pr-native-chat-host="1"]) {
+    [class*="button-3IzmP"] {
       display: none !important;
       visibility: hidden !important;
       opacity: 0 !important;
       pointer-events: none !important;
     }
 
-    #paradise-rp-hud .prhud-chat {
+    [data-pr-native-ui-killed="1"]:not([data-pr-native-chat-live="1"]):not([data-pr-native-chat-host="1"]):not([data-pr-renderer-safe="1"]) {
       display: none !important;
       visibility: hidden !important;
       opacity: 0 !important;
       pointer-events: none !important;
+    }
+
+    #${HUD_ID} .prhud-chat {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    [data-pr-renderer-safe="1"],
+    [data-pr-renderer-safe="1"] canvas,
+    #root canvas {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
     }
 
     [data-pr-native-chat-host="1"] {
@@ -56,36 +72,37 @@
     #root textarea[placeholder*="chat" i]:not(#prhud-chat-input) {
       position: fixed !important;
       left: 50% !important;
-      bottom: 64px !important;
+      bottom: 25px !important;
       transform: translateX(-50%) !important;
-      width: 610px !important;
-      height: 44px !important;
-      min-width: 610px !important;
-      min-height: 44px !important;
-      max-width: calc(100vw - 620px) !important;
-      max-height: 44px !important;
+      width: min(560px, calc(100vw - 860px)) !important;
+      min-width: 420px !important;
+      max-width: 620px !important;
+      height: 48px !important;
+      min-height: 48px !important;
+      max-height: 48px !important;
       z-index: 2147483646 !important;
       display: block !important;
       visibility: visible !important;
       opacity: 1 !important;
       pointer-events: auto !important;
-      color: #dce8f3 !important;
-      caret-color: #38ddff !important;
-      background: linear-gradient(180deg, rgba(8,24,37,.972), rgba(2,8,14,.992)) !important;
-      border: 1px solid rgba(39,200,255,.48) !important;
+      color: #17272d !important;
+      caret-color: #65d7c5 !important;
+      background: rgba(255,255,255,.82) !important;
+      border: 1px solid rgba(255,255,255,.58) !important;
       border-radius: 14px !important;
-      box-shadow: 0 14px 28px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.10) !important;
-      padding: 0 52px 0 18px !important;
+      box-shadow: 0 14px 30px rgba(18,34,40,.17), inset 0 1px 0 rgba(255,255,255,.6) !important;
+      padding: 0 54px 0 108px !important;
       outline: 0 !important;
-      font: 800 13px/44px Inter, "Segoe UI", Arial, sans-serif !important;
+      font: 800 13px/48px Inter, "Segoe UI", Arial, sans-serif !important;
       text-align: left !important;
+      backdrop-filter: blur(8px) !important;
     }
 
     [data-pr-native-chat-live="1"]::placeholder,
     #root input[placeholder*="Haz" i]:not(#prhud-chat-input)::placeholder,
     #root input[placeholder*="chatear" i]:not(#prhud-chat-input)::placeholder,
     #root input[placeholder*="chat" i]:not(#prhud-chat-input)::placeholder {
-      color: #7d8d9f !important;
+      color: #72868b !important;
       opacity: 1 !important;
     }
 
@@ -112,26 +129,70 @@
 
   const isProtected = el => {
     if (!el || el === document.documentElement || el === document.body) return true;
-    if (el.id === 'root' || el.id === 'RdpNitroFrame' || el.id === 'paradise-rp-hud' || el.id === 'paradise-loader') return true;
+    if (el.id === 'root' || el.id === 'RdpNitroFrame' || el.id === HUD_ID || el.id === 'paradise-loader') return true;
     if (el.tagName === 'IFRAME' || el.tagName === 'CANVAS') return true;
-    if (el.closest && el.closest('#paradise-rp-hud, #paradise-loader')) return true;
     if (['SCRIPT', 'STYLE', 'LINK', 'META', 'TITLE', 'BASE', 'NOSCRIPT'].includes(el.tagName)) return true;
+    if (el.closest && el.closest(`#${HUD_ID}, #paradise-loader`)) return true;
+    if (el.closest && el.closest('[data-pr-renderer-safe="1"]')) return true;
     return false;
   };
 
-  const hasLargeCanvas = el => {
+  const hasRendererCanvas = el => {
     try {
       if (!el || !el.querySelectorAll) return false;
-      for (const canvas of el.querySelectorAll('canvas')) {
+      return Array.from(el.querySelectorAll('canvas')).some(canvas => {
         const r = canvas.getBoundingClientRect();
-        if (r.width > window.innerWidth * 0.35 && r.height > window.innerHeight * 0.35) return true;
+        const w = r.width || canvas.width || 0;
+        const h = r.height || canvas.height || 0;
+        return w > window.innerWidth * 0.18 && h > window.innerHeight * 0.18;
+      });
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const restoreElement = el => {
+    if (!el || el === document.documentElement || el === document.body) return;
+    try {
+      el.setAttribute('data-pr-renderer-safe', '1');
+      el.removeAttribute('data-pr-native-ui-killed');
+      el.style.removeProperty('display');
+      el.style.removeProperty('visibility');
+      el.style.removeProperty('opacity');
+      el.style.removeProperty('pointer-events');
+      el.style.removeProperty('filter');
+      el.style.removeProperty('clip-path');
+      el.style.removeProperty('transform');
+      el.style.removeProperty('height');
+      el.style.removeProperty('width');
+      el.style.setProperty('visibility', 'visible', 'important');
+      el.style.setProperty('opacity', '1', 'important');
+      if (el.tagName === 'CANVAS') {
+        el.style.setProperty('display', 'block', 'important');
       }
-    } catch (_) {}
-    return false;
+    } catch (error) {}
+  };
+
+  const protectRenderer = () => {
+    try {
+      document.querySelectorAll('#root canvas').forEach(canvas => {
+        restoreElement(canvas);
+        let parent = canvas.parentElement;
+        for (let depth = 0; parent && depth < 12; depth += 1, parent = parent.parentElement) {
+          restoreElement(parent);
+          if (parent.id === 'root') break;
+        }
+      });
+
+      document.querySelectorAll('[data-pr-native-ui-killed="1"]').forEach(el => {
+        if (hasRendererCanvas(el)) restoreElement(el);
+      });
+    } catch (error) {}
   };
 
   const hideElement = el => {
-    if (isProtected(el) || hasLargeCanvas(el)) return;
+    protectRenderer();
+    if (isProtected(el) || hasRendererCanvas(el)) return;
     if (el.querySelector?.('[data-pr-native-chat-live="1"]') || el.getAttribute?.('data-pr-native-chat-live') === '1') return;
     try {
       el.removeAttribute('data-pr-native-chat-live');
@@ -141,22 +202,14 @@
       el.style.setProperty('visibility', 'hidden', 'important');
       el.style.setProperty('opacity', '0', 'important');
       el.style.setProperty('pointer-events', 'none', 'important');
-    } catch (_) {}
-  };
-
-  const getText = el => {
-    try {
-      return String((el.innerText || el.textContent || el.getAttribute?.('placeholder') || el.getAttribute?.('title') || el.getAttribute?.('aria-label') || '')).trim();
-    } catch (_) {
-      return '';
-    }
+    } catch (error) {}
   };
 
   const isNativeChatField = el => {
     if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return false;
-    if (el.id === 'prhud-chat-input' || el.closest?.('#paradise-rp-hud')) return false;
+    if (el.id === 'prhud-chat-input' || el.closest?.(`#${HUD_ID}`)) return false;
     const text = `${el.getAttribute('placeholder') || ''} ${el.className || ''} ${el.id || ''} ${el.value || ''}`;
-    return /haz|chatear|chat|parler|message|say/i.test(text);
+    return /haz|chatear|chat|chatter|parler|message|say/i.test(text);
   };
 
   const restoreNativeChat = () => {
@@ -167,122 +220,72 @@
         input.removeAttribute('data-pr-native-ui-killed');
         input.removeAttribute('data-pr-native-chat-parked');
         input.setAttribute('data-pr-native-chat-live', '1');
-        if (/haz|chatear/i.test(input.getAttribute('placeholder') || '')) input.setAttribute('placeholder', 'Clique ici pour chatter...');
+        if (/haz|chatear/i.test(input.getAttribute('placeholder') || '')) input.setAttribute('placeholder', 'Écrire un message...');
+        if (!input.getAttribute('placeholder')) input.setAttribute('placeholder', 'Écrire un message...');
 
-        try {
-          input.style.setProperty('display', 'block', 'important');
-          input.style.setProperty('visibility', 'visible', 'important');
-          input.style.setProperty('opacity', '1', 'important');
-          input.style.setProperty('pointer-events', 'auto', 'important');
-        } catch (_) {}
+        input.style.setProperty('display', 'block', 'important');
+        input.style.setProperty('visibility', 'visible', 'important');
+        input.style.setProperty('opacity', '1', 'important');
+        input.style.setProperty('pointer-events', 'auto', 'important');
 
         let parent = input.parentElement;
         for (let i = 0; parent && i < 5; i += 1, parent = parent.parentElement) {
-          if (isProtected(parent) || hasLargeCanvas(parent)) break;
-          try {
-            parent.removeAttribute('data-pr-native-ui-killed');
-            parent.removeAttribute('data-pr-native-chat-parked');
-            parent.setAttribute('data-pr-native-chat-host', '1');
-            parent.style.setProperty('display', 'block', 'important');
-            parent.style.setProperty('visibility', 'visible', 'important');
-            parent.style.setProperty('opacity', '1', 'important');
-            parent.style.setProperty('pointer-events', 'none', 'important');
-            parent.style.setProperty('background', 'transparent', 'important');
-            parent.style.setProperty('border', '0', 'important');
-            parent.style.setProperty('box-shadow', 'none', 'important');
-            parent.style.setProperty('overflow', 'visible', 'important');
-          } catch (_) {}
+          if (isProtected(parent) || hasRendererCanvas(parent)) break;
+          parent.removeAttribute('data-pr-native-ui-killed');
+          parent.removeAttribute('data-pr-native-chat-parked');
+          parent.setAttribute('data-pr-native-chat-host', '1');
+          parent.style.setProperty('display', 'block', 'important');
+          parent.style.setProperty('visibility', 'visible', 'important');
+          parent.style.setProperty('opacity', '1', 'important');
+          parent.style.setProperty('pointer-events', 'none', 'important');
+          parent.style.setProperty('background', 'transparent', 'important');
+          parent.style.setProperty('border', '0', 'important');
+          parent.style.setProperty('box-shadow', 'none', 'important');
+          parent.style.setProperty('overflow', 'visible', 'important');
         }
       });
-    } catch (_) {}
+    } catch (error) {}
   };
 
   const selectors = [
     '#CombatMode', '#PSVMode', '#TicketMode', '#NavigatorMode', '#FriendsMode', '#SettingsMode',
     '#PhoneMode', '#CatalogMode', '#InventoryMode', '#RoomInfoMode',
     '.menuButton-yNbz6_0', '[class*="menuButton-yNbz6"]', '[class*="button-3IzmP"]',
-    '[class*="nitro-toolbar"]', '[class*="toolbar"]', '[class*="toolbar-item"]',
-    '[class*="habbo-toolbar"]'
+    '[class*="nitro-toolbar"]', '[class*="habbo-toolbar"]'
   ];
-
-  const isLegacyText = text => /\[(CALLE|INT|SALA|ROOM)\]|HabboVIP|Que hay|Qué hay|What'?s new|proposito|propósito|seguridad|sitio web|Bubble/i.test(text || '');
-
-  const isSmallVisibleBox = el => {
-    if (isProtected(el) || hasLargeCanvas(el)) return false;
-    if (el.querySelector?.('[data-pr-native-chat-live="1"]') || el.getAttribute?.('data-pr-native-chat-live') === '1') return false;
-    let r;
-    try { r = el.getBoundingClientRect(); } catch (_) { return false; }
-    if (!r || r.width <= 2 || r.height <= 2) return false;
-    if (r.width > Math.min(520, window.innerWidth * 0.42)) return false;
-    if (r.height > Math.min(170, window.innerHeight * 0.22)) return false;
-    return true;
-  };
-
-  const isBottomLeftLegacy = el => {
-    if (el.querySelector?.('[data-pr-native-chat-live="1"]') || el.getAttribute?.('data-pr-native-chat-live') === '1') return false;
-    if (!isSmallVisibleBox(el)) return false;
-    let r;
-    try { r = el.getBoundingClientRect(); } catch (_) { return false; }
-
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const text = getText(el);
-
-    const oldRoomLabel = r.left < 280 && r.top > vh - 300 && r.width < 300 && r.height < 105 && isLegacyText(text);
-    const oldBottomIcons = r.left < 260 && r.top > vh - 135 && r.width < 280 && r.height < 125;
-    const oldLowerLeftRail = r.left < 55 && r.top > vh - 315 && r.width < 65 && r.height < 315;
-    const oldPhone = r.right > vw - 85 && r.bottom > vh - 100 && r.width < 85 && r.height < 100;
-    const oldTopRightToast = r.right > vw - 360 && r.top < 95 && r.width < 360 && r.height < 95 && isLegacyText(text);
-
-    return oldRoomLabel || oldBottomIcons || oldLowerLeftRail || oldPhone || oldTopRightToast;
-  };
-
-  const killLegacyTextBlocks = () => {
-    try {
-      document.querySelectorAll('div, span, p, section, aside, label, button').forEach(el => {
-        if (!isSmallVisibleBox(el)) return;
-        const text = getText(el);
-        if (!isLegacyText(text)) return;
-        hideElement(el);
-      });
-    } catch (_) {}
-  };
 
   const killOnlyKnownButtons = () => {
     installCss();
+    protectRenderer();
     restoreNativeChat();
 
     for (const selector of selectors) {
       try {
         document.querySelectorAll(selector).forEach(el => {
-          if (isProtected(el)) return;
-          if (el.querySelector?.('[data-pr-native-chat-live="1"]')) return;
-          const r = el.getBoundingClientRect();
-          if (r.width > window.innerWidth * 0.55 || r.height > window.innerHeight * 0.55) return;
+          if (isProtected(el) || hasRendererCanvas(el)) return;
+          const r = el.getBoundingClientRect?.();
+          if (r && (r.width > window.innerWidth * 0.55 || r.height > window.innerHeight * 0.55)) return;
           hideElement(el);
         });
-      } catch (_) {}
+      } catch (error) {}
     }
 
-    try {
-      document.querySelectorAll('button, img, div, span, i, p, section, aside').forEach(el => {
-        if (isBottomLeftLegacy(el)) hideElement(el);
-      });
-    } catch (_) {}
-
-    killLegacyTextBlocks();
+    // Filet de sécurité: si un précédent scan a caché un parent du renderer,
+    // on le réactive immédiatement. C'est ce qui évite l'écran noir aléatoire.
+    protectRenderer();
     restoreNativeChat();
   };
 
   const boot = () => {
     installCss();
     killOnlyKnownButtons();
-    [0, 50, 120, 250, 500, 900, 1400, 2200, 4000, 7000].forEach(ms => setTimeout(killOnlyKnownButtons, ms));
+    [0, 50, 120, 250, 500, 900, 1400, 2200, 4000, 7000, 11000].forEach(ms => setTimeout(killOnlyKnownButtons, ms));
     if (window.__paradiseNativeUiOffSafeInterval) clearInterval(window.__paradiseNativeUiOffSafeInterval);
     window.__paradiseNativeUiOffSafeInterval = setInterval(killOnlyKnownButtons, 700);
   };
 
   window.__paradiseNativeUiOffScan = killOnlyKnownButtons;
+  window.__paradiseNativeUiOffProtectRenderer = protectRenderer;
   window.__paradiseNativeUiOffVersion = VERSION;
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
