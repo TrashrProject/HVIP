@@ -1,0 +1,36 @@
+name: ParadiseRP Phase 2 checks
+
+on:
+  push:
+    branches:
+      - feature/paradise-character-v2
+  pull_request:
+    paths:
+      - 'WebPixel/nitro-last/paradise-character-v2.js'
+      - 'WebPixel/paradise-character-lib.php'
+      - 'WebPixel/rp-character-action.php'
+      - 'WebPixel/rp-hud-data.php'
+      - 'migrations/2026_08_21_paradise_character_system.sql'
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JavaScript syntax
+        run: node --check WebPixel/nitro-last/paradise-character-v2.js
+
+      - name: PHP syntax
+        run: |
+          php -l WebPixel/paradise-character-lib.php
+          php -l WebPixel/rp-character-action.php
+          php -l WebPixel/rp-hud-data.php
+
+      - name: Forward migration stays additive
+        shell: bash
+        run: |
+          if grep -Eiq '^[[:space:]]*DROP[[:space:]]+(TABLE|DATABASE)|^[[:space:]]*TRUNCATE[[:space:]]' migrations/2026_08_21_paradise_character_system.sql; then
+            echo 'Destructive SQL detected in forward Phase 2 migration.'
+            exit 1
+          fi
