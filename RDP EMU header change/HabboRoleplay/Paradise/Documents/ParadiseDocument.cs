@@ -21,7 +21,7 @@ namespace Plus.HabboRoleplay.Paradise.Documents
             get
             {
                 if (!String.Equals(Status, "VALID", StringComparison.OrdinalIgnoreCase)) return false;
-                return !ExpiresAt.HasValue || ExpiresAt.Value > DateTime.UtcNow;
+                return !ExpiresAt.HasValue || ExpiresAt.Value > DateTime.Now;
             }
         }
 
