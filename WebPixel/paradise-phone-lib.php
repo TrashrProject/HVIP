@@ -1,5 +1,8 @@
 <?php
-/** ParadiseRP Phase 4 — server-authoritative ParadisePhone helpers. */
+/** ParadiseRP Phase 4 — server-authoritative ParadisePhone helpers.
+ * SMS persistence deliberately reuses the existing play_phone_chats table used
+ * by the emulator PhoneChatManager. No second SMS store is introduced.
+ */
 
 function pr_phone_table_exists(mysqli $con, string $table): bool
 {
@@ -46,9 +49,22 @@ function pr_phone_number_candidate(): string
 function pr_phone_row_by_user(mysqli $con, int $userId): ?array
 {
     if (!pr_phone_table_exists($con, 'rp_phones')) return null;
-    $stmt = mysqli_prepare($con, 'SELECT * FROM rp_phones WHERE user_id=? AND status=\'ACTIVE\' LIMIT 1');
+    $stmt = mysqli_prepare($con, "SELECT * FROM rp_phones WHERE user_id=? AND status='ACTIVE' LIMIT 1");
     if (!$stmt) return null;
     mysqli_stmt_bind_param($stmt, 'i', $userId);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = $res ? (mysqli_fetch_assoc($res) ?: null) : null;
+    if ($res) mysqli_free_result($res);
+    mysqli_stmt_close($stmt);
+    return $row;
+}
+
+function pr_phone_row_by_id(mysqli $con, int $phoneId): ?array
+{
+    $stmt = mysqli_prepare($con, "SELECT * FROM rp_phones WHERE id=? AND status='ACTIVE' LIMIT 1");
+    if (!$stmt) return null;
+    mysqli_stmt_bind_param($stmt, 'i', $phoneId);
     mysqli_stmt_execute($stmt);
     $res = mysqli_stmt_get_result($stmt);
     $row = $res ? (mysqli_fetch_assoc($res) ?: null) : null;
@@ -60,7 +76,7 @@ function pr_phone_row_by_user(mysqli $con, int $userId): ?array
 function pr_phone_row_by_number(mysqli $con, string $number): ?array
 {
     $number = trim($number);
-    $stmt = mysqli_prepare($con, 'SELECT * FROM rp_phones WHERE phone_number=? AND status=\'ACTIVE\' LIMIT 1');
+    $stmt = mysqli_prepare($con, "SELECT * FROM rp_phones WHERE phone_number=? AND status='ACTIVE' LIMIT 1");
     if (!$stmt) return null;
     mysqli_stmt_bind_param($stmt, 's', $number);
     mysqli_stmt_execute($stmt);
@@ -77,10 +93,10 @@ function pr_phone_ensure(mysqli $con, int $userId): ?array
     if ($existing) return $existing;
     if (!pr_phone_has_device($con, $userId)) return null;
 
-    for ($attempt=0; $attempt<50; $attempt++) {
+    for ($attempt = 0; $attempt < 50; $attempt++) {
         $number = pr_phone_number_candidate();
         $device = 'PI-' . strtoupper(substr(hash('sha256', $userId . '|' . microtime(true) . '|' . $attempt), 0, 20));
-        $stmt = mysqli_prepare($con, 'INSERT IGNORE INTO rp_phones (user_id,phone_number,device_identifier,status) VALUES (?,?,?,\'ACTIVE\')');
+        $stmt = mysqli_prepare($con, "INSERT IGNORE INTO rp_phones (user_id,phone_number,device_identifier,status) VALUES (?,?,?,'ACTIVE')");
         if (!$stmt) return null;
         mysqli_stmt_bind_param($stmt, 'iss', $userId, $number, $device);
         mysqli_stmt_execute($stmt);
@@ -128,7 +144,7 @@ function pr_phone_resolve(mysqli $con, array $ownerPhone, string $token): ?array
     if ($token === '') return null;
     $byNumber = pr_phone_row_by_number($con, $token);
     if ($byNumber) return $byNumber;
-    $stmt = mysqli_prepare($con, 'SELECT p.* FROM rp_phone_contacts c INNER JOIN rp_phones p ON p.phone_number=c.contact_phone_number WHERE c.phone_id=? AND LOWER(c.display_name)=LOWER(?) AND p.status=\'ACTIVE\' LIMIT 1');
+    $stmt = mysqli_prepare($con, "SELECT p.* FROM rp_phone_contacts c INNER JOIN rp_phones p ON p.phone_number=c.contact_phone_number WHERE c.phone_id=? AND LOWER(c.display_name)=LOWER(?) AND p.status='ACTIVE' LIMIT 1");
     if (!$stmt) return null;
     $phoneId = (int)$ownerPhone['id'];
     mysqli_stmt_bind_param($stmt, 'is', $phoneId, $token);
@@ -164,57 +180,190 @@ function pr_phone_log_action(mysqli $con, int $phoneId, string $action, ?int $ta
 
 function pr_phone_contacts(mysqli $con, array $phone): array
 {
-    $sql = 'SELECT c.id,c.display_name,c.contact_phone_number,p.user_id FROM rp_phone_contacts c LEFT JOIN rp_phones p ON p.phone_number=c.contact_phone_number AND p.status=\'ACTIVE\' WHERE c.phone_id=? ORDER BY c.display_name';
+    $sql = "SELECT c.id,c.display_name,c.contact_phone_number,p.user_id FROM rp_phone_contacts c LEFT JOIN rp_phones p ON p.phone_number=c.contact_phone_number AND p.status='ACTIVE' WHERE c.phone_id=? ORDER BY c.display_name";
     $stmt = mysqli_prepare($con, $sql);
     if (!$stmt) return [];
-    $phoneId=(int)$phone['id']; mysqli_stmt_bind_param($stmt, 'i', $phoneId); mysqli_stmt_execute($stmt);
-    $res=mysqli_stmt_get_result($stmt); $out=[];
-    while ($res && ($row=mysqli_fetch_assoc($res))) {
+    $phoneId = (int)$phone['id'];
+    mysqli_stmt_bind_param($stmt, 'i', $phoneId);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $out = [];
+    while ($res && ($row = mysqli_fetch_assoc($res))) {
         $identity = $row['user_id'] ? pr_phone_identity($con, (int)$row['user_id']) : ['username'=>null,'name'=>null,'look'=>null];
-        $out[]=['id'=>(int)$row['id'],'name'=>(string)$row['display_name'],'number'=>(string)$row['contact_phone_number'],'user_id'=>$row['user_id'] ? (int)$row['user_id'] : null,'username'=>$identity['username'],'look'=>$identity['look'],'online'=>$row['user_id'] ? pr_phone_is_online($con,(int)$row['user_id']) : false];
+        $out[] = [
+            'id'=>(int)$row['id'], 'name'=>(string)$row['display_name'], 'number'=>(string)$row['contact_phone_number'],
+            'user_id'=>$row['user_id'] ? (int)$row['user_id'] : null, 'username'=>$identity['username'], 'look'=>$identity['look'],
+            'online'=>$row['user_id'] ? pr_phone_is_online($con, (int)$row['user_id']) : false
+        ];
     }
-    if ($res) mysqli_free_result($res); mysqli_stmt_close($stmt); return $out;
+    if ($res) mysqli_free_result($res);
+    mysqli_stmt_close($stmt);
+    return $out;
+}
+
+function pr_phone_contact_name(mysqli $con, int $phoneId, string $number): ?string
+{
+    $stmt = mysqli_prepare($con, 'SELECT display_name FROM rp_phone_contacts WHERE phone_id=? AND contact_phone_number=? LIMIT 1');
+    if (!$stmt) return null;
+    mysqli_stmt_bind_param($stmt, 'is', $phoneId, $number);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = $res ? (mysqli_fetch_assoc($res) ?: null) : null;
+    if ($res) mysqli_free_result($res);
+    mysqli_stmt_close($stmt);
+    return $row ? (string)$row['display_name'] : null;
 }
 
 function pr_phone_conversations(mysqli $con, array $phone): array
 {
-    $id=(int)$phone['id'];
-    $sql = "SELECT x.other_id,p.phone_number,p.user_id,m.body,m.sent_at,COALESCE(u.unread,0) unread FROM (SELECT CASE WHEN sender_phone_id=? THEN receiver_phone_id ELSE sender_phone_id END other_id,MAX(id) last_id FROM rp_phone_messages WHERE sender_phone_id=? OR receiver_phone_id=? GROUP BY other_id) x INNER JOIN rp_phone_messages m ON m.id=x.last_id INNER JOIN rp_phones p ON p.id=x.other_id LEFT JOIN (SELECT sender_phone_id,COUNT(*) unread FROM rp_phone_messages WHERE receiver_phone_id=? AND read_at IS NULL GROUP BY sender_phone_id) u ON u.sender_phone_id=x.other_id ORDER BY m.sent_at DESC LIMIT 50";
-    $stmt=mysqli_prepare($con,$sql); if(!$stmt)return[]; mysqli_stmt_bind_param($stmt,'iiii',$id,$id,$id,$id); mysqli_stmt_execute($stmt); $res=mysqli_stmt_get_result($stmt); $out=[];
-    while($res && ($row=mysqli_fetch_assoc($res))){
-        $contactName=null; $cs=mysqli_prepare($con,'SELECT display_name FROM rp_phone_contacts WHERE phone_id=? AND contact_phone_number=? LIMIT 1'); if($cs){$num=(string)$row['phone_number'];mysqli_stmt_bind_param($cs,'is',$id,$num);mysqli_stmt_execute($cs);$cr=mysqli_stmt_get_result($cs);$c=$cr?mysqli_fetch_assoc($cr):null;if($cr)mysqli_free_result($cr);mysqli_stmt_close($cs);$contactName=$c?$c['display_name']:null;}
-        $identity=pr_phone_identity($con,(int)$row['user_id']);
-        $out[]=['phone_id'=>(int)$row['other_id'],'number'=>(string)$row['phone_number'],'name'=>$contactName ?: $identity['name'] ?: (string)$row['phone_number'],'username'=>$identity['username'],'look'=>$identity['look'],'last_message'=>(string)$row['body'],'last_at'=>(string)$row['sent_at'],'unread'=>(int)$row['unread']];
+    $selfUserId = (int)$phone['user_id'];
+    $selfPhoneId = (int)$phone['id'];
+    $sql = "SELECT x.other_user_id,x.last_id,m.msg,m.timestamp,COALESCE(u.unread,0) unread
+            FROM (
+              SELECT CASE WHEN emisor_id=? THEN receptor_id ELSE emisor_id END other_user_id, MAX(id) last_id
+              FROM play_phone_chats
+              WHERE type=1 AND (emisor_id=? OR receptor_id=?)
+              GROUP BY other_user_id
+            ) x
+            INNER JOIN play_phone_chats m ON m.id=x.last_id
+            LEFT JOIN (
+              SELECT emisor_id,COUNT(*) unread FROM play_phone_chats
+              WHERE type=1 AND receptor_id=? AND read_at IS NULL GROUP BY emisor_id
+            ) u ON u.emisor_id=x.other_user_id
+            ORDER BY m.timestamp DESC LIMIT 50";
+    $stmt = mysqli_prepare($con, $sql);
+    if (!$stmt) return [];
+    mysqli_stmt_bind_param($stmt, 'iiii', $selfUserId, $selfUserId, $selfUserId, $selfUserId);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $out = [];
+    while ($res && ($row = mysqli_fetch_assoc($res))) {
+        $otherPhone = pr_phone_row_by_user($con, (int)$row['other_user_id']);
+        if (!$otherPhone) continue;
+        $identity = pr_phone_identity($con, (int)$row['other_user_id']);
+        $contactName = pr_phone_contact_name($con, $selfPhoneId, (string)$otherPhone['phone_number']);
+        $out[] = [
+            'phone_id'=>(int)$otherPhone['id'], 'number'=>(string)$otherPhone['phone_number'],
+            'name'=>$contactName ?: ($identity['name'] ?: (string)$otherPhone['phone_number']), 'username'=>$identity['username'], 'look'=>$identity['look'],
+            'last_message'=>(string)$row['msg'], 'last_at'=>(string)$row['timestamp'], 'unread'=>(int)$row['unread']
+        ];
     }
-    if($res)mysqli_free_result($res);mysqli_stmt_close($stmt);return$out;
+    if ($res) mysqli_free_result($res);
+    mysqli_stmt_close($stmt);
+    return $out;
 }
 
 function pr_phone_messages(mysqli $con, int $selfPhoneId, int $otherPhoneId, int $limit=30): array
 {
-    $limit=max(1,min(50,$limit));
-    $sql="SELECT id,sender_phone_id,receiver_phone_id,body,sent_at,read_at FROM rp_phone_messages WHERE (sender_phone_id=? AND receiver_phone_id=?) OR (sender_phone_id=? AND receiver_phone_id=?) ORDER BY id DESC LIMIT {$limit}";
-    $stmt=mysqli_prepare($con,$sql);if(!$stmt)return[];mysqli_stmt_bind_param($stmt,'iiii',$selfPhoneId,$otherPhoneId,$otherPhoneId,$selfPhoneId);mysqli_stmt_execute($stmt);$res=mysqli_stmt_get_result($stmt);$out=[];
-    while($res&&($r=mysqli_fetch_assoc($res)))$out[]=['id'=>(int)$r['id'],'mine'=>(int)$r['sender_phone_id']===$selfPhoneId,'body'=>(string)$r['body'],'sent_at'=>(string)$r['sent_at'],'read_at'=>$r['read_at']];
-    if($res)mysqli_free_result($res);mysqli_stmt_close($stmt);return array_reverse($out);
+    $self = pr_phone_row_by_id($con, $selfPhoneId);
+    $other = pr_phone_row_by_id($con, $otherPhoneId);
+    if (!$self || !$other) return [];
+    $selfUser = (int)$self['user_id'];
+    $otherUser = (int)$other['user_id'];
+    $limit = max(1, min(50, $limit));
+    $sql = "SELECT id,emisor_id,receptor_id,msg,timestamp,read_at FROM play_phone_chats
+            WHERE type=1 AND ((emisor_id=? AND receptor_id=?) OR (emisor_id=? AND receptor_id=?))
+            ORDER BY id DESC LIMIT {$limit}";
+    $stmt = mysqli_prepare($con, $sql);
+    if (!$stmt) return [];
+    mysqli_stmt_bind_param($stmt, 'iiii', $selfUser, $otherUser, $otherUser, $selfUser);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $out = [];
+    while ($res && ($row = mysqli_fetch_assoc($res))) {
+        $out[] = [
+            'id'=>(int)$row['id'], 'mine'=>(int)$row['emisor_id'] === $selfUser,
+            'body'=>(string)$row['msg'], 'sent_at'=>(string)$row['timestamp'], 'read_at'=>$row['read_at']
+        ];
+    }
+    if ($res) mysqli_free_result($res);
+    mysqli_stmt_close($stmt);
+    return array_reverse($out);
+}
+
+function pr_phone_mark_read(mysqli $con, array $selfPhone, int $otherPhoneId): bool
+{
+    $other = pr_phone_row_by_id($con, $otherPhoneId);
+    if (!$other) return false;
+    $selfUser = (int)$selfPhone['user_id'];
+    $otherUser = (int)$other['user_id'];
+    $stmt = mysqli_prepare($con, "UPDATE play_phone_chats SET read_at=COALESCE(read_at,NOW()),status='READ' WHERE type=1 AND receptor_id=? AND emisor_id=? AND read_at IS NULL");
+    if (!$stmt) return false;
+    mysqli_stmt_bind_param($stmt, 'ii', $selfUser, $otherUser);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    return true;
 }
 
 function pr_phone_active_call(mysqli $con, int $phoneId): ?array
 {
-    $stmt=mysqli_prepare($con,"SELECT * FROM rp_phone_calls WHERE (caller_phone_id=? OR receiver_phone_id=?) AND status IN ('RINGING','CONNECTED') ORDER BY id DESC LIMIT 1"); if(!$stmt)return null;mysqli_stmt_bind_param($stmt,'ii',$phoneId,$phoneId);mysqli_stmt_execute($stmt);$res=mysqli_stmt_get_result($stmt);$r=$res?(mysqli_fetch_assoc($res)?:null):null;if($res)mysqli_free_result($res);mysqli_stmt_close($stmt);return$r;
+    $stmt = mysqli_prepare($con, "SELECT * FROM rp_phone_calls WHERE (caller_phone_id=? OR receiver_phone_id=?) AND status IN ('RINGING','CONNECTED') ORDER BY id DESC LIMIT 1");
+    if (!$stmt) return null;
+    mysqli_stmt_bind_param($stmt, 'ii', $phoneId, $phoneId);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = $res ? (mysqli_fetch_assoc($res) ?: null) : null;
+    if ($res) mysqli_free_result($res);
+    mysqli_stmt_close($stmt);
+    return $row;
 }
 
-function pr_phone_notifications(mysqli $con,int $phoneId): array
+function pr_phone_notifications(mysqli $con, int $phoneId): array
 {
-    $stmt=mysqli_prepare($con,'SELECT id,notification_type,title,body,created_at,read_at FROM rp_phone_notifications WHERE phone_id=? ORDER BY id DESC LIMIT 30');if(!$stmt)return[];mysqli_stmt_bind_param($stmt,'i',$phoneId);mysqli_stmt_execute($stmt);$res=mysqli_stmt_get_result($stmt);$out=[];while($res&&($r=mysqli_fetch_assoc($res)))$out[]=['id'=>(int)$r['id'],'type'=>(string)$r['notification_type'],'title'=>(string)$r['title'],'body'=>(string)$r['body'],'created_at'=>(string)$r['created_at'],'read'=>!is_null($r['read_at'])];if($res)mysqli_free_result($res);mysqli_stmt_close($stmt);return$out;
+    $stmt = mysqli_prepare($con, 'SELECT id,notification_type,title,body,created_at,read_at FROM rp_phone_notifications WHERE phone_id=? ORDER BY id DESC LIMIT 30');
+    if (!$stmt) return [];
+    mysqli_stmt_bind_param($stmt, 'i', $phoneId);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $out = [];
+    while ($res && ($row = mysqli_fetch_assoc($res))) {
+        $out[] = ['id'=>(int)$row['id'],'type'=>(string)$row['notification_type'],'title'=>(string)$row['title'],'body'=>(string)$row['body'],'created_at'=>(string)$row['created_at'],'read'=>!is_null($row['read_at'])];
+    }
+    if ($res) mysqli_free_result($res);
+    mysqli_stmt_close($stmt);
+    return $out;
 }
 
-function pr_phone_snapshot(mysqli $con,int $userId): array
+function pr_phone_snapshot(mysqli $con, int $userId): array
 {
-    $hasDevice=pr_phone_has_device($con,$userId);
-    $phone=$hasDevice?pr_phone_ensure($con,$userId):pr_phone_row_by_user($con,$userId);
-    if(!$hasDevice || !$phone)return['available'=>false,'has_device'=>$hasDevice,'number'=>null,'contacts'=>[],'conversations'=>[],'unread_count'=>0,'active_call'=>null,'notifications'=>[],'settings'=>['silent'=>false,'notifications'=>true,'sounds'=>true]];
-    $pid=(int)$phone['id'];
-    $stmt=mysqli_prepare($con,'SELECT COUNT(*) c FROM rp_phone_messages WHERE receiver_phone_id=? AND read_at IS NULL');mysqli_stmt_bind_param($stmt,'i',$pid);mysqli_stmt_execute($stmt);$res=mysqli_stmt_get_result($stmt);$r=$res?mysqli_fetch_assoc($res):null;$unread=$r?(int)$r['c']:0;if($res)mysqli_free_result($res);mysqli_stmt_close($stmt);
-    $call=pr_phone_active_call($con,$pid);$callView=null;if($call){$other=(int)$call['caller_phone_id']===$pid?(int)$call['receiver_phone_id']:(int)$call['caller_phone_id'];$stmt=mysqli_prepare($con,'SELECT user_id,phone_number FROM rp_phones WHERE id=? LIMIT 1');mysqli_stmt_bind_param($stmt,'i',$other);mysqli_stmt_execute($stmt);$res=mysqli_stmt_get_result($stmt);$op=$res?mysqli_fetch_assoc($res):null;if($res)mysqli_free_result($res);mysqli_stmt_close($stmt);$ident=$op?pr_phone_identity($con,(int)$op['user_id']):['name'=>null,'look'=>null,'username'=>null];$callView=['id'=>(int)$call['id'],'status'=>(string)$call['status'],'direction'=>(int)$call['caller_phone_id']===$pid?'outgoing':'incoming','other_phone_id'=>$other,'other_number'=>$op?$op['phone_number']:null,'other_name'=>$ident['name'],'other_username'=>$ident['username'],'other_look'=>$ident['look'],'started_at'=>$call['started_at'],'answered_at'=>$call['answered_at']];}
-    return['available'=>true,'has_device'=>true,'id'=>$pid,'number'=>(string)$phone['phone_number'],'contacts'=>pr_phone_contacts($con,$phone),'conversations'=>pr_phone_conversations($con,$phone),'unread_count'=>$unread,'active_call'=>$callView,'notifications'=>pr_phone_notifications($con,$pid),'settings'=>['silent'=>(bool)$phone['silent_mode'],'notifications'=>(bool)$phone['notifications_enabled'],'sounds'=>(bool)$phone['sounds_enabled']]];
+    $hasDevice = pr_phone_has_device($con, $userId);
+    $phone = $hasDevice ? pr_phone_ensure($con, $userId) : pr_phone_row_by_user($con, $userId);
+    if (!$hasDevice || !$phone) {
+        return ['available'=>false,'has_device'=>$hasDevice,'number'=>null,'contacts'=>[],'conversations'=>[],'unread_count'=>0,'active_call'=>null,'notifications'=>[],'settings'=>['silent'=>false,'notifications'=>true,'sounds'=>true]];
+    }
+
+    $phoneId = (int)$phone['id'];
+    $stmt = mysqli_prepare($con, 'SELECT COUNT(*) c FROM play_phone_chats WHERE type=1 AND receptor_id=? AND read_at IS NULL');
+    $unread = 0;
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, 'i', $userId);
+        mysqli_stmt_execute($stmt);
+        $res = mysqli_stmt_get_result($stmt);
+        $row = $res ? mysqli_fetch_assoc($res) : null;
+        $unread = $row ? (int)$row['c'] : 0;
+        if ($res) mysqli_free_result($res);
+        mysqli_stmt_close($stmt);
+    }
+
+    $call = pr_phone_active_call($con, $phoneId);
+    $callView = null;
+    if ($call) {
+        $otherId = (int)$call['caller_phone_id'] === $phoneId ? (int)$call['receiver_phone_id'] : (int)$call['caller_phone_id'];
+        $other = pr_phone_row_by_id($con, $otherId);
+        $identity = $other ? pr_phone_identity($con, (int)$other['user_id']) : ['name'=>null,'look'=>null,'username'=>null];
+        $callView = [
+            'id'=>(int)$call['id'], 'status'=>(string)$call['status'],
+            'direction'=>(int)$call['caller_phone_id'] === $phoneId ? 'outgoing' : 'incoming',
+            'other_phone_id'=>$otherId, 'other_number'=>$other ? (string)$other['phone_number'] : null,
+            'other_name'=>$identity['name'], 'other_username'=>$identity['username'], 'other_look'=>$identity['look'],
+            'started_at'=>(string)$call['started_at'], 'answered_at'=>$call['answered_at']
+        ];
+    }
+
+    return [
+        'available'=>true,'has_device'=>true,'id'=>$phoneId,'number'=>(string)$phone['phone_number'],
+        'contacts'=>pr_phone_contacts($con,$phone),'conversations'=>pr_phone_conversations($con,$phone),'unread_count'=>$unread,
+        'active_call'=>$callView,'notifications'=>pr_phone_notifications($con,$phoneId),
+        'settings'=>['silent'=>(bool)$phone['silent_mode'],'notifications'=>(bool)$phone['notifications_enabled'],'sounds'=>(bool)$phone['sounds_enabled']]
+    ];
 }
