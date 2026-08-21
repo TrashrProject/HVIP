@@ -19,8 +19,9 @@
     <link rel="stylesheet" href="./paradise-character-v2.css?v=2" id="paradise-character-v2-css">
     <link rel="stylesheet" href="./paradise-inventory-v2.css?v=1" id="paradise-inventory-v2-css">
     <link rel="stylesheet" href="./paradise-phone-v1.css?v=1" id="paradise-phone-v1-css">
-    <link rel="stylesheet" href="./paradise-phone-v1-ux.css?v=1" id="paradise-phone-v1-ux-css">
-    <!-- Hard guard stays last: only the visible phone rectangle/controls capture pointers. -->
+    <link rel="stylesheet" href="./paradise-phone-v1-ux.css?v=2" id="paradise-phone-v1-ux-css">
+    <link rel="stylesheet" href="./paradise-quality-gate.css?v=1" id="paradise-quality-gate-css">
+    <!-- Hard guard stays last: only explicit UI controls/windows capture pointers. -->
     <link rel="stylesheet" href="./paradise-clickthrough-guard.css?v=3" id="paradise-clickthrough-guard-css">
     <style>html,body,#root{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:#000;}</style>
     <script>
@@ -36,8 +37,8 @@
         patchUrlProperty(HTMLImageElement.prototype,'src');patchUrlProperty(HTMLSourceElement.prototype,'src');patchUrlProperty(HTMLLinkElement.prototype,'href');
         const query=new URLSearchParams(window.location.search);const sso=query.get('sso')||null;
         window.NitroConfig={'config.urls':['./local-config.json','./renderer-config.json','./ui-config.json'],'sso.ticket':sso,'forward.type':-1,'forward.id':0,'friend.id':Number.parseInt(query.get('friend')||'0',10)||0,'roomenterad.habbohotel.enabled':false,'roomenterad.habblet.enabled':false};
-        window.__PARADISE_BASELINE__={version:'5.0.1-phone-v1',paradiseUi:'isolated-root',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,roomBinding:'event-first-no-room-poll',stabilityPatch:false,chatFix:'react-state-synchronized',polish:true,characterProfile:'v2-persistent',documents:'server-authoritative',identity:'persistent-sql',inventory:'v2-server-authoritative',inventoryActions:'emu-validated',inventoryWeight:'server-calculated',phone:'v1-persistent',phoneTransport:'authenticated-http-plus-legacy-emu-sms',phoneItem:'inventory-linked',phoneSmsStore:'play_phone_chats-reused',stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,paradiseBridge:'split-hud-inventory-phone',nativeToolbar:'audit-migrate-preserve',clickThroughGuard:'hard-last-css',hasSso:!!sso};
-        console.info('[ParadiseRP] Phase 4 ParadisePhone V1 active',window.__PARADISE_BASELINE__);
+        window.__PARADISE_BASELINE__={version:'5.1.2-quality-gate-direct-room-sync',paradiseUi:'isolated-root',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,roomBinding:'event-first-bounded-scan-plus-direct-ui-sync',stabilityPatch:false,chatFix:'react-state-synchronized',polish:true,visualQualityGate:'strict-correction-only',characterProfile:'v2-persistent',documents:'server-authoritative',identity:'persistent-sql',inventory:'v2-server-authoritative',inventoryActions:'emu-validated',inventoryWeight:'server-calculated',phone:'v1-persistent',phoneTransport:'authenticated-http-plus-legacy-emu-sms',phoneItem:'inventory-linked',phoneSmsStore:'play_phone_chats-reused',stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,paradiseBridge:'split-hud-inventory-phone',nativeToolbar:'audit-migrate-preserve',clickThroughGuard:'hard-last-css',hasSso:!!sso};
+        console.info('[ParadiseRP] strict visual quality gate baseline active',window.__PARADISE_BASELINE__);
       })();
     </script>
     <script src="./paradise-native-ui-off.js?v=11"></script>
@@ -52,7 +53,9 @@
     <script src="./paradise-store.js?v=4" defer></script>
     <script src="./paradise-bridge.js?v=2" defer></script>
     <script src="./paradise-ui-foundation.js?v=1" defer></script>
-    <script src="./paradise-room-adapter.js?v=1" defer></script>
+    <script src="./paradise-room-adapter.js?v=2" defer></script>
+    <script src="./paradise-room-reconciler.js?v=1" defer></script>
+    <script src="./paradise-room-ui-sync.js?v=1" defer></script>
     <script src="./paradise-ui-phase11.js?v=1" defer></script>
     <script src="./paradise-native-toolbar-migration.js?v=1" defer></script>
     <script src="./paradise-ui-event-isolation.js?v=2" defer></script>
@@ -62,6 +65,7 @@
     <script src="./paradise-inventory-commands-ui.js?v=1" defer></script>
     <script src="./paradise-phone-commands-ui.js?v=1" defer></script>
     <script src="./paradise-phone-v1.js?v=1" defer></script>
-    <script src="./paradise-phone-v1-ux.js?v=1" defer></script>
+    <script src="./paradise-phone-v1-ux.js?v=2" defer></script>
+    <script src="./paradise-quality-gate.js?v=1" defer></script>
   </body>
 </html>
