@@ -38,9 +38,15 @@ function pr_inventory_safe_icon($value): ?string
 {
     $value = trim((string)$value);
     if ($value === '') return null;
-    // Phase 3 never emits remote URLs. Verified local paths can be configured later.
-    if (preg_match('#^(?:\./|/)[a-z0-9_./%\-]+$#i', $value)) return $value;
-    return null;
+
+    // Inventory V2 only serves verified files located in the Nitro bundle.
+    // A typo/case mismatch therefore falls back to the built-in pixel marker
+    // instead of producing another browser 404.
+    if (!preg_match('#^\./[a-z0-9_./%\-]+$#i', $value)) return null;
+    $relative = ltrim(substr($value, 2), '/');
+    if ($relative === '' || str_contains($relative, '..')) return null;
+    $absolute = __DIR__ . '/nitro-last/' . $relative;
+    return is_file($absolute) ? $value : null;
 }
 
 function pr_inventory_items(mysqli $con, int $userId): array
@@ -61,7 +67,8 @@ function pr_inventory_items(mysqli $con, int $userId): array
             $actions = [];
             if ((bool)$row['usable']) $actions[] = 'use';
             if ((bool)$row['tradeable']) $actions[] = 'give';
-            if ((bool)$row['droppable']) $actions[] = 'drop';
+            // `droppable` is persisted for the future, but no DROP button is
+            // exposed until a real room-ground representation is proven stable.
             if ($effect === 'KEY') $actions = array_values(array_unique(array_merge(['inspect'], $actions)));
             $items[] = [
                 'key' => 'item:' . (string)$row['id'],
