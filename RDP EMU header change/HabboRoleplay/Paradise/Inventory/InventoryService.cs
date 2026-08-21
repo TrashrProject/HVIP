@@ -11,7 +11,9 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
     {
         private static readonly InventoryRepository Repository = new InventoryRepository();
         private static readonly ConcurrentDictionary<int, long> LastUseAt = new ConcurrentDictionary<int, long>();
+        private static readonly ConcurrentDictionary<int, long> LastGiveAt = new ConcurrentDictionary<int, long>();
         private const long UseGuardMilliseconds = 450;
+        private const long GiveGuardMilliseconds = 650;
 
         public static IList<InventoryItem> GetItems(int userId)
         {
@@ -84,7 +86,7 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
                 message = "Vous ne pouvez pas utiliser cet objet dans votre état actuel.";
                 return false;
             }
-            if (!AcquireUseGuard(userId))
+            if (!AcquireGuard(LastUseAt, userId, UseGuardMilliseconds))
             {
                 message = "Action trop rapide. Réessayez.";
                 return false;
@@ -126,7 +128,7 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
                         session.GetPlay().Hunger = Math.Min(100, session.GetPlay().Hunger + item.Definition.EffectValue);
                         if (session.GetPlay().UserDataHandler != null) session.GetPlay().UserDataHandler.SaveData();
                     }
-                    session.SendWhisper(item.Definition.Name + " utilisé.", 1);
+                    session.SendWhisper("[INVENTAIRE] " + item.Definition.Name + " utilisé.", 1);
                     InventoryUiEventService.Toast(userId, "Objet utilisé", item.Definition.Name + " utilisé.");
                     return true;
 
@@ -138,7 +140,7 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
                         message = "Impossible d’utiliser cet objet.";
                         return false;
                     }
-                    session.SendWhisper(item.Definition.Name + " utilisé.", 1);
+                    session.SendWhisper("[INVENTAIRE] " + item.Definition.Name + " utilisé.", 1);
                     InventoryUiEventService.Toast(userId, "Objet utilisé", item.Definition.Name + " utilisé.");
                     return true;
 
@@ -151,7 +153,7 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
                 case "KEY":
                     Repository.LogUseWithoutConsume(userId, item);
                     message = "Clé inspectée. Son accès sera validé par le système concerné lorsqu’il sera branché.";
-                    session.SendWhisper(message, 1);
+                    session.SendWhisper("[INVENTAIRE] " + message, 1);
                     return true;
 
                 case "NONE":
@@ -188,6 +190,13 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
                 return false;
             }
 
+            int senderUserId = sender.GetHabbo().Id;
+            if (!AcquireGuard(LastGiveAt, senderUserId, GiveGuardMilliseconds))
+            {
+                message = "Transfert trop rapide. Réessayez.";
+                return false;
+            }
+
             targetUsername = (targetUsername ?? String.Empty).Trim();
             GameClient target = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(targetUsername);
             if (target == null || target.GetHabbo() == null || target.LoggingOut)
@@ -195,7 +204,7 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
                 message = "Ce joueur n’est pas connecté.";
                 return false;
             }
-            if (target.GetHabbo().Id == sender.GetHabbo().Id)
+            if (target.GetHabbo().Id == senderUserId)
             {
                 message = "Vous ne pouvez pas vous donner un objet à vous-même.";
                 return false;
@@ -206,20 +215,20 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
                 return false;
             }
 
-            InventoryItem source = Repository.LoadItem(sender.GetHabbo().Id, itemId);
+            InventoryItem source = Repository.LoadItem(senderUserId, itemId);
             if (source == null || source.Definition == null)
             {
                 message = "Objet introuvable dans votre inventaire.";
                 return false;
             }
 
-            if (!Repository.Transfer(sender.GetHabbo().Id, target.GetHabbo().Id, source.Id, quantity, out message)) return false;
+            if (!Repository.Transfer(senderUserId, target.GetHabbo().Id, source.Id, quantity, out message)) return false;
 
             string quantityText = quantity > 1 ? " ×" + quantity.ToString(CultureInfo.InvariantCulture) : String.Empty;
-            sender.SendWhisper("Vous avez donné " + source.Definition.Name + quantityText + " à " + target.GetHabbo().Username + ".", 1);
-            target.SendWhisper(sender.GetHabbo().Username + " vous a donné " + source.Definition.Name + quantityText + ".", 1);
+            sender.SendWhisper("[INVENTAIRE] Vous avez donné " + source.Definition.Name + quantityText + " à " + target.GetHabbo().Username + ".", 1);
+            target.SendWhisper("[INVENTAIRE] " + sender.GetHabbo().Username + " vous a donné " + source.Definition.Name + quantityText + ".", 1);
             InventoryUiEventService.Toast(target.GetHabbo().Id, "Objet reçu", source.Definition.Name + quantityText);
-            InventoryUiEventService.Toast(sender.GetHabbo().Id, "Objet donné", source.Definition.Name + quantityText);
+            InventoryUiEventService.Toast(senderUserId, "Objet donné", source.Definition.Name + quantityText);
             return true;
         }
 
@@ -231,19 +240,19 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
                    capacity.MaximumWeight.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR")) + " kg";
         }
 
-        private static bool AcquireUseGuard(int userId)
+        private static bool AcquireGuard(ConcurrentDictionary<int, long> guard, int userId, long milliseconds)
         {
             long now = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
             while (true)
             {
                 long previous;
-                if (!LastUseAt.TryGetValue(userId, out previous))
+                if (!guard.TryGetValue(userId, out previous))
                 {
-                    if (LastUseAt.TryAdd(userId, now)) return true;
+                    if (guard.TryAdd(userId, now)) return true;
                     continue;
                 }
-                if (now - previous < UseGuardMilliseconds) return false;
-                if (LastUseAt.TryUpdate(userId, now, previous)) return true;
+                if (now - previous < milliseconds) return false;
+                if (guard.TryUpdate(userId, now, previous)) return true;
             }
         }
 
