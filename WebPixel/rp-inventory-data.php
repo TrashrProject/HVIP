@@ -24,6 +24,9 @@ try {
 
     $con = $DB->Con();
     if (!($con instanceof mysqli)) pr_inventory_json(['ok' => false, 'reason' => 'database_unavailable']);
+    if (!mysqli_set_charset($con, 'utf8mb4')) {
+        pr_inventory_json(['ok' => false, 'reason' => 'database_charset_unavailable']);
+    }
 
     $safe = mysqli_real_escape_string($con, $username);
     $result = mysqli_query($con, "SELECT `id`,`username` FROM `users` WHERE `username`='{$safe}' LIMIT 1");
