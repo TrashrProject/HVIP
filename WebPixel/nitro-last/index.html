@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#18252a" />
     <base href="./">
-    <title>ParadiseRP — Nitro baseline</title>
+    <title>ParadiseRP — HUD isolation test</title>
     <link rel="icon" href="./favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
@@ -13,6 +13,11 @@
     <link rel="manifest" crossorigin="use-credentials" href="./site.webmanifest">
     <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#000000">
     <link rel="stylesheet" href="./src/assets/index.css">
+
+    <!-- TEST 1: Paradise visual HUD only. No DOM cleanup, websocket wrapper,
+         room trace, Nitro stability patch, chat fix or polish runtime. -->
+    <link rel="stylesheet" href="./paradise-rp-hud.css?v=80" id="paradise-rp-hud-css">
+
     <style>
       html, body, #root {
         width: 100%;
@@ -23,17 +28,15 @@
         background: #000;
       }
     </style>
+
     <script>
       (() => {
         'use strict';
 
-        // Regression baseline: keep only the legacy asset URL compatibility that
-        // existed before the Paradise UI regression. Do not touch WebSocket,
-        // Nitro DOM, renderer lifecycle, canvas, packet parsing or room state.
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations()
             .then(registrations => registrations.forEach(registration => registration.unregister()))
-            .catch(error => console.warn('[ParadiseRP:baseline] service worker cleanup failed', error));
+            .catch(error => console.warn('[ParadiseRP:hud-test] service worker cleanup failed', error));
         }
 
         const TRANSPARENT_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==';
@@ -66,7 +69,7 @@
               if (typeof input === 'string' || input instanceof URL) return nativeFetch(next, init);
               if (input instanceof Request && next !== raw) return nativeFetch(new Request(next, input), init);
             } catch (error) {
-              console.warn('[ParadiseRP:baseline] asset fetch rewrite failed', error);
+              console.warn('[ParadiseRP:hud-test] asset fetch rewrite failed', error);
             }
             return nativeFetch(input, init);
           };
@@ -96,8 +99,6 @@
         const query = new URLSearchParams(window.location.search);
         const sso = query.get('sso') || null;
 
-        // Nitro's own lifecycle is deliberately restored here. /play no longer
-        // forces a room, so the emulator / normal navigator flow owns room entry.
         window.NitroConfig = {
           'config.urls': ['./local-config.json', './renderer-config.json', './ui-config.json'],
           'sso.ticket': sso,
@@ -109,18 +110,21 @@
         };
 
         window.__PARADISE_BASELINE__ = {
-          version: '1.0.0-native-nitro-baseline',
-          paradiseUi: false,
+          version: '1.1.0-hud-only-isolation',
+          paradiseUi: 'hud-only',
           websocketPatched: false,
           domCleanup: false,
           roomTrace: false,
           stabilityPatch: false,
+          chatFix: false,
+          polish: false,
           hasSso: !!sso
         };
 
-        console.info('[ParadiseRP] Native Nitro regression baseline active', window.__PARADISE_BASELINE__);
+        console.info('[ParadiseRP] HUD-only isolation test active', window.__PARADISE_BASELINE__);
       })();
     </script>
+
     <script type="module" crossorigin src="./assets/index-9f9954ad.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/vendor-0a5897c2.js">
     <link rel="modulepreload" crossorigin href="./assets/nitro-renderer-1dc7b8c5.js">
@@ -128,5 +132,8 @@
   <body>
     <noscript>JavaScript doit être activé pour lancer le client.</noscript>
     <div id="root" class="w-100 h-100"></div>
+
+    <!-- Only Paradise runtime enabled in TEST 1. -->
+    <script src="./paradise-rp-hud.js?v=80" defer></script>
   </body>
 </html>
