@@ -3,7 +3,7 @@
 
   if (window.ParadiseStore) return;
 
-  const VERSION = '1.0.0-ui-foundation';
+  const VERSION = '1.0.1-ui-foundation';
   const listeners = new Set();
 
   const state = {
@@ -23,15 +23,15 @@
         citizenId: null
       },
       economy: {
-        cash: null,
-        bank: null
+        cash: undefined,
+        bank: undefined
       },
       room: {
         id: null,
         name: null,
         district: null,
         city: null,
-        playerCount: null
+        playerCount: undefined
       },
       notifications: {
         count: 0
@@ -109,8 +109,8 @@
     };
 
     state.gameplay.economy = {
-      cash: asNumber(money.cash ?? money.credits),
-      bank: asNumber(money.bank)
+      cash: asNumber(money.cash ?? money.credits) ?? undefined,
+      bank: asNumber(money.bank) ?? undefined
     };
 
     state.gameplay.room = {
@@ -118,7 +118,7 @@
       name: asText(roomRaw),
       district: asText(payload.district),
       city: asText(payload.city),
-      playerCount: asNumber(payload.players)
+      playerCount: asNumber(payload.players) ?? undefined
     };
 
     state.gameplay.notifications = {
@@ -131,8 +131,6 @@
     state.meta.lastError = null;
 
     emit('gameplay:snapshot', state.gameplay);
-
-    // Compatibility event for any safe Paradise layer that still listens to the old contract.
     window.dispatchEvent(new CustomEvent('paradise:player-data', { detail: payload }));
     return true;
   };
@@ -146,14 +144,8 @@
   const setUi = patch => {
     if (!patch || typeof patch !== 'object') return;
     const next = {};
-
-    if (Object.prototype.hasOwnProperty.call(patch, 'activeWindow')) {
-      next.activeWindow = asText(patch.activeWindow);
-    }
-    if (Object.prototype.hasOwnProperty.call(patch, 'actionsOpen')) {
-      next.actionsOpen = Boolean(patch.actionsOpen);
-    }
-
+    if (Object.prototype.hasOwnProperty.call(patch, 'activeWindow')) next.activeWindow = asText(patch.activeWindow);
+    if (Object.prototype.hasOwnProperty.call(patch, 'actionsOpen')) next.actionsOpen = Boolean(patch.actionsOpen);
     Object.assign(state.ui, next);
     emit('ui:change', state.ui);
   };
