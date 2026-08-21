@@ -1,0 +1,48 @@
+/* ParadiseRP stable UI fixes — visual/event isolation only.
+   IMPORTANT: never target #root parents, renderer containers or canvas. */
+
+/* Hide only known native Nitro UI surfaces that Paradise replaces. */
+#CombatMode,
+#PSVMode,
+#TicketMode,
+#NavigatorMode,
+#FriendsMode,
+#SettingsMode,
+#PhoneMode,
+#CatalogMode,
+#InventoryMode,
+#RoomInfoMode,
+#MessengerMode,
+#HotelViewMode,
+#HelpMode,
+.menuButton-yNbz6_0,
+.button-3IzmP_0.menuButton-yNbz6_0,
+[class*="menuButton-yNbz6"],
+[class*="button-3IzmP"][class*="menuButton"],
+[class*="nitro-toolbar"],
+[class*="habbo-toolbar"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Never allow Paradise cleanup rules to collapse the renderer itself. */
+#root canvas {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* The HUD used to rebuild its HTML on every interaction. Keep those updates
+   visually instantaneous so opening a module no longer looks like a page reload. */
+#paradise-rp-hud .pr4-window,
+#paradise-rp-hud .pr4-phone-frame,
+#paradise-rp-hud .pr4-more-menu {
+  animation: none !important;
+}
+
+/* Avoid global transition flashes when a HUD subtree is recreated. */
+#paradise-rp-hud .pr4-layer,
+#paradise-rp-hud .pr4-layer * {
+  transition-property: background-color, border-color, color, box-shadow, transform !important;
+}
