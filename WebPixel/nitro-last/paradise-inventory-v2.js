@@ -3,11 +3,11 @@
 
   if (window.ParadiseInventoryV2) return;
 
-  const VERSION = '3.0.0-inventory-v2';
+  const VERSION = '3.0.1-inventory-v2';
   const HUD_ID = 'paradise-rp-hud';
   const API_URL = '../rp-inventory-data.php';
   const CHARACTER_ACTION_URL = '../rp-character-action.php';
-  const POLL_MS = 7000;
+  const POLL_MS = 15000;
   const FILTERS = [
     ['all', 'Tous'], ['object', 'Objets'], ['food', 'Nourriture'], ['document', 'Documents'], ['key', 'Clés'], ['misc', 'Divers']
   ];
@@ -98,13 +98,12 @@
     return key ? (store?.inventory?.items || []).find(item => item.key === key) || null : null;
   }
 
-  function actionLabel(action, item) {
-    if (action === 'use') return item?.effectType === 'PHONE' ? 'Utiliser' : 'Utiliser';
+  function actionLabel(action) {
+    if (action === 'use') return 'Utiliser';
     if (action === 'give') return 'Donner';
     if (action === 'view') return 'Consulter';
     if (action === 'present') return 'Présenter';
     if (action === 'inspect') return 'Inspecter';
-    if (action === 'drop') return 'Jeter';
     return action;
   }
 
@@ -118,12 +117,14 @@
       ['Catégorie', categoryLabel(item)],
       ['État', status || (item.locked ? 'Lié' : 'Disponible')]
     ];
-    const actions = (item.actions || []).filter(action => action !== 'drop' || item.droppable);
+    // DROP remains deliberately absent until a stable ground-item representation
+    // exists in the actual Nitro room. No fake action is ever rendered.
+    const actions = (item.actions || []).filter(action => action !== 'drop');
     return `<div class="pr3-selected">
       <div class="pr3-selected-head"><div class="pr3-selected-art">${art(item)}</div><div class="pr3-selected-title"><h3>${esc(item.name)}</h3><small>${esc(item.code || categoryLabel(item))}</small></div></div>
       <div class="pr3-description">${esc(item.description || 'Aucune description.')}</div>
       <div class="pr3-facts">${facts.map(([label, value]) => `<div class="pr3-fact"><span>${esc(label)}</span><b>${esc(value)}</b></div>`).join('')}</div>
-      <div class="pr3-actions">${actions.length ? actions.map(action => `<button type="button" class="pr3-button ${action === 'use' || action === 'view' ? 'is-primary' : action === 'present' ? 'is-gold' : action === 'drop' ? 'is-danger' : ''}" data-pr3-action="${esc(action)}">${esc(actionLabel(action, item))}</button>`).join('') : '<small>Aucune action disponible.</small>'}</div>
+      <div class="pr3-actions">${actions.length ? actions.map(action => `<button type="button" class="pr3-button ${action === 'use' || action === 'view' ? 'is-primary' : action === 'present' ? 'is-gold' : ''}" data-pr3-action="${esc(action)}">${esc(actionLabel(action))}</button>`).join('') : '<small>Aucune action disponible.</small>'}</div>
       <div class="pr3-give-box" data-pr3-give-box hidden>
         <label><span data-pr3-give-label>Joueur destinataire</span><input type="text" maxlength="32" autocomplete="off" placeholder="Pseudo du joueur" data-pr3-target></label>
         <div class="pr3-give-controls"><div><small>Quantité</small><div class="pr3-quantity"><button type="button" class="pr3-button" data-pr3-qty="-1">−</button><output data-pr3-qty-value>1</output><button type="button" class="pr3-button" data-pr3-qty="1">+</button></div></div></div>
@@ -270,7 +271,9 @@
     }
 
     if (giveMode === 'present' && item.source === 'document') {
-      const command = item.documentType === 'DRIVER_LICENSE' ? `:showlicense ${target}` : `:showid ${target}`;
+      const command = item.documentType === 'DRIVER_LICENSE'
+        ? `:inv presentlicense ${target}`
+        : `:inv presentid ${target}`;
       await sendCommand(command, false);
       body.querySelector('[data-pr3-give-box]').hidden = true;
       return;
@@ -312,7 +315,7 @@
     switch (action.dataset.pr3Action) {
       case 'use':
         if (!item?.id) return;
-        if (item.effectType === 'PHONE') window.ParadiseWindowManager?.openWindow?.('phone');
+        // The server validates ownership/use first; PHONE_OPEN arrives only after that validation.
         sendCommand(`:inv useid ${item.id}`);
         break;
       case 'give': startGive('give'); break;
