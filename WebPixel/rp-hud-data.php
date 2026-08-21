@@ -1,14 +1,14 @@
 <?php
 /**
- * ParadiseRP UI foundation data endpoint.
- *
- * Read-only bridge for the current authenticated user. Gameplay values remain
- * authoritative in the existing database/emulator systems; this endpoint only
- * exposes them to the Paradise UI without inventing client-side demo values.
+ * ParadiseRP UI data bridge.
+ * Read-only: gameplay values remain authoritative in existing systems, while
+ * Phase 2 character/documents are exposed from the additive RP tables.
  */
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('X-Content-Type-Options: nosniff');
+
+require_once __DIR__ . '/paradise-character-lib.php';
 
 function pr_hud_json(array $data, int $code = 200): void {
     http_response_code($code);
@@ -33,6 +33,12 @@ function pr_hud_empty(string $reason = 'not_connected'): array {
         'health' => null,
         'armor' => null,
         'money' => ['credits' => null, 'cash' => null, 'bank' => null, 'pixels' => null],
+        'character' => ['exists' => false],
+        'documents' => [],
+        'reputation' => ['general' => 0],
+        'statistics' => [],
+        'document_offer' => null,
+        'ui_event' => null,
         'city' => null,
         'district' => null,
         'room_id' => null,
@@ -148,9 +154,10 @@ try {
         pr_hud_json(pr_hud_empty('user_id_unavailable'));
     }
 
-    // Existing RP statistics remain the gameplay authority.
     $statsColumns = pr_hud_columns($con, 'play_stats');
     $stats = pr_hud_row_by_user($con, 'play_stats', $statsColumns, $id) ?: [];
+    $userStatsColumns = pr_hud_columns($con, 'user_stats');
+    $userStats = pr_hud_row_by_user($con, 'user_stats', $userStatsColumns, $id) ?: [];
 
     $rank = pr_hud_int_or_null(pr_hud_first($user, $usersColumns, ['rank']));
     $role = null;
@@ -206,7 +213,6 @@ try {
     }
     if ($jobId !== null && $jobId <= 0) $jobId = null;
 
-    // Room data is resolved only from real persisted values. No decorative room fallback.
     $roomRaw = pr_hud_first($stats, $statsColumns, ['room_id','current_room_id','current_room','room'], null);
     if ($roomRaw === null) $roomRaw = pr_hud_first($user, $usersColumns, ['room_id','current_room_id','current_room','room'], null);
     $roomId = is_numeric($roomRaw) ? (int) $roomRaw : null;
@@ -238,10 +244,20 @@ try {
     $district = pr_hud_first($user, $usersColumns, ['district','zone'], null);
     $city = pr_hud_first($user, $usersColumns, ['city'], null);
 
+    // Phase 2: additive character/document layer. Missing migration degrades cleanly.
+    $character = pr_character_snapshot($con, $id);
+    $documents = pr_character_documents($con, $id);
+    $documentOffer = pr_character_offer($con, $id);
+    $uiEvent = pr_character_ui_event($con, $id);
+
+    $accountCreated = pr_hud_first($user, $usersColumns, ['account_created','created_at','reg_timestamp'], null);
+    $onlineTime = pr_hud_int_or_null(pr_hud_first($userStats, $userStatsColumns, ['onlinetime','online_time'], null));
+    $roomVisits = pr_hud_int_or_null(pr_hud_first($userStats, $userStatsColumns, ['roomvisits','room_visits'], null));
+
     pr_hud_json([
         'ok' => true,
         'id' => $id,
-        'citizen_id' => 'PR-' . str_pad((string) $id, 5, '0', STR_PAD_LEFT),
+        'citizen_id' => $character['citizen_id'] ?? null,
         'username' => (string) ($user[$usernameColumn] ?? $username),
         'role' => $role,
         'job' => $job,
@@ -258,15 +274,26 @@ try {
             'bank' => $bank,
             'pixels' => $pixels
         ],
+        'character' => $character,
+        'documents' => $documents,
+        'reputation' => ['general' => (int)($character['reputation'] ?? 0)],
+        'statistics' => [
+            'account_created' => $accountCreated,
+            'online_time' => $onlineTime,
+            'room_visits' => $roomVisits,
+        ],
+        'document_offer' => $documentOffer,
+        'ui_event' => $uiEvent,
         'city' => $city,
         'district' => $district,
         'room_id' => $roomId,
         'room_name' => $roomName,
         'room' => $roomName,
         'players' => $playerCount,
-        'notifications_count' => 0,
+        'notifications_count' => $documentOffer ? 1 : 0,
         'time' => date('H:i')
     ]);
 } catch (Throwable $e) {
+    error_log('[ParadiseRP HUD] ' . $e->getMessage());
     pr_hud_json(pr_hud_empty('hud_data_unavailable'));
 }
