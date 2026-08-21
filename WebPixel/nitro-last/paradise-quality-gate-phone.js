@@ -3,10 +3,31 @@
 
   if (window.ParadiseQualityGatePhone) return;
 
-  const VERSION = '1.0.0-core-v1-phone-fixes';
+  const VERSION = '1.1.0-core-v1-phone-fixes';
   const ACTION_URL = '../rp-phone-action.php';
   let destroyed = false;
   let readRequest = null;
+  let scheduled = false;
+
+  function schedulePolish() {
+    if (destroyed || scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      scheduled = false;
+      if (!destroyed) pruneInactiveSettings();
+    }));
+  }
+
+  function pruneInactiveSettings() {
+    const device = document.querySelector('#paradise-rp-hud .pp-device');
+    if (!device) return;
+    device.querySelectorAll('input[data-pp-setting="silent"],input[data-pp-setting="sounds"]').forEach(input => {
+      const row = input.closest('label');
+      if (row) row.remove();
+    });
+    const settings = device.querySelector('.pp-settings');
+    if (settings) settings.dataset.ppQualitySettings = 'notifications-only';
+  }
 
   async function markNotificationsRead() {
     if (destroyed || readRequest) return readRequest;
@@ -44,23 +65,39 @@
   function onClick(event) {
     const target = event.target;
     if (!(target instanceof Element)) return;
-    const notifications = target.closest('#paradise-rp-hud .pp-device [data-pp-app="notifications"]');
-    if (!notifications) return;
-    window.setTimeout(markNotificationsRead, 0);
+    if (!target.closest('#paradise-rp-hud .pp-device')) return;
+
+    const notifications = target.closest('[data-pp-app="notifications"]');
+    if (notifications) window.setTimeout(markNotificationsRead, 0);
+    window.setTimeout(schedulePolish, 0);
+    window.setTimeout(schedulePolish, 80);
+  }
+
+  function onPhoneEvent() {
+    schedulePolish();
   }
 
   function destroy() {
     if (destroyed) return;
     destroyed = true;
     document.removeEventListener('click', onClick, false);
+    window.removeEventListener('paradise:phone', onPhoneEvent, false);
   }
 
   document.addEventListener('click', onClick, false);
+  window.addEventListener('paradise:phone', onPhoneEvent, false);
   window.addEventListener('beforeunload', destroy, { once: true });
+  schedulePolish();
 
   window.ParadiseQualityGatePhone = Object.freeze({
     version: VERSION,
     markNotificationsRead,
-    getStatus: () => ({ version: VERSION, destroyed, pending: Boolean(readRequest) })
+    refresh: schedulePolish,
+    getStatus: () => ({
+      version: VERSION,
+      destroyed,
+      pending: Boolean(readRequest),
+      settingsMode: document.querySelector('#paradise-rp-hud .pp-settings')?.dataset.ppQualitySettings || null
+    })
   });
 })();
