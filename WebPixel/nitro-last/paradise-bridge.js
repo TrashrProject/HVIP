@@ -3,7 +3,7 @@
 
   if (window.ParadiseBridge) return;
 
-  const VERSION = '1.0.0-http-bootstrap';
+  const VERSION = '1.0.1-http-bootstrap';
   const API_URL = '../rp-hud-data.php';
   const POLL_MS = 10000;
 
@@ -11,9 +11,10 @@
   let running = false;
   let request = null;
   let lastPayload = null;
+  let destroyed = false;
 
   async function refresh() {
-    if (!window.ParadiseStore) return false;
+    if (destroyed || !window.ParadiseStore) return false;
     if (request) return request;
 
     request = (async () => {
@@ -23,7 +24,6 @@
           credentials: 'same-origin',
           headers: { Accept: 'application/json' }
         });
-
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const payload = await response.json();
         lastPayload = payload;
@@ -40,7 +40,7 @@
   }
 
   function start() {
-    if (running) return;
+    if (destroyed || running) return;
     running = true;
     refresh();
     timer = window.setInterval(refresh, POLL_MS);
@@ -57,21 +57,26 @@
     refresh();
   }
 
+  function destroy() {
+    if (destroyed) return;
+    destroyed = true;
+    stop();
+    document.removeEventListener('visibilitychange', onVisibilityChange, false);
+  }
+
   document.addEventListener('visibilitychange', onVisibilityChange, false);
-  window.addEventListener('beforeunload', stop, { once: true });
+  window.addEventListener('beforeunload', destroy, { once: true });
 
   window.ParadiseBridge = Object.freeze({
     version: VERSION,
     start,
     stop,
+    destroy,
     refresh,
     getLastPayload: () => lastPayload,
-    getStatus: () => ({ running, pollingMs: POLL_MS, pending: Boolean(request), api: API_URL })
+    getStatus: () => ({ running, destroyed, pollingMs: POLL_MS, pending: Boolean(request), api: API_URL })
   });
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start, { once: true });
-  } else {
-    start();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+  else start();
 })();
