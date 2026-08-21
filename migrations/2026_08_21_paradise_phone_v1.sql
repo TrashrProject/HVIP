@@ -1,5 +1,6 @@
 -- ParadiseRP Phase 4 — ParadisePhone V1
 -- Additive MariaDB 10.4 migration. No production player/test seed.
+-- Existing legacy PhoneChat persistence is reused instead of creating a second message store.
 
 CREATE TABLE IF NOT EXISTS `rp_phones` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -31,21 +32,28 @@ CREATE TABLE IF NOT EXISTS `rp_phone_contacts` (
   CONSTRAINT `fk_rp_phone_contacts_phone` FOREIGN KEY (`phone_id`) REFERENCES `rp_phones` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `rp_phone_messages` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `sender_phone_id` BIGINT UNSIGNED NOT NULL,
-  `receiver_phone_id` BIGINT UNSIGNED NOT NULL,
-  `body` VARCHAR(500) NOT NULL,
+-- Reuse the emulator's existing PhoneChat table.
+CREATE TABLE IF NOT EXISTS `play_phone_chats` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `type` INT NOT NULL DEFAULT 1,
+  `emisor_id` INT NOT NULL,
+  `emisor_name` VARCHAR(64) NOT NULL,
+  `receptor_id` INT NOT NULL,
+  `receptor_name` VARCHAR(64) NOT NULL,
+  `msg` TEXT NOT NULL,
+  `timestamp` DATETIME NOT NULL,
   `status` VARCHAR(16) NOT NULL DEFAULT 'SENT',
-  `sent_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `read_at` TIMESTAMP NULL DEFAULT NULL,
+  `read_at` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_rp_phone_messages_sender` (`sender_phone_id`,`sent_at`),
-  KEY `idx_rp_phone_messages_receiver` (`receiver_phone_id`,`sent_at`),
-  KEY `idx_rp_phone_messages_unread` (`receiver_phone_id`,`read_at`,`sent_at`),
-  CONSTRAINT `fk_rp_phone_messages_sender` FOREIGN KEY (`sender_phone_id`) REFERENCES `rp_phones` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_rp_phone_messages_receiver` FOREIGN KEY (`receiver_phone_id`) REFERENCES `rp_phones` (`id`) ON DELETE CASCADE
+  KEY `idx_phone_sender` (`emisor_id`),
+  KEY `idx_phone_receiver` (`receptor_id`),
+  KEY `idx_phone_type` (`type`),
+  KEY `idx_phone_unread` (`receptor_id`,`type`,`read_at`,`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `play_phone_chats`
+  ADD COLUMN IF NOT EXISTS `status` VARCHAR(16) NOT NULL DEFAULT 'SENT' AFTER `timestamp`,
+  ADD COLUMN IF NOT EXISTS `read_at` DATETIME NULL DEFAULT NULL AFTER `status`;
 
 CREATE TABLE IF NOT EXISTS `rp_phone_calls` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -77,7 +85,6 @@ CREATE TABLE IF NOT EXISTS `rp_phone_notifications` (
   CONSTRAINT `fk_rp_phone_notifications_phone` FOREIGN KEY (`phone_id`) REFERENCES `rp_phones` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Optional audit/rate-limit trail. No message body duplication beyond the authoritative message table.
 CREATE TABLE IF NOT EXISTS `rp_phone_action_log` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `phone_id` BIGINT UNSIGNED NOT NULL,
