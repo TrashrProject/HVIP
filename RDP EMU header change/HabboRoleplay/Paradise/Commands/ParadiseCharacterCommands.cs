@@ -13,12 +13,23 @@ namespace Plus.HabboRoleplay.Paradise.Commands
         public static void Register(CommandManager commands)
         {
             if (commands == null) return;
+
+            // English + French aliases. ParadiseRP is francophone first, while
+            // keeping the original command names for compatibility.
             commands.Register("profile", new ParadiseProfileCommand());
+            commands.Register("profil", new ParadiseProfileCommand());
             commands.Register("id", new ParadiseIdCommand());
+            commands.Register("identite", new ParadiseIdCommand());
+            commands.Register("identité", new ParadiseIdCommand());
             commands.Register("documents", new ParadiseDocumentsCommand());
             commands.Register("showid", new ParadiseShowIdCommand());
+            commands.Register("montrerid", new ParadiseShowIdCommand());
             commands.Register("license", new ParadiseLicenseCommand());
+            commands.Register("licence", new ParadiseLicenseCommand());
+            commands.Register("permis", new ParadiseLicenseCommand());
             commands.Register("showlicense", new ParadiseShowLicenseCommand());
+            commands.Register("showlicence", new ParadiseShowLicenseCommand());
+            commands.Register("montrerpermis", new ParadiseShowLicenseCommand());
         }
     }
 
