@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '3.0.0-react-state-synchronized-chat';
+  const VERSION = '3.1.0-quality-gate-chat-lifecycle';
   const HUD_ID = 'paradise-rp-hud';
   const PARADISE_INPUT_ID = 'pr4-chat-input';
 
@@ -11,7 +11,10 @@
   let nativeInput = null;
   let hudAbort = null;
   let nativeAbort = null;
+  let nitroObserver = null;
+  let observerScanScheduled = false;
   let sending = false;
+  let destroyed = false;
 
   const diag = {
     version: VERSION,
@@ -25,7 +28,10 @@
     lastReactChangeCalled: false,
     lastReactEnterCalled: false,
     lastConsumed: false,
-    lastError: null
+    lastError: null,
+    observerActive: false,
+    observerCallbacks: 0,
+    observerScans: 0
   };
 
   const nextFrame = () => new Promise(resolve => requestAnimationFrame(() => resolve()));
@@ -41,8 +47,8 @@
 
     return [...document.querySelectorAll('#root input, #root textarea')].find(el => {
       if (!el || el.disabled || el.readOnly || el.closest(`#${HUD_ID}`)) return false;
-      const text = `${el.placeholder || ''} ${el.className || ''} ${el.id || ''}`;
-      return /haz|chatear|chat|chatter|parler|message|say/i.test(text);
+      const value = `${el.placeholder || ''} ${el.className || ''} ${el.id || ''}`;
+      return /haz|chatear|chat|chatter|parler|message|say/i.test(value);
     }) || null;
   }
 
@@ -155,6 +161,7 @@
   }
 
   function bindNative() {
+    if (destroyed) return false;
     const next = findNativeInput();
     if (!next) {
       nativeInput = null;
@@ -178,14 +185,14 @@
   }
 
   async function sendThroughNitro(message) {
-    const text = String(message || '').trim();
-    if (!text) return true;
-    if (sending) return false;
+    const messageText = String(message || '').trim();
+    if (!messageText) return true;
+    if (sending || destroyed) return false;
     if (!bindNative() || !nativeInput) return false;
 
     sending = true;
     diag.sends += 1;
-    diag.lastMessage = text;
+    diag.lastMessage = messageText;
     diag.lastError = null;
     diag.lastConsumed = false;
     diag.lastReactChangeCalled = false;
@@ -195,28 +202,24 @@
       let input = nativeInput;
       diag.lastBeforeValue = String(input.value ?? '');
 
-      // Phase 1: update the controlled Nitro input and its React state.
-      setNativeValue(input, text);
+      setNativeValue(input, messageText);
       try { input.focus({ preventScroll: true }); } catch (_) {}
       dispatchNativeInput(input);
       invokeReactChange(input);
 
-      // Let React commit the state update before Enter is evaluated.
       await nextFrame();
       await delay(0);
 
-      // Nitro can recreate the input while committing; reacquire the live element.
       bindNative();
       input = nativeInput || input;
-      if (String(input.value ?? '') !== text) {
-        setNativeValue(input, text);
+      if (String(input.value ?? '') !== messageText) {
+        setNativeValue(input, messageText);
         dispatchNativeInput(input);
       }
 
       diag.lastValueBeforeEnter = String(input.value ?? '');
       try { input.focus({ preventScroll: true }); } catch (_) {}
 
-      // Phase 2: real DOM event first, then direct React handler as a fallback.
       input.dispatchEvent(makeEnterEvent('keydown', input));
       input.dispatchEvent(makeEnterEvent('keypress', input));
       input.dispatchEvent(makeEnterEvent('keyup', input));
@@ -224,14 +227,14 @@
       await nextFrame();
       diag.lastAfterValue = String(input.value ?? '');
 
-      if (diag.lastAfterValue === text) {
+      if (diag.lastAfterValue === messageText) {
         invokeReactEnter(input);
         await nextFrame();
         await delay(10);
         diag.lastAfterValue = String((nativeInput && nativeInput.isConnected ? nativeInput : input).value ?? '');
       }
 
-      diag.lastConsumed = diag.lastAfterValue !== text;
+      diag.lastConsumed = diag.lastAfterValue !== messageText;
       return diag.lastConsumed;
     } catch (error) {
       diag.lastError = error?.message || String(error);
@@ -243,6 +246,7 @@
   }
 
   function bindParadise() {
+    if (destroyed) return false;
     const next = findParadiseInput();
     if (!next) return false;
     if (next === paradiseInput && hudAbort) return true;
@@ -259,14 +263,14 @@
       if (event.key === 'Enter' || event.keyCode === 13) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        const text = paradiseInput.value;
-        if (!String(text || '').trim()) {
+        const value = paradiseInput.value;
+        if (!String(value || '').trim()) {
           paradiseInput.blur();
           return;
         }
 
         paradiseInput.disabled = true;
-        const sent = await sendThroughNitro(text);
+        const sent = await sendThroughNitro(value);
         paradiseInput.disabled = false;
 
         if (sent) {
@@ -291,19 +295,46 @@
   }
 
   function scan() {
+    if (destroyed) return;
     bindParadise();
     bindNative();
+  }
+
+  function scheduleObserverScan() {
+    if (destroyed || observerScanScheduled) return;
+    if (nativeInput?.isConnected && paradiseInput?.isConnected) return;
+    observerScanScheduled = true;
+    requestAnimationFrame(() => {
+      observerScanScheduled = false;
+      if (destroyed) return;
+      diag.observerScans += 1;
+      if (!nativeInput?.isConnected) bindNative();
+      if (!paradiseInput?.isConnected) bindParadise();
+    });
+  }
+
+  function destroy() {
+    if (destroyed) return;
+    destroyed = true;
+    nitroObserver?.disconnect();
+    nitroObserver = null;
+    hudAbort?.abort();
+    nativeAbort?.abort();
+    hudAbort = null;
+    nativeAbort = null;
+    diag.observerActive = false;
   }
 
   function boot() {
     scan();
     const nitroRoot = document.getElementById('root');
     if (nitroRoot) {
-      const observer = new MutationObserver(() => {
-        if (!nativeInput?.isConnected) bindNative();
-        if (!paradiseInput?.isConnected) bindParadise();
+      nitroObserver = new MutationObserver(() => {
+        diag.observerCallbacks += 1;
+        scheduleObserverScan();
       });
-      observer.observe(nitroRoot, { childList: true, subtree: true });
+      nitroObserver.observe(nitroRoot, { childList: true, subtree: true });
+      diag.observerActive = true;
     }
 
     window.__ParadiseNativeChatAdapter = {
@@ -311,10 +342,12 @@
       scan,
       send: sendThroughNitro,
       diag,
+      destroy,
       get nativeInput() { return nativeInput; },
       get paradiseInput() { return paradiseInput; }
     };
 
+    window.addEventListener('beforeunload', destroy, { once: true });
     console.info('[ParadiseRP:chat] React-state synchronized adapter active', { version: VERSION });
   }
 
