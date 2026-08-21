@@ -1,36 +1,15 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Data;
-using System.Collections.Generic;
-
-using Plus.Communication.Packets.Outgoing.Users;
-using Plus.Communication.Packets.Outgoing.Notifications;
-
-
-using Plus.Communication.Packets.Outgoing.Handshake;
-using Plus.Communication.Packets.Outgoing.Quests;
-using Plus.HabboHotel.Items;
-using Plus.Communication.Packets.Outgoing.Inventory.Furni;
-using Plus.Communication.Packets.Outgoing.Catalog;
-using Plus.HabboHotel.Quests;
-using Plus.HabboHotel.Rooms;
-using System.Threading;
+using System;
 using Plus.HabboHotel.GameClients;
-using Plus.Communication.Packets.Outgoing.Rooms.Avatar;
-using Plus.Communication.Packets.Outgoing.Pets;
-using Plus.Communication.Packets.Outgoing.Messenger;
-using Plus.HabboHotel.Users.Messenger;
-using Plus.Communication.Packets.Outgoing.Rooms.Polls;
-using Plus.Communication.Packets.Outgoing.Rooms.Notifications;
-using Plus.Communication.Packets.Outgoing.Availability;
-using Plus.Communication.Packets.Outgoing;
-using Plus.Communication.Packets.Outgoing.Rooms.Polls.Questions;
-using Plus.HabboRoleplay.Weapons;
-using Plus.HabboRoleplay.Misc;
+using Plus.HabboHotel.Rooms;
+using Plus.HabboRoleplay.Paradise.Inventory;
 
 namespace Plus.HabboHotel.Rooms.Chat.Commands.User
 {
+    /// <summary>
+    /// Legacy :inventario / :inv entry point, now intentionally reused by
+    /// ParadiseRP Inventory V2 instead of opening the old text-only MOTD.
+    /// The underlying legacy RP fields are not deleted by Phase 3.
+    /// </summary>
     class InventoryCommand : IChatCommand
     {
         public string PermissionRequired
@@ -40,60 +19,20 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User
 
         public string Parameters
         {
-            get { return ""; }
+            get { return String.Empty; }
         }
 
         public string Description
         {
-            get { return "Abre tu inventario."; }
+            get { return "Ouvre l’inventaire physique ParadiseRP."; }
         }
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] parameters)
         {
-            string Stats = "";
-            Stats += "\n============================================\n                  INVENTARIO \n============================================\n";
+            if (session == null || session.GetHabbo() == null) return;
 
-            Stats += "\n============= CONSUMIBLES ====================\n";
-            Stats += "Crack: " + Session.GetPlay().Cocaine + " gramo(s)\n";
-            Stats += "Medicamentos: " + Session.GetPlay().Medicines + " medicamento(s)\n";
-            Stats += "Marihuana: " + Session.GetPlay().Weed + " gramo(s)\n";
-
-            Stats += "\n============= ARMAS ====================\n";
-            Stats += "Armas: ";
-            Session.GetPlay().OwnedWeapons = null;
-            Session.GetPlay().OwnedWeapons = Session.GetPlay().LoadAndReturnWeapons();
-            if (Session.GetPlay().OwnedWeapons.Count > 0)
-            {
-                foreach (KeyValuePair<string, Weapon> Weapon in Session.GetPlay().OwnedWeapons.ToList())
-                {
-                    Stats += Weapon.Value.Name + " (Estado: "+Weapon.Value.WLife+"/100), ";
-                }
-            }
-            else
-                Stats += "Ninguna";
-            Stats += "\n";
-            Stats += "Piezas de Armas: " + Session.GetPlay().ArmPieces + "\n";
-            Stats += "Materiales para Piezas: " + Session.GetPlay().ArmMat + "\n";
-
-            Stats += "\n============= OBJETOS ====================\n";
-            if (RoleplayManager.CheckHaveProduct(Session, "knife"))
-                Stats += "Cuchillo\n";
-            if (RoleplayManager.CheckHaveProduct(Session, "destornillador"))
-                Stats += "Destornillador\n";
-            if (RoleplayManager.CheckHaveProduct(Session, "palanca"))
-                Stats += "Palanca\n";
-            if (Session.GetPlay().MecParts > 0)
-                Stats += Session.GetPlay().MecParts + " Repuesto(s)\n";
-            if (Session.GetPlay().Bidon > 0)
-                Stats += Session.GetPlay().Bidon + " Bidon(es)\n";
-
-            Stats += "\n============= FARMING ====================\n";
-            if (Session.GetPlay().FarmSeeds == true)
-                Stats += "Semillas de Zanahorias\n";
-            if (Session.GetPlay().WateringCan == true)
-                Stats += "Regadera con agua\n";
-            Stats += "============================================\n";
-            Session.SendMessage(new MOTDNotificationComposer(Stats));
+            InventoryUiEventService.OpenInventory(session.GetHabbo().Id);
+            session.SendWhisper(InventoryService.WeightText(session.GetHabbo().Id), 1);
         }
     }
 }
