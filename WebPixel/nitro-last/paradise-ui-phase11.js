@@ -3,7 +3,7 @@
 
   if (window.ParadisePhase11) return;
 
-  const VERSION = '1.0.0-phase11';
+  const VERSION = '1.0.1-phase11';
   let unsubscribe = () => {};
   let previousCash;
   let previousBank;
@@ -56,10 +56,18 @@
     const chip = hud.querySelector('.pr-room-chip');
     const nameNodes = hud.querySelectorAll('[data-bind="room-name"]');
     const profileNodes = hud.querySelectorAll('[data-bind="profile-room"]');
+    const metaNodes = hud.querySelectorAll('[data-bind="room-meta"]');
 
     if (name) {
+      const count = number(room.playerCount);
+      const secondary = [
+        text(room.district) || text(room.city),
+        count !== null ? `${Math.round(count)} joueur${Math.round(count) > 1 ? 's' : ''}` : ''
+      ].filter(Boolean).join(' · ');
+
       nameNodes.forEach(node => { node.textContent = name; });
       profileNodes.forEach(node => { node.textContent = name; });
+      metaNodes.forEach(node => { node.textContent = secondary; });
       chip?.classList.remove('is-connecting');
       chip?.classList.toggle('is-live', /^(nitro|room-event|nitro-dom)/i.test(text(meta.roomSource)));
       return;
@@ -68,7 +76,7 @@
     const fallback = meta.connected ? 'Localisation inconnue' : 'Connexion à Placid...';
     nameNodes.forEach(node => { node.textContent = fallback; });
     profileNodes.forEach(node => { node.textContent = fallback; });
-    hud.querySelectorAll('[data-bind="room-meta"]').forEach(node => { node.textContent = ''; });
+    metaNodes.forEach(node => { node.textContent = ''; });
     chip?.classList.add('is-connecting');
     chip?.classList.remove('is-live');
   }
