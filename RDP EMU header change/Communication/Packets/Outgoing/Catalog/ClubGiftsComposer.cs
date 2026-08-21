@@ -37,7 +37,10 @@ namespace Plus.Communication.Packets.Outgoing.Catalog
                 //base.WriteBoolean(true);
             }
 
-            base.WriteInteger(0);//Count
+            // One trailing entry is serialized below, so the advertised count
+            // must be 1. Advertising 0 while still writing the entry desynchronizes
+            // Nitro's parser and can surface as a DataView out-of-bounds error.
+            base.WriteInteger(1);//Count
             {
                 //int, bool, int, bool
                 base.WriteInteger(3253248);//Maybe the item id?
@@ -46,7 +49,7 @@ namespace Plus.Communication.Packets.Outgoing.Catalog
                 base.WriteInteger(256);//idk
                 base.WriteBoolean(false);//idk
                 base.WriteInteger(0);
-                base.WriteBoolean(true);
+                base.WriteBoolean(true);//idk
 
             }
         }
