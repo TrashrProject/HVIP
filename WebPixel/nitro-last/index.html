@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
-    <meta name="theme-color" content="#18252a" />
+    <meta name="theme-color" content="#000000" />
     <base href="./">
-    <title>ParadiseRP</title>
+    <title>ParadiseRP — Nitro baseline</title>
     <link rel="icon" href="./favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
@@ -13,23 +13,31 @@
     <link rel="manifest" crossorigin="use-credentials" href="./site.webmanifest">
     <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#000000">
     <link rel="stylesheet" href="./src/assets/index.css">
-    <link rel="stylesheet" href="./paradise-rp-hud.css?v=80" id="paradise-rp-hud-css">
-    <link rel="stylesheet" href="./paradise-dock-redesign.css?v=82" id="paradise-rp-polish-css">
-    <link rel="stylesheet" href="./paradise-chat-fix.css?v=83" id="paradise-rp-chat-fix-css">
     <style>
-      html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #000; }
-      #paradise-loader, .nitro-loading, [class*="nitro-loading" i] { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+      html, body, #root {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+      }
     </style>
     <script>
-      (function () {
+      (() => {
+        'use strict';
+
+        // Regression baseline: keep only the legacy asset URL compatibility that
+        // existed before the Paradise UI regression. Do not touch WebSocket,
+        // Nitro DOM, renderer lifecycle, canvas, packet parsing or room state.
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            registrations.forEach(function(registration) { registration.unregister(); });
-          }).catch(function(error) { console.warn('[ParadiseRP] service worker cleanup failed', error); });
+          navigator.serviceWorker.getRegistrations()
+            .then(registrations => registrations.forEach(registration => registration.unregister()))
+            .catch(error => console.warn('[ParadiseRP:baseline] service worker cleanup failed', error));
         }
 
         const TRANSPARENT_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg==';
-        const rewriteLegacyUrl = (value) => {
+        const rewriteLegacyUrl = value => {
           let url = String(value || '');
           if (!url) return url;
           url = url.replace(/^https?:\/\/swf\.habbovip\.us\/V5-0-2\/?/i, 'https://paradiserp.fr/swf_pz/V5-0-2/');
@@ -46,24 +54,30 @@
           if (/(?:^|\/)styles\.[a-z0-9_-]+\.css(?:\?|$)/i.test(url)) return './empty-legacy.css';
           return url;
         };
+
         window.__rewriteLegacyNitroUrl = rewriteLegacyUrl;
+
         if (window.fetch) {
           const nativeFetch = window.fetch.bind(window);
           window.fetch = function(input, init) {
             try {
-              const raw = (input && input.url) ? input.url : input;
+              const raw = input && input.url ? input.url : input;
               const next = rewriteLegacyUrl(raw);
               if (typeof input === 'string' || input instanceof URL) return nativeFetch(next, init);
               if (input instanceof Request && next !== raw) return nativeFetch(new Request(next, input), init);
-            } catch (error) { console.warn('[ParadiseRP] fetch rewrite failed', error); }
+            } catch (error) {
+              console.warn('[ParadiseRP:baseline] asset fetch rewrite failed', error);
+            }
             return nativeFetch(input, init);
           };
         }
+
         const nativeOpen = XMLHttpRequest.prototype.open;
         XMLHttpRequest.prototype.open = function(method, url) {
           arguments[1] = rewriteLegacyUrl(url);
           return nativeOpen.apply(this, arguments);
         };
+
         const patchUrlProperty = (prototype, property) => {
           const descriptor = Object.getOwnPropertyDescriptor(prototype, property);
           if (!descriptor || !descriptor.set) return;
@@ -74,36 +88,39 @@
             enumerable: descriptor.enumerable
           });
         };
+
         patchUrlProperty(HTMLImageElement.prototype, 'src');
         patchUrlProperty(HTMLSourceElement.prototype, 'src');
         patchUrlProperty(HTMLLinkElement.prototype, 'href');
-        window.addEventListener('unhandledrejection', event => {
-          const reason = event.reason;
-          const text = String(reason && (reason.message || reason) || '');
-          if (reason instanceof Event || /Element not found/i.test(text)) {
-            console.warn('[ParadiseRP] unhandled rejection kept visible for debug', reason || text);
-          }
-        });
+
+        const query = new URLSearchParams(window.location.search);
+        const sso = query.get('sso') || null;
+
+        // Nitro's own lifecycle is deliberately restored here. /play no longer
+        // forces a room, so the emulator / normal navigator flow owns room entry.
+        window.NitroConfig = {
+          'config.urls': ['./local-config.json', './renderer-config.json', './ui-config.json'],
+          'sso.ticket': sso,
+          'forward.type': -1,
+          'forward.id': 0,
+          'friend.id': Number.parseInt(query.get('friend') || '0', 10) || 0,
+          'roomenterad.habbohotel.enabled': false,
+          'roomenterad.habblet.enabled': false
+        };
+
+        window.__PARADISE_BASELINE__ = {
+          version: '1.0.0-native-nitro-baseline',
+          paradiseUi: false,
+          websocketPatched: false,
+          domCleanup: false,
+          roomTrace: false,
+          stabilityPatch: false,
+          hasSso: !!sso
+        };
+
+        console.info('[ParadiseRP] Native Nitro regression baseline active', window.__PARADISE_BASELINE__);
       })();
-      const query = new URLSearchParams(window.location.search);
-      const paradiseRoomId = Number.parseInt(query.get("room") || "0", 10) || 0;
-      const paradiseSsoTicket = query.get("sso") || query.get("ticket") || query.get("auth") || query.get("s") || query.get("client") || null;
-      window.__PARADISE_ROOM_ID__ = paradiseRoomId;
-      window.__PARADISE_SSO_PRESENT__ = !!paradiseSsoTicket;
-      window.NitroConfig = {
-        "config.urls": [ "./local-config.json", "./renderer-config.json", "./ui-config.json" ],
-        "sso.ticket": paradiseSsoTicket,
-        "forward.type": paradiseRoomId > 0 ? 2 : -1,
-        "forward.id": paradiseRoomId,
-        "friend.id": Number.parseInt(query.get("friend") || "0", 10) || 0,
-        "roomenterad.habbohotel.enabled": false,
-        "roomenterad.habblet.enabled": false
-      };
     </script>
-    <script src="./paradise-boot-auth-fix.js?v=86"></script>
-    <script src="./paradise-nitro-stability.js?v=86.1-abws"></script>
-    <script src="./paradise-room-send-trace.js?v=1"></script>
-    <script src="./paradise-native-ui-off.js?v=10"></script>
     <script type="module" crossorigin src="./assets/index-9f9954ad.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/vendor-0a5897c2.js">
     <link rel="modulepreload" crossorigin href="./assets/nitro-renderer-1dc7b8c5.js">
@@ -111,14 +128,5 @@
   <body>
     <noscript>JavaScript doit être activé pour lancer le client.</noscript>
     <div id="root" class="w-100 h-100"></div>
-    <script src="./paradise-rp-hud.js?v=80" defer></script>
-    <script src="./paradise-ui-polish.js?v=82" defer></script>
-    <script src="./paradise-chat-fix.js?v=83" defer></script>
-    <script>
-      window.setTimeout(function () {
-        try { window.__paradiseNativeUiOffScan && window.__paradiseNativeUiOffScan(); } catch (error) { console.warn('[ParadiseRP] native UI scan failed', error); }
-        try { window.__ParadiseRPChatFix && window.__ParadiseRPChatFix.scan && window.__ParadiseRPChatFix.scan(); } catch (error) { console.warn('[ParadiseRP] chat fix scan failed', error); }
-      }, 300);
-    </script>
   </body>
 </html>
