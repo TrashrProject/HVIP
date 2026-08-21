@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `rp_document_types` (
   UNIQUE KEY `uq_rp_document_types_code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- These are system definitions, not player/test data.
+-- System definitions only; no player/test data.
 INSERT IGNORE INTO `rp_document_types` (`code`, `name`, `category`, `expires`) VALUES
   ('PLACID_ID', 'Carte d’identité de Placid Island', 'identity', 0),
   ('DRIVER_LICENSE', 'Permis de conduire', 'license', 1);
@@ -72,4 +72,19 @@ CREATE TABLE IF NOT EXISTS `rp_document_shares` (
   CONSTRAINT `fk_rp_document_shares_document`
     FOREIGN KEY (`player_document_id`) REFERENCES `rp_player_documents` (`id`)
     ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Small one-shot queue used by EMU chat commands to ask the Paradise overlay to
+-- open a specific profile tab. The existing read-only HUD bridge consumes it.
+CREATE TABLE IF NOT EXISTS `rp_ui_events` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `event_type` VARCHAR(40) NOT NULL,
+  `payload` VARCHAR(500) NULL DEFAULT NULL,
+  `status` VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` DATETIME NOT NULL,
+  `consumed_at` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_rp_ui_events_user` (`user_id`, `status`, `expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
