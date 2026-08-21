@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="./paradise-phone-v1.css?v=1" id="paradise-phone-v1-css">
     <link rel="stylesheet" href="./paradise-quality-gate.css?v=1" id="paradise-quality-gate-css">
     <link rel="stylesheet" href="./paradise-phone-v1-ux.css?v=3" id="paradise-phone-v1-ux-css">
+    <link rel="stylesheet" href="./paradise-phone-final.css?v=1" id="paradise-phone-final-css">
     <!-- Hard guard stays last: only explicit UI controls/windows capture pointers. -->
     <link rel="stylesheet" href="./paradise-clickthrough-guard.css?v=3" id="paradise-clickthrough-guard-css">
     <style>html,body,#root{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:#000;}</style>
@@ -37,8 +38,8 @@
         patchUrlProperty(HTMLImageElement.prototype,'src');patchUrlProperty(HTMLSourceElement.prototype,'src');patchUrlProperty(HTMLLinkElement.prototype,'href');
         const query=new URLSearchParams(window.location.search);const sso=query.get('sso')||null;
         window.NitroConfig={'config.urls':['./local-config.json','./renderer-config.json','./ui-config.json'],'sso.ticket':sso,'forward.type':-1,'forward.id':0,'friend.id':Number.parseInt(query.get('friend')||'0',10)||0,'roomenterad.habbohotel.enabled':false,'roomenterad.habblet.enabled':false};
-        window.__PARADISE_BASELINE__={version:'5.2.0-phone-visual-parity',paradiseUi:'isolated-root',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,roomBinding:'event-first-bounded-scan-plus-direct-ui-sync',stabilityPatch:false,chatFix:'react-state-synchronized',polish:true,visualQualityGate:'strict-correction-only',phoneVisualParity:'mockup-contract-v1',characterProfile:'v2-persistent',documents:'server-authoritative',identity:'persistent-sql',inventory:'v2-server-authoritative',inventoryActions:'emu-validated',inventoryWeight:'server-calculated',phone:'v1-persistent',phoneTransport:'authenticated-http-plus-legacy-emu-sms',phoneItem:'inventory-linked',phoneSmsStore:'play_phone_chats-reused',stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,paradiseBridge:'split-hud-inventory-phone',nativeToolbar:'audit-migrate-preserve',clickThroughGuard:'hard-last-css',hasSso:!!sso};
-        console.info('[ParadiseRP] ParadisePhone visual parity baseline active',window.__PARADISE_BASELINE__);
+        window.__PARADISE_BASELINE__={version:'5.3.0-phone-final-visual',paradiseUi:'isolated-root',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,roomBinding:'event-first-bounded-scan-plus-direct-ui-sync',stabilityPatch:false,chatFix:'react-state-synchronized',polish:true,visualQualityGate:'strict-correction-only',phoneVisualParity:'mockup-contract-final',characterProfile:'v2-persistent',documents:'server-authoritative',identity:'persistent-sql',inventory:'v2-server-authoritative',inventoryActions:'emu-validated',inventoryWeight:'server-calculated',phone:'v1-persistent',phoneTransport:'authenticated-http-plus-legacy-emu-sms',phoneItem:'inventory-linked',phoneSmsStore:'play_phone_chats-reused',stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,paradiseBridge:'split-hud-inventory-phone',nativeToolbar:'audit-migrate-preserve',clickThroughGuard:'hard-last-css',hasSso:!!sso};
+        console.info('[ParadiseRP] ParadisePhone final visual correction active',window.__PARADISE_BASELINE__);
       })();
     </script>
     <script src="./paradise-native-ui-off.js?v=11"></script>
@@ -67,5 +68,6 @@
     <script src="./paradise-phone-v1.js?v=1" defer></script>
     <script src="./paradise-quality-gate.js?v=1" defer></script>
     <script src="./paradise-phone-v1-ux.js?v=3" defer></script>
+    <script src="./paradise-phone-final.js?v=1" defer></script>
   </body>
 </html>
