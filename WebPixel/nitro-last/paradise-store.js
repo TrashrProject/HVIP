@@ -3,7 +3,7 @@
 
   if (window.ParadiseStore) return;
 
-  const VERSION = '1.1.0-ui-foundation';
+  const VERSION = '1.2.0-phase11';
   const listeners = new Set();
 
   const state = {
@@ -34,7 +34,9 @@
       connected: false,
       source: null,
       lastUpdatedAt: null,
-      lastError: null
+      lastError: null,
+      roomSource: null,
+      roomUpdatedAt: null
     }
   };
 
@@ -61,11 +63,30 @@
     };
   };
 
+  const normalizeRoom = value => {
+    const source = value && typeof value === 'object' ? value : {};
+    const nested = source.room && typeof source.room === 'object' ? source.room : {};
+    const rawName = source.room_name ?? source.roomName ?? source.caption ?? source.name ?? nested.caption ?? nested.name ?? (typeof source.room === 'string' ? source.room : null);
+    const rawId = source.room_id ?? source.roomId ?? source.id ?? nested.id ?? nested.roomId ?? null;
+    return {
+      id: asNumber(rawId),
+      name: asText(rawName),
+      district: asText(source.district ?? source.zone ?? nested.district ?? nested.zone),
+      city: asText(source.city ?? nested.city),
+      playerCount: asNumber(source.players ?? source.playerCount ?? source.users ?? nested.players ?? nested.playerCount) ?? undefined
+    };
+  };
+
   const emit = (event, detail) => {
     listeners.forEach(listener => {
       try { listener(state, event, detail); } catch (error) { console.warn('[ParadiseStore] listener failed', error); }
     });
     window.dispatchEvent(new CustomEvent('paradise:store-change', { detail: { event, data: detail, state } }));
+  };
+
+  const hasLiveRoomAuthority = () => {
+    const source = asText(state.meta.roomSource) || '';
+    return /^(nitro|room-event|nitro-dom)/i.test(source);
   };
 
   const applyServerSnapshot = payload => {
@@ -77,7 +98,14 @@
     }
 
     const sourceMoney = payload.money && typeof payload.money === 'object' ? payload.money : {};
-    const roomRaw = payload.room_name ?? payload.room;
+    const serverRoom = normalizeRoom({
+      room_id: payload.room_id,
+      room_name: payload.room_name ?? payload.room,
+      district: payload.district,
+      city: payload.city,
+      players: payload.players
+    });
+
     const nextGameplay = {
       player: {
         id: asNumber(payload.id),
@@ -97,13 +125,7 @@
         cash: asNumber(sourceMoney.cash ?? sourceMoney.credits) ?? undefined,
         bank: asNumber(sourceMoney.bank) ?? undefined
       },
-      room: {
-        id: asNumber(payload.room_id),
-        name: asText(roomRaw),
-        district: asText(payload.district),
-        city: asText(payload.city),
-        playerCount: asNumber(payload.players) ?? undefined
-      },
+      room: hasLiveRoomAuthority() ? state.gameplay.room : serverRoom,
       notifications: {
         count: Math.max(0, asNumber(payload.notifications_count) ?? asNumber(payload.notifications?.count) ?? 0)
       }
@@ -116,10 +138,48 @@
     state.meta.lastUpdatedAt = new Date().toISOString();
     state.meta.lastError = null;
 
+    if (!hasLiveRoomAuthority()) {
+      state.meta.roomSource = 'rp-hud-data';
+      state.meta.roomUpdatedAt = state.meta.lastUpdatedAt;
+    }
+
     if (changed) {
       emit('gameplay:snapshot', state.gameplay);
       window.dispatchEvent(new CustomEvent('paradise:player-data', { detail: payload }));
     }
+    return true;
+  };
+
+  const setRoomSnapshot = (snapshot, source = 'nitro') => {
+    const nextRoom = normalizeRoom(snapshot);
+    const previous = state.gameplay.room;
+    const changedRoom = previous.id !== nextRoom.id || previous.name !== nextRoom.name;
+
+    // A district belongs to a room. Do not carry it into a different room unless
+    // the new room event actually provides one. City may remain global.
+    if (nextRoom.district === null && !changedRoom) nextRoom.district = previous.district;
+    if (nextRoom.city === null) nextRoom.city = previous.city;
+    if (nextRoom.playerCount === undefined && !changedRoom) nextRoom.playerCount = previous.playerCount;
+
+    const changed = JSON.stringify(previous) !== JSON.stringify(nextRoom);
+    state.gameplay.room = nextRoom;
+    state.meta.roomSource = asText(source) || 'nitro';
+    state.meta.roomUpdatedAt = new Date().toISOString();
+
+    if (changed) {
+      emit('room:change', nextRoom);
+      window.dispatchEvent(new CustomEvent('paradise:room-data', {
+        detail: { room: nextRoom, source: state.meta.roomSource }
+      }));
+    }
+    return true;
+  };
+
+  const releaseRoomAuthority = () => {
+    if (!hasLiveRoomAuthority()) return false;
+    state.meta.roomSource = 'rp-hud-data';
+    state.meta.roomUpdatedAt = new Date().toISOString();
+    emit('room:authority-release', state.gameplay.room);
     return true;
   };
 
@@ -144,6 +204,8 @@
     version: VERSION,
     getState: () => state,
     applyServerSnapshot,
+    setRoomSnapshot,
+    releaseRoomAuthority,
     setBridgeError,
     setUi,
     subscribe(listener) {
