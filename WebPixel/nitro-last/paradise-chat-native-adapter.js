@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '1.0.0-real-native-chat-focus';
+  const VERSION = '2.0.0-direct-paradise-input';
   const HUD_ID = 'paradise-rp-hud';
   const PARADISE_INPUT_ID = 'pr4-chat-input';
 
@@ -9,8 +9,18 @@
 
   let paradiseInput = null;
   let nativeInput = null;
-  let nativeAbort = null;
   let hudAbort = null;
+  let nativeAbort = null;
+
+  const diag = {
+    version: VERSION,
+    sends: 0,
+    lastMessage: '',
+    lastNativeFound: false,
+    lastBeforeValue: '',
+    lastAfterValue: '',
+    lastError: null
+  };
 
   function findParadiseInput() {
     return document.getElementById(PARADISE_INPUT_ID);
@@ -27,33 +37,73 @@
     }) || null;
   }
 
-  function syncFromNative() {
-    if (!paradiseInput || !nativeInput) return;
-    const value = String(nativeInput.value ?? '');
-    if (paradiseInput.value !== value) paradiseInput.value = value;
+  function setNativeValue(input, value) {
+    const win = input.ownerDocument?.defaultView || window;
+    const proto = input instanceof win.HTMLTextAreaElement ? win.HTMLTextAreaElement.prototype : win.HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (setter) setter.call(input, String(value ?? ''));
+    else input.value = String(value ?? '');
+
+    input.dispatchEvent(new win.Event('input', { bubbles: true, composed: true }));
+    input.dispatchEvent(new win.Event('change', { bubbles: true, composed: true }));
   }
 
-  function focusNative() {
-    if (!nativeInput || !nativeInput.isConnected) bindNative();
-    if (!nativeInput) return false;
+  function makeEnterEvent(type) {
+    const win = nativeInput?.ownerDocument?.defaultView || window;
+    const event = new win.KeyboardEvent(type, {
+      key: 'Enter',
+      code: 'Enter',
+      bubbles: true,
+      cancelable: true,
+      composed: true
+    });
 
-    try {
-      nativeInput.removeAttribute('aria-hidden');
-      nativeInput.focus({ preventScroll: true });
-      const length = String(nativeInput.value || '').length;
-      nativeInput.setSelectionRange?.(length, length);
-      syncFromNative();
-      paradiseInput?.classList.add('is-native-focused');
-      return document.activeElement === nativeInput;
-    } catch (error) {
-      console.warn('[ParadiseRP:chat] native focus failed', error);
-      return false;
+    // Older Nitro/Habbo handlers often test keyCode/which instead of event.key.
+    for (const [name, value] of [['keyCode', 13], ['which', 13], ['charCode', type === 'keypress' ? 13 : 0]]) {
+      try { Object.defineProperty(event, name, { configurable: true, get: () => value }); } catch (_) {}
     }
+
+    return event;
+  }
+
+  function invokeReactEnterFallback(input) {
+    try {
+      let node = input;
+      for (let depth = 0; node && depth < 5; depth += 1, node = node.parentElement) {
+        const propsKey = Object.keys(node).find(key => key.startsWith('__reactProps$'));
+        const props = propsKey ? node[propsKey] : null;
+        if (!props) continue;
+
+        const handler = props.onKeyDown || props.onKeyPress || props.onKeyUp;
+        if (typeof handler !== 'function') continue;
+
+        const fake = {
+          key: 'Enter', code: 'Enter', keyCode: 13, which: 13, charCode: 13,
+          target: input, currentTarget: node,
+          nativeEvent: { key: 'Enter', code: 'Enter', keyCode: 13, which: 13 },
+          defaultPrevented: false,
+          preventDefault() { this.defaultPrevented = true; },
+          stopPropagation() {},
+          persist() {}
+        };
+        handler(fake);
+        return true;
+      }
+    } catch (error) {
+      diag.lastError = `react-fallback: ${error?.message || error}`;
+    }
+    return false;
   }
 
   function bindNative() {
     const next = findNativeInput();
-    if (!next) return false;
+    if (!next) {
+      nativeInput = null;
+      diag.lastNativeFound = false;
+      return false;
+    }
+
+    diag.lastNativeFound = true;
     if (next === nativeInput && nativeAbort) return true;
 
     nativeAbort?.abort();
@@ -61,29 +111,49 @@
     nativeInput = next;
     nativeInput.dataset.prNativeChatBridge = '1';
 
-    nativeInput.addEventListener('input', syncFromNative, { signal: nativeAbort.signal });
-    nativeInput.addEventListener('change', syncFromNative, { signal: nativeAbort.signal });
-    nativeInput.addEventListener('focus', () => paradiseInput?.classList.add('is-native-focused'), { signal: nativeAbort.signal });
-    nativeInput.addEventListener('blur', () => {
-      paradiseInput?.classList.remove('is-native-focused');
-      window.setTimeout(syncFromNative, 0);
-    }, { signal: nativeAbort.signal });
-    nativeInput.addEventListener('keydown', event => {
-      // This is the REAL Nitro input receiving the REAL keyboard event.
-      // Do not prevent Enter: Nitro must handle and send it itself.
-      if (event.key === 'Enter') {
-        window.setTimeout(syncFromNative, 0);
-        window.setTimeout(syncFromNative, 30);
-      } else if (event.key === 'Escape') {
-        window.setTimeout(() => {
-          try { nativeInput.blur(); } catch (_) {}
-          syncFromNative();
-        }, 0);
-      }
+    // Keep Nitro's own field alive only as the network/controller bridge.
+    nativeInput.addEventListener('input', () => {
+      diag.lastAfterValue = String(nativeInput?.value ?? '');
     }, { signal: nativeAbort.signal });
 
-    syncFromNative();
     return true;
+  }
+
+  function sendThroughNitro(message) {
+    const text = String(message || '').trim();
+    if (!text) return true;
+    if (!bindNative() || !nativeInput) return false;
+
+    try {
+      diag.sends += 1;
+      diag.lastMessage = text;
+      diag.lastError = null;
+      diag.lastBeforeValue = String(nativeInput.value ?? '');
+
+      setNativeValue(nativeInput, text);
+
+      // Dispatch the complete legacy keyboard sequence with keyCode compatibility.
+      nativeInput.dispatchEvent(makeEnterEvent('keydown'));
+      nativeInput.dispatchEvent(makeEnterEvent('keypress'));
+      nativeInput.dispatchEvent(makeEnterEvent('keyup'));
+
+      // If Nitro did not consume/clear the field, try its React key handler directly.
+      window.setTimeout(() => {
+        try {
+          diag.lastAfterValue = String(nativeInput?.value ?? '');
+          if (nativeInput && nativeInput.value === text) invokeReactEnterFallback(nativeInput);
+          window.setTimeout(() => {
+            diag.lastAfterValue = String(nativeInput?.value ?? '');
+          }, 30);
+        } catch (_) {}
+      }, 0);
+
+      return true;
+    } catch (error) {
+      diag.lastError = error?.message || String(error);
+      console.warn('[ParadiseRP:chat] Nitro send failed', error);
+      return false;
+    }
   }
 
   function bindParadise() {
@@ -95,29 +165,41 @@
     hudAbort = new AbortController();
     paradiseInput = next;
 
-    // Paradise is the visible shell. Nitro remains the actual focused input.
-    paradiseInput.readOnly = true;
-    paradiseInput.dataset.prNativeChatVisual = '1';
+    // Paradise is now a REAL writable input. No focus redirection, no readonly shell.
+    paradiseInput.readOnly = false;
+    paradiseInput.removeAttribute('readonly');
+    paradiseInput.removeAttribute('data-pr-native-chat-visual');
+    paradiseInput.dataset.prChatDirect = '1';
+    paradiseInput.tabIndex = 0;
 
-    const redirect = event => {
-      // Keep the click inside Paradise, but put the keyboard focus on Nitro.
-      event?.preventDefault?.();
-      event?.stopPropagation?.();
-      bindNative();
-      focusNative();
-    };
+    paradiseInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.keyCode === 13) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
 
-    paradiseInput.addEventListener('pointerdown', redirect, { signal: hudAbort.signal });
-    paradiseInput.addEventListener('click', redirect, { signal: hudAbort.signal });
-    paradiseInput.addEventListener('focus', redirect, { signal: hudAbort.signal });
+        const text = paradiseInput.value;
+        if (!String(text || '').trim()) {
+          paradiseInput.blur();
+          return;
+        }
 
-    const module = paradiseInput.closest('.pr4-chat-module');
-    module?.addEventListener('pointerdown', event => {
-      if (event.target === paradiseInput) return;
-      redirect(event);
+        if (sendThroughNitro(text)) {
+          paradiseInput.value = '';
+          paradiseInput.dispatchEvent(new Event('input', { bubbles: true }));
+          paradiseInput.blur();
+        } else {
+          console.warn('[ParadiseRP:chat] Nitro native input not found');
+        }
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        paradiseInput.blur();
+      }
     }, { signal: hudAbort.signal });
 
-    syncFromNative();
     return true;
   }
 
@@ -129,21 +211,25 @@
   function boot() {
     scan();
 
-    const observer = new MutationObserver(() => {
-      // Nitro may recreate its chat input during room transitions.
-      if (!nativeInput?.isConnected || !paradiseInput?.isConnected) scan();
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+    const nitroRoot = document.getElementById('root');
+    if (nitroRoot) {
+      const observer = new MutationObserver(() => {
+        if (!nativeInput?.isConnected) bindNative();
+        if (!paradiseInput?.isConnected) bindParadise();
+      });
+      observer.observe(nitroRoot, { childList: true, subtree: true });
+    }
 
     window.__ParadiseNativeChatAdapter = {
       version: VERSION,
       scan,
-      focus: focusNative,
+      send: sendThroughNitro,
+      diag,
       get nativeInput() { return nativeInput; },
       get paradiseInput() { return paradiseInput; }
     };
 
-    console.info('[ParadiseRP:chat] real Nitro input adapter active', { version: VERSION });
+    console.info('[ParadiseRP:chat] direct Paradise input adapter active', { version: VERSION });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
