@@ -37,7 +37,7 @@
         patchUrlProperty(HTMLImageElement.prototype,'src');patchUrlProperty(HTMLSourceElement.prototype,'src');patchUrlProperty(HTMLLinkElement.prototype,'href');
         const query=new URLSearchParams(window.location.search);const sso=query.get('sso')||null;
         window.NitroConfig={'config.urls':['./local-config.json','./renderer-config.json','./ui-config.json'],'sso.ticket':sso,'forward.type':-1,'forward.id':0,'friend.id':Number.parseInt(query.get('friend')||'0',10)||0,'roomenterad.habbohotel.enabled':false,'roomenterad.habblet.enabled':false};
-        window.__PARADISE_BASELINE__={version:'5.1.1-quality-gate-room-reconcile',paradiseUi:'isolated-root',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,roomBinding:'event-first-bounded-scan-plus-server-reconcile',stabilityPatch:false,chatFix:'react-state-synchronized',polish:true,visualQualityGate:'strict-correction-only',characterProfile:'v2-persistent',documents:'server-authoritative',identity:'persistent-sql',inventory:'v2-server-authoritative',inventoryActions:'emu-validated',inventoryWeight:'server-calculated',phone:'v1-persistent',phoneTransport:'authenticated-http-plus-legacy-emu-sms',phoneItem:'inventory-linked',phoneSmsStore:'play_phone_chats-reused',stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,paradiseBridge:'split-hud-inventory-phone',nativeToolbar:'audit-migrate-preserve',clickThroughGuard:'hard-last-css',hasSso:!!sso};
+        window.__PARADISE_BASELINE__={version:'5.1.2-quality-gate-direct-room-sync',paradiseUi:'isolated-root',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,roomBinding:'event-first-bounded-scan-plus-direct-ui-sync',stabilityPatch:false,chatFix:'react-state-synchronized',polish:true,visualQualityGate:'strict-correction-only',characterProfile:'v2-persistent',documents:'server-authoritative',identity:'persistent-sql',inventory:'v2-server-authoritative',inventoryActions:'emu-validated',inventoryWeight:'server-calculated',phone:'v1-persistent',phoneTransport:'authenticated-http-plus-legacy-emu-sms',phoneItem:'inventory-linked',phoneSmsStore:'play_phone_chats-reused',stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,paradiseBridge:'split-hud-inventory-phone',nativeToolbar:'audit-migrate-preserve',clickThroughGuard:'hard-last-css',hasSso:!!sso};
         console.info('[ParadiseRP] strict visual quality gate baseline active',window.__PARADISE_BASELINE__);
       })();
     </script>
@@ -55,6 +55,7 @@
     <script src="./paradise-ui-foundation.js?v=1" defer></script>
     <script src="./paradise-room-adapter.js?v=2" defer></script>
     <script src="./paradise-room-reconciler.js?v=1" defer></script>
+    <script src="./paradise-room-ui-sync.js?v=1" defer></script>
     <script src="./paradise-ui-phase11.js?v=1" defer></script>
     <script src="./paradise-native-toolbar-migration.js?v=1" defer></script>
     <script src="./paradise-ui-event-isolation.js?v=2" defer></script>
