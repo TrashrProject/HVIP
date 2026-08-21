@@ -8,20 +8,35 @@
   --pr-pixel-line: rgba(44, 175, 164, .18);
 }
 
-/* Keep the whole overlay transparent to Nitro except actual controls. */
+/*
+ * Nitro click-through safety.
+ *
+ * The permanent Paradise HUD is visually above the room, but its large shell
+ * surfaces must NEVER become hit targets. Only actual controls are allowed to
+ * receive pointer input. This prevents invisible/transparent portions of the
+ * economy, navigation, chat and bottom-right containers from stealing room
+ * clicks and making walkable Nitro tiles feel blocked.
+ */
 #paradise-ui-root,
 #paradise-ui-root .pr-foundation,
 #paradise-ui-root .pr-player-stack,
-#paradise-ui-root .pr-window-layer {
-  pointer-events: none;
-}
-
-#paradise-ui-root button,
-#paradise-ui-root input,
+#paradise-ui-root .pr-window-layer,
 #paradise-ui-root .pr-economy,
 #paradise-ui-root .pr-bottom-nav,
 #paradise-ui-root .pr-chatbar,
 #paradise-ui-root .pr-bottom-right,
+#paradise-ui-root .pr-actions-wrap,
+#paradise-ui-root .pr-actions-menu {
+  pointer-events: none;
+}
+
+/* Actual controls stay interactive. Open windows intentionally own their area. */
+#paradise-ui-root button,
+#paradise-ui-root input,
+#paradise-ui-root textarea,
+#paradise-ui-root select,
+#paradise-ui-root a,
+#paradise-ui-root [contenteditable="true"],
 #paradise-ui-root .pr-window.is-open {
   pointer-events: auto;
 }
