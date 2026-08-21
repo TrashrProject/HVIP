@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="./paradise-ui-foundation.css?v=1" id="paradise-ui-foundation-css">
     <link rel="stylesheet" href="./paradise-stable-ui-fixes.css?v=2" id="paradise-stable-ui-fixes-css">
     <link rel="stylesheet" href="./paradise-ui-phase11.css?v=1" id="paradise-ui-phase11-css">
+    <link rel="stylesheet" href="./paradise-character-v2.css?v=2" id="paradise-character-v2-css">
     <style>html,body,#root{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:#000;}</style>
     <script>
       (()=>{
@@ -30,8 +31,8 @@
         patchUrlProperty(HTMLImageElement.prototype,'src');patchUrlProperty(HTMLSourceElement.prototype,'src');patchUrlProperty(HTMLLinkElement.prototype,'href');
         const query=new URLSearchParams(window.location.search);const sso=query.get('sso')||null;
         window.NitroConfig={'config.urls':['./local-config.json','./renderer-config.json','./ui-config.json'],'sso.ticket':sso,'forward.type':-1,'forward.id':0,'friend.id':Number.parseInt(query.get('friend')||'0',10)||0,'roomenterad.habbohotel.enabled':false,'roomenterad.habblet.enabled':false};
-        window.__PARADISE_BASELINE__={version:'2.1.1-phase11',paradiseUi:'isolated-root',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,roomBinding:'event-first-no-room-poll',stabilityPatch:false,chatFix:'react-state-synchronized',polish:true,stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,paradiseBridge:'http-readonly-existing',nativeToolbar:'audit-migrate-preserve',hasSso:!!sso};
-        console.info('[ParadiseRP] Phase 1.1 active',window.__PARADISE_BASELINE__);
+        window.__PARADISE_BASELINE__={version:'3.0.0-character-v2',paradiseUi:'isolated-root',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,roomBinding:'event-first-no-room-poll',stabilityPatch:false,chatFix:'react-state-synchronized',polish:true,characterProfile:'v2-persistent',documents:'server-authoritative',identity:'persistent-sql',stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,paradiseBridge:'http-readonly-existing',nativeToolbar:'audit-migrate-preserve',hasSso:!!sso};
+        console.info('[ParadiseRP] Phase 2 Character System active',window.__PARADISE_BASELINE__);
       })();
     </script>
     <script src="./paradise-native-ui-off.js?v=11"></script>
@@ -43,7 +44,7 @@
     <noscript>JavaScript doit être activé pour lancer le client.</noscript>
     <div id="root" class="w-100 h-100"></div>
     <div id="paradise-ui-root" aria-label="Interface ParadiseRP"></div>
-    <script src="./paradise-store.js?v=2" defer></script>
+    <script src="./paradise-store.js?v=3" defer></script>
     <script src="./paradise-bridge.js?v=1" defer></script>
     <script src="./paradise-ui-foundation.js?v=1" defer></script>
     <script src="./paradise-room-adapter.js?v=1" defer></script>
@@ -51,5 +52,6 @@
     <script src="./paradise-native-toolbar-migration.js?v=1" defer></script>
     <script src="./paradise-ui-event-isolation.js?v=2" defer></script>
     <script src="./paradise-chat-native-adapter.js?v=3" defer></script>
+    <script src="./paradise-character-v2.js?v=2" defer></script>
   </body>
 </html>
