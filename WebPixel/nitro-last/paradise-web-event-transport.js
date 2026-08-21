@@ -1,8 +1,9 @@
 (() => {
   'use strict';
 
+  const VERSION = '1.1.0-session-safe';
   if (window.__ParadiseWebEventTransportBooted) return;
-  window.__ParadiseWebEventTransportBooted = '1.0.0';
+  window.__ParadiseWebEventTransportBooted = VERSION;
 
   // If the legacy RDP WebEvent transport is already present, ParadiseBridge can
   // reuse it directly and this compatibility transport must stay out of the way.
@@ -19,6 +20,14 @@
   const rdp = window.rdp || {};
   let reconnectTimer = 0;
   let stopped = false;
+  let lastEndpoint = null;
+  let lastError = null;
+
+  const validUserId = value => {
+    if (value === null || value === undefined || value === '') return null;
+    const id = Number(value);
+    return Number.isInteger(id) && id > 0 ? id : null;
+  };
 
   function buildEndpoint(userId) {
     const configured = String(window.__PARADISE_BRIDGE_WS__ || '').trim();
@@ -36,12 +45,12 @@
       credentials: 'same-origin'
     });
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) throw new Error(`Session HTTP ${response.status}`);
     const data = await response.json();
-    const userId = Number(data?.id);
+    const userId = validUserId(data?.id);
 
-    if (!Number.isInteger(userId) || userId < 0) {
-      throw new Error('No authenticated ParadiseRP user id');
+    if (!userId) {
+      throw new Error(`No authenticated ParadiseRP user id (received ${String(data?.id)})`);
     }
 
     app.UserID = userId;
@@ -54,7 +63,10 @@
     if (stopped || reconnectTimer) return;
     reconnectTimer = window.setTimeout(() => {
       reconnectTimer = 0;
-      connect().catch(() => scheduleReconnect());
+      connect().catch(error => {
+        lastError = String(error?.message || error || 'Unknown transport error');
+        scheduleReconnect();
+      });
     }, 2000);
   }
 
@@ -66,26 +78,33 @@
       return existing;
     }
 
-    const userId = Number.isInteger(Number(app.UserID)) && Number(app.UserID) >= 0
-      ? Number(app.UserID)
-      : await resolveSession();
+    // Important: Number(null) === 0 in JavaScript. Never treat a missing session
+    // value as user 0; resolve the authenticated CMS session first.
+    const userId = validUserId(app.UserID) || await resolveSession();
+    const endpoint = buildEndpoint(userId);
+    lastEndpoint = endpoint;
+    lastError = null;
 
-    const socket = new WebSocket(buildEndpoint(userId));
+    const socket = new WebSocket(endpoint);
     app.webSocket = socket;
 
     socket.addEventListener('open', () => {
       app.startedSocket = true;
-      window.dispatchEvent(new CustomEvent('paradise:webevent-open', { detail: { userId } }));
+      lastError = null;
+      console.info('[ParadiseBridge] WebEvent connected', { userId, endpoint });
+      window.dispatchEvent(new CustomEvent('paradise:webevent-open', { detail: { userId, endpoint } }));
     });
 
-    socket.addEventListener('close', () => {
+    socket.addEventListener('close', event => {
       app.startedSocket = false;
-      window.dispatchEvent(new CustomEvent('paradise:webevent-close', { detail: { userId } }));
+      lastError = `WebSocket closed (${event.code})`;
+      window.dispatchEvent(new CustomEvent('paradise:webevent-close', { detail: { userId, endpoint, code: event.code } }));
       scheduleReconnect();
     });
 
     socket.addEventListener('error', () => {
       app.startedSocket = false;
+      lastError = `WebSocket handshake failed for ${endpoint}`;
     });
 
     return socket;
@@ -93,10 +112,10 @@
 
   rdp.sendData = function(eventName, data, bypass, json, socket, started, userId) {
     const target = socket || app.webSocket;
-    const resolvedUserId = Number(userId ?? app.UserID);
+    const resolvedUserId = validUserId(userId) || validUserId(app.UserID);
 
     if (!target || target.readyState !== WebSocket.OPEN) return false;
-    if (!Number.isInteger(resolvedUserId) || resolvedUserId < 0) return false;
+    if (!resolvedUserId) return false;
 
     target.send(JSON.stringify({
       UserId: resolvedUserId,
@@ -112,6 +131,7 @@
   window.rdp_app = app;
   window.rdp = rdp;
   window.ParadiseWebEventTransport = Object.freeze({
+    version: VERSION,
     connect,
     stop() {
       stopped = true;
@@ -120,11 +140,21 @@
       try { app.webSocket?.close(); } catch (_) {}
     },
     getSocket: () => app.webSocket,
-    getUserId: () => app.UserID
+    getUserId: () => validUserId(app.UserID),
+    getEndpoint: () => lastEndpoint,
+    getDiag: () => ({
+      version: VERSION,
+      userId: validUserId(app.UserID),
+      endpoint: lastEndpoint,
+      readyState: app.webSocket?.readyState ?? null,
+      startedSocket: Boolean(app.startedSocket),
+      lastError
+    })
   });
 
   connect().catch(error => {
-    console.warn('[ParadiseBridge] WebEvent transport unavailable', error.message || error);
+    lastError = String(error?.message || error || 'Unknown transport error');
+    console.warn('[ParadiseBridge] WebEvent transport unavailable', lastError);
     scheduleReconnect();
   });
 })();
