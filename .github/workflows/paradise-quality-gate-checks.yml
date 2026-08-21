@@ -26,12 +26,14 @@ jobs:
           node --check WebPixel/nitro-last/paradise-room-adapter.js
           node --check WebPixel/nitro-last/paradise-room-reconciler.js
           node --check WebPixel/nitro-last/paradise-room-ui-sync.js
+          node --check WebPixel/nitro-last/paradise-chat-native-adapter.js
           node --check WebPixel/nitro-last/paradise-phone-v1-ux.js
           node --check WebPixel/nitro-last/paradise-phone-final.js
           node --check WebPixel/nitro-last/paradise-phone-layout-final.js
           node --check WebPixel/nitro-last/paradise-quality-gate.js
           node --check WebPixel/nitro-last/paradise-quality-gate-input.js
           node --check WebPixel/nitro-last/paradise-quality-gate-phone.js
+          node --check WebPixel/nitro-last/paradise-quality-gate-ui.js
 
       - name: PHP syntax
         run: |
@@ -61,6 +63,7 @@ jobs:
           grep -q 'paradise-quality-gate.css' "$INDEX"
           grep -q 'paradise-quality-gate-input.js' "$INDEX"
           grep -q 'paradise-quality-gate-phone.js' "$INDEX"
+          grep -q 'paradise-quality-gate-ui.js' "$INDEX"
           grep -q 'paradise-clickthrough-guard.css' "$INDEX"
           q=$(grep -n 'paradise-quality-gate.css' "$INDEX" | head -1 | cut -d: -f1)
           g=$(grep -n 'paradise-clickthrough-guard.css' "$INDEX" | head -1 | cut -d: -f1)
@@ -68,13 +71,15 @@ jobs:
           ! grep -Eiq 'https?://' WebPixel/nitro-last/paradise-quality-gate.css
           ! grep -Eiq 'https?://' WebPixel/nitro-last/paradise-quality-gate.js
 
-      - name: No invasive room observer or polling
+      - name: Room and lifecycle safety
         shell: bash
         run: |
           set -e
           ! grep -q 'new MutationObserver' WebPixel/nitro-last/paradise-room-adapter.js
           ! grep -q 'setInterval' WebPixel/nitro-last/paradise-room-adapter.js
           ! grep -q 'new MutationObserver' WebPixel/nitro-last/paradise-phone-v1-ux.js
+          grep -q 'nitroObserver?.disconnect' WebPixel/nitro-last/paradise-chat-native-adapter.js
+          grep -q 'observerScanScheduled' WebPixel/nitro-last/paradise-chat-native-adapter.js
 
       - name: Server-authority guards
         shell: bash
@@ -87,6 +92,7 @@ jobs:
           grep -q 'mysqli_set_charset' WebPixel/rp-inventory-data.php
           grep -q 'mysqli_set_charset' WebPixel/rp-phone-action.php
           grep -q 'mysqli_set_charset' WebPixel/rp-character-action.php
+          grep -q 'read_notifications' WebPixel/rp-phone-action.php
 
       - name: UTF-8 repair is client-charset safe
         shell: bash
