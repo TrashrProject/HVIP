@@ -19,9 +19,16 @@ namespace Plus.HabboRoleplay.Paradise.Documents
         {
             List<ParadiseDocument> cached;
             if (!forceReload && Cache.TryGetValue(userId, out cached)) return cached.AsReadOnly();
-            List<ParadiseDocument> loaded = Repository.LoadForUser(userId);
-            Cache[userId] = loaded;
-            return loaded.AsReadOnly();
+            try
+            {
+                List<ParadiseDocument> loaded = Repository.LoadForUser(userId);
+                Cache[userId] = loaded;
+                return loaded.AsReadOnly();
+            }
+            catch
+            {
+                return new List<ParadiseDocument>().AsReadOnly();
+            }
         }
 
         public static ParadiseDocument GetDocument(int userId, string typeCode, bool forceReload = false)
@@ -32,9 +39,9 @@ namespace Plus.HabboRoleplay.Paradise.Documents
 
         public static ParadiseDocument EnsureIdentityCard(int userId, ParadiseCharacter character)
         {
+            if (character == null) return null;
             ParadiseDocument current = GetDocument(userId, IdentityCode, true);
             if (current != null) return current;
-            if (character == null) return null;
 
             ParadiseDocument created = null;
             for (int attempt = 0; attempt < 3 && created == null; attempt++)
@@ -45,7 +52,7 @@ namespace Plus.HabboRoleplay.Paradise.Documents
                 }
                 catch
                 {
-                    if (attempt == 2) throw;
+                    if (attempt == 2) return null;
                 }
             }
             Invalidate(userId);
@@ -86,7 +93,9 @@ namespace Plus.HabboRoleplay.Paradise.Documents
                 return false;
             }
 
-            ParadiseCharacter character = CharacterService.GetOrLoad(sender.GetHabbo().Id);
+            ParadiseCharacter character;
+            try { character = CharacterService.GetOrLoad(sender.GetHabbo().Id); }
+            catch { character = null; }
             if (character == null)
             {
                 message = "Créez d'abord votre identité RP.";
@@ -102,7 +111,15 @@ namespace Plus.HabboRoleplay.Paradise.Documents
                 return false;
             }
 
-            Repository.CreateShare(sender.GetHabbo().Id, target.GetHabbo().Id, document.Id, DateTime.UtcNow.AddMinutes(2));
+            try
+            {
+                Repository.CreateShare(sender.GetHabbo().Id, target.GetHabbo().Id, document.Id, DateTime.Now.AddMinutes(2));
+            }
+            catch
+            {
+                message = "Le système documentaire est momentanément indisponible.";
+                return false;
+            }
 
             string documentLabel = String.Equals(typeCode, DriverLicenseCode, StringComparison.OrdinalIgnoreCase)
                 ? "son permis de conduire"
@@ -122,7 +139,7 @@ namespace Plus.HabboRoleplay.Paradise.Documents
 
         private static string GenerateDocumentNumber(string prefix)
         {
-            return prefix + "-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpperInvariant();
+            return prefix + "-" + Guid.NewGuid().ToString("N").Substring(0, 12).ToUpperInvariant();
         }
     }
 }
