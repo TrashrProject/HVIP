@@ -3,7 +3,7 @@
 
   if (window.ParadiseStore) return;
 
-  const VERSION = '1.2.0-phase11';
+  const VERSION = '2.0.0-character-v2';
   const listeners = new Set();
 
   const state = {
@@ -26,9 +26,32 @@
       room: { id: null, name: null, district: null, city: null, playerCount: undefined },
       notifications: { count: 0 }
     },
+    character: {
+      exists: false,
+      firstName: null,
+      lastName: null,
+      fullName: null,
+      birthDate: null,
+      age: null,
+      gender: null,
+      nationality: null,
+      citizenId: null,
+      biography: null,
+      reputation: 0,
+      createdAt: null,
+      updatedAt: null
+    },
+    documents: [],
+    reputation: { general: 0 },
+    statistics: { accountCreated: null, onlineTime: null, roomVisits: null },
+    offers: { document: null },
     ui: {
       activeWindow: null,
-      actionsOpen: false
+      actionsOpen: false,
+      profileTab: 'overview',
+      profileDocument: null,
+      presentedDocument: null,
+      onboarding: false
     },
     meta: {
       connected: false,
@@ -36,7 +59,8 @@
       lastUpdatedAt: null,
       lastError: null,
       roomSource: null,
-      roomUpdatedAt: null
+      roomUpdatedAt: null,
+      pendingUiEvent: null
     }
   };
 
@@ -57,10 +81,7 @@
     const current = asNumber(value.current);
     const max = asNumber(value.max);
     if (current === null) return null;
-    return {
-      current: Math.max(0, current),
-      max: max !== null && max > 0 ? max : null
-    };
+    return { current: Math.max(0, current), max: max !== null && max > 0 ? max : null };
   };
 
   const normalizeRoom = value => {
@@ -76,6 +97,38 @@
       playerCount: asNumber(source.players ?? source.playerCount ?? source.users ?? nested.players ?? nested.playerCount) ?? undefined
     };
   };
+
+  const normalizeCharacter = value => {
+    const source = value && typeof value === 'object' ? value : {};
+    return {
+      exists: Boolean(source.exists),
+      firstName: asText(source.first_name ?? source.firstName),
+      lastName: asText(source.last_name ?? source.lastName),
+      fullName: asText(source.full_name ?? source.fullName),
+      birthDate: asText(source.birth_date ?? source.birthDate),
+      age: asNumber(source.age),
+      gender: asText(source.gender),
+      nationality: asText(source.nationality),
+      citizenId: asText(source.citizen_id ?? source.citizenId),
+      biography: asText(source.biography) || '',
+      reputation: asNumber(source.reputation) ?? 0,
+      createdAt: asText(source.created_at ?? source.createdAt),
+      updatedAt: asText(source.updated_at ?? source.updatedAt)
+    };
+  };
+
+  const normalizeDocuments = value => Array.isArray(value) ? value.map(item => ({
+    id: asNumber(item?.id),
+    type: asText(item?.type),
+    name: asText(item?.name),
+    category: asText(item?.category),
+    number: asText(item?.number),
+    status: asText(item?.status) || 'UNKNOWN',
+    issuedAt: asText(item?.issued_at ?? item?.issuedAt),
+    expiresAt: asText(item?.expires_at ?? item?.expiresAt),
+    canExpire: Boolean(item?.can_expire ?? item?.canExpire),
+    metadata: asText(item?.metadata)
+  })) : [];
 
   const emit = (event, detail) => {
     listeners.forEach(listener => {
@@ -131,8 +184,32 @@
       }
     };
 
-    const changed = JSON.stringify(state.gameplay) !== JSON.stringify(nextGameplay);
+    const nextCharacter = normalizeCharacter(payload.character);
+    const nextDocuments = normalizeDocuments(payload.documents);
+    const nextReputation = { general: asNumber(payload.reputation?.general) ?? nextCharacter.reputation ?? 0 };
+    const nextStatistics = {
+      accountCreated: asText(payload.statistics?.account_created ?? payload.statistics?.accountCreated),
+      onlineTime: asNumber(payload.statistics?.online_time ?? payload.statistics?.onlineTime),
+      roomVisits: asNumber(payload.statistics?.room_visits ?? payload.statistics?.roomVisits)
+    };
+    const nextOffer = payload.document_offer && typeof payload.document_offer === 'object' ? payload.document_offer : null;
+    const nextUiEvent = payload.ui_event && typeof payload.ui_event === 'object' ? payload.ui_event : null;
+
+    const gameplayChanged = JSON.stringify(state.gameplay) !== JSON.stringify(nextGameplay);
+    const characterChanged = JSON.stringify(state.character) !== JSON.stringify(nextCharacter);
+    const documentsChanged = JSON.stringify(state.documents) !== JSON.stringify(nextDocuments);
+    const reputationChanged = JSON.stringify(state.reputation) !== JSON.stringify(nextReputation);
+    const statisticsChanged = JSON.stringify(state.statistics) !== JSON.stringify(nextStatistics);
+    const offerChanged = JSON.stringify(state.offers.document) !== JSON.stringify(nextOffer);
+    const uiEventChanged = JSON.stringify(state.meta.pendingUiEvent) !== JSON.stringify(nextUiEvent);
+
     state.gameplay = nextGameplay;
+    state.character = nextCharacter;
+    state.documents = nextDocuments;
+    state.reputation = nextReputation;
+    state.statistics = nextStatistics;
+    state.offers.document = nextOffer;
+    state.meta.pendingUiEvent = nextUiEvent;
     state.meta.connected = true;
     state.meta.source = 'rp-hud-data';
     state.meta.lastUpdatedAt = new Date().toISOString();
@@ -143,10 +220,16 @@
       state.meta.roomUpdatedAt = state.meta.lastUpdatedAt;
     }
 
-    if (changed) {
+    if (gameplayChanged) {
       emit('gameplay:snapshot', state.gameplay);
       window.dispatchEvent(new CustomEvent('paradise:player-data', { detail: payload }));
     }
+    if (characterChanged) emit('character:update', state.character);
+    if (documentsChanged) emit('documents:update', state.documents);
+    if (reputationChanged) emit('reputation:update', state.reputation);
+    if (statisticsChanged) emit('statistics:update', state.statistics);
+    if (offerChanged && nextOffer) emit('document:offer', nextOffer);
+    if (uiEventChanged && nextUiEvent) emit('ui:event', nextUiEvent);
     return true;
   };
 
@@ -154,23 +237,16 @@
     const nextRoom = normalizeRoom(snapshot);
     const previous = state.gameplay.room;
     const changedRoom = previous.id !== nextRoom.id || previous.name !== nextRoom.name;
-
-    // A district belongs to a room. Do not carry it into a different room unless
-    // the new room event actually provides one. City may remain global.
     if (nextRoom.district === null && !changedRoom) nextRoom.district = previous.district;
     if (nextRoom.city === null) nextRoom.city = previous.city;
     if (nextRoom.playerCount === undefined && !changedRoom) nextRoom.playerCount = previous.playerCount;
-
     const changed = JSON.stringify(previous) !== JSON.stringify(nextRoom);
     state.gameplay.room = nextRoom;
     state.meta.roomSource = asText(source) || 'nitro';
     state.meta.roomUpdatedAt = new Date().toISOString();
-
     if (changed) {
       emit('room:change', nextRoom);
-      window.dispatchEvent(new CustomEvent('paradise:room-data', {
-        detail: { room: nextRoom, source: state.meta.roomSource }
-      }));
+      window.dispatchEvent(new CustomEvent('paradise:room-data', { detail: { room: nextRoom, source: state.meta.roomSource } }));
     }
     return true;
   };
@@ -194,10 +270,29 @@
     const next = {};
     if (Object.prototype.hasOwnProperty.call(patch, 'activeWindow')) next.activeWindow = asText(patch.activeWindow);
     if (Object.prototype.hasOwnProperty.call(patch, 'actionsOpen')) next.actionsOpen = Boolean(patch.actionsOpen);
-
+    if (Object.prototype.hasOwnProperty.call(patch, 'profileTab')) next.profileTab = asText(patch.profileTab) || 'overview';
+    if (Object.prototype.hasOwnProperty.call(patch, 'profileDocument')) next.profileDocument = asText(patch.profileDocument);
+    if (Object.prototype.hasOwnProperty.call(patch, 'presentedDocument')) next.presentedDocument = patch.presentedDocument || null;
+    if (Object.prototype.hasOwnProperty.call(patch, 'onboarding')) next.onboarding = Boolean(patch.onboarding);
     const before = JSON.stringify(state.ui);
     Object.assign(state.ui, next);
     if (JSON.stringify(state.ui) !== before) emit('ui:change', state.ui);
+  };
+
+  const clearDocumentOffer = offerId => {
+    const currentId = asNumber(state.offers.document?.id);
+    if (offerId === undefined || offerId === null || currentId === asNumber(offerId)) {
+      state.offers.document = null;
+      emit('document:offer-cleared', offerId ?? currentId);
+    }
+  };
+
+  const clearUiEvent = eventId => {
+    const currentId = asNumber(state.meta.pendingUiEvent?.id);
+    if (eventId === undefined || eventId === null || currentId === asNumber(eventId)) {
+      state.meta.pendingUiEvent = null;
+      emit('ui:event-cleared', eventId ?? currentId);
+    }
   };
 
   window.ParadiseStore = Object.freeze({
@@ -208,6 +303,8 @@
     releaseRoomAuthority,
     setBridgeError,
     setUi,
+    clearDocumentOffer,
+    clearUiEvent,
     subscribe(listener) {
       if (typeof listener !== 'function') return () => {};
       listeners.add(listener);
