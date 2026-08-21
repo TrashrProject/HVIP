@@ -3,12 +3,13 @@
  * ParadiseRP UI data bridge.
  * Read-only: gameplay values remain authoritative in existing systems, while
  * Phase 2 character/documents are exposed from the additive RP tables.
+ *
+ * IMPORTANT: Phase 2 is strictly supplemental. A Character/Documents failure
+ * must never take down the stable Phase 1 HUD data.
  */
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('X-Content-Type-Options: nosniff');
-
-require_once __DIR__ . '/paradise-character-lib.php';
 
 function pr_hud_json(array $data, int $code = 200): void {
     http_response_code($code);
@@ -39,6 +40,7 @@ function pr_hud_empty(string $reason = 'not_connected'): array {
         'statistics' => [],
         'document_offer' => null,
         'ui_event' => null,
+        'phase2' => ['available' => false, 'reason' => $reason],
         'city' => null,
         'district' => null,
         'room_id' => null,
@@ -154,6 +156,7 @@ try {
         pr_hud_json(pr_hud_empty('user_id_unavailable'));
     }
 
+    // Stable Phase 1 gameplay layer.
     $statsColumns = pr_hud_columns($con, 'play_stats');
     $stats = pr_hud_row_by_user($con, 'play_stats', $statsColumns, $id) ?: [];
     $userStatsColumns = pr_hud_columns($con, 'user_stats');
@@ -244,11 +247,44 @@ try {
     $district = pr_hud_first($user, $usersColumns, ['district','zone'], null);
     $city = pr_hud_first($user, $usersColumns, ['city'], null);
 
-    // Phase 2: additive character/document layer. Missing migration degrades cleanly.
-    $character = pr_character_snapshot($con, $id);
-    $documents = pr_character_documents($con, $id);
-    $documentOffer = pr_character_offer($con, $id);
-    $uiEvent = pr_character_ui_event($con, $id);
+    // Phase 2 is optional/additive. Never let it invalidate the stable HUD.
+    $character = [
+        'exists' => false,
+        'first_name' => null,
+        'last_name' => null,
+        'full_name' => null,
+        'birth_date' => null,
+        'age' => null,
+        'gender' => null,
+        'nationality' => null,
+        'citizen_id' => null,
+        'biography' => null,
+        'reputation' => 0,
+        'created_at' => null,
+        'updated_at' => null,
+    ];
+    $documents = [];
+    $documentOffer = null;
+    $uiEvent = null;
+    $phase2Available = false;
+    $phase2Reason = null;
+
+    try {
+        $phase2Lib = __DIR__ . '/paradise-character-lib.php';
+        if (!is_file($phase2Lib)) {
+            throw new RuntimeException('character_lib_missing');
+        }
+        require_once $phase2Lib;
+
+        $character = pr_character_snapshot($con, $id);
+        $documents = pr_character_documents($con, $id);
+        $documentOffer = pr_character_offer($con, $id);
+        $uiEvent = pr_character_ui_event($con, $id);
+        $phase2Available = true;
+    } catch (Throwable $phase2Error) {
+        $phase2Reason = $phase2Error->getMessage();
+        error_log('[ParadiseRP Phase2 supplement] ' . $phase2Reason);
+    }
 
     $accountCreated = pr_hud_first($user, $usersColumns, ['account_created','created_at','reg_timestamp'], null);
     $onlineTime = pr_hud_int_or_null(pr_hud_first($userStats, $userStatsColumns, ['onlinetime','online_time'], null));
@@ -284,6 +320,10 @@ try {
         ],
         'document_offer' => $documentOffer,
         'ui_event' => $uiEvent,
+        'phase2' => [
+            'available' => $phase2Available,
+            'reason' => $phase2Reason,
+        ],
         'city' => $city,
         'district' => $district,
         'room_id' => $roomId,
@@ -294,6 +334,6 @@ try {
         'time' => date('H:i')
     ]);
 } catch (Throwable $e) {
-    error_log('[ParadiseRP HUD] ' . $e->getMessage());
+    error_log('[ParadiseRP HUD CORE] ' . $e->getMessage());
     pr_hud_json(pr_hud_empty('hud_data_unavailable'));
 }
