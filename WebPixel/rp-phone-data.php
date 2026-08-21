@@ -12,7 +12,8 @@ try{
  if($username==='')pr_phone_json(['ok'=>false,'reason'=>'not_connected']);
  $con=$DB->Con(); if(!($con instanceof mysqli))pr_phone_json(['ok'=>false,'reason'=>'database_unavailable']);
  $safe=mysqli_real_escape_string($con,$username);$r=mysqli_query($con,"SELECT id,username FROM users WHERE username='{$safe}' LIMIT 1");$user=$r?(mysqli_fetch_assoc($r)?:null):null;if($r)mysqli_free_result($r);if(!$user)pr_phone_json(['ok'=>false,'reason'=>'user_not_found']);
- foreach(['rp_phones','rp_phone_contacts','rp_phone_messages','rp_phone_calls'] as $t)if(!pr_phone_table_exists($con,$t))pr_phone_json(['ok'=>false,'reason'=>'phone_migration_required']);
+ foreach(['rp_phones','rp_phone_contacts','play_phone_chats','rp_phone_calls','rp_phone_notifications'] as $t)if(!pr_phone_table_exists($con,$t))pr_phone_json(['ok'=>false,'reason'=>'phone_migration_required']);
+ if(!pr_phone_has_column($con,'play_phone_chats','read_at'))pr_phone_json(['ok'=>false,'reason'=>'phone_migration_required']);
  $snapshot=pr_phone_snapshot($con,(int)$user['id']);
  pr_phone_json(['ok'=>true,'user_id'=>(int)$user['id'],'username'=>(string)$user['username'],'phone'=>$snapshot,'server_time'=>date(DATE_ATOM)]);
 }catch(Throwable $e){error_log('[ParadisePhone:data] '.$e->getMessage());pr_phone_json(['ok'=>false,'reason'=>'phone_unavailable']);}
