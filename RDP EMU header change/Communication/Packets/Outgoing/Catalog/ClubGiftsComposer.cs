@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +13,10 @@ namespace Plus.Communication.Packets.Outgoing.Catalog
         {
             base.WriteInteger(-1);//Days until next gift.
             base.WriteInteger(0);//Gifts available
-            base.WriteInteger(12);//Count?
+            // Exactly one gift entry is serialized below. Advertising a larger
+            // count makes Nitro attempt to parse entries that are not present
+            // and can trigger a DataView out-of-bounds RangeError.
+            base.WriteInteger(1);//Count
             {
                 base.WriteInteger(12701);
                 base.WriteString("hc16_1");
