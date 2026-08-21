@@ -49,7 +49,7 @@ try{
  if($action==='send_message'){
    $targetToken=trim((string)($input['target']??''));$body=clean_body($input['body']??'');
    if($body===''||mb_strlen($body)>500)out(['ok'=>false,'reason'=>'invalid_message','message'=>'Le message doit contenir entre 1 et 500 caractères.'],422);
-   if(pr_phone_rate_limited($con,$pid,'SMS',10,8))out(['ok'=>false,'reason'=>'rate_limited','message'=>'Vous envoyez des messages trop rapidement.'],429);
+   if(pr_phone_rate_limited($con,$pid,'SMS',1,1)||pr_phone_rate_limited($con,$pid,'SMS',10,8))out(['ok'=>false,'reason'=>'rate_limited','message'=>'Vous envoyez des messages trop rapidement.'],429);
    $target=pr_phone_resolve($con,$phone,$targetToken);if(!$target)out(['ok'=>false,'reason'=>'target_not_found','message'=>'Ce numéro/contact est indisponible.'],404);$tid=(int)$target['id'];
    if($tid===$pid)out(['ok'=>false,'reason'=>'self_message','message'=>'Vous ne pouvez pas vous envoyer un SMS à vous-même.'],422);
    $receiverUserId=(int)$target['user_id'];$senderIdentity=pr_phone_identity($con,$userId);$targetIdentity=pr_phone_identity($con,$receiverUserId);
@@ -70,6 +70,13 @@ try{
  if($action==='conversation'){
    $other=(int)($input['other_phone_id']??0);if($other<=0||!pr_phone_row_by_id($con,$other))out(['ok'=>false,'reason'=>'conversation_not_found'],404);
    out(['ok'=>true,'messages'=>pr_phone_messages($con,$pid,$other,30)]);
+ }
+
+ if($action==='read_notifications'){
+   $stmt=mysqli_prepare($con,'UPDATE rp_phone_notifications SET read_at=COALESCE(read_at,NOW()) WHERE phone_id=? AND read_at IS NULL');
+   if(!$stmt)out(['ok'=>false,'reason'=>'notification_store_unavailable'],503);
+   mysqli_stmt_bind_param($stmt,'i',$pid);mysqli_stmt_execute($stmt);mysqli_stmt_close($stmt);
+   out(['ok'=>true,'phone'=>pr_phone_snapshot($con,$userId)]);
  }
 
  if($action==='call'){
