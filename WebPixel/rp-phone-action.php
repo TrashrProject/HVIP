@@ -7,6 +7,10 @@ function out(array $d,int $s=200):void{http_response_code($s);echo json_encode($
 function clean_name($v):string{return mb_substr(trim(preg_replace('/\s+/u',' ',strip_tags((string)$v))),0,64);}
 function clean_body($v):string{return trim(strip_tags((string)$v));}
 function phone_notification(mysqli $con,int $phoneId,string $type,string $title,string $body,array $meta=[]):void{
+    $enabledStmt=mysqli_prepare($con,'SELECT notifications_enabled FROM rp_phones WHERE id=? LIMIT 1');
+    if(!$enabledStmt)return;
+    mysqli_stmt_bind_param($enabledStmt,'i',$phoneId);mysqli_stmt_execute($enabledStmt);$enabledResult=mysqli_stmt_get_result($enabledStmt);$enabledRow=$enabledResult?(mysqli_fetch_assoc($enabledResult)?:null):null;if($enabledResult)mysqli_free_result($enabledResult);mysqli_stmt_close($enabledStmt);
+    if(!$enabledRow||(int)$enabledRow['notifications_enabled']!==1)return;
     $stmt=mysqli_prepare($con,'INSERT INTO rp_phone_notifications (phone_id,notification_type,title,body,metadata) VALUES (?,?,?,?,?)');
     if(!$stmt)return;$metadata=$meta?json_encode($meta,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES):null;mysqli_stmt_bind_param($stmt,'issss',$phoneId,$type,$title,$body,$metadata);@mysqli_stmt_execute($stmt);mysqli_stmt_close($stmt);
 }
