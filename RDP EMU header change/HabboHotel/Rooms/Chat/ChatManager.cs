@@ -11,6 +11,7 @@ using Plus.HabboHotel.Rooms.Chat.Pets.Commands;
 using Plus.HabboHotel.Rooms.Chat.Pets.Locale;
 using log4net;
 using Plus.HabboHotel.Rooms.Chat.Styles;
+using Plus.HabboRoleplay.Paradise.Commands;
 
 namespace Plus.HabboHotel.Rooms.Chat
 {
@@ -65,6 +66,7 @@ namespace Plus.HabboHotel.Rooms.Chat
             this._filter.Init();
 
             this._commands = new CommandManager(":");
+            ParadiseCommandBootstrap.Register(this._commands);
             this._petCommands = new PetCommandManager();
             this._petLocale = new PetLocale();
       
