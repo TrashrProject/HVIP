@@ -1,6 +1,7 @@
 using System;
 using Plus.HabboHotel.GameClients;
 using Plus.HabboHotel.Rooms;
+using Plus.HabboRoleplay.Paradise.Documents;
 using Plus.HabboRoleplay.Paradise.Inventory;
 
 namespace Plus.HabboHotel.Rooms.Chat.Commands.User
@@ -8,12 +9,12 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User
     /// <summary>
     /// Existing :inventario / :inv entry point, refactored for ParadiseRP V2.
     /// Keeping this command avoids introducing a second competing inventory.
-    /// UI actions use exact server item ids through private-looking subcommands.
+    /// UI actions use exact server item ids through server-validated subcommands.
     /// </summary>
     class InventoryCommand : IChatCommand
     {
         public string PermissionRequired { get { return "command_inventory"; } }
-        public string Parameters { get { return "[use|useid|give|giveid|weight]"; } }
+        public string Parameters { get { return "[use|useid|give|giveid|presentid|presentlicense|weight]"; } }
         public string Description { get { return "Ouvre et contrôle l’inventaire physique ParadiseRP."; } }
 
         public void Execute(GameClient session, Room room, string[] parameters)
@@ -48,6 +49,14 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User
 
                 case "give":
                     ExecuteGive(session, parameters);
+                    return;
+
+                case "presentid":
+                    ExecutePresent(session, parameters, DocumentService.IdentityCode);
+                    return;
+
+                case "presentlicense":
+                    ExecutePresent(session, parameters, DocumentService.DriverLicenseCode);
                     return;
 
                 default:
@@ -131,6 +140,18 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User
                 return;
             }
             if (!InventoryService.Give(session, target, item.Id, quantity, out message) && !String.IsNullOrWhiteSpace(message))
+                session.SendWhisper(message, 1);
+        }
+
+        private static void ExecutePresent(GameClient session, string[] parameters, string typeCode)
+        {
+            if (parameters.Length != 3)
+            {
+                session.SendWhisper("Indiquez le joueur à qui présenter le document.", 1);
+                return;
+            }
+            string message;
+            if (!DocumentService.Present(session, parameters[2], typeCode, out message) && !String.IsNullOrWhiteSpace(message))
                 session.SendWhisper(message, 1);
         }
     }
