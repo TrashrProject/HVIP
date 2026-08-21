@@ -8,6 +8,7 @@ using Fleck;
 using Plus.HabboHotel.GameClients;
 using System.IO;
 using Plus.HabboHotel.Roleplay.Web;
+using Plus.HabboRoleplay.Paradise.Bridge;
 
 
 namespace Plus.HabboRoleplay.Web.Outgoing.Statistics
@@ -27,6 +28,14 @@ namespace Plus.HabboRoleplay.Web.Outgoing.Statistics
         {
             if (!PlusEnvironment.GetGame().GetWebEventManager().SocketReady(Client, true) || !PlusEnvironment.GetGame().GetWebEventManager().SocketReady(Socket))
                 return;
+
+            // Character V2 migration shim. We deliberately reuse the already registered
+            // roleplay WebEvent channel so no Nitro network/framing code is touched.
+            if (String.Equals(Data, "paradise_snapshot", StringComparison.OrdinalIgnoreCase))
+            {
+                ParadiseSnapshotBridge.Send(Client, Socket);
+                return;
+            }
 
             if (Client.GetPlay().TargetLock)
                 return;
@@ -82,7 +91,7 @@ namespace Plus.HabboRoleplay.Web.Outgoing.Statistics
                                 Socket.Send("compose_hospital|open_actionbtn|Subir|subir");
                             }
                             // Salvar
-							else if (TargetClient.GetPlay().ChoferID == Client.GetHabbo().Id)
+                            else if (TargetClient.GetPlay().ChoferID == Client.GetHabbo().Id)
 							{
                                 Socket.Send("compose_hospital|open_actionbtn|Salvar|salvar");
                             }
