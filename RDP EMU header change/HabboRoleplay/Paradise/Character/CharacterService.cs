@@ -16,10 +16,17 @@ namespace Plus.HabboRoleplay.Paradise.Character
             ParadiseCharacter cached;
             if (!forceReload && Cache.TryGetValue(userId, out cached)) return cached;
 
-            ParadiseCharacter loaded = Repository.LoadByUserId(userId);
-            if (loaded != null) Cache[userId] = loaded;
-            else Cache.TryRemove(userId, out cached);
-            return loaded;
+            try
+            {
+                ParadiseCharacter loaded = Repository.LoadByUserId(userId);
+                if (loaded != null) Cache[userId] = loaded;
+                else Cache.TryRemove(userId, out cached);
+                return loaded;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static ParadiseCharacter CreateIdentity(int userId, string firstName, string lastName,
@@ -88,7 +95,11 @@ namespace Plus.HabboRoleplay.Paradise.Character
                 }
                 catch
                 {
-                    if (attempt == 2) throw;
+                    if (attempt == 2)
+                    {
+                        error = "Le système d'identité ParadiseRP n'est pas disponible. Vérifiez la migration Phase 2.";
+                        return null;
+                    }
                 }
             }
 
@@ -120,10 +131,18 @@ namespace Plus.HabboRoleplay.Paradise.Character
                 return false;
             }
 
-            Repository.UpdateBiography(userId, biography);
-            character.SetBiography(biography);
-            Cache[userId] = character;
-            return true;
+            try
+            {
+                Repository.UpdateBiography(userId, biography);
+                character.SetBiography(biography);
+                Cache[userId] = character;
+                return true;
+            }
+            catch
+            {
+                error = "Impossible d'enregistrer la biographie pour le moment.";
+                return false;
+            }
         }
 
         public static void Invalidate(int userId)
@@ -135,7 +154,7 @@ namespace Plus.HabboRoleplay.Paradise.Character
 
         private static string GenerateCitizenId()
         {
-            return "PID-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpperInvariant();
+            return "PID-" + Guid.NewGuid().ToString("N").Substring(0, 12).ToUpperInvariant();
         }
 
         private static string Clean(string value)
