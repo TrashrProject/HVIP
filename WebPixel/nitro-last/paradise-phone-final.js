@@ -2,7 +2,7 @@
   'use strict';
 
   if (window.__ParadisePhoneFinalPolish) return;
-  window.__ParadisePhoneFinalPolish = '1.0.0-final-home-composition';
+  window.__ParadisePhoneFinalPolish = '1.1.0-final-polish';
 
   let destroyed = false;
   let scheduled = false;
@@ -10,9 +10,6 @@
 
   const root = () => document.querySelector('#paradise-rp-hud .pp-device');
   const text = value => value == null ? '' : String(value).trim();
-  const esc = value => String(value ?? '')
-    .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;').replaceAll("'", '&#039;');
 
   const navIcons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9h-6v-6h-4v6H4z"/></svg>',
@@ -32,20 +29,31 @@
     }));
   }
 
-  function enhanceNav(phone) {
+  function enhanceNav(phone, isHome) {
     const nav = phone.querySelector('.pp-nav');
     if (!nav) return;
+
     const home = nav.querySelector('[data-pp-home]');
     const close = nav.querySelector('[data-window-close="phone"]');
+
     if (home && home.dataset.ppFinalNav !== '1') {
       home.innerHTML = navIcons.home;
       home.dataset.ppFinalNav = '1';
       home.title = 'Accueil ParadisePhone';
+      home.setAttribute('aria-label', 'Accueil ParadisePhone');
     }
+
+    if (home) {
+      home.classList.toggle('is-active', isHome);
+      if (isHome) home.setAttribute('aria-current', 'page');
+      else home.removeAttribute('aria-current');
+    }
+
     if (close && close.dataset.ppFinalNav !== '1') {
       close.innerHTML = navIcons.close;
       close.dataset.ppFinalNav = '1';
       close.title = 'Fermer ParadisePhone';
+      close.setAttribute('aria-label', 'Fermer ParadisePhone');
     }
   }
 
@@ -58,35 +66,8 @@
     }
   }
 
-  function currentRoomLabel() {
-    const room = store().gameplay?.room || {};
-    return text(room.name);
-  }
-
-  function unreadCount() {
-    return Math.max(0, Number(store().phone?.unreadCount) || 0);
-  }
-
-  function ensureLiveStrip(home) {
-    let strip = home.querySelector('.ppf-live-strip');
-    if (!strip) {
-      strip = document.createElement('div');
-      strip.className = 'ppf-live-strip';
-      strip.innerHTML = `
-        <span class="ppf-live-mark" aria-hidden="true">P</span>
-        <span class="ppf-live-copy"><small>PLACID LIVE</small><strong data-ppf-room></strong></span>
-        <span class="ppf-live-count" data-ppf-unread></span>`;
-      home.appendChild(strip);
-    }
-
-    const room = currentRoomLabel();
-    const unread = unreadCount();
-    const roomNode = strip.querySelector('[data-ppf-room]');
-    const unreadNode = strip.querySelector('[data-ppf-unread]');
-
-    if (roomNode) roomNode.textContent = room || 'ParadiseRP';
-    if (unreadNode) unreadNode.textContent = unread > 0 ? `${unread} msg` : 'En ligne';
-    strip.hidden = false;
+  function removeNonFunctionalLiveStrip(home) {
+    home?.querySelectorAll('.ppf-live-strip').forEach(node => node.remove());
   }
 
   function tagPages(phone) {
@@ -105,14 +86,15 @@
 
     phone.dataset.ppFinal = '1';
     const home = phone.querySelector('.pp-home');
-    phone.classList.toggle('ppf-is-home', Boolean(home));
+    const isHome = Boolean(home);
+    phone.classList.toggle('ppf-is-home', isHome);
 
-    enhanceNav(phone);
+    enhanceNav(phone, isHome);
     tagPages(phone);
 
     if (home) {
       ensureScene(home);
-      ensureLiveStrip(home);
+      removeNonFunctionalLiveStrip(home);
     }
   }
 
@@ -129,7 +111,17 @@
   }
 
   function onStoreChange(_state, eventName) {
-    if (['room:change', 'gameplay:snapshot', 'phone:update', 'ui:change'].includes(eventName)) schedule();
+    if ([
+      'room:change',
+      'gameplay:snapshot',
+      'phone:update',
+      'ui:change',
+      'player:update',
+      'character:update'
+    ].includes(eventName)) {
+      window.ParadisePhoneVisualParity?.refresh?.();
+      schedule();
+    }
   }
 
   function boot() {
@@ -150,15 +142,21 @@
   }
 
   window.ParadisePhoneFinalPolish = Object.freeze({
-    version: '1.0.0-final-home-composition',
+    version: '1.1.0-final-polish',
     refresh: schedule,
-    getStatus: () => ({
-      version: '1.0.0-final-home-composition',
-      mounted: Boolean(root()?.dataset.ppFinal === '1'),
-      home: Boolean(root()?.classList.contains('ppf-is-home')),
-      room: currentRoomLabel() || null,
-      unread: unreadCount()
-    })
+    getStatus: () => {
+      const phone = root();
+      const state = store();
+      return {
+        version: '1.1.0-final-polish',
+        mounted: Boolean(phone?.dataset.ppFinal === '1'),
+        home: Boolean(phone?.classList.contains('ppf-is-home')),
+        liveWidget: Boolean(phone?.querySelector('.ppf-live-strip')),
+        username: text(state.gameplay?.player?.username) || null,
+        look: text(state.gameplay?.player?.look) || null,
+        phoneNumber: text(state.phone?.number) || null
+      };
+    }
   });
 
   window.addEventListener('beforeunload', destroy, { once: true });
