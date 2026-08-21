@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '2.0.0-direct-paradise-input';
+  const VERSION = '3.0.0-react-state-synchronized-chat';
   const HUD_ID = 'paradise-rp-hud';
   const PARADISE_INPUT_ID = 'pr4-chat-input';
 
@@ -11,6 +11,7 @@
   let nativeInput = null;
   let hudAbort = null;
   let nativeAbort = null;
+  let sending = false;
 
   const diag = {
     version: VERSION,
@@ -18,9 +19,17 @@
     lastMessage: '',
     lastNativeFound: false,
     lastBeforeValue: '',
+    lastValueBeforeEnter: '',
     lastAfterValue: '',
+    lastReactProps: [],
+    lastReactChangeCalled: false,
+    lastReactEnterCalled: false,
+    lastConsumed: false,
     lastError: null
   };
+
+  const nextFrame = () => new Promise(resolve => requestAnimationFrame(() => resolve()));
+  const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   function findParadiseInput() {
     return document.getElementById(PARADISE_INPUT_ID);
@@ -28,7 +37,7 @@
 
   function findNativeInput() {
     const explicit = document.querySelector('#root [data-pr-native-chat-bridge="1"]');
-    if (explicit) return explicit;
+    if (explicit && explicit.isConnected) return explicit;
 
     return [...document.querySelectorAll('#root input, #root textarea')].find(el => {
       if (!el || el.disabled || el.readOnly || el.closest(`#${HUD_ID}`)) return false;
@@ -37,60 +46,110 @@
     }) || null;
   }
 
+  function getReactProps(node) {
+    if (!node) return null;
+    const key = Object.keys(node).find(name => name.startsWith('__reactProps$'));
+    return key ? node[key] : null;
+  }
+
+  function collectReactProps(input) {
+    const found = [];
+    let node = input;
+    for (let depth = 0; node && depth < 6; depth += 1, node = node.parentElement) {
+      const props = getReactProps(node);
+      if (!props) continue;
+      found.push({ node, props, keys: Object.keys(props).filter(key => /^on[A-Z]/.test(key)) });
+    }
+    diag.lastReactProps = found.flatMap(item => item.keys);
+    return found;
+  }
+
   function setNativeValue(input, value) {
     const win = input.ownerDocument?.defaultView || window;
     const proto = input instanceof win.HTMLTextAreaElement ? win.HTMLTextAreaElement.prototype : win.HTMLInputElement.prototype;
     const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
     if (setter) setter.call(input, String(value ?? ''));
     else input.value = String(value ?? '');
+  }
 
-    input.dispatchEvent(new win.Event('input', { bubbles: true, composed: true }));
+  function dispatchNativeInput(input) {
+    const win = input.ownerDocument?.defaultView || window;
+    try {
+      input.dispatchEvent(new win.InputEvent('input', {
+        bubbles: true,
+        composed: true,
+        inputType: 'insertText',
+        data: String(input.value || '')
+      }));
+    } catch (_) {
+      input.dispatchEvent(new win.Event('input', { bubbles: true, composed: true }));
+    }
     input.dispatchEvent(new win.Event('change', { bubbles: true, composed: true }));
   }
 
-  function makeEnterEvent(type) {
-    const win = nativeInput?.ownerDocument?.defaultView || window;
-    const event = new win.KeyboardEvent(type, {
-      key: 'Enter',
-      code: 'Enter',
-      bubbles: true,
-      cancelable: true,
-      composed: true
-    });
+  function invokeReactChange(input) {
+    const chain = collectReactProps(input);
+    for (const item of chain) {
+      const handler = item.props.onChange || item.props.onInput;
+      if (typeof handler !== 'function') continue;
+      const event = {
+        type: 'change',
+        target: input,
+        currentTarget: item.node,
+        nativeEvent: { type: 'input', target: input },
+        defaultPrevented: false,
+        isPropagationStopped: () => false,
+        isDefaultPrevented() { return this.defaultPrevented; },
+        preventDefault() { this.defaultPrevented = true; },
+        stopPropagation() {},
+        persist() {}
+      };
+      try {
+        handler(event);
+        diag.lastReactChangeCalled = true;
+        return true;
+      } catch (error) {
+        diag.lastError = `react-change: ${error?.message || error}`;
+      }
+    }
+    return false;
+  }
 
-    // Older Nitro/Habbo handlers often test keyCode/which instead of event.key.
+  function makeEnterEvent(type, input) {
+    const win = input.ownerDocument?.defaultView || window;
+    const event = new win.KeyboardEvent(type, {
+      key: 'Enter', code: 'Enter', bubbles: true, cancelable: true, composed: true
+    });
     for (const [name, value] of [['keyCode', 13], ['which', 13], ['charCode', type === 'keypress' ? 13 : 0]]) {
       try { Object.defineProperty(event, name, { configurable: true, get: () => value }); } catch (_) {}
     }
-
     return event;
   }
 
-  function invokeReactEnterFallback(input) {
-    try {
-      let node = input;
-      for (let depth = 0; node && depth < 5; depth += 1, node = node.parentElement) {
-        const propsKey = Object.keys(node).find(key => key.startsWith('__reactProps$'));
-        const props = propsKey ? node[propsKey] : null;
-        if (!props) continue;
-
-        const handler = props.onKeyDown || props.onKeyPress || props.onKeyUp;
-        if (typeof handler !== 'function') continue;
-
-        const fake = {
-          key: 'Enter', code: 'Enter', keyCode: 13, which: 13, charCode: 13,
-          target: input, currentTarget: node,
-          nativeEvent: { key: 'Enter', code: 'Enter', keyCode: 13, which: 13 },
-          defaultPrevented: false,
-          preventDefault() { this.defaultPrevented = true; },
-          stopPropagation() {},
-          persist() {}
-        };
+  function invokeReactEnter(input) {
+    const chain = collectReactProps(input);
+    for (const item of chain) {
+      const handler = item.props.onKeyDown || item.props.onKeyPress || item.props.onKeyUp;
+      if (typeof handler !== 'function') continue;
+      const fake = {
+        type: 'keydown',
+        key: 'Enter', code: 'Enter', keyCode: 13, which: 13, charCode: 0,
+        target: input, currentTarget: item.node,
+        nativeEvent: { type: 'keydown', key: 'Enter', code: 'Enter', keyCode: 13, which: 13, target: input },
+        defaultPrevented: false,
+        isPropagationStopped: () => false,
+        isDefaultPrevented() { return this.defaultPrevented; },
+        preventDefault() { this.defaultPrevented = true; },
+        stopPropagation() {},
+        persist() {}
+      };
+      try {
         handler(fake);
+        diag.lastReactEnterCalled = true;
         return true;
+      } catch (error) {
+        diag.lastError = `react-enter: ${error?.message || error}`;
       }
-    } catch (error) {
-      diag.lastError = `react-fallback: ${error?.message || error}`;
     }
     return false;
   }
@@ -111,7 +170,6 @@
     nativeInput = next;
     nativeInput.dataset.prNativeChatBridge = '1';
 
-    // Keep Nitro's own field alive only as the network/controller bridge.
     nativeInput.addEventListener('input', () => {
       diag.lastAfterValue = String(nativeInput?.value ?? '');
     }, { signal: nativeAbort.signal });
@@ -119,40 +177,68 @@
     return true;
   }
 
-  function sendThroughNitro(message) {
+  async function sendThroughNitro(message) {
     const text = String(message || '').trim();
     if (!text) return true;
+    if (sending) return false;
     if (!bindNative() || !nativeInput) return false;
 
+    sending = true;
+    diag.sends += 1;
+    diag.lastMessage = text;
+    diag.lastError = null;
+    diag.lastConsumed = false;
+    diag.lastReactChangeCalled = false;
+    diag.lastReactEnterCalled = false;
+
     try {
-      diag.sends += 1;
-      diag.lastMessage = text;
-      diag.lastError = null;
-      diag.lastBeforeValue = String(nativeInput.value ?? '');
+      let input = nativeInput;
+      diag.lastBeforeValue = String(input.value ?? '');
 
-      setNativeValue(nativeInput, text);
+      // Phase 1: update the controlled Nitro input and its React state.
+      setNativeValue(input, text);
+      try { input.focus({ preventScroll: true }); } catch (_) {}
+      dispatchNativeInput(input);
+      invokeReactChange(input);
 
-      // Dispatch the complete legacy keyboard sequence with keyCode compatibility.
-      nativeInput.dispatchEvent(makeEnterEvent('keydown'));
-      nativeInput.dispatchEvent(makeEnterEvent('keypress'));
-      nativeInput.dispatchEvent(makeEnterEvent('keyup'));
+      // Let React commit the state update before Enter is evaluated.
+      await nextFrame();
+      await delay(0);
 
-      // If Nitro did not consume/clear the field, try its React key handler directly.
-      window.setTimeout(() => {
-        try {
-          diag.lastAfterValue = String(nativeInput?.value ?? '');
-          if (nativeInput && nativeInput.value === text) invokeReactEnterFallback(nativeInput);
-          window.setTimeout(() => {
-            diag.lastAfterValue = String(nativeInput?.value ?? '');
-          }, 30);
-        } catch (_) {}
-      }, 0);
+      // Nitro can recreate the input while committing; reacquire the live element.
+      bindNative();
+      input = nativeInput || input;
+      if (String(input.value ?? '') !== text) {
+        setNativeValue(input, text);
+        dispatchNativeInput(input);
+      }
 
-      return true;
+      diag.lastValueBeforeEnter = String(input.value ?? '');
+      try { input.focus({ preventScroll: true }); } catch (_) {}
+
+      // Phase 2: real DOM event first, then direct React handler as a fallback.
+      input.dispatchEvent(makeEnterEvent('keydown', input));
+      input.dispatchEvent(makeEnterEvent('keypress', input));
+      input.dispatchEvent(makeEnterEvent('keyup', input));
+
+      await nextFrame();
+      diag.lastAfterValue = String(input.value ?? '');
+
+      if (diag.lastAfterValue === text) {
+        invokeReactEnter(input);
+        await nextFrame();
+        await delay(10);
+        diag.lastAfterValue = String((nativeInput && nativeInput.isConnected ? nativeInput : input).value ?? '');
+      }
+
+      diag.lastConsumed = diag.lastAfterValue !== text;
+      return diag.lastConsumed;
     } catch (error) {
       diag.lastError = error?.message || String(error);
       console.warn('[ParadiseRP:chat] Nitro send failed', error);
       return false;
+    } finally {
+      sending = false;
     }
   }
 
@@ -164,31 +250,32 @@
     hudAbort?.abort();
     hudAbort = new AbortController();
     paradiseInput = next;
-
-    // Paradise is now a REAL writable input. No focus redirection, no readonly shell.
     paradiseInput.readOnly = false;
     paradiseInput.removeAttribute('readonly');
-    paradiseInput.removeAttribute('data-pr-native-chat-visual');
     paradiseInput.dataset.prChatDirect = '1';
     paradiseInput.tabIndex = 0;
 
-    paradiseInput.addEventListener('keydown', event => {
+    paradiseInput.addEventListener('keydown', async event => {
       if (event.key === 'Enter' || event.keyCode === 13) {
         event.preventDefault();
         event.stopImmediatePropagation();
-
         const text = paradiseInput.value;
         if (!String(text || '').trim()) {
           paradiseInput.blur();
           return;
         }
 
-        if (sendThroughNitro(text)) {
+        paradiseInput.disabled = true;
+        const sent = await sendThroughNitro(text);
+        paradiseInput.disabled = false;
+
+        if (sent) {
           paradiseInput.value = '';
           paradiseInput.dispatchEvent(new Event('input', { bubbles: true }));
           paradiseInput.blur();
         } else {
-          console.warn('[ParadiseRP:chat] Nitro native input not found');
+          paradiseInput.focus({ preventScroll: true });
+          console.warn('[ParadiseRP:chat] Nitro did not consume message', diag);
         }
         return;
       }
@@ -210,7 +297,6 @@
 
   function boot() {
     scan();
-
     const nitroRoot = document.getElementById('root');
     if (nitroRoot) {
       const observer = new MutationObserver(() => {
@@ -229,7 +315,7 @@
       get paradiseInput() { return paradiseInput; }
     };
 
-    console.info('[ParadiseRP:chat] direct Paradise input adapter active', { version: VERSION });
+    console.info('[ParadiseRP:chat] React-state synchronized adapter active', { version: VERSION });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
