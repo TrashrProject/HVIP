@@ -1,0 +1,43 @@
+/* ParadiseRP — hard click-through guard
+ * Loaded LAST. The room must receive every pointer event except on explicit UI controls.
+ */
+
+#paradise-ui-root,
+#paradise-ui-root #paradise-rp-hud,
+#paradise-ui-root #paradise-rp-hud *,
+#paradise-ui-root #paradise-rp-hud *::before,
+#paradise-ui-root #paradise-rp-hud *::after {
+  pointer-events: none !important;
+}
+
+/* Permanent controls */
+#paradise-ui-root #paradise-rp-hud button:not([disabled]),
+#paradise-ui-root #paradise-rp-hud input,
+#paradise-ui-root #paradise-rp-hud textarea,
+#paradise-ui-root #paradise-rp-hud select,
+#paradise-ui-root #paradise-rp-hud a[href],
+#paradise-ui-root #paradise-rp-hud [contenteditable="true"] {
+  pointer-events: auto !important;
+}
+
+/* An opened Paradise window intentionally owns only its own rectangle. */
+#paradise-ui-root #paradise-rp-hud .pr-window.is-open,
+#paradise-ui-root #paradise-rp-hud .pr-window.is-open * {
+  pointer-events: auto !important;
+}
+
+/* Explicit transient interactive surfaces. */
+#paradise-ui-root #paradise-rp-hud .pr2-command-guide,
+#paradise-ui-root #paradise-rp-hud .pr2-command-guide *,
+#paradise-ui-root #paradise-rp-hud .pr2-offer-toast,
+#paradise-ui-root #paradise-rp-hud .pr2-offer-toast *,
+#paradise-ui-root #paradise-rp-hud .pr2-mini-toast,
+#paradise-ui-root #paradise-rp-hud .pr2-mini-toast * {
+  pointer-events: auto !important;
+}
+
+/* Status-only controls must remain transparent to Nitro. */
+#paradise-ui-root #paradise-rp-hud .pr-chat-scope,
+#paradise-ui-root #paradise-rp-hud .pr-notification-button {
+  pointer-events: none !important;
+}
