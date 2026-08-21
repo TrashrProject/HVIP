@@ -1,154 +1,164 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Drawing;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Rooms.Chat.Styles;
-using Plus.HabboRoleplay.RoleplayUsers;
-using Plus.HabboHotel.Groups;
-using Plus.HabboRoleplay.Misc;
-using Plus.Communication.Packets.Outgoing.Rooms.Notifications;
-using Plus.Communication.Packets.Outgoing.Notifications;
-using Plus.HabboHotel.RolePlay.PlayRoom;
-using Plus.HabboRoleplay.PhoneChat;
+using System;
 using System.Text.RegularExpressions;
-using Plus.HabboHotel.Users.Messenger;
+using Plus.Database.Interfaces;
+using Plus.HabboHotel.GameClients;
+using Plus.HabboHotel.Rooms;
+using Plus.HabboHotel.Rooms.Chat.Commands;
+using Plus.HabboRoleplay.Misc;
 
 namespace Plus.HabboHotel.Rooms.Chat.Commands.Users.Jobs.Types.Police
 {
+    /// <summary>
+    /// Legacy :sms entry point kept for emulator compatibility.
+    /// ParadisePhone V1 reuses PhoneChatManager/play_phone_chats instead of creating
+    /// a second emulator chat subsystem. The new 555-XXXX identity is resolved in SQL.
+    /// </summary>
     class SmsCommand : IChatCommand
     {
-        public string PermissionRequired
+        public string PermissionRequired { get { return "command_sms"; } }
+        public string Parameters { get { return "<numero> <message>"; } }
+        public string Description { get { return "Envoie un SMS privé avec ParadisePhone."; } }
+
+        public void Execute(GameClient session, Room room, string[] parameters)
         {
-            get { return "command_sms"; }
-        }
-
-        public string Parameters
-        {
-            get { return "%user%"; }
-        }
-
-        public string Description
-        {
-            get { return "Envía un mensaje de texto a una persona."; }
-        }
-
-        public void Execute(GameClient Session, Rooms.Room Room, string[] Params)
-        {
-            #region Conditions
-            if (Session.GetPlay().Phone == 0)
+            if (session == null || session.GetHabbo() == null) return;
+            if (parameters == null || parameters.Length < 3)
             {
-                Session.SendWhisper("No tienes ningún teléfono comprado para hacer eso.", 1);
-                return;
-            }
-            if (Params.Length == 1)
-            {
-                Session.SendWhisper("Debes ingresar un número telefónico. (:sms [número/contacto] [mensaje])", 1);
-                return;
-            }
-            if (Params.Length == 2)
-            {
-                Session.SendWhisper("Debes ingresar el mensaje a enviar. (:sms [número/contacto] [mensaje])", 1);
-                return;
-            }
-            string Text = CommandManager.MergeParams(Params, 2);
-            Text = Regex.Replace(Text, "<(.|\\n)*?>", string.Empty); // Filtramos mensaje
-            if (Text.Length <= 0)
-            {
-                Session.SendWhisper("No puedes enviar mensajes sin texto.", 1);
-                return;
-            }
-            string Target = Params[1];
-            Target = Regex.Replace(Target, "<(.|\\n)*?>", string.Empty);
-            if (Target.Length <= 0)
-            {
-                Session.SendWhisper("No puedes enviar mensajes sin destinatario.", 1);
-                return;
-            }
-            if (Session.GetPlay().TryGetCooldown("msg", true))
-            {
-                Session.SendWhisper("Por favor espera un poco para hacer eso nuevamente.", 1);
-                return;
-            }
-            #endregion
-
-            #region Execute
-            /*
-            * El Target recibido puede ser
-            * número telefónico, ya sea con o sin formato
-            * ó el nombre de usuario.
-            * Si es nombre de usuario éste debe ser "amigo"
-            * Nota: Validar cuando el Target esté online o no.
-            */
-
-            int Targetid = PlusEnvironment.GetGame().GetPhoneChatManager().GetIDbyContact(Session, Target);
-
-            #region Extra Conditions
-            if (Targetid <= 0)
-            {
-                Session.SendWhisper("Ese número telefónico no existe.", 1);
-                return;
-            }
-            if (Targetid == Session.GetHabbo().Id)
-            {
-                Session.SendWhisper("No puedes enviarte mensajes a ti mis@.", 1);
+                session.SendWhisper("[TÉLÉPHONE] Syntaxe : :sms <numéro> <message>", 1);
                 return;
             }
 
-            // Envió a un nombre de contacto
-            if (Session.GetPlay().SendToName)
+            int senderId = session.GetHabbo().Id;
+            if (!HasPhysicalPhone(senderId))
             {
-                // Verificamos que sean amigos
-                List<MessengerBuddy> Friend = (from TG in Session.GetHabbo().GetMessenger().GetFriends().ToList() where TG != null && TG.UserId == Targetid select TG).ToList();
+                session.SendWhisper("[TÉLÉPHONE] Vous ne possédez pas de téléphone.", 1);
+                return;
+            }
+            if (session.GetPlay() != null && session.GetPlay().TryGetCooldown("msg", true))
+            {
+                session.SendWhisper("[TÉLÉPHONE] Veuillez patienter avant d'envoyer un nouveau message.", 1);
+                return;
+            }
 
-                if (Friend == null || Friend.Count <= 0)
+            string targetToken = Regex.Replace(parameters[1] ?? String.Empty, "<(.|\\n)*?>", String.Empty).Trim();
+            string message = Regex.Replace(CommandManager.MergeParams(parameters, 2), "<(.|\\n)*?>", String.Empty).Trim();
+            if (message.Length == 0 || message.Length > 500)
+            {
+                session.SendWhisper("[ERREUR] Le message doit contenir entre 1 et 500 caractères.", 1);
+                return;
+            }
+
+            int targetId;
+            string targetNumber;
+            string targetName;
+            if (!TryResolveTarget(senderId, targetToken, out targetId, out targetNumber, out targetName))
+            {
+                session.SendWhisper("[ERREUR] Ce numéro/contact est indisponible.", 1);
+                return;
+            }
+            if (targetId == senderId)
+            {
+                session.SendWhisper("[ERREUR] Vous ne pouvez pas vous envoyer un SMS à vous-même.", 1);
+                return;
+            }
+
+            int id = RoleplayManager.ChatsID += 1;
+            DateTime sentAt = DateTime.Now;
+            string senderName = session.GetHabbo().Username;
+            PlusEnvironment.GetGame().GetPhoneChatManager().NewPhoneChat(id, 1, senderId, senderName, targetId, targetName, message, sentAt);
+
+            // PhoneChatManager persists the authoritative SMS in play_phone_chats.
+            // Add read state fields introduced by Phase 4 without duplicating the message.
+            try
+            {
+                using (IQueryAdapter db = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    Session.SendWhisper("No se encontró ese nombre en tus Contactos. Intenta escribiendo el Número Telefónico.", 1);
-                    return;
+                    db.SetQuery("UPDATE `play_phone_chats` SET `status`='SENT',`read_at`=NULL WHERE `id`=@id LIMIT 1");
+                    db.AddParameter("id", id);
+                    db.RunQuery();
+
+                    int targetPhoneId = GetPhoneIdByUser(targetId);
+                    if (targetPhoneId > 0)
+                    {
+                        db.SetQuery("INSERT INTO `rp_phone_notifications` (`phone_id`,`notification_type`,`title`,`body`,`metadata`) VALUES (@phone,'MESSAGE','Nouveau message',@body,@metadata)");
+                        db.AddParameter("phone", targetPhoneId);
+                        db.AddParameter("body", senderName + " : " + (message.Length > 90 ? message.Substring(0, 90) : message));
+                        db.AddParameter("metadata", "{\"chat_id\":" + id + "}");
+                        db.RunQuery();
+                    }
                 }
             }
-            #endregion
+            catch { }
 
-            #region Execute
-            int ID = RoleplayManager.ChatsID += 1;
-            DateTime TimeStamp = DateTime.Now;
-            string TargetName = PlusEnvironment.GetUserInfoBy("username", "id", Convert.ToString(Targetid));
+            GameClient targetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(targetId);
+            if (targetClient != null && !targetClient.LoggingOut)
+                targetClient.SendWhisper("[TÉLÉPHONE] Nouveau message de " + senderName + ".", 1);
 
-            // TryAdd al Diccionario de PhoneChat
-            PlusEnvironment.GetGame().GetPhoneChatManager().NewPhoneChat(ID, 1, Session.GetHabbo().Id, Session.GetHabbo().Username, Targetid, TargetName, Text, TimeStamp);
-
-            // Comprobamos si destinatario está online
-            GameClient TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(Targetid);
-            if (TargetClient != null)
-            {
-                PlusEnvironment.GetGame().GetWebEventManager().ExecuteWebEvent(TargetClient, "event_phone", "open_chatrooms");
-                RoleplayManager.Shout(TargetClient, "*Recibe un Mensaje de Texto*", 5);
-
-                // Verificamos si el último chat del destinatario es el nuestro y actualizamos
-                if (TargetClient.GetPlay().LastChat == Session.GetHabbo().Username)
-                {
-                    // Refresh ChatRooms Target
-                    TargetClient.GetPlay().UpdateChats = true;
-                    PlusEnvironment.GetGame().GetWebEventManager().ExecuteWebEvent(TargetClient, "event_phone", "open_messages," + Session.GetHabbo().Username);
-                    TargetClient.GetPlay().UpdateChats = false;
-
-                    // Refresh Msgs Target
-                    if (TargetClient.GetPlay().LastChat == Session.GetHabbo().Username)
-                        PlusEnvironment.GetGame().GetWebEventManager().ExecuteWebEvent(TargetClient, "event_phone", "open_chatrooms");
-                }
-            }
-
-            PlusEnvironment.GetGame().GetWebEventManager().ExecuteWebEvent(Session, "event_phone", "open_chatrooms");
-            PlusEnvironment.GetGame().GetWebEventManager().ExecuteWebEvent(Session, "event_phone", "open_messages," + TargetName);
-            RoleplayManager.Shout(Session, "*Ha enviado un Mensaje de Texto*", 5);
-            Session.GetPlay().CooldownManager.CreateCooldown("msg", 1000, 3);
-            #endregion
-            #endregion
+            session.SendWhisper("[TÉLÉPHONE] Message envoyé à " + targetName + ".", 1);
+            if (session.GetPlay() != null)
+                session.GetPlay().CooldownManager.CreateCooldown("msg", 1000, 3);
         }
 
+        private static bool HasPhysicalPhone(int userId)
+        {
+            try
+            {
+                using (IQueryAdapter db = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                {
+                    db.SetQuery("SELECT COUNT(*) FROM `rp_inventory_items` i INNER JOIN `rp_item_definitions` d ON d.`id`=i.`item_definition_id` WHERE i.`owner_user_id`=@uid AND i.`quantity`>0 AND (UPPER(d.`effect_type`)='PHONE' OR UPPER(d.`code`)='PHONE_BASIC')");
+                    db.AddParameter("uid", userId);
+                    return db.getInteger() > 0;
+                }
+            }
+            catch { return false; }
+        }
+
+        private static int GetPhoneIdByUser(int userId)
+        {
+            try
+            {
+                using (IQueryAdapter db = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                {
+                    db.SetQuery("SELECT `id` FROM `rp_phones` WHERE `user_id`=@uid AND `status`='ACTIVE' LIMIT 1");
+                    db.AddParameter("uid", userId);
+                    return db.getInteger();
+                }
+            }
+            catch { return 0; }
+        }
+
+        private static bool TryResolveTarget(int senderUserId, string token, out int targetUserId, out string number, out string displayName)
+        {
+            targetUserId = 0;
+            number = null;
+            displayName = null;
+            if (String.IsNullOrWhiteSpace(token)) return false;
+
+            try
+            {
+                using (IQueryAdapter db = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                {
+                    db.SetQuery("SELECT `user_id`,`phone_number` FROM `rp_phones` WHERE `phone_number`=@token AND `status`='ACTIVE' LIMIT 1");
+                    db.AddParameter("token", token.Trim());
+                    System.Data.DataRow row = db.getRow();
+                    if (row == null)
+                    {
+                        db.SetQuery("SELECT p.`user_id`,p.`phone_number`,c.`display_name` FROM `rp_phones` mine INNER JOIN `rp_phone_contacts` c ON c.`phone_id`=mine.`id` INNER JOIN `rp_phones` p ON p.`phone_number`=c.`contact_phone_number` WHERE mine.`user_id`=@uid AND LOWER(c.`display_name`)=LOWER(@token) AND p.`status`='ACTIVE' LIMIT 1");
+                        db.AddParameter("uid", senderUserId);
+                        db.AddParameter("token", token.Trim());
+                        row = db.getRow();
+                    }
+                    if (row == null) return false;
+                    targetUserId = Convert.ToInt32(row["user_id"]);
+                    number = Convert.ToString(row["phone_number"]);
+                    displayName = row.Table.Columns.Contains("display_name") && row["display_name"] != DBNull.Value
+                        ? Convert.ToString(row["display_name"])
+                        : PlusEnvironment.GetUserInfoBy("username", "id", Convert.ToString(targetUserId));
+                    if (String.IsNullOrWhiteSpace(displayName)) displayName = number;
+                    return targetUserId > 0;
+                }
+            }
+            catch { return false; }
+        }
     }
 }

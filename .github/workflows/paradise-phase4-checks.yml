@@ -1,0 +1,37 @@
+name: ParadiseRP Phase 4 checks
+
+on:
+  push:
+    branches: [ "feature/paradise-phone-v1" ]
+  pull_request:
+    paths:
+      - 'WebPixel/paradise-phone-lib.php'
+      - 'WebPixel/rp-phone-*.php'
+      - 'WebPixel/nitro-last/paradise-phone-*'
+      - 'RDP EMU header change/HabboHotel/Rooms/Chat/Commands/User/PhoneChat/SmsCommand.cs'
+      - 'migrations/2026_08_21_paradise_phone_v1.sql'
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP syntax
+        run: |
+          php -l WebPixel/paradise-phone-lib.php
+          php -l WebPixel/rp-phone-data.php
+          php -l WebPixel/rp-phone-action.php
+      - name: JavaScript syntax
+        run: |
+          node --check WebPixel/nitro-last/paradise-phone-v1.js
+          node --check WebPixel/nitro-last/paradise-phone-v1-ux.js
+          node --check WebPixel/nitro-last/paradise-phone-commands-ui.js
+      - name: Production migration safety
+        shell: bash
+        run: |
+          set -e
+          FILE='migrations/2026_08_21_paradise_phone_v1.sql'
+          ! grep -Eiq 'DROP[[:space:]]+(TABLE|DATABASE)|TRUNCATE[[:space:]]+TABLE|DELETE[[:space:]]+FROM[[:space:]]+users|INSERT[[:space:]]+INTO[[:space:]]+`?users`?' "$FILE"
+          ! grep -Eiq 'Nathan|Luiz|555-0001' "$FILE"
+          grep -q 'play_phone_chats' "$FILE"
+          grep -q 'rp_phones' "$FILE"
