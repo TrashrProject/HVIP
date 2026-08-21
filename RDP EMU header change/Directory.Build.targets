@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- ParadiseRP domain modules live outside the legacy explicit Compile list. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)HabboRoleplay\Paradise\**\*.cs" />
+  </ItemGroup>
+
   <Target Name="PrepareParadiseCompileGeneratedFiles" BeforeTargets="CoreCompile">
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <WriteLinesToFile
