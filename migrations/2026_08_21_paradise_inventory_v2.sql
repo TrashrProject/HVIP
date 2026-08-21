@@ -116,7 +116,7 @@ VALUES
 ('WATER_BOTTLE','Bouteille d’eau','Une bouteille d’eau fraîche de Placid Island.','FOOD',0.500,10,NULL,1,1,0,'DRINK',0),
 ('SANDWICH','Sandwich','Un sandwich simple à emporter.','FOOD',0.350,10,NULL,1,1,0,'EAT',15),
 ('PHONE_BASIC','Téléphone','Votre téléphone personnel ParadiseRP.','OBJECT',0.220,1,NULL,1,0,0,'PHONE',0),
-('GENERIC_KEY','Clé','Une clé physique liée à un accès RP.','KEY',0.080,1,NULL,1,1,0,'KEY',0),
+('GENERIC_KEY','Clé','Une clé physique liée à un accès RP.','KEY',0.080,1,NULL,0,1,0,'KEY',0),
 ('SCRAP_METAL','Ferraille','Petite ressource métier récupérable et transportable.','MISC',2.500,20,NULL,0,1,0,'RESOURCE',0)
 ON DUPLICATE KEY UPDATE
   `name`=VALUES(`name`),
