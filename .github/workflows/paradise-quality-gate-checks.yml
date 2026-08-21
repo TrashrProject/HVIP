@@ -1,47 +1,73 @@
-name: ParadiseRP Visual Quality Gate
+name: ParadiseRP Core V1 Quality Gate
 
 on:
   push:
-    branches: [ "fix/paradise-quality-gate" ]
+    branches:
+      - "fix/paradise-quality-gate"
+      - "quality/paradise-core-v1"
+      - "quality/paradise-core-v1-fixes"
   pull_request:
     paths:
-      - 'WebPixel/nitro-last/paradise-room-adapter.js'
-      - 'WebPixel/nitro-last/paradise-phone-v1-ux.js'
-      - 'WebPixel/nitro-last/paradise-quality-gate.js'
-      - 'WebPixel/nitro-last/paradise-quality-gate.css'
-      - 'WebPixel/nitro-last/index.html'
+      - 'WebPixel/nitro-last/**'
+      - 'WebPixel/rp-*.php'
+      - 'WebPixel/paradise-*.php'
+      - 'RDP EMU header change/HabboRoleplay/Paradise/**'
+      - 'migrations/2026_08_21_quality_gate_utf8_repair.sql'
+      - '.github/workflows/paradise-quality-gate-checks.yml'
 
 jobs:
   correction-safety:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: JavaScript syntax
         run: |
           node --check WebPixel/nitro-last/paradise-room-adapter.js
+          node --check WebPixel/nitro-last/paradise-room-reconciler.js
+          node --check WebPixel/nitro-last/paradise-room-ui-sync.js
           node --check WebPixel/nitro-last/paradise-phone-v1-ux.js
+          node --check WebPixel/nitro-last/paradise-phone-final.js
+          node --check WebPixel/nitro-last/paradise-phone-layout-final.js
           node --check WebPixel/nitro-last/paradise-quality-gate.js
+          node --check WebPixel/nitro-last/paradise-quality-gate-input.js
+          node --check WebPixel/nitro-last/paradise-quality-gate-phone.js
+
+      - name: PHP syntax
+        run: |
+          php -l WebPixel/rp-inventory-data.php
+          php -l WebPixel/rp-phone-data.php
+          php -l WebPixel/rp-phone-action.php
+          php -l WebPixel/rp-character-action.php
+          php -l WebPixel/paradise-inventory-lib.php
+          php -l WebPixel/paradise-phone-lib.php
+          php -l WebPixel/paradise-character-lib.php
+
       - name: Correction-only guard
         shell: bash
         run: |
           set -e
           git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" 2>/dev/null > /tmp/changed || true
-          if grep -E '(^|/)(nitro-proxy|.*nitro-renderer.*|.*packet.*|.*WebSocket.*)' /tmp/changed; then
-            echo 'Quality gate must not modify renderer/network/proxy/packet files.' >&2
+          if grep -E '(^|/)(nitro-proxy|.*nitro-renderer.*|.*packet.*|.*WebSocket.*|.*GamePacketParser.*|.*canvas.*)' /tmp/changed; then
+            echo 'Core quality gate must not modify renderer/network/proxy/packet/canvas files.' >&2
             exit 1
           fi
-      - name: UI load order and no external quality-gate assets
+
+      - name: UI load order and click-through safety
         shell: bash
         run: |
           set -e
           INDEX='WebPixel/nitro-last/index.html'
           grep -q 'paradise-quality-gate.css' "$INDEX"
+          grep -q 'paradise-quality-gate-input.js' "$INDEX"
+          grep -q 'paradise-quality-gate-phone.js' "$INDEX"
           grep -q 'paradise-clickthrough-guard.css' "$INDEX"
           q=$(grep -n 'paradise-quality-gate.css' "$INDEX" | head -1 | cut -d: -f1)
           g=$(grep -n 'paradise-clickthrough-guard.css' "$INDEX" | head -1 | cut -d: -f1)
           test "$q" -lt "$g"
           ! grep -Eiq 'https?://' WebPixel/nitro-last/paradise-quality-gate.css
           ! grep -Eiq 'https?://' WebPixel/nitro-last/paradise-quality-gate.js
+
       - name: No invasive room observer or polling
         shell: bash
         run: |
@@ -49,3 +75,24 @@ jobs:
           ! grep -q 'new MutationObserver' WebPixel/nitro-last/paradise-room-adapter.js
           ! grep -q 'setInterval' WebPixel/nitro-last/paradise-room-adapter.js
           ! grep -q 'new MutationObserver' WebPixel/nitro-last/paradise-phone-v1-ux.js
+
+      - name: Server-authority guards
+        shell: bash
+        run: |
+          set -e
+          grep -q "X-Paradise-Action':'phase4\|HTTP_X_PARADISE_ACTION" WebPixel/rp-phone-action.php
+          grep -q "pr_phone_rate_limited.*SMS.*1,1" WebPixel/rp-phone-action.php
+          grep -q 'LastGiveAt' 'RDP EMU header change/HabboRoleplay/Paradise/Inventory/InventoryService.cs'
+          grep -q 'FOR UPDATE' 'RDP EMU header change/HabboRoleplay/Paradise/Inventory/InventoryRepository.cs'
+          grep -q 'mysqli_set_charset' WebPixel/rp-inventory-data.php
+          grep -q 'mysqli_set_charset' WebPixel/rp-phone-action.php
+          grep -q 'mysqli_set_charset' WebPixel/rp-character-action.php
+
+      - name: UTF-8 repair is client-charset safe
+        shell: bash
+        run: |
+          set -e
+          SQL='migrations/2026_08_21_quality_gate_utf8_repair.sql'
+          grep -q 'SET NAMES utf8mb4' "$SQL"
+          grep -q 'CONVERT(0x54c3a96cc3a970686f6e65 USING utf8mb4)' "$SQL"
+          grep -q "WHERE \`code\` = 'PHONE_BASIC'" "$SQL"
