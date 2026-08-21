@@ -13,8 +13,7 @@
     <link rel="manifest" crossorigin="use-credentials" href="./site.webmanifest">
     <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#000000">
     <link rel="stylesheet" href="./src/assets/index.css">
-    <link rel="stylesheet" href="./paradise-rp-hud.css?v=80" id="paradise-rp-hud-css">
-    <link rel="stylesheet" href="./paradise-dock-redesign.css?v=82" id="paradise-rp-polish-css">
+    <link rel="stylesheet" href="./paradise-ui-foundation.css?v=1" id="paradise-ui-foundation-css">
     <link rel="stylesheet" href="./paradise-stable-ui-fixes.css?v=2" id="paradise-stable-ui-fixes-css">
     <style>html,body,#root{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:#000;}</style>
     <script>
@@ -30,8 +29,8 @@
         patchUrlProperty(HTMLImageElement.prototype,'src');patchUrlProperty(HTMLSourceElement.prototype,'src');patchUrlProperty(HTMLLinkElement.prototype,'href');
         const query=new URLSearchParams(window.location.search);const sso=query.get('sso')||null;
         window.NitroConfig={'config.urls':['./local-config.json','./renderer-config.json','./ui-config.json'],'sso.ticket':sso,'forward.type':-1,'forward.id':0,'friend.id':Number.parseInt(query.get('friend')||'0',10)||0,'roomenterad.habbohotel.enabled':false,'roomenterad.habblet.enabled':false};
-        window.__PARADISE_BASELINE__={version:'1.5.3-react-synchronized-chat',paradiseUi:'primary',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,stabilityPatch:false,chatFix:'react-state-synchronized',polish:'event-driven',stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,hasSso:!!sso};
-        console.info('[ParadiseRP] Stable integration active',window.__PARADISE_BASELINE__);
+        window.__PARADISE_BASELINE__={version:'2.0.0-ui-foundation',paradiseUi:'isolated-root',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,stabilityPatch:false,chatFix:'react-state-synchronized',polish:false,stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,paradiseBridge:'http-readonly',hasSso:!!sso};
+        console.info('[ParadiseRP] UI Foundation active',window.__PARADISE_BASELINE__);
       })();
     </script>
     <script src="./paradise-native-ui-off.js?v=11"></script>
@@ -42,8 +41,10 @@
   <body>
     <noscript>JavaScript doit être activé pour lancer le client.</noscript>
     <div id="root" class="w-100 h-100"></div>
-    <script src="./paradise-rp-hud.js?v=81" defer></script>
-    <script src="./paradise-ui-polish.js?v=83" defer></script>
+    <div id="paradise-ui-root" aria-label="Interface ParadiseRP"></div>
+    <script src="./paradise-store.js?v=1" defer></script>
+    <script src="./paradise-bridge.js?v=1" defer></script>
+    <script src="./paradise-ui-foundation.js?v=1" defer></script>
     <script src="./paradise-ui-event-isolation.js?v=2" defer></script>
     <script src="./paradise-chat-native-adapter.js?v=3" defer></script>
   </body>
