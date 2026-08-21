@@ -30,7 +30,7 @@
         patchUrlProperty(HTMLImageElement.prototype,'src');patchUrlProperty(HTMLSourceElement.prototype,'src');patchUrlProperty(HTMLLinkElement.prototype,'href');
         const query=new URLSearchParams(window.location.search);const sso=query.get('sso')||null;
         window.NitroConfig={'config.urls':['./local-config.json','./renderer-config.json','./ui-config.json'],'sso.ticket':sso,'forward.type':-1,'forward.id':0,'friend.id':Number.parseInt(query.get('friend')||'0',10)||0,'roomenterad.habbohotel.enabled':false,'roomenterad.habblet.enabled':false};
-        window.__PARADISE_BASELINE__={version:'1.5.3-react-synchronized-chat',paradiseUi:'primary',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,stabilityPatch:false,chatFix:'react-state-synchronized',polish:'event-driven',stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,hasSso:!!sso};
+        window.__PARADISE_BASELINE__={version:'1.5.3-react-synchronized-chat',paradiseUi:'primary',websocketPatched:false,domCleanup:'migration-safe',roomTrace:false,stabilityPatch:false,chatFix:'react-state-synchronized',polish:'event-driven',stableUiFixes:true,eventIsolation:'input-safe',windowManager:true,hasSso:!!sso,paradiseBridge:'character-v2'};
         console.info('[ParadiseRP] Stable integration active',window.__PARADISE_BASELINE__);
       })();
     </script>
@@ -42,6 +42,8 @@
   <body>
     <noscript>JavaScript doit être activé pour lancer le client.</noscript>
     <div id="root" class="w-100 h-100"></div>
+    <script src="./paradise-store.js?v=1" defer></script>
+    <script src="./paradise-bridge.js?v=1" defer></script>
     <script src="./paradise-rp-hud.js?v=81" defer></script>
     <script src="./paradise-ui-polish.js?v=83" defer></script>
     <script src="./paradise-ui-event-isolation.js?v=2" defer></script>
