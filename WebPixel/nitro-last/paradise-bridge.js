@@ -1,10 +1,11 @@
 (() => {
   'use strict';
 
-  const VERSION = '1.0.0-character-snapshot';
+  const VERSION = '1.0.1-character-snapshot';
   const boundSockets = new WeakSet();
   let lastSnapshot = null;
-  let requestTimer = 0;
+  let discoveryTimer = 0;
+  let socketHookInstalled = false;
 
   const fmt = value => new Intl.NumberFormat('fr-FR').format(Number(value) || 0);
 
@@ -148,9 +149,45 @@
     }
   }
 
-  function discoverSocket() {
-    const socket = window.rdp_app?.webSocket;
+  function installSocketHook() {
+    const app = window.rdp_app;
+    if (!app || socketHookInstalled) return false;
+
+    let socket = app.webSocket || null;
     if (socket) bindSocket(socket);
+
+    try {
+      Object.defineProperty(app, 'webSocket', {
+        configurable: true,
+        enumerable: true,
+        get() { return socket; },
+        set(next) {
+          socket = next;
+          if (next) bindSocket(next);
+        }
+      });
+      socketHookInstalled = true;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function bootstrapDiscovery() {
+    if (installSocketHook()) {
+      if (discoveryTimer) window.clearInterval(discoveryTimer);
+      discoveryTimer = 0;
+      return;
+    }
+
+    if (!discoveryTimer) {
+      discoveryTimer = window.setInterval(() => {
+        if (installSocketHook()) {
+          window.clearInterval(discoveryTimer);
+          discoveryTimer = 0;
+        }
+      }, 250);
+    }
   }
 
   // The existing HUD still polls PHP during migration. Re-apply the authoritative
@@ -161,23 +198,16 @@
   });
 
   window.addEventListener('paradise:request-snapshot', () => {
-    discoverSocket();
+    bootstrapDiscovery();
     requestSnapshot(window.rdp_app?.webSocket);
   });
 
-  requestTimer = window.setInterval(discoverSocket, 250);
-  window.setTimeout(() => {
-    if (requestTimer) {
-      window.clearInterval(requestTimer);
-      requestTimer = 0;
-    }
-    discoverSocket();
-  }, 30000);
+  bootstrapDiscovery();
 
   window.ParadiseBridge = Object.freeze({
     version: VERSION,
     requestSnapshot: () => {
-      discoverSocket();
+      bootstrapDiscovery();
       return requestSnapshot(window.rdp_app?.webSocket);
     },
     getLastSnapshot: () => lastSnapshot
