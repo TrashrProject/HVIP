@@ -3,7 +3,7 @@
 
   if (window.ParadiseQualityGateUi) return;
 
-  const VERSION = '1.0.0-core-v1-ui-coherence';
+  const VERSION = '1.0.1-core-v1-ui-coherence';
   let destroyed = false;
   let scheduled = false;
 
@@ -20,8 +20,8 @@
     const hud = document.getElementById('paradise-rp-hud');
     if (!hud) return;
 
-    // Vehicles must remain in the validated bottom-left HUD structure, but the
-    // duplicate Actions shortcut is misleading until a real vehicle domain exists.
+    // Vehicles stays in the validated bottom-left HUD structure. Until the real
+    // vehicle domain exists, do not duplicate its placeholder in Actions.
     hud.querySelector('.pr-actions-menu [data-window-open="vehicles"]')?.remove();
 
     const bell = hud.querySelector('[data-action="notifications"]');
@@ -41,12 +41,6 @@
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
-
-    const phone = window.ParadiseStore?.getState?.().phone;
-    if (!phone?.available || !phone?.hasDevice) {
-      window.ParadiseSystemFeedback?.show?.('Vous devez posséder un téléphone pour consulter vos notifications.', 'ERROR');
-      return;
-    }
     window.ParadisePhoneV1?.open?.('notifications');
   }
 
