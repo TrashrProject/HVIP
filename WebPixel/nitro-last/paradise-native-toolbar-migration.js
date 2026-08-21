@@ -3,7 +3,7 @@
 
   if (window.ParadiseNativeToolbarMigration) return;
 
-  const VERSION = '1.0.0-phase11';
+  const VERSION = '1.0.1-phase11';
   const DEBUG = /(?:^|[?&])prdebug=1(?:&|$)/.test(location.search) || localStorage.getItem('pr_nitro_debug') === '1';
   const KNOWN = {
     CombatMode: { label: 'Combat', mode: 'proxy' },
@@ -46,16 +46,22 @@
   }
 
   function proxyKey(element, info) {
-    return clean(info.id || element.getAttribute?.('data-action') || element.getAttribute?.('aria-label') || info.label)
+    const raw = clean(info.id || element.getAttribute?.('data-action') || element.getAttribute?.('aria-label') || element.getAttribute?.('title') || info.label)
       .toLowerCase()
       .replace(/[^a-z0-9_-]+/g, '-');
+    if (!raw || raw === 'outil-nitro') return `legacy-${audit.length + 1}`;
+    return raw;
+  }
+
+  function hasProxy(host, key) {
+    return [...host.querySelectorAll('[data-pr-legacy-key]')].some(button => button.dataset.prLegacyKey === key);
   }
 
   function ensureProxy(element, info) {
     const host = proxyHost();
     if (!host) return false;
-    const key = proxyKey(element, info) || `legacy-${audit.length + 1}`;
-    if (host.querySelector(`[data-pr-legacy-key="${CSS.escape(key)}"]`)) return true;
+    const key = proxyKey(element, info);
+    if (hasProxy(host, key)) return true;
 
     const button = document.createElement('button');
     button.type = 'button';
