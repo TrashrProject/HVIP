@@ -87,21 +87,17 @@ try {
 
         mysqli_begin_transaction($con);
         try {
-            $citizenId = pr_character_generate_number('PID', 4);
+            $citizenId = pr_character_generate_number('PID', 6);
+            $firstName = (string)$identity['first_name'];
+            $lastName = (string)$identity['last_name'];
+            $birthDate = (string)$identity['birth_date'];
+            $gender = $identity['gender'];
+            $nationality = (string)$identity['nationality'];
+            $biography = $identity['biography'];
+
             $stmt = mysqli_prepare($con, 'INSERT INTO `rp_characters` (`user_id`,`citizen_id`,`first_name`,`last_name`,`birth_date`,`gender`,`nationality`,`biography`,`reputation`) VALUES (?,?,?,?,?,?,?,?,0)');
             if (!$stmt) throw new RuntimeException('character_insert_prepare_failed');
-            mysqli_stmt_bind_param(
-                $stmt,
-                'isssssss',
-                $userId,
-                $citizenId,
-                $identity['first_name'],
-                $identity['last_name'],
-                $identity['birth_date'],
-                $identity['gender'],
-                $identity['nationality'],
-                $identity['biography']
-            );
+            mysqli_stmt_bind_param($stmt, 'isssssss', $userId, $citizenId, $firstName, $lastName, $birthDate, $gender, $nationality, $biography);
             if (!mysqli_stmt_execute($stmt)) throw new RuntimeException('character_insert_failed');
             mysqli_stmt_close($stmt);
 
@@ -117,7 +113,7 @@ try {
             if (!$typeRow) throw new RuntimeException('identity_document_type_missing');
 
             $typeId = (int)$typeRow['id'];
-            $documentNumber = pr_character_generate_number('PI', 4);
+            $documentNumber = pr_character_generate_number('PI', 6);
             $stmt = mysqli_prepare($con, "INSERT INTO `rp_player_documents` (`user_id`,`document_type_id`,`document_number`,`issued_at`,`status`) VALUES (?,?,?,NOW(),'VALID')");
             if (!$stmt) throw new RuntimeException('identity_document_prepare_failed');
             mysqli_stmt_bind_param($stmt, 'iis', $userId, $typeId, $documentNumber);
@@ -142,7 +138,8 @@ try {
         $character = pr_character_row($con, $userId);
         if (!$character) pr_character_action_json(['ok' => false, 'reason' => 'identity_required'], 409);
         $biography = pr_character_clean_bio($input['biography'] ?? '');
-        if (mb_strlen($biography) > 400) {
+        $bioLength = function_exists('mb_strlen') ? mb_strlen($biography) : strlen($biography);
+        if ($bioLength > 400) {
             pr_character_action_json(['ok' => false, 'reason' => 'validation_failed', 'errors' => ['La biographie est limitée à 400 caractères.']], 422);
         }
         $stmt = mysqli_prepare($con, 'UPDATE `rp_characters` SET `biography` = ? WHERE `user_id` = ? LIMIT 1');
