@@ -1,0 +1,12 @@
+# ParadiseRP WebEvent reverse proxy
+#
+# Load this only after confirming these Apache modules are enabled:
+#   proxy_module
+#   proxy_http_module
+#   proxy_wstunnel_module
+#
+# The browser connects over the existing HTTPS origin while the emulator keeps
+# its Roleplay WebEvent server private on 127.0.0.1:2087.
+
+ProxyPass        "/paradise-ws/"  "ws://127.0.0.1:2087/" retry=0 timeout=60
+ProxyPassReverse "/paradise-ws/"  "ws://127.0.0.1:2087/"
