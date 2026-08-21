@@ -3,7 +3,7 @@
 
   if (window.ParadiseStore) return;
 
-  const VERSION = '1.0.1-ui-foundation';
+  const VERSION = '1.1.0-ui-foundation';
   const listeners = new Set();
 
   const state = {
@@ -22,20 +22,9 @@
         level: null,
         citizenId: null
       },
-      economy: {
-        cash: undefined,
-        bank: undefined
-      },
-      room: {
-        id: null,
-        name: null,
-        district: null,
-        city: null,
-        playerCount: undefined
-      },
-      notifications: {
-        count: 0
-      }
+      economy: { cash: undefined, bank: undefined },
+      room: { id: null, name: null, district: null, city: null, playerCount: undefined },
+      notifications: { count: 0 }
     },
     ui: {
       activeWindow: null,
@@ -76,10 +65,7 @@
     listeners.forEach(listener => {
       try { listener(state, event, detail); } catch (error) { console.warn('[ParadiseStore] listener failed', error); }
     });
-
-    window.dispatchEvent(new CustomEvent('paradise:store-change', {
-      detail: { event, data: detail, state }
-    }));
+    window.dispatchEvent(new CustomEvent('paradise:store-change', { detail: { event, data: detail, state } }));
   };
 
   const applyServerSnapshot = payload => {
@@ -90,48 +76,50 @@
       return false;
     }
 
-    const money = payload.money && typeof payload.money === 'object' ? payload.money : {};
+    const sourceMoney = payload.money && typeof payload.money === 'object' ? payload.money : {};
     const roomRaw = payload.room_name ?? payload.room;
-
-    state.gameplay.player = {
-      id: asNumber(payload.id),
-      username: asText(payload.username),
-      look: asText(payload.look),
-      avatarUrl: asText(payload.avatar_url),
-      motto: asText(payload.motto),
-      role: asText(payload.role),
-      job: asText(payload.job),
-      jobId: asNumber(payload.job_id),
-      health: normalizeStat(payload.health),
-      armor: normalizeStat(payload.armor),
-      level: asNumber(payload.level),
-      citizenId: asText(payload.citizen_id)
+    const nextGameplay = {
+      player: {
+        id: asNumber(payload.id),
+        username: asText(payload.username),
+        look: asText(payload.look),
+        avatarUrl: asText(payload.avatar_url),
+        motto: asText(payload.motto),
+        role: asText(payload.role),
+        job: asText(payload.job),
+        jobId: asNumber(payload.job_id),
+        health: normalizeStat(payload.health),
+        armor: normalizeStat(payload.armor),
+        level: asNumber(payload.level),
+        citizenId: asText(payload.citizen_id)
+      },
+      economy: {
+        cash: asNumber(sourceMoney.cash ?? sourceMoney.credits) ?? undefined,
+        bank: asNumber(sourceMoney.bank) ?? undefined
+      },
+      room: {
+        id: asNumber(payload.room_id),
+        name: asText(roomRaw),
+        district: asText(payload.district),
+        city: asText(payload.city),
+        playerCount: asNumber(payload.players) ?? undefined
+      },
+      notifications: {
+        count: Math.max(0, asNumber(payload.notifications_count) ?? asNumber(payload.notifications?.count) ?? 0)
+      }
     };
 
-    state.gameplay.economy = {
-      cash: asNumber(money.cash ?? money.credits) ?? undefined,
-      bank: asNumber(money.bank) ?? undefined
-    };
-
-    state.gameplay.room = {
-      id: asNumber(payload.room_id),
-      name: asText(roomRaw),
-      district: asText(payload.district),
-      city: asText(payload.city),
-      playerCount: asNumber(payload.players) ?? undefined
-    };
-
-    state.gameplay.notifications = {
-      count: Math.max(0, asNumber(payload.notifications_count) ?? asNumber(payload.notifications?.count) ?? 0)
-    };
-
+    const changed = JSON.stringify(state.gameplay) !== JSON.stringify(nextGameplay);
+    state.gameplay = nextGameplay;
     state.meta.connected = true;
     state.meta.source = 'rp-hud-data';
     state.meta.lastUpdatedAt = new Date().toISOString();
     state.meta.lastError = null;
 
-    emit('gameplay:snapshot', state.gameplay);
-    window.dispatchEvent(new CustomEvent('paradise:player-data', { detail: payload }));
+    if (changed) {
+      emit('gameplay:snapshot', state.gameplay);
+      window.dispatchEvent(new CustomEvent('paradise:player-data', { detail: payload }));
+    }
     return true;
   };
 
@@ -146,8 +134,10 @@
     const next = {};
     if (Object.prototype.hasOwnProperty.call(patch, 'activeWindow')) next.activeWindow = asText(patch.activeWindow);
     if (Object.prototype.hasOwnProperty.call(patch, 'actionsOpen')) next.actionsOpen = Boolean(patch.actionsOpen);
+
+    const before = JSON.stringify(state.ui);
     Object.assign(state.ui, next);
-    emit('ui:change', state.ui);
+    if (JSON.stringify(state.ui) !== before) emit('ui:change', state.ui);
   };
 
   window.ParadiseStore = Object.freeze({
