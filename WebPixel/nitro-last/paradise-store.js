@@ -3,7 +3,7 @@
 
   if (window.ParadiseStore) return;
 
-  const VERSION = '2.0.0-character-v2';
+  const VERSION = '3.0.0-inventory-v2';
   const listeners = new Set();
 
   const state = {
@@ -44,6 +44,17 @@
     documents: [],
     reputation: { general: 0 },
     statistics: { accountCreated: null, onlineTime: null, roomVisits: null },
+    inventory: {
+      items: [],
+      weight: 0,
+      capacity: 50,
+      baseCapacity: 50,
+      capacityBonus: 0,
+      slotsUsed: 0,
+      maxSlots: 30,
+      lastUpdatedAt: null,
+      lastError: null
+    },
     offers: { document: null },
     ui: {
       activeWindow: null,
@@ -51,7 +62,9 @@
       profileTab: 'overview',
       profileDocument: null,
       presentedDocument: null,
-      onboarding: false
+      onboarding: false,
+      inventorySelected: null,
+      inventoryFilter: 'all'
     },
     meta: {
       connected: false,
@@ -130,6 +143,37 @@
     metadata: asText(item?.metadata)
   })) : [];
 
+  const normalizeInventoryItem = item => {
+    const source = item && typeof item === 'object' ? item : {};
+    return {
+      key: asText(source.key) || `item:${asText(source.id) || Math.random().toString(36).slice(2)}`,
+      id: asNumber(source.id),
+      source: asText(source.source) || 'inventory',
+      definitionId: asNumber(source.definition_id ?? source.definitionId),
+      documentId: asNumber(source.document_id ?? source.documentId),
+      documentType: asText(source.document_type ?? source.documentType),
+      code: asText(source.code),
+      name: asText(source.name) || 'Objet',
+      description: asText(source.description) || '',
+      category: (asText(source.category) || 'OBJECT').toUpperCase(),
+      weight: Math.max(0, asNumber(source.weight) ?? 0),
+      totalWeight: Math.max(0, asNumber(source.total_weight ?? source.totalWeight) ?? 0),
+      quantity: Math.max(0, Math.round(asNumber(source.quantity) ?? 0)),
+      maxStack: Math.max(1, Math.round(asNumber(source.max_stack ?? source.maxStack) ?? 1)),
+      icon: asText(source.icon),
+      usable: Boolean(source.usable),
+      tradeable: Boolean(source.tradeable),
+      droppable: Boolean(source.droppable),
+      effectType: (asText(source.effect_type ?? source.effectType) || 'NONE').toUpperCase(),
+      metadata: asText(source.metadata),
+      slot: asNumber(source.slot),
+      status: asText(source.status),
+      number: asText(source.number),
+      actions: Array.isArray(source.actions) ? source.actions.map(value => String(value).toLowerCase()) : [],
+      locked: Boolean(source.locked)
+    };
+  };
+
   const emit = (event, detail) => {
     listeners.forEach(listener => {
       try { listener(state, event, detail); } catch (error) { console.warn('[ParadiseStore] listener failed', error); }
@@ -151,37 +195,16 @@
     }
 
     const sourceMoney = payload.money && typeof payload.money === 'object' ? payload.money : {};
-    const serverRoom = normalizeRoom({
-      room_id: payload.room_id,
-      room_name: payload.room_name ?? payload.room,
-      district: payload.district,
-      city: payload.city,
-      players: payload.players
-    });
-
+    const serverRoom = normalizeRoom({ room_id: payload.room_id, room_name: payload.room_name ?? payload.room, district: payload.district, city: payload.city, players: payload.players });
     const nextGameplay = {
       player: {
-        id: asNumber(payload.id),
-        username: asText(payload.username),
-        look: asText(payload.look),
-        avatarUrl: asText(payload.avatar_url),
-        motto: asText(payload.motto),
-        role: asText(payload.role),
-        job: asText(payload.job),
-        jobId: asNumber(payload.job_id),
-        health: normalizeStat(payload.health),
-        armor: normalizeStat(payload.armor),
-        level: asNumber(payload.level),
-        citizenId: asText(payload.citizen_id)
+        id: asNumber(payload.id), username: asText(payload.username), look: asText(payload.look), avatarUrl: asText(payload.avatar_url), motto: asText(payload.motto),
+        role: asText(payload.role), job: asText(payload.job), jobId: asNumber(payload.job_id), health: normalizeStat(payload.health), armor: normalizeStat(payload.armor),
+        level: asNumber(payload.level), citizenId: asText(payload.citizen_id)
       },
-      economy: {
-        cash: asNumber(sourceMoney.cash ?? sourceMoney.credits) ?? undefined,
-        bank: asNumber(sourceMoney.bank) ?? undefined
-      },
+      economy: { cash: asNumber(sourceMoney.cash ?? sourceMoney.credits) ?? undefined, bank: asNumber(sourceMoney.bank) ?? undefined },
       room: hasLiveRoomAuthority() ? state.gameplay.room : serverRoom,
-      notifications: {
-        count: Math.max(0, asNumber(payload.notifications_count) ?? asNumber(payload.notifications?.count) ?? 0)
-      }
+      notifications: { count: Math.max(0, asNumber(payload.notifications_count) ?? asNumber(payload.notifications?.count) ?? 0) }
     };
 
     const nextCharacter = normalizeCharacter(payload.character);
@@ -233,6 +256,32 @@
     return true;
   };
 
+  const applyInventorySnapshot = payload => {
+    if (!payload || typeof payload !== 'object' || payload.ok === false || !payload.inventory) {
+      state.inventory.lastError = asText(payload?.reason) || 'inventory_unavailable';
+      emit('inventory:error', state.inventory.lastError);
+      return false;
+    }
+    const source = payload.inventory;
+    const next = {
+      items: Array.isArray(source.items) ? source.items.map(normalizeInventoryItem) : [],
+      weight: Math.max(0, asNumber(source.weight) ?? 0),
+      capacity: Math.max(0, asNumber(source.capacity) ?? 50),
+      baseCapacity: Math.max(0, asNumber(source.base_capacity ?? source.baseCapacity) ?? 50),
+      capacityBonus: Math.max(0, asNumber(source.capacity_bonus ?? source.capacityBonus) ?? 0),
+      slotsUsed: Math.max(0, Math.round(asNumber(source.slots_used ?? source.slotsUsed) ?? 0)),
+      maxSlots: Math.max(1, Math.round(asNumber(source.max_slots ?? source.maxSlots) ?? 30)),
+      lastUpdatedAt: new Date().toISOString(),
+      lastError: null
+    };
+    const changed = JSON.stringify(state.inventory) !== JSON.stringify(next);
+    state.inventory = next;
+    const selected = state.ui.inventorySelected;
+    if (selected && !next.items.some(item => item.key === selected)) state.ui.inventorySelected = null;
+    if (changed) emit('inventory:update', state.inventory);
+    return true;
+  };
+
   const setRoomSnapshot = (snapshot, source = 'nitro') => {
     const nextRoom = normalizeRoom(snapshot);
     const previous = state.gameplay.room;
@@ -274,9 +323,18 @@
     if (Object.prototype.hasOwnProperty.call(patch, 'profileDocument')) next.profileDocument = asText(patch.profileDocument);
     if (Object.prototype.hasOwnProperty.call(patch, 'presentedDocument')) next.presentedDocument = patch.presentedDocument || null;
     if (Object.prototype.hasOwnProperty.call(patch, 'onboarding')) next.onboarding = Boolean(patch.onboarding);
+    if (Object.prototype.hasOwnProperty.call(patch, 'inventorySelected')) next.inventorySelected = asText(patch.inventorySelected);
+    if (Object.prototype.hasOwnProperty.call(patch, 'inventoryFilter')) next.inventoryFilter = asText(patch.inventoryFilter) || 'all';
     const before = JSON.stringify(state.ui);
     Object.assign(state.ui, next);
     if (JSON.stringify(state.ui) !== before) emit('ui:change', state.ui);
+  };
+
+  const setInventoryUi = patch => {
+    const safe = {};
+    if (Object.prototype.hasOwnProperty.call(patch || {}, 'selected')) safe.inventorySelected = asText(patch.selected);
+    if (Object.prototype.hasOwnProperty.call(patch || {}, 'filter')) safe.inventoryFilter = asText(patch.filter) || 'all';
+    setUi(safe);
   };
 
   const clearDocumentOffer = offerId => {
@@ -299,10 +357,12 @@
     version: VERSION,
     getState: () => state,
     applyServerSnapshot,
+    applyInventorySnapshot,
     setRoomSnapshot,
     releaseRoomAuthority,
     setBridgeError,
     setUi,
+    setInventoryUi,
     clearDocumentOffer,
     clearUiEvent,
     subscribe(listener) {
