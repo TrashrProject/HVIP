@@ -1,0 +1,36 @@
+name: ParadiseRP Phase 3 checks
+
+on:
+  push:
+    branches: [ feature/paradise-inventory-v2 ]
+  pull_request:
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check WebPixel/nitro-last/paradise-store.js
+          node --check WebPixel/nitro-last/paradise-inventory-v2.js
+          node --check WebPixel/nitro-last/paradise-inventory-commands-ui.js
+      - name: PHP syntax
+        run: |
+          php -l WebPixel/paradise-inventory-lib.php
+          php -l WebPixel/rp-inventory-data.php
+      - name: Production migration safety
+        shell: bash
+        run: |
+          FILE=migrations/2026_08_21_paradise_inventory_v2.sql
+          ! grep -Eiq 'DROP[[:space:]]+(TABLE|DATABASE)|TRUNCATE[[:space:]]|DELETE[[:space:]]+FROM[[:space:]]+`?(users|play_stats)' "$FILE"
+          grep -q 'rp_item_definitions' "$FILE"
+          grep -q 'rp_inventory_items' "$FILE"
+          grep -q 'rp_inventory_transactions' "$FILE"
+      - name: No production player seed
+        shell: bash
+        run: |
+          ! grep -Eiq 'owner_user_id[^\n]*(VALUES|SELECT)[^\n]*[1-9][0-9]*' migrations/2026_08_21_paradise_inventory_v2.sql
