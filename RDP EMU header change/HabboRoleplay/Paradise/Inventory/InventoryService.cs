@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
     public static class InventoryService
     {
         private static readonly InventoryRepository Repository = new InventoryRepository();
+        private static readonly ConcurrentDictionary<int, long> LastUseAt = new ConcurrentDictionary<int, long>();
+        private const long UseGuardMilliseconds = 450;
 
         public static IList<InventoryItem> GetItems(int userId)
         {
@@ -76,6 +79,17 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
             }
 
             int userId = session.GetHabbo().Id;
+            if (session.GetPlay() != null && (session.GetPlay().IsDead || session.GetPlay().IsDying))
+            {
+                message = "Vous ne pouvez pas utiliser cet objet dans votre état actuel.";
+                return false;
+            }
+            if (!AcquireUseGuard(userId))
+            {
+                message = "Action trop rapide. Réessayez.";
+                return false;
+            }
+
             InventoryItem item = Repository.LoadItem(userId, itemId);
             if (item == null || item.Definition == null)
             {
@@ -110,15 +124,15 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
                     if (item.Definition.EffectValue > 0)
                     {
                         session.GetPlay().Hunger = Math.Min(100, session.GetPlay().Hunger + item.Definition.EffectValue);
-                        session.GetPlay().UserDataHandler.SaveData();
+                        if (session.GetPlay().UserDataHandler != null) session.GetPlay().UserDataHandler.SaveData();
                     }
                     session.SendWhisper(item.Definition.Name + " utilisé.", 1);
                     InventoryUiEventService.Toast(userId, "Objet utilisé", item.Definition.Name + " utilisé.");
                     return true;
 
                 case "DRINK":
-                    // ParadiseRP currently has Hunger but no authoritative Thirst stat.
-                    // Drinking is therefore a physical RP consumption only: no invented thirst system.
+                    // There is no authoritative Thirst stat in the audited RP core.
+                    // Water is therefore a real consumable without inventing a fake thirst meter.
                     if (!Repository.ConsumeOne(userId, item.Id))
                     {
                         message = "Impossible d’utiliser cet objet.";
@@ -215,6 +229,22 @@ namespace Plus.HabboRoleplay.Paradise.Inventory
             decimal weight = GetWeight(userId);
             return "Inventaire : " + weight.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR")) + " / " +
                    capacity.MaximumWeight.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR")) + " kg";
+        }
+
+        private static bool AcquireUseGuard(int userId)
+        {
+            long now = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
+            while (true)
+            {
+                long previous;
+                if (!LastUseAt.TryGetValue(userId, out previous))
+                {
+                    if (LastUseAt.TryAdd(userId, now)) return true;
+                    continue;
+                }
+                if (now - previous < UseGuardMilliseconds) return false;
+                if (LastUseAt.TryUpdate(userId, now, previous)) return true;
+            }
         }
 
         private static string Normalize(string value)
