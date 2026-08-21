@@ -85,7 +85,7 @@ namespace Plus.HabboRoleplay.Paradise.Character
                 },
                 Room = new CharacterRoomSnapshot
                 {
-                    Id = room != null ? (int?)room.Id : null,
+                    Id = room != null ? (int?)Convert.ToInt32(room.Id) : null,
                     Name = room != null ? room.Name : null,
                     City = room != null ? room.City : null
                 }
