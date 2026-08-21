@@ -10,13 +10,26 @@ function phone_notification(mysqli $con,int $phoneId,string $type,string $title,
     $stmt=mysqli_prepare($con,'INSERT INTO rp_phone_notifications (phone_id,notification_type,title,body,metadata) VALUES (?,?,?,?,?)');
     if(!$stmt)return;$metadata=$meta?json_encode($meta,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES):null;mysqli_stmt_bind_param($stmt,'issss',$phoneId,$type,$title,$body,$metadata);@mysqli_stmt_execute($stmt);mysqli_stmt_close($stmt);
 }
+
+if(($_SERVER['REQUEST_METHOD']??'GET')!=='POST')out(['ok'=>false,'reason'=>'method_not_allowed'],405);
+if(($_SERVER['HTTP_X_PARADISE_ACTION']??'')!=='phase4')out(['ok'=>false,'reason'=>'missing_action_header'],403);
+if(!empty($_SERVER['HTTP_ORIGIN'])){
+    $originHost=strtolower((string)parse_url($_SERVER['HTTP_ORIGIN'],PHP_URL_HOST));
+    $requestHost=strtolower(preg_replace('/:\d+$/','',(string)($_SERVER['HTTP_HOST']??'')));
+    if($originHost!==''&&$requestHost!==''&&$originHost!==$requestHost)out(['ok'=>false,'reason'=>'origin_rejected'],403);
+}
+
 try{
  require_once __DIR__.'/app/init.pz.php'; require_once __DIR__.'/paradise-phone-lib.php';
  if(!isset($Session,$DB)||!class_exists('Config'))out(['ok'=>false,'reason'=>'bootstrap_unavailable'],503);
  $username=trim((string)$Session->Read(Config::$SessionName)); if($username==='')out(['ok'=>false,'reason'=>'not_connected'],401);
  $con=$DB->Con(); if(!($con instanceof mysqli))out(['ok'=>false,'reason'=>'database_unavailable'],503);
+ if(!mysqli_set_charset($con,'utf8mb4'))out(['ok'=>false,'reason'=>'database_charset_unavailable'],503);
  $safe=mysqli_real_escape_string($con,$username);$r=mysqli_query($con,"SELECT id,username FROM users WHERE username='{$safe}' LIMIT 1");$user=$r?(mysqli_fetch_assoc($r)?:null):null;if($r)mysqli_free_result($r);if(!$user)out(['ok'=>false,'reason'=>'user_not_found'],404);
- $userId=(int)$user['id'];$input=json_decode(file_get_contents('php://input'),true);if(!is_array($input))$input=$_POST;$action=strtolower(trim((string)($input['action']??'')));
+ $userId=(int)$user['id'];
+ $raw=file_get_contents('php://input');if($raw===false||strlen($raw)>12000)out(['ok'=>false,'reason'=>'invalid_payload'],400);
+ $input=json_decode($raw!==''?$raw:'{}',true);if(!is_array($input))out(['ok'=>false,'reason'=>'invalid_json'],400);
+ $action=strtolower(trim((string)($input['action']??'')));
  $phone=pr_phone_ensure($con,$userId); if(!$phone)out(['ok'=>false,'reason'=>'no_phone_item','message'=>'Vous ne possédez pas de téléphone.'],403);$pid=(int)$phone['id'];
 
  if($action==='add_contact'){
@@ -39,14 +52,12 @@ try{
    if(pr_phone_rate_limited($con,$pid,'SMS',10,8))out(['ok'=>false,'reason'=>'rate_limited','message'=>'Vous envoyez des messages trop rapidement.'],429);
    $target=pr_phone_resolve($con,$phone,$targetToken);if(!$target)out(['ok'=>false,'reason'=>'target_not_found','message'=>'Ce numéro/contact est indisponible.'],404);$tid=(int)$target['id'];
    if($tid===$pid)out(['ok'=>false,'reason'=>'self_message','message'=>'Vous ne pouvez pas vous envoyer un SMS à vous-même.'],422);
-
    $receiverUserId=(int)$target['user_id'];$senderIdentity=pr_phone_identity($con,$userId);$targetIdentity=pr_phone_identity($con,$receiverUserId);
    $senderName=$senderIdentity['name']?:$username;$receiverName=$targetIdentity['name']?:($targetIdentity['username']?:$target['phone_number']);
    $stmt=mysqli_prepare($con,"INSERT INTO play_phone_chats (type,emisor_id,emisor_name,receptor_id,receptor_name,msg,timestamp,status,read_at) VALUES (1,?,?,?,?,?,NOW(),'SENT',NULL)");
    if(!$stmt)out(['ok'=>false,'reason'=>'message_store_unavailable'],503);
    mysqli_stmt_bind_param($stmt,'isiss',$userId,$senderName,$receiverUserId,$receiverName,$body);mysqli_stmt_execute($stmt);$messageId=(int)mysqli_insert_id($con);mysqli_stmt_close($stmt);
-   pr_phone_log_action($con,$pid,'SMS',$tid);
-   phone_notification($con,$tid,'MESSAGE','Nouveau message',$senderName.': '.mb_substr($body,0,90),['chat_id'=>$messageId,'sender_phone_id'=>$pid]);
+   pr_phone_log_action($con,$pid,'SMS',$tid);phone_notification($con,$tid,'MESSAGE','Nouveau message',$senderName.': '.mb_substr($body,0,90),['chat_id'=>$messageId,'sender_phone_id'=>$pid]);
    out(['ok'=>true,'message'=>'Message envoyé à '.$receiverName.'.','phone'=>pr_phone_snapshot($con,$userId)]);
  }
 
