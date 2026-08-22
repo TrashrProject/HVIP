@@ -53,6 +53,82 @@ class DBManager extends DBConManager
         return $R;
     }
 
+    /**
+     * Execute a prepared statement. Use this for every value coming from an
+     * HTTP request or another untrusted source.
+     */
+    public function Prepared($sql, $types = '', array $params = array())
+    {
+        $stmt = mysqli_prepare($this->Con(), $sql);
+        if (!$stmt) {
+            throw new RuntimeException('Database prepare failed: ' . mysqli_error($this->Con()));
+        }
+
+        if ($types !== '') {
+            if (strlen($types) !== count($params)) {
+                mysqli_stmt_close($stmt);
+                throw new InvalidArgumentException('Prepared statement parameter count mismatch.');
+            }
+            $bind = array($stmt, $types);
+            foreach ($params as $key => $value) {
+                $bind[] = &$params[$key];
+            }
+            if (!call_user_func_array('mysqli_stmt_bind_param', $bind)) {
+                $error = mysqli_stmt_error($stmt);
+                mysqli_stmt_close($stmt);
+                throw new RuntimeException('Database bind failed: ' . $error);
+            }
+        }
+
+        if (!mysqli_stmt_execute($stmt)) {
+            $error = mysqli_stmt_error($stmt);
+            mysqli_stmt_close($stmt);
+            throw new RuntimeException('Database execute failed: ' . $error);
+        }
+
+        return $stmt;
+    }
+
+    public function PreparedResult($sql, $types = '', array $params = array())
+    {
+        $stmt = $this->Prepared($sql, $types, $params);
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result === false) {
+            $error = mysqli_stmt_error($stmt);
+            mysqli_stmt_close($stmt);
+            throw new RuntimeException('Database result failed: ' . $error);
+        }
+        mysqli_stmt_close($stmt);
+        return $result;
+    }
+
+    public function PreparedAffect($sql, $types = '', array $params = array())
+    {
+        $stmt = $this->Prepared($sql, $types, $params);
+        $affected = mysqli_stmt_affected_rows($stmt);
+        mysqli_stmt_close($stmt);
+        return $affected;
+    }
+
+    public function BeginTransaction()
+    {
+        if (!mysqli_begin_transaction($this->Con())) {
+            throw new RuntimeException('Could not start database transaction.');
+        }
+    }
+
+    public function Commit()
+    {
+        if (!mysqli_commit($this->Con())) {
+            throw new RuntimeException('Could not commit database transaction.');
+        }
+    }
+
+    public function Rollback()
+    {
+        mysqli_rollback($this->Con());
+    }
+
     public function Select($T, $C = '*', $W = null, $E = null, $NoFetch = false)
     {
         $Q = 'SELECT ' . $C . ' FROM ' . $T;
