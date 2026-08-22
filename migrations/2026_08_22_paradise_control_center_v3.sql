@@ -1,6 +1,6 @@
 -- ParadiseRP — Paradise Control Center V3
 -- Additive / non-destructive migration for MariaDB 10.4+.
--- The Control Center deliberately refuses sensitive writes until this table exists.
+-- Safe both on a fresh DB and on a DB where the earlier PCC V2 audit table exists.
 
 CREATE TABLE IF NOT EXISTS `cms_admin_audit_log` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -22,3 +22,10 @@ CREATE TABLE IF NOT EXISTS `cms_admin_audit_log` (
   KEY `idx_pcc_audit_module` (`module`,`created_at`),
   KEY `idx_pcc_audit_target` (`target_type`,`target_id`,`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Upgrade path from the earlier V2 audit schema without deleting existing logs.
+ALTER TABLE `cms_admin_audit_log`
+  ADD COLUMN IF NOT EXISTS `module` VARCHAR(40) NOT NULL DEFAULT 'legacy' AFTER `action`;
+
+ALTER TABLE `cms_admin_audit_log`
+  ADD INDEX IF NOT EXISTS `idx_pcc_audit_module` (`module`,`created_at`);
