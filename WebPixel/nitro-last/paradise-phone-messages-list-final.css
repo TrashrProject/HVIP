@@ -1,9 +1,9 @@
 /* ParadiseRP — ParadisePhone Messages list final micro-polish
    Scope: Messages main list only. No Home/backend/SQL/EMU/CMS/Nitro changes. */
 
-/* Lift the real empty state by ~24px without changing the validated header/screen. */
+/* Lift the current empty state by ~10px more without changing its validated size. */
 html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app>.pp-list:has(.pp-msg-empty){
-  padding:0 14px 96px!important;
+  padding:0 14px 116px!important;
 }
 html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app .pp-msg-empty{
   position:relative!important;
@@ -11,7 +11,7 @@ html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app .pp-msg-empty{
   transform:translateY(-6px)!important;
 }
 
-/* Replace the technical "..." tile with a small CSS conversation bubble. */
+/* Keep the validated small CSS conversation bubble unchanged. */
 html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app .pp-msg-empty::before{
   content:''!important;
   width:34px!important;
@@ -49,36 +49,68 @@ html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app .pp-msg-empty stro
   font-weight:600!important;
 }
 html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app .pp-msg-empty>span::after{
-  color:#b8cdcb!important;
+  color:#c6d8d6!important;
   font-size:12px!important;
+  line-height:1.35!important;
+  font-weight:420!important;
   opacity:1!important;
 }
 
-/* Bottom controls are real global phone actions (Home + Close): keep them, only improve clarity. */
+/*
+ * Bottom navigation origin in paradise-phone-v1.js:
+ * - [data-pp-home] = real Home action
+ * - [data-window-close="phone"] = real Close action
+ * - .pp-nav:before = decorative gesture line only
+ * Keep the two real controls, remove the decorative third element, and align both actions.
+ */
+html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  align-items:center!important;
+  justify-items:center!important;
+  gap:0!important;
+  box-sizing:border-box!important;
+  padding:0 54px 4px!important;
+}
 html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav:before{
   display:none!important;
   content:none!important;
 }
 html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav button{
-  color:#b7cecb!important;
-  opacity:.82!important;
+  width:30px!important;
+  height:26px!important;
+  min-width:30px!important;
+  display:grid!important;
+  place-items:center!important;
+  margin:0!important;
+  padding:0!important;
+  color:#bfd2d0!important;
+  opacity:.86!important;
   filter:none!important;
   text-shadow:none!important;
+  font-size:15px!important;
+  line-height:1!important;
+  font-weight:600!important;
 }
 html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav button:hover{
-  color:#d7ebe8!important;
+  color:#d9ebe9!important;
   opacity:1!important;
 }
 html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav button svg{
+  width:15px!important;
+  height:15px!important;
   fill:currentColor!important;
 }
+html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav button:last-child{
+  font-size:15px!important;
+}
 html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav button:last-child:after{
-  background:#a8c1be!important;
-  opacity:.9!important;
+  display:none!important;
+  content:none!important;
 }
 
 @media (max-height:800px){
   html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app>.pp-list:has(.pp-msg-empty){
-    padding-bottom:86px!important;
+    padding-bottom:106px!important;
   }
 }
