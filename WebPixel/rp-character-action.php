@@ -19,6 +19,30 @@ function pr_character_action_json(array $data, int $status = 200): void
     exit;
 }
 
+function pr_character_unique_number(mysqli $con, string $table, string $column, string $prefix, int $digits): ?string
+{
+    $allowed = [
+        'rp_characters.citizen_id' => true,
+        'rp_player_documents.document_number' => true,
+    ];
+    if (!isset($allowed[$table . '.' . $column])) return null;
+
+    for ($attempt = 0; $attempt < 12; $attempt++) {
+        $candidate = pr_character_generate_number($prefix, $digits);
+        $sql = "SELECT 1 FROM `{$table}` WHERE `{$column}` = ? LIMIT 1";
+        $stmt = mysqli_prepare($con, $sql);
+        if (!$stmt) return null;
+        mysqli_stmt_bind_param($stmt, 's', $candidate);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $exists = $result && mysqli_num_rows($result) > 0;
+        if ($result) mysqli_free_result($result);
+        mysqli_stmt_close($stmt);
+        if (!$exists) return $candidate;
+    }
+    return null;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     pr_character_action_json(['ok' => false, 'reason' => 'method_not_allowed'], 405);
 }
@@ -47,6 +71,9 @@ if ($username === '') {
 $con = $DB->Con();
 if (!($con instanceof mysqli)) {
     pr_character_action_json(['ok' => false, 'reason' => 'database_unavailable'], 503);
+}
+if (!mysqli_set_charset($con, 'utf8mb4')) {
+    pr_character_action_json(['ok' => false, 'reason' => 'database_charset_unavailable'], 503);
 }
 
 $stmt = mysqli_prepare($con, 'SELECT `id`,`username` FROM `users` WHERE `username` = ? LIMIT 1');
@@ -87,7 +114,8 @@ try {
 
         mysqli_begin_transaction($con);
         try {
-            $citizenId = pr_character_generate_number('PID', 6);
+            $citizenId = pr_character_unique_number($con, 'rp_characters', 'citizen_id', 'PID', 6);
+            if (!$citizenId) throw new RuntimeException('citizen_id_generation_failed');
             $firstName = (string)$identity['first_name'];
             $lastName = (string)$identity['last_name'];
             $birthDate = (string)$identity['birth_date'];
@@ -113,7 +141,8 @@ try {
             if (!$typeRow) throw new RuntimeException('identity_document_type_missing');
 
             $typeId = (int)$typeRow['id'];
-            $documentNumber = pr_character_generate_number('PI', 6);
+            $documentNumber = pr_character_unique_number($con, 'rp_player_documents', 'document_number', 'PI', 6);
+            if (!$documentNumber) throw new RuntimeException('document_number_generation_failed');
             $stmt = mysqli_prepare($con, "INSERT INTO `rp_player_documents` (`user_id`,`document_type_id`,`document_number`,`issued_at`,`status`) VALUES (?,?,?,NOW(),'VALID')");
             if (!$stmt) throw new RuntimeException('identity_document_prepare_failed');
             mysqli_stmt_bind_param($stmt, 'iis', $userId, $typeId, $documentNumber);

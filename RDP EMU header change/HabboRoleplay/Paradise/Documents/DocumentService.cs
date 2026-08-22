@@ -122,11 +122,14 @@ namespace Plus.HabboRoleplay.Paradise.Documents
             }
 
             string documentLabel = String.Equals(typeCode, DriverLicenseCode, StringComparison.OrdinalIgnoreCase)
+                ? "votre permis de conduire"
+                : "votre carte d'identité";
+            string targetDocumentLabel = String.Equals(typeCode, DriverLicenseCode, StringComparison.OrdinalIgnoreCase)
                 ? "son permis de conduire"
                 : "sa carte d'identité";
 
-            sender.SendWhisper("Vous présentez " + documentLabel + " à " + target.GetHabbo().Username + ".", 1);
-            target.SendWhisper(character.FullName + " vous présente " + documentLabel + ".", 1);
+            sender.SendWhisper("[DOCUMENT] Vous présentez " + documentLabel + " à " + target.GetHabbo().Username + ".", 1);
+            target.SendWhisper("[DOCUMENT] " + character.FullName + " vous présente " + targetDocumentLabel + ".", 1);
             message = "Document présenté.";
             return true;
         }

@@ -1,144 +1,493 @@
-/* ParadiseRP — ParadisePhone strict final layout correction
-   Visual only. Reuses existing phone logic and real Store data. */
+/* ParadiseRP — ParadisePhone official HOME
+   IMAGE 2 is the sole visual reference.
+   HOME only: internal apps / backend / Nitro remain untouched. */
 
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-home{
-  display:grid!important;
-  grid-template-rows:auto auto minmax(82px,1fr)!important;
-  align-content:stretch!important;
-  gap:10px!important;
-  padding:7px 11px 8px!important;
+#paradise-rp-hud .pr-window[data-window="phone"],
+#paradise-rp-hud .pr-window.pp-window{
+  width:min(307px,calc(49.5vh - 47px))!important;
+  height:min(620px,calc(100vh - 96px))!important;
+  right:16px!important;
+  bottom:72px!important;
+  top:auto!important;
+  left:auto!important;
+  max-width:calc(100vw - 24px)!important;
+  max-height:calc(100vh - 88px)!important;
 }
 
-/* Compact the identity card so it belongs to the composition instead of floating above it. */
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-hero{
-  min-height:73px!important;
-  padding:8px 63px 7px 10px!important;
-  border-radius:15px!important;
-  box-shadow:0 9px 18px rgba(1,24,30,.24),inset 0 1px 0 rgba(255,255,255,.36),inset 0 -1px 0 rgba(1,45,53,.23),0 0 0 1px rgba(123,226,213,.05)!important;
+/* ---------- black / graphite frame ---------- */
+#paradise-rp-hud .pp-device[data-pp-launcher-version="5.0.0-official-home"].ppv4-is-home{
+  padding:5px!important;
+  border:1px solid #4b5258!important;
+  border-radius:34px!important;
+  background:linear-gradient(145deg,#252a2f 0%,#101417 48%,#050708 100%)!important;
+  box-shadow:
+    0 22px 48px rgba(0,0,0,.38),
+    0 5px 14px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 0 0 1px rgba(0,0,0,.72)!important;
+  overflow:hidden!important;
 }
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-hero:before{
-  opacity:.82!important;
-  background:
-    linear-gradient(118deg,rgba(255,255,255,.08),transparent 29%),
-    repeating-linear-gradient(0deg,transparent 0 7px,rgba(220,251,245,.022) 7px 8px),
-    repeating-linear-gradient(90deg,transparent 0 7px,rgba(220,251,245,.022) 7px 8px),
-    radial-gradient(circle at 76% 22%,rgba(183,244,233,.1),transparent 30%)!important;
+#paradise-rp-hud .pp-device[data-pp-launcher-version="5.0.0-official-home"].ppv4-is-home:before{
+  inset:2px!important;
+  border-radius:31px!important;
+  border-color:rgba(255,255,255,.07)!important;
 }
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .ppp-card-copy{min-height:53px!important;justify-content:center!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .ppp-card-copy small{font-size:6.5px!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .ppp-card-copy strong{font-size:18px!important;margin-top:2px!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .ppp-card-copy span{font-size:6.6px!important;margin-top:2px!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .ppp-card-copy b{font-size:8.2px!important;margin-top:1px!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .ppp-card-avatar{
-  right:7px!important;
-  bottom:0!important;
-  width:51px!important;
-  height:68px!important;
+#paradise-rp-hud .pp-device[data-pp-launcher-version="5.0.0-official-home"].ppv4-is-home:after{
+  left:0!important;
+  top:98px!important;
+  width:2px!important;
+  height:45px!important;
+  border-radius:0 2px 2px 0!important;
+  background:#30363a!important;
+  box-shadow:0 58px 0 #30363a!important;
+  opacity:.75!important;
 }
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .ppp-card-avatar img{max-width:55px!important;max-height:70px!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .ppp-card-avatar:before{width:39px!important;height:15px!important;bottom:4px!important;background:rgba(184,242,232,.16)!important;box-shadow:0 0 13px rgba(137,231,216,.18)!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .ppp-card-chip{bottom:6px!important;width:13px!important;height:9px!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .ppp-card-mark{font-size:57px!important;right:48px!important;bottom:-16px!important}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-screen{
+  position:relative!important;
+  grid-template-rows:42px minmax(0,1fr) 0!important;
+  border-radius:29px!important;
+  overflow:hidden!important;
+  background-image:
+    linear-gradient(180deg,rgba(0,25,34,.03) 0%,rgba(0,25,34,.08) 42%,rgba(0,18,25,.22) 100%),
+    url("./paradise-phone-wallpaper-v3.svg?v=2")!important;
+  background-position:center!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-nav{
+  display:none!important;
+  height:0!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
 
-/* Five existing apps: compact 3+2 composition with a stronger visual anchor. */
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app-grid{
-  flex:none!important;
-  margin:0!important;
-  padding:2px 3px 1px!important;
-  display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  grid-auto-rows:auto!important;
-  align-content:start!important;
-  justify-items:center!important;
-  column-gap:9px!important;
-  row-gap:13px!important;
+/* ---------- compact dynamic island ---------- */
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-notch{
+  top:5px!important;
+  width:72px!important;
+  height:21px!important;
+  border-radius:0 0 14px 14px!important;
+  background:#030506!important;
+  box-shadow:0 1px 0 rgba(255,255,255,.03)!important;
 }
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app:nth-child(4){grid-column:1/2!important;transform:translateX(16px)}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app:nth-child(5){grid-column:2/3!important;transform:translateX(16px)}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app:nth-child(4):hover,
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app:nth-child(5):hover{transform:translateX(16px) translateY(-2px)}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app:nth-child(4):active,
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app:nth-child(5):active{transform:translateX(16px) scale(.96)}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app{font-size:9.8px!important;gap:6px!important;letter-spacing:0!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app-icon{
-  width:52px!important;
-  height:52px!important;
-  border-radius:15px!important;
-  border-color:rgba(255,255,255,.5)!important;
-  box-shadow:0 9px 17px rgba(0,19,25,.26),inset 0 1px 0 rgba(255,255,255,.78),inset 0 -2px 0 rgba(35,54,57,.09),0 0 0 1px rgba(8,36,43,.08)!important;
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-notch span{
+  width:0!important;
+  height:0!important;
+  opacity:0!important;
 }
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app-icon svg{width:32px!important;height:32px!important}
 
-/* Real functional lower zone. It mirrors existing Messages/Notifications actions and real Store counters. */
-#paradise-rp-hud .ppf-real-zone{
-  align-self:end;
-  min-height:82px;
-  display:grid;
-  grid-template-rows:auto 1fr;
-  gap:5px;
-  padding-top:1px;
-  animation:ppf-real-zone-in .18s ease both;
+/* ---------- status bar ---------- */
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-status{
+  position:relative!important;
+  z-index:30!important;
+  height:42px!important;
+  padding:9px 13px 0!important;
+  grid-template-columns:1fr 70px 1fr!important;
+  align-items:start!important;
+  color:#fff!important;
+  background:transparent!important;
+  font-family:Inter,Arial,sans-serif!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  letter-spacing:0!important;
+  text-shadow:0 1px 3px rgba(0,0,0,.42)!important;
 }
-#paradise-rp-hud .ppf-real-zone-head{display:flex;align-items:center;justify-content:space-between;padding:0 3px;color:#b9ddd8}
-#paradise-rp-hud .ppf-real-zone-head strong{font-size:7px;font-weight:950;letter-spacing:.15em;text-transform:uppercase}
-#paradise-rp-hud .ppf-real-zone-head span{font-size:6.5px;font-weight:750;color:rgba(215,240,235,.58)}
-#paradise-rp-hud .ppf-real-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-#paradise-rp-hud .ppf-real-shortcut{
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-status>strong{
+  font-size:10px!important;
+  line-height:1!important;
+  font-weight:850!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-status>span{
+  color:transparent!important;
+  text-shadow:none!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-status>span:before{content:none!important;display:none!important}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-status>div{
+  justify-self:end!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:5px!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-signal{
+  width:13px!important;
+  height:9px!important;
+  filter:brightness(0) invert(1) drop-shadow(0 1px 1px rgba(0,0,0,.3))!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-battery{
+  width:15px!important;
+  height:8px!important;
+  border-color:#fff!important;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-battery:before{background:#fff!important}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-battery:after{background:#fff!important}
+#paradise-rp-hud .ppv4-wifi{
   position:relative;
-  min-width:0;
-  min-height:64px;
-  padding:8px 8px 7px;
-  display:grid;
-  grid-template-columns:27px minmax(0,1fr);
-  grid-template-rows:auto auto;
-  column-gap:7px;
-  align-content:center;
-  text-align:left;
-  border:1px solid rgba(205,239,233,.14);
-  border-radius:12px;
-  color:#eff8f5;
-  background:linear-gradient(135deg,rgba(255,255,255,.095),rgba(77,176,168,.055));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 6px 16px rgba(0,19,25,.11);
-  backdrop-filter:blur(5px);
-  cursor:pointer;
-  overflow:hidden;
-  transition:transform .15s ease,border-color .15s ease,background .15s ease;
+  width:14px;
+  height:10px;
+  display:block;
 }
-#paradise-rp-hud .ppf-real-shortcut:before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(169,235,225,.35),transparent)}
-#paradise-rp-hud .ppf-real-shortcut:hover{transform:translateY(-1px);border-color:rgba(208,242,236,.22);background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(77,176,168,.075))}
-#paradise-rp-hud .ppf-real-shortcut:active{transform:scale(.97)}
-#paradise-rp-hud .ppf-real-shortcut-icon{grid-row:1/3;width:27px;height:27px;display:grid;place-items:center;align-self:center;border-radius:8px;background:rgba(81,201,188,.13);box-shadow:inset 0 0 0 1px rgba(141,225,214,.12)}
-#paradise-rp-hud .ppf-real-shortcut.is-notifications .ppf-real-shortcut-icon{background:rgba(218,170,81,.13);box-shadow:inset 0 0 0 1px rgba(237,203,135,.12)}
-#paradise-rp-hud .ppf-real-shortcut-icon svg{width:16px;height:16px;fill:#92dfd4}
-#paradise-rp-hud .ppf-real-shortcut.is-notifications .ppf-real-shortcut-icon svg{fill:#e3c47f}
-#paradise-rp-hud .ppf-real-shortcut-copy{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:4px}
-#paradise-rp-hud .ppf-real-shortcut-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8.1px;font-weight:900}
-#paradise-rp-hud .ppf-real-shortcut-copy b{min-width:16px;height:16px;padding:0 4px;display:grid;place-items:center;border-radius:8px;background:#df7169;color:white;font-size:6.8px;font-weight:950}
-#paradise-rp-hud .ppf-real-shortcut small{grid-column:2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(229,244,240,.66);font-size:6.7px;line-height:1.2}
+#paradise-rp-hud .ppv4-wifi:before,
+#paradise-rp-hud .ppv4-wifi:after{
+  content:"";
+  position:absolute;
+  left:50%;
+  border:2px solid #fff;
+  border-left-color:transparent;
+  border-right-color:transparent;
+  border-bottom-color:transparent;
+  border-radius:50%;
+  transform:translateX(-50%);
+}
+#paradise-rp-hud .ppv4-wifi:before{top:0;width:13px;height:9px}
+#paradise-rp-hud .ppv4-wifi:after{top:4px;width:6px;height:5px}
+#paradise-rp-hud .ppv4-wifi{filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
 
-/* Bottom dock gets a little more structure without imitating a real phone OS. */
-#paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-nav{height:38px!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"] .pp-nav:before{bottom:13px!important;letter-spacing:.15em!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"] .pp-nav:after{bottom:17px!important;width:21px!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"] .pp-nav button.is-active{background:rgba(87,205,190,.18)!important;box-shadow:inset 0 0 0 1px rgba(136,228,216,.16),0 3px 8px rgba(0,20,26,.08)!important}
+/* ---------- launcher ---------- */
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-content{
+  position:relative!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  background:transparent!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-home{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  width:auto!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:transparent!important;
+}
+#paradise-rp-hud .ppv4-launcher{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:grid;
+  grid-template-rows:87px minmax(0,1fr) 25px 82px;
+  gap:0;
+  padding:0 13px 14px;
+  overflow:hidden;
+  color:#fff;
+  font-family:Inter,Arial,sans-serif;
+  text-shadow:0 2px 4px rgba(0,0,0,.62);
+  animation:ppv4-launcher-in .18s ease both;
+}
+#paradise-rp-hud .ppv4-launcher:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 10%,rgba(0,208,210,.08),transparent 27%),
+    linear-gradient(180deg,rgba(0,18,25,.02) 0%,rgba(0,20,28,.06) 55%,rgba(0,15,22,.16) 100%);
+}
 
-/* More subtle physical frame/highlight. */
-#paradise-rp-hud .pp-device[data-pp-final="1"]{box-shadow:0 20px 43px rgba(3,19,24,.35),0 5px 12px rgba(4,23,29,.2),inset 0 1px 0 rgba(255,255,255,.13),inset 1px 0 0 rgba(255,255,255,.04)!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"] .pp-notch{width:60px!important;height:14px!important}
-#paradise-rp-hud .pp-device[data-pp-final="1"] .pp-status{padding-left:11px!important;padding-right:11px!important}
+/* ---------- title ---------- */
+#paradise-rp-hud .ppv4-brand{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding-top:9px;
+  color:#fff;
+  user-select:none;
+}
+#paradise-rp-hud .ppv4-brand-palm{
+  width:25px;
+  height:21px;
+  display:grid;
+  place-items:center;
+  margin-bottom:3px;
+}
+#paradise-rp-hud .ppv4-brand-palm svg{
+  width:25px;
+  height:21px;
+  fill:#21a7a4;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));
+}
+#paradise-rp-hud .ppv4-brand strong{
+  color:#fff;
+  font-size:20px;
+  line-height:1.06;
+  font-weight:760;
+  letter-spacing:-.03em;
+  text-shadow:0 2px 5px rgba(0,0,0,.46);
+}
+#paradise-rp-hud .ppv4-brand-rule{
+  position:relative;
+  width:126px;
+  height:8px;
+  margin-top:7px;
+  display:block;
+}
+#paradise-rp-hud .ppv4-brand-rule:before,
+#paradise-rp-hud .ppv4-brand-rule:after{
+  content:"";
+  position:absolute;
+  top:3px;
+  width:53px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,#22b4b0);
+}
+#paradise-rp-hud .ppv4-brand-rule:before{left:0}
+#paradise-rp-hud .ppv4-brand-rule:after{right:0;transform:scaleX(-1)}
+#paradise-rp-hud .ppv4-brand-rule i{
+  position:absolute;
+  left:50%;
+  top:0;
+  width:7px;
+  height:7px;
+  margin-left:-3.5px;
+  border-radius:50%;
+  background:#23c4c1;
+  box-shadow:0 0 0 1px rgba(0,0,0,.16);
+}
 
-@keyframes ppf-real-zone-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* ---------- 3 × 4 app grid ---------- */
+#paradise-rp-hud .ppv4-app-grid{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-rows:repeat(4,minmax(0,1fr));
+  align-items:center;
+  justify-items:center;
+  column-gap:5px;
+  row-gap:3px;
+  min-height:0;
+  padding:1px 0 2px;
+}
+#paradise-rp-hud .ppv4-app{
+  --app-a:#41a7d9;
+  --app-b:#2378bc;
+  --app-glyph:#fff;
+  position:relative;
+  width:82px;
+  min-width:0;
+  padding:0;
+  display:grid;
+  justify-items:center;
+  gap:5px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  font:inherit;
+  cursor:pointer;
+  outline:none;
+  text-shadow:0 1px 3px rgba(0,0,0,.68);
+  transition:transform .18s ease,filter .18s ease,opacity .18s ease;
+}
+#paradise-rp-hud .ppv4-app:hover{transform:translateY(-1px)}
+#paradise-rp-hud .ppv4-app:active,
+#paradise-rp-hud .ppv4-app.is-pressed{transform:scale(.96)}
+#paradise-rp-hud .ppv4-app.is-coming{opacity:1}
+#paradise-rp-hud .ppv4-app-icon{
+  position:relative;
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.34);
+  border-radius:17px;
+  background:linear-gradient(145deg,var(--app-a),var(--app-b));
+  box-shadow:
+    0 5px 9px rgba(0,0,0,.27),
+    inset 0 1px 0 rgba(255,255,255,.34),
+    inset 0 -1px 0 rgba(0,0,0,.22);
+}
+#paradise-rp-hud .ppv4-app-icon:before{
+  content:"";
+  position:absolute;
+  inset:1px 2px auto;
+  height:43%;
+  border-radius:14px 14px 18px 18px;
+  background:linear-gradient(180deg,rgba(255,255,255,.20),rgba(255,255,255,0));
+  pointer-events:none;
+}
+#paradise-rp-hud .ppv4-app-icon svg{
+  position:relative;
+  z-index:2;
+  width:38px;
+  height:38px;
+  fill:var(--app-glyph);
+  filter:drop-shadow(0 2px 1px rgba(0,0,0,.18));
+}
+#paradise-rp-hud .ppv4-app-icon .g-main{fill:var(--app-glyph)}
+#paradise-rp-hud .ppv4-app-icon .g-cut{fill:rgba(23,65,84,.58)}
+#paradise-rp-hud .ppv4-app-label{
+  max-width:86px;
+  overflow:hidden;
+  color:#fff;
+  font-size:11px;
+  line-height:1.05;
+  font-weight:520;
+  letter-spacing:-.015em;
+  text-align:center;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
 
-@media(max-height:720px){
-  #paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-home{grid-template-rows:auto auto minmax(66px,1fr)!important;gap:7px!important;padding-top:6px!important}
-  #paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-hero{min-height:66px!important}
-  #paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app-grid{row-gap:8px!important}
-  #paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app-icon{width:45px!important;height:45px!important}
-  #paradise-rp-hud .pp-device[data-pp-final="1"].ppf-is-home .pp-app-icon svg{width:28px!important;height:28px!important}
-  #paradise-rp-hud .ppf-real-zone{min-height:66px;gap:3px}
-  #paradise-rp-hud .ppf-real-shortcut{min-height:51px;padding:6px;grid-template-columns:23px minmax(0,1fr);column-gap:5px}
-  #paradise-rp-hud .ppf-real-shortcut-icon{width:23px;height:23px}
-  #paradise-rp-hud .ppf-real-shortcut-icon svg{width:14px;height:14px}
-  #paradise-rp-hud .ppf-real-shortcut-copy strong{font-size:7.5px}
-  #paradise-rp-hud .ppf-real-shortcut small{font-size:6.2px}
+/* exact visual palette from the official mockup */
+#paradise-rp-hud .ppv4-app.is-messages{--app-a:#69db43;--app-b:#36a92b}
+#paradise-rp-hud .ppv4-app.is-contacts{--app-a:#3ea9ff;--app-b:#1f70cb}
+#paradise-rp-hud .ppv4-app.is-calls{--app-a:#6cda45;--app-b:#39ad31}
+#paradise-rp-hud .ppv4-app.is-bank{--app-a:#31c9c1;--app-b:#159a9e}
+#paradise-rp-hud .ppv4-app.is-jobs{--app-a:#ff9f31;--app-b:#ea6a19}
+#paradise-rp-hud .ppv4-app.is-estate{--app-a:#9965e1;--app-b:#7140b7}
+#paradise-rp-hud .ppv4-app.is-paradise{--app-a:#2cc9c6;--app-b:#149ca6}
+#paradise-rp-hud .ppv4-app.is-news{--app-a:#f05b55;--app-b:#c82c32}
+#paradise-rp-hud .ppv4-app.is-enterprise{--app-a:#45b1f2;--app-b:#236fc4}
+#paradise-rp-hud .ppv4-app.is-taxi{--app-a:#ffd44f;--app-b:#f0a81f;--app-glyph:#20272a}
+#paradise-rp-hud .ppv4-app.is-settings{--app-a:#a6b1b8;--app-b:#65727a}
+#paradise-rp-hud .ppv4-app.is-appstore{--app-a:#4dbaff;--app-b:#1f75d5}
+
+/* ---------- true unread badge ---------- */
+#paradise-rp-hud .ppv4-badge{
+  position:absolute;
+  z-index:5;
+  top:-5px;
+  right:8px;
+  min-width:18px;
+  height:18px;
+  padding:0 4px;
+  display:grid;
+  place-items:center;
+  border:1.5px solid rgba(255,255,255,.90);
+  border-radius:10px;
+  background:#e94843;
+  color:#fff;
+  box-shadow:0 2px 5px rgba(0,0,0,.26);
+  font-size:9px;
+  line-height:1;
+  font-weight:800;
+  text-shadow:none;
+}
+
+/* ---------- three page dots ---------- */
+#paradise-rp-hud .ppv4-page-indicator{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+#paradise-rp-hud .ppv4-page-indicator i{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:rgba(208,225,225,.30);
+  box-shadow:0 1px 2px rgba(0,0,0,.28);
+}
+#paradise-rp-hud .ppv4-page-indicator i.is-active{background:#26c9c7}
+
+/* ---------- bottom dock ---------- */
+#paradise-rp-hud .ppv4-dock{
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  padding:8px 17px;
+  border:1px solid rgba(218,244,242,.24);
+  border-radius:27px;
+  background:linear-gradient(180deg,rgba(42,110,121,.38),rgba(18,73,84,.50));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 5px 13px rgba(0,0,0,.13);
+  backdrop-filter:blur(10px);
+}
+#paradise-rp-hud .ppv4-dock-app{
+  --dock-a:#3db8a6;
+  --dock-b:#178e80;
+  width:58px;
+  height:58px;
+  padding:0;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.30);
+  border-radius:17px;
+  background:linear-gradient(145deg,var(--dock-a),var(--dock-b));
+  box-shadow:0 4px 8px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -1px 0 rgba(0,0,0,.15);
+  cursor:pointer;
+  transition:transform .18s ease,opacity .18s ease;
+}
+#paradise-rp-hud .ppv4-dock-app:hover{transform:translateY(-1px)}
+#paradise-rp-hud .ppv4-dock-app:active{transform:scale(.96)}
+#paradise-rp-hud .ppv4-dock-app>span{display:grid;place-items:center}
+#paradise-rp-hud .ppv4-dock-app svg{width:37px;height:37px;fill:#fff;filter:drop-shadow(0 2px 1px rgba(0,0,0,.15))}
+#paradise-rp-hud .ppv4-dock-app .g-main{fill:#fff}
+#paradise-rp-hud .ppv4-dock-app .g-cut{fill:rgba(20,60,82,.50)}
+#paradise-rp-hud .ppv4-dock-app.is-dock-profile{--dock-a:#35c3ae;--dock-b:#159783}
+#paradise-rp-hud .ppv4-dock-app.is-dock-mail{--dock-a:#45adf6;--dock-b:#1d78d2}
+#paradise-rp-hud .ppv4-dock-app.is-dock-browser{--dock-a:#8a62d6;--dock-b:#6240ae}
+
+/* ---------- disabled-app toast ---------- */
+#paradise-rp-hud .ppv4-toast{
+  position:absolute;
+  z-index:100;
+  left:50%;
+  bottom:103px;
+  width:230px;
+  max-width:calc(100% - 24px);
+  transform:translateX(-50%);
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:13px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  background:rgba(15,30,35,.92);
+  color:#fff;
+  box-shadow:0 10px 26px rgba(0,0,0,.30);
+  backdrop-filter:blur(8px);
+  animation:ppv4-toast-in .18s ease both;
+  pointer-events:none;
+}
+#paradise-rp-hud .ppv4-toast strong{font-size:10px;font-weight:700}
+#paradise-rp-hud .ppv4-toast span{font-size:9px;color:rgba(255,255,255,.78);line-height:1.35}
+
+/* ---------- launcher transition ---------- */
+#paradise-rp-hud .ppv4-launcher.is-launching{animation:ppv4-launch-out .18s ease both}
+@keyframes ppv4-launcher-in{from{opacity:0;transform:scale(.992)}to{opacity:1;transform:none}}
+@keyframes ppv4-launch-out{to{opacity:0;transform:scale(1.008)}}
+@keyframes ppv4-toast-in{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* ---------- keep internal apps untouched ---------- */
+#paradise-rp-hud .pp-device:not(.ppv4-is-home) .ppv4-launcher{display:none!important}
+
+/* ---------- responsive: phone must remain fully visible ---------- */
+@media (max-height:700px){
+  #paradise-rp-hud .ppv4-launcher{
+    grid-template-rows:72px minmax(0,1fr) 20px 68px;
+    padding:0 11px 10px;
+  }
+  #paradise-rp-hud .ppv4-brand-palm{width:20px;height:17px}
+  #paradise-rp-hud .ppv4-brand-palm svg{width:20px;height:17px}
+  #paradise-rp-hud .ppv4-brand strong{font-size:17px}
+  #paradise-rp-hud .ppv4-brand-rule{margin-top:5px;width:108px}
+  #paradise-rp-hud .ppv4-brand-rule:before,
+  #paradise-rp-hud .ppv4-brand-rule:after{width:46px}
+  #paradise-rp-hud .ppv4-app{width:72px;gap:4px}
+  #paradise-rp-hud .ppv4-app-icon{width:50px;height:50px;border-radius:15px}
+  #paradise-rp-hud .ppv4-app-icon svg{width:32px;height:32px}
+  #paradise-rp-hud .ppv4-app-label{font-size:9.5px}
+  #paradise-rp-hud .ppv4-dock{border-radius:23px;padding:6px 13px}
+  #paradise-rp-hud .ppv4-dock-app{width:49px;height:49px;border-radius:14px}
+  #paradise-rp-hud .ppv4-dock-app svg{width:31px;height:31px}
+}
+@media (max-height:590px){
+  #paradise-rp-hud .pp-device.ppv4-is-home .pp-status{height:36px!important;padding-top:8px!important}
+  #paradise-rp-hud .pp-device.ppv4-is-home .pp-screen{grid-template-rows:36px minmax(0,1fr) 0!important}
+  #paradise-rp-hud .ppv4-launcher{grid-template-rows:60px minmax(0,1fr) 16px 58px;padding:0 9px 8px}
+  #paradise-rp-hud .ppv4-brand-palm{display:none}
+  #paradise-rp-hud .ppv4-brand strong{font-size:15px}
+  #paradise-rp-hud .ppv4-brand-rule{margin-top:4px}
+  #paradise-rp-hud .ppv4-app-icon{width:44px;height:44px;border-radius:13px}
+  #paradise-rp-hud .ppv4-app-icon svg{width:28px;height:28px}
+  #paradise-rp-hud .ppv4-app-label{font-size:8.8px}
+  #paradise-rp-hud .ppv4-dock-app{width:42px;height:42px;border-radius:12px}
+  #paradise-rp-hud .ppv4-dock-app svg{width:27px;height:27px}
 }

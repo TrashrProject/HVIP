@@ -1,0 +1,305 @@
+/* ParadiseRP — ParadisePhone HOME final micro polish
+   Typography readability correction only.
+   No new DA, no assets, no backend/EMU/CMS/Nitro changes. */
+
+/* Keep the existing wallpaper exactly as-is. */
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-screen{
+  background-image:
+    linear-gradient(180deg,rgba(3,24,31,.24) 0%,rgba(3,24,31,.34) 48%,rgba(2,18,25,.50) 100%),
+    url("./paradise-phone-wallpaper-polish.jpg?v=1")!important;
+  background-position:center 46%!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+}
+#paradise-rp-hud .ppv4-launcher:before{
+  background:linear-gradient(180deg,rgba(0,19,27,.04) 0%,rgba(0,18,25,.12) 55%,rgba(0,14,20,.24) 100%)!important;
+}
+
+/* Validated phone dimensions stay untouched. */
+#paradise-rp-hud .pr-window[data-window="phone"],
+#paradise-rp-hud .pr-window.pp-window{
+  width:clamp(264px,14.5vw,278px)!important;
+  height:clamp(535px,54.6vh,590px)!important;
+  right:16px!important;
+  bottom:72px!important;
+  top:auto!important;
+  left:auto!important;
+  max-width:calc(100vw - 20px)!important;
+  max-height:calc(100vh - 84px)!important;
+}
+
+/* Validated graphite shell stays untouched. */
+#paradise-rp-hud .pp-device[data-pp-launcher-version="5.0.0-official-home"].ppv4-is-home{
+  padding:4px!important;
+  border-width:1px!important;
+  border-radius:30px!important;
+  box-shadow:
+    0 16px 34px rgba(0,0,0,.32),
+    0 4px 10px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 0 0 1px rgba(0,0,0,.64)!important;
+}
+#paradise-rp-hud .pp-device[data-pp-launcher-version="5.0.0-official-home"].ppv4-is-home:before{
+  inset:2px!important;
+  border-radius:28px!important;
+}
+#paradise-rp-hud .pp-device[data-pp-launcher-version="5.0.0-official-home"].ppv4-is-home:after{
+  top:88px!important;
+  height:38px!important;
+  box-shadow:0 50px 0 #30363a!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-screen{
+  grid-template-rows:36px minmax(0,1fr) 0!important;
+  border-radius:26px!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-notch{
+  top:4px!important;
+  width:64px!important;
+  height:18px!important;
+  border-radius:0 0 12px 12px!important;
+}
+
+/* Status bar remains unchanged. */
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-status{
+  height:36px!important;
+  padding:7px 10px 0!important;
+  grid-template-columns:1fr 58px 1fr!important;
+  font-size:9px!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-status>strong{
+  font-size:9px!important;
+  line-height:1!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-status>div{gap:3px!important}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-signal{width:11px!important;height:8px!important}
+#paradise-rp-hud .ppv4-wifi{width:12px!important;height:9px!important}
+#paradise-rp-hud .ppv4-wifi:before{width:11px!important;height:8px!important;border-width:1.5px!important}
+#paradise-rp-hud .ppv4-wifi:after{top:4px!important;width:5px!important;height:4px!important;border-width:1.5px!important}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-battery{width:13px!important;height:7px!important}
+
+/* Same HOME structure, unchanged. */
+#paradise-rp-hud .ppv4-launcher{
+  grid-template-rows:44px minmax(0,1fr) 16px 48px!important;
+  padding:0 8px 8px!important;
+}
+
+/* Header stays unchanged. */
+#paradise-rp-hud .ppv4-brand{
+  justify-content:flex-start!important;
+  padding:1px 0 0!important;
+}
+#paradise-rp-hud .ppv4-brand-palm{
+  width:12px!important;
+  height:10px!important;
+  margin-bottom:1px!important;
+}
+#paradise-rp-hud .ppv4-brand-palm svg{width:12px!important;height:10px!important}
+#paradise-rp-hud .ppv4-brand strong{
+  font-size:15.5px!important;
+  line-height:1!important;
+  font-weight:650!important;
+}
+#paradise-rp-hud .ppv4-brand-rule{
+  display:none!important;
+  width:0!important;
+  height:0!important;
+  margin:0!important;
+}
+
+/* Grid remains exactly 3 columns x 4 rows. */
+#paradise-rp-hud .ppv4-app-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-template-rows:repeat(4,minmax(0,1fr))!important;
+  align-items:center!important;
+  justify-items:center!important;
+  column-gap:7px!important;
+  row-gap:5px!important;
+  padding:0!important;
+}
+#paradise-rp-hud .ppv4-app{
+  width:68px!important;
+  min-width:0!important;
+  height:auto!important;
+  min-height:61px!important;
+  align-content:center!important;
+  grid-template-rows:auto auto!important;
+  gap:6px!important;
+  overflow:visible!important;
+}
+#paradise-rp-hud .ppv4-app-icon{
+  width:38px!important;
+  height:38px!important;
+  border-radius:10px!important;
+  border-width:1px!important;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.23),
+    inset 0 -1px 0 rgba(0,0,0,.10)!important;
+}
+#paradise-rp-hud .ppv4-app-icon:before{
+  inset:1px 2px auto!important;
+  height:34%!important;
+  border-radius:8px 8px 10px 10px!important;
+}
+#paradise-rp-hud .ppv4-app-icon svg{
+  width:25px!important;
+  height:25px!important;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.11))!important;
+}
+
+/* Labels: readability correction only. Keep icon/app dimensions unchanged. */
+#paradise-rp-hud .ppv4-app-label{
+  position:relative!important;
+  z-index:8!important;
+  display:block!important;
+  width:auto!important;
+  max-width:78px!important;
+  min-height:13px!important;
+  overflow:visible!important;
+  color:#fff!important;
+  font-size:11.5px!important;
+  line-height:1.08!important;
+  font-weight:550!important;
+  letter-spacing:-.015em!important;
+  text-align:center!important;
+  text-overflow:clip!important;
+  white-space:nowrap!important;
+  text-shadow:0 1px 2px rgba(0,0,0,.76)!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+
+/* Hitbox stays comfortably larger than the 38px visual icon. */
+#paradise-rp-hud .ppv4-app:hover{transform:translateY(-1px)}
+#paradise-rp-hud .ppv4-app:active,
+#paradise-rp-hud .ppv4-app.is-pressed{transform:scale(.97)}
+
+/* Existing unread badge stays unchanged. */
+#paradise-rp-hud .ppv4-badge{
+  top:-3px!important;
+  right:10px!important;
+  min-width:14px!important;
+  height:14px!important;
+  padding:0 3px!important;
+  border-width:1px!important;
+  border-radius:8px!important;
+  font-size:7.5px!important;
+}
+
+/* Pagination stays unchanged. */
+#paradise-rp-hud .ppv4-page-indicator{
+  align-self:stretch!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  padding:1px 0!important;
+}
+#paradise-rp-hud .ppv4-page-indicator i{
+  width:2.5px!important;
+  height:2.5px!important;
+  background:rgba(211,226,229,.22)!important;
+  box-shadow:none!important;
+}
+#paradise-rp-hud .ppv4-page-indicator i.is-active{
+  background:rgba(43,197,196,.88)!important;
+  box-shadow:none!important;
+}
+
+/* Dock stays unchanged. */
+#paradise-rp-hud .ppv4-dock{
+  height:48px!important;
+  min-height:48px!important;
+  margin:0 5px!important;
+  padding:4px 10px!important;
+  border:0!important;
+  border-radius:18px!important;
+  background:linear-gradient(180deg,rgba(25,83,92,.48),rgba(10,54,64,.45))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 3px 8px rgba(0,0,0,.10)!important;
+  backdrop-filter:blur(9px)!important;
+}
+#paradise-rp-hud .ppv4-dock-app{
+  width:36px!important;
+  height:36px!important;
+  border-radius:10px!important;
+  box-shadow:0 2px 4px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.22)!important;
+}
+#paradise-rp-hud .ppv4-dock-app svg{width:23px!important;height:23px!important}
+
+/* 1366x768 and similar laptop heights: preserve readable labels. */
+@media (max-height:800px){
+  #paradise-rp-hud .pr-window[data-window="phone"],
+  #paradise-rp-hud .pr-window.pp-window{
+    width:clamp(258px,19.3vw,264px)!important;
+    height:clamp(515px,69.7vh,535px)!important;
+  }
+  #paradise-rp-hud .ppv4-launcher{
+    grid-template-rows:39px minmax(0,1fr) 14px 44px!important;
+    padding:0 7px 7px!important;
+  }
+  #paradise-rp-hud .ppv4-brand{padding-top:1px!important}
+  #paradise-rp-hud .ppv4-brand-palm{width:11px!important;height:9px!important}
+  #paradise-rp-hud .ppv4-brand-palm svg{width:11px!important;height:9px!important}
+  #paradise-rp-hud .ppv4-brand strong{font-size:14.5px!important}
+  #paradise-rp-hud .ppv4-app-grid{column-gap:6px!important;row-gap:4px!important}
+  #paradise-rp-hud .ppv4-app{width:65px!important;min-height:56px!important;gap:5px!important}
+  #paradise-rp-hud .ppv4-app-icon{width:35px!important;height:35px!important;border-radius:9px!important}
+  #paradise-rp-hud .ppv4-app-icon:before{border-radius:7px 7px 9px 9px!important}
+  #paradise-rp-hud .ppv4-app-icon svg{width:22px!important;height:22px!important}
+  #paradise-rp-hud .ppv4-app-label{
+    max-width:72px!important;
+    min-height:12px!important;
+    font-size:10.8px!important;
+    line-height:1.08!important;
+    font-weight:550!important;
+    letter-spacing:-.018em!important;
+    text-shadow:0 1px 2px rgba(0,0,0,.76)!important;
+    opacity:1!important;
+  }
+  #paradise-rp-hud .ppv4-page-indicator i{width:2.5px!important;height:2.5px!important}
+  #paradise-rp-hud .ppv4-dock{height:44px!important;min-height:44px!important;padding:3px 9px!important;border-radius:16px!important}
+  #paradise-rp-hud .ppv4-dock-app{width:33px!important;height:33px!important;border-radius:9px!important}
+  #paradise-rp-hud .ppv4-dock-app svg{width:21px!important;height:21px!important}
+}
+
+/* Very short viewport guard: never fall back to unreadable 7–8px labels. */
+@media (max-height:600px){
+  #paradise-rp-hud .pr-window[data-window="phone"],
+  #paradise-rp-hud .pr-window.pp-window{
+    width:252px!important;
+    height:min(500px,calc(100vh - 76px))!important;
+    bottom:64px!important;
+  }
+  #paradise-rp-hud .pp-device.ppv4-is-home .pp-status{height:32px!important;padding-top:6px!important}
+  #paradise-rp-hud .pp-device.ppv4-is-home .pp-screen{grid-template-rows:32px minmax(0,1fr) 0!important}
+  #paradise-rp-hud .ppv4-launcher{grid-template-rows:34px minmax(0,1fr) 12px 39px!important;padding:0 6px 6px!important}
+  #paradise-rp-hud .ppv4-brand-palm{display:none!important}
+  #paradise-rp-hud .ppv4-brand strong{font-size:13px!important}
+  #paradise-rp-hud .ppv4-app-grid{column-gap:5px!important;row-gap:4px!important}
+  #paradise-rp-hud .ppv4-app{width:61px!important;min-height:49px!important;gap:4px!important}
+  #paradise-rp-hud .ppv4-app-icon{width:32px!important;height:32px!important;border-radius:8px!important}
+  #paradise-rp-hud .ppv4-app-icon svg{width:20px!important;height:20px!important}
+  #paradise-rp-hud .ppv4-app-label{
+    max-width:68px!important;
+    min-height:12px!important;
+    font-size:10.5px!important;
+    line-height:1.05!important;
+    font-weight:540!important;
+    letter-spacing:-.02em!important;
+    text-shadow:0 1px 2px rgba(0,0,0,.78)!important;
+    opacity:1!important;
+  }
+  #paradise-rp-hud .ppv4-page-indicator i{width:2.5px!important;height:2.5px!important}
+  #paradise-rp-hud .ppv4-dock{height:39px!important;min-height:39px!important;padding:3px 8px!important;border-radius:14px!important}
+  #paradise-rp-hud .ppv4-dock-app{width:29px!important;height:29px!important;border-radius:8px!important}
+  #paradise-rp-hud .ppv4-dock-app svg{width:18px!important;height:18px!important}
+}
+
+/* Large desktops: preserve the validated shell dimensions. */
+@media (min-width:2200px) and (min-height:1200px){
+  #paradise-rp-hud .pr-window[data-window="phone"],
+  #paradise-rp-hud .pr-window.pp-window{
+    width:286px!important;
+    height:604px!important;
+  }
+}

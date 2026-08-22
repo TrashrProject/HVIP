@@ -7,16 +7,33 @@ function out(array $d,int $s=200):void{http_response_code($s);echo json_encode($
 function clean_name($v):string{return mb_substr(trim(preg_replace('/\s+/u',' ',strip_tags((string)$v))),0,64);}
 function clean_body($v):string{return trim(strip_tags((string)$v));}
 function phone_notification(mysqli $con,int $phoneId,string $type,string $title,string $body,array $meta=[]):void{
+    $enabledStmt=mysqli_prepare($con,'SELECT notifications_enabled FROM rp_phones WHERE id=? LIMIT 1');
+    if(!$enabledStmt)return;
+    mysqli_stmt_bind_param($enabledStmt,'i',$phoneId);mysqli_stmt_execute($enabledStmt);$enabledResult=mysqli_stmt_get_result($enabledStmt);$enabledRow=$enabledResult?(mysqli_fetch_assoc($enabledResult)?:null):null;if($enabledResult)mysqli_free_result($enabledResult);mysqli_stmt_close($enabledStmt);
+    if(!$enabledRow||(int)$enabledRow['notifications_enabled']!==1)return;
     $stmt=mysqli_prepare($con,'INSERT INTO rp_phone_notifications (phone_id,notification_type,title,body,metadata) VALUES (?,?,?,?,?)');
     if(!$stmt)return;$metadata=$meta?json_encode($meta,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES):null;mysqli_stmt_bind_param($stmt,'issss',$phoneId,$type,$title,$body,$metadata);@mysqli_stmt_execute($stmt);mysqli_stmt_close($stmt);
 }
+
+if(($_SERVER['REQUEST_METHOD']??'GET')!=='POST')out(['ok'=>false,'reason'=>'method_not_allowed'],405);
+if(($_SERVER['HTTP_X_PARADISE_ACTION']??'')!=='phase4')out(['ok'=>false,'reason'=>'missing_action_header'],403);
+if(!empty($_SERVER['HTTP_ORIGIN'])){
+    $originHost=strtolower((string)parse_url($_SERVER['HTTP_ORIGIN'],PHP_URL_HOST));
+    $requestHost=strtolower(preg_replace('/:\d+$/','',(string)($_SERVER['HTTP_HOST']??'')));
+    if($originHost!==''&&$requestHost!==''&&$originHost!==$requestHost)out(['ok'=>false,'reason'=>'origin_rejected'],403);
+}
+
 try{
  require_once __DIR__.'/app/init.pz.php'; require_once __DIR__.'/paradise-phone-lib.php';
  if(!isset($Session,$DB)||!class_exists('Config'))out(['ok'=>false,'reason'=>'bootstrap_unavailable'],503);
  $username=trim((string)$Session->Read(Config::$SessionName)); if($username==='')out(['ok'=>false,'reason'=>'not_connected'],401);
  $con=$DB->Con(); if(!($con instanceof mysqli))out(['ok'=>false,'reason'=>'database_unavailable'],503);
+ if(!mysqli_set_charset($con,'utf8mb4'))out(['ok'=>false,'reason'=>'database_charset_unavailable'],503);
  $safe=mysqli_real_escape_string($con,$username);$r=mysqli_query($con,"SELECT id,username FROM users WHERE username='{$safe}' LIMIT 1");$user=$r?(mysqli_fetch_assoc($r)?:null):null;if($r)mysqli_free_result($r);if(!$user)out(['ok'=>false,'reason'=>'user_not_found'],404);
- $userId=(int)$user['id'];$input=json_decode(file_get_contents('php://input'),true);if(!is_array($input))$input=$_POST;$action=strtolower(trim((string)($input['action']??'')));
+ $userId=(int)$user['id'];
+ $raw=file_get_contents('php://input');if($raw===false||strlen($raw)>12000)out(['ok'=>false,'reason'=>'invalid_payload'],400);
+ $input=json_decode($raw!==''?$raw:'{}',true);if(!is_array($input))out(['ok'=>false,'reason'=>'invalid_json'],400);
+ $action=strtolower(trim((string)($input['action']??'')));
  $phone=pr_phone_ensure($con,$userId); if(!$phone)out(['ok'=>false,'reason'=>'no_phone_item','message'=>'Vous ne possédez pas de téléphone.'],403);$pid=(int)$phone['id'];
 
  if($action==='add_contact'){
@@ -36,17 +53,15 @@ try{
  if($action==='send_message'){
    $targetToken=trim((string)($input['target']??''));$body=clean_body($input['body']??'');
    if($body===''||mb_strlen($body)>500)out(['ok'=>false,'reason'=>'invalid_message','message'=>'Le message doit contenir entre 1 et 500 caractères.'],422);
-   if(pr_phone_rate_limited($con,$pid,'SMS',10,8))out(['ok'=>false,'reason'=>'rate_limited','message'=>'Vous envoyez des messages trop rapidement.'],429);
+   if(pr_phone_rate_limited($con,$pid,'SMS',1,1)||pr_phone_rate_limited($con,$pid,'SMS',10,8))out(['ok'=>false,'reason'=>'rate_limited','message'=>'Vous envoyez des messages trop rapidement.'],429);
    $target=pr_phone_resolve($con,$phone,$targetToken);if(!$target)out(['ok'=>false,'reason'=>'target_not_found','message'=>'Ce numéro/contact est indisponible.'],404);$tid=(int)$target['id'];
    if($tid===$pid)out(['ok'=>false,'reason'=>'self_message','message'=>'Vous ne pouvez pas vous envoyer un SMS à vous-même.'],422);
-
    $receiverUserId=(int)$target['user_id'];$senderIdentity=pr_phone_identity($con,$userId);$targetIdentity=pr_phone_identity($con,$receiverUserId);
    $senderName=$senderIdentity['name']?:$username;$receiverName=$targetIdentity['name']?:($targetIdentity['username']?:$target['phone_number']);
    $stmt=mysqli_prepare($con,"INSERT INTO play_phone_chats (type,emisor_id,emisor_name,receptor_id,receptor_name,msg,timestamp,status,read_at) VALUES (1,?,?,?,?,?,NOW(),'SENT',NULL)");
    if(!$stmt)out(['ok'=>false,'reason'=>'message_store_unavailable'],503);
    mysqli_stmt_bind_param($stmt,'isiss',$userId,$senderName,$receiverUserId,$receiverName,$body);mysqli_stmt_execute($stmt);$messageId=(int)mysqli_insert_id($con);mysqli_stmt_close($stmt);
-   pr_phone_log_action($con,$pid,'SMS',$tid);
-   phone_notification($con,$tid,'MESSAGE','Nouveau message',$senderName.': '.mb_substr($body,0,90),['chat_id'=>$messageId,'sender_phone_id'=>$pid]);
+   pr_phone_log_action($con,$pid,'SMS',$tid);phone_notification($con,$tid,'MESSAGE','Nouveau message',$senderName.': '.mb_substr($body,0,90),['chat_id'=>$messageId,'sender_phone_id'=>$pid]);
    out(['ok'=>true,'message'=>'Message envoyé à '.$receiverName.'.','phone'=>pr_phone_snapshot($con,$userId)]);
  }
 
@@ -59,6 +74,13 @@ try{
  if($action==='conversation'){
    $other=(int)($input['other_phone_id']??0);if($other<=0||!pr_phone_row_by_id($con,$other))out(['ok'=>false,'reason'=>'conversation_not_found'],404);
    out(['ok'=>true,'messages'=>pr_phone_messages($con,$pid,$other,30)]);
+ }
+
+ if($action==='read_notifications'){
+   $stmt=mysqli_prepare($con,'UPDATE rp_phone_notifications SET read_at=COALESCE(read_at,NOW()) WHERE phone_id=? AND read_at IS NULL');
+   if(!$stmt)out(['ok'=>false,'reason'=>'notification_store_unavailable'],503);
+   mysqli_stmt_bind_param($stmt,'i',$pid);mysqli_stmt_execute($stmt);mysqli_stmt_close($stmt);
+   out(['ok'=>true,'phone'=>pr_phone_snapshot($con,$userId)]);
  }
 
  if($action==='call'){
