@@ -1,0 +1,6 @@
+/* Paradise Control Center V2 hotfixes */
+.pcc-modal-backdrop[hidden],
+.pcc-search-results[hidden],
+.pcc-picker-results[hidden] {
+    display: none !important;
+}
