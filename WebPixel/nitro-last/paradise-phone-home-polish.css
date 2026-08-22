@@ -1,0 +1,181 @@
+/* ParadiseRP — ParadisePhone HOME final polish
+   Strict polish layer only. No internal apps/backend/Nitro changes. */
+
+/* Real Paradise room wallpaper, kept deliberately dark/discreet. */
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-screen{
+  background-image:
+    linear-gradient(180deg,rgba(3,24,31,.24) 0%,rgba(3,24,31,.34) 48%,rgba(2,18,25,.50) 100%),
+    url("./paradise-phone-wallpaper-polish.jpg?v=1")!important;
+  background-position:center 46%!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+}
+#paradise-rp-hud .ppv4-launcher:before{
+  background:linear-gradient(180deg,rgba(0,19,27,.04) 0%,rgba(0,18,25,.12) 55%,rgba(0,14,20,.24) 100%)!important;
+}
+
+/* Header polish: same identity, less vertical occupation. */
+#paradise-rp-hud .ppv4-launcher{
+  grid-template-rows:72px minmax(0,1fr) 27px 70px!important;
+  padding:0 12px 12px!important;
+}
+#paradise-rp-hud .ppv4-brand{
+  justify-content:flex-end!important;
+  padding:0 0 3px!important;
+}
+#paradise-rp-hud .ppv4-brand-palm{
+  width:22px!important;
+  height:18px!important;
+  margin-bottom:1px!important;
+}
+#paradise-rp-hud .ppv4-brand-palm svg{width:22px!important;height:18px!important}
+#paradise-rp-hud .ppv4-brand strong{
+  font-size:19px!important;
+  line-height:1!important;
+}
+#paradise-rp-hud .ppv4-brand-rule{
+  width:118px!important;
+  height:8px!important;
+  margin-top:4px!important;
+}
+#paradise-rp-hud .ppv4-brand-rule:before,
+#paradise-rp-hud .ppv4-brand-rule:after{
+  top:3px!important;
+  width:50px!important;
+}
+#paradise-rp-hud .ppv4-brand-rule i{
+  top:0!important;
+  width:6px!important;
+  height:6px!important;
+}
+
+/* Grid stays 3x4. Extra vertical room prevents labels being painted under the next row. */
+#paradise-rp-hud .ppv4-app-grid{
+  align-items:stretch!important;
+  column-gap:6px!important;
+  row-gap:3px!important;
+  padding:0!important;
+}
+#paradise-rp-hud .ppv4-app{
+  width:88px!important;
+  height:100%!important;
+  min-height:0!important;
+  align-content:center!important;
+  grid-template-rows:auto auto!important;
+  gap:4px!important;
+  overflow:visible!important;
+}
+#paradise-rp-hud .ppv4-app-icon{
+  border-radius:17px!important;
+  box-shadow:0 5px 9px rgba(0,0,0,.27),inset 0 1px 0 rgba(255,255,255,.30),inset 0 -1px 0 rgba(0,0,0,.18)!important;
+}
+#paradise-rp-hud .ppv4-app-label{
+  position:relative!important;
+  z-index:8!important;
+  display:block!important;
+  width:auto!important;
+  max-width:92px!important;
+  min-height:12px!important;
+  overflow:visible!important;
+  color:#fff!important;
+  font-size:10.5px!important;
+  line-height:1.1!important;
+  font-weight:600!important;
+  letter-spacing:-.01em!important;
+  text-align:center!important;
+  text-overflow:clip!important;
+  white-space:nowrap!important;
+  text-shadow:0 2px 4px rgba(0,0,0,.78)!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+
+/* Page indicator gets its own breathing room between grid and dock. */
+#paradise-rp-hud .ppv4-page-indicator{
+  align-self:stretch!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  padding:3px 0 2px!important;
+}
+#paradise-rp-hud .ppv4-page-indicator i{
+  width:6px!important;
+  height:6px!important;
+  background:rgba(211,226,229,.30)!important;
+  box-shadow:none!important;
+}
+#paradise-rp-hud .ppv4-page-indicator i.is-active{
+  background:#2bc5c4!important;
+  box-shadow:none!important;
+}
+
+/* Existing dock retained, simply made a little lighter/thinner. */
+#paradise-rp-hud .ppv4-dock{
+  margin:0 5px!important;
+  padding:6px 14px!important;
+  border:0!important;
+  border-radius:24px!important;
+  background:linear-gradient(180deg,rgba(25,83,92,.52),rgba(10,54,64,.48))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 5px 14px rgba(0,0,0,.12)!important;
+  backdrop-filter:blur(10px)!important;
+}
+#paradise-rp-hud .ppv4-dock-app{
+  width:54px!important;
+  height:54px!important;
+  border-radius:16px!important;
+  box-shadow:0 5px 9px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.28)!important;
+}
+#paradise-rp-hud .ppv4-dock-app svg{width:34px!important;height:34px!important}
+
+/* Small status-bar alignment polish only. */
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-status{
+  padding-top:8px!important;
+}
+#paradise-rp-hud .pp-device.ppv4-is-home .pp-status>div{gap:4px!important}
+
+/* Important compressed-height layout used by laptop/browser viewports. */
+@media (max-height:700px){
+  #paradise-rp-hud .ppv4-launcher{
+    grid-template-rows:58px minmax(0,1fr) 24px 58px!important;
+    padding:0 10px 8px!important;
+  }
+  #paradise-rp-hud .ppv4-brand{padding-bottom:2px!important}
+  #paradise-rp-hud .ppv4-brand-palm{width:18px!important;height:15px!important;margin-bottom:0!important}
+  #paradise-rp-hud .ppv4-brand-palm svg{width:18px!important;height:15px!important}
+  #paradise-rp-hud .ppv4-brand strong{font-size:16.5px!important}
+  #paradise-rp-hud .ppv4-brand-rule{width:102px!important;height:7px!important;margin-top:3px!important}
+  #paradise-rp-hud .ppv4-brand-rule:before,
+  #paradise-rp-hud .ppv4-brand-rule:after{width:43px!important}
+  #paradise-rp-hud .ppv4-app{width:76px!important;gap:3px!important}
+  #paradise-rp-hud .ppv4-app-icon{width:49px!important;height:49px!important;border-radius:14px!important}
+  #paradise-rp-hud .ppv4-app-icon svg{width:31px!important;height:31px!important}
+  #paradise-rp-hud .ppv4-app-label{max-width:82px!important;font-size:9.4px!important;min-height:10px!important}
+  #paradise-rp-hud .ppv4-page-indicator{padding:2px 0!important}
+  #paradise-rp-hud .ppv4-dock{margin:0 4px!important;padding:5px 12px!important;border-radius:21px!important}
+  #paradise-rp-hud .ppv4-dock-app{width:46px!important;height:46px!important;border-radius:13px!important}
+  #paradise-rp-hud .ppv4-dock-app svg{width:29px!important;height:29px!important}
+}
+
+@media (max-height:590px){
+  #paradise-rp-hud .pp-device.ppv4-is-home .pp-status{height:34px!important;padding-top:7px!important}
+  #paradise-rp-hud .pp-device.ppv4-is-home .pp-screen{grid-template-rows:34px minmax(0,1fr) 0!important}
+  #paradise-rp-hud .ppv4-launcher{
+    grid-template-rows:48px minmax(0,1fr) 21px 51px!important;
+    padding:0 8px 7px!important;
+  }
+  #paradise-rp-hud .ppv4-brand-palm{width:15px!important;height:13px!important;display:grid!important}
+  #paradise-rp-hud .ppv4-brand-palm svg{width:15px!important;height:13px!important}
+  #paradise-rp-hud .ppv4-brand strong{font-size:15px!important}
+  #paradise-rp-hud .ppv4-brand-rule{width:92px!important;height:6px!important;margin-top:2px!important}
+  #paradise-rp-hud .ppv4-brand-rule:before,
+  #paradise-rp-hud .ppv4-brand-rule:after{width:39px!important}
+  #paradise-rp-hud .ppv4-app{width:70px!important;gap:2px!important}
+  #paradise-rp-hud .ppv4-app-icon{width:43px!important;height:43px!important;border-radius:12px!important}
+  #paradise-rp-hud .ppv4-app-icon svg{width:27px!important;height:27px!important}
+  #paradise-rp-hud .ppv4-app-label{max-width:76px!important;font-size:8.8px!important;line-height:1!important;min-height:9px!important}
+  #paradise-rp-hud .ppv4-page-indicator i{width:5px!important;height:5px!important}
+  #paradise-rp-hud .ppv4-dock{padding:4px 10px!important;border-radius:19px!important}
+  #paradise-rp-hud .ppv4-dock-app{width:40px!important;height:40px!important;border-radius:12px!important}
+  #paradise-rp-hud .ppv4-dock-app svg{width:25px!important;height:25px!important}
+}
