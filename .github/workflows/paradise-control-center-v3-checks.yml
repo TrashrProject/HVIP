@@ -61,8 +61,8 @@ jobs:
           grep -q 'requireCapability' WebPixel/admin.php
           grep -q 'requireAuditReady' WebPixel/admin.php
           grep -q 'hash_equals' WebPixel/app/Controller/AdminControlCenter.class.php
-          grep -q 'HttpOnly' WebPixel/app/Modal/SessionMG.class.php
-          grep -q 'SameSite' WebPixel/app/Modal/SessionMG.class.php
+          grep -q "'httponly' => true" WebPixel/app/Modal/SessionMG.class.php
+          grep -q "'samesite' => 'Lax'" WebPixel/app/Modal/SessionMG.class.php
           grep -q 'Prepared' WebPixel/app/Controller/DBManager.class.php
           ! grep -R -nE 'DBPass|db\.password|private[_ -]?key|api[_ -]?secret' WebPixel/app/View/Directory/Admin WebPixel/app/View/Directory/Body/admin.php
 
