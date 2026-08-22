@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Plus.HabboHotel.GameClients;
 using Plus.HabboRoleplay.Paradise.Character;
+using Plus.HabboRoleplay.Paradise.Messaging;
 
 namespace Plus.HabboRoleplay.Paradise.Documents
 {
@@ -128,8 +129,13 @@ namespace Plus.HabboRoleplay.Paradise.Documents
                 ? "son permis de conduire"
                 : "sa carte d'identité";
 
-            sender.SendWhisper("[DOCUMENT] Vous présentez " + documentLabel + " à " + target.GetHabbo().Username + ".", 1);
-            target.SendWhisper("[DOCUMENT] " + character.FullName + " vous présente " + targetDocumentLabel + ".", 1);
+            ParadiseSystemMessageService.SendTarget(
+                sender,
+                target,
+                ParadiseSystemMessageCategory.Document,
+                "Vous présentez " + documentLabel + " à " + target.GetHabbo().Username + ".",
+                character.FullName + " vous présente " + targetDocumentLabel + ".");
+
             message = "Document présenté.";
             return true;
         }

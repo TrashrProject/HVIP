@@ -1,24 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <!-- Phase 2 domain files live outside the legacy explicit Compile list. -->
+  <!-- Paradise domain files live outside the legacy explicit Compile list. -->
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)HabboRoleplay\Paradise\**\*.cs" />
+
+    <!-- The legacy project file hard-coded three generated obj/x86 files as
+         source inputs. obj is build output, not source-of-truth; remove those
+         stale Compile items so every configuration can generate its own obj. -->
+    <Compile Remove="obj\x86\Debug\TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs" />
+    <Compile Remove="obj\x86\Debug\TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs" />
+    <Compile Remove="obj\x86\Debug\TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs" />
+
+    <!-- The csproj was committed with machine-local ..\Torontov1\bin\Debug
+         HintPaths. Replace only those four legacy references with reproducible
+         project-local/package locations. -->
+    <Reference Remove="AStar" />
+    <Reference Remove="HabboEncryption, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Remove="log4net" />
+    <Reference Remove="MySql.Data, Version=6.9.7.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
+
+    <Reference Include="AStar">
+      <HintPath>$(MSBuildThisFileDirectory)Resources\libs\AStar.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="HabboEncryption">
+      <HintPath>$(MSBuildThisFileDirectory)Resources\libs\HabboEncryption.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>$(MSBuildThisFileDirectory)packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MySql.Data">
+      <HintPath>$(MSBuildThisFileDirectory)packages\MySql.Data.6.9.7\lib\net45\MySql.Data.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
 
-  <Target Name="PrepareParadiseCompileGeneratedFiles" BeforeTargets="CoreCompile">
-    <MakeDir Directories="$(IntermediateOutputPath)" />
-    <WriteLinesToFile
-      File="$(IntermediateOutputPath)TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs"
-      Lines="// Auto-generated compatibility stub required by legacy MSBuild/CoreCompile."
-      Overwrite="false" />
-    <WriteLinesToFile
-      File="$(IntermediateOutputPath)TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs"
-      Lines="// Auto-generated compatibility stub required by legacy MSBuild/CoreCompile."
-      Overwrite="false" />
-    <WriteLinesToFile
-      File="$(IntermediateOutputPath)TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs"
-      Lines="// Auto-generated compatibility stub required by legacy MSBuild/CoreCompile."
-      Overwrite="false" />
+  <Target Name="VerifyLegacyBuildDependencies" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(MSBuildThisFileDirectory)Resources\libs\AStar.dll')"
+           Text="Missing legacy dependency Resources\libs\AStar.dll. Run RestoreLegacyDependencies.ps1 first." />
+    <Error Condition="!Exists('$(MSBuildThisFileDirectory)Resources\libs\HabboEncryption.dll')"
+           Text="Missing legacy dependency Resources\libs\HabboEncryption.dll. Run RestoreLegacyDependencies.ps1 first." />
   </Target>
 
   <Target Name="PrepareParadiseRuntimeFiles" AfterTargets="Build">
