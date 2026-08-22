@@ -1,90 +1,319 @@
-/* ParadiseRP — ParadisePhone strict final layout correction
-   HOME V3 launcher only. Existing app pages / backend / Nitro remain untouched. */
+/* ParadiseRP — ParadisePhone HOME V3 target parity
+   Launcher only. Existing internal apps / backend / Nitro remain untouched. */
 
-#paradise-rp-hud .pp-device[data-pp-launcher-version="4.0.0-home-v3-correct-target"] {
-  box-shadow:0 24px 52px rgba(4,18,24,.38),0 5px 13px rgba(4,18,24,.22),inset 0 1px 0 rgba(255,255,255,.13)!important;
+/* -------- Physical frame / home shell -------- */
+#paradise-rp-hud .pp-device[data-pp-launcher-version="4.0.0-home-v3-correct-target"].ppv3-is-home{
+  padding:4px!important;
+  border:2px solid #40545b!important;
+  border-radius:31px!important;
+  background:linear-gradient(145deg,#17242a,#080f13)!important;
+  box-shadow:0 20px 46px rgba(0,13,18,.38),0 5px 12px rgba(0,13,18,.22),inset 0 1px 0 rgba(255,255,255,.18)!important;
 }
-#paradise-rp-hud .pp-device.ppv3-is-home .pp-screen{background:#193a43!important}
-#paradise-rp-hud .pp-device.ppv3-is-home .pp-status{position:relative;z-index:20;height:37px!important;padding:7px 13px 0!important;color:#fff!important;background:transparent!important;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+#paradise-rp-hud .pp-device.ppv3-is-home:before{
+  inset:2px!important;
+  border-radius:28px!important;
+  border-color:rgba(255,255,255,.08)!important;
+}
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-screen{
+  grid-template-rows:39px minmax(0,1fr) 0!important;
+  border-radius:25px!important;
+  overflow:hidden!important;
+  background:
+    linear-gradient(180deg,rgba(7,28,35,.12) 0%,rgba(8,27,34,.17) 45%,rgba(8,23,29,.30) 100%),
+    url("./paradise-phone-wallpaper-v3.svg?v=1") center center/cover no-repeat!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)!important;
+}
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-nav{display:none!important;height:0!important;min-height:0!important;overflow:hidden!important}
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-notch{
+  top:4px!important;
+  width:78px!important;
+  height:17px!important;
+  border-radius:0 0 12px 12px!important;
+  background:#080f13!important;
+  box-shadow:none!important;
+}
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-notch span{width:24px!important;height:2px!important;background:#263c44!important}
+
+/* -------- Status bar -------- */
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-status{
+  position:relative;
+  z-index:30;
+  height:39px!important;
+  padding:8px 13px 0!important;
+  grid-template-columns:1fr 60px 1fr!important;
+  align-items:start!important;
+  color:#fff!important;
+  background:transparent!important;
+  font-size:9px!important;
+  text-shadow:0 1px 3px rgba(0,0,0,.42)!important;
+}
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-status>strong{font-size:9px!important;font-weight:900!important;letter-spacing:.01em!important}
 #paradise-rp-hud .pp-device.ppv3-is-home .pp-status>span{color:transparent!important;text-shadow:none!important}
-#paradise-rp-hud .pp-device.ppv3-is-home .pp-status .pp-signal,#paradise-rp-hud .pp-device.ppv3-is-home .pp-status .pp-battery{filter:brightness(0) invert(1) drop-shadow(0 1px 1px rgba(0,0,0,.28))}
-#paradise-rp-hud .pp-device.ppv3-is-home .pp-content{position:relative;min-height:0;overflow:hidden;background:transparent!important}
-#paradise-rp-hud .pp-device.ppv3-is-home .pp-home{position:absolute!important;inset:0!important;display:block!important;min-height:0!important;height:100%!important;padding:0!important;margin:0!important;overflow:hidden!important;background:#204b51!important}
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-status>span:before{content:none!important;display:none!important}
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-status>div{justify-self:end!important;gap:5px!important}
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-signal,
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-battery{filter:brightness(0) invert(1) drop-shadow(0 1px 1px rgba(0,0,0,.3))!important}
 
-#paradise-rp-hud .ppv3-launcher{position:absolute;inset:0;z-index:1;display:grid;grid-template-rows:30px minmax(0,1fr) 14px 61px;gap:5px;padding:2px 11px 10px;overflow:hidden;isolation:isolate;animation:ppv3-launcher-in .18s ease both}
-#paradise-rp-hud .ppv3-wallpaper{position:absolute;z-index:-2;inset:-8px;background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgNTIwIj4KPGRlZnM+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJza3kiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzZlYzdkMiIvPjxzdG9wIG9mZnNldD0iLjUyIiBzdG9wLWNvbG9yPSIjODNjMmIzIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZDliODc1Ii8+CiAgPC9saW5lYXJHcmFkaWVudD4KICA8bGluZWFyR3JhZGllbnQgaWQ9InNlYSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMmY4ZmEwIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMjI2MzdiIi8+CiAgPC9saW5lYXJHcmFkaWVudD4KICA8bGluZWFyR3JhZGllbnQgaWQ9InJvYWQiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzZmNzI1ZiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzRmNWI1NSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjMyMCIgaGVpZ2h0PSI1MjAiIGZpbGw9InVybCgjc2t5KSIvPgo8cmVjdCB5PSIzMDUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjE1IiBmaWxsPSJ1cmwoI3NlYSkiLz4KPHBhdGggZD0iTTAgMjc0IDExMCAyMjggMzIwIDMwOXYxMDNMMjA0IDM2MCAwIDQwNVoiIGZpbGw9InVybCgjcm9hZCkiLz4KPHBhdGggZD0iTTAgMjkwIDExMSAyNDYgMzIwIDMyNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZDhjOThkIiBzdHJva2Utd2lkdGg9IjgiIG9wYWNpdHk9Ii43Ii8+CjxnIHN0cm9rZT0iIzI4NGU0YyIgc3Ryb2tlLXdpZHRoPSIyIj4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNSAxMTgpIj4KICAgIDxwYXRoIGQ9Ik0wIDYwIDUyIDI5bDQ0IDI1djk2TDQ0IDE3OCAwIDE1MVoiIGZpbGw9IiNiODg4NTkiLz48cGF0aCBkPSJNNTIgMjkgOTYgNTQgNDQgODIgMCA2MFoiIGZpbGw9IiNkMWEyNmQiLz4KICAgIDxwYXRoIGQ9Ik00NCA4MiA5NiA1NHY5NmwtNTIgMjhaIiBmaWxsPSIjOGE1YTQzIi8+CiAgICA8ZyBmaWxsPSIjNzViNmJkIj48cmVjdCB4PSIxMCIgeT0iNzkiIHdpZHRoPSIxNCIgaGVpZ2h0PSIyNSIvPjxyZWN0IHg9IjI5IiB5PSI2OSIgd2lkdGg9IjE0IiBoZWlnaHQ9IjI2Ii8+PHJlY3QgeD0iNTUiIHk9Ijc4IiB3aWR0aD0iMTMiIGhlaWdodD0iMjQiLz48cmVjdCB4PSI3NCIgeT0iNjciIHdpZHRoPSIxMyIgaGVpZ2h0PSIyNCIvPjwvZz4KICA8L2c+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjExIDE1MSkiPgogICAgPHBhdGggZD0iTTAgNDEgNDggMTNsNDYgMjZ2MTA0bC00NiAyNUwwIDE0M1oiIGZpbGw9IiNjNDk3NjIiLz48cGF0aCBkPSJNNDggMTMgOTQgMzkgNDggNjUgMCA0MVoiIGZpbGw9IiNkN2FjNzYiLz4KICAgIDxwYXRoIGQ9Ik00OCA2NSA5NCAzOXYxMDRsLTQ2IDI1WiIgZmlsbD0iIzljNjk0ZiIvPgogICAgPGcgZmlsbD0iIzZlYjZjMiI+PHJlY3QgeD0iMTIiIHk9IjYwIiB3aWR0aD0iMTMiIGhlaWdodD0iMjQiLz48cmVjdCB4PSIzMCIgeT0iNTEiIHdpZHRoPSIxMiIgaGVpZ2h0PSIyNCIvPjxyZWN0IHg9IjU5IiB5PSI2MCIgd2lkdGg9IjEzIiBoZWlnaHQ9IjI0Ii8+PHJlY3QgeD0iNzciIHk9IjUwIiB3aWR0aD0iMTEiIGhlaWdodD0iMjQiLz48L2c+CiAgPC9nPgo8L2c+CjxnIHN0cm9rZT0iIzI1NGU0MiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYzIDU2KSI+CiAgICA8cGF0aCBkPSJNMjYgNDYgMjEgMTIzIiBzdHJva2U9IiM3YjU3MzgiIHN0cm9rZS13aWR0aD0iOCIvPjxwYXRoIGQ9Ik0yNSA1MWMtMjMtMTgtMzYtOS00MC0zIDE1IDEgMjUgNiAzNyAxMy04LTE4IDAtMzAgNy0zNiAxIDE1IDEgMjMtMiAzNSAxMi0xNiAyNy0yMSAzOC0xNy0xMSA4LTE4IDEzLTMxIDIwIDE2LTYgMzEtMiAzOSA1LTE2IDItMjcgMi00NC0yIiBmaWxsPSIjM2Y4YTU0Ii8+CiAgPC9nPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4NCA3Mikgc2NhbGUoLjg2KSI+CiAgICA8cGF0aCBkPSJNMjYgNDYgMjEgMTIzIiBzdHJva2U9IiM4MDViM2IiIHN0cm9rZS13aWR0aD0iOCIvPjxwYXRoIGQ9Ik0yNSA1MWMtMjMtMTgtMzYtOS00MC0zIDE1IDEgMjUgNiAzNyAxMy04LTE4IDAtMzAgNy0zNiAxIDE1IDEgMjMtMiAzNSAxMi0xNiAyNy0yMSAzOC0xNy0xMSA4LTE4IDEzLTMxIDIwIDE2LTYgMzEtMiAzOSA1LTE2IDItMjcgMi00NC0yIiBmaWxsPSIjNDU4ZDU1Ii8+CiAgPC9nPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1MCAyODMpIHNjYWxlKC43NCkiPgogICAgPHBhdGggZD0iTTI2IDQ2IDIxIDEyMyIgc3Ryb2tlPSIjN2Q1YjNiIiBzdHJva2Utd2lkdGg9IjgiLz48cGF0aCBkPSJNMjUgNTFjLTIzLTE4LTM2LTktNDAtMyAxNSAxIDI1IDYgMzcgMTMtOC0xOCAwLTMwIDctMzYgMSAxNSAxIDIzLTIgMzUgMTItMTYgMjctMjEgMzgtMTctMTEgOC0xOCAxMy0zMSAyMCAxNi02IDMxLTIgMzkgNS0xNiAyLTI3IDItNDQtMiIgZmlsbD0iIzNkODQ1MiIvPgogIDwvZz4KPC9nPgo8ZyBvcGFjaXR5PSIuOCI+CiAgPHBhdGggZD0iTTAgNDMwIDk2IDM5Mmw2OCAzMCA5NS0zNiA2MSAyNXYxMDlIMFoiIGZpbGw9IiMxZDU5NjciLz4KICA8cGF0aCBkPSJNMTQgNDQ0IDk0IDQxNGw2NSAyOCA5Ni0zNyA1MyAyMyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOGZjOWMyIiBzdHJva2Utd2lkdGg9IjMiLz4KPC9nPgo8ZyBvcGFjaXR5PSIuMjgiIGZpbGw9IiNmZmYiPgogIDxjaXJjbGUgY3g9IjQ4IiBjeT0iMzQiIHI9IjIiLz48Y2lyY2xlIGN4PSI3OCIgeT0iMjAiIHI9IjEuNSIvPjxjaXJjbGUgY3g9IjI0NSIgY3k9IjQ0IiByPSIyIi8+PGNpcmNsZSBjeD0iMjgwIiBjeT0iMjciIHI9IjEuNCIvPgo8L2c+Cjwvc3ZnPg==");background-position:center;background-size:cover;filter:saturate(.88) contrast(1.04) brightness(.68) blur(.45px);transform:scale(1.04)}
-#paradise-rp-hud .ppv3-wallpaper::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,30,37,.12) 0%,rgba(8,28,34,.18) 42%,rgba(4,19,25,.38) 100%),radial-gradient(circle at 50% 16%,rgba(255,238,180,.09),transparent 34%);box-shadow:inset 0 -100px 110px rgba(5,19,25,.14)}
-#paradise-rp-hud .ppv3-title{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.01em;text-shadow:0 2px 4px rgba(0,0,0,.42);user-select:none}
+/* -------- Launcher -------- */
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-content{position:relative!important;min-height:0!important;overflow:hidden!important;background:transparent!important}
+#paradise-rp-hud .pp-device.ppv3-is-home .pp-home{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  width:auto!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:transparent!important;
+}
+#paradise-rp-hud .ppv3-launcher{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:grid;
+  grid-template-rows:31px minmax(0,1fr) 15px 62px;
+  gap:4px;
+  padding:0 10px 9px;
+  overflow:hidden;
+  isolation:isolate;
+  animation:ppv3-launcher-in .18s ease both;
+}
+#paradise-rp-hud .ppv3-wallpaper{display:none!important}
+#paradise-rp-hud .ppv3-launcher:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 48% 8%,rgba(255,255,255,.08),transparent 24%),
+    linear-gradient(180deg,rgba(5,23,29,.02) 0%,rgba(5,23,29,.05) 55%,rgba(5,20,26,.18) 100%);
+}
+#paradise-rp-hud .ppv3-title{
+  position:relative;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  letter-spacing:.005em!important;
+  line-height:1!important;
+  text-shadow:0 2px 5px rgba(0,0,0,.52)!important;
+  user-select:none;
+}
 
-#paradise-rp-hud .ppv3-app-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));align-items:center;justify-items:center;column-gap:7px;row-gap:4px;min-height:0;padding:2px 0 0}
-#paradise-rp-hud .ppv3-app{--app-top:#66c7c1;--app-bottom:#2b8789;--app-glyph:#fff8e7;--app-dark:#32666b;--app-hi:#fff4c7;position:relative;width:72px;min-width:0;padding:0;display:grid;justify-items:center;gap:3px;border:0;background:transparent;color:#fff;font:inherit;cursor:pointer;outline:none;text-shadow:0 1px 3px rgba(0,0,0,.52);transition:transform .16s ease,filter .16s ease,opacity .16s ease}
-#paradise-rp-hud .ppv3-app:hover{transform:translateY(-2px)}
-#paradise-rp-hud .ppv3-app:active,#paradise-rp-hud .ppv3-app.is-pressed{transform:scale(.94)}
-#paradise-rp-hud .ppv3-app.is-coming{opacity:.88}
-#paradise-rp-hud .ppv3-app.is-coming:hover{opacity:1}
-#paradise-rp-hud .ppv3-app-icon{position:relative;width:53px;height:53px;display:grid;place-items:center;overflow:hidden;border-radius:13px;border:1px solid rgba(255,255,255,.52);background:linear-gradient(150deg,rgba(255,255,255,.20),transparent 36%),linear-gradient(180deg,var(--app-top),var(--app-bottom));box-shadow:0 7px 13px rgba(4,18,24,.28),inset 0 1px 0 rgba(255,255,255,.72),inset 0 -2px 0 rgba(20,42,45,.16),0 0 0 1px rgba(17,43,47,.13)}
-#paradise-rp-hud .ppv3-app-icon::before{content:"";position:absolute;left:5px;right:5px;top:4px;height:12px;border-radius:9px 9px 5px 5px;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0));pointer-events:none}
-#paradise-rp-hud .ppv3-app.is-coming .ppv3-app-icon::after{content:"•••";position:absolute;right:3px;bottom:3px;min-width:14px;height:10px;display:grid;place-items:center;border-radius:5px;color:rgba(255,255,255,.86);background:rgba(20,37,43,.38);font-size:5px;font-weight:900;letter-spacing:-.05em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
-#paradise-rp-hud .ppv3-app-icon svg{position:relative;z-index:1;width:32px;height:32px;filter:drop-shadow(0 2px 1px rgba(0,0,0,.14))}
-#paradise-rp-hud .ppv3-app-icon .g-main{fill:var(--app-glyph)}
-#paradise-rp-hud .ppv3-app-icon .g-dark{fill:var(--app-dark)}
-#paradise-rp-hud .ppv3-app-icon .g-hi{fill:var(--app-hi)}
-#paradise-rp-hud .ppv3-app-label{max-width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:8.1px;line-height:1.1;font-weight:760;letter-spacing:-.01em}
-#paradise-rp-hud .ppv3-badge{position:absolute;z-index:5;top:-4px;right:7px;min-width:17px;height:17px;padding:0 4px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(255,255,255,.76);background:#e05f58;color:#fff;font-size:7px;font-weight:900;text-shadow:none;box-shadow:0 3px 6px rgba(49,18,18,.25)}
+/* -------- App grid: target 3 x 4 -------- */
+#paradise-rp-hud .ppv3-app-grid{
+  position:relative;
+  z-index:3;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-rows:repeat(4,minmax(0,1fr));
+  align-items:center;
+  justify-items:center;
+  column-gap:6px;
+  row-gap:3px;
+  min-height:0;
+  padding:2px 0 0;
+}
+#paradise-rp-hud .ppv3-app{
+  position:relative;
+  width:72px;
+  min-width:0;
+  padding:0;
+  display:grid;
+  justify-items:center;
+  align-content:center;
+  gap:4px;
+  border:0!important;
+  background:transparent!important;
+  color:#fff!important;
+  font:inherit;
+  cursor:pointer;
+  outline:none;
+  opacity:1!important;
+  filter:none!important;
+  text-shadow:0 1px 3px rgba(0,0,0,.62)!important;
+  transition:transform .15s ease,filter .15s ease;
+}
+#paradise-rp-hud .ppv3-app:hover{transform:translateY(-1px)}
+#paradise-rp-hud .ppv3-app:active,#paradise-rp-hud .ppv3-app.is-pressed{transform:scale(.96)}
+#paradise-rp-hud .ppv3-app.is-coming{opacity:1!important;filter:none!important}
+#paradise-rp-hud .ppv3-app.is-coming:after,
+#paradise-rp-hud .ppv3-app.is-coming .ppv3-app-icon:after{content:none!important;display:none!important}
+#paradise-rp-hud .ppv3-app-label{
+  display:block;
+  max-width:72px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#fff!important;
+  font-size:8.3px!important;
+  font-weight:750!important;
+  line-height:1.05!important;
+  letter-spacing:0!important;
+  text-align:center;
+}
 
-#paradise-rp-hud .ppv3-app.is-orange{--app-top:#e7b866;--app-bottom:#b97731;--app-glyph:#fffaf0;--app-dark:#a35d2f;--app-hi:#ffe3a6}
-#paradise-rp-hud .ppv3-app.is-cream{--app-top:#fff8e9;--app-bottom:#ead9c0;--app-glyph:#a96c46;--app-dark:#86513c;--app-hi:#fff}
-#paradise-rp-hud .ppv3-app.is-green{--app-top:#72d379;--app-bottom:#3aa35f;--app-glyph:#fff;--app-dark:#dff8df;--app-hi:#fff}
-#paradise-rp-hud .ppv3-app.is-aqua{--app-top:#81d7d3;--app-bottom:#3c9da5;--app-glyph:#f5ffff;--app-dark:#226a78;--app-hi:#c9ffff}
-#paradise-rp-hud .ppv3-app.is-brown{--app-top:#c99c67;--app-bottom:#805735;--app-glyph:#fff1d8;--app-dark:#5e3f2a;--app-hi:#f6c986}
-#paradise-rp-hud .ppv3-app.is-sand{--app-top:#e5c285;--app-bottom:#b08045;--app-glyph:#fff8e8;--app-dark:#7e5931;--app-hi:#ffe1a0}
-#paradise-rp-hud .ppv3-app.is-blue{--app-top:#65d3dd;--app-bottom:#2d9ebe;--app-glyph:#fff;--app-dark:#22718b;--app-hi:#c9f8ff}
-#paradise-rp-hud .ppv3-app.is-grayblue{--app-top:#e6edf0;--app-bottom:#9fb8c1;--app-glyph:#315f6f;--app-dark:#466d77;--app-hi:#fff}
-#paradise-rp-hud .ppv3-app.is-teal{--app-top:#67c5be;--app-bottom:#2d827f;--app-glyph:#efffff;--app-dark:#205f62;--app-hi:#c9fff8}
-#paradise-rp-hud .ppv3-app.is-yellow{--app-top:#ffd95f;--app-bottom:#d3a61f;--app-glyph:#313330;--app-dark:#4e4b37;--app-hi:#fff2a9}
-#paradise-rp-hud .ppv3-app.is-warm{--app-top:#f6f3ed;--app-bottom:#c9c5bc;--app-glyph:#60767b;--app-dark:#4e6267;--app-hi:#fff}
-#paradise-rp-hud .ppv3-app.is-ocean{--app-top:#59c0ff;--app-bottom:#287bc9;--app-glyph:#fff;--app-dark:#d7f3ff;--app-hi:#fff}
+/* -------- App object finish -------- */
+#paradise-rp-hud .ppv3-app-icon{
+  position:relative;
+  width:49px!important;
+  height:49px!important;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.30)!important;
+  border-radius:12px!important;
+  background:linear-gradient(180deg,#fbf7ef,#ebe5da)!important;
+  box-shadow:0 5px 11px rgba(0,12,17,.24),inset 0 1px 0 rgba(255,255,255,.72),inset 0 -1px 0 rgba(28,43,47,.08)!important;
+}
+#paradise-rp-hud .ppv3-app-icon:before{
+  content:"";
+  position:absolute;
+  z-index:1;
+  left:4px;
+  right:4px;
+  top:3px;
+  height:10px;
+  border-radius:9px 9px 6px 6px;
+  background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0));
+  pointer-events:none;
+}
+#paradise-rp-hud .ppv3-app-icon svg{position:relative;z-index:2;width:29px!important;height:29px!important;overflow:visible!important;filter:drop-shadow(0 1px 0 rgba(0,0,0,.10))!important}
+#paradise-rp-hud .ppv3-app-icon .g-main{fill:#7b5b42!important}
+#paradise-rp-hud .ppv3-app-icon .g-dark{fill:#9d7250!important}
+#paradise-rp-hud .ppv3-app-icon .g-hi{fill:#d7af7e!important}
 
-#paradise-rp-hud .ppv3-page-indicator{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:6px}
-#paradise-rp-hud .ppv3-page-indicator i{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.46);box-shadow:0 1px 2px rgba(0,0,0,.24)}
+/* Target palette */
+#paradise-rp-hud .ppv3-app.is-orange .ppv3-app-icon{background:linear-gradient(180deg,#c99552,#aa6d24)!important;border-color:rgba(255,232,185,.34)!important}
+#paradise-rp-hud .ppv3-app.is-orange .g-main{fill:#fff7e9!important}
+#paradise-rp-hud .ppv3-app.is-orange .g-dark{fill:#fff7e9!important}
+#paradise-rp-hud .ppv3-app.is-orange .g-hi{fill:#f7dfbb!important}
+#paradise-rp-hud .ppv3-app.is-green .ppv3-app-icon{background:linear-gradient(180deg,#57cf68,#36a84f)!important;border-color:rgba(218,255,222,.38)!important}
+#paradise-rp-hud .ppv3-app.is-green .g-main,#paradise-rp-hud .ppv3-app.is-green .g-dark,#paradise-rp-hud .ppv3-app.is-green .g-hi{fill:#fff!important}
+#paradise-rp-hud .ppv3-app.is-aqua .g-main,#paradise-rp-hud .ppv3-app.is-aqua .g-dark{fill:#36a7b1!important}
+#paradise-rp-hud .ppv3-app.is-aqua .g-hi{fill:#78d4d8!important}
+#paradise-rp-hud .ppv3-app.is-brown .g-main{fill:#9c642d!important}
+#paradise-rp-hud .ppv3-app.is-brown .g-dark{fill:#6e431f!important}
+#paradise-rp-hud .ppv3-app.is-brown .g-hi{fill:#d89b4f!important}
+#paradise-rp-hud .ppv3-app.is-sand .g-main{fill:#c58a42!important}
+#paradise-rp-hud .ppv3-app.is-sand .g-dark{fill:#8c5f30!important}
+#paradise-rp-hud .ppv3-app.is-sand .g-hi{fill:#e9bd71!important}
+#paradise-rp-hud .ppv3-app.is-blue .ppv3-app-icon{background:linear-gradient(145deg,#55c5ed,#39b7ae)!important;border-color:rgba(208,250,255,.34)!important}
+#paradise-rp-hud .ppv3-app.is-blue .g-main,#paradise-rp-hud .ppv3-app.is-blue .g-dark{fill:#fff!important}
+#paradise-rp-hud .ppv3-app.is-blue .g-hi{fill:#b5fff4!important}
+#paradise-rp-hud .ppv3-app.is-grayblue .g-main{fill:#647a84!important}
+#paradise-rp-hud .ppv3-app.is-grayblue .g-dark{fill:#8298a1!important}
+#paradise-rp-hud .ppv3-app.is-grayblue .g-hi{fill:#e4be59!important}
+#paradise-rp-hud .ppv3-app.is-teal .g-main{fill:#245c68!important}
+#paradise-rp-hud .ppv3-app.is-teal .g-dark{fill:#2e8790!important}
+#paradise-rp-hud .ppv3-app.is-teal .g-hi{fill:#75d9d5!important}
+#paradise-rp-hud .ppv3-app.is-yellow .ppv3-app-icon{background:linear-gradient(180deg,#ffd75d,#f0b52c)!important;border-color:rgba(255,240,160,.42)!important}
+#paradise-rp-hud .ppv3-app.is-yellow .g-main{fill:#222d31!important}
+#paradise-rp-hud .ppv3-app.is-yellow .g-dark{fill:#151d20!important}
+#paradise-rp-hud .ppv3-app.is-yellow .g-hi{fill:#5b4f24!important}
+#paradise-rp-hud .ppv3-app.is-warm .g-main{fill:#728086!important}
+#paradise-rp-hud .ppv3-app.is-warm .g-dark{fill:#8c999e!important}
+#paradise-rp-hud .ppv3-app.is-warm .g-hi{fill:#d7dde0!important}
+#paradise-rp-hud .ppv3-app.is-ocean .ppv3-app-icon{background:linear-gradient(180deg,#4bb9f4,#2588df)!important;border-color:rgba(205,239,255,.40)!important}
+#paradise-rp-hud .ppv3-app.is-ocean .g-main,#paradise-rp-hud .ppv3-app.is-ocean .g-dark,#paradise-rp-hud .ppv3-app.is-ocean .g-hi{fill:#fff!important}
+
+/* Real unread badge */
+#paradise-rp-hud .ppv3-badge{
+  position:absolute;
+  top:-4px;
+  right:8px;
+  z-index:6;
+  min-width:17px;
+  height:17px;
+  padding:0 4px;
+  display:grid;
+  place-items:center;
+  border:2px solid rgba(245,246,239,.92);
+  border-radius:10px;
+  background:#ef5a55;
+  color:#fff;
+  font-size:7px;
+  font-weight:950;
+  line-height:1;
+  box-shadow:0 3px 8px rgba(0,12,17,.25);
+  text-shadow:none;
+}
+
+/* Page indicator */
+#paradise-rp-hud .ppv3-page-indicator{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;gap:5px}
+#paradise-rp-hud .ppv3-page-indicator i{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.52);box-shadow:0 1px 3px rgba(0,0,0,.35)}
 #paradise-rp-hud .ppv3-page-indicator i.is-active{background:#fff}
 
-#paradise-rp-hud .ppv3-dock{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);align-items:center;justify-items:center;gap:12px;padding:6px 14px;border:1px solid rgba(255,255,255,.24);border-radius:15px;background:linear-gradient(180deg,rgba(23,34,38,.66),rgba(16,24,29,.54));box-shadow:0 7px 18px rgba(1,13,18,.22),inset 0 1px 0 rgba(255,255,255,.16);backdrop-filter:blur(7px)}
-#paradise-rp-hud .ppv3-dock-app{--dock-top:#4c5a62;--dock-bottom:#28343b;--dock-main:#fff;--dock-dark:#8ca0a8;--dock-hi:#dff4ff;width:43px;height:43px;padding:0;display:grid;place-items:center;overflow:hidden;border-radius:11px;border:1px solid rgba(255,255,255,.34);background:linear-gradient(145deg,rgba(255,255,255,.14),transparent 38%),linear-gradient(180deg,var(--dock-top),var(--dock-bottom));box-shadow:0 4px 9px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.46);cursor:pointer;transition:transform .15s ease,filter .15s ease}
-#paradise-rp-hud .ppv3-dock-app:hover{transform:translateY(-2px)}
-#paradise-rp-hud .ppv3-dock-app:active{transform:scale(.94)}
-#paradise-rp-hud .ppv3-dock-app svg{width:27px;height:27px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
-#paradise-rp-hud .ppv3-dock-app .g-main{fill:var(--dock-main)}
-#paradise-rp-hud .ppv3-dock-app .g-dark{fill:var(--dock-dark)}
-#paradise-rp-hud .ppv3-dock-app .g-hi{fill:var(--dock-hi)}
-#paradise-rp-hud .ppv3-dock-app.is-gallery{--dock-top:#fff4d9;--dock-bottom:#d8b98a;--dock-main:#3e718d;--dock-dark:#4b9a77;--dock-hi:#f5c45c}
-#paradise-rp-hud .ppv3-dock-app.is-browser{--dock-top:#64c7ff;--dock-bottom:#2074cf;--dock-main:#fff;--dock-dark:#d7f4ff;--dock-hi:#fff}
-
-#paradise-rp-hud .pp-device.ppv3-is-home .pp-nav{display:none!important}
-#paradise-rp-hud .ppv3-toast{position:absolute;z-index:100;left:16px;right:16px;bottom:18px;min-height:45px;padding:8px 10px;display:grid;align-content:center;gap:2px;border:1px solid rgba(255,255,255,.24);border-radius:11px;color:#fff;background:rgba(18,36,41,.88);box-shadow:0 9px 24px rgba(0,0,0,.26);backdrop-filter:blur(8px);animation:ppv3-toast-in .17s ease both;pointer-events:none}
-#paradise-rp-hud .ppv3-toast strong{font-size:9px;font-weight:900}
-#paradise-rp-hud .ppv3-toast span{color:rgba(255,255,255,.78);font-size:8px}
-#paradise-rp-hud .ppv3-launcher.is-launching{animation:ppv3-launch-out .17s ease both}
-
-@keyframes ppv3-launcher-in{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
-@keyframes ppv3-launch-out{to{opacity:0;transform:scale(1.025)}}
-@keyframes ppv3-toast-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-
-@media(max-height:760px){
-  #paradise-rp-hud .ppv3-launcher{grid-template-rows:27px minmax(0,1fr) 12px 55px;gap:3px;padding:1px 9px 8px}
-  #paradise-rp-hud .ppv3-app-grid{row-gap:2px;column-gap:5px}
-  #paradise-rp-hud .ppv3-app{width:65px;gap:2px}
-  #paradise-rp-hud .ppv3-app-icon{width:46px;height:46px;border-radius:12px}
-  #paradise-rp-hud .ppv3-app-icon svg{width:28px;height:28px}
-  #paradise-rp-hud .ppv3-app-label{font-size:7.5px;max-width:66px}
-  #paradise-rp-hud .ppv3-dock{padding:5px 12px;border-radius:13px}
-  #paradise-rp-hud .ppv3-dock-app{width:38px;height:38px;border-radius:10px}
-  #paradise-rp-hud .ppv3-dock-app svg{width:24px;height:24px}
+/* -------- Dock copied in spirit from target -------- */
+#paradise-rp-hud .ppv3-dock{
+  position:relative;
+  z-index:3;
+  width:calc(100% - 10px);
+  height:61px;
+  margin:0 auto;
+  padding:7px 13px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  align-items:center;
+  justify-items:center;
+  border:0!important;
+  border-radius:18px;
+  background:rgba(219,207,190,.44)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 6px 15px rgba(0,13,18,.12)!important;
+  backdrop-filter:blur(8px) saturate(.9);
 }
-@media(max-height:660px){
-  #paradise-rp-hud .ppv3-title{font-size:9.5px}
-  #paradise-rp-hud .ppv3-app-icon{width:42px;height:42px}
-  #paradise-rp-hud .ppv3-app-icon svg{width:25px;height:25px}
-  #paradise-rp-hud .ppv3-app-label{font-size:7px}
-  #paradise-rp-hud .ppv3-dock-app{width:35px;height:35px}
+#paradise-rp-hud .ppv3-dock-app{
+  position:relative;
+  width:44px;
+  height:44px;
+  padding:0;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.28)!important;
+  border-radius:11px!important;
+  background:#f7f1e7!important;
+  box-shadow:0 4px 9px rgba(0,12,17,.20),inset 0 1px 0 rgba(255,255,255,.64)!important;
+  cursor:pointer;
+  opacity:1!important;
+  filter:none!important;
+}
+#paradise-rp-hud .ppv3-dock-app:after{content:none!important;display:none!important}
+#paradise-rp-hud .ppv3-dock-app span{display:grid;place-items:center;width:100%;height:100%}
+#paradise-rp-hud .ppv3-dock-app svg{width:27px!important;height:27px!important}
+#paradise-rp-hud .ppv3-dock-app .g-main{fill:#26333a!important}
+#paradise-rp-hud .ppv3-dock-app .g-dark{fill:#121a1e!important}
+#paradise-rp-hud .ppv3-dock-app .g-hi{fill:#75858c!important}
+#paradise-rp-hud .ppv3-dock-app.is-gallery{background:#454f59!important}
+#paradise-rp-hud .ppv3-dock-app.is-gallery .g-main{fill:#eef3e8!important}
+#paradise-rp-hud .ppv3-dock-app.is-gallery .g-dark{fill:#4f8b59!important}
+#paradise-rp-hud .ppv3-dock-app.is-gallery .g-hi{fill:#eab84c!important}
+#paradise-rp-hud .ppv3-dock-app.is-browser{background:linear-gradient(180deg,#47b8ff,#2789e8)!important}
+#paradise-rp-hud .ppv3-dock-app.is-browser .g-main,#paradise-rp-hud .ppv3-dock-app.is-browser .g-dark,#paradise-rp-hud .ppv3-dock-app.is-browser .g-hi{fill:#fff!important}
+
+/* Coming-soon toast */
+#paradise-rp-hud .ppv3-toast{position:absolute;z-index:80;left:50%;bottom:83px;width:calc(100% - 42px);transform:translateX(-50%);padding:9px 11px;display:grid;gap:2px;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:rgba(22,35,40,.88);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.26);backdrop-filter:blur(7px);animation:ppv3-toast-in .16s ease both}
+#paradise-rp-hud .ppv3-toast strong{font-size:9px}
+#paradise-rp-hud .ppv3-toast span{font-size:7.4px;color:rgba(255,255,255,.75)}
+
+#paradise-rp-hud .ppv3-launcher.is-launching{animation:ppv3-launch-out .17s ease both}
+@keyframes ppv3-launcher-in{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+@keyframes ppv3-launch-out{to{opacity:0;transform:scale(1.018)}}
+@keyframes ppv3-toast-in{from{opacity:0;transform:translate(-50%,5px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* Small viewport: keep proportions rather than reflowing into another design. */
+@media(max-height:720px){
+  #paradise-rp-hud .ppv3-launcher{grid-template-rows:27px minmax(0,1fr) 12px 54px;padding:0 8px 7px;gap:3px}
+  #paradise-rp-hud .ppv3-app{width:64px;gap:2px}
+  #paradise-rp-hud .ppv3-app-icon{width:43px!important;height:43px!important;border-radius:11px!important}
+  #paradise-rp-hud .ppv3-app-icon svg{width:25px!important;height:25px!important}
+  #paradise-rp-hud .ppv3-app-label{font-size:7.4px!important;max-width:64px}
+  #paradise-rp-hud .ppv3-dock{height:54px;padding:6px 11px}
+  #paradise-rp-hud .ppv3-dock-app{width:38px;height:38px;border-radius:10px!important}
+  #paradise-rp-hud .ppv3-dock-app svg{width:23px!important;height:23px!important}
 }
