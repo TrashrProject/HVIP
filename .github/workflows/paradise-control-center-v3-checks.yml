@@ -1,0 +1,84 @@
+name: Paradise Control Center V3 Quality Gate
+
+on:
+  push:
+    branches:
+      - "feature/paradise-control-center-v3"
+    paths:
+      - 'WebPixel/admin.php'
+      - 'WebPixel/app/Controller/AdminControlCenter.class.php'
+      - 'WebPixel/app/Controller/DBManager.class.php'
+      - 'WebPixel/app/Modal/SessionMG.class.php'
+      - 'WebPixel/app/View/Directory/Admin/**'
+      - 'WebPixel/app/View/Directory/Body/admin.php'
+      - 'WebPixel/app/View/Directory/Headers/admin.php'
+      - 'WebPixel/app/View/Directory/Footers/admin.php'
+      - 'WebPixel/Dynamics/js/admin-control-center-v3.js'
+      - 'WebPixel/Dynamics/css/admin-control-center-v3.css'
+      - 'migrations/2026_08_22_paradise_control_center_v3.sql'
+      - '.github/workflows/paradise-control-center-v3-checks.yml'
+  pull_request:
+    paths:
+      - 'WebPixel/admin.php'
+      - 'WebPixel/app/Controller/AdminControlCenter.class.php'
+      - 'WebPixel/app/Controller/DBManager.class.php'
+      - 'WebPixel/app/Modal/SessionMG.class.php'
+      - 'WebPixel/app/View/Directory/Admin/**'
+      - 'WebPixel/app/View/Directory/Body/admin.php'
+      - 'WebPixel/app/View/Directory/Headers/admin.php'
+      - 'WebPixel/app/View/Directory/Footers/admin.php'
+      - 'WebPixel/Dynamics/js/admin-control-center-v3.js'
+      - 'WebPixel/Dynamics/css/admin-control-center-v3.css'
+      - 'migrations/2026_08_22_paradise_control_center_v3.sql'
+
+jobs:
+  admin-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP syntax — Control Center
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l WebPixel/admin.php
+          php -l WebPixel/app/Controller/AdminControlCenter.class.php
+          php -l WebPixel/app/Controller/DBManager.class.php
+          php -l WebPixel/app/Modal/SessionMG.class.php
+          php -l WebPixel/app/View/Directory/Body/admin.php
+          php -l WebPixel/app/View/Directory/Headers/admin.php
+          php -l WebPixel/app/View/Directory/Footers/admin.php
+          find WebPixel/app/View/Directory/Admin -maxdepth 1 -type f -name '*.php' -print0 | sort -z | xargs -0 -n1 php -l
+
+      - name: JavaScript syntax — Control Center
+        run: node --check WebPixel/Dynamics/js/admin-control-center-v3.js
+
+      - name: Admin security guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'requirePostSecurity' WebPixel/admin.php
+          grep -q 'requireCapability' WebPixel/admin.php
+          grep -q 'requireAuditReady' WebPixel/admin.php
+          grep -q 'hash_equals' WebPixel/app/Controller/AdminControlCenter.class.php
+          grep -q "'httponly' => true" WebPixel/app/Modal/SessionMG.class.php
+          grep -q "'samesite' => 'Lax'" WebPixel/app/Modal/SessionMG.class.php
+          grep -q 'Prepared' WebPixel/app/Controller/DBManager.class.php
+          ! grep -R -nE 'DBPass|db\.password|private[_ -]?key|api[_ -]?secret' WebPixel/app/View/Directory/Admin WebPixel/app/View/Directory/Body/admin.php
+
+      - name: Audit migration guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          SQL='migrations/2026_08_22_paradise_control_center_v3.sql'
+          grep -q 'CREATE TABLE IF NOT EXISTS `cms_admin_audit_log`' "$SQL"
+          grep -q '`before_data`' "$SQL"
+          grep -q '`after_data`' "$SQL"
+          grep -q '`reason`' "$SQL"
+          ! grep -Eiq 'DROP[[:space:]]+TABLE|TRUNCATE[[:space:]]+|DELETE[[:space:]]+FROM' "$SQL"
+
+      - name: No fake admin EMU API
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R -nE 'fake[_ -]?emu|mock[_ -]?emu|localhost:[0-9]+/admin' WebPixel/admin.php WebPixel/app/Controller/AdminControlCenter.class.php WebPixel/app/View/Directory/Admin
