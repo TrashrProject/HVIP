@@ -1,0 +1,30 @@
+name: Paradise EMU Core V2 build
+
+on:
+  push:
+    branches:
+      - "feature/paradise-emu-core-v2"
+  pull_request:
+    paths:
+      - 'RDP EMU header change/**/*.cs'
+      - 'RDP EMU header change/Plus Emulator.csproj'
+      - '.github/workflows/paradise-emu-core-v2-build.yml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - uses: NuGet/setup-nuget@v2
+      - name: Restore packages
+        shell: pwsh
+        run: nuget restore "RDP EMU header change\Plus Emulator.sln" -NonInteractive
+      - name: Build emulator
+        shell: pwsh
+        run: msbuild "RDP EMU header change\Plus Emulator.csproj" /t:Build /p:Configuration=Debug /p:Platform=x64 /m
+      - name: System message guards
+        shell: pwsh
+        run: |
+          Select-String -Path "RDP EMU header change\HabboRoleplay\Events\EventManager.cs" -Pattern "ParadiseSystemMessageCategory","ParadiseSystemMessageScope","SendSelf","SendTarget","SendRoom" | Out-Null
+          Select-String -Path "RDP EMU header change\HabboRoleplay\Paradise\Documents\DocumentService.cs" -Pattern "ParadiseSystemMessageService.SendTarget" | Out-Null
