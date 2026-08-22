@@ -49,6 +49,18 @@ class AdminControlCenter
         'phone.messages.read' => 7
     );
 
+    /**
+     * These operations touch services that keep process-local caches or apply
+     * non-trivial domain rules inside the emulator. Until a real authenticated
+     * admin bridge exists, the CMS must not fake those services with raw SQL.
+     */
+    private $emuBridgeCapabilities = array(
+        'character.edit' => true,
+        'documents.manage' => true,
+        'inventory.adjust' => true,
+        'phone.manage' => true
+    );
+
     public function __construct(DBManager $DB, array $staff)
     {
         $this->DB = $DB;
@@ -58,13 +70,30 @@ class AdminControlCenter
 
     public function staff() { return $this->staff; }
 
+    public function emuAdminBridgeReady()
+    {
+        // Audit found the client MUS/WebSocket layer, but no authenticated
+        // CMS -> EMU administration endpoint. Do not treat client sockets as one.
+        return false;
+    }
+
+    public function capabilityRequiresEmuBridge($capability)
+    {
+        return isset($this->emuBridgeCapabilities[$capability]);
+    }
+
     public function can($capability)
     {
-        return isset($this->capabilities[$capability]) && (int)$this->staff['rank'] >= (int)$this->capabilities[$capability];
+        if (!isset($this->capabilities[$capability])) return false;
+        if (isset($this->emuBridgeCapabilities[$capability]) && !$this->emuAdminBridgeReady()) return false;
+        return (int)$this->staff['rank'] >= (int)$this->capabilities[$capability];
     }
 
     public function requireCapability($capability)
     {
+        if (isset($this->emuBridgeCapabilities[$capability]) && !$this->emuAdminBridgeReady()) {
+            throw new RuntimeException('Action verrouillée : un bridge admin CMS → ÉMU authentifié est requis pour réutiliser le service métier existant sans désynchronisation.');
+        }
         if (!$this->can($capability)) {
             http_response_code(403);
             throw new RuntimeException('Permission insuffisante pour cette action.');
