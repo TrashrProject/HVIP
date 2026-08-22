@@ -6,6 +6,9 @@ $pageTitles = array(
     'dashboard' => array('Vue d’ensemble', 'La situation réelle de ParadiseRP, sans KPI inventé.'),
     'players' => array('Joueurs', 'Comptes Habbo, identité RP, économie et état de connexion.'),
     'player' => array('Fiche joueur', 'Administrer la vie ParadiseRP d’un joueur depuis une fiche centrale.'),
+    'characters' => array('Personnages RP', 'Identités Character V2 et Citizen ID réellement existants.'),
+    'sessions' => array('Sessions', 'Joueurs actuellement marqués en ligne par l’ÉMU.'),
+    'economy' => array('Économie', 'Comptes cash et banque existants, sans inventer de ledger.'),
     'documents' => array('Documents', 'Documents RP réellement stockés par Character / Documents V2.'),
     'inventory' => array('Inventaires', 'Inventaires V2, capacité, poids et objets détenus.'),
     'items' => array('Objets', 'Définitions d’objets utilisées par Inventory V2.'),
@@ -15,6 +18,7 @@ $pageTitles = array(
     'businesses' => array('Entreprises', 'Corporations et memberships existants dans le core RP.'),
     'sanctions' => array('Sanctions', 'Bannissements actifs et historique disponible.'),
     'staff' => array('Staff', 'Comptes staff, ranks Habbo et état de connexion.'),
+    'commands' => array('Commandes', 'Registry réelle lue depuis CommandManager.cs.'),
     'logs' => array('Audit Logs', 'Traçabilité avant / après des actions du Control Center.'),
     'permissions' => array('Permissions', 'Correspondance ranks Habbo → capacités administratives.'),
     'settings' => array('Configuration', 'Réglages CMS exposables sans secrets.'),
@@ -52,7 +56,15 @@ $adminViewFile = $adminViewDir . $AdminPage . '.php';
             <div class="pcc-nav-group">
                 <span class="pcc-nav-label">Joueurs</span>
                 <?php if($PCC->can('players.view')): ?><a class="pcc-nav-item <?php echo in_array($AdminPage, array('players','player'), true) ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=players"><i class="fas fa-users"></i><span>Joueurs</span></a><?php endif; ?>
+                <?php if($PCC->can('character.view')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'characters' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=characters"><i class="fas fa-id-badge"></i><span>Personnages RP</span></a><?php endif; ?>
+                <?php if($PCC->can('players.view')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'sessions' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=sessions"><i class="fas fa-satellite-dish"></i><span>Sessions</span></a><?php endif; ?>
                 <?php if($PCC->can('sanctions.view')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'sanctions' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=sanctions"><i class="fas fa-gavel"></i><span>Sanctions</span></a><?php endif; ?>
+            </div>
+
+            <div class="pcc-nav-group">
+                <span class="pcc-nav-label">Économie</span>
+                <?php if($PCC->can('economy.view')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'economy' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=economy"><i class="fas fa-coins"></i><span>Comptes</span></a><?php endif; ?>
+                <?php if($PCC->can('catalog.view')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'catalogue' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=catalogue"><i class="fas fa-shopping-bag"></i><span>Catalogue</span></a><?php endif; ?>
             </div>
 
             <div class="pcc-nav-group">
@@ -65,14 +77,14 @@ $adminViewFile = $adminViewDir . $AdminPage . '.php';
             </div>
 
             <div class="pcc-nav-group">
-                <span class="pcc-nav-label">Économie & contenu</span>
-                <?php if($PCC->can('catalog.view')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'catalogue' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=catalogue"><i class="fas fa-shopping-bag"></i><span>Catalogue</span></a><?php endif; ?>
+                <span class="pcc-nav-label">Contenu</span>
                 <?php if($PCC->can('badges.view')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'badges' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=badges"><i class="fas fa-certificate"></i><span>Badges</span></a><?php endif; ?>
             </div>
 
             <div class="pcc-nav-group">
                 <span class="pcc-nav-label">Administration</span>
                 <?php if($PCC->can('staff.view')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'staff' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=staff"><i class="fas fa-user-shield"></i><span>Staff</span></a><?php endif; ?>
+                <a class="pcc-nav-item <?php echo $AdminPage === 'commands' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=commands"><i class="fas fa-terminal"></i><span>Commandes</span></a>
                 <?php if($PCC->can('logs.view')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'logs' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=logs"><i class="fas fa-stream"></i><span>Logs</span></a><?php endif; ?>
                 <?php if($PCC->can('permissions.view')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'permissions' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=permissions"><i class="fas fa-key"></i><span>Permissions</span></a><?php endif; ?>
                 <?php if($PCC->can('config.manage')): ?><a class="pcc-nav-item <?php echo $AdminPage === 'settings' ? 'is-active' : ''; ?>" href="<?php echo URL; ?>/admin.php?page=settings"><i class="fas fa-sliders-h"></i><span>Configuration</span></a><?php endif; ?>
