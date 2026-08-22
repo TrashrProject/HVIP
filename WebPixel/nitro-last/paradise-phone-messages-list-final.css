@@ -1,0 +1,84 @@
+/* ParadiseRP — ParadisePhone Messages list final micro-polish
+   Scope: Messages main list only. No Home/backend/SQL/EMU/CMS/Nitro changes. */
+
+/* Lift the real empty state by ~24px without changing the validated header/screen. */
+html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app>.pp-list:has(.pp-msg-empty){
+  padding:0 14px 96px!important;
+}
+html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app .pp-msg-empty{
+  position:relative!important;
+  gap:6px!important;
+  transform:translateY(-6px)!important;
+}
+
+/* Replace the technical "..." tile with a small CSS conversation bubble. */
+html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app .pp-msg-empty::before{
+  content:''!important;
+  width:34px!important;
+  height:28px!important;
+  box-sizing:border-box!important;
+  display:block!important;
+  margin:0 0 5px!important;
+  border:2px solid #69d8ce!important;
+  border-radius:9px 9px 9px 4px!important;
+  background:
+    linear-gradient(#69d8ce,#69d8ce) 8px 8px/16px 2px no-repeat,
+    linear-gradient(#69d8ce,#69d8ce) 8px 14px/11px 2px no-repeat,
+    rgba(77,190,181,.045)!important;
+  box-shadow:none!important;
+  color:transparent!important;
+  font-size:0!important;
+  letter-spacing:0!important;
+}
+html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app .pp-msg-empty::after{
+  content:''!important;
+  position:absolute!important;
+  top:21px!important;
+  left:calc(50% - 11px)!important;
+  width:8px!important;
+  height:8px!important;
+  box-sizing:border-box!important;
+  border-left:2px solid #69d8ce!important;
+  border-bottom:2px solid #69d8ce!important;
+  background:#092731!important;
+  transform:skewX(-24deg) rotate(-7deg)!important;
+  pointer-events:none!important;
+}
+html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app .pp-msg-empty strong{
+  font-size:15px!important;
+  font-weight:600!important;
+}
+html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app .pp-msg-empty>span::after{
+  color:#b8cdcb!important;
+  font-size:12px!important;
+  opacity:1!important;
+}
+
+/* Bottom controls are real global phone actions (Home + Close): keep them, only improve clarity. */
+html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav:before{
+  display:none!important;
+  content:none!important;
+}
+html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav button{
+  color:#b7cecb!important;
+  opacity:.82!important;
+  filter:none!important;
+  text-shadow:none!important;
+}
+html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav button:hover{
+  color:#d7ebe8!important;
+  opacity:1!important;
+}
+html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav button svg{
+  fill:currentColor!important;
+}
+html #paradise-rp-hud .pp-device.pp-msg-mode:has(.pp-messages-app) .pp-nav button:last-child:after{
+  background:#a8c1be!important;
+  opacity:.9!important;
+}
+
+@media (max-height:800px){
+  html #paradise-rp-hud .pp-device.pp-msg-mode .pp-messages-app>.pp-list:has(.pp-msg-empty){
+    padding-bottom:86px!important;
+  }
+}
