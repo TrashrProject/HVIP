@@ -3,12 +3,13 @@
 
   if (window.ParadiseQualityGateUi) return;
 
-  const VERSION = '1.1.0-core-v1-render-diagnostic';
+  const VERSION = '1.2.0-core-v1-render-diagnostic';
   const RENDER_CHECK_STYLE_ID = 'paradise-profile-render-check-style';
   const RENDER_CHECK_LABEL_ID = 'paradise-profile-render-check-label';
-  const STYLE_PROPS = ['background', 'backgroundColor', 'border', 'borderRadius', 'padding', 'fontSize', 'boxShadow', 'width', 'height', 'maxHeight'];
+  const STYLE_PROPS = ['background', 'backgroundColor', 'border', 'borderRadius', 'padding', 'fontSize', 'boxShadow', 'width', 'height', 'maxHeight', 'outline', 'outlineOffset', 'display', 'visibility', 'opacity', 'position', 'zIndex'];
   let destroyed = false;
   let scheduled = false;
+  let renderCheckTouched = [];
 
   function schedule() {
     if (destroyed || scheduled) return;
@@ -56,20 +57,28 @@
   function computedSnapshot(selector) {
     const element = document.querySelector(selector);
     if (!element) return { selector, exists: false };
+    return elementSnapshot(element, selector);
+  }
+
+  function elementSnapshot(element, selector = null) {
     const style = getComputedStyle(element);
     const values = {};
     STYLE_PROPS.forEach(prop => { values[prop] = style[prop]; });
+    const rect = element.getBoundingClientRect();
     return {
       selector,
       exists: true,
       tag: element.tagName,
       className: element.className,
+      id: element.id || null,
+      ariaHidden: element.getAttribute('aria-hidden'),
       rect: {
-        x: Math.round(element.getBoundingClientRect().x),
-        y: Math.round(element.getBoundingClientRect().y),
-        width: Math.round(element.getBoundingClientRect().width),
-        height: Math.round(element.getBoundingClientRect().height)
+        x: Math.round(rect.x),
+        y: Math.round(rect.y),
+        width: Math.round(rect.width),
+        height: Math.round(rect.height)
       },
+      visible: rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) !== 0,
       computed: values
     };
   }
@@ -108,17 +117,25 @@
     return output;
   }
 
+  function profileInstances() {
+    return [...document.querySelectorAll('#paradise-rp-hud .pr-window[data-window="profile"]')]
+      .map((element, index) => ({ index, ...elementSnapshot(element, `profile[${index}]`) }));
+  }
+
   function componentMap() {
     return {
       roots: {
         nitroRoot: Boolean(document.getElementById('root')),
         paradiseRoot: Boolean(document.getElementById('paradise-ui-root')),
         paradiseHud: Boolean(document.getElementById('paradise-rp-hud')),
+        paradiseHudCount: document.querySelectorAll('#paradise-rp-hud').length,
         outerLegacyAppInsideFrame: Boolean(document.getElementById('app'))
       },
       profile: {
         window: Boolean(document.querySelector('#paradise-rp-hud .pr-window[data-window="profile"]')),
+        windowCount: document.querySelectorAll('#paradise-rp-hud .pr-window[data-window="profile"]').length,
         component: Boolean(document.querySelector('#paradise-rp-hud .pr2-profile')),
+        componentCount: document.querySelectorAll('#paradise-rp-hud .pr2-profile').length,
         generator: 'paradise-character-v2.js',
         generatorLoaded: assetLoaded('paradise-character-v2.js'),
         styles: ['paradise-character-v2.css', 'paradise-quality-gate.css'],
@@ -153,10 +170,13 @@
       baseline: window.__PARADISE_BASELINE__ || null,
       activeWindow: window.ParadiseWindowManager?.getActiveWindow?.() || null,
       components: componentMap(),
+      profileInstances: profileInstances(),
       profileWindow: computedSnapshot('#paradise-rp-hud .pr-window[data-window="profile"]'),
+      profileHeader: computedSnapshot('#paradise-rp-hud .pr-window[data-window="profile"] .pr-window-header'),
       profileComponent: computedSnapshot('#paradise-rp-hud .pr2-profile'),
       profileAvatarCard: computedSnapshot('#paradise-rp-hud .pr2-avatar-card'),
       profileWindowRules: matchingRules('#paradise-rp-hud .pr-window[data-window="profile"]'),
+      profileHeaderRules: matchingRules('#paradise-rp-hud .pr-window[data-window="profile"] .pr-window-header'),
       profileAvatarRules: matchingRules('#paradise-rp-hud .pr2-avatar-card'),
       loadedStyles: [...document.querySelectorAll('link[rel="stylesheet"][href]')].map(node => node.href),
       loadedScripts: [...document.querySelectorAll('script[src]')].map(node => node.src)
@@ -186,50 +206,89 @@
     return results;
   }
 
-  function runProfileVisualCheck() {
-    window.ParadiseWindowManager?.openWindow?.('profile');
-    document.getElementById(RENDER_CHECK_STYLE_ID)?.remove();
-    document.getElementById(RENDER_CHECK_LABEL_ID)?.remove();
+  function rememberInline(element) {
+    if (!element || renderCheckTouched.some(entry => entry.element === element)) return;
+    renderCheckTouched.push({ element, cssText: element.style.cssText });
+  }
 
-    const style = document.createElement('style');
-    style.id = RENDER_CHECK_STYLE_ID;
-    style.textContent = `
-      #paradise-rp-hud .pr-window[data-window="profile"] { outline: 4px solid #ff00ff !important; outline-offset: -4px !important; }
-      #paradise-rp-hud .pr-window[data-window="profile"] .pr-window-header { background: #ff00ff !important; }
-      #paradise-rp-hud .pr-window[data-window="profile"] .pr-window-title strong,
-      #paradise-rp-hud .pr-window[data-window="profile"] .pr-window-title small { color: #ffffff !important; }
-    `;
-    document.head.appendChild(style);
-
-    const win = document.querySelector('#paradise-rp-hud .pr-window[data-window="profile"]');
-    if (win) {
-      const label = document.createElement('div');
-      label.id = RENDER_CHECK_LABEL_ID;
-      label.textContent = 'DEV-RENDER-CHECK · PROFILE ACTIF';
-      Object.assign(label.style, {
-        position: 'absolute',
-        zIndex: '99999',
-        top: '64px',
-        right: '12px',
-        padding: '7px 10px',
-        borderRadius: '6px',
-        background: '#ff00ff',
-        color: '#ffffff',
-        fontSize: '11px',
-        fontWeight: '900',
-        letterSpacing: '.04em',
-        boxShadow: '0 4px 12px rgba(0,0,0,.25)',
-        pointerEvents: 'none'
-      });
-      win.appendChild(label);
-    }
-    return computedSnapshot('#paradise-rp-hud .pr-window[data-window="profile"]');
+  function forceStyle(element, properties) {
+    if (!element) return;
+    rememberInline(element);
+    Object.entries(properties).forEach(([name, value]) => element.style.setProperty(name, value, 'important'));
   }
 
   function clearProfileVisualCheck() {
     document.getElementById(RENDER_CHECK_STYLE_ID)?.remove();
-    document.getElementById(RENDER_CHECK_LABEL_ID)?.remove();
+    document.querySelectorAll(`[id^="${RENDER_CHECK_LABEL_ID}"]`).forEach(node => node.remove());
+    renderCheckTouched.forEach(({ element, cssText }) => {
+      if (element?.isConnected) element.style.cssText = cssText;
+    });
+    renderCheckTouched = [];
     return true;
+  }
+
+  function runProfileVisualCheck() {
+    window.ParadiseWindowManager?.openWindow?.('profile');
+    clearProfileVisualCheck();
+
+    const windows = [...document.querySelectorAll('#paradise-rp-hud .pr-window[data-window="profile"]')];
+    const results = [];
+
+    windows.forEach((win, index) => {
+      const header = win.querySelector('.pr-window-header');
+      const titleStrong = win.querySelector('.pr-window-title strong');
+      const titleSmall = win.querySelector('.pr-window-title small');
+
+      forceStyle(win, {
+        outline: '6px solid #ff00ff',
+        'outline-offset': '-6px',
+        'box-shadow': '0 0 0 8px rgba(255,0,255,.35), 0 18px 50px rgba(255,0,255,.45)'
+      });
+      forceStyle(header, {
+        background: '#ff00ff',
+        'background-color': '#ff00ff',
+        position: 'relative'
+      });
+      forceStyle(titleStrong, { color: '#ffffff' });
+      forceStyle(titleSmall, { color: '#ffffff' });
+
+      const label = document.createElement('div');
+      label.id = `${RENDER_CHECK_LABEL_ID}-${index}`;
+      label.textContent = `DEV-RENDER-CHECK · PROFILE ${index + 1}/${windows.length}`;
+      Object.assign(label.style, {
+        position: 'absolute',
+        zIndex: '2147483647',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        padding: '8px 12px',
+        borderRadius: '6px',
+        background: '#170017',
+        border: '2px solid #ffffff',
+        color: '#ffffff',
+        fontSize: '11px',
+        fontWeight: '900',
+        letterSpacing: '.05em',
+        whiteSpace: 'nowrap',
+        boxShadow: '0 4px 14px rgba(0,0,0,.35)',
+        pointerEvents: 'none'
+      });
+      (header || win).appendChild(label);
+
+      results.push({
+        index,
+        window: elementSnapshot(win, `profile[${index}]`),
+        header: header ? elementSnapshot(header, `profile[${index}] header`) : { exists: false },
+        labelConnected: label.isConnected
+      });
+    });
+
+    return {
+      version: VERSION,
+      count: windows.length,
+      visibleCount: results.filter(item => item.window.visible).length,
+      results
+    };
   }
 
   function destroy() {
@@ -255,13 +314,16 @@
     clearProfileVisualCheck,
     inspect: computedSnapshot,
     matchingRules,
+    profileInstances,
     getStatus: () => ({
       version: VERSION,
       destroyed,
       actionsVehiclesRemoved: !document.querySelector('#paradise-rp-hud .pr-actions-menu [data-window-open="vehicles"]'),
       notificationBellRouted: Boolean(document.querySelector('#paradise-rp-hud [data-qg-notification-route="phone"]')),
       renderDiagnosticAvailable: true,
-      profileRenderCheckActive: Boolean(document.getElementById(RENDER_CHECK_STYLE_ID))
+      profileRenderCheckActive: renderCheckTouched.length > 0,
+      profileWindowCount: document.querySelectorAll('#paradise-rp-hud .pr-window[data-window="profile"]').length,
+      profileComponentCount: document.querySelectorAll('#paradise-rp-hud .pr2-profile').length
     })
   });
 })();
