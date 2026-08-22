@@ -7,6 +7,8 @@ on:
   pull_request:
     paths:
       - 'RDP EMU header change/**/*.cs'
+      - 'RDP EMU header change/**/*.ps1'
+      - 'RDP EMU header change/Directory.Build.targets'
       - 'RDP EMU header change/Plus Emulator.csproj'
       - '.github/workflows/paradise-emu-core-v2-build.yml'
 
@@ -17,12 +19,26 @@ jobs:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
       - uses: NuGet/setup-nuget@v2
+
+      - name: Clean generated outputs
+        shell: pwsh
+        run: |
+          Remove-Item -Recurse -Force "RDP EMU header change\bin" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "RDP EMU header change\obj" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "RDP EMU header change\packages" -ErrorAction SilentlyContinue
+
+      - name: Restore canonical legacy dependencies
+        shell: pwsh
+        run: '& "RDP EMU header change\RestoreLegacyDependencies.ps1"'
+
       - name: Restore packages
         shell: pwsh
         run: nuget restore "RDP EMU header change\Plus Emulator.sln" -NonInteractive
+
       - name: Build emulator
         shell: pwsh
         run: msbuild "RDP EMU header change\Plus Emulator.csproj" /t:Build /p:Configuration=Debug /p:Platform=x64 /m
+
       - name: System message guards
         shell: pwsh
         run: |
