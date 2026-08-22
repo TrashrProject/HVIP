@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Plus.Utilities;
 using Plus.HabboHotel.Rooms;
 using Plus.HabboHotel.GameClients;
+using Plus.HabboRoleplay.Paradise.Commands;
 
 using Plus.HabboHotel.Rooms.Chat.Commands.User;
 using Plus.HabboHotel.Rooms.Chat.Commands.User.Fun;
@@ -67,6 +68,10 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands
             this.RegisterModerator();
             this.RegisterAdministrator();
             this.RegisterDeveloper();
+
+            // Keep the legacy registry as the single command source-of-truth;
+            // ParadiseRP commands are appended to that existing registry.
+            ParadiseCommandBootstrap.Register(this);
         }
 
         /// <summary>
@@ -665,7 +670,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands
                 else if (Type.ToLower() == "police")
                     dbClient.SetQuery("INSERT INTO `command_logs_police` (`user_id`,`data_string`,`machine_id`, `timestamp`) VALUES (@UserId,@Data,@MachineId,@Timestamp)");
                 else if (Type.ToLower() == "logged")
-                    dbClient.SetQuery("INSERT INTO `command_logs` (`user_id`,`data_string`,`machine_id`, `timestamp`) VALUES (@UserId,@Data,@MachineId,@Timestamp)");
+                    dbClient.SetQuery("INSERT INTO `command_logs` (`user_id`,`data_string`,`machine_id`,`timestamp`) VALUES (@UserId,@Data,@MachineId,@Timestamp)");
                 dbClient.AddParameter("UserId", UserId);
                 dbClient.AddParameter("Data", Data);
                 dbClient.AddParameter("MachineId", MachineId);
