@@ -3,4 +3,11 @@ obj/
 runtime/
 *.user
 *.suo
-Logs/
+/Logs/
+
+!Core/Cache/
+!Core/Cache/**
+!HabboHotel/Cache/
+!HabboHotel/Cache/**
+!HabboHotel/Rooms/Chat/Logs/
+!HabboHotel/Rooms/Chat/Logs/**
