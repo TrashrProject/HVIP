@@ -1,0 +1,6 @@
+bin/
+obj/
+runtime/
+*.user
+*.suo
+Logs/
