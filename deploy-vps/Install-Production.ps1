@@ -2,6 +2,7 @@ $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 $source=Join-Path $root 'WavePlus'
 $sql=Join-Path $source 'waveplus.sql'
+$migrations=Join-Path $source 'database\production-migrations.sql'
 $out=Join-Path $root 'runtime\WavePlus'
 Write-Host 'Installation WavePlus + base ParadiseRP' -ForegroundColor Cyan
 $mysql=@('C:\xampp\mysql\bin\mysql.exe','C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe')|Where-Object{Test-Path $_}|Select-Object -First 1
@@ -20,6 +21,10 @@ try{
  if($LASTEXITCODE){throw 'Creation base impossible'}
  $imp=Start-Process $mysql -ArgumentList @("--host=$h","--port=$p","--user=$u","--database=$n",'--default-character-set=utf8mb4') -RedirectStandardInput $sql -NoNewWindow -Wait -PassThru
  if($imp.ExitCode){throw 'Import SQL echoue'}
+ if(Test-Path $migrations){
+  $mig=Start-Process $mysql -ArgumentList @("--host=$h","--port=$p","--user=$u","--database=$n",'--default-character-set=utf8mb4') -RedirectStandardInput $migrations -NoNewWindow -Wait -PassThru
+  if($mig.ExitCode){throw 'Migration SQL echouee'}
+ }
  $cp=Join-Path $source 'Config\config.ini';$cfg=[IO.File]::ReadAllText($cp)
  $v=@{'db.hostname'=$h;'db.port'=$p;'db.username'=$u;'db.password'=$pw.Replace("`r",'').Replace("`n",'');'db.name'=$n}
  foreach($k in $v.Keys){$cfg=[regex]::Replace($cfg,"(?m)^$([regex]::Escape($k))=.*$","$k=$($v[$k])")}
