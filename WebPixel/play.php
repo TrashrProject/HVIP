@@ -233,7 +233,7 @@ $nitroParams = ['sso' => $ticket, '_boot' => $bootNonce];
 if ($autoRoomId > 0) $nitroParams = ['room' => $autoRoomId, 'sso' => $ticket, '_boot' => $bootNonce];
 if (isset($_GET['prdebug']) && $_GET['prdebug'] === '1') $nitroParams['prdebug'] = '1';
 
-$nitroSrc = '/nitro-last/index.html?' . http_build_query($nitroParams, '', '&', PHP_QUERY_RFC3986);
+$nitroSrc = '/nitro/index.html?' . http_build_query($nitroParams, '', '&', PHP_QUERY_RFC3986);
 $nitroSrcHtml = htmlspecialchars($nitroSrc, ENT_QUOTES, 'UTF-8');
 $autoRoomJs = (int)$autoRoomId;
 $ticketJs = json_encode($ticket, JSON_UNESCAPED_SLASHES);
@@ -285,7 +285,7 @@ $authDebugJs = json_encode($authDebug, JSON_UNESCAPED_SLASHES);
             state.reason = reason || 'roomless';
             setState(state);
             if (notice) notice.style.display = 'block';
-            const next = new URL('/nitro-last/index.html', window.location.origin);
+            const next = new URL('/nitro/index.html', window.location.origin);
             next.searchParams.set('room', String(autoRoomId));
             next.searchParams.set('sso', ticket || '');
             next.searchParams.set('_boot', String(now));

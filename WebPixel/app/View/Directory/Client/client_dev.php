@@ -197,7 +197,7 @@ endif;*/
 		</div>
 		<?php endif; ?>
 
-		<iframe src="https://paradiserp.fr/WebPixel/nitro/?sso=<?php echo $ClientAUTH; ?>" class="Nitro">
+		<iframe src="https://paradiserp.fr/nitro/?sso=<?php echo $ClientAUTH; ?>" class="Nitro">
 		</iframe>
 
 		<!--<div id="AdBox3">

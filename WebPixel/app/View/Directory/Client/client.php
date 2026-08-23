@@ -219,7 +219,7 @@ endif;*/
 		</div>
 		<?php endif; ?>-->
 
-		<iframe src="https://paradiserp.fr/WebPixel/nitro/?sso=<?php echo $ClientAUTH; ?>" class="Nitro" allow="camera none; microphone *">
+		<iframe src="https://paradiserp.fr/nitro/?sso=<?php echo $ClientAUTH; ?>" class="Nitro" allow="camera none; microphone *">
 		</iframe>
 
 
