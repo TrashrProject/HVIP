@@ -27,3 +27,17 @@ CREATE TABLE IF NOT EXISTS `user_xmas15_calendar` (
   `day` int(11) NOT NULL DEFAULT 0,
   KEY `idx_user_xmas15_calendar_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+UPDATE `website_settings`
+SET `value` = '0'
+WHERE `key` IN ('maintenance_enabled', 'requires_beta_code', 'disable_registration', 'disable_register');
+
+UPDATE `website_settings`
+SET `value` = 'https://paradiserp.fr'
+WHERE `key` = 'avatar_imager';
+
+UPDATE `rdp_config`
+SET `site_name` = 'ParadiseRP',
+    `site_url` = 'paradiserp.fr',
+    `site_ssl` = 'https',
+    `beta_mode` = 'off';

@@ -44,6 +44,24 @@ try{
  $runtimeConfigDir=Join-Path $out 'Config'
  New-Item -ItemType Directory -Path $runtimeConfigDir -Force|Out-Null
  [IO.File]::WriteAllText((Join-Path $runtimeConfigDir 'config.ini'),$cfg)
+ $cmsConfigPath=Join-Path $root 'WebPixel\app\Controller\Config.class.php'
+ if(Test-Path $cmsConfigPath){
+  $cms=[IO.File]::ReadAllText($cmsConfigPath)
+  $phpValues=@{
+   'DBHOST'=$h
+   'DBName'=$n
+   'DBUser'=$u
+   'DBPass'=$pw
+  }
+  foreach($property in $phpValues.Keys){
+   $escaped=[string]$phpValues[$property]
+   $escaped=$escaped.Replace('\','\\').Replace("'","\'").Replace("`r",'').Replace("`n",'')
+   $replacement="    protected static `$$property = '$escaped';"
+   $pattern="(?m)^\s*protected static \`$$property\s*=\s*.*?;\s*$"
+   $cms=[regex]::Replace($cms,$pattern,[System.Text.RegularExpressions.MatchEvaluator]{param($match)$replacement})
+  }
+  [IO.File]::WriteAllText($cmsConfigPath,$cms)
+ }
  Push-Location (Join-Path $root 'nitro-proxy');try{npm install --omit=dev;if($LASTEXITCODE){throw 'npm install echoue'}}finally{Pop-Location}
  Write-Host 'PRET. Lance LANCER-PARADISERP.bat' -ForegroundColor Green
 }finally{$env:MYSQL_PWD=$null;if($ptr-ne[IntPtr]::Zero){[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)}}
