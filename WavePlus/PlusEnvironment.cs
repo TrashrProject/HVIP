@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -239,7 +239,12 @@ namespace Plus
                 HabboEncryptionV2.Initialize(new RSAKeys());
 
                 //Make sure Rcon is connected before we allow clients to Connect.
-                _rcon = new RconSocket(GetConfig().Data["rcon.tcp.bindip"], int.Parse(GetConfig().Data["rcon.tcp.port"]), GetConfig().Data["rcon.tcp.allowedaddr"].Split(Convert.ToChar(";")));
+                try {
+                    _rcon = new RconSocket(GetConfig().Data["rcon.tcp.bindip"], int.Parse(GetConfig().Data["rcon.tcp.port"]), GetConfig().Data["rcon.tcp.allowedaddr"].Split(Convert.ToChar(";")));
+                } catch (System.Net.Sockets.SocketException e) {
+                    _rcon = null;
+                    Log.Warn("RCON disabled because its socket could not be opened: " + e.Message);
+                }
 
                 _game = new Game();
                 _game.StartGameLoop();
