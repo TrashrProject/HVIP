@@ -15,7 +15,7 @@
     <meta content="#000000" name="theme-color"/>
     <meta content="yes" name="apple-mobile-web-app-capable">
     <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
-    <base href="/WebPixel/nitro/">
+    <base href="/nitro/">
     <title>Nitro</title>
 
   <script type="module" crossorigin src="./assets/index-988G3uA2.js"></script>
@@ -32,7 +32,7 @@
 <div id="app"></div>
 <script>
     const NitroConfig = {
-        "config.urls": ['/WebPixel/nitro/local-config.json?v=4', '/WebPixel/nitro/renderer-config.json?v=4', '/WebPixel/nitro/ui-config.json?v=4'],
+        "config.urls": ['/nitro/local-config.json?v=4', '/nitro/renderer-config.json?v=4', '/nitro/ui-config.json?v=4'],
         "sso.ticket": (new URLSearchParams(window.location.search).get('sso') || null),
         "forward.type": (new URLSearchParams(window.location.search).get('room') ? 2 : -1),
         "forward.id": (new URLSearchParams(window.location.search).get('room') || 0),
