@@ -30,6 +30,12 @@ try{
  foreach($k in $v.Keys){$cfg=[regex]::Replace($cfg,"(?m)^$([regex]::Escape($k))=.*$","$k=$($v[$k])")}
  $cfg=[regex]::Replace($cfg,'(?m)^group\.badge\.url=.*$','group.badge.url=https://paradiserp.fr/swf_pz/V5-0-2/c_images/Badgeparts/%badge%.png')
  [IO.File]::WriteAllText($cp,$cfg)
+ $runningWavePlus=Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($out,[StringComparison]::OrdinalIgnoreCase) }
+ if($runningWavePlus){
+  Write-Host 'Arret de WavePlus avant mise a jour...' -ForegroundColor Yellow
+  $runningWavePlus | Stop-Process -Force
+  Start-Sleep -Seconds 2
+ }
  New-Item -ItemType Directory -Path $out -Force|Out-Null
  & dotnet publish (Join-Path $source 'Plus.csproj') -c Release -r win-x64 --self-contained true -o $out
  if($LASTEXITCODE){throw 'Compilation WavePlus echouee'}
