@@ -21,8 +21,6 @@ CREATE TABLE IF NOT EXISTS `rp_clothing_sets` (
   KEY `idx_rp_clothing_sets_tab_id` (`tab_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `furniture_copy1` LIKE `furniture`;
-
 CREATE TABLE IF NOT EXISTS `user_xmas15_calendar` (
   `user_id` int(11) NOT NULL,
   `status` int(11) NOT NULL DEFAULT 0,
