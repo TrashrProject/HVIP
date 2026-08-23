@@ -26,7 +26,9 @@ try{
   if($mig.ExitCode){throw 'Migration SQL echouee'}
  }
  $cp=Join-Path $source 'Config\config.ini';$cfg=[IO.File]::ReadAllText($cp)
- $v=@{'db.hostname'=$h;'db.port'=$p;'db.username'=$u;'db.password'=$pw.Replace("`r",'').Replace("`n",'');'db.name'=$n}
+ $rconPort=30001
+ while(Get-NetTCPConnection -State Listen -LocalPort $rconPort -ErrorAction SilentlyContinue){$rconPort++}
+ $v=@{'db.hostname'=$h;'db.port'=$p;'db.username'=$u;'db.password'=$pw.Replace("`r",'').Replace("`n",'');'rcon.tcp.port'=[string]$rconPort;'db.name'=$n}
  foreach($k in $v.Keys){$cfg=[regex]::Replace($cfg,"(?m)^$([regex]::Escape($k))=.*$","$k=$($v[$k])")}
  $cfg=[regex]::Replace($cfg,'(?m)^group\.badge\.url=.*$','group.badge.url=https://paradiserp.fr/swf_pz/V5-0-2/c_images/Badgeparts/%badge%.png')
  [IO.File]::WriteAllText($cp,$cfg)
