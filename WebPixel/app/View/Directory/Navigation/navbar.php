@@ -12,7 +12,7 @@
 <div class="navigation">
     <div class="container d-flex justify-content-center align-items-center">
         <a href="/" class="pixel-wrapper">
-            <img class="pixel" src="https://www.habbo.es/habbo-imaging/avatarimage?figure=<?php echo rawurlencode($UData['look']); ?>&amp;size=l&amp;headonly=1&amp;direction=2&amp;head_direction=3&amp;gesture=sml" alt="<?php echo htmlspecialchars($UData['username'], ENT_QUOTES, 'UTF-8'); ?>">
+            <img class="pixel" src="<?php echo URL; ?>/avatar.php?figure=<?php echo rawurlencode($UData['look']); ?>&amp;size=l&amp;direction=3&amp;head_direction=3&amp;gesture=sml&amp;v=<?php echo rawurlencode($UData['look']); ?>" alt="<?php echo htmlspecialchars($UData['username'], ENT_QUOTES, 'UTF-8'); ?>">
         </a>
         <div class="nav-button dropdown">
             <a href="#">
@@ -72,10 +72,9 @@
             </a>
         </div>
         <?php if(isset($UData) && (int)$UData['rank'] >= 3): ?>
-        <div class="nav-button">
-            <a href="<?php echo URL; ?>/admin">
-                <i class="fas fa-shield-alt"></i>
-                <span class="nav-button-text">Espace staff</span>
+        <div class="staff-navbar-action">
+            <a href="<?php echo URL; ?>/admin" title="Ouvrir l’administration">
+                <span>Administration</span>
             </a>
         </div>
         <?php endif; ?>

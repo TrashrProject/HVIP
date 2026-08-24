@@ -1,108 +1,43 @@
 <?php
-/**
- * PixelZone by RDP Services, Emulated by Retro Development Server.
- * The use of this program is restricted to clients and owners of RDP Services.
- * Any unauthorized use of this code it'll end up on deletion of the program.
- * Developers P3x & Jeihden.
- * Copyrights © 2020
- * Last Modified: $file.lastModefied
- */
-
-
+$roster=array();
+$rosterRows=$Corp->GetCorpRoster();
+while($row=mysqli_fetch_assoc($rosterRows)) {
+    $rank=(int)$row['rank'];
+    if(!isset($roster[$rank])) $roster[$rank]=array('name'=>$row['rank_name'],'pay'=>(int)$row['pay'],'members'=>array());
+    if($row['user_id']!==null && $row['username']!==null) $roster[$rank]['members'][]=$row;
+}
+$corpName=htmlspecialchars($Corp->CorpData['name'],ENT_QUOTES,'UTF-8');
 ?>
-
-
-<div class="content">
-
-    <div class="container">
-
-
-
-        <div class="row">
-            <div class="col-3">
-                <div class="content-box" style="margin-bottom: 10px;">
-                    <div class="title text-center"><?php echo $Corp->CorpData['name']; ?></div>
-                    <div class="box-content text-center">
-                        <div><img class="corporation-badge profile-level-box" style="padding: 15px;" src="<?php echo Config::$SWF; ?>/habbo-imaging/corp/<?php echo $Corp->CorpData['badge']; ?>.gif" ></div>
-                        <div></div>
-                        <div class="text-center p-2">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Employés
-                                    <span class="badge badge-secondary badge-pill peak"><?php echo $Corp->GetCorpEmployeesCount(); ?></span>
-                                </li>
-                                <?php if($Corp->CorpData['type'] == "1"): ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Valeur totale
-                                    <span class="badge badge-secondary badge-pill peak">$<?php echo number_format($Corp->CorpData['bank']); ?></span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Services terminés
-                                    <span class="badge badge-secondary badge-pill peak"><?php echo number_format($Corp->CorpData['shifts']); ?></span>
-                                </li>
-
-                                <?php endif; ?>
-
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+<div class="content"><div class="container">
+    <div class="profession-detail-heading"><a class="cms-back-link" href="<?php echo Config::$URL; ?>/corporations"><i class="fas fa-arrow-left"></i> Retour aux métiers</a></div>
+    <div class="row profession-detail-layout">
+        <aside class="col-3"><div class="content-box profession-summary">
+            <div class="title text-center"><?php echo $corpName; ?></div>
+            <div class="box-content text-center">
+                <div class="corporation-badge-stage"><span class="corporation-letter-badge large"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($Corp->CorpData['name'],0,1,'UTF-8'),'UTF-8'),ENT_QUOTES,'UTF-8'); ?></span></div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center"><span>Employés</span><b><?php echo $Corp->GetCorpEmployeesCount(); ?></b></li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center"><span>Valeur totale</span><b><?php echo number_format((int)$Corp->CorpData['bank'],0,',',' '); ?> $</b></li>
+                </ul>
             </div>
-            <div class="col">
-                <?php
-                $CorpRanks_ = $Corp->GetCorpRanks();
-                while($Ranks = mysqli_fetch_assoc($CorpRanks_)): ?>
-                <div class="content-box">
-                    <div class="title"><?php echo $Ranks['name']; ?></div>
-                    <div class="box-content">
-                        <div class="corporation-employee-grid">
-                            <?php
-                                $R = $Corp->GetCorpEmployeesByRank($Ranks['rank']);
-                                if(mysqli_num_rows($R) > 0):
-                                while ($E = mysqli_fetch_assoc($R)):
-                                    $EU = mysqli_fetch_assoc($DB->Query("SELECT id, username, look, online FROM users WHERE id = ".$E['user_id']." LIMIT 1"));
-                            ?>
-                            <a href="<?php echo Config::$URL; ?>/profile/<?php echo $EU['id']; ?>" class="employee d-flex justify-content-center align-items-center no-link-styling rank-">
-                                <div class="employee-pixel <?php echo ($EU['online'] == '0')? "grayscale" :  "" ; ?>">
-                                    <img src="https://nitro-imager.kubbo.ch/?figure=<?php echo $EU['look']; ?>&amp;head_direction=3&amp;gesture=sml">
-                                </div>
-                                <div>
-                                    <span class="font-weight-bold"><?php echo $EU['username']; ?></span>
-                                    <div class="employee-stats" style="font-size: 11px;">
-
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center justify-content-center flex-fill">
-                                    <img src="<?php echo DY; ?>/img/icons/<?php echo ($EU['online'] == '1')? "online" : "offline" ; ?>.gif">
-                                </div>
-                            </a>
-                            <?php endwhile; else: ?>
-                            <center><b>Aucun citoyen n’occupe ce poste.</b></center>
-                            <?php endif; ?>
-
-
-                        </div>
-                    </div>
-                    
+        </div></aside>
+        <main class="col">
+        <?php foreach($roster as $rank=>$rankData): ?>
+            <section class="content-box corporation-rank-box">
+                <div class="title"><?php echo htmlspecialchars($rankData['name'],ENT_QUOTES,'UTF-8'); ?><span class="title-small float-right"><small>Salaire : <?php echo number_format($rankData['pay'],0,',',' '); ?> $</small></span></div>
+                <div class="box-content">
+                <?php if(count($rankData['members'])): ?><div class="corporation-employee-grid">
+                    <?php foreach($rankData['members'] as $employee): ?>
+                    <a href="<?php echo Config::$URL; ?>/profile/<?php echo (int)$employee['user_id']; ?>" class="employee d-flex justify-content-center align-items-center no-link-styling">
+                        <div class="employee-pixel <?php echo $employee['online']=='1'?'':'grayscale'; ?>"><img src="<?php echo URL; ?>/avatar.php?figure=<?php echo rawurlencode($employee['look']); ?>&amp;head_direction=3&amp;direction=3&amp;gesture=sml" alt=""></div>
+                        <div class="profession-employee-name"><b><?php echo htmlspecialchars($employee['username'],ENT_QUOTES,'UTF-8'); ?></b><small><?php echo htmlspecialchars($rankData['name'],ENT_QUOTES,'UTF-8'); ?></small></div>
+                        <span class="corp-online-dot <?php echo $employee['online']=='1'?'on':''; ?>"></span>
+                    </a>
+                    <?php endforeach; ?>
+                </div><?php else: ?><div class="profession-empty"><i class="fas fa-user-clock"></i> Aucun citoyen n’occupe ce poste.</div><?php endif; ?>
                 </div>
-                <?php endwhile; ?>
-
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<!-- Responsive -->
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-5384077970237124"
-     data-ad-slot="7246095666"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-            </div>
-        </div>
-
-
-
-
+            </section>
+        <?php endforeach; ?>
+        </main>
     </div>
-</div>
+</div></div>

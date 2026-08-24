@@ -32,7 +32,7 @@ $C = 1;
                     <div class="flex-fill m-1" style="border-bottom: 2px solid <?php if($C == 1): echo "gold"; elseif($C == 2): echo "silver";  else: echo "#cd7f32;"; endif; ?>">
                         <div class="d-flex justify-content-center align-items-center pb-2">
                             <div>
-                                <img src="https://www.habbo.es/habbo-imaging/avatarimage?figure=<?php echo rawurlencode($Row['look']); ?>&amp;direction=2&amp;gesture=sml&amp;head_direction=3&amp;action=wav" alt="<?php echo htmlspecialchars($Row['username'], ENT_QUOTES, 'UTF-8'); ?>">
+                                <img src="<?php echo URL; ?>/avatar.php?figure=<?php echo rawurlencode($Row['look']); ?>&amp;direction=3&amp;gesture=sml&amp;head_direction=3&amp;action=wav&amp;v=<?php echo rawurlencode($Row['look']); ?>" alt="<?php echo htmlspecialchars($Row['username'], ENT_QUOTES, 'UTF-8'); ?>">
                             </div>
                             <div class="mr-auto">
 

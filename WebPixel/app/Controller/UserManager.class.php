@@ -30,11 +30,11 @@ class UserManager
 
         // A fresh hotel can have fewer than three users and does not necessarily
         // include the optional bans table. Neither case should crash the CMS.
-        $R = $this->DB->Query("SELECT users.username, users.look, users.credits, play_stats.bank
+        $R = $this->DB->Query("SELECT users.username, users.look, users.credits, COALESCE(user_rp_bank.balance,0) AS bank
             FROM users
-            INNER JOIN play_stats ON play_stats.id = users.id
+            LEFT JOIN user_rp_bank ON user_rp_bank.user_id = users.id
             WHERE users.username != 'Tester'
-            ORDER BY play_stats.bank + users.credits DESC
+            ORDER BY users.credits + COALESCE(user_rp_bank.balance,0) DESC
             LIMIT 3");
 
         return ($R instanceof mysqli_result) ? $R : false;
@@ -47,7 +47,8 @@ class UserManager
         // The database uses ID 0 for the initial account. It is a valid user,
         // not a missing value, and must receive an SSO ticket too.
         if($I !== null && is_numeric($I) && (int)$I >= 0):
-            $this->DB->Update("users", "rdpticket = '". $T ."'", "id = ". (int)$I);
+            // WavePlus authenticates Nitro sessions through users.auth_ticket.
+            $this->DB->Update("users", "auth_ticket = '". $T ."'", "id = ". (int)$I);
             return $T;
         else:
             return "";
@@ -60,7 +61,7 @@ class UserManager
     {
         //Find right type
         if($Data == "money"):
-            $r = mysqli_fetch_assoc($this->DB->Query("SELECT SUM(p.bank + u.credits) as total FROM play_stats p INNER JOIN users u ON u.id = p.id WHERE u.rank < 2"));
+            $r = mysqli_fetch_assoc($this->DB->Query("SELECT COALESCE(SUM(u.credits + COALESCE(b.balance,0)),0) AS total FROM users u LEFT JOIN user_rp_bank b ON b.user_id=u.id"));
 
             return number_format($r['total']);
         elseif($Data == "users_registered"):
@@ -69,23 +70,33 @@ class UserManager
         elseif($Data == "apts_total"):
             $R = mysqli_fetch_assoc($this->DB->Query("SELECT COUNT(*) as Total FROM play_apartments_owned"));
             return number_format($R['Total']);
+        elseif($Data == "rp_locations"):
+            $R = mysqli_fetch_assoc($this->DB->Query("SELECT COUNT(*) AS Total FROM rooms WHERE roomtype='public'"));
+            return number_format($R['Total']);
         elseif($Data == "gangs_total"):
-            $R = mysqli_fetch_assoc($this->DB->Query("SELECT COUNT(*) as Total FROM groups WHERE type = '3'"));
+            $R = mysqli_fetch_assoc($this->DB->Query("SELECT COUNT(*) as Total FROM groups WHERE group_type IN (2, 3)"));
             return number_format($R['Total']);
         elseif($Data == "business_count"):
-            $R = mysqli_fetch_assoc($this->DB->Query("SELECT COUNT(*) as Total FROM groups WHERE type = '1'"));
+            $R = mysqli_fetch_assoc($this->DB->Query("SELECT COUNT(*) as Total FROM groups WHERE group_type IN (1,5)"));
             return number_format($R['Total']);
         elseif($Data == "users_online"):
             $R = mysqli_fetch_assoc($this->DB->Query("SELECT COUNT(*) as Total FROM users WHERE online = '1'"));
             return number_format($R['Total']);
         elseif($Data == "users_bans"):
 
-            $R = mysqli_fetch_assoc($this->DB->Query("SELECT COUNT(*) as Total FROM bans WHERE expire >= " . time()));
+            $R = mysqli_fetch_assoc($this->DB->Query("SELECT COUNT(*) as Total FROM bans WHERE ban_expire >= " . time()));
             return number_format($R['Total']);
         elseif($Data == "edit_version"):
             return "Build #" . Config::$V;
         endif;
 
+    }
+
+    public function GetUserGameStats($userId)
+    {
+        $userId = (int) $userId;
+        $R = $this->DB->Query("SELECT u.credits,u.vip_points,COALESCE(b.balance,0) AS bank,COALESCE(r.experience,0) AS experience,COALESCE(r.health,100) AS health,COALESCE(r.energy,100) AS energy FROM users u LEFT JOIN user_rp_bank b ON b.user_id=u.id LEFT JOIN user_rp_statistics r ON r.user_id=u.id WHERE u.id={$userId} LIMIT 1");
+        return mysqli_num_rows($R) === 1 ? mysqli_fetch_assoc($R) : array('credits'=>0,'vip_points'=>0,'bank'=>0,'experience'=>0,'health'=>100,'energy'=>100);
     }
 
     // Gets Stats
@@ -113,9 +124,32 @@ class UserManager
 
     }
 
+    /** Classements alimentés par les tables réellement utilisées par WavePlus. */
+    public function GetGameLeaderboard($metric)
+    {
+        $metrics = array(
+            'wealth' => array('LEFT JOIN user_rp_bank s ON s.user_id=u.id', '(u.credits + COALESCE(s.balance,0))'),
+            'online_time' => array('INNER JOIN user_stats s ON s.id=u.id', 's.OnlineTime'),
+            'room_visits' => array('INNER JOIN user_stats s ON s.id=u.id', 's.RoomVisits'),
+            'achievement_score' => array('INNER JOIN user_stats s ON s.id=u.id', 's.AchievementScore'),
+            'experience' => array('INNER JOIN user_rp_statistics s ON s.user_id=u.id', 's.experience'),
+            'strength' => array('INNER JOIN user_rp_statistics s ON s.user_id=u.id', 's.strength'),
+            'knowledge' => array('INNER JOIN user_rp_statistics s ON s.user_id=u.id', 's.knowledge'),
+            'damage_dealt' => array('INNER JOIN user_rp_statistics s ON s.user_id=u.id', 's.damage_dealt'),
+            'knockouts' => array('INNER JOIN user_rp_statistics s ON s.user_id=u.id', 's.knockouts'),
+            'robberies' => array('INNER JOIN user_rp_statistics s ON s.user_id=u.id', 's.robberies'),
+            'escapes' => array('INNER JOIN user_rp_statistics s ON s.user_id=u.id', 's.escapes'),
+            'respect' => array('INNER JOIN user_stats s ON s.id=u.id', 's.Respect')
+        );
+        if (!isset($metrics[$metric])) return null;
+        $join = $metrics[$metric][0];
+        $value = $metrics[$metric][1];
+        return $this->DB->Query("SELECT u.id,u.username,u.look,u.online,{$value} AS value FROM users u {$join} ORDER BY value DESC,u.username ASC LIMIT 8");
+    }
+
     // Gets Stats
     public function GetStaffs(){
-        $R = $this->DB->Query("SELECT username, look, online, rank, id FROM users WHERE rank > 2 AND rank < 8 AND username != 'Jeihden' ORDER BY rank DESC");
+        $R = $this->DB->Query("SELECT u.username, u.look, u.online, u.rank, u.id, pg.name AS rank_name, pg.description AS rank_description, pg.level AS rank_level FROM users u INNER JOIN permissions_groups pg ON pg.id = u.rank WHERE pg.level >= 3 ORDER BY pg.level DESC, u.username ASC");
         return $R;
     }
 
@@ -191,14 +225,14 @@ class UserManager
         // Does the Password Matches
         $Match = $this->Session->MatchPass($U, $Old);
         if($Match == false):
-            $JS['msg'] = "Tu contranseña actual no es correcta.";
+            $JS['msg'] = "Ton mot de passe actuel est incorrect.";
             $JS['result'] = false;
             return json_encode($JS);
         endif;
 
-        $NPass = AppFunctions::EncryptPass($N);
+        $NPass = password_hash($N, PASSWORD_DEFAULT);
         $this->Session->UpdateOldPassword($U, $NPass);
-        $JS['msg'] = "Tu contraseña ha sido actualizada correctamente.";
+        $JS['msg'] = "Ton mot de passe a été mis à jour.";
         $JS['result'] = true;
         return json_encode($JS);
     }

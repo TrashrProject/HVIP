@@ -20,15 +20,19 @@
                         <?php
                         $R_ = $UserMG->GetStaffs();
                         $CurrentStaffRank = null;
-                        $StaffRankNames = array(7 => 'Fondateurs', 6 => 'Développeurs', 5 => 'Administrateurs', 4 => 'Modérateurs', 3 => 'Assistants');
                         while($Row = mysqli_fetch_assoc($R_)): 
-                            if($Row['rank'] == 7): $Badge = "DEV"; elseif($Row['rank'] == 6): $Badge = "DEV"; elseif($Row['rank'] == 5): $Badge = "ADM"; elseif($Row['rank'] == 4): $Badge = "MOD"; elseif($Row['rank'] == 3): $Badge = "STAFF"; endif;
-                            $BadgeFile = ($Row['rank'] == 7) ? 'FOND.png' : $Badge . '.png';
+                            $RankName = (string)($Row['rank_name'] ?? ('Rang '.$Row['rank']));
+                            $RankKey = strtolower($RankName);
+                            if(strpos($RankKey, 'owner') !== false || strpos($RankKey, 'founder') !== false): $BadgeFile = 'FOND.png';
+                            elseif(strpos($RankKey, 'developer') !== false): $BadgeFile = 'DEV.png';
+                            elseif(strpos($RankKey, 'administrator') !== false || strpos($RankKey, 'manager') !== false): $BadgeFile = 'ADM.png';
+                            elseif(strpos($RankKey, 'moderator') !== false): $BadgeFile = 'MOD.png';
+                            else: $BadgeFile = 'STAFF.png'; endif;
                             $BadgePath = dirname(__DIR__, 4) . '/Dynamics/img/staff/normalized/' . $BadgeFile;
                             if($CurrentStaffRank !== (int)$Row['rank']):
                                 $CurrentStaffRank = (int)$Row['rank'];
                         ?>
-                        <div class="staff-rank-heading"><span><?php echo $StaffRankNames[$CurrentStaffRank]; ?></span></div>
+                        <div class="staff-rank-heading"><span><?php echo htmlspecialchars($RankName, ENT_QUOTES, 'UTF-8'); ?></span></div>
                         <?php endif; ?>
                         <a href="<?php echo Config::$URL; ?>/profile/<?php echo $Row['id']; ?>" class="content-box mb-0 no-link-styling" style="<?php echo ($Row['online'] == '1')? "border-bottom: 3px solid #1dc40e;" : "" ; ?>">
                             <div class="title d-flex align-items-center" style="">
@@ -41,11 +45,11 @@
                                 </div>
                                 <div class="mr-auto">
                                     <div class="staff-role text-white">
-                                        <?php if($Row['rank'] == 7): echo "Fondateur"; elseif($Row['rank'] == 6): echo "D&eacute;veloppeur"; elseif($Row['rank'] == 5): echo "Administrateur"; elseif($Row['rank'] == 4): echo "Mod&eacute;rateur"; elseif($Row['rank'] == 3): echo "Assistant"; endif; ?>
+                                        <?php echo htmlspecialchars($RankName, ENT_QUOTES, 'UTF-8'); ?>
 
                                     </div>
                                 </div>
-                                <div class="mr-3"><img class="staff-rank-badge" src="<?php echo DY; ?>/img/staff/normalized/<?php echo $BadgeFile; ?>?v=<?php echo is_file($BadgePath) ? filemtime($BadgePath) : time(); ?>" alt="<?php echo ($Row['rank'] == 7) ? 'Fondateur' : $Badge; ?>"></div>
+                                <div class="mr-3"><img class="staff-rank-badge" src="<?php echo DY; ?>/img/staff/normalized/<?php echo $BadgeFile; ?>?v=<?php echo is_file($BadgePath) ? filemtime($BadgePath) : time(); ?>" alt="<?php echo htmlspecialchars($RankName, ENT_QUOTES, 'UTF-8'); ?>"></div>
                             </div>
                         </a>
 

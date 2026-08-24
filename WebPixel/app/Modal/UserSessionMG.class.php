@@ -54,6 +54,7 @@ class UserSessionMG
 
             // Update last ip
             $this->DB->Update("users", "ip_last = '". AppFunctions::GetIP() ."'", "username = '". $U ."'");
+            session_regenerate_id(true);
             $this->Session->Save(Config::$SessionName, $U);
             $Response['msg'] = "Connexion réussie, vous allez être redirigé dans un instant.";
             $Response['result'] = true;
@@ -110,13 +111,13 @@ class UserSessionMG
         endif;
 
         // Email Validation
-      /*  if(!filter_var($E, FILTER_VALIDATE_EMAIL)):
+        if(!filter_var($E, FILTER_VALIDATE_EMAIL)):
             // Message for Email failed validation
             $Response['msg'] = 'L’adresse e-mail renseignée n’est pas valide.';
             $Response['result'] = false;
             return json_encode($Response);
             exit;
-        endif;*/
+        endif;
 
         // Password Validation
         if(strlen($P) < 6):
@@ -157,24 +158,30 @@ class UserSessionMG
         endif;
 
         // Encrypt password
-        $P = AppFunctions::EncryptPass($P);
+        $P = password_hash($P, PASSWORD_DEFAULT);
 
         // Insert User in Database
         //Keys
         $PA["username"] = "username";
         $PA["password"] = "password";
-        //$PA["mail"]    = "mail";
+        $PA["mail"]    = "mail";
         $PA["ip_register"] = "ip_reg";
         $PA["ip_last"] = "ip_last";
         $PA["account_created"] = "account_created";
+        $PA["look"] = "look";
+        $PA["motto"] = "motto";
+        $PA["home_room_data"] = "home_room_data";
 
         // Values
         $VA["username"] = "'" . $U .  "'";
         $VA["password"] = "'" . $P . "'";
-       // $VA["mail"]    = "'" . $E . "'";
+        $VA["mail"]    = "'" . mysqli_real_escape_string($this->DB->Con(), $E) . "'";
         $VA["ip_register"] = "'" . AppFunctions::GetIP() . "'";
         $VA["ip_last"] = "'" . AppFunctions::GetIP() . "'";
         $VA["account_created"] = "" . time() . "";
+        $VA["look"] = "'hr-100-61.hd-180-1.ch-210-66.lg-270-82.sh-290-80'";
+        $VA["motto"] = "'Bienvenue sur ParadiseRP !'";
+        $VA["home_room_data"] = "'{\"roomid\":3,\"x\":18,\"y\":22,\"z\":0,\"rotation\":4,\"weapon\":0}'";
 
         // Insert new user to our records
         $this->DB->Insert("users", $PA, $VA);
@@ -195,6 +202,7 @@ class UserSessionMG
         $this->DB->Insert("play_stats", $PA_, $VA_);
         $this->DB->Insert("user_stats", $PA_, $VA_);
 
+        session_regenerate_id(true);
         $this->Session->Save(Config::$SessionName, $U);
 
         // Idea, se pueden mandar MUS de feed para avisar que alguein nuevo se ha registrado
@@ -272,19 +280,17 @@ class UserSessionMG
 
     // Mach old or new password encryption
     public function MatchPass($U, $P){
-
-        $PassOLD = AppFunctions::TryOldmatch($U, $P);
-        $Pass = AppFunctions::EncryptPass($P);
-
-        if($this->DB->Count("users", "null", "username = '" . $U . "' AND password = '" . $PassOLD . "'")):
-            $NPass = AppFunctions::EncryptPass($P);
-            $this->UpdateOldPassword($U, $NPass);
-            return true;
-        elseif($this->DB->Count("users", "null", "username = '" . $U . "' AND password = '" . $Pass . "'")):
-            return true;
-        else:
-            return false;
-        endif;
+        $stmt = mysqli_prepare($this->DB->Con(), "SELECT password FROM users WHERE username = ? LIMIT 1");
+        mysqli_stmt_bind_param($stmt, 's', $U);
+        mysqli_stmt_execute($stmt);
+        $row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+        mysqli_stmt_close($stmt);
+        if(!$row) return false;
+        $stored = (string)$row['password'];
+        $isModern = password_get_info($stored)['algo'] !== null;
+        $valid = $isModern ? password_verify($P, $stored) : (hash_equals($stored, AppFunctions::EncryptPass($P)) || hash_equals($stored, AppFunctions::TryOldmatch($U, $P)));
+        if($valid && !$isModern) $this->UpdateOldPassword($U, password_hash($P, PASSWORD_DEFAULT));
+        return $valid;
     }
 
     public function UpdateOldPassword($U, $P){
@@ -379,6 +385,9 @@ class UserSessionMG
         $PA["account_created"] = "account_created";
         $PA["facebook_id"] = "facebook_id";
         $PA["facebook_change_name"] = "facebook_change_name";
+        $PA["look"] = "look";
+        $PA["motto"] = "motto";
+        $PA["home_room_data"] = "home_room_data";
 
         // Values
         $VA["username"] = "'" . $U .  "'";
@@ -389,6 +398,9 @@ class UserSessionMG
         $VA["account_created"] = "" . time() . "";
         $VA["facebook_id"]  = "'" . $ID . "'";
         $VA["facebook_change_name"] = "'1'";
+        $VA["look"] = "'hr-100-61.hd-180-1.ch-210-66.lg-270-82.sh-290-80'";
+        $VA["motto"] = "'Bienvenue sur ParadiseRP !'";
+        $VA["home_room_data"] = "'{\"roomid\":3,\"x\":18,\"y\":22,\"z\":0,\"rotation\":4,\"weapon\":0}'";
 
 
         // Insert new user to our records
@@ -422,11 +434,22 @@ class UserSessionMG
     }
 
     public function BanValidation($T, $Data){
-
-        $R = $this->DB->Query("SELECT * FROM bans WHERE bantype = '". $T ."' AND value = '". $Data ."'");
+        if($T === 'user') $T = 'account';
+        $now = time();
+        if($T === 'ip'):
+            $stmt = mysqli_prepare($this->DB->Con(), "SELECT b.*, b.ban_expire AS expire, b.ban_reason AS reason FROM bans b WHERE b.type IN ('ip', 'super') AND b.ip = ? AND (b.ban_expire = 0 OR b.ban_expire >= ?) LIMIT 1");
+        else:
+            $stmt = mysqli_prepare($this->DB->Con(), "SELECT b.*, b.ban_expire AS expire, b.ban_reason AS reason FROM bans b INNER JOIN users u ON u.id = b.user_id WHERE b.type IN ('account', 'super') AND u.username = ? AND (b.ban_expire = 0 OR b.ban_expire >= ?) LIMIT 1");
+        endif;
+        if(!$stmt):
+            return ['banned' => false];
+        endif;
+        mysqli_stmt_bind_param($stmt, 'si', $Data, $now);
+        mysqli_stmt_execute($stmt);
+        $R = mysqli_stmt_get_result($stmt);
         if(mysqli_num_rows($R) >= 1):
             $Ban = mysqli_fetch_assoc($R);
-            if($Ban['expire'] >= time()):
+            if((int)$Ban['expire'] === 0 || $Ban['expire'] >= time()):
                 $R_['banned'] = true;
                 $R_['exp'] = $Ban['expire'];
                 $R_['reason'] = $Ban['reason'];

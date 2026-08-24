@@ -18,7 +18,7 @@ if (isset($_POST['badge'])):
     $Response['result'] = false;
     $Response['msg'] = "";
 
-    $LookUP = $DB->Query("SELECT * FROM groups WHERE owner_id = ".$UData['id']." AND type = '3'");
+    $LookUP = $DB->Query("SELECT *, group_type AS type FROM groups WHERE owner_id = ".$UData['id']." AND group_type IN (2, 3)");
     if(mysqli_num_rows($LookUP) > 0):
         while ($Results = mysqli_fetch_assoc($LookUP)):
             $Cost = ($Results['badge_changes'] > 0) ? 0 : 10000;
@@ -27,11 +27,11 @@ if (isset($_POST['badge'])):
                 $Response['result'] = false;
                 $Response['msg'] = "Necesitas $" . number_format($Cost) . " para editar el emblema de tu banda.";
             else:
-                if ($DB->Query("UPDATE groups SET badge = '".$B."', colour1 = '".$C1."', colour2 = '".$C2."' WHERE owner_id = ".$UData['id']." AND type = '3'")):
+                if ($DB->Query("UPDATE groups SET badge = '".$B."', colour1 = '".$C1."', colour2 = '".$C2."' WHERE owner_id = ".$UData['id']." AND group_type IN (2, 3)")):
 
                     // Restamos cambio de emblema gratuito
                     if ($Results['badge_changes'] > 0)
-                        $DB->Query("UPDATE groups SET badge_changes = badge_changes - 1 WHERE owner_id = ".$UData['id']." AND type = '3'");
+                        $DB->Query("UPDATE groups SET badge_changes = badge_changes - 1 WHERE owner_id = ".$UData['id']." AND group_type IN (2, 3)");
                     else
                         // Restamos dinero
                         $DB->Query("UPDATE users SET credits = credits - ".$Cost." WHERE id = ".$UData['id']);
@@ -74,5 +74,4 @@ require_once HEADER . 'main.php';
 require_once NAVBAR . 'navbar.php';
 require_once BODY . 'gang.php';
 require_once FOOTER . 'main.php';
-
 

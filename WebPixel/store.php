@@ -1,49 +1,8 @@
 <?php
-/**
- * PixelZone by RDP Services, Emulated by Retro Development Server.
- * The use of this program is restricted to clients and owners of RDP Services.
- * Any unauthorized use of this code it'll end up on deletion of the program.
- * Developers P3x & Jeihden.
- * Copyrights © 2020
- * Last Modified: $file.lastModefied
- */
-
-//Page Name
-$PageName = "Tienda";
-
-require_once "app/init.pz.php";
-
-// Redirect if logged in
-if(!$Session->Exist(Config::$SessionName)):
-    header("Location: /");
-    exit;
-endif;
-
-
-require_once 'app/Controller/StoreManager.class.php';
-$StoreMG = new StoreManager($DB);
-
-// If store checkout requested
-if(isset($_POST['orderID']) && isset($_POST['itemID'])):
-    $OrderID = AppFunctions::InjectionCleaner($_POST['orderID']);
-    $ItemID = AppFunctions::InjectionCleaner($_POST['itemID']);
-
-    require_once 'app/Controller/PayPalManager.php';
-    $_P = new PayPalManager($DB, $OrderID, $ItemID, $UData);
-
-    // Execute Transaction
-    echo $_P->ProcessTransaction();
-    exit;
-endif;
-
-if(isset($_POST['vipType'])):
-	$VIPType = AppFunctions::InjectionCleaner($_POST['vipType']);
-	echo $UserMG->BuyVIP($VIPType, $UData["id"]);
-    exit;
-endif;
-
-// Load Pages
-require_once HEADER . 'main.php';
-require_once NAVBAR . 'navbar.php';
-require_once BODY . 'Store.php';
-require_once FOOTER . 'main.php';
+$PageName='Boutique';require_once 'app/init.pz.php';
+if(!$Session->Exist(Config::$SessionName)){header('Location: '.Config::$URL.'/');exit;}
+require_once 'app/Controller/ShopService.class.php';$Shop=new ShopService($DB->Con());$ShopNotice='';$ShopError='';
+if(empty($_SESSION['shop_csrf']))$_SESSION['shop_csrf']=bin2hex(random_bytes(32));if(empty($_SESSION['shop_request_token']))$_SESSION['shop_request_token']=bin2hex(random_bytes(16));
+if($_SERVER['REQUEST_METHOD']==='POST'&&($_POST['action']??'')==='buy'){try{if(!hash_equals($_SESSION['shop_csrf'],(string)($_POST['csrf']??'')))throw new RuntimeException('Formulaire expiré.');$result=$Shop->buy((int)$UData['id'],(int)($_POST['product_id']??0),(string)($_POST['request_token']??''));$_SESSION['shop_request_token']=bin2hex(random_bytes(16));$ShopNotice='Achat effectué : '.$result['product'].'.';$User=new User($DB,$Session);$UData=$User->UData;$UPData=$User->UPData;}catch(Throwable $e){$ShopError=$e instanceof RuntimeException?$e->getMessage():'Achat impossible.';}}
+$category=max(0,(int)($_GET['category']??0));$ShopCategories=$Shop->categories();$ShopProducts=$Shop->products($category);$ShopHistory=$Shop->history((int)$UData['id']);
+require_once HEADER.'main.php';require_once NAVBAR.'navbar.php';require_once BODY.'store.php';require_once FOOTER.'main.php';

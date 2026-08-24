@@ -14,7 +14,7 @@ require_once "app/init.pz.php";
 if(isset($_POST['gname'])):
 
     $G = AppFunctions::GeneralClean($_POST['gname']);
-    $LookUP = $DB->Query("SELECT name, id, badge, type FROM groups WHERE name LIKE '%". $G ."%' AND type = '3' LIMIT 20");
+    $LookUP = $DB->Query("SELECT name, id, badge, group_type AS type FROM groups WHERE name LIKE '%". $G ."%' AND group_type IN (2, 3) LIMIT 20");
     if(mysqli_num_rows($LookUP) <= 0): ?>
         <div class="content-box">
             <div class="title">Oops!</div>

@@ -4,11 +4,10 @@ class Config
     public static $V = "2.5.1";
 
     ## DB Configuration ##
-    protected static $DBHOST = "127.0.0.1";
-    protected static $DBName = "hv_rp";
-    protected static $DBUser = "root";
+    protected static $DBHOST = '127.0.0.1';
+    protected static $DBName = 'waveplus';
+    protected static $DBUser = 'root';
     protected static $DBPass = '';
-
     ## Web Configuration ##
     public static $WName = "ParadiseRP";
     public static $URL = "https://paradiserp.fr";

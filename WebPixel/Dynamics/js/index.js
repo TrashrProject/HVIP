@@ -82,7 +82,7 @@
                     $preview.removeClass('ready').html('<i class="fas fa-user"></i>');
                     return;
                 }
-                var avatarUrl = 'http://127.0.0.1:5000/habbo-imaging/avatarimage?figure=' +
+                var avatarUrl = '/avatar.php?figure=' +
                     encodeURIComponent(response.look) + '&direction=2&head_direction=3&headonly=1&size=l';
                 var safeName = $('<div>').text(response.username).html();
                 $preview.addClass('ready').html('<img src="' + avatarUrl + '" alt="Look de ' + safeName + '">');

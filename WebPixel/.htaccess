@@ -1,26 +1,36 @@
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+<FilesMatch "^(config\.php|runtime-settings\.json|.*\.sql)$">
+    Require all denied
+</FilesMatch>
+
 RewriteEngine On
 RewriteBase /
-
-# Favicon racine : le navigateur demande souvent /favicon.ico même quand Nitro est dans /nitro-last/.
-RewriteRule ^favicon\.ico$ nitro-last/favicon.ico [L,QSA,NC]
-
-# Laisser passer les vrais fichiers/dossiers.
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
-
-# Fallback propre pour les assets Nitro/SWF manquants.
-# Important : ce rewrite passe uniquement pour les fichiers inexistants,
-# donc un vrai asset local garde toujours la priorité.
-RewriteRule ^(.+\.(?:png|gif|jpe?g|webp|svg|ico|nitro|json|mp3|ogg|wav|ttf|otf|woff2?|eot))$ asset-resolver.php?u=/$1 [L,QSA,NC,B]
-
-# URLs propres -> fichiers PHP correspondants
-RewriteCond %{DOCUMENT_ROOT}/$1.php -f
-RewriteRule ^(.+?)/?$ $1.php [L,QSA]
-
-# Routes legacy
-RewriteRule ^profile/(.+)$ profile.php?id=$1 [L,QSA]
-RewriteRule ^corporation/(.+)$ corporation.php?id=$1 [L,QSA]
-RewriteRule ^gang/(.+)$ gang.php?gang_id=$1 [L,QSA]
+RewriteRule ^app/ - [F,L]
+RewriteRule ^migrations/ - [F,L]
+RewriteRule ^WavePlus/ - [F,L]
+RewriteRule ^play/?$ play.php [L,QSA]
+RewriteRule ^me/?$ me.php [L,QSA]
+RewriteRule ^account/?$ account.php [L,QSA]
+RewriteRule ^profile/([A-Za-z0-9]+)/?$ profile.php?id=$1 [L,QSA]
+RewriteRule ^corporation/([0-9]+)/?$ corporation.php?id=$1 [L,QSA]
+RewriteRule ^gang/([0-9]+)/?$ gang.php?gang_id=$1 [L,QSA]
 RewriteRule ^gangs/leaderboard/?$ gangs_leaderboard.php [L,QSA]
 RewriteRule ^store/checkout/?$ store.php [L,QSA]
+RewriteRule ^staff/?$ staff.php [L,QSA]
+RewriteRule ^actualites/?$ actualites.php [L,QSA]
+RewriteRule ^article/([a-z0-9-]+)/?$ article.php?slug=$1 [L,QSA]
+RewriteRule ^logout/?$ logout.php [L,QSA]
+
+# Toutes les autres URL historiques sans extension utilisent le fichier PHP
+# correspondant (search_users, online, leaderboards, corporations, store...).
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/$1.php -f
+RewriteRule ^(.+?)/?$ $1.php [L,QSA]

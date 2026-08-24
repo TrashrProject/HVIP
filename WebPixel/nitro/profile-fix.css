@@ -1,0 +1,24 @@
+.user-profile .profile-block.blue-container,
+.user-profile .profile-avatar-block.blue-container {
+  color: #172033;
+}
+
+.user-profile .stat-row:not(.header-row) > :last-child {
+  color: #172033 !important;
+}
+
+.user-profile .level-xp-bar > :first-child {
+  color: #172033;
+}
+
+.user-profile .stat-row {
+  min-height: 20px;
+}
+
+.user-profile .stat-row > * {
+  min-width: 0;
+}
+
+.user-profile .stat-row > :first-child {
+  overflow-wrap: anywhere;
+}

@@ -1,53 +1,38 @@
 <?php
-/**
- * PixelZone by RDP Services, Emulated by Retro Development Server.
- * The use of this program is restricted to clients and owners of RDP Services.
- * Any unauthorized use of this code it'll end up on deletion of the program.
- * Developers P3x & Jeihden.
- * Copyrights © 2020
- * Last Modified: $file.lastModefied
- */
-
 class GangsManager
 {
     protected $DB;
+    public function __construct($DB) { $this->DB = $DB; }
 
-    public function __construct($DB)
+    public function GetUserGang($ID)
     {
-        // Construct function
-        $this->DB = $DB;
-
+        $ID = (int) $ID;
+        $R = $this->DB->Query("SELECT g.*, g.group_type AS type FROM group_memberships gm INNER JOIN groups g ON g.id=gm.group_id WHERE g.group_type IN (2,3) AND gm.user_id={$ID} LIMIT 1");
+        return mysqli_num_rows($R) === 1 ? mysqli_fetch_assoc($R) : null;
     }
 
-    public function GetUserGang($ID) {
-        $R = $this->DB->Query("SELECT `group_id`, `type`, `user_id` FROM group_memberships WHERE `type` = '3' AND `user_id` = ". $ID ." LIMIT 1");
-        if(mysqli_num_rows($R) == 1):
-            $GangID = mysqli_fetch_assoc($R);
-            $R_ = $this->DB->Query("SELECT `name`, `id`, `type`, `badge`, `gang_deaths`, `gang_kills` FROM groups WHERE `type` = '3' AND `id` = ". $GangID['group_id'] ." LIMIT 1");
-            return mysqli_fetch_assoc($R_);
-        else:
-            return null;
-        endif;
+    public function GetGangs($search = '')
+    {
+        $where = "g.group_type IN (2,3)";
+        $search = trim((string) $search);
+        if ($search !== '') {
+            $escaped = mysqli_real_escape_string($this->DB->Con(), $search);
+            $where .= " AND g.name LIKE '%{$escaped}%'";
+        }
+        return $this->DB->Query("SELECT g.*, (SELECT COUNT(*) FROM group_memberships gm INNER JOIN users u ON u.id=gm.user_id WHERE gm.group_id=g.id) AS member_count FROM groups g WHERE {$where} ORDER BY g.name ASC");
     }
 
-    // Gets Stats
-    public function GetLeaderBoard($Data, $Column){
-
-        if($Data == "groups"):
-            $R = $this->DB->Query("SELECT * FROM groups WHERE type = '3' ORDER BY ". $Column ." DESC LIMIT 8");
-            return $R;
-        endif;
-
-        return null;
+    public function GetLeaderBoard($Data, $Column)
+    {
+        $allowed = array('bank','gang_kills','gang_deaths','gang_cop_kills','gang_turfs_taken','gang_turfs_defend','gang_farm_cocaine','gang_farm_weed','gang_farm_medicines','gang_fab_guns','gang_heists');
+        if ($Data !== 'groups' || !in_array($Column, $allowed, true)) return null;
+        return $this->DB->Query("SELECT *, group_type AS type FROM groups WHERE group_type IN (2,3) ORDER BY `{$Column}` DESC, name ASC LIMIT 8");
     }
 
-    public function GetGangLeader($GangId) {
-        $R = $this->DB->Query("SELECT users.username FROM groups, users WHERE groups.id = ".$GangId." AND users.id = groups.owner_id LIMIT 1");
-        if(mysqli_num_rows($R) == 1):
-            $GangID = mysqli_fetch_assoc($R);
-            return $GangID['username'];
-        else:
-            return "Desconocid@";
-        endif;
+    public function GetGangLeader($GangId)
+    {
+        $GangId = (int) $GangId;
+        $R = $this->DB->Query("SELECT u.username FROM groups g INNER JOIN users u ON u.id=g.owner_id WHERE g.id={$GangId} LIMIT 1");
+        return mysqli_num_rows($R) === 1 ? mysqli_fetch_assoc($R)['username'] : 'Compte supprimé';
     }
 }

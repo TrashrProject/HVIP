@@ -16,7 +16,10 @@ require_once "app/init.pz.php";
 if(isset($_GET['q'])):
     $QuickSearch = trim(AppFunctions::GeneralClean($_GET['q']));
     if($QuickSearch !== ''):
-        $ExactUser = $DB->Query("SELECT id FROM `users` WHERE `username` = '". $QuickSearch ."' LIMIT 1");
+        $stmt = mysqli_prepare($DB->Con(), "SELECT id FROM users WHERE username = ? LIMIT 1");
+        mysqli_stmt_bind_param($stmt, 's', $QuickSearch);
+        mysqli_stmt_execute($stmt);
+        $ExactUser = mysqli_stmt_get_result($stmt);
         if($ExactUser && mysqli_num_rows($ExactUser) === 1):
             $ExactUserData = mysqli_fetch_assoc($ExactUser);
             header("Location: " . Config::$URL . "/profile/" . (int)$ExactUserData['id']);
@@ -28,7 +31,11 @@ endif;
 if(isset($_POST['uname'])):
 
     $U = AppFunctions::GeneralClean($_POST['uname']);
-    $LookUP = $DB->Query("SELECT id, username, look, online, rank, rank_vip FROM `users` WHERE `username` LIKE '%". $U ."%' LIMIT 20");
+    $term = '%' . $U . '%';
+    $stmt = mysqli_prepare($DB->Con(), "SELECT id, username, look, online, rank, rank_vip FROM users WHERE username LIKE ? LIMIT 20");
+    mysqli_stmt_bind_param($stmt, 's', $term);
+    mysqli_stmt_execute($stmt);
+    $LookUP = mysqli_stmt_get_result($stmt);
     if(mysqli_num_rows($LookUP) <= 0):
         echo "<center><b>Aucun citoyen ne correspond à cette recherche.</b></center>";
         exit;

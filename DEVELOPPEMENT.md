@@ -19,11 +19,11 @@ Le serveur utilise actuellement :
 - CMS : `WebPixel`
 - Client actif : `WebPixel/nitro`
 - Emulateur : WaveRP base Arcturus, sources dans `WavePlus/src/main/java`
-- Plugin RP : sources dans `_waverp_arcturus_stage_20260824/waverp_plugin/roleplay-plugin-main/packages/plugin`
+- Plugin RP : sources dans `WaveRP-Plugin`
 - Base de donnees : `waveplus`
 - Runtime deploye : `runtime/WavePlus`
 
-Les dossiers `backups`, les archives ZIP/RAR et les bases de sauvegarde ne sont pas des versions de production a modifier. Le chemin `_waverp_arcturus_stage_20260824` contient actuellement les sources actives du plugin WaveRP malgre son nom technique.
+Les dossiers `backups`, les archives ZIP/RAR et les bases de sauvegarde ne sont pas des versions de production a modifier.
 
 ## Commandes en jeu
 
@@ -32,8 +32,7 @@ Les dossiers `backups`, les archives ZIP/RAR et les bases de sauvegarde ne sont 
 Les commandes de metiers, Police, Taxi, banque et RP sont dans :
 
 ```text
-_waverp_arcturus_stage_20260824/
-  waverp_plugin/roleplay-plugin-main/packages/plugin/src/main/java/
+WaveRP-Plugin/src/main/java/
     io/github/brenoepics/roleplay/commands/
 ```
 
@@ -154,13 +153,37 @@ Regles :
 
 ## Compilation
 
+### Coeur Arcturus
+
+Le projet Maven du coeur est `WavePlus/pom.xml`. Il doit etre installe en premier dans le depot Maven local, car le plugin en depend :
+
+```powershell
+$env:JAVA_HOME = 'C:\Program Files\Android\openjdk\jdk-21.0.8'
+cd WavePlus
+_tools\apache-maven-3.9.11\bin\mvn.cmd -DskipTests clean install
+```
+
+Copier `WavePlus/config.ini.example` en `config.ini`, puis adapter uniquement la configuration locale. `config.ini` ne doit jamais etre pousse.
+
+Le JAR utilise en production est construit dans :
+
+```text
+WavePlus/target/RPHabbo-3.5.4-jar-with-dependencies.jar
+```
+
+Il est deploye sous :
+
+```text
+runtime/WavePlus/WaveRP-Arcturus.jar
+```
+
 ### Plugin WaveRP
 
 Depuis le dossier du plugin :
 
 ```powershell
 $env:JAVA_HOME = 'C:\Program Files\Android\openjdk\jdk-21.0.8'
-cd _waverp_arcturus_stage_20260824\waverp_plugin\roleplay-plugin-main\packages\plugin
+cd WaveRP-Plugin
 _tools\apache-maven-3.9.11\bin\mvn.cmd -DskipTests clean package
 ```
 
@@ -174,14 +197,6 @@ Deploiement serveur :
 
 ```text
 runtime/WavePlus/plugins/WaveRP-Roleplay.jar
-```
-
-### Coeur Arcturus
-
-Le projet Maven du coeur est `WavePlus/pom.xml`. Le JAR utilise en production est :
-
-```text
-runtime/WavePlus/WaveRP-Arcturus.jar
 ```
 
 Apres une modification Java, toujours compiler avant de remplacer un JAR. Sauvegarder le JAR actif, deployer le nouveau, redemarrer, puis verifier les logs et les ports `30000`, `30001` et `2096`.
@@ -218,4 +233,4 @@ git push
 
 Sur le serveur, ne pas lancer automatiquement `git pull` si le depot contient des modifications locales. Examiner d'abord `git status`, sauvegarder les fichiers concernes, puis recuperer et deployer uniquement les changements valides.
 
-Important : le depot GitHub contient actuellement les fichiers Java modifies, mais pas encore l'integralite du pack Wave Java importe. La compilation complete reste donc fiable dans l'environnement serveur. Avant de compiler tout le pack sur un autre PC, il faudra versionner proprement l'ensemble des sources Wave Java et leurs dependances, sans les runtimes ni les sauvegardes.
+Le depot contient les sources du coeur WaveRP, du plugin, du CMS et du client actif. Les runtimes, sauvegardes, caches et configurations privees restent volontairement exclus et doivent etre recrees localement.

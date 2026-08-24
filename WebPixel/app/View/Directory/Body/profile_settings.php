@@ -17,7 +17,8 @@
                 <div class="content-box">
                     <div class="title">Modifier le mot de passe</div>
                     <div class="box-content">
-                        <form role="form" method="POST" action="/account?chanpass" class="form-block p-2">
+                        <form role="form" method="POST" action="<?php echo URL; ?>/account.php?chanpass" class="form-block p-2">
+                            <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['account_csrf'], ENT_QUOTES, 'UTF-8') ?>">
                             <?php
                             if(isset($_SESSION['E'])):
                                 if($_SESSION['E'] == true): ?>

@@ -59,7 +59,7 @@
                         <div><div class="stats-pz-apts"></div></div>
                     </div>
                     <div class="post-info mr-auto ml-2">
-                        <b>Appartements :</b> <?php echo $UserMG->GetStatData("apts_total"); ?>
+                        <b>Lieux publics RP :</b> <?php echo $UserMG->GetStatData("rp_locations"); ?>
                     </div>
                     <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
                 </div>
@@ -71,7 +71,7 @@
                         <div><div class="stats-pz-business"></div></div>
                     </div>
                     <div class="post-info mr-auto ml-2">
-                        <b>Empresas:</b> <?php echo $UserMG->GetStatData("business_count"); ?>
+                        <b>Entreprises :</b> <?php echo $UserMG->GetStatData("business_count"); ?>
                     </div>
                     <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
                 </div>
