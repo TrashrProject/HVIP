@@ -1,5 +1,6 @@
 package io.github.brenoepics.roleplay.commands.jobs.hospital;
 
+import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
@@ -18,5 +19,4 @@ public class ReviveCommand extends Command {
     return true;
   }
 }
-import com.eu.habbo.habbohotel.commands.Command;
 

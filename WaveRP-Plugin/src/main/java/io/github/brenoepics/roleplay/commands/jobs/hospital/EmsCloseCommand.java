@@ -1,5 +1,6 @@
 package io.github.brenoepics.roleplay.commands.jobs.hospital;
 
+import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import io.github.brenoepics.roleplay.RolePlay;
@@ -30,5 +31,4 @@ public class EmsCloseCommand extends Command {
     return true;
   }
 }
-import com.eu.habbo.habbohotel.commands.Command;
 
