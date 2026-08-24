@@ -13,7 +13,7 @@ import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.items.interactions.InteractionRPBed;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 @Slf4j
 public class HospitalService {
 
-  private final HashMap<Integer, RpAvatar> healingUsers = new HashMap<>();
+  private final ConcurrentHashMap<Integer, RpAvatar> healingUsers = new ConcurrentHashMap<>();
   private final HospitalBedCache bedCache = new HospitalBedCache();
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 

@@ -26,6 +26,7 @@ import io.github.brenoepics.roleplay.features.escort.EscortManager;
 import io.github.brenoepics.roleplay.features.farm.data.FarmManager;
 import io.github.brenoepics.roleplay.features.farm.marketplace.MarketplaceManager;
 import io.github.brenoepics.roleplay.features.hospital.HospitalService;
+import io.github.brenoepics.roleplay.features.hospital.ems.EmsService;
 import io.github.brenoepics.roleplay.features.items.ItemManager;
 import io.github.brenoepics.roleplay.features.job.JobService;
 import io.github.brenoepics.roleplay.features.job.JobsManager;
@@ -69,6 +70,8 @@ public class RolePlay extends HabboPlugin implements EventListener {
   @Getter
   private static final HospitalService hospitalService = new HospitalService();
   @Getter
+  private static final EmsService emsService = new EmsService();
+  @Getter
   private static final PrisonService prisonService = new PrisonService();
   @Getter
   private static final PrisonHandler prisonHandler = new PrisonHandler();
@@ -105,6 +108,7 @@ public class RolePlay extends HabboPlugin implements EventListener {
       incoming.remove(3320);
       Emulator.getGameServer().getPacketManager().registerHandler(3320, RoomUserWalkEvent.class);
       farmManager.dispose();
+      hospitalService.shutdown();
       LOGGER.info("[NaHabbo RolePlay] Plugin disabled");
     } catch (Exception e) {
       LOGGER.error("[NaHabbo RolePlay] Error while disabling plugin", e);

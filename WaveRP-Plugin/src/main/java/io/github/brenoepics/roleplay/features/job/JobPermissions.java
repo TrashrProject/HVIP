@@ -13,8 +13,11 @@ public final class JobPermissions {
 
   // Medical permissions
   public static final String MEDICAL_HEAL = "medical.heal";
+  public static final String MEDICAL_BANDAGE = "medical.bandage";
+  public static final String MEDICAL_STABILIZE = "medical.stabilize";
   public static final String MEDICAL_REVIVE = "medical.revive";
   public static final String MEDICAL_AMBULANCE = "medical.ambulance";
+  public static final String MEDICAL_DISPATCH = "medical.dispatch";
   public static final String MEDICAL_SURGERY = "medical.surgery";
 
   // Job management permissions

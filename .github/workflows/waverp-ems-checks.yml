@@ -1,0 +1,35 @@
+name: WaveRP EMS checks
+
+on:
+  push:
+    branches: [quality/paradise-core-v1-fixes]
+    paths:
+      - 'WavePlus/**'
+      - 'WaveRP-Plugin/**'
+      - 'migrations/20260824_waverp_ems_complete.sql'
+      - '.github/workflows/waverp-ems-checks.yml'
+  pull_request:
+    paths:
+      - 'WavePlus/**'
+      - 'WaveRP-Plugin/**'
+      - 'migrations/20260824_waverp_ems_complete.sql'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Compile WavePlus
+        run: mvn -B -f WavePlus/pom.xml -DskipTests clean install
+      - name: Test and package WaveRP plugin
+        run: mvn -B -f WaveRP-Plugin/pom.xml test package
+      - name: Verify EMS migration
+        run: test -s migrations/20260824_waverp_ems_complete.sql
+
+

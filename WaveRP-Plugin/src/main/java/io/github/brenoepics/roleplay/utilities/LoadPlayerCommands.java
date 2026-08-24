@@ -17,6 +17,8 @@ import io.github.brenoepics.roleplay.commands.escort.StopEscortCommand;
 import io.github.brenoepics.roleplay.commands.generic.ApplyCommand;
 import io.github.brenoepics.roleplay.commands.generic.BucksCommand;
 import io.github.brenoepics.roleplay.commands.generic.HelpCommand;
+import io.github.brenoepics.roleplay.commands.generic.EmsCallCommand;
+import io.github.brenoepics.roleplay.commands.generic.EmsCancelCommand;
 import io.github.brenoepics.roleplay.commands.generic.JobCommand;
 import io.github.brenoepics.roleplay.commands.generic.PassiveCommand;
 import io.github.brenoepics.roleplay.commands.generic.SellCommand;
@@ -30,7 +32,14 @@ import io.github.brenoepics.roleplay.commands.jobs.QuitJobCommand;
 import io.github.brenoepics.roleplay.commands.jobs.SendHomeCommand;
 import io.github.brenoepics.roleplay.commands.jobs.StartWorkCommand;
 import io.github.brenoepics.roleplay.commands.jobs.StopWorkCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.BandageCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.EmsAcceptCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.EmsCallsCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.EmsCloseCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.HealCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.ReviveCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.StabilizeCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.TransportHospitalCommand;
 import io.github.brenoepics.roleplay.commands.jobs.offer.AcceptOfferCommand;
 import io.github.brenoepics.roleplay.commands.jobs.offer.ClearOffersCommand;
 import io.github.brenoepics.roleplay.commands.jobs.offer.DeclineOfferCommand;
@@ -120,6 +129,34 @@ public class LoadPlayerCommands {
           new String[]{"passive"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(new HealCommand("cmd_heal", getSplit("commands.cmd_heal.keys")),
           new String[]{"heal"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new EmsCallCommand("cmd_ems", new String[]{"ems", "medecin", "ambulance"}),
+          new String[]{"ems", "medecin", "ambulance"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new EmsCancelCommand("cmd_cancel_ems", new String[]{"annulerems"}),
+          new String[]{"annulerems"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new EmsCallsCommand("cmd_ems_calls", new String[]{"appelsems", "emscalls"}),
+          new String[]{"appelsems", "emscalls"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new EmsAcceptCommand("cmd_accept_ems", new String[]{"accepterems"}),
+          new String[]{"accepterems"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new EmsCloseCommand("cmd_close_ems", new String[]{"fermerems"}),
+          new String[]{"fermerems"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new BandageCommand("cmd_bandage", new String[]{"bandage", "panser"}),
+          new String[]{"bandage", "panser"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new StabilizeCommand("cmd_stabilize", new String[]{"stabiliser"}),
+          new String[]{"stabiliser"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new ReviveCommand("cmd_revive", new String[]{"reanimer", "revive"}),
+          new String[]{"reanimer", "revive"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new TransportHospitalCommand("cmd_transport_hospital",
+              new String[]{"transporthopital", "evacuer"}),
+          new String[]{"transporthopital", "evacuer"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
           new QuitJobCommand("cmd_quit_job", getSplit("commands.cmd_quit_job.keys")),
           new String[]{"quitjob"}, CheckDatabase.PermissionState.ALLOWED);

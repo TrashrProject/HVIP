@@ -21,6 +21,8 @@ public class UserDisconnect implements EventListener {
     Habbo habbo = e.habbo;
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
     data.updateDatabase();
+    RolePlay.getEmsService().onDisconnect(habbo);
+    RolePlay.getDeathHandler().onDisconnect(habbo);
     RolePlay.getOfferManager().getUserOffers(habbo.getHabboInfo().getId()).clear();
     RolePlay.getOfferManager().clearOffers(habbo);
     if (habbo.getHabboInfo().getHabboStats().cache.containsKey("lastlook")) {

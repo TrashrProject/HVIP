@@ -8,6 +8,14 @@ public class LoadConfig {
             Emulator.getConfig().register("macro.configs.limit", "5");
             Emulator.getConfig().register("roleplay.rooms.change_clothing.enabled", "1;2;3");
             Emulator.getConfig().register("nahabbo.features.hospital.roomid", "0");
+            Emulator.getConfig().register("features.hospital.autosend.seconds", "45");
+            Emulator.getConfig().register("features.ems.call.cooldown.seconds", "30");
+            Emulator.getConfig().register("features.ems.calls.list.limit", "15");
+            Emulator.getConfig().register("features.ems.bandage.health", "20");
+            Emulator.getConfig().register("features.ems.stabilize.seconds", "90");
+            Emulator.getConfig().register("features.ems.revive.health", "35");
+            Emulator.getConfig().register("features.ems.treatment.range", "1");
+            Emulator.getConfig().register("features.ems.treatment.cooldown.seconds", "3");
             Emulator.getConfig().register("features.prison.release.roomid", "0");
             Emulator.getConfig().register("features.jailrock.time", "15");
             Emulator.getConfig().register("features.prison.look.m", "");
