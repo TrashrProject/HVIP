@@ -1,0 +1,343 @@
+package io.github.brenoepics.roleplay.utilities;
+
+import com.eu.habbo.Emulator;
+import com.eu.habbo.habbohotel.commands.Command;
+import com.eu.habbo.habbohotel.commands.CommandHandler;
+import io.github.brenoepics.roleplay.commands.combat.CombatStatsCommand;
+import io.github.brenoepics.roleplay.commands.combat.EquipCommand;
+import io.github.brenoepics.roleplay.commands.combat.HitCommand;
+import io.github.brenoepics.roleplay.commands.combat.RobCommand;
+import io.github.brenoepics.roleplay.commands.combat.ShootCommand;
+import io.github.brenoepics.roleplay.commands.combat.UnequipCommand;
+import io.github.brenoepics.roleplay.commands.combat.SpitCommand;
+import io.github.brenoepics.roleplay.commands.generic.HotRoomsCommand;
+import io.github.brenoepics.roleplay.commands.generic.PingCommand;
+import io.github.brenoepics.roleplay.commands.escort.EscortCommand;
+import io.github.brenoepics.roleplay.commands.escort.StopEscortCommand;
+import io.github.brenoepics.roleplay.commands.generic.ApplyCommand;
+import io.github.brenoepics.roleplay.commands.generic.BucksCommand;
+import io.github.brenoepics.roleplay.commands.generic.HelpCommand;
+import io.github.brenoepics.roleplay.commands.generic.JobCommand;
+import io.github.brenoepics.roleplay.commands.generic.PassiveCommand;
+import io.github.brenoepics.roleplay.commands.generic.SellCommand;
+import io.github.brenoepics.roleplay.commands.generic.TargetLockCommand;
+import io.github.brenoepics.roleplay.commands.generic.TaxiCommand;
+import io.github.brenoepics.roleplay.commands.jobs.DemoteCommand;
+import io.github.brenoepics.roleplay.commands.jobs.FireCommand;
+import io.github.brenoepics.roleplay.commands.jobs.HireCommand;
+import io.github.brenoepics.roleplay.commands.jobs.PromoteCommand;
+import io.github.brenoepics.roleplay.commands.jobs.QuitJobCommand;
+import io.github.brenoepics.roleplay.commands.jobs.SendHomeCommand;
+import io.github.brenoepics.roleplay.commands.jobs.StartWorkCommand;
+import io.github.brenoepics.roleplay.commands.jobs.StopWorkCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.HealCommand;
+import io.github.brenoepics.roleplay.commands.jobs.offer.AcceptOfferCommand;
+import io.github.brenoepics.roleplay.commands.jobs.offer.ClearOffersCommand;
+import io.github.brenoepics.roleplay.commands.jobs.offer.DeclineOfferCommand;
+import io.github.brenoepics.roleplay.commands.jobs.offer.OfferCommand;
+import io.github.brenoepics.roleplay.commands.jobs.police.ArrestCommand;
+import io.github.brenoepics.roleplay.commands.jobs.police.ChargeCommand;
+import io.github.brenoepics.roleplay.commands.jobs.police.DetaserCommand;
+import io.github.brenoepics.roleplay.commands.jobs.police.PardonCommand;
+import io.github.brenoepics.roleplay.commands.jobs.police.PrisonCommand;
+import io.github.brenoepics.roleplay.commands.jobs.police.ReleaseCommand;
+import io.github.brenoepics.roleplay.commands.jobs.police.TazorCommand;
+import io.github.brenoepics.roleplay.commands.macro.OpenMacroCommand;
+import io.github.brenoepics.roleplay.commands.organizations.CreateOrganizationCommand;
+import io.github.brenoepics.roleplay.commands.organizations.DisbandOrganizationCommand;
+import io.github.brenoepics.roleplay.commands.organizations.InviteOrganizationCommand;
+import io.github.brenoepics.roleplay.commands.organizations.JoinOrganizationCommand;
+import io.github.brenoepics.roleplay.commands.organizations.KickOrganizationCommand;
+import io.github.brenoepics.roleplay.commands.organizations.LeaveOrganizationCommand;
+import io.github.brenoepics.roleplay.commands.organizations.RankDownOrganizationCommand;
+import io.github.brenoepics.roleplay.commands.organizations.RankUpOrganizationCommand;
+import io.github.brenoepics.roleplay.commands.organizations.RenameOrganizationCommand;
+import io.github.brenoepics.roleplay.commands.staff.GlobalHealCommand;
+import io.github.brenoepics.roleplay.commands.staff.GotoRoomCommand;
+import io.github.brenoepics.roleplay.commands.staff.MakeTerritoryCommand;
+import io.github.brenoepics.roleplay.commands.staff.RoomHealCommand;
+import io.github.brenoepics.roleplay.commands.staff.RoomReleaseCommand;
+import io.github.brenoepics.roleplay.commands.staff.SendRoomCommand;
+import io.github.brenoepics.roleplay.commands.staff.SetStatsCommand;
+import io.github.brenoepics.roleplay.commands.staff.StaffArrestCommand;
+import io.github.brenoepics.roleplay.commands.staff.StaffHitCommand;
+import io.github.brenoepics.roleplay.commands.staff.StaffReleaseCommand;
+import io.github.brenoepics.roleplay.commands.staff.SuperHealCommand;
+import io.github.brenoepics.roleplay.commands.staff.SuperHireCommand;
+import io.github.brenoepics.roleplay.commands.wanted.WantedListCommand;
+import io.github.brenoepics.roleplay.commands.banking.BalanceCommand;
+import io.github.brenoepics.roleplay.commands.banking.DepositCommand;
+import io.github.brenoepics.roleplay.commands.banking.GiveCommand;
+import io.github.brenoepics.roleplay.commands.banking.OpenAccountCommand;
+import io.github.brenoepics.roleplay.commands.banking.TransactionHistoryCommand;
+import io.github.brenoepics.roleplay.commands.banking.WithdrawCommand;
+import io.github.brenoepics.roleplay.features.farm.commands.ReloadFarmCommand;
+import io.github.brenoepics.roleplay.features.farm.commands.ReloadMarketplaceCommand;
+import io.github.brenoepics.roleplay.features.farm.commands.SellItemCommand;
+import io.github.brenoepics.roleplay.features.user.CheckDatabase;
+import io.github.brenoepics.roleplay.features.user.CheckDatabase.PermissionState;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class LoadPlayerCommands {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(LoadPlayerCommands.class);
+
+  public static void loadCommands() {
+    try {
+
+      CheckDatabase.registerPermission("acc_change_anywhere", CheckDatabase.PermissionState.DENIED);
+      CheckDatabase.registerPermission("acc_infinite_hunger", CheckDatabase.PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new BucksCommand("cmd_bucks", getSplit("commands.cmd_bucks.keys")), new String[]{"bucks"},
+          CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new JobCommand("cmd_job", getSplit("commands.cmd_job.keys")),
+          new String[]{"job"}, CheckDatabase.PermissionState.DENIED);
+      LoadPlayerCommands.addCommand(
+          new SendHomeCommand("cmd_send_home", getSplit("commands.cmd_send_home.keys")),
+          new String[]{"sendhome"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new TaxiCommand("cmd_taxi", getSplit("commands.cmd_taxi.keys")),
+          new String[]{"taxi", "uber"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new RobCommand("cmd_rob", getSplit("commands.cmd_rob.keys")),
+          new String[]{"rob"}, CheckDatabase.PermissionState.DENIED);
+      LoadPlayerCommands.addCommand(new HitCommand("cmd_hit", getSplit("commands.cmd_hit.keys")),
+          new String[]{"hit"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new SpitCommand("cmd_spit", getSplit("commands.cmd_spit.keys")),
+          new String[]{"spit"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new ShootCommand("cmd_shoot", getSplit("commands.cmd_shoot.keys")), new String[]{"shoot"},
+          CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new EquipCommand("cmd_equip", getSplit("commands.cmd_equip.keys")), new String[]{"equip"},
+          CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new UnequipCommand("cmd_unequip", getSplit("commands.cmd_unequip.keys")),
+          new String[]{"unequip"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new PassiveCommand("cmd_passive", getSplit("commands.cmd_passive.keys")),
+          new String[]{"passive"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new HealCommand("cmd_heal", getSplit("commands.cmd_heal.keys")),
+          new String[]{"heal"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new QuitJobCommand("cmd_quit_job", getSplit("commands.cmd_quit_job.keys")),
+          new String[]{"quitjob"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new TazorCommand("cmd_tazor", new String[]{"taser", "tazor", "taze", "tase"}),
+          new String[]{"taser", "tazor", "taze", "tase"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new DetaserCommand("cmd_detaser", new String[]{"detaser"}),
+          new String[]{"detaser"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new StartWorkCommand("cmd_start_work", getSplit("commands.cmd_start_work.keys")),
+          new String[]{"startwork"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new StopWorkCommand("cmd_stop_work", getSplit("commands.cmd_stop_work.keys")),
+          new String[]{"stopwork"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new OpenMacroCommand("cmd_open_macro", getSplit("commands.cmd_open_macro.keys")),
+          new String[]{"macro", "open_macro"}, CheckDatabase.PermissionState.ALLOWED);
+
+      // Generic utility commands
+      LoadPlayerCommands.addCommand(
+          new HotRoomsCommand("cmd_hotrooms", getSplit("commands.cmd_hotrooms.keys")),
+          new String[]{"hotrooms", "hot"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new PingCommand("cmd_ping", getSplit("commands.cmd_ping.keys")),
+          new String[]{"ping"}, CheckDatabase.PermissionState.ALLOWED);
+
+      // Banking commands
+      LoadPlayerCommands.addCommand(
+          new OpenAccountCommand("cmd_openaccount", getSplit("commands.cmd_openaccount.keys")),
+          new String[]{"openaccount"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new BalanceCommand("cmd_balance", getSplit("commands.cmd_balance.keys")),
+          new String[]{"balance"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new GiveCommand("cmd_give", getSplit("commands.cmd_give.keys")),
+          new String[]{"give"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new TransactionHistoryCommand("cmd_transactions", getSplit("commands.cmd_transactions.keys")),
+          new String[]{"transactions", "history"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new DepositCommand("cmd_deposit", getSplit("commands.cmd_deposit.keys")),
+          new String[]{"deposit"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new WithdrawCommand("cmd_withdraw", getSplit("commands.cmd_withdraw.keys")),
+          new String[]{"withdraw"}, CheckDatabase.PermissionState.ALLOWED);
+
+      LoadPlayerCommands.addCommand(
+          new SellCommand("cmd_sell_rpitem", getSplit("commands.cmd_sell_rpitem.keys")),
+          new String[]{"sell"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new OfferCommand("cmd_offer_rpitem", getSplit("commands.cmd_offer_rpitem.keys")),
+          new String[]{"offer"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new AcceptOfferCommand("cmd_accept_offer", getSplit("commands.cmd_accept_offer.keys")),
+          new String[]{"acceptoffer"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new ClearOffersCommand("cmd_clear_offer", getSplit("commands.cmd_clear_offer.keys")),
+          new String[]{"clearoffers"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new DeclineOfferCommand("cmd_decline_offer", getSplit("commands.cmd_decline_offer.keys")),
+          new String[]{"declineoffer"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new ArrestCommand("cmd_arrest", getSplit("commands.cmd_arrest.keys")),
+          new String[]{"arrest", "jail"}, CheckDatabase.PermissionState.ALLOWED);
+      //LoadPlayerCommands.addCommand(
+      //    new StarCommand("cmd_give_stars", getSplit("commands.cmd_give_stars.keys")),
+      //    new String[]{"stars"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new ReleaseCommand("cmd_release", new String[]{"liberer", "release"}),
+          new String[]{"liberer", "release"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new PrisonCommand("cmd_prison", new String[]{"prison"}),
+          new String[]{"prison"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new PardonCommand("cmd_pardon", getSplit("commands.cmd_pardon.keys")),
+          new String[]{"pardon"}, PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new ChargeCommand("cmd_charge", getSplit("commands.cmd_charge.keys")),
+          new String[]{"charge"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new HireCommand("cmd_hire", getSplit("commands.cmd_hire.keys")),
+          new String[]{"hire"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new ApplyCommand("cmd_apply", getSplit("commands.cmd_apply.keys")), new String[]{"apply"},
+          CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new HelpCommand("cmd_911", getSplit("commands.cmd_911.keys")),
+          new String[]{"help", "911", "callpolice"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new FireCommand("cmd_fire", getSplit("commands.cmd_fire.keys")),
+          new String[]{"fire"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new PromoteCommand("cmd_promote", getSplit("commands.cmd_promote.keys")),
+          new String[]{"promote"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new DemoteCommand("cmd_demote", getSplit("commands.cmd_demote.keys")),
+          new String[]{"demote"}, CheckDatabase.PermissionState.ALLOWED);
+
+      LoadPlayerCommands.addCommand(
+          new CreateOrganizationCommand("cmd_org_create", getSplit("commands.cmd_org_create.keys")),
+          new String[]{"create", "create_organization"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new JoinOrganizationCommand("cmd_org_join", getSplit("commands.cmd_org_join.keys")),
+          new String[]{"join_organization", "join"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new LeaveOrganizationCommand("cmd_org_leave", getSplit("commands.cmd_org_leave.keys")),
+          new String[]{"leave", "leave_organization"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new InviteOrganizationCommand("cmd_org_invite", getSplit("commands.cmd_org_invite.keys")),
+          new String[]{"recruit", "invite_organization"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new KickOrganizationCommand("cmd_org_kick", getSplit("commands.cmd_org_kick.keys")),
+          new String[]{"remove", "kick_organization"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new RenameOrganizationCommand("cmd_org_rename", getSplit("commands.cmd_org_rename.keys")),
+          new String[]{"rename", "rename_organization"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new DisbandOrganizationCommand("cmd_org_delete",
+              getSplit("commands.cmd_org_delete.keys")),
+          new String[]{"delete", "disband", "disband_organization"},
+          CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new RankUpOrganizationCommand("cmd_org_rankup", getSplit("commands.cmd_org_rankup.keys")),
+          new String[]{"rankup", "rankup_organization"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new RankDownOrganizationCommand("cmd_org_rankdown",
+              getSplit("commands.cmd_org_rankdown.keys")),
+          new String[]{"rankdown", "rankdown_organization"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new MakeTerritoryCommand("cmd_make_territory",
+              getSplit("commands.cmd_make_territory.keys")),
+          new String[]{"territory", "create_territory"}, CheckDatabase.PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new EscortCommand("cmd_escort", getSplit("commands.cmd_escort.keys")),
+          new String[]{"escort"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new StopEscortCommand("cmd_stopescort", new String[]{"stopescort"}),
+          new String[]{"stopescort"}, CheckDatabase.PermissionState.ALLOWED);
+
+      LoadPlayerCommands.addCommand(
+          new WantedListCommand("cmd_wanted_list", getSplit("commands.cmd_wanted_list.keys")),
+          new String[]{"wanted_list"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new CombatStatsCommand("cmd_combat_stats", getSplit("commands.cmd_combat_stats.keys")),
+          new String[]{"combat_stats"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(
+          new TargetLockCommand("cmd_target_lock", getSplit("commands.cmd_target_lock.keys")),
+          new String[]{"locktarget", "lt", "lock"}, CheckDatabase.PermissionState.ALLOWED);
+
+      LoadPlayerCommands.addCommand(
+          new RoomHealCommand("cmd_room_heal", getSplit("commands.cmd_room_heal.keys")),
+          new String[]{"room_heal"}, PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new StaffHitCommand("cmd_staff_hit", getSplit("commands.cmd_staff_hit.keys")),
+          new String[]{"staff_hit"}, PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new SuperHealCommand("cmd_super_heal", getSplit("commands.cmd_super_heal.keys")),
+          new String[]{"super_heal"}, PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new SendRoomCommand("cmd_send_room", getSplit("commands.cmd_send_room.keys")),
+          new String[]{"send_room"}, PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new GotoRoomCommand("cmd_goto_room", getSplit("commands.cmd_goto_room.keys")),
+          new String[]{"goto_room"}, PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new StaffArrestCommand("cmd_staff_arrest", getSplit("commands.cmd_staff_arrest.keys")),
+          new String[]{"staff_arrest"}, PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new StaffReleaseCommand("cmd_staff_release", getSplit("commands.cmd_release.keys")),
+          new String[]{"staff_release"}, PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new RoomReleaseCommand("cmd_room_release", getSplit("commands.cmd_room_release.keys")),
+          new String[]{"room_release"}, PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new SetStatsCommand("cmd_set_stats", getSplit("commands.cmd_set_stats.keys")),
+          new String[]{"set_stats"}, PermissionState.DENIED);
+
+      LoadPlayerCommands.addCommand(
+          new GlobalHealCommand("cmd_global_heal", getSplit("commands.cmd_global_heal.keys")),
+          new String[]{"global_heal"}, PermissionState.DENIED);
+
+      Emulator.getTexts().register("commands.description.cmd_superhire",
+          ":superhire <pseudo> <metier|id> <rank>");
+      LoadPlayerCommands.addCommand(
+          new SuperHireCommand("cmd_superhire", new String[]{"superhire"}),
+          new String[]{"superhire"}, PermissionState.DENIED);
+      CheckDatabase.allowPermissionForRankRange("cmd_superhire", 5, 9);
+
+      LoadPlayerCommands.addCommand(
+          new SellItemCommand("cmd_sell_item", getSplit("commands.keys.cmd_sell_item")),
+          new String[]{"sell_item"}, PermissionState.DENIED);
+      LoadPlayerCommands.addCommand(new ReloadMarketplaceCommand("cmd_update_item_marketplace",
+              getSplit("commands.keys.cmd_update_item_marketplace")),
+          new String[]{"update_item_marketplace"}, PermissionState.DENIED);
+      LoadPlayerCommands.addCommand(
+          new ReloadFarmCommand("cmd_reload_farm", getSplit("commands.keys.cmd_reload_farm")),
+          new String[]{"reload_farm"}, PermissionState.DENIED);
+
+      Emulator.getGameEnvironment().getPermissionsManager().reload();
+    } catch (Exception ex) {
+      LOGGER.error("[NaHabbo RolePlay] Error while loading player commands: ", ex);
+    }
+  }
+
+  private static String @NotNull [] getSplit(String key) {
+    return Emulator.getConfig().getValue(key).split(";");
+  }
+
+  private static void addCommand(Command command, String[] keys,
+      CheckDatabase.PermissionState permissionState) {
+    Emulator.getConfig()
+        .register("commands." + command.permission + ".keys", String.join(";", keys));
+    Emulator.getTexts().register("commands.description." + command.permission, ":" + keys[0]);
+    CommandHandler.addCommand(command);
+    CheckDatabase.registerPermission(command.permission, permissionState);
+  }
+}
