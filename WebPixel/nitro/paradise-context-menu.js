@@ -109,7 +109,7 @@
     function scheduleEnhancement() {
         if (scheduled) return;
         scheduled = true;
-        window.requestAnimationFrame(enhanceAll);
+        Promise.resolve().then(enhanceAll);
     }
 
     function mutationTouchesMenu(mutation) {
