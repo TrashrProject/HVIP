@@ -1,7 +1,7 @@
 .nitro-context-menu.paradise-player-context-menu {
     box-sizing: border-box;
-    width: 108px;
-    min-width: 108px !important;
+    width: 100px;
+    min-width: 100px !important;
     max-width: calc(100vw - 20px);
     padding: 1px;
     color: #f4f6f7;
@@ -9,7 +9,7 @@
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 4px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.24);
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1.2;
 }
 
@@ -24,8 +24,8 @@
 .nitro-context-menu.paradise-player-context-menu .menu-header {
     position: relative;
     min-width: 0;
-    height: 28px;
-    max-height: 28px;
+    height: 23px;
+    max-height: 23px;
     margin: 0 0 1px;
     padding: 0 5px !important;
     overflow: hidden;
@@ -33,7 +33,7 @@
     background: #3b5663;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 3px;
-    font-size: 11.5px;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.01em;
     text-overflow: ellipsis;
@@ -47,9 +47,9 @@
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item {
-    min-height: 32px;
-    height: 32px;
-    max-height: 32px;
+    min-height: 25px;
+    height: 25px;
+    max-height: 25px;
     margin: 0;
     padding: 0 17px 0 5px !important;
     justify-content: flex-start !important;
@@ -113,9 +113,9 @@
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-list-split-3 .menu-item.list-item {
-    min-height: 30px;
-    height: 30px;
-    max-height: 30px;
+    min-height: 24px;
+    height: 24px;
+    max-height: 24px;
     margin: 0 !important;
     padding: 0 !important;
     justify-content: center !important;
@@ -124,12 +124,12 @@
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-footer {
-    min-height: 18px;
+    min-height: 14px;
     margin-top: 1px;
     padding: 1px 0 0 !important;
     color: #c4ccd0;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 9px;
+    font-size: 8px;
     transition: color 80ms ease, background-color 80ms ease;
 }
 
@@ -148,8 +148,8 @@
 
 @media (max-width: 460px) {
     .nitro-context-menu.paradise-player-context-menu {
-        width: 104px;
-        min-width: 104px !important;
+        width: 96px;
+        min-width: 96px !important;
     }
 }
 
