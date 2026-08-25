@@ -1,15 +1,15 @@
 .nitro-context-menu.paradise-player-context-menu {
     box-sizing: border-box;
-    width: 188px;
-    min-width: 188px !important;
+    width: 152px;
+    min-width: 152px !important;
     max-width: calc(100vw - 20px);
-    padding: 5px;
+    padding: 3px;
     color: #f3fbfc;
     background: linear-gradient(180deg, #132f38 0%, #0d232b 100%);
     border: 1px solid rgba(65, 191, 186, 0.46);
-    border-radius: 8px;
-    box-shadow: 0 10px 24px rgba(0, 10, 15, 0.34), 0 2px 6px rgba(0, 10, 15, 0.32);
-    font-size: 13px;
+    border-radius: 6px;
+    box-shadow: 0 6px 14px rgba(0, 10, 15, 0.3), 0 1px 4px rgba(0, 10, 15, 0.26);
+    font-size: 12px;
     line-height: 1.2;
 }
 
@@ -22,16 +22,16 @@
 .nitro-context-menu.paradise-player-context-menu .menu-header {
     position: relative;
     min-width: 0;
-    height: 34px;
-    max-height: 34px;
-    margin: 0 0 4px;
-    padding: 0 12px !important;
+    height: 27px;
+    max-height: 27px;
+    margin: 0 0 2px;
+    padding: 0 8px !important;
     overflow: hidden;
     color: #f7ffff;
     background: #193d47;
     border: 1px solid rgba(111, 215, 209, 0.2);
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.01em;
     text-overflow: ellipsis;
@@ -40,20 +40,20 @@
 }
 
 .nitro-context-menu.paradise-player-context-menu[data-paradise-view="submenu"] .menu-header {
-    border-left: 3px solid #35b9b2;
-    padding-left: 10px !important;
+    border-left: 2px solid #35b9b2;
+    padding-left: 7px !important;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item {
-    min-height: 34px;
-    height: 34px;
-    max-height: 34px;
+    min-height: 27px;
+    height: 27px;
+    max-height: 27px;
     margin: 0;
-    padding: 0 32px 0 12px !important;
+    padding: 0 24px 0 8px !important;
     justify-content: flex-start !important;
     overflow: hidden;
     color: #eaf7f8;
-    background: rgba(6, 20, 27, 0.5);
+    background: linear-gradient(180deg, rgba(8, 27, 33, 0.66), rgba(5, 21, 27, 0.66));
     border-bottom: 1px solid rgba(121, 201, 199, 0.12);
     border-radius: 3px;
     text-align: left;
@@ -82,7 +82,7 @@
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon {
-    right: 12px;
+    right: 8px;
     color: #82d5d1;
     font-size: 11px;
     opacity: 0.82;
@@ -91,12 +91,12 @@
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon.left,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon.left {
-    left: 12px;
+    left: 8px;
     right: auto;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item.paradise-back-item {
-    padding-left: 32px !important;
+    padding-left: 24px !important;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item.paradise-item-opening .fa-icon.right {
@@ -106,14 +106,14 @@
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-list-split-3 {
-    gap: 3px;
-    margin-bottom: 3px;
+    gap: 2px;
+    margin-bottom: 2px;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-list-split-3 .menu-item.list-item {
-    min-height: 30px;
-    height: 30px;
-    max-height: 30px;
+    min-height: 25px;
+    height: 25px;
+    max-height: 25px;
     margin: 0 !important;
     padding: 0 !important;
     justify-content: center !important;
@@ -122,12 +122,12 @@
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-footer {
-    min-height: 24px;
-    margin-top: 4px;
-    padding: 3px 0 0 !important;
+    min-height: 19px;
+    margin-top: 2px;
+    padding: 2px 0 0 !important;
     color: rgba(218, 247, 247, 0.82);
     border-top: 1px solid rgba(121, 201, 199, 0.14);
-    font-size: 12px;
+    font-size: 10px;
     transition: color 120ms ease, background-color 120ms ease;
 }
 
@@ -146,8 +146,8 @@
 
 @media (max-width: 460px) {
     .nitro-context-menu.paradise-player-context-menu {
-        width: 176px;
-        min-width: 176px !important;
+        width: 146px;
+        min-width: 146px !important;
     }
 }
 
