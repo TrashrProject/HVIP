@@ -8,22 +8,58 @@ import com.eu.habbo.messages.outgoing.MessageComposer;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 public class CommandsWindowComposer extends MessageComposer {
     private static final int LINK_EVENT_PACKET_ID = 2023;
+    private static final int MAX_INLINE_BYTES = 60000;
+    private static final int CHUNK_SIZE = 45000;
 
-    private final List<Command> commands;
+    private final String linkEvent;
 
-    public CommandsWindowComposer(List<Command> commands) {
-        this.commands = commands;
+    private CommandsWindowComposer(String linkEvent) {
+        this.linkEvent = linkEvent;
+    }
+
+    public static List<CommandsWindowComposer> createResponses(List<Command> commands) {
+        String payload = buildPayload(commands).toString();
+        String inlineEvent = "habblet/open/" + payload.replace("/", "&#47;");
+
+        if (inlineEvent.getBytes(StandardCharsets.UTF_8).length <= MAX_INLINE_BYTES) {
+            return Collections.singletonList(new CommandsWindowComposer(inlineEvent));
+        }
+
+        String encoded = Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(payload.getBytes(StandardCharsets.UTF_8));
+        int total = (encoded.length() + CHUNK_SIZE - 1) / CHUNK_SIZE;
+        String transferId = Long.toHexString(System.nanoTime());
+        List<CommandsWindowComposer> responses = new ArrayList<>(total);
+
+        for (int index = 0; index < total; index++) {
+            int start = index * CHUNK_SIZE;
+            int end = Math.min(start + CHUNK_SIZE, encoded.length());
+            String event = "habblet/open/commands-chunk/" + transferId + "/" + index + "/" + total + "/"
+                    + encoded.substring(start, end);
+            responses.add(new CommandsWindowComposer(event));
+        }
+
+        return responses;
     }
 
     @Override
     protected ServerMessage composeInternal() {
+        this.response.init(LINK_EVENT_PACKET_ID);
+        this.response.appendString(this.linkEvent);
+        return this.response;
+    }
+
+    private static JsonObject buildPayload(List<Command> commands) {
         JsonObject payload = new JsonObject();
         JsonObject data = new JsonObject();
         JsonArray commandItems = new JsonArray();
@@ -31,7 +67,7 @@ public class CommandsWindowComposer extends MessageComposer {
 
         payload.addProperty("header", "commands");
 
-        for (Command command : this.commands) {
+        for (Command command : commands) {
             CommandDetails details = getDetails(command);
             JsonObject item = new JsonObject();
             JsonArray aliases = new JsonArray();
@@ -46,7 +82,6 @@ public class CommandsWindowComposer extends MessageComposer {
             item.addProperty("category", details.category);
             item.addProperty("subcategory", details.subcategory);
             item.addProperty("access", details.access);
-            item.addProperty("permission", command.permission == null ? "" : command.permission);
             commandItems.add(item);
             usedCategories.add(details.category);
         }
@@ -63,9 +98,7 @@ public class CommandsWindowComposer extends MessageComposer {
         data.add("categories", categories);
         payload.add("data", data);
 
-        this.response.init(LINK_EVENT_PACKET_ID);
-        this.response.appendString("habblet/open/" + payload.toString().replace("/", "&#47;"));
-        return this.response;
+        return payload;
     }
 
     private static void addCategory(JsonArray categories, Set<String> usedCategories, String category) {

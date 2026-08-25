@@ -14,7 +14,9 @@ public class CommandsCommand extends Command {
     @Override
     public boolean handle(GameClient gameClient, String[] params) throws Exception {
         List<Command> commands = Emulator.getGameEnvironment().getCommandHandler().getCommandsForRank(gameClient.getHabbo().getHabboInfo().getRank().getId());
-        gameClient.sendResponse(new CommandsWindowComposer(commands));
+        for (CommandsWindowComposer composer : CommandsWindowComposer.createResponses(commands)) {
+            gameClient.sendResponse(composer);
+        }
 
         return true;
     }
