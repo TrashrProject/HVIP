@@ -22,12 +22,12 @@ public class RobCommand extends Command {
     public boolean handle(GameClient gameClient, String[] params) {
         RpAvatar attackerData = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
         if (attackerData.isPassive()) {
-            gameClient.getHabbo().whisper("You cannot execute RolePlay commands while passive mode is on!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (params.length != 3) {
-            gameClient.getHabbo().whisper(":rob <player> <amount>", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":braquer <pseudo> <montant>", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -38,11 +38,11 @@ public class RobCommand extends Command {
 
         Habbo habbo = gameClient.getHabbo().getHabboInfo().getCurrentRoom().getHabbo(params[1]);
         if (habbo == null) {
-            gameClient.getHabbo().whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         if (habbo == gameClient.getHabbo()) {
-            gameClient.getHabbo().whisper("You cannot rob yourself!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez pas vous braquer vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         int bucks;
@@ -58,40 +58,40 @@ public class RobCommand extends Command {
 
         RpAvatar targetData = RolePlay.getAvatarManager().getRpAvatar(habbo);
         if (targetData.isPassive() && !targetData.isAggressive()) {
-            gameClient.getHabbo().whisper("You can't hit " + habbo.getHabboInfo().getUsername()
-                + " because they are in passive mode.", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez pas braquer " + habbo.getHabboInfo().getUsername()
+                + " car ce joueur est en mode passif.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (attackerData.isAtSafeZone() && (!targetData.isAggressive() || !attackerData.isAggressive())) {
-            gameClient.getHabbo().whisper("Sorry you can not use this command while in a safe zone.",
+            gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser cette commande dans une zone prot\u00e9g\u00e9e.",
                 RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if(!Emulator.getConfig().getBoolean("features.organizations.friendly_fire") && attackerData.getOrganizationId() == targetData.getOrganizationId()) {
-            gameClient.getHabbo().whisper("You can't rob " + habbo.getHabboInfo().getUsername() + " because they are in the same organization as you.", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez pas braquer " + habbo.getHabboInfo().getUsername() + " car vous appartenez \u00e0 la m\u00eame organisation.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (tFront.x != habbo.getRoomUnit().getX() || tFront.y != habbo.getRoomUnit().getY()) {
-            gameClient.getHabbo().whisper("User " + params[1] + " is too far away", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Le joueur " + params[1] + " est trop loin.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (habbo.getHabboInfo().getCurrencyAmount(200) < bucks) {
-            gameClient.getHabbo().whisper("User " + params[1] + " does not have so much money", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Le joueur " + params[1] + " ne poss\u00e8de pas ce montant.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         Timeout timeout = RolePlay.getCommandsCounter().getCoolDown("rob").getTimeOut(gameClient.getHabbo().getHabboInfo().getId());
         if (timeout != null) {
-            gameClient.getHabbo().whisper("You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis()).getEpochSecond() + " seconds to use this command again!");
+            gameClient.getHabbo().whisper("Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis()).getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
             return true;
         }
 
-        gameClient.getHabbo().whisper("You have stolen " + params[1] + " " + bucks + " bucks", RoomChatMessageBubbles.ALERT);
-        habbo.whisper("You have been robbed of " + bucks + " bucks");
+        gameClient.getHabbo().whisper("Vous avez vol\u00e9 " + bucks + " $ \u00e0 " + params[1] + ".", RoomChatMessageBubbles.ALERT);
+        habbo.whisper("On vous a vol\u00e9 " + bucks + " $.");
         habbo.givePoints(200, -bucks);
         gameClient.getHabbo().givePoints(200, bucks);
         attackerData.executeAction();

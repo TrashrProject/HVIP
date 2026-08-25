@@ -32,6 +32,7 @@ import io.github.brenoepics.roleplay.commands.jobs.QuitJobCommand;
 import io.github.brenoepics.roleplay.commands.jobs.SendHomeCommand;
 import io.github.brenoepics.roleplay.commands.jobs.StartWorkCommand;
 import io.github.brenoepics.roleplay.commands.jobs.StopWorkCommand;
+<<<<<<< HEAD
 import io.github.brenoepics.roleplay.commands.jobs.hospital.BandageCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.EmsAcceptCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.EmsCallsCommand;
@@ -40,17 +41,24 @@ import io.github.brenoepics.roleplay.commands.jobs.hospital.HealCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.ReviveCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.StabilizeCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.TransportHospitalCommand;
+=======
+import io.github.brenoepics.roleplay.commands.jobs.hospital.CarryPatientCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.DiagnosticCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.DropPatientCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.HealCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.MedicalReviveCommand;
+>>>>>>> 39dc96e65 (Modifications collègue ParadiseRP)
 import io.github.brenoepics.roleplay.commands.jobs.offer.AcceptOfferCommand;
 import io.github.brenoepics.roleplay.commands.jobs.offer.ClearOffersCommand;
 import io.github.brenoepics.roleplay.commands.jobs.offer.DeclineOfferCommand;
 import io.github.brenoepics.roleplay.commands.jobs.offer.OfferCommand;
-import io.github.brenoepics.roleplay.commands.jobs.police.ArrestCommand;
 import io.github.brenoepics.roleplay.commands.jobs.police.ChargeCommand;
 import io.github.brenoepics.roleplay.commands.jobs.police.DetaserCommand;
-import io.github.brenoepics.roleplay.commands.jobs.police.PardonCommand;
+import io.github.brenoepics.roleplay.commands.jobs.police.HandcuffCommand;
 import io.github.brenoepics.roleplay.commands.jobs.police.PrisonCommand;
 import io.github.brenoepics.roleplay.commands.jobs.police.ReleaseCommand;
 import io.github.brenoepics.roleplay.commands.jobs.police.TazorCommand;
+import io.github.brenoepics.roleplay.commands.jobs.police.UnhandcuffCommand;
 import io.github.brenoepics.roleplay.commands.macro.OpenMacroCommand;
 import io.github.brenoepics.roleplay.commands.organizations.CreateOrganizationCommand;
 import io.github.brenoepics.roleplay.commands.organizations.DisbandOrganizationCommand;
@@ -63,7 +71,9 @@ import io.github.brenoepics.roleplay.commands.organizations.RankUpOrganizationCo
 import io.github.brenoepics.roleplay.commands.organizations.RenameOrganizationCommand;
 import io.github.brenoepics.roleplay.commands.staff.GlobalHealCommand;
 import io.github.brenoepics.roleplay.commands.staff.GotoRoomCommand;
+import io.github.brenoepics.roleplay.commands.staff.KillCommand;
 import io.github.brenoepics.roleplay.commands.staff.MakeTerritoryCommand;
+import io.github.brenoepics.roleplay.commands.staff.ReviveCommand;
 import io.github.brenoepics.roleplay.commands.staff.RoomHealCommand;
 import io.github.brenoepics.roleplay.commands.staff.RoomReleaseCommand;
 import io.github.brenoepics.roleplay.commands.staff.SendRoomCommand;
@@ -127,8 +137,27 @@ public class LoadPlayerCommands {
       LoadPlayerCommands.addCommand(
           new PassiveCommand("cmd_passive", getSplit("commands.cmd_passive.keys")),
           new String[]{"passive"}, CheckDatabase.PermissionState.ALLOWED);
-      LoadPlayerCommands.addCommand(new HealCommand("cmd_heal", getSplit("commands.cmd_heal.keys")),
-          new String[]{"heal"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_ems_heal", ":soigner <pseudo> - Soigner un joueur bless\u00e9.");
+      LoadPlayerCommands.addCommand(new HealCommand("cmd_ems_heal", new String[]{"soigner", "heal"}),
+          new String[]{"soigner", "heal"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_ems_revive",
+          ":reanimer <pseudo> - R\u00e9animer un joueur inconscient.");
+      LoadPlayerCommands.addCommand(
+          new MedicalReviveCommand("cmd_ems_revive", new String[]{"reanimer", "medicalrevive"}),
+          new String[]{"reanimer", "medicalrevive"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_ems_diagnostic",
+          ":diagnostic <pseudo> - Consulter l'\u00e9tat de sant\u00e9 d'un joueur.");
+      LoadPlayerCommands.addCommand(
+          new DiagnosticCommand("cmd_ems_diagnostic", new String[]{"diagnostic", "diagnose"}),
+          new String[]{"diagnostic", "diagnose"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_ems_carry", ":porter <pseudo> - Transporter un joueur bless\u00e9.");
+      LoadPlayerCommands.addCommand(
+          new CarryPatientCommand("cmd_ems_carry", new String[]{"porter", "carry"}),
+          new String[]{"porter", "carry"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_ems_drop", ":deposer [pseudo] - Arr\u00eater le transport d'un joueur.");
+      LoadPlayerCommands.addCommand(
+          new DropPatientCommand("cmd_ems_drop", new String[]{"deposer", "drop"}),
+          new String[]{"deposer", "drop"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
           new EmsCallCommand("cmd_ems", new String[]{"ems", "medecin", "ambulance"}),
           new String[]{"ems", "medecin", "ambulance"}, CheckDatabase.PermissionState.ALLOWED);
@@ -160,18 +189,30 @@ public class LoadPlayerCommands {
       LoadPlayerCommands.addCommand(
           new QuitJobCommand("cmd_quit_job", getSplit("commands.cmd_quit_job.keys")),
           new String[]{"quitjob"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_tazor", ":taser <pseudo> - Immobilise temporairement un joueur.");
       LoadPlayerCommands.addCommand(
           new TazorCommand("cmd_tazor", new String[]{"taser", "tazor", "taze", "tase"}),
           new String[]{"taser", "tazor", "taze", "tase"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_detaser", ":detaser <pseudo> - Retire l'effet du taser.");
       LoadPlayerCommands.addCommand(
           new DetaserCommand("cmd_detaser", new String[]{"detaser"}),
           new String[]{"detaser"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_handcuff", ":menotter <pseudo> - Menotte un joueur tase.");
       LoadPlayerCommands.addCommand(
-          new StartWorkCommand("cmd_start_work", getSplit("commands.cmd_start_work.keys")),
-          new String[]{"startwork"}, CheckDatabase.PermissionState.ALLOWED);
+          new HandcuffCommand("cmd_handcuff", new String[]{"menotter", "handcuff"}),
+          new String[]{"menotter", "handcuff"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_unhandcuff", ":demenotter <pseudo> - Retire les menottes.");
       LoadPlayerCommands.addCommand(
-          new StopWorkCommand("cmd_stop_work", getSplit("commands.cmd_stop_work.keys")),
-          new String[]{"stopwork"}, CheckDatabase.PermissionState.ALLOWED);
+          new UnhandcuffCommand("cmd_unhandcuff", new String[]{"demenotter", "unhandcuff"}),
+          new String[]{"demenotter", "unhandcuff"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_start_work", ":travailler - Commence votre service.");
+      LoadPlayerCommands.addCommand(
+          new StartWorkCommand("cmd_start_work", new String[]{"travailler", "startwork"}),
+          new String[]{"travailler", "startwork"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_stop_work", ":arreter - Termine votre service.");
+      LoadPlayerCommands.addCommand(
+          new StopWorkCommand("cmd_stop_work", new String[]{"arreter", "stopwork"}),
+          new String[]{"arreter", "stopwork"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
           new OpenMacroCommand("cmd_open_macro", getSplit("commands.cmd_open_macro.keys")),
           new String[]{"macro", "open_macro"}, CheckDatabase.PermissionState.ALLOWED);
@@ -219,21 +260,17 @@ public class LoadPlayerCommands {
       LoadPlayerCommands.addCommand(
           new DeclineOfferCommand("cmd_decline_offer", getSplit("commands.cmd_decline_offer.keys")),
           new String[]{"declineoffer"}, CheckDatabase.PermissionState.ALLOWED);
-      LoadPlayerCommands.addCommand(
-          new ArrestCommand("cmd_arrest", getSplit("commands.cmd_arrest.keys")),
-          new String[]{"arrest", "jail"}, CheckDatabase.PermissionState.ALLOWED);
       //LoadPlayerCommands.addCommand(
       //    new StarCommand("cmd_give_stars", getSplit("commands.cmd_give_stars.keys")),
       //    new String[]{"stars"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_release", ":liberer <pseudo> - Libère un joueur emprisonné.");
       LoadPlayerCommands.addCommand(
           new ReleaseCommand("cmd_release", new String[]{"liberer", "release"}),
           new String[]{"liberer", "release"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_prison", ":prison <pseudo> <minutes> <raison> - Emprisonne un joueur.");
       LoadPlayerCommands.addCommand(
           new PrisonCommand("cmd_prison", new String[]{"prison"}),
           new String[]{"prison"}, CheckDatabase.PermissionState.ALLOWED);
-      LoadPlayerCommands.addCommand(
-          new PardonCommand("cmd_pardon", getSplit("commands.cmd_pardon.keys")),
-          new String[]{"pardon"}, PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
           new ChargeCommand("cmd_charge", getSplit("commands.cmd_charge.keys")),
           new String[]{"charge"}, CheckDatabase.PermissionState.ALLOWED);
@@ -285,12 +322,14 @@ public class LoadPlayerCommands {
               getSplit("commands.cmd_make_territory.keys")),
           new String[]{"territory", "create_territory"}, CheckDatabase.PermissionState.DENIED);
 
+      setDescription("cmd_escort", ":escorter <pseudo> - Escorte un joueur menotté.");
       LoadPlayerCommands.addCommand(
-          new EscortCommand("cmd_escort", getSplit("commands.cmd_escort.keys")),
-          new String[]{"escort"}, CheckDatabase.PermissionState.ALLOWED);
+          new EscortCommand("cmd_escort", new String[]{"escorter", "escort"}),
+          new String[]{"escorter", "escort"}, CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_stopescort", ":arreterescorte [pseudo] - Arrête une escorte.");
       LoadPlayerCommands.addCommand(
-          new StopEscortCommand("cmd_stopescort", new String[]{"stopescort"}),
-          new String[]{"stopescort"}, CheckDatabase.PermissionState.ALLOWED);
+          new StopEscortCommand("cmd_stopescort", new String[]{"arreterescorte", "stopescort"}),
+          new String[]{"arreterescorte", "stopescort"}, CheckDatabase.PermissionState.ALLOWED);
 
       LoadPlayerCommands.addCommand(
           new WantedListCommand("cmd_wanted_list", getSplit("commands.cmd_wanted_list.keys")),
@@ -345,9 +384,21 @@ public class LoadPlayerCommands {
       Emulator.getTexts().register("commands.description.cmd_superhire",
           ":superhire <pseudo> <metier|id> <rank>");
       LoadPlayerCommands.addCommand(
-          new SuperHireCommand("cmd_superhire", new String[]{"superhire"}),
-          new String[]{"superhire"}, PermissionState.DENIED);
+          new SuperHireCommand("cmd_superhire", new String[]{"superhire", "superrecruter"}),
+          new String[]{"superhire", "superrecruter"}, PermissionState.DENIED);
       CheckDatabase.allowPermissionForRankRange("cmd_superhire", 5, 9);
+
+      Emulator.getTexts().register("commands.description.cmd_staff_kill", ":kill <pseudo>");
+      LoadPlayerCommands.addCommand(
+          new KillCommand("cmd_staff_kill", new String[]{"kill"}),
+          new String[]{"kill"}, PermissionState.DENIED);
+      CheckDatabase.allowPermissionForRankRange("cmd_staff_kill", 5, 9);
+
+      Emulator.getTexts().register("commands.description.cmd_staff_revive", ":revive <pseudo>");
+      LoadPlayerCommands.addCommand(
+          new ReviveCommand("cmd_staff_revive", new String[]{"revive"}),
+          new String[]{"revive"}, PermissionState.DENIED);
+      CheckDatabase.allowPermissionForRankRange("cmd_staff_revive", 5, 9);
 
       LoadPlayerCommands.addCommand(
           new SellItemCommand("cmd_sell_item", getSplit("commands.keys.cmd_sell_item")),
@@ -376,5 +427,11 @@ public class LoadPlayerCommands {
     Emulator.getTexts().register("commands.description." + command.permission, ":" + keys[0]);
     CommandHandler.addCommand(command);
     CheckDatabase.registerPermission(command.permission, permissionState);
+  }
+
+  private static void setDescription(String permission, String description) {
+    String key = "commands.description." + permission;
+    Emulator.getTexts().register(key, description);
+    Emulator.getTexts().update(key, description);
   }
 }

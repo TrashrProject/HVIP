@@ -18,24 +18,24 @@ public class DisbandOrganizationCommand extends Command {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
 
         if (data.getOrganizationId() == 0) {
-            gameClient.getHabbo().whisper("You are not in an organization!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous n'appartenez \u00e0 aucune organisation.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         Organization org = RolePlay.getOrganizationManager().getOrganization(data.getOrganizationId());
         if (org == null || org.getAdminId() != gameClient.getHabbo().getHabboInfo().getId()) {
-            gameClient.getHabbo().whisper("You do not own an organization!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous n'\u00eates pas propri\u00e9taire d'une organisation.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if(params.length < 2 || !params[1].equals("confirm")) {
-            gameClient.getHabbo().whisper("This command requires confirmation, your organization will be deleted permanently! use :delete confirm", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Cette action supprimera d\u00e9finitivement votre organisation. Confirmez avec :supprimerorganisation confirmer", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
 
         RolePlay.getOrganizationManager().disbandOrganization(org.getId());
-        gameClient.getHabbo().whisper("You have disbanded the organization!", RoomChatMessageBubbles.ALERT);
+        gameClient.getHabbo().whisper("Votre organisation a \u00e9t\u00e9 dissoute.", RoomChatMessageBubbles.ALERT);
         return true;
     }
 }

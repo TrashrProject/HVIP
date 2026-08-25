@@ -26,12 +26,12 @@ public class StarCommand extends Command {
     RpAvatar officerData = RolePlay.getAvatarManager().getRpAvatar(officer);
 
     if (!officerData.getJobRankEntity().hasPermission(JobPermissions.POLICE_ARREST)) {
-      officer.whisper("You are not an Police Officer", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous n'\u00eates pas policier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!officerData.isDuty()) {
-      officer.whisper("You are not on Duty", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -41,7 +41,7 @@ public class StarCommand extends Command {
     }
 
     if (params.length < 2) {
-      officer.whisper(":star <user> 1-5", RoomChatMessageBubbles.ALERT);
+      officer.whisper(":recherche <pseudo> 1-5", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -49,18 +49,18 @@ public class StarCommand extends Command {
         .getTimeOut(officer.getHabboInfo().getId());
     if (timeout != null) {
       officer.whisper(
-          "You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to use this command again!");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
       return true;
     }
 
     Habbo criminal = officer.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     if (criminal == null) {
-      officer.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (criminal == officer) {
-      officer.whisper("You cannot add stars to yourself!", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous ne pouvez pas vous ajouter un niveau de recherche.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -75,8 +75,8 @@ public class StarCommand extends Command {
   }
 
   private static @NotNull Crime getManualCharge(Integer starCount, Habbo officer) {
-    return new Crime(-1, "Manual charge", starCount, true, false, false,
-        "Manual charge by " + officer.getHabboInfo().getUsername());
+    return new Crime(-1, "Inculpation manuelle", starCount, true, false, false,
+        "Inculpation manuelle par " + officer.getHabboInfo().getUsername());
   }
 
   private static @Nullable Integer getStarCount(String[] params, Habbo officer) {
@@ -84,11 +84,11 @@ public class StarCommand extends Command {
     try {
       starCount = Integer.parseInt(params[2]);
       if (starCount < 1 || starCount > 5) {
-        officer.whisper("Invalid number of stars", RoomChatMessageBubbles.ALERT);
+        officer.whisper("Le niveau de recherche est invalide.", RoomChatMessageBubbles.ALERT);
         return null;
       }
     } catch (NumberFormatException exception) {
-      officer.whisper("Invalid number of stars", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Le niveau de recherche est invalide.", RoomChatMessageBubbles.ALERT);
       return null;
     }
     return starCount;

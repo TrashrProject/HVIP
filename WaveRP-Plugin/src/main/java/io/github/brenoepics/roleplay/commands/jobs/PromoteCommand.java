@@ -21,12 +21,12 @@ public class PromoteCommand extends Command {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo1);
 
         if (data.getJobEntity() == null || data.getJobEntity().equals(RolePlay.getJobService().getUnemployedJob())) {
-            habbo1.whisper("You are currently unemployeed!", RoomChatMessageBubbles.ALERT);
+            habbo1.whisper("Vous n'avez aucun m\u00e9tier.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (params.length != 2) {
-            habbo1.whisper(":promote <user>", RoomChatMessageBubbles.ALERT);
+            habbo1.whisper(":promouvoir <pseudo>", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -37,12 +37,12 @@ public class PromoteCommand extends Command {
 
         Habbo habbo = habbo1.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
         if (habbo == null) {
-            habbo1.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+            habbo1.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (!data.isDuty()) {
-            gameClient.getHabbo().whisper("You are not on duty!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 

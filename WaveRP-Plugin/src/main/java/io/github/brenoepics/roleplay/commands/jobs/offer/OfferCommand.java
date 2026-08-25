@@ -20,28 +20,28 @@ public class OfferCommand extends Command {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
 
         if (params.length != 3) {
-            gameClient.getHabbo().whisper(":offer <name> <item>", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":proposer <pseudo> <objet>", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (data.getJobEntity() == null) {
-            gameClient.getHabbo().whisper("You are unemployed", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous n'avez aucun m\u00e9tier.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (!data.isDuty()) {
-            gameClient.getHabbo().whisper("You are not on duty", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         Habbo habbo = gameClient.getHabbo().getHabboInfo().getCurrentRoom().getHabbo(params[1]);
         if (habbo == null) {
-            gameClient.getHabbo().whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (habbo == gameClient.getHabbo()) {
-            gameClient.getHabbo().whisper("You cannot offer anything to yourself", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez rien vous proposer \u00e0 vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -49,7 +49,7 @@ public class OfferCommand extends Command {
         if (timeout != null) {
             long secondsLeft = timeout.getFinish().minusMillis(System.currentTimeMillis()).getEpochSecond();
             if (secondsLeft < 0) secondsLeft = 0;
-            gameClient.getHabbo().whisper("You have to wait " + secondsLeft + " seconds to use this command again!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous devez attendre " + secondsLeft + " seconde(s) avant de r\u00e9utiliser cette commande.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 

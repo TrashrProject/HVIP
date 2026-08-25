@@ -24,12 +24,12 @@ public class PardonCommand extends Command {
     RpAvatar officerData = RolePlay.getAvatarManager().getRpAvatar(officer);
 
     if (!officerData.getJobRankEntity().hasPermission(JobPermissions.POLICE_ARREST)) {
-      officer.whisper("You are not an Police Officer", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous n'\u00eates pas policier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!officerData.isDuty()) {
-      officer.whisper("You are not on Duty", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -39,7 +39,7 @@ public class PardonCommand extends Command {
     }
 
     if (params.length < 2) {
-      officer.whisper(":pardon <user>", RoomChatMessageBubbles.ALERT);
+      officer.whisper(":gracier <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -47,18 +47,18 @@ public class PardonCommand extends Command {
         .getTimeOut(officer.getHabboInfo().getId());
     if (timeout != null) {
       officer.whisper(
-          "You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to use this command again!");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
       return true;
     }
 
     Habbo criminal = officer.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     if (criminal == null) {
-      officer.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (criminal == officer) {
-      officer.whisper("You cannot pardon yourself!", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous ne pouvez pas vous gracier vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -66,7 +66,7 @@ public class PardonCommand extends Command {
     int userWantedStars = RolePlay.getWantedManager()
         .getUserWantedStars(criminal.getHabboInfo().getId());
     if (!criminalData.isJailed() && userWantedStars <= 0) {
-      officer.whisper("This user is neither jailed or wanted!", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Ce joueur n'est ni emprisonn\u00e9 ni recherch\u00e9.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 

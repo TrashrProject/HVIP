@@ -135,7 +135,7 @@
                                 </div>
                             </div>
                             <div class="news-title d-flex justify-content-center">
-                                <div class="ml-3 flex-grow-1">New Corporation - Manager Applications</div>
+                                <div class="ml-3 flex-grow-1">Nouvelle entreprise - Candidatures de responsables</div>
                                 <div class="mr-3"><i class="fas fa-certificate"></i></div>
                             </div>
                         </a>

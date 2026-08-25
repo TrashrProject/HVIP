@@ -18,18 +18,18 @@ public class UnequipCommand extends Command {
     Habbo habbo = gameClient.getHabbo();
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
     if (data.isPassive()) {
-      habbo.whisper("You cannot execute RolePlay commands while passive mode is on!",
+      habbo.whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (params.length != 1) {
-      habbo.whisper(":unequip", RoomChatMessageBubbles.ALERT);
+      habbo.whisper(":desequiper", RoomChatMessageBubbles.ALERT);
       return true;
     }
     data.getInventory().unEquipWeapon();
     data.getInventory().updateInventory(gameClient.getHabbo());
     habbo.getHabboInfo().getCurrentRoom().giveEffect(habbo, 0, -1);
-    habbo.whisper("You have unequipped your current weapon", RoomChatMessageBubbles.ALERT);
+    habbo.whisper("Vous avez rang\u00e9 votre arme.", RoomChatMessageBubbles.ALERT);
     data.setEquippedWeapon(0);
     return true;
   }

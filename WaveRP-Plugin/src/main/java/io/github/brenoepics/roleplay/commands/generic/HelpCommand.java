@@ -31,19 +31,19 @@ public class HelpCommand extends Command {
     @Override
     public boolean handle(GameClient gameClient, String[] params) {
         if (params.length != 1) {
-            gameClient.getHabbo().whisper(":help/911", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":aide ou :911", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         Timeout timeout = RolePlay.getCommandsCounter().getCoolDown("help").getTimeOut(gameClient.getHabbo().getHabboInfo().getId());
         if (timeout != null) {
-            gameClient.getHabbo().whisper("You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis()).getEpochSecond() + " seconds to use this command again!");
+            gameClient.getHabbo().whisper("Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis()).getEpochSecond() + " seconde(s) avant de rappeler la police.");
             return true;
         }
 
         Room room = gameClient.getHabbo().getRoomUnit().getRoom();
         if (room == null) {
-            gameClient.getHabbo().whisper("Something very strange has happened!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Impossible d'envoyer l'appel depuis cet endroit.", RoomChatMessageBubbles.ALERT);
             LOGGER.error("[NaHabbo RolePlay] {} tried to execute a command in hotel view", gameClient.getHabbo().getHabboInfo().getUsername());
             return true;
         }
@@ -58,21 +58,21 @@ public class HelpCommand extends Command {
         }
 
         if (policeOfficers.isEmpty()) {
-            gameClient.getHabbo().whisper("There is currently no police officer on duty", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Aucun policier n'est actuellement en service.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         //TODO: make this into livefeed
         policeOfficers.forEach(officer -> {
-            officer.whisper(gameClient.getHabbo().getHabboInfo().getUsername() + " requires assistance in " + room.getName() + " (" + room.getId() + ")", RoomChatMessageBubbles.RADIO);
+            officer.whisper(gameClient.getHabbo().getHabboInfo().getUsername() + " demande de l'aide dans " + room.getName() + " (" + room.getId() + ")", RoomChatMessageBubbles.RADIO);
             THashMap<String, String> notify_keys = new THashMap<>();
             notify_keys.put("display", "BUBBLE");
             notify_keys.put("image", "${image.library.url}notifications/mention.png");
             notify_keys.put("linkUrl", "event:navigator/goto/" + room.getId());
-            notify_keys.put("message", gameClient.getHabbo().getHabboInfo().getUsername() + " requires assistance in " + room.getName() + " (" + room.getId() + ")");
+            notify_keys.put("message", gameClient.getHabbo().getHabboInfo().getUsername() + " demande de l'aide dans " + room.getName() + " (" + room.getId() + ")");
             officer.getClient().sendResponse(new BubbleAlertComposer("911call", notify_keys));
         });
-        gameClient.getHabbo().whisper("You called the police", RoomChatMessageBubbles.ALERT);
+        gameClient.getHabbo().whisper("Vous avez appel\u00e9 la police.", RoomChatMessageBubbles.ALERT);
         RolePlay.getCommandsCounter().getCoolDown("help").addTimeOut(gameClient.getHabbo().getHabboInfo().getId(), HELP_TIMEOUT);
         return true;
     }

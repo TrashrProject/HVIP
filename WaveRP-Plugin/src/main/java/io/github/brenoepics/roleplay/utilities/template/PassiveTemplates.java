@@ -10,17 +10,17 @@ import io.github.brenoepics.roleplay.utilities.LiveFeed.PlayerState;
  * actor, LivePlayer receiver) or format(String actorName, String receiverName)
  */
 public enum PassiveTemplates {
-  ACCEPT_OFFER("%actor% accepted an offer from %receiver%"),
-  HEAL("%actor% healed %receiver%"),
-  PROMOTE("%actor% promoted %receiver% to %action%"),
-  DEMOTE("%actor% demoted %receiver% to %action%"),
-  HIRE("%actor% hired %receiver% as %action%"),
-  FIRE("%actor% fired %receiver% from their corp"),
-  ARREST("%actor% sent %receiver% to jail"),
-  INVITE_ORG("%actor% recruited %receiver% to their organization"),
-  KICK_ORG("%actor% removed %receiver% from their organization"),
-  ESCORT_START("%actor% started escorting %receiver%"),
-  ESCORT_STOP("%actor% stopped escorting %receiver%");
+  ACCEPT_OFFER("%actor% a accept\u00e9 une offre de %receiver%"),
+  HEAL("%actor% a soign\u00e9 %receiver%"),
+  PROMOTE("%actor% a promu %receiver% au grade %action%"),
+  DEMOTE("%actor% a r\u00e9trograd\u00e9 %receiver% au grade %action%"),
+  HIRE("%actor% a recrut\u00e9 %receiver% en tant que %action%"),
+  FIRE("%actor% a licenci\u00e9 %receiver%"),
+  ARREST("%actor% a envoy\u00e9 %receiver% en prison"),
+  INVITE_ORG("%actor% a recrut\u00e9 %receiver% dans son organisation"),
+  KICK_ORG("%actor% a exclu %receiver% de son organisation"),
+  ESCORT_START("%actor% commence \u00e0 escorter %receiver%"),
+  ESCORT_STOP("%actor% arr\u00eate d'escorter %receiver%");
 
 
   private final String template;

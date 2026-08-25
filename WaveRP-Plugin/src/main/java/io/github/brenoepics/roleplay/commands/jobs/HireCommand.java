@@ -25,11 +25,11 @@ public class HireCommand extends Command {
 
     if (data.getJobEntity() == null || data.getJobEntity()
         .equals(RolePlay.getJobService().getUnemployedJob())) {
-      manager.whisper("You are not employed", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Vous n'avez aucun m\u00e9tier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (params.length != 2) {
-      manager.whisper(":hire <user>", RoomChatMessageBubbles.ALERT);
+      manager.whisper(":recruter <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -40,37 +40,37 @@ public class HireCommand extends Command {
 
     Habbo habbo = manager.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     if (habbo == null) {
-      manager.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (!data.getJobRankEntity().isManager()) {
-      manager.whisper("You are not authorized to hire anyone", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Votre grade ne vous autorise pas \u00e0 recruter.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     RpAvatar targetData = RolePlay.getAvatarManager().getRpAvatar(habbo);
 
     if (!targetData.getJobEntity().equals(RolePlay.getJobService().getUnemployedJob())) {
-      manager.whisper("You can't hire " + habbo.getHabboInfo().getUsername(),
+      manager.whisper("Vous ne pouvez pas recruter " + habbo.getHabboInfo().getUsername() + ".",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     JobRankEntity job = data.getJobEntity().getRanks().getFirst();
     if (job == null || job.equals(RolePlay.getJobService().getUnemployedRank())) {
-      manager.whisper("You can't hire " + habbo.getHabboInfo().getUsername(),
+      manager.whisper("Vous ne pouvez pas recruter " + habbo.getHabboInfo().getUsername() + ".",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!data.isDuty()) {
-      gameClient.getHabbo().whisper("You are not on duty!", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     targetData.setJobEntity(data.getJobEntity());
     targetData.setJobRankEntity(job);
-    manager.whisper("Hires " + habbo.getHabboInfo().getUsername(), RoomChatMessageBubbles.NORMAL);
-    habbo.whisper("You were hired by " + manager.getHabboInfo().getUsername(),
+    manager.whisper("Vous avez recrut\u00e9 " + habbo.getHabboInfo().getUsername() + ".", RoomChatMessageBubbles.NORMAL);
+    habbo.whisper("Vous avez \u00e9t\u00e9 recrut\u00e9 par " + manager.getHabboInfo().getUsername() + ".",
         RoomChatMessageBubbles.ALERT);
     String managerName = manager.getHabboInfo().getUsername();
     String employeeName = habbo.getHabboInfo().getUsername();

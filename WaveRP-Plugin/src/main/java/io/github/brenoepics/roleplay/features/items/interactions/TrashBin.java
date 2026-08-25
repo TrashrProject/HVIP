@@ -45,7 +45,7 @@ public class TrashBin extends InteractionDefault {
         }
 
         if (this.searched) {
-            client.getHabbo().whisper("This trash can has already been searched, try again later");
+            client.getHabbo().whisper("Cette poubelle a déjà été fouillée. Réessayez plus tard.");
             return;
         }
 
@@ -57,7 +57,7 @@ public class TrashBin extends InteractionDefault {
         if (client.getHabbo().getHabboInfo().getCurrentRoom().getLayout().getTilesAround(location, 0, false).contains(client.getHabbo().getRoomUnit().getCurrentLocation())) {
             this.occupied = true;
             room.updateItem(this);
-            client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserShoutComposer(new RoomChatMessage("Searches the trash can for some useful items*", client.getHabbo(), client.getHabbo(), RoomChatMessageBubbles.NORMAL)).compose());
+            client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserShoutComposer(new RoomChatMessage("*Fouille la poubelle à la recherche d'objets utiles*", client.getHabbo(), client.getHabbo(), RoomChatMessageBubbles.NORMAL)).compose());
             Emulator.getThreading().run(() -> updateOccupied(client.getHabbo(), sum, chances, items, data, room, bin, location), Emulator.getConfig().getInt("nahabbo.features.trashbin.search.time"));
         }
     }
@@ -90,39 +90,39 @@ public class TrashBin extends InteractionDefault {
             case "Bucks":
                 int bucks = ThreadLocalRandom.current().nextInt(1, 5);
                 habbo.getHabboInfo().addCurrencyAmount(200, bucks);
-                habbo.whisper("You found " + bucks + " Bucks");
+                habbo.whisper("Vous avez trouvé " + bucks + " Bucks.");
                 break;
             case "Pizza":
                 data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Snack"), 1);
-                habbo.whisper("You found a Snack");
+                habbo.whisper("Vous avez trouvé un encas.");
                 break;
             case "Medkit":
                 data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Medkit"), 1);
-                habbo.whisper("You found a Medkit");
+                habbo.whisper("Vous avez trouvé une trousse de secours.");
                 break;
             case "Shield":
                 data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Shield"), 1);
-                habbo.whisper("You found a Shield");
+                habbo.whisper("Vous avez trouvé une protection.");
                 break;
             case "Weapon":
                 int weapon = ThreadLocalRandom.current().nextInt(1, 3);
                 if (weapon == 1) {
                     data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Bat"), 1);
-                    habbo.whisper("You found a Bat");
+                    habbo.whisper("Vous avez trouvé une batte.");
                     return;
                 }
                 if (weapon == 2) {
                     data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Sword"), 1);
-                    habbo.whisper("You found a Sword");
+                    habbo.whisper("Vous avez trouvé une épée.");
                     return;
                 }
                 if (weapon == 3) {
                     data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Pistol"), 1);
-                    habbo.whisper("You found a Pistol");
+                    habbo.whisper("Vous avez trouvé un pistolet.");
                 }
                 break;
             default:
-                habbo.whisper("You found nothing");
+                habbo.whisper("Vous n'avez rien trouvé.");
                 break;
         }
     }

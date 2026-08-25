@@ -8,17 +8,17 @@ import io.github.brenoepics.roleplay.utilities.LiveFeed.PlayerState;
  * format(LivePlayer player)
  */
 public enum SinglePlayerTemplates {
-  START_WORK("%player% clocked in for the grind"),
-  STOP_WORK("%player% made a break for freedom"),
-  HELP("%player% screamed for backup"),
-  PASSIVE_ON("%player% went all zen mode"),
-  PASSIVE_OFF("%player% got ready to rumble again"),
-  CREATE_ORG("%player% established their criminal empire"),
-  JOIN_ORG("%player% pledged allegiance to the crew"),
-  LEAVE_ORG("%player% went rogue from their crew"),
-  DIED_HUNGRY("%player% was knocked out from hunger"),
-  HEALED("%player% has been healed at the hospital"),
-  RELEASED_JAIL("%player% has been released from jail"),
+  START_WORK("%player% a commenc\u00e9 son service"),
+  STOP_WORK("%player% a termin\u00e9 son service"),
+  HELP("%player% a demand\u00e9 des renforts"),
+  PASSIVE_ON("%player% est pass\u00e9 en mode passif"),
+  PASSIVE_OFF("%player% a quitt\u00e9 le mode passif"),
+  CREATE_ORG("%player% a fond\u00e9 son organisation"),
+  JOIN_ORG("%player% a rejoint une organisation"),
+  LEAVE_ORG("%player% a quitt\u00e9 son organisation"),
+  DIED_HUNGRY("%player% s'est \u00e9vanoui de faim"),
+  HEALED("%player% a \u00e9t\u00e9 soign\u00e9 par les services m\u00e9dicaux"),
+  RELEASED_JAIL("%player% a \u00e9t\u00e9 lib\u00e9r\u00e9 de prison"),
   ;
 
   private final String template;

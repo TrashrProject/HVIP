@@ -20,12 +20,12 @@ public class FireCommand extends Command {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
 
         if (data.getJobEntity() == null || data.getJobEntity().equals(RolePlay.getJobService().getUnemployedJob())) {
-            gameClient.getHabbo().whisper("You are not employed", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous n'avez aucun m\u00e9tier.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (params.length != 2) {
-            gameClient.getHabbo().whisper(":fire <user>", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":licencier <pseudo>", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -36,12 +36,12 @@ public class FireCommand extends Command {
 
         Habbo habbo = gameClient.getHabbo().getHabboInfo().getCurrentRoom().getHabbo(params[1]);
         if (habbo == null) {
-            gameClient.getHabbo().whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (!data.isDuty()) {
-            gameClient.getHabbo().whisper("You are not on duty!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 

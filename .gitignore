@@ -26,6 +26,7 @@ cache/
 **/tmp/
 **/logs/
 **/log/
+**/logging/
 *.log
 WebPixel/Dynamics/uploads/
 

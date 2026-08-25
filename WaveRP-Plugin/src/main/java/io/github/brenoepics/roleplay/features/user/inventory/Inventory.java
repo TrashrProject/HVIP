@@ -432,7 +432,7 @@ public class Inventory {
       habbo.getHabboInfo().getCurrentRoom().giveEffect(habbo, 0, -1);
       RPItem item = getPrimaryWeaponSlot().getItem();
       habbo.whisper(
-          "*Your " + item.getDisplayName() + " breaks with a loud crack, becoming unusable*");
+          "*Votre " + item.getDisplayName() + " se brise avec fracas et devient inutilisable*");
       unEquipWeapon();
     }
   }

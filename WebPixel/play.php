@@ -2,7 +2,7 @@
 /**
  * ParadiseRP clean play entry.
  * Only the Nitro iframe is rendered here.
- * Stable room boot: explicit /play?room=ID URL, fresh SSO, validated room id.
+ * Room restoration is handled by WaveRP from users_roleplay.last_pos.
  */
 
 require_once "app/init.pz.php";
@@ -37,79 +37,6 @@ function pr_play_columns(mysqli $con, string $table): array {
         }
     }
     return $cols;
-}
-
-function pr_play_room_exists(mysqli $con, int $roomId): bool {
-    if ($roomId <= 0) return false;
-    if (!pr_play_table_exists($con, 'rooms')) return true;
-    $cols = pr_play_columns($con, 'rooms');
-    $idCol = $cols['id'] ?? '';
-    if ($idCol === '') return true;
-    $res = @mysqli_query($con, "SELECT 1 FROM `rooms` WHERE `" . $idCol . "` = '" . $roomId . "' LIMIT 1");
-    return $res && mysqli_num_rows($res) > 0;
-}
-
-function pr_play_first_valid_room(mysqli $con, string $sql): int {
-    $res = @mysqli_query($con, $sql);
-    if (!$res) return 0;
-    while ($row = mysqli_fetch_assoc($res)) {
-        foreach ($row as $value) {
-            if (is_numeric($value) && (int)$value > 0 && pr_play_room_exists($con, (int)$value)) return (int)$value;
-        }
-    }
-    return 0;
-}
-
-function pr_play_resolve_room(mysqli $con, int $userId, string $username): int {
-    if (isset($_GET['room']) && is_numeric($_GET['room'])) {
-        $roomId = max(0, (int)$_GET['room']);
-        if (pr_play_room_exists($con, $roomId)) return $roomId;
-        unset($_SESSION['paradise_last_room_id']);
-    }
-
-    if (isset($_SESSION['paradise_last_room_id']) && is_numeric($_SESSION['paradise_last_room_id'])) {
-        $roomId = max(0, (int)$_SESSION['paradise_last_room_id']);
-        if (pr_play_room_exists($con, $roomId)) return $roomId;
-        unset($_SESSION['paradise_last_room_id']);
-    }
-
-    if (pr_play_table_exists($con, 'play_apartments_owned')) {
-        $roomId = pr_play_first_valid_room($con, "SELECT room_id FROM `play_apartments_owned` WHERE owner = '" . $userId . "' AND room_id > 0 ORDER BY id ASC LIMIT 10");
-        if ($roomId > 0) return $roomId;
-    }
-
-    if (pr_play_table_exists($con, 'rooms')) {
-        $cols = pr_play_columns($con, 'rooms');
-        $idCol = $cols['id'] ?? '';
-        if ($idCol !== '') {
-            foreach (['owner_id', 'userid', 'user_id'] as $ownerCol) {
-                if (isset($cols[$ownerCol])) {
-                    $roomId = pr_play_first_valid_room($con, "SELECT `" . $idCol . "` FROM `rooms` WHERE `" . $cols[$ownerCol] . "` = '" . $userId . "' AND `" . $idCol . "` > 0 ORDER BY `" . $idCol . "` ASC LIMIT 10");
-                    if ($roomId > 0) return $roomId;
-                }
-            }
-            foreach (['owner', 'owner_name', 'username'] as $ownerCol) {
-                if (isset($cols[$ownerCol])) {
-                    $safeName = mysqli_real_escape_string($con, $username);
-                    $roomId = pr_play_first_valid_room($con, "SELECT `" . $idCol . "` FROM `rooms` WHERE `" . $cols[$ownerCol] . "` = '" . $safeName . "' AND `" . $idCol . "` > 0 ORDER BY `" . $idCol . "` ASC LIMIT 10");
-                    if ($roomId > 0) return $roomId;
-                }
-            }
-
-            $order = [];
-            foreach (['users_now', 'users', 'score'] as $candidate) if (isset($cols[$candidate])) $order[] = '`' . $cols[$candidate] . '` DESC';
-            $order[] = '`' . $idCol . '` ASC';
-            $roomId = pr_play_first_valid_room($con, "SELECT `" . $idCol . "` FROM `rooms` WHERE `" . $idCol . "` > 0 ORDER BY " . implode(',', $order) . " LIMIT 20");
-            if ($roomId > 0) return $roomId;
-        }
-    }
-
-    if (pr_play_table_exists($con, 'play_apartments_owned')) {
-        $roomId = pr_play_first_valid_room($con, "SELECT room_id FROM `play_apartments_owned` WHERE room_id > 0 ORDER BY id ASC LIMIT 20");
-        if ($roomId > 0) return $roomId;
-    }
-
-    return 0;
 }
 
 function pr_play_ticket_columns(mysqli $con): array {
@@ -203,18 +130,7 @@ function pr_play_auth_debug(mysqli $con, int $userId, string $ticket): array {
 
 $con = $DB->Con();
 $userId = isset($UData['id']) ? (int)$UData['id'] : -1;
-$username = isset($UData['username']) ? (string)$UData['username'] : '';
-$autoRoomId = $userId >= 0 ? pr_play_resolve_room($con, $userId, $username) : 0;
-if ($autoRoomId > 0) $_SESSION['paradise_last_room_id'] = $autoRoomId;
-
-$currentRoom = (isset($_GET['room']) && is_numeric($_GET['room'])) ? (int)$_GET['room'] : 0;
-if ($autoRoomId > 0 && $currentRoom !== $autoRoomId) {
-    $target = rtrim(Config::$URL, '/') . '/play?room=' . $autoRoomId;
-    if (isset($_GET['prdebug']) && $_GET['prdebug'] === '1') $target .= '&prdebug=1';
-    $target .= '&_=' . time();
-    header('Location: ' . $target, true, 302);
-    exit;
-}
+unset($_SESSION['paradise_last_room_id']);
 
 $ticket = pr_play_generate_ticket($con, $userId, $UserMG ?? null);
 
@@ -230,12 +146,11 @@ $authDebug = pr_play_auth_debug($con, $userId, $ticket);
 
 $bootNonce = time() . '-' . mt_rand(1000, 9999);
 $nitroParams = ['sso' => $ticket, '_boot' => $bootNonce];
-if ($autoRoomId > 0) $nitroParams = ['room' => $autoRoomId, 'sso' => $ticket, '_boot' => $bootNonce];
 if (isset($_GET['prdebug']) && $_GET['prdebug'] === '1') $nitroParams['prdebug'] = '1';
 
 $nitroSrc = '/nitro/index.html?' . http_build_query($nitroParams, '', '&', PHP_QUERY_RFC3986);
 $nitroSrcHtml = htmlspecialchars($nitroSrc, ENT_QUOTES, 'UTF-8');
-$autoRoomJs = (int)$autoRoomId;
+$autoRoomJs = 0;
 $ticketJs = json_encode($ticket, JSON_UNESCAPED_SLASHES);
 $authDebugJs = json_encode($authDebug, JSON_UNESCAPED_SLASHES);
 ?>

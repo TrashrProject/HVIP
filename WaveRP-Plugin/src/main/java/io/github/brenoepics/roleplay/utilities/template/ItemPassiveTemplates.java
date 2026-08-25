@@ -9,7 +9,7 @@ import io.github.brenoepics.roleplay.utilities.LiveFeed.PlayerState;
  * String itemName)
  */
 public enum ItemPassiveTemplates {
-  OFFER("%actor% waved %item% in front of %receiver%'s face");
+  OFFER("%actor% propose %item% \u00e0 %receiver%");
 
   private final String template;
 

@@ -105,7 +105,7 @@ public class HospitalService {
 
   private static void alertRegen(Habbo habbo, RpAvatar avatar) {
     if (avatar.getHealth() < avatar.getMaxHealth()) {
-      habbo.whisper("Your health has started to regenerate!");
+      habbo.whisper("Votre sant\u00e9 commence \u00e0 se r\u00e9g\u00e9n\u00e9rer !");
     }
   }
 

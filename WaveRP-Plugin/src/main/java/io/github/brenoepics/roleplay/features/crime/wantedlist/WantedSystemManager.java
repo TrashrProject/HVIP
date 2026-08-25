@@ -38,7 +38,7 @@ public class WantedSystemManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(WantedSystemManager.class);
   public static final String STARS = "%stars%";
   public static final String CRIME = "%crime%";
-  public static final String SYSTEM = "System";
+  public static final String SYSTEM = "Syst\u00e8me";
 
   private final Map<Integer, Crime> crimes = new HashMap<>();
   private final Map<Integer, CrimePenalty> penalties = new HashMap<>();
@@ -370,14 +370,14 @@ public class WantedSystemManager {
   public void arrestUser(Habbo police, Habbo criminal, List<CriminalRecord> records, int stars) {
     RpAvatar targetData = RolePlay.getAvatarManager().getRpAvatar(criminal);
     if (targetData.isJailed()) {
-      police.whisper("This player is already arrested", RoomChatMessageBubbles.ALERT);
+      police.whisper("Ce joueur est d\u00e9j\u00e0 arr\u00eat\u00e9.", RoomChatMessageBubbles.ALERT);
       return;
     }
 
     Optional<Duration> jailTime = calculateJailTime(stars);
     if (jailTime.isEmpty() || records.isEmpty()) {
       police.whisper(
-          "This player does not have anything in criminal records or can't be arrested.");
+          "Ce joueur n'a aucun ant\u00e9c\u00e9dent actif ou ne peut pas \u00eatre arr\u00eat\u00e9.");
       return;
     }
 
@@ -456,24 +456,24 @@ public class WantedSystemManager {
     RpAvatar victimData = RolePlay.getAvatarManager().getRpAvatar(victim);
 
     if (victimData != null && victimData.isJailed()) {
-      crime = getCrimeByName("Execution");
+      crime = getCrimeByName("Ex\u00e9cution");
     } else if (determineIfGangHomicide(killer, victim)) {
-      crime = getCrimeByName("Gang Homicide");
+      crime = getCrimeByName("Homicide entre gangs");
     } else {
-      crime = getCrimeByName("Murder");
+      crime = getCrimeByName("Meurtre");
     }
 
     // Apply additional checks
     int killerWantedLevel = getUserWantedStars(killer.getHabboInfo().getId());
     if (killerWantedLevel > 0) {
       // Mass murder - already wanted
-      crime = getCrimeByName("Mass Murder");
+      crime = getCrimeByName("Meurtres multiples");
     }
 
     // Check if a victim is a cop on duty
     if (victimData != null && victimData.isDuty() && victimData.getJobEntity() != null
         && victimData.getJobEntity().getName().contains("police")) {
-      crime = getCrimeByName("Cop Murder");
+      crime = getCrimeByName("Meurtre d'un policier");
     }
 
     autoChargeCrime(killer, crime);

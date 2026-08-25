@@ -129,24 +129,144 @@ public class UserProfileCustomComposer extends MessageComposer {
         Emulator.getIntUnixTimestamp() - this.habboInfo.getLastOnline()); //Secs ago.
     this.response.appendBoolean(true);
 
-    this.response.appendBoolean(rpAvatar.isDuty());
-    this.response.appendString(rpAvatar.getJobEntity().getName());
-    this.response.appendString(rpAvatar.getJobRankEntity().getDisplayName());
-    Organization organization = RolePlay.getOrganizationManager()
-        .getOrganization(rpAvatar.getOrganizationId());
+    boolean hasRpAvatar = rpAvatar != null;
+    this.response.appendBoolean(hasRpAvatar && rpAvatar.isDuty());
+    this.response.appendString(hasRpAvatar && rpAvatar.getJobEntity() != null
+        ? rpAvatar.getJobEntity().getDisplayName() : "Sans emploi");
+    this.response.appendString(hasRpAvatar && rpAvatar.getJobRankEntity() != null
+        ? rpAvatar.getJobRankEntity().getDisplayName() : "Sans grade");
+    Organization organization = hasRpAvatar ? RolePlay.getOrganizationManager()
+        .getOrganization(rpAvatar.getOrganizationId()) : null;
 
-    this.response.appendString(organization == null ? "No Gang" : organization.getName());
+    this.response.appendString(organization == null ? "Aucun gang" : organization.getName());
 
-    this.response.appendInt(rpAvatar.getCombatStats().getKills());
-    this.response.appendInt(rpAvatar.getCombatStats().getDeaths());
-    this.response.appendInt(rpAvatar.getCombatStats().getArrests());
-    this.response.appendDouble(rpAvatar.getCombatStats().getKdRatio());
-    this.response.appendInt(rpAvatar.getCombatStats().getPunchesThrown());
-    this.response.appendInt(rpAvatar.getCombatStats().getPunchesReceived());
-    this.response.appendInt(rpAvatar.getCombatStats().getDamageDealt());
-    this.response.appendInt(rpAvatar.getCombatStats().getDamageReceived());
+    this.response.appendInt(hasRpAvatar ? rpAvatar.getCombatStats().getKills() : 0);
+    this.response.appendInt(hasRpAvatar ? rpAvatar.getCombatStats().getDeaths() : 0);
+    this.response.appendInt(hasRpAvatar ? rpAvatar.getCombatStats().getArrests() : 0);
+    this.response.appendDouble(hasRpAvatar ? rpAvatar.getCombatStats().getKdRatio() : 0);
+    this.response.appendInt(hasRpAvatar ? rpAvatar.getCombatStats().getPunchesThrown() : 0);
+    this.response.appendInt(hasRpAvatar ? rpAvatar.getCombatStats().getPunchesReceived() : 0);
+    this.response.appendInt(hasRpAvatar ? rpAvatar.getCombatStats().getDamageDealt() : 0);
+    this.response.appendInt(hasRpAvatar ? rpAvatar.getCombatStats().getDamageReceived() : 0);
+
+    this.response.appendInt(0); // Attribute points are not implemented server-side yet.
+    this.response.appendInt(hasRpAvatar ? (int) Math.round(rpAvatar.getStrength()) : 1);
+    this.response.appendInt(0); // Knowledge is not implemented server-side yet.
+
+    List<ProfileSkill> skills = loadEquippedSkills(this.habboInfo.getId());
+    this.response.appendInt(skills.size());
+    for (ProfileSkill skill : skills) {
+      this.response.appendString(skill.iconLink);
+      this.response.appendInt(skill.id);
+      this.response.appendInt(skill.level);
+    }
+
+    this.response.appendInt(1);
+    this.response.appendInt(0);
+    this.response.appendInt(100);
+
+    ProfileJobGroup jobGroup = hasRpAvatar && rpAvatar.getJobEntity() != null
+        ? loadJobGroup(this.habboInfo.getId(), rpAvatar.getJobEntity().getName(),
+            rpAvatar.getJobEntity().getDisplayName()) : null;
+    this.response.appendInt(jobGroup == null ? 0 : jobGroup.id);
+    if (jobGroup != null) {
+      this.response.appendString(jobGroup.name);
+      this.response.appendString(jobGroup.badge);
+      this.response.appendInt(jobGroup.kind);
+      this.response.appendInt(jobGroup.weeklyShifts);
+      this.response.appendInt(jobGroup.totalShifts);
+    }
 
     return this.response;
+  }
+
+  private static List<ProfileSkill> loadEquippedSkills(int userId) {
+    List<ProfileSkill> skills = new ArrayList<>();
+    String query = "SELECT skill.id, skill.badge_code, COALESCE(MAX(skill_level.level), 0) AS level "
+        + "FROM user_rp_skills AS user_skill "
+        + "INNER JOIN rp_skills AS skill ON skill.id = user_skill.skill_id "
+        + "LEFT JOIN rp_skills_levels AS skill_level ON skill_level.skill_id = skill.id "
+        + "AND user_skill.progress >= skill_level.required_progress "
+        + "WHERE user_skill.user_id = ? AND user_skill.equipped = 1 "
+        + "GROUP BY skill.id, skill.badge_code ORDER BY user_skill.id LIMIT 4";
+    try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
+        PreparedStatement statement = connection.prepareStatement(query)) {
+      statement.setInt(1, userId);
+      try (ResultSet set = statement.executeQuery()) {
+        while (set.next()) {
+          skills.add(new ProfileSkill(set.getInt("id"), set.getInt("level"),
+              set.getString("badge_code") == null ? "" : set.getString("badge_code")));
+        }
+      }
+    } catch (SQLException e) {
+      log.error("Unable to load profile skills for user {}", userId, e);
+    }
+    return skills;
+  }
+
+  private static ProfileJobGroup loadJobGroup(int userId, String jobName,
+      String jobDisplayName) {
+    String query = "SELECT group_data.id, group_data.name, group_data.badge, "
+        + "COALESCE(group_data.group_type, 0) AS group_type, "
+        + "SUM(CASE WHEN shift_log.shift_finished >= ? THEN 1 ELSE 0 END) AS weekly_shifts, "
+        + "COUNT(shift_log.id) AS total_shifts FROM groups AS group_data "
+        + "LEFT JOIN rp_shift_logs AS shift_log ON shift_log.group_id = group_data.id "
+        + "AND shift_log.user_id = ? WHERE LOWER(group_data.name) = LOWER(?) "
+        + "OR LOWER(group_data.name) LIKE CONCAT('%', LOWER(?), '%') "
+        + "OR LOWER(?) LIKE CONCAT('%', LOWER(group_data.name), '%') "
+        + "GROUP BY group_data.id, group_data.name, group_data.badge, group_data.group_type "
+        + "ORDER BY CASE WHEN LOWER(group_data.name) = LOWER(?) THEN 0 ELSE 1 END, "
+        + "group_data.id LIMIT 1";
+    try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
+        PreparedStatement statement = connection.prepareStatement(query)) {
+      statement.setInt(1, Emulator.getIntUnixTimestamp() - (7 * 24 * 60 * 60));
+      statement.setInt(2, userId);
+      statement.setString(3, jobName);
+      statement.setString(4, jobName);
+      statement.setString(5, jobDisplayName);
+      statement.setString(6, jobName);
+      try (ResultSet set = statement.executeQuery()) {
+        if (set.next()) {
+          return new ProfileJobGroup(set.getInt("id"), set.getString("name"),
+              set.getString("badge"), set.getInt("group_type"),
+              set.getInt("weekly_shifts"), set.getInt("total_shifts"));
+        }
+      }
+    } catch (SQLException e) {
+      log.error("Unable to load profile job group for user {}", userId, e);
+    }
+    return null;
+  }
+
+  private static final class ProfileSkill {
+    private final int id;
+    private final int level;
+    private final String iconLink;
+
+    private ProfileSkill(int id, int level, String iconLink) {
+      this.id = id;
+      this.level = level;
+      this.iconLink = iconLink;
+    }
+  }
+
+  private static final class ProfileJobGroup {
+    private final int id;
+    private final String name;
+    private final String badge;
+    private final int kind;
+    private final int weeklyShifts;
+    private final int totalShifts;
+
+    private ProfileJobGroup(int id, String name, String badge, int kind, int weeklyShifts,
+        int totalShifts) {
+      this.id = id;
+      this.name = name;
+      this.badge = badge;
+      this.kind = kind;
+      this.weeklyShifts = weeklyShifts;
+      this.totalShifts = totalShifts;
+    }
   }
 
   public HabboInfo getHabboInfo() {

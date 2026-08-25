@@ -24,11 +24,11 @@ public class ArrestCommand extends Command {
     RpAvatar managerData = RolePlay.getAvatarManager().getRpAvatar(manager);
 
     if (!managerData.getJobRankEntity().hasPermission(JobPermissions.POLICE_ARREST)) {
-      manager.whisper("You are not an Police Officer", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Vous n'\u00eates pas policier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (!managerData.isDuty()) {
-      manager.whisper("You are not on Duty", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -38,7 +38,7 @@ public class ArrestCommand extends Command {
     }
 
     if (params.length < 2) {
-      manager.whisper(":arrest <user>", RoomChatMessageBubbles.ALERT);
+      manager.whisper(":arreterpolice <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -46,18 +46,18 @@ public class ArrestCommand extends Command {
         .getTimeOut(manager.getHabboInfo().getId());
     if (timeout != null) {
       manager.whisper(
-          "You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to use this command again!");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
       return true;
     }
 
     Habbo habbo = manager.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     if (habbo == null) {
-      manager.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (habbo == manager) {
-      manager.whisper("You cannot arrest yourself!", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Vous ne pouvez pas vous arr\u00eater vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -71,7 +71,7 @@ public class ArrestCommand extends Command {
     }
 
     if (RolePlay.getWantedManager().getUserWantedStars(habbo.getHabboInfo().getId()) <= 0) {
-      manager.whisper("This user is not wanted!", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Ce joueur n'est pas recherch\u00e9.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -80,4 +80,3 @@ public class ArrestCommand extends Command {
     return true;
   }
 }
-

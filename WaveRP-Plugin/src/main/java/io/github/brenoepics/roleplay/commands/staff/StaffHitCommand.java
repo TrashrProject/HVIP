@@ -19,37 +19,37 @@ public class StaffHitCommand extends Command {
   public boolean handle(GameClient gameClient, String[] params) {
     Habbo staff = gameClient.getHabbo();
     if (params.length <= 2) {
-      staff.whisper(":staffhit <player> <amount>", RoomChatMessageBubbles.ALERT);
+      staff.whisper(":frapperstaff <pseudo> <d\u00e9g\u00e2ts>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     Habbo victim = staff.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     if (victim == null) {
-      staff.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (victim == staff) {
-      staff.whisper("You can't hit yourself!", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Vous ne pouvez pas vous frapper vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     RpAvatar target = RolePlay.getAvatarManager().getRpAvatar(victim);
     if (target.isPassive()) {
-      staff.whisper("You can't hit " + victim.getHabboInfo().getUsername()
-          + " because they are in passive mode.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Vous ne pouvez pas frapper " + victim.getHabboInfo().getUsername()
+          + " car ce joueur est en mode passif.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (target.isDead()) {
-      staff.whisper(victim.getHabboInfo().getUsername() + " is already dead!",
+      staff.whisper(victim.getHabboInfo().getUsername() + " est d\u00e9j\u00e0 inconscient.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     Integer damage = getDamage(params);
     if (damage == null) {
-      staff.whisper("Invalid amount, must be a number", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Le nombre de d\u00e9g\u00e2ts est invalide.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 

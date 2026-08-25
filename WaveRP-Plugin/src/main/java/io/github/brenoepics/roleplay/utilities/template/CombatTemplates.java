@@ -10,22 +10,22 @@ import io.github.brenoepics.roleplay.utilities.LiveFeed.PlayerState;
  * attacker, LivePlayer victim) or format(String attackerName, String victimName)
  */
 public enum CombatTemplates {
-  KILL("%attacker% knocked out %victim%"), HIT(
-      "%attacker% smacked %victim% right in the face"), SHOOT(
-      "%attacker% stunned %victim%"), TAZOR(
-      "%attacker% robbed %victim%"), ROB(
-      "%attacker% relieved %victim% of their valuables"), ARREST(
-      "%attacker% arrested %victim% for %action%"), // Auto-charge-related templates
-  AUTO_MURDER("%attacker% committed homicide against %victim%"), AUTO_GANG_HOMICIDE(
-      "%attacker% executed a rival gang member, %victim%"), AUTO_MASS_MURDER(
-      "%attacker% added %victim% to their growing list of victims"), AUTO_COP_MURDER(
-      "%attacker% knocked out on-duty cop %victim%"), AUTO_EXECUTION(
-      "%attacker% carried out the execution of prisoner %victim%"), // Police and crime notification templates
-  OFFICER_CHARGED("%attacker% charged %victim% with %crime%"), CRIMINAL_ALERT(
-      "[AUTO CHARGE] %attacker% committed %crime%"), NOTIFY_CRIMINAL(
-      "You've been charged with: %crime% by officer %attacker%"), NOTIFY_OFFICER(
-      " You've charged %victim% with: %crime%"), AUTO_CRIME_NOTIFY(
-      "[AUTO CHARGE] You've committed a crime: %crime%");
+  KILL("%attacker% a mis %victim% K.-O."), HIT(
+      "%attacker% a frapp\u00e9 %victim% au visage"), SHOOT(
+      "%attacker% a tir\u00e9 sur %victim%"), TAZOR(
+      "%attacker% a tas\u00e9 %victim%"), ROB(
+      "%attacker% a d\u00e9rob\u00e9 les biens de %victim%"), ARREST(
+      "%attacker% a arr\u00eat\u00e9 %victim% pour %action%"),
+  AUTO_MURDER("%attacker% a commis un homicide sur %victim%"), AUTO_GANG_HOMICIDE(
+      "%attacker% a abattu le membre d'un gang rival, %victim%"), AUTO_MASS_MURDER(
+      "%attacker% a ajout\u00e9 %victim% \u00e0 sa liste de victimes"), AUTO_COP_MURDER(
+      "%attacker% a mis K.-O. l'agent en service %victim%"), AUTO_EXECUTION(
+      "%attacker% a ex\u00e9cut\u00e9 le prisonnier %victim%"),
+  OFFICER_CHARGED("%attacker% a inculp\u00e9 %victim% pour %crime%"), CRIMINAL_ALERT(
+      "[INCULPATION AUTOMATIQUE] %attacker% a commis : %crime%"), NOTIFY_CRIMINAL(
+      "L'agent %attacker% vous a inculp\u00e9 pour : %crime%"), NOTIFY_OFFICER(
+      "Vous avez inculp\u00e9 %victim% pour : %crime%"), AUTO_CRIME_NOTIFY(
+      "[INCULPATION AUTOMATIQUE] Vous avez commis : %crime%");
 
 
   private final String template;

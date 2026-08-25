@@ -18,7 +18,7 @@ public class SendRoomCommand extends Command {
     Habbo staff = gameClient.getHabbo();
 
     if (strings.length < 3) {
-      staff.whisper(":sendroom <username> <roomid>", RoomChatMessageBubbles.ALERT);
+      staff.whisper(":envoyersalle <pseudo> <id_salle>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -27,7 +27,7 @@ public class SendRoomCommand extends Command {
 
     Habbo target = Emulator.getGameEnvironment().getHabboManager().getHabbo(username);
     if (target == null) {
-      staff.whisper("Player " + username + " not found.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Le joueur " + username + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -35,19 +35,19 @@ public class SendRoomCommand extends Command {
     try {
       roomId = Integer.parseInt(roomIdStr);
     } catch (NumberFormatException e) {
-      staff.whisper("Invalid room ID.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("L'ID de la salle est invalide.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     Room room = Emulator.getGameEnvironment().getRoomManager().loadRoom(roomId);
     if (room == null) {
-      staff.whisper("Room with ID " + roomId + " not found.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("La salle " + roomId + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     target.goToRoom(roomId);
-    staff.shout("Sent " + username + " to room " + roomId + "*", RoomChatMessageBubbles.NORMAL);
-    target.whisper("You have been sent to room " + roomId + " by staff.",
+    staff.shout("* Envoie " + username + " dans la salle " + roomId + " *", RoomChatMessageBubbles.NORMAL);
+    target.whisper("Un membre du staff vous a envoy\u00e9 dans la salle " + roomId + ".",
         RoomChatMessageBubbles.ALERT);
 
     return true;

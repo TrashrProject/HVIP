@@ -19,7 +19,7 @@ public class PrisonHandler {
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
     int jailId = JAIL_ROOM_ID;
 
-    long currentTime = System.currentTimeMillis();
+    long currentTime = Emulator.getIntUnixTimestamp();
     if (!data.isJailed() || data.getJailTime() <= currentTime
         || usersBeingSentToJail.containsKey(habbo.getHabboInfo().getId())
         || jailId <= 0 || RolePlay.getPrisonService().isServing(habbo)) {
@@ -30,6 +30,7 @@ public class PrisonHandler {
 
     Room jail = Emulator.getGameEnvironment().getRoomManager().loadRoom(jailId);
     if (jail == null) {
+      usersBeingSentToJail.remove(habbo.getHabboInfo().getId());
       return;
     }
 
@@ -37,9 +38,12 @@ public class PrisonHandler {
   }
 
   private void run(Habbo habbo, RpAvatar data, Room jail) {
-    long currentTime = System.currentTimeMillis();
+    long currentTime = Emulator.getIntUnixTimestamp();
     if (habbo == null || !data.isJailed() || data.getJailTime() <= currentTime
         || !usersBeingSentToJail.containsKey(habbo.getHabboInfo().getId())) {
+      if (habbo != null) {
+        usersBeingSentToJail.remove(habbo.getHabboInfo().getId());
+      }
       return;
     }
 

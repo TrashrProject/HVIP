@@ -23,7 +23,7 @@ public class RoomHealCommand extends Command {
     Room room = healer.getHabboInfo().getCurrentRoom();
 
     RoomChatMessage roomChatMessage = new RoomChatMessage(
-        "Begins healing everyone in the room" + "*",
+        "* Commence \u00e0 soigner toutes les personnes dans la salle *",
         healer.getRoomUnit(), RoomChatMessageBubbles.NORMAL);
 
     room.sendComposer(new RoomUserShoutComposer(roomChatMessage).compose());

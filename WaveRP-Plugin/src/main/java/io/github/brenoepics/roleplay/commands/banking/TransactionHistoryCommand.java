@@ -14,7 +14,7 @@ import java.util.List;
 public class TransactionHistoryCommand extends Command {
 
     private static final int DEFAULT_HISTORY_LIMIT = 10;
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd HH:mm");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM HH:mm");
 
     public TransactionHistoryCommand(String permission, String[] keys) {
         super(permission, keys);
@@ -24,7 +24,7 @@ public class TransactionHistoryCommand extends Command {
     public boolean handle(GameClient gameClient, String[] params) {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
         if (data.isPassive()) {
-            gameClient.getHabbo().whisper("You cannot execute RolePlay commands while passive mode is on!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         
@@ -34,15 +34,15 @@ public class TransactionHistoryCommand extends Command {
             try {
                 limit = Integer.parseInt(params[1]);
                 if (limit <= 0 || limit > 20) {
-                    gameClient.getHabbo().whisper("Limit must be between 1 and 20!", RoomChatMessageBubbles.ALERT);
+                    gameClient.getHabbo().whisper("La limite doit \u00eatre comprise entre 1 et 20.", RoomChatMessageBubbles.ALERT);
                     return true;
                 }
             } catch (NumberFormatException e) {
-                gameClient.getHabbo().whisper(":transactions [limit] - Example: :transactions 5", RoomChatMessageBubbles.ALERT);
+                gameClient.getHabbo().whisper(":transactions [limite] - Exemple : :transactions 5", RoomChatMessageBubbles.ALERT);
                 return true;
             }
         } else if (params.length > 2) {
-            gameClient.getHabbo().whisper(":transactions [limit] - Example: :transactions 5", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":transactions [limite] - Exemple : :transactions 5", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -59,12 +59,12 @@ public class TransactionHistoryCommand extends Command {
         List<BankTransaction> transactions = bankManager.getTransactionHistory(userId, limit);
         
         if (transactions.isEmpty()) {
-            gameClient.getHabbo().whisper("No transaction history found.", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Aucune transaction trouv\u00e9e.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         // Display header
-        gameClient.getHabbo().whisper("=== Recent Transactions ===", RoomChatMessageBubbles.ALERT);
+        gameClient.getHabbo().whisper("=== Transactions r\u00e9centes ===", RoomChatMessageBubbles.ALERT);
         
         // Display transactions
         for (BankTransaction transaction : transactions) {
@@ -73,7 +73,7 @@ public class TransactionHistoryCommand extends Command {
         }
         
         // Display footer
-        String footerMessage = String.format("=== Showing %d of your recent transactions ===", transactions.size());
+        String footerMessage = String.format("=== %d transaction(s) affich\u00e9e(s) ===", transactions.size());
         gameClient.getHabbo().whisper(footerMessage, RoomChatMessageBubbles.ALERT);
         
         return true;
@@ -89,27 +89,27 @@ public class TransactionHistoryCommand extends Command {
         
         switch (transaction.getTransactionType()) {
             case DEPOSIT:
-                message.append("Deposit: +").append(amount);
+                message.append("D\u00e9p\u00f4t : +").append(amount);
                 break;
             case WITHDRAW:
                 String fee = RolePlay.getBankManager().formatCurrency(transaction.getFeeAmount());
-                message.append("Withdraw: -").append(amount).append(" (Fee: ").append(fee).append(")");
+                message.append("Retrait : -").append(amount).append(" (Frais : ").append(fee).append(")");
                 break;
             case TRANSFER:
                 if (transaction.getFromUserId() != null && transaction.getFromUserId().equals(currentUserId)) {
                     // Sent money
-                    message.append("Sent: -").append(amount).append(" (Transfer out)");
+                    message.append("Envoy\u00e9 : -").append(amount).append(" (Virement sortant)");
                 } else if (transaction.getToUserId() != null && transaction.getToUserId().equals(currentUserId)) {
                     // Received money
-                    message.append("Received: +").append(amount).append(" (Transfer in)");
+                    message.append("Re\u00e7u : +").append(amount).append(" (Virement entrant)");
                 }
                 break;
             case ROBBERY:
-                message.append("ATM Robbery: +").append(amount);
+                message.append("Braquage de distributeur : +").append(amount);
                 break;
             case ATM_FEE:
                 String feeAmount = RolePlay.getBankManager().formatCurrency(transaction.getFeeAmount());
-                message.append("ATM Fee: -").append(feeAmount);
+                message.append("Frais de distributeur : -").append(feeAmount);
                 break;
             default:
                 message.append(type).append(": ").append(amount);

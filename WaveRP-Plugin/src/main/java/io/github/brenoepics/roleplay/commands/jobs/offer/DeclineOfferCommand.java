@@ -13,12 +13,12 @@ public class DeclineOfferCommand extends Command {
     @Override
     public boolean handle(GameClient gameClient, String[] params) {
         if (params.length != 2) {
-            gameClient.getHabbo().whisper(":declineoffer <code>", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":refuseroffre <code>", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         if (RolePlay.getOfferManager().declineOffer(gameClient.getHabbo().getHabboInfo().getId(), params[1])) {
-            gameClient.getHabbo().whisper("Offer declined!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("L'offre a \u00e9t\u00e9 refus\u00e9e.", RoomChatMessageBubbles.ALERT);
         }
         return true;
     }

@@ -52,7 +52,7 @@ public class WantedRunner implements Runnable {
     boolean isEmpty = wantedList.updateUserCriminalRecord(habbo.getHabboInfo().getId());
 
     if (isEmpty) {
-      habbo.whisper("Your wanted level has expired - you're free of all charges!",
+      habbo.whisper("Votre niveau de recherche a expir\u00e9. Vous n'\u00eates plus poursuivi.",
           RoomChatMessageBubbles.ALERT);
     }
   }

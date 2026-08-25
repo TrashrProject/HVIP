@@ -35,7 +35,7 @@ public class SuperHireCommand extends Command {
     }
 
     if (params.length < 4) {
-      staff.whisper(":superhire <pseudo> <metier|id> <rank>", RoomChatMessageBubbles.ALERT);
+      staff.whisper(":superhire <pseudo> <m\u00e9tier|id> <grade>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -58,7 +58,7 @@ public class SuperHireCommand extends Command {
 
     JobRankEntity jobRank = findRank(jobService, job, rankInput).orElse(null);
     if (jobRank == null || !jobRank.isActive()) {
-      staff.whisper("Ce rank n'existe pas pour ce m\u00e9tier.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Ce grade n'existe pas pour ce m\u00e9tier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -81,7 +81,7 @@ public class SuperHireCommand extends Command {
     }
 
     staff.whisper("Le joueur " + username + " a \u00e9t\u00e9 recrut\u00e9 dans "
-        + job.getDisplayName() + " au rank " + jobRank.getLevel() + " ("
+        + job.getDisplayName() + " au grade " + jobRank.getLevel() + " ("
         + jobRank.getDisplayName() + ").", RoomChatMessageBubbles.NORMAL);
     return true;
   }

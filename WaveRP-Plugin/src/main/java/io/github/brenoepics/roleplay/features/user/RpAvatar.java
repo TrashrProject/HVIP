@@ -1,7 +1,5 @@
 package io.github.brenoepics.roleplay.features.user;
 
-import static io.github.brenoepics.roleplay.features.user.AvatarManager.sendToSpawn;
-
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.Room;
@@ -46,8 +44,8 @@ import org.slf4j.LoggerFactory;
 public class RpAvatar {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RpAvatar.class);
-  public static final String HUNGER_KNOCKOUT_MESSAGE = "%s has knocked themselves out with Hunger.";
-  public static final String HUNGER_LOSS_MESSAGE = "You've lost %d of your hunger, consume food to regain!";
+  public static final String HUNGER_KNOCKOUT_MESSAGE = "%s s'est évanoui de faim.";
+  public static final String HUNGER_LOSS_MESSAGE = "Votre faim a diminué de %d. Mangez pour la récupérer !";
 
   private Habbo habbo;
   private int health;
@@ -156,7 +154,6 @@ public class RpAvatar {
 
     if (habbo != null) {
       Inventory.createInventory(habbo, connection, data);
-      Emulator.getThreading().run(() -> sendToSpawn(habbo, data), 500);
     }
 
     return data;
@@ -310,6 +307,10 @@ public class RpAvatar {
       return;
     }
 
+    long jailEndTime = Emulator.getIntUnixTimestamp() + duration.toSeconds();
+    this.setJailTime(jailEndTime);
+    this.setJailed(true);
+
     habbo.getRoomUnit().setCanWalk(true);
     Room room = habbo.getHabboInfo().getCurrentRoom();
 
@@ -318,14 +319,18 @@ public class RpAvatar {
     }
 
     setEquippedWeapon(0);
-    RolePlay.getJobsManager().removeEmployee(habbo);
+    if (this.isDuty()) {
+      RolePlay.getJobsManager().stopWork(habbo, this);
+    } else {
+      RolePlay.getJobsManager().removeEmployee(habbo);
+    }
 
-    if (!habbo.getHabboInfo().getCurrentRoom().equals(jail.get())) {
+    // Persist the sentence before moving rooms so reconnecting cannot bypass it.
+    updateDatabase();
+
+    if (room == null || !room.equals(jail.get())) {
       habbo.goToRoom(jail.get().getId());
     }
-    this.setJailTime(Emulator.getIntUnixTimestamp() + duration.toSeconds());
-    this.setJailed(true);
-    updateDatabase();
   }
 
   public void resetHungry() {
@@ -333,6 +338,7 @@ public class RpAvatar {
   }
 
   public void heal() {
+    RolePlay.getDeathHandler().cancelPendingHospitalTransfer(habbo);
     this.setHealth(this.getMaxHealth());
     this.setDead(false);
     this.habbo.getRoomUnit().setCanWalk(true);
@@ -341,6 +347,16 @@ public class RpAvatar {
 
     boolean cantGoUp = isSitLay();
     updateStatus(cantGoUp);
+  }
+
+  public void kill() {
+    if (isDead()) {
+      return;
+    }
+
+    handleDeath(null);
+    updateLife();
+    updateDatabase();
   }
 
   private void updateStatus(boolean cantGoUp) {
@@ -411,9 +427,12 @@ public class RpAvatar {
   }
 
   public void makeJailed() {
-    if (this.getJailTime() > Emulator.getIntUnixTimestamp()) {
+    if (this.getJailTime() <= Emulator.getIntUnixTimestamp()) {
+      this.setJailed(false);
       return;
     }
+
+    this.setJailed(true);
 
     habbo.getRoomUnit().setCanWalk(true);
     Room room = habbo.getHabboInfo().getCurrentRoom();
@@ -429,7 +448,11 @@ public class RpAvatar {
     }
 
     setEquippedWeapon(0);
-    RolePlay.getJobsManager().removeEmployee(habbo);
+    if (this.isDuty()) {
+      RolePlay.getJobsManager().stopWork(habbo, this);
+    } else {
+      RolePlay.getJobsManager().removeEmployee(habbo);
+    }
 
     if (!jail.get().equals(room)) {
       habbo.goToRoom(jail.get().getId());
@@ -563,18 +586,6 @@ public class RpAvatar {
   }
 
   public void resetLastPosition() {
-    try (Connection connection = Emulator.getDatabase().getDataSource().getConnection()) {
-      try (PreparedStatement statement = connection.prepareStatement(
-          "UPDATE `users_roleplay` SET last_pos = ? WHERE user_id = ?")) {
-        statement.setString(1, buildLastPosition());
-        statement.setInt(2, this.habbo.getHabboInfo().getId());
-        statement.execute();
-      }
-
-    } catch (SQLException e) {
-      LOGGER.error("[NaHabbo Roleplay] Failed to update last_pos for [{}] {}",
-          this.habbo.getHabboInfo().getUsername(), this.habbo.getHabboInfo().getId(), e);
-    }
     this.lastPosition = null;
   }
 
@@ -601,7 +612,7 @@ public class RpAvatar {
     setEnergy(newEnergy);
 
     if (newEnergy < 20 && newEnergy > 0) {
-      habbo.whisper("Your energy is below 20. Rest or use energy items to recover.!",
+      habbo.whisper("Votre énergie est inférieure à 20. Reposez-vous ou utilisez un objet énergétique.",
           RoomChatMessageBubbles.ALERT);
     }
 

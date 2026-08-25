@@ -89,5 +89,15 @@ public class DeathHandler {
   public void sendToHospitalAsync(Habbo habbo) {
     CompletableFuture.runAsync(() -> sendToHospital(habbo));
   }
+<<<<<<< HEAD
 }
 
+=======
+
+  public void cancelPendingHospitalTransfer(Habbo habbo) {
+    if (habbo != null) {
+      usersBeingSentToHospital.remove(habbo.getHabboInfo().getId());
+    }
+  }
+}
+>>>>>>> 39dc96e65 (Modifications collègue ParadiseRP)

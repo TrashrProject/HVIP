@@ -20,12 +20,12 @@ public class BalanceCommand extends Command {
     public boolean handle(GameClient gameClient, String[] params) {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
         if (data.isPassive()) {
-            gameClient.getHabbo().whisper("You cannot execute RolePlay commands while passive mode is on!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         
         if (params.length != 1) {
-            gameClient.getHabbo().whisper(":balance", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":solde", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -39,7 +39,7 @@ public class BalanceCommand extends Command {
 
         Optional<BankAccount> accountOpt = bankManager.getBankAccount(userId);
         if (accountOpt.isEmpty()) {
-            gameClient.getHabbo().whisper("Error retrieving bank account information.", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Impossible de r\u00e9cup\u00e9rer les informations du compte bancaire.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 

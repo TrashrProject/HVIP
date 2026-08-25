@@ -18,7 +18,7 @@ public class GotoRoomCommand extends Command {
     Habbo staff = gameClient.getHabbo();
 
     if (strings.length < 2) {
-      staff.whisper(":goto <roomid>", RoomChatMessageBubbles.ALERT);
+      staff.whisper(":allersalle <id_salle>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -26,18 +26,18 @@ public class GotoRoomCommand extends Command {
     try {
       roomId = Integer.parseInt(strings[1]);
     } catch (NumberFormatException e) {
-      staff.whisper("Invalid room ID.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("L'ID de la salle est invalide.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     Room room = Emulator.getGameEnvironment().getRoomManager().loadRoom(roomId);
     if (room == null) {
-      staff.whisper("Room with ID " + roomId + " not found.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("La salle " + roomId + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     staff.goToRoom(roomId);
-    staff.whisper("You have been sent to room " + roomId + ".", RoomChatMessageBubbles.NORMAL);
+    staff.whisper("Vous avez \u00e9t\u00e9 envoy\u00e9 dans la salle " + roomId + ".", RoomChatMessageBubbles.NORMAL);
 
     return true;
   }

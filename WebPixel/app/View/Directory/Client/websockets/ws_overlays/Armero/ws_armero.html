@@ -5,17 +5,17 @@
 <!-- Make Pieces -->
 <div class="container-3YsDW_0" id="ArmPiecesInfo" style="display: none;">
     <div class="handle header-Oc1Kh_0">
-      <div class="title-RLCLd_0">Crear Piezas</div>
+      <div class="title-RLCLd_0">Fabriquer des pièces</div>
       <div id="CloseArmPiecesWindow" class="close-1YQdp_0 close-3RMRU_0"></div>
     </div>
     <div class="body-32Vs4_0" style="color:white;">
 		<center><div class="ArmPiecesMsg"></div></center>
-		<div class="MyPiecesCounter">Mis Piezas: 0</div>
+		<div class="MyPiecesCounter">Mes pièces : 0</div>
 		<div class="d-flex justify-content-center mt-2">
 			<div nitro-furniture-image="" class="d-flex justify-content-center align-items-center bg-secondary rounded" style="width: 100px; height: 100px;">
 				<div id="TotalMats" class="CounterArmero">x10</div>
 				<img image-placeholder="" class="d-block ng-star-inserted" src="<?php echo WS_DY;?>/ws_overlays/Armero/resources/img/materiales.png">
-				<div class="FurniDesc">Materiales</div>
+				<div class="FurniDesc">Matériaux</div>
 			</div>
 			<div class="d-flex align-items-center" style="padding: 10px;">
 				<div class="btn btn-secondary">
@@ -30,7 +30,7 @@
 		</div>
 		<br>
 		<div class="btn-group w-100">
-			<button id="CreatePieces" type="button" class="btn btn-success">Crear Piezas</button>
+			<button id="CreatePieces" type="button" class="btn btn-success">Fabriquer les pièces</button>
 		</div>
     </div>
 </div>
@@ -39,18 +39,18 @@
 <!-- Create Guns -->
 <div class="container-3YsDW_0" id="ArmCreateInfo" style="display: none;width: 480px;">
     <div class="handle header-Oc1Kh_0">
-      <div class="title-RLCLd_0">Crear Armas</div>
+      <div class="title-RLCLd_0">Fabriquer des armes</div>
       <div id="CloseArmCreateWindow" class="close-1YQdp_0 close-3RMRU_0"></div>
     </div>
     <div class="body-32Vs4_0" style="color:white;">
 		<center><div class="ArmPiecesMsg"></div></center>
 		<div style="max-height: 395px;overflow: auto;padding: 5px;">
-			<div class="MyPiecesCounter">Mis Piezas: 0</div>
+			<div class="MyPiecesCounter">Mes pièces : 0</div>
 			<table>
 				<tr>
 					<th style="width:25%">Arma</th>
-					<th>Detalles</th>
-					<th style="width:10%">Crear</th>
+					<th>Détails</th>
+					<th style="width:10%">Fabriquer</th>
 				</tr>
 				<?php
 					$query =  $UserMG->GetWeaponList();
@@ -69,18 +69,18 @@
 					</td>
 					<td style="text-align: left;">
 						<ul>
-							<li><b>Nivel:</b> <?php echo $Row["level_requirement"]; ?></li>
-							<li><b>Piezas:</b> <?php echo $Row["cost"]; ?></li>
-							<li><b>Alcance:</b> <?php echo $Row["firingrange"]; ?> cuadros</li>
-							<li><b>Daño:</b> <?php echo $Row["mindamage"]; ?> - <?php echo $Row["maxdamage"]; ?></li>
-							<li><b>Cartucho:</b> <?php echo $Row["clipsize"]; ?> balas</li>
-							<li><b>Recarga:</b> <?php echo $Row["reloadtime"]; ?> segundos</li>
-							<li><b>Precio recomendado:</b> $<?php echo number_format($Row["costfine"]); ?></li>
+							<li><b>Niveau :</b> <?php echo $Row["level_requirement"]; ?></li>
+							<li><b>Pièces :</b> <?php echo $Row["cost"]; ?></li>
+							<li><b>Portée :</b> <?php echo $Row["firingrange"]; ?> cases</li>
+							<li><b>Dégâts :</b> <?php echo $Row["mindamage"]; ?> - <?php echo $Row["maxdamage"]; ?></li>
+							<li><b>Chargeur :</b> <?php echo $Row["clipsize"]; ?> balles</li>
+							<li><b>Rechargement :</b> <?php echo $Row["reloadtime"]; ?> secondes</li>
+							<li><b>Prix conseillé :</b> $<?php echo number_format($Row["costfine"]); ?></li>
 						</ul>
 					</td>
 					<td>
 						<div class="btn-group w-100">
-							<button type="button" data-gun="<?php echo $gunName; ?>" class="CreateGun btn btn-success">Crear</button>
+							<button type="button" data-gun="<?php echo $gunName; ?>" class="CreateGun btn btn-success">Fabriquer</button>
 						</div>
 					</td>
 				</tr>

@@ -22,12 +22,12 @@ public class GiveCommand extends Command {
     public boolean handle(GameClient gameClient, String[] params) {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
         if (data.isPassive()) {
-            gameClient.getHabbo().whisper("You cannot execute RolePlay commands while passive mode is on!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         
         if (params.length != 3) {
-            gameClient.getHabbo().whisper(":give <username> <amount>", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":virement <pseudo> <montant>", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -59,7 +59,7 @@ public class GiveCommand extends Command {
         // Find target user (must be in same room for security)
         Habbo targetHabbo = gameClient.getHabbo().getHabboInfo().getCurrentRoom().getHabbo(targetUsername);
         if (targetHabbo == null) {
-            gameClient.getHabbo().whisper("User not found in current room!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Ce joueur est introuvable dans cette salle.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -93,12 +93,12 @@ public class GiveCommand extends Command {
             gameClient.getHabbo().whisper(successMessage, RoomChatMessageBubbles.ALERT);
             
             // Notify target user (already in same room so already online)
-            String receiveMessage = String.format("You received %s from %s!", 
+            String receiveMessage = String.format("Vous avez re\u00e7u %s de %s.",
                                                  formattedAmount, 
                                                  gameClient.getHabbo().getHabboInfo().getUsername());
             targetHabbo.whisper(receiveMessage, RoomChatMessageBubbles.ALERT);
         } else {
-            gameClient.getHabbo().whisper("Transfer failed. Please try again later.", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Le virement a \u00e9chou\u00e9. R\u00e9essayez plus tard.", RoomChatMessageBubbles.ALERT);
         }
         
         return true;

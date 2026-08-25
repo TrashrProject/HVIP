@@ -13,7 +13,7 @@ public class AcceptOfferCommand extends Command {
     @Override
     public boolean handle(GameClient gameClient, String[] params) {
         if (params.length != 2) {
-            gameClient.getHabbo().whisper(":acceptoffer <code>", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":accepteroffre <code>", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -21,4 +21,3 @@ public class AcceptOfferCommand extends Command {
         return true;
     }
 }
-

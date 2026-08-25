@@ -13,8 +13,8 @@ public class RoomUserWalkEventPlugin extends RoomUserWalkEvent {
 
     @Override
     public void handle() throws Exception {
-        int escorting = (int) this.client.getHabbo().getHabboStats().cache.getOrDefault(ESCORT_VARIABLE, 0);
-        if (escorting > 0) return;
+        Object escorting = this.client.getHabbo().getHabboStats().cache.get(ESCORT_VARIABLE);
+        if (escorting instanceof Number && ((Number) escorting).intValue() > 0) return;
 
         super.handle();
     }

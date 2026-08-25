@@ -20,7 +20,7 @@ public class RoomReleaseCommand extends Command {
     Room room = staff.getHabboInfo().getCurrentRoom();
 
     if (room == null) {
-      staff.whisper("You are not in a room.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Vous n'\u00eates dans aucune salle.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -29,15 +29,15 @@ public class RoomReleaseCommand extends Command {
       RpAvatar avatar = RolePlay.getAvatarManager().getRpAvatar(user);
       if (avatar != null && avatar.isJailed()) {
         RolePlay.getPrisonService().releaseFromJail(user, avatar);
-        user.whisper("You have been released from jail by staff.", RoomChatMessageBubbles.ALERT);
+        user.whisper("Un membre du staff vous a lib\u00e9r\u00e9 de prison.", RoomChatMessageBubbles.ALERT);
         releasedCount++;
       }
     }
 
     if (releasedCount == 0) {
-      staff.whisper("No jailed users found in this room.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Aucun prisonnier n'a \u00e9t\u00e9 trouv\u00e9 dans cette salle.", RoomChatMessageBubbles.ALERT);
     } else {
-      staff.whisper("Released " + releasedCount + " jailed user(s) in this room.",
+      staff.whisper(releasedCount + " prisonnier(s) lib\u00e9r\u00e9(s) dans cette salle.",
           RoomChatMessageBubbles.NORMAL);
     }
 

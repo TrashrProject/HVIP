@@ -13,6 +13,7 @@ import com.eu.habbo.plugin.EventListener;
 import com.eu.habbo.plugin.events.users.UserEnterRoomEvent;
 import com.eu.habbo.plugin.events.users.UserIdleEvent;
 import io.github.brenoepics.roleplay.RolePlay;
+import io.github.brenoepics.roleplay.features.crime.PoliceHandcuffService;
 import io.github.brenoepics.roleplay.features.job.JobsDelegate;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.features.user.inventory.InventorySlot;
@@ -26,6 +27,8 @@ public class UserEnterRoomListener implements EventListener {
   public static void onRoomChange(UserEnterRoomEvent event) {
     Habbo habbo = event.habbo;
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
+    RolePlay.getEscortManager().stopEscorting(habbo.getHabboInfo().getId());
+    RolePlay.getEscortManager().stopEscortingByOfficer(habbo.getHabboInfo().getId());
     resetPosition(event, data);
 
     if (data.isPassive()) {
@@ -40,6 +43,7 @@ public class UserEnterRoomListener implements EventListener {
     handleSpecialRooms(event, habbo, data);
     Emulator.getThreading().run(() -> {
       data.updateState();
+      PoliceHandcuffService.enforce(habbo);
       Optional<InventorySlot> equippedWeapon = data.getEquippedWeapon();
       if (!data.isPassive() && !data.isDead() && equippedWeapon.isPresent()) {
         event.room.giveEffect(habbo, equippedWeapon.get().getItem().getEnableId(),
@@ -58,7 +62,7 @@ public class UserEnterRoomListener implements EventListener {
       RolePlay.getPrisonService().onEnterJail(event, event.habbo);
       return true;
 
-    } else if (data.isJailed() && System.currentTimeMillis() < data.getJailTime()) {
+    } else if (data.isJailed() && Emulator.getIntUnixTimestamp() < data.getJailTime()) {
       log.info("User {} is jailed, sending to jail", habbo.getHabboInfo().getUsername());
       RolePlay.getPrisonHandler().sendToJailAsync(habbo);
       return false;
@@ -72,16 +76,17 @@ public class UserEnterRoomListener implements EventListener {
   }
 
   private static void resetPosition(UserEnterRoomEvent event, RpAvatar data) {
-    if (data.getLastPosition() == null
-        || data.getLastPosition().getRoomId() != event.room.getId()) {
+    if (data.getLastPosition() == null) {
       return;
     }
 
-    RoomTile rt = event.room.getLayout()
-        .getTile(data.getLastPosition().getX(), data.getLastPosition().getY());
-    if (rt != null && rt.state != RoomTileState.INVALID) {
-      event.setDoorTile(rt);
-      event.setRotation(RoomUserRotation.fromValue(data.getLastPosition().getRotation()));
+    if (data.getLastPosition().getRoomId() == event.room.getId()) {
+      RoomTile rt = event.room.getLayout()
+          .getTile(data.getLastPosition().getX(), data.getLastPosition().getY());
+      if (rt != null && rt.state != RoomTileState.INVALID && rt.state != RoomTileState.BLOCKED) {
+        event.setDoorTile(rt);
+        event.setRotation(RoomUserRotation.fromValue(data.getLastPosition().getRotation()));
+      }
     }
 
     data.resetLastPosition();

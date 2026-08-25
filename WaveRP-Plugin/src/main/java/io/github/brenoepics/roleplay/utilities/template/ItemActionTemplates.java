@@ -8,10 +8,10 @@ import io.github.brenoepics.roleplay.utilities.LiveFeed.PlayerState;
  * itemName) or format(String playerName, String itemName)
  */
 public enum ItemActionTemplates {
-  EQUIP("%player% whipped out their %item%"),
-  UNEQUIP("%player% stashed their %item%"),
-  SELL("%player% tried to hawk their %item%"),
-  APPLY("%player% slapped on some %item%");
+  EQUIP("%player% a \u00e9quip\u00e9 %item%"),
+  UNEQUIP("%player% a rang\u00e9 %item%"),
+  SELL("%player% a mis %item% en vente"),
+  APPLY("%player% a utilis\u00e9 %item%");
 
 
   private final String template;

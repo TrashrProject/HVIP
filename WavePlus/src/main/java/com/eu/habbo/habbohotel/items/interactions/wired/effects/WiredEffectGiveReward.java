@@ -212,7 +212,7 @@ public class WiredEffectGiveReward extends InteractionWiredEffect {
             return true;
         }
 
-        gameClient.getHabbo().whisper("U cannot do this.", RoomChatMessageBubbles.ALERT);
+        gameClient.getHabbo().whisper("Vous ne pouvez pas effectuer cette action.", RoomChatMessageBubbles.ALERT);
         return false;
     }
 

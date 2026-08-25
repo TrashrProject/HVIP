@@ -2,6 +2,7 @@ package com.eu.habbo.messages.outgoing.generic;
 
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.commands.Command;
+import com.eu.habbo.habbohotel.commands.CommandDocumentation;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
 import com.google.gson.JsonArray;
@@ -10,7 +11,6 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 public class CommandsWindowComposer extends MessageComposer {
@@ -44,17 +44,19 @@ public class CommandsWindowComposer extends MessageComposer {
             item.addProperty("description", details.description);
             item.addProperty("usage", details.usage);
             item.addProperty("category", details.category);
+            item.addProperty("subcategory", details.subcategory);
+            item.addProperty("access", details.access);
             commandItems.add(item);
             usedCategories.add(details.category);
         }
 
         JsonArray categories = new JsonArray();
-        categories.add("All");
-        addCategory(categories, usedCategories, "Roleplay");
+        categories.add("Toutes");
+        addCategory(categories, usedCategories, "RP");
         addCategory(categories, usedCategories, "Appartement");
         addCategory(categories, usedCategories, "Personnage");
         addCategory(categories, usedCategories, "Staff");
-        addCategory(categories, usedCategories, "General");
+        addCategory(categories, usedCategories, "Général");
 
         data.add("commands", commandItems);
         data.add("categories", categories);
@@ -101,9 +103,13 @@ public class CommandsWindowComposer extends MessageComposer {
             name = usageCommand;
         }
 
-        String category = getCategory(command.permission, name);
-        if (description.isEmpty() || description.equals("commands.description." + command.permission)) {
-            description = getDefaultDescription(category);
+        usage = normalizeUsage(usage);
+        CommandDocumentation.Metadata metadata = CommandDocumentation.resolve(command.permission, name);
+        String descriptionOverride = CommandDocumentation.descriptionOverride(command.permission);
+        if (descriptionOverride != null) {
+            description = descriptionOverride;
+        } else if (description.isEmpty() || description.equals("commands.description." + command.permission)) {
+            description = metadata.defaultDescription;
         }
 
         List<String> aliases = new ArrayList<>();
@@ -114,7 +120,8 @@ public class CommandsWindowComposer extends MessageComposer {
             }
         }
 
-        return new CommandDetails(name, aliases, description, usage, category);
+        return new CommandDetails(name, aliases, description, usage, metadata.category,
+                metadata.subcategory, metadata.access);
     }
 
     private static String firstLine(String value) {
@@ -131,61 +138,22 @@ public class CommandsWindowComposer extends MessageComposer {
         return false;
     }
 
-    private static String getCategory(String permission, String name) {
-        String value = ((permission == null ? "" : permission) + " " + name).toLowerCase(Locale.ROOT);
-
-        if (value.contains("superhire")) {
-            return "Staff";
-        }
-
-        if (containsAny(value, "job", "work", "taxi", "rob", "hit", "shoot", "equip", "passive",
-                "heal", "tazor", "tase", "arrest", "release", "pardon", "charge", "hire", "apply",
-                "promote", "demote", "org_", "organization", "territory", "wanted", "combat", "target",
-                "account", "balance", "deposit", "withdraw", "transaction", "offer", "sell_rpitem", "911")) {
-            return "Roleplay";
-        }
-
-        if (containsAny(value, "room", "eject", "pickall", "setmax", "setspeed", "diagonal", "coords",
-                "teleport", "bundle", "buildheight", "closedice", "setpublic", "buyroom", "sellroom")) {
-            return "Appartement";
-        }
-
-        if (containsAny(value, "ban", "mute", "kick", "alert", "rank", "staff", "shutdown", "update_",
-                "reload", "mass", "disconnect", "summon", "control", "userinfo", "freeze", "gift",
-                "points", "credits", "duckets", "badge", "plugins", "filter", "unload")) {
-            return "Staff";
-        }
-
-        if (containsAny(value, "mimic", "moonwalk", "fastwalk", "sit", "lay", "dance", "effect", "faceless",
-                "changename", "hand_item", "kiss", "hug", "brb", "hoverboard")) {
-            return "Personnage";
-        }
-
-        return "General";
-    }
-
-    private static boolean containsAny(String value, String... fragments) {
-        for (String fragment : fragments) {
-            if (value.contains(fragment)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static String getDefaultDescription(String category) {
-        switch (category) {
-            case "Roleplay":
-                return "Commande liee aux actions roleplay.";
-            case "Appartement":
-                return "Commande de gestion d'appartement.";
-            case "Personnage":
-                return "Commande liee a votre personnage.";
-            case "Staff":
-                return "Commande de moderation ou d'administration.";
-            default:
-                return "Commande generale.";
-        }
+    private static String normalizeUsage(String usage) {
+        return usage
+                .replace("<username>", "[pseudo]")
+                .replace("<user>", "[pseudo]")
+                .replace("<pseudo>", "[pseudo]")
+                .replace("<amount>", "[montant]")
+                .replace("<montant>", "[montant]")
+                .replace("<message>", "[message]")
+                .replace("<text>", "[message]")
+                .replace("<time in seconds>", "[durée en secondes]")
+                .replace("<minutes>", "[minutes]")
+                .replace("<raison>", "[raison]")
+                .replace("<rank>", "[rang]")
+                .replace("<metier|id>", "[métier|ID]")
+                .replace("<code>", "[code]")
+                .replace("<objet>", "[objet]");
     }
 
     private static class CommandDetails {
@@ -194,13 +162,18 @@ public class CommandsWindowComposer extends MessageComposer {
         private final String description;
         private final String usage;
         private final String category;
+        private final String subcategory;
+        private final String access;
 
-        private CommandDetails(String name, List<String> aliases, String description, String usage, String category) {
+        private CommandDetails(String name, List<String> aliases, String description, String usage,
+                               String category, String subcategory, String access) {
             this.name = name;
             this.aliases = aliases;
             this.description = description;
             this.usage = usage;
             this.category = category;
+            this.subcategory = subcategory;
+            this.access = access;
         }
     }
 }

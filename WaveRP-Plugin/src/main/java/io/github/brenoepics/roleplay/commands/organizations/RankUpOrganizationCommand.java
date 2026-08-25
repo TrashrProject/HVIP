@@ -20,7 +20,7 @@ public class RankUpOrganizationCommand extends Command {
     @Override
     public boolean handle(GameClient gameClient, String[] params) {
         if (params.length < 2) {
-            gameClient.getHabbo().whisper(":rankup <username>", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":promouvoirorganisation <pseudo>", RoomChatMessageBubbles.ALERT);
             return true;
         }
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
@@ -32,7 +32,7 @@ public class RankUpOrganizationCommand extends Command {
 
         Organization org = RolePlay.getOrganizationManager().getOrganization(data.getOrganizationId());
         if (org == null || org.getAdminId() != gameClient.getHabbo().getHabboInfo().getId()) {
-            gameClient.getHabbo().whisper("You cannot rank up this user!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez pas promouvoir ce joueur.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -40,23 +40,23 @@ public class RankUpOrganizationCommand extends Command {
         Habbo targetUser = Emulator.getGameEnvironment().getHabboManager().getHabbo(params[1]);
         target = targetUser == null ? HabboManager.getOfflineHabboInfo(params[1]) : targetUser.getHabboInfo();
         if (target == null) {
-            gameClient.getHabbo().whisper("This user does not exist!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Ce joueur est introuvable.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         Integer userOrg = RolePlay.getOrganizationManager().getUserOrganization(target.getId());
         if (userOrg == null || userOrg != org.getId()) {
-            gameClient.getHabbo().whisper("This user is not in your organization!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Ce joueur n'appartient pas \u00e0 votre organisation.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         boolean success = RolePlay.getOrganizationManager().rankUpUser(target.getId(), org.getId());
         if (!success) {
-            gameClient.getHabbo().whisper("This user is already the highest rank!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Ce joueur poss\u00e8de d\u00e9j\u00e0 le grade maximal.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
-        gameClient.getHabbo().whisper("You have ranked up " + target.getUsername() + "!", RoomChatMessageBubbles.ALERT);
+        gameClient.getHabbo().whisper("Vous avez promu " + target.getUsername() + ".", RoomChatMessageBubbles.ALERT);
         return true;
     }
 }

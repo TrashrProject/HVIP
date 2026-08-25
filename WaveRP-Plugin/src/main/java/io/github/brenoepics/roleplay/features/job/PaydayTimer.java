@@ -44,14 +44,14 @@ public class PaydayTimer {
       int diffInMinutes = minutesSinceLastPayday(now, data);
 
       if (diffInMinutes < 10) {
-        h.whisper("You have to wait " + (10 - diffInMinutes) + " minutes to receive your paycheck",
+        h.whisper("Vous devez attendre " + (10 - diffInMinutes) + " minute(s) avant de recevoir votre paie.",
             RoomChatMessageBubbles.ALERT);
       } else {
         double earned =
             ((double) diffInMinutes / 10) * data.getJobRankEntity().getSalary().doubleValue();
         data.setLastPayday(now);
         h.givePoints(200, (int) Math.round(earned));
-        h.whisper("You received your paycheck. +" + (int) Math.round(earned) + " Bucks",
+        h.whisper("Vous avez reçu votre paie : +" + (int) Math.round(earned) + " Bucks.",
             RoomChatMessageBubbles.ALERT);
       }
 

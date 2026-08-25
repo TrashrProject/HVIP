@@ -81,8 +81,13 @@ public class JobsDelegate {
 
   // Keep the static utility methods as they are still needed
   public static RoomUserShoutComposer getRoomUserShoutComposer(String message, Habbo habbo) {
+    return getRoomUserShoutComposer(message, habbo, RoomChatMessageBubbles.NORMAL);
+  }
+
+  public static RoomUserShoutComposer getRoomUserShoutComposer(String message, Habbo habbo,
+      RoomChatMessageBubbles bubble) {
     return new RoomUserShoutComposer(
-        new RoomChatMessage(message, habbo, habbo, RoomChatMessageBubbles.NORMAL));
+        new RoomChatMessage(message, habbo, habbo, bubble));
   }
 
   public static Look findLook(Habbo habbo, List<Look> figure) {

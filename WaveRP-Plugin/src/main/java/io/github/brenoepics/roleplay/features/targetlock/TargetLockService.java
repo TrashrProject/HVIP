@@ -24,13 +24,13 @@ public class TargetLockService {
 
   public static boolean disableLock(Habbo habbo) {
     habbo.getHabboStats().cache.remove(CLICKED_USER_LOCK);
-    habbo.whisper("You have unlocked your target");
+    habbo.whisper("Vous avez déverrouillé votre cible.");
     return false;
   }
 
   public static boolean enableLock(Habbo habbo) {
     habbo.getHabboStats().cache.put(CLICKED_USER_LOCK, "1");
-    habbo.whisper("You have locked on to your target");
+    habbo.whisper("Vous avez verrouillé votre cible.");
     return true;
   }
 

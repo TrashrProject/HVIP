@@ -17,24 +17,24 @@ public class MakeTerritoryCommand extends Command {
     @Override
     public boolean handle(GameClient gameClient, String[] strings) {
         if (strings.length != 2) {
-            gameClient.getHabbo().whisper("Invalid syntax! :make_territory (gang/mafia/cartel/any)", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Syntaxe : :creerterritoire <gang/mafia/cartel/tous>", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         Room room = gameClient.getHabbo().getHabboInfo().getCurrentRoom();
         if (RolePlay.getOrganizationManager().getOrganizationTerritories().containsKey(room.getId())) {
-            gameClient.getHabbo().whisper("This room is already a territory!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Cette salle est d\u00e9j\u00e0 un territoire.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         OrganizationType type = getOrganizationType(strings[1]);
         if (type == null) {
-            gameClient.getHabbo().whisper("Invalid organization type! :make_territory (gang/mafia/cartel/any)", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Type invalide : gang, mafia, cartel ou tous.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         boolean isCreated = RolePlay.getOrganizationManager().createTerritory(type, gameClient.getHabbo().getHabboInfo().getCurrentRoom().getId());
-        gameClient.getHabbo().whisper(isCreated ? "Territory created!" : "Something went wrong!", RoomChatMessageBubbles.ALERT);
+        gameClient.getHabbo().whisper(isCreated ? "Le territoire a \u00e9t\u00e9 cr\u00e9\u00e9." : "Impossible de cr\u00e9er le territoire.", RoomChatMessageBubbles.ALERT);
         return true;
     }
 }

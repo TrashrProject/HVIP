@@ -3,6 +3,7 @@ package io.github.brenoepics.roleplay.events;
 import static io.github.brenoepics.roleplay.features.user.AvatarManager.sendToSpawn;
 
 import com.eu.habbo.Emulator;
+import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.plugin.EventHandler;
 import com.eu.habbo.plugin.EventListener;
@@ -12,6 +13,7 @@ import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.communication.outgoing.macro.MacroSetComposer;
 import io.github.brenoepics.roleplay.communication.packets.js.JavascriptCallbackComposer;
 import io.github.brenoepics.roleplay.features.macro.Macro;
+import io.github.brenoepics.roleplay.features.user.AvatarManager;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,6 +40,10 @@ public class UserConnect implements EventListener {
     }
 
     RpAvatar avatar = RolePlay.getAvatarManager().getRpAvatar(habbo);
+    GameClient loginClient = habbo.getClient();
+    AvatarManager.resetSpawnForward(habbo);
+    scheduleSpawnRetry(habbo, avatar, loginClient, 1500);
+    scheduleSpawnRetry(habbo, avatar, loginClient, 7000);
 
     Map<Integer, Macro> userMacros = RolePlay.getMacroManager().loadUser(habbo);
     try (final Connection connection = Emulator.getDatabase().getDataSource()
@@ -63,6 +69,16 @@ public class UserConnect implements EventListener {
             10000);
       }
     }
+  }
+
+  private static void scheduleSpawnRetry(Habbo habbo, RpAvatar avatar, GameClient loginClient,
+      long delayMillis) {
+    Emulator.getThreading().run(() -> {
+      if (habbo.getClient() != loginClient || habbo.getHabboInfo().getCurrentRoom() != null) {
+        return;
+      }
+      AvatarManager.retrySpawnIfRoomless(habbo, avatar);
+    }, delayMillis);
   }
 
   private static Macro getUserMacro(UserLoginEvent event, Map<Integer, Macro> userMacros) {

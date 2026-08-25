@@ -34,13 +34,13 @@ public class HitCommand extends Command {
     Habbo attacker = gameClient.getHabbo();
     RpAvatar attackerData = RolePlay.getAvatarManager().getRpAvatar(attacker);
     if (attackerData.isPassive()) {
-      attacker.whisper("Sorry you can not use this command while in passive mode.",
+      attacker.whisper("Vous ne pouvez pas utiliser cette commande en mode passif.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (params.length != 2) {
-      attacker.whisper(":hit <player>", RoomChatMessageBubbles.ALERT);
+      attacker.whisper(":frapper <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -51,40 +51,40 @@ public class HitCommand extends Command {
 
     Habbo habbo = attacker.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     if (habbo == null) {
-      attacker.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (habbo == attacker) {
-      attacker.whisper("You can't hit yourself!", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Vous ne pouvez pas vous frapper vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     RpAvatar targetData = RolePlay.getAvatarManager().getRpAvatar(habbo);
     if (targetData.isPassive() && !targetData.isAggressive()) {
-      attacker.whisper("You can't hit " + habbo.getHabboInfo().getUsername()
-          + " because they are in passive mode.", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Vous ne pouvez pas frapper " + habbo.getHabboInfo().getUsername()
+          + " car ce joueur est en mode passif.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (attackerData.isAtSafeZone() && (!targetData.isAggressive()
         || !attackerData.isAggressive())) {
-      attacker.whisper("Sorry you can not use this command while in a safe zone.",
+      attacker.whisper("Vous ne pouvez pas utiliser cette commande dans une zone prot\u00e9g\u00e9e.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!Emulator.getConfig().getBoolean("features.organizations.friendly_fire")
         && attackerData.getOrganizationId() == targetData.getOrganizationId()) {
-      attacker.whisper("You can't hit " + habbo.getHabboInfo().getUsername()
-          + " because they are in the same organization as you.", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Vous ne pouvez pas frapper " + habbo.getHabboInfo().getUsername()
+          + " car vous appartenez \u00e0 la m\u00eame organisation.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     Timeout timeout = RolePlay.getCommandsCounter().getCoolDown("hit")
         .getTimeOut(attacker.getHabboInfo().getId());
     if (timeout != null) {
       attacker.whisper(
-          "You must wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to swing again");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de frapper de nouveau.");
       return true;
     }
 
@@ -96,7 +96,7 @@ public class HitCommand extends Command {
 
     if (!isAttackAllowed(attacker, habbo, nonDiag, middleTile)) {
       attacker.getHabboInfo().getCurrentRoom().sendComposer(
-          createKnockoutMessage("swings at " + habbo.getHabboInfo().getUsername() + ", but misses*", attacker).compose());
+          createKnockoutMessage("* Frappe " + habbo.getHabboInfo().getUsername() + ", mais le rate *", attacker).compose());
       RolePlay.getCommandsCounter().getCoolDown("hit")
           .addTimeOut(attacker.getHabboInfo().getId(), HIT_TIMEOUT);
       return true;
@@ -104,7 +104,7 @@ public class HitCommand extends Command {
 
     if (!tilesCheck1.contains(attacker.getRoomUnit().getCurrentLocation())) {
       attacker.getHabboInfo().getCurrentRoom().sendComposer(
-          createKnockoutMessage("swings at " + habbo.getHabboInfo().getUsername() + ", but misses*",
+          createKnockoutMessage("* Frappe " + habbo.getHabboInfo().getUsername() + ", mais le rate *",
               attacker).compose());
       // Apply cooldown on miss
       RolePlay.getCommandsCounter().getCoolDown("hit")
@@ -113,7 +113,7 @@ public class HitCommand extends Command {
     }
 
     if (targetData.isDead()) {
-      attacker.whisper(habbo.getHabboInfo().getUsername() + " is already dead!",
+      attacker.whisper(habbo.getHabboInfo().getUsername() + " est d\u00e9j\u00e0 inconscient.",
           RoomChatMessageBubbles.ALERT);
       // Apply cooldown even if target is dead
       RolePlay.getCommandsCounter().getCoolDown("hit")
@@ -229,10 +229,10 @@ public class HitCommand extends Command {
 
     if (targetData.isDead()) {
       actor.getHabboInfo().getCurrentRoom().sendComposer(createKnockoutMessage(
-          "Lands the final blow on " + victimUsername + ", knocking them out*", actor).compose());
+          "* Porte le coup final \u00e0 " + victimUsername + " et le met K.-O. *", actor).compose());
     } else {
       actor.getHabboInfo().getCurrentRoom().sendComposer(
-          createKnockoutMessage("Swings at " + victimUsername + " dealing " + damage + " damage*",
+          createKnockoutMessage("* Frappe " + victimUsername + " et inflige " + damage + " d\u00e9g\u00e2t(s) *",
               actor).compose());
     }
   }

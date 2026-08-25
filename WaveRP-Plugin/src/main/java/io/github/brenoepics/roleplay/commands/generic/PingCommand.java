@@ -25,7 +25,7 @@ public class PingCommand extends Command {
 
     Channel ch = gameClient.getChannel();
     if (ch == null || !ch.isOpen()) {
-      gameClient.getHabbo().whisper("Ping: connection closed", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper("Ping : connexion ferm\u00e9e", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -35,11 +35,11 @@ public class PingCommand extends Command {
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
         // Ensure a minimum of 1ms for user feedback clarity
         if (elapsedMs < 0) elapsedMs = 0;
-        String message = "Ping: " + elapsedMs + " ms";
+        String message = "Ping : " + elapsedMs + " ms";
         gameClient.getHabbo().whisper(message, RoomChatMessageBubbles.ALERT);
       });
     } catch (Throwable t) {
-      gameClient.getHabbo().whisper("Ping: N/A", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper("Ping : indisponible", RoomChatMessageBubbles.ALERT);
     }
     return true;
   }

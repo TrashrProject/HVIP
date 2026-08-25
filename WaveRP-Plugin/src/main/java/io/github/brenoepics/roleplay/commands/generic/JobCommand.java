@@ -20,22 +20,23 @@ public class JobCommand extends Command {
   public boolean handle(GameClient gameClient, String[] params) {
     if (params.length != 4) {
       gameClient.getHabbo()
-          .whisper(":job <user> <jobname (police/hospital/starbucks/armory)> <rank>",
+          .whisper(":job <joueur> <m\u00e9tier (police/EMS/starbucks/armory)> <rank>",
               RoomChatMessageBubbles.ALERT);
       return true;
     }
     Habbo habbo = gameClient.getHabbo().getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     if (habbo == null) {
       gameClient.getHabbo()
-          .whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+          .whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
-    Optional<JobEntity> job = RolePlay.getJobService().getJobByName(params[2]);
+    String requestedJob = "ems".equalsIgnoreCase(params[2]) ? "hospital" : params[2];
+    Optional<JobEntity> job = RolePlay.getJobService().getJobByName(requestedJob);
     if (job.isEmpty()) {
       gameClient.getHabbo()
-          .whisper("Job " + params[2] + " not found!", RoomChatMessageBubbles.ALERT);
+          .whisper("Le m\u00e9tier " + params[2] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -49,14 +50,15 @@ public class JobCommand extends Command {
         jobRank = RolePlay.getJobService().getRankByJobAndLevel(job.get(), jobRankLevel)
             .orElse(null);
       } catch (NumberFormatException e) {
-        gameClient.getHabbo().whisper("Rank level must be a number!", RoomChatMessageBubbles.ALERT);
+        gameClient.getHabbo()
+            .whisper("Le niveau du grade doit \u00eatre un nombre.", RoomChatMessageBubbles.ALERT);
         return true;
       }
     }
 
     if (jobRank == null) {
       gameClient.getHabbo()
-          .whisper("Rank " + jobString + " not found!", RoomChatMessageBubbles.ALERT);
+          .whisper("Le grade " + jobString + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -64,8 +66,9 @@ public class JobCommand extends Command {
     data.setJobRankEntity(jobRank);
     data.updateDatabase();
     gameClient.getHabbo().whisper(
-        "You have set the job of " + habbo.getHabboInfo().getUsername() + " to " + job.get()
-            .getDisplayName() + " with rank " + jobRank.getDisplayName(),
+        "Vous avez attribu\u00e9 le m\u00e9tier " + job.get().getDisplayName() + " au joueur "
+            + habbo.getHabboInfo().getUsername() + " avec le grade " + jobRank.getDisplayName()
+            + ".",
         RoomChatMessageBubbles.ALERT);
     return true;
   }

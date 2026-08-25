@@ -15,7 +15,7 @@ public class TargetLockCommand extends Command {
   @Override
   public boolean handle(GameClient gameClient, String[] strings) throws Exception {
     if (!TargetLockService.hasClickedUser(gameClient.getHabbo())) {
-      gameClient.getHabbo().whisper("You don't have a target to lock on!");
+      gameClient.getHabbo().whisper("Vous n'avez sélectionné aucune cible à verrouiller !");
       return true;
     }
 

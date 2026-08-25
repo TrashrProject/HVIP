@@ -58,11 +58,11 @@ public class WarCycle implements Runnable {
 
     private void handleStatus(TerritoryWar war, Room room, int progress) {
         if (Objects.requireNonNull(war.getStatus()) == TerritoryWar.WarStatus.ATTACKED) {
-            messageTeam(war.getDefenders(), "Your territory is being attacked by " + war.getAttackingOrganization().getName() + "! (" + progress + "%)");
-            messageTeam(war.getAttackers(), "You are attacking " + war.getDefendingOrganization().getName() + "'s territory! (" + progress + "%)");
+            messageTeam(war.getDefenders(), "Votre territoire est attaqu\u00e9 par " + war.getAttackingOrganization().getName() + " ! (" + progress + " %)");
+            messageTeam(war.getAttackers(), "Vous attaquez le territoire de " + war.getDefendingOrganization().getName() + " ! (" + progress + " %)");
         } else {
-            messageTeam(war.getDefenders(), "Continue, you are contesting your territory! (" + progress + "%)");
-            messageTeam(war.getAttackers(), "Someone is contesting the territory " + room.getName() + ", Kill them! (" + progress + "%)");
+            messageTeam(war.getDefenders(), "Continuez, vous reprenez votre territoire ! (" + progress + " %)");
+            messageTeam(war.getAttackers(), "Quelqu'un conteste le territoire " + room.getName() + " ! (" + progress + " %)");
         }
     }
     private int processProgress(TerritoryWar war, Room room) {
@@ -100,19 +100,19 @@ public class WarCycle implements Runnable {
     }
 
     private void warStarted(TerritoryWar war, Room room) {
-        messageTeam(war.getAttackers(), "Your organization is attacking " + war.getDefendingOrganization().getName() + "'s territory: " + room.getName());
-        messageTeam(war.getDefenders(), "Your territory " + room.getName() + "is being attacked by " + war.getAttackingOrganization().getName() + "!");
+        messageTeam(war.getAttackers(), "Votre organisation attaque le territoire " + room.getName() + " de " + war.getDefendingOrganization().getName() + ".");
+        messageTeam(war.getDefenders(), "Votre territoire " + room.getName() + " est attaqu\u00e9 par " + war.getAttackingOrganization().getName() + " !");
     }
 
     private void captureTerritory(TerritoryWar war, Room room) {
-        messageTeam(war.getDefenders(), "Your territory " + room.getName() + "has been captured by " + war.getAttackingOrganization().getName() + "!");
-        messageTeam(war.getAttackers(), "Your organization has captured the territory: " + room.getName());
+        messageTeam(war.getDefenders(), "Votre territoire " + room.getName() + " a \u00e9t\u00e9 captur\u00e9 par " + war.getAttackingOrganization().getName() + " !");
+        messageTeam(war.getAttackers(), "Votre organisation a captur\u00e9 le territoire " + room.getName() + ".");
         RolePlay.getOrganizationManager().captureTerritory(war.getAttackingOrganization().getId(), room.getId());
     }
 
     private void territoryDefended(TerritoryWar war, Room room) {
-        messageTeam(war.getDefenders(), "Your territory " + room.getName() + "has been defended!");
-        messageTeam(war.getAttackers(), "Your organization has failed to capture " + room.getName() );
+        messageTeam(war.getDefenders(), "Votre territoire " + room.getName() + " a \u00e9t\u00e9 d\u00e9fendu !");
+        messageTeam(war.getAttackers(), "Votre organisation n'a pas r\u00e9ussi \u00e0 capturer " + room.getName() + ".");
         RolePlay.getOrganizationManager().getOrganizationTerritories().get(room.getId()).getClaimCountDown().addTimeOut(0, Emulator.getConfig().getInt("features.territory.defended.seconds_cooldown", 60));
         RolePlay.getOrganizationManager().getOrganizationWars().remove(room.getId());
     }

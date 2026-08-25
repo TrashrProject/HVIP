@@ -22,12 +22,12 @@ public class WithdrawCommand extends Command {
     public boolean handle(GameClient gameClient, String[] params) {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
         if (data.isPassive()) {
-            gameClient.getHabbo().whisper("You cannot execute RolePlay commands while passive mode is on!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         
         if (params.length != 2) {
-            gameClient.getHabbo().whisper(":withdraw <amount>", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":retirer <montant>", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -58,13 +58,13 @@ public class WithdrawCommand extends Command {
         // Check if user is near an ATM
         Room currentRoom = gameClient.getHabbo().getHabboInfo().getCurrentRoom();
         if (currentRoom == null) {
-            gameClient.getHabbo().whisper("You must be in a room to use banking commands!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous devez \u00eatre dans une salle pour utiliser les commandes bancaires.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         boolean nearATM = isNearATM(currentRoom, gameClient.getHabbo());
         if (!nearATM) {
-            gameClient.getHabbo().whisper("You must be near an ATM to make withdrawals!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous devez \u00eatre pr\u00e8s d'un distributeur pour effectuer un retrait.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -79,7 +79,7 @@ public class WithdrawCommand extends Command {
         BigDecimal fee = amount.multiply(feePercentage);
         BigDecimal amountAfterFee = amount.subtract(fee);
         
-        String feeInfo = String.format("ATM Fee: %s (%.0f%%) | You will receive: %s", 
+        String feeInfo = String.format("Frais : %s (%.0f%%) | Montant re\u00e7u : %s",
                                       bankManager.formatCurrency(fee), 
                                       feePercentage.multiply(BigDecimal.valueOf(100)), 
                                       bankManager.formatCurrency(amountAfterFee));
@@ -93,7 +93,7 @@ public class WithdrawCommand extends Command {
             String successMessage = String.format(BankManager.SUCCESS_WITHDRAW, formattedAmount, formattedFee);
             gameClient.getHabbo().whisper(successMessage, RoomChatMessageBubbles.ALERT);
         } else {
-            gameClient.getHabbo().whisper("Withdrawal failed. Please try again later.", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Le retrait a \u00e9chou\u00e9. R\u00e9essayez plus tard.", RoomChatMessageBubbles.ALERT);
         }
         
         return true;

@@ -8,8 +8,14 @@ final class PoliceCommandSupport {
   private PoliceCommandSupport() {}
 
   static boolean authorize(Habbo officer, RpAvatar data, String permission) {
-    if (data == null || data.getJobRankEntity() == null || !data.getJobRankEntity().hasPermission(permission)) {
+    if (data == null || data.getJobEntity() == null
+        || !"police".equalsIgnoreCase(data.getJobEntity().getName())) {
       officer.whisper("Vous n'etes pas policier.", RoomChatMessageBubbles.ALERT);
+      return false;
+    }
+    if (data.getJobRankEntity() == null || !data.getJobRankEntity().hasPermission(permission)) {
+      officer.whisper("Votre grade de Police ne permet pas cette action.",
+          RoomChatMessageBubbles.ALERT);
       return false;
     }
     if (!data.isDuty()) {

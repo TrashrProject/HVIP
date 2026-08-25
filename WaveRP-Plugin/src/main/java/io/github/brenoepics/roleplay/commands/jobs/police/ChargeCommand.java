@@ -26,12 +26,12 @@ public class ChargeCommand extends Command {
     RpAvatar officerData = RolePlay.getAvatarManager().getRpAvatar(officer);
 
     if (!officerData.getJobRankEntity().hasPermission(JobPermissions.POLICE_ARREST)) {
-      officer.whisper("You are not an Police Officer", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous n'\u00eates pas policier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!officerData.isDuty()) {
-      officer.whisper("You are not on Duty", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -41,7 +41,7 @@ public class ChargeCommand extends Command {
     }
 
     if (params.length < 2) {
-      officer.whisper(":charge <user> <crime>", RoomChatMessageBubbles.ALERT);
+      officer.whisper(":inculper <pseudo> <infraction>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -49,18 +49,18 @@ public class ChargeCommand extends Command {
         .getTimeOut(officer.getHabboInfo().getId());
     if (timeout != null) {
       officer.whisper(
-          "You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to use this command again!");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
       return true;
     }
 
     Habbo criminal = officer.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     if (criminal == null) {
-      officer.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (criminal == officer) {
-      officer.whisper("You cannot add stars to yourself!", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous ne pouvez pas vous inculper vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -69,13 +69,13 @@ public class ChargeCommand extends Command {
     Crime crime = RolePlay.getWantedManager().getCrimeByName(crimeName);
 
     if (crime == null) {
-      officer.whisper("Crime not found", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Cette infraction est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     RolePlay.getWantedManager().chargeCrime(officer, criminal, crime);
     officer.getHabboInfo().getCurrentRoom().sendComposer(getRoomUserShoutComposer(
-        "Charges %username% for %crime%*".replace("%username%",
+        "* Inculpe %username% pour %crime% *".replace("%username%",
             criminal.getHabboInfo().getUsername()).replace("%crime%", crime.getName()),
         officer).compose());
     officerData.executeAction();

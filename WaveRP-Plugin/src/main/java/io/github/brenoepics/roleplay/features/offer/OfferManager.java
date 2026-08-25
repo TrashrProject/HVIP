@@ -26,20 +26,20 @@ public class OfferManager {
   public void acceptOffer(Habbo habbo, String code) {
     Map<String, Offer> userOffers = getUserOffers(habbo.getHabboInfo().getId());
     if (userOffers == null || userOffers.isEmpty()) {
-      habbo.whisper("No offer was made to you", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Vous n'avez reçu aucune offre.", RoomChatMessageBubbles.ALERT);
       return;
     }
 
     Offer offer = userOffers.get(code);
     if (offer == null) {
-      habbo.whisper("The offer code is invalid", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Le code de l'offre est invalide.", RoomChatMessageBubbles.ALERT);
       return;
     }
 
     RpAvatar habboData = RolePlay.getAvatarManager().getRpAvatar(habbo);
     RpAvatar offerData = RolePlay.getAvatarManager().getRpAvatar(offer.habbo());
     if (habboData == null || offerData == null) {
-      habbo.whisper("An error occurred while accepting the offer", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Une erreur est survenue lors de l'acceptation de l'offre.", RoomChatMessageBubbles.ALERT);
       userOffers.remove(code);
       return;
     }
@@ -47,13 +47,13 @@ public class OfferManager {
     RPItem item = offer.isSell() ? offerData.getInventory().getSlotItem(offer.itemId())
         : RolePlay.getItemManager().getItemById(offer.itemId());
     if (item == null) {
-      habbo.whisper("The offer item was not found", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("L'objet proposé est introuvable.", RoomChatMessageBubbles.ALERT);
       userOffers.remove(code);
       return;
     }
 
     if (habbo.getHabboInfo().getCurrencyAmount(200) < item.getPrice()) {
-      habbo.whisper("You do not have enough Bucks", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Vous n'avez pas assez de Bucks.", RoomChatMessageBubbles.ALERT);
       userOffers.remove(code);
       return;
     }
@@ -69,7 +69,7 @@ public class OfferManager {
     offerData.getInventory().updateInventory(offer.habbo);
     habbo.getHabboInfo().getCurrentRoom().sendComposer(new RoomUserShoutComposer(
         new RoomChatMessage(
-            "Accepted the offer from " + offer.habbo().getHabboInfo().getUsername() + "*", habbo,
+            "*Accepte l'offre de " + offer.habbo().getHabboInfo().getUsername() + "*", habbo,
             habbo, RoomChatMessageBubbles.NORMAL)).compose());
     userOffers.remove(code);
   }
@@ -82,25 +82,25 @@ public class OfferManager {
       Habbo receiver) {
     RPItem item = RolePlay.getItemManager().getItemByName(itemName);
     if (item == null) {
-      offering.whisper("Item not found", RoomChatMessageBubbles.ALERT);
+      offering.whisper("Objet introuvable.", RoomChatMessageBubbles.ALERT);
       return false;
     }
 
     if (item.getOfferJob() != null && item.getOfferJob() != offeringData.getJobEntity()) {
       offering.whisper(
-          "You must be from the " + item.getOfferJob().getName() + " to offer this item",
+          "Vous devez exercer le métier " + item.getOfferJob().getDisplayName() + " pour proposer cet objet.",
           RoomChatMessageBubbles.ALERT);
       return false;
     }
     if (item.getOfferJob() == null) {
-      offering.whisper("This item cannot be offered", RoomChatMessageBubbles.ALERT);
+      offering.whisper("Cet objet ne peut pas être proposé.", RoomChatMessageBubbles.ALERT);
       return false;
     }
     Organization organization = RolePlay.getOrganizationManager()
         .getOrganization(offeringData.getOrganizationId());
     if (!item.getCrafterOrganizations().isEmpty() && (organization == null
         || !item.getCrafterOrganizations().contains(organization.getType()))) {
-      offering.whisper("Your organization cannot craft this item", RoomChatMessageBubbles.ALERT);
+      offering.whisper("Votre organisation ne peut pas fabriquer cet objet.", RoomChatMessageBubbles.ALERT);
       return false;
     }
 
@@ -108,7 +108,7 @@ public class OfferManager {
     if (item.getRequiredHanditem() > 0) {
       int hand = offering.getRoomUnit().getHandItem();
       if (hand != item.getRequiredHanditem()) {
-        offering.whisper("You must be holding the required item to offer this.", RoomChatMessageBubbles.ALERT);
+        offering.whisper("Vous devez tenir l'objet requis pour faire cette offre.", RoomChatMessageBubbles.ALERT);
         return false;
       }
     }
@@ -127,9 +127,9 @@ public class OfferManager {
     createOffer(receiver.getHabboInfo().getId(), new Offer(offering, item.getId(), false),
         offerCode);
     receiver.whisper(
-        "You have received an offer from " + offering.getHabboInfo().getUsername() + " for "
-            + item.getDisplayName() + " for " + item.getPrice() + " bucks. Use :acceptoffer "
-            + offerCode + " to accept it", RoomChatMessageBubbles.NORMAL);
+        "Vous avez reçu une offre de " + offering.getHabboInfo().getUsername() + " : "
+            + item.getDisplayName() + " pour " + item.getPrice() + " Bucks. Utilisez :accepteroffre "
+            + offerCode + " pour l'accepter.", RoomChatMessageBubbles.NORMAL);
     OfferComposer offerComposer = new OfferComposer(offering, item, offerCode);
     receiver.getClient().sendResponse(offerComposer);
     return true;
@@ -137,7 +137,7 @@ public class OfferManager {
 
   public String buildMessage(String username, RPItem item, String price) {
     String message = Emulator.getTexts().getValue("features.offer." + item.getId() + ".message",
-        "Offers %habbo% a %item% for %price% bucks.*");
+        "*Propose à %habbo% un objet %item% pour %price% Bucks*");
     message = message.replace("%habbo%", username);
     message = message.replace("%item%", item.getDisplayName());
     return message.replace("%price%", price);
@@ -147,14 +147,14 @@ public class OfferManager {
     
     if (item.getRequirementJob() != null && item.getRequirementJob() != data.getJobEntity()) {
       offering.whisper(
-          "You must be a " + item.getRequirementJob().getName() + " to offer this item",
+          "Vous devez exercer le métier " + item.getRequirementJob().getDisplayName() + " pour proposer cet objet.",
           RoomChatMessageBubbles.ALERT);
       return;
     }
 
     if (item.getOfferJob() != null && item.getOfferJob() != data.getJobEntity()) {
       offering.whisper(
-          "You must be from the " + item.getOfferJob().getName() + " to offer this item",
+          "Vous devez exercer le métier " + item.getOfferJob().getDisplayName() + " pour proposer cet objet.",
           RoomChatMessageBubbles.ALERT);
       return;
     }
@@ -163,7 +163,7 @@ public class OfferManager {
         .getOrganization(data.getOrganizationId());
     if (!item.getCrafterOrganizations().isEmpty() && (organization == null
         || !item.getCrafterOrganizations().contains(organization.getType()))) {
-      offering.whisper("Your organization cannot craft this item", RoomChatMessageBubbles.ALERT);
+      offering.whisper("Votre organisation ne peut pas fabriquer cet objet.", RoomChatMessageBubbles.ALERT);
       return;
     }
 
@@ -171,7 +171,7 @@ public class OfferManager {
     if (item.getRequiredHanditem() > 0) {
       int hand = offering.getRoomUnit().getHandItem();
       if (hand != item.getRequiredHanditem()) {
-        offering.whisper("You must be holding the required item to offer this.", RoomChatMessageBubbles.ALERT);
+        offering.whisper("Vous devez tenir l'objet requis pour faire cette offre.", RoomChatMessageBubbles.ALERT);
         return;
       }
     }
@@ -187,9 +187,9 @@ public class OfferManager {
     createOffer(receiving.getHabboInfo().getId(), new Offer(offering, item.getId(), true),
         offerCode);
     receiving.whisper(
-        "You have received an offer from " + offering.getHabboInfo().getUsername() + " for "
-            + item.getDisplayName() + " for " + item.getPrice() + " bucks. Use :acceptoffer "
-            + offerCode + " to accept it", RoomChatMessageBubbles.NORMAL);
+        "Vous avez reçu une offre de " + offering.getHabboInfo().getUsername() + " : "
+            + item.getDisplayName() + " pour " + item.getPrice() + " Bucks. Utilisez :accepteroffre "
+            + offerCode + " pour l'accepter.", RoomChatMessageBubbles.NORMAL);
     OfferComposer offerComposer = new OfferComposer(offering, item, offerCode);
     receiving.getClient().sendResponse(offerComposer);
   }
@@ -202,22 +202,22 @@ public class OfferManager {
     if (offering.getHabboInfo().getCurrentRoom() == null
         || receiver.getHabboInfo().getCurrentRoom() == null
         || offering.getHabboInfo().getCurrentRoom() != receiver.getHabboInfo().getCurrentRoom()) {
-      offering.whisper("This user is too far away!", RoomChatMessageBubbles.ALERT);
+      offering.whisper("Ce joueur est trop loin !", RoomChatMessageBubbles.ALERT);
       return false;
     }
     RoomTile oTile = offering.getRoomUnit().getCurrentLocation();
     RoomTile rTile = receiver.getRoomUnit().getCurrentLocation();
     if (oTile == null || rTile == null) {
-      offering.whisper("This user is too far away!", RoomChatMessageBubbles.ALERT);
+      offering.whisper("Ce joueur est trop loin !", RoomChatMessageBubbles.ALERT);
       return false;
     }
     double distance = oTile.distance(rTile);
     if (distance < 1.0) {
-      offering.whisper("You must be at least 1 tile away!", RoomChatMessageBubbles.ALERT);
+      offering.whisper("Vous devez être à exactement une case de distance !", RoomChatMessageBubbles.ALERT);
       return false;
     }
     if (distance > 1.0) {
-      offering.whisper("This user is too far away!", RoomChatMessageBubbles.ALERT);
+      offering.whisper("Ce joueur est trop loin !", RoomChatMessageBubbles.ALERT);
       return false;
     }
     return true;

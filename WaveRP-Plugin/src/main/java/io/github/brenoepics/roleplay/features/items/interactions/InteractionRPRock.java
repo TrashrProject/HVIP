@@ -38,12 +38,12 @@ public class InteractionRPRock extends InteractionDefault {
       return;
     }
     if (!data.isJailed()) {
-      habbo.whisper("You must be in a jail to use this rock");
+      habbo.whisper("Vous devez être en prison pour casser ce rocher.");
       return;
     }
     int effectId = getEffectId();
     if (effectId > -1 && habbo.getRoomUnit().getEffectId() != effectId) {
-      habbo.whisper("You must have the effect " + effectId + " to break this rock");
+      habbo.whisper("Vous devez porter l'effet " + effectId + " pour casser ce rocher.");
       return;
     }
 
@@ -60,7 +60,7 @@ public class InteractionRPRock extends InteractionDefault {
     if (finish != null && finish.isAfter(now) && currentState == 0) {
       long waitTime = (finish.toEpochMilli() - now.toEpochMilli()) / 1000;
       habbo.whisper(
-          "You should wait more " + waitTime + " seconds before breaking this rock again");
+          "Vous devez attendre encore " + waitTime + " seconde(s) avant de casser ce rocher.");
       return;
     }
 
@@ -68,7 +68,7 @@ public class InteractionRPRock extends InteractionDefault {
     if (currentState == 0) {
       this.finish = now.plusSeconds(getDelaySeconds());
       updateState("1", room);
-      habbo.whisper("Started breaking the rock! Keep clicking before time runs out!");
+      habbo.whisper("Vous commencez à casser le rocher ! Continuez à cliquer avant la fin du temps imparti !");
       return;
     }
 
@@ -76,20 +76,20 @@ public class InteractionRPRock extends InteractionDefault {
     if (finish == null || !finish.isAfter(now)) {
       // Time ran out, reset
       resetRock(room, now);
-      habbo.whisper("You were too slow! Try again after cooldown.");
+      habbo.whisper("Vous avez été trop lent ! Réessayez après le délai d'attente.");
       return;
     }
 
     if (currentState < maxState) {
       updateState(String.valueOf(currentState + 1), room);
-      habbo.whisper("Keep going! State: " + (currentState + 1) + "/" + maxState);
+      habbo.whisper("Continuez ! Progression : " + (currentState + 1) + "/" + maxState);
       return;
     }
 
     // Success: break the rock
     resetRock(room, now);
     room.sendComposer(new RoomUserShoutComposer(
-        new RoomChatMessage("Successfully mines the rock and reduces their jail time*", habbo,
+        new RoomChatMessage("*Casse le rocher et réduit sa peine de prison*", habbo,
             habbo, RoomChatMessageBubbles.NORMAL)).compose());
     breakRock(habbo, data);
   }

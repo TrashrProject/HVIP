@@ -29,41 +29,41 @@ public class SendHomeCommand extends Command {
     }
 
     if (params.length < 2) {
-      habbo.whisper(":sendhome <user> <minutes>", RoomChatMessageBubbles.ALERT);
+      habbo.whisper(":renvoyer <pseudo> <minutes>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     Habbo target = habbo.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     if (target == null) {
-      habbo.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     RpAvatar targetData = RolePlay.getAvatarManager().getRpAvatar(target);
     if (targetData == null) {
-      habbo.whisper("RP Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Les donn\u00e9es RP de " + params[1] + " sont introuvables.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (target == habbo) {
-      habbo.whisper("You cannot send yourself home!", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Vous ne pouvez pas vous renvoyer vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (targetData.getJobEntity() == null || targetData.getJobEntity()
         .equals(RolePlay.getJobService().getUnemployedJob())) {
-      habbo.whisper("Player " + params[1] + " is not employed!", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Le joueur " + params[1] + " n'a aucun m\u00e9tier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (targetData.getJobEntity().getId() != data.getJobEntity().getId()) {
-      habbo.whisper("Player " + params[1] + " is not in the same job as you!",
+      habbo.whisper("Le joueur " + params[1] + " n'exerce pas le m\u00eame m\u00e9tier que vous.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (targetData.getJobRankEntity().isHigherOrEqualThan(data.getJobRankEntity())) {
-      habbo.whisper("You cannot send someone with the same or higher rank to home!",
+      habbo.whisper("Vous ne pouvez pas renvoyer une personne de grade \u00e9gal ou sup\u00e9rieur.",
           RoomChatMessageBubbles.ALERT);
     }
 
@@ -73,14 +73,14 @@ public class SendHomeCommand extends Command {
       try {
         minutes = Integer.parseInt(params[2]);
       } catch (Exception e) {
-        habbo.whisper("Invalid time!", RoomChatMessageBubbles.ALERT);
+        habbo.whisper("La dur\u00e9e est invalide.", RoomChatMessageBubbles.ALERT);
         return true;
       }
     }
 
     if (minutes < SEND_HOME_MIN || minutes > SEND_HOME_MAX) {
-      habbo.whisper("You can only send a user home for " + SEND_HOME_MIN + " to " + SEND_HOME_MAX
-          + " minutes!", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("La dur\u00e9e doit \u00eatre comprise entre " + SEND_HOME_MIN + " et " + SEND_HOME_MAX
+          + " minutes.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -88,13 +88,13 @@ public class SendHomeCommand extends Command {
         .getTimeOut(habbo.getHabboInfo().getId());
     if (timeout != null) {
       habbo.whisper(
-          "You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to use this command again!");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
       return true;
     }
 
     if (!data.isDuty()) {
-      gameClient.getHabbo().whisper("You are not on duty!", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 

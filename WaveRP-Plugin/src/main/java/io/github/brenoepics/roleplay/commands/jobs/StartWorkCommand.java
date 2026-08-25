@@ -22,12 +22,12 @@ public class StartWorkCommand extends Command {
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
 
     if (data.getJobEntity() == null || data.getJobEntity().equals(RolePlay.getJobService().getUnemployedJob())) {
-      habbo.whisper("You are currently unemployeed!", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Vous n'avez aucun metier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (params.length != 1) {
-      habbo.whisper(":startwork", RoomChatMessageBubbles.ALERT);
+      habbo.whisper(":travailler", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -36,14 +36,15 @@ public class StartWorkCommand extends Command {
       return true;
     }
 
-    if (!RolePlay.getJobsManager()
+    if (habbo.getHabboInfo().getCurrentRoom() == null || !RolePlay.getJobsManager()
         .canWorkAtRoom(data.getJobEntity(), habbo.getHabboInfo().getCurrentRoom().getId())) {
-      habbo.whisper("You can't work here!", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Vous devez \u00eatre dans votre lieu de travail pour commencer votre service.",
+          RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (data.isDuty()) {
-      habbo.whisper("You are already on duty!", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Vous travaillez deja.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -51,8 +52,8 @@ public class StartWorkCommand extends Command {
         .getTimeOut(habbo.getHabboInfo().getId());
     if (timeout != null) {
       habbo.whisper(
-          "You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to use this command again!");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de reutiliser cette commande.");
       return true;
     }
 

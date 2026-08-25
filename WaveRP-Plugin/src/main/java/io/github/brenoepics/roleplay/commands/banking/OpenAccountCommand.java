@@ -18,12 +18,12 @@ public class OpenAccountCommand extends Command {
     public boolean handle(GameClient gameClient, String[] params) {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
         if (data.isPassive()) {
-            gameClient.getHabbo().whisper("You cannot execute RolePlay commands while passive mode is on!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         
         if (params.length != 1) {
-            gameClient.getHabbo().whisper(":openaccount", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":ouvrircompte", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -32,14 +32,14 @@ public class OpenAccountCommand extends Command {
         
         // Check if user already has a bank account
         if (bankManager.hasBankAccount(userId)) {
-            gameClient.getHabbo().whisper("You already have a bank account!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous poss\u00e9dez d\u00e9j\u00e0 un compte bancaire.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         // Check if user is in a bank room (optional - can be removed if not needed)
         int currentRoomId = gameClient.getHabbo().getHabboInfo().getCurrentRoom().getId();
         if (!isBankRoom(currentRoomId)) {
-            gameClient.getHabbo().whisper("You must be in a bank to open an account!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous devez \u00eatre dans une banque pour ouvrir un compte.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -47,13 +47,13 @@ public class OpenAccountCommand extends Command {
             // Create bank account
             BankAccount account = bankManager.createBankAccount(userId);
             
-            String successMessage = String.format("%s Your account number is: %s", 
+            String successMessage = String.format("%s Votre num\u00e9ro de compte est : %s",
                                                  BankManager.SUCCESS_ACCOUNT_CREATED, 
                                                  account.getAccountNumber());
             gameClient.getHabbo().whisper(successMessage, RoomChatMessageBubbles.ALERT);
             
         } catch (Exception e) {
-            gameClient.getHabbo().whisper("Failed to create bank account. Please try again later.", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("L'ouverture du compte a \u00e9chou\u00e9. R\u00e9essayez plus tard.", RoomChatMessageBubbles.ALERT);
         }
         
         return true;

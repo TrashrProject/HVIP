@@ -31,12 +31,16 @@ public final class PoliceTaserService {
   }
 
   public static boolean remove(Habbo target) {
+    if (PoliceHandcuffService.isHandcuffed(target.getHabboInfo().getId())) {
+      return false;
+    }
     if (ACTIVE.remove(target.getHabboInfo().getId()) == null) return false;
     finish(target, false);
     return true;
   }
 
   private static void recover(Habbo target, UUID token, boolean announce) {
+    if (PoliceHandcuffService.isHandcuffed(target.getHabboInfo().getId())) return;
     if (!ACTIVE.remove(target.getHabboInfo().getId(), token)) return;
     finish(target, announce);
   }
@@ -49,5 +53,15 @@ public final class PoliceTaserService {
     if (announce && room != null) {
       target.shout("* " + target.getHabboInfo().getUsername() + " recupere de l'effet du taser *", RoomChatMessageBubbles.YELLOW);
     }
+  }
+
+  static boolean removeAfterUnhandcuff(Habbo target) {
+    if (ACTIVE.remove(target.getHabboInfo().getId()) == null) return false;
+    finish(target, false);
+    return true;
+  }
+
+  public static void clear(int userId) {
+    ACTIVE.remove(userId);
   }
 }

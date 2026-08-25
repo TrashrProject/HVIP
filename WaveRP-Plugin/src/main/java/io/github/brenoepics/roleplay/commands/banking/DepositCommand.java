@@ -22,13 +22,13 @@ public class DepositCommand extends Command {
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
     if (data.isPassive()) {
       gameClient.getHabbo()
-          .whisper("You cannot execute RolePlay commands while passive mode is on!",
+          .whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.",
               RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (params.length != 2) {
-      gameClient.getHabbo().whisper(":deposit <amount>", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper(":depot <montant>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -62,14 +62,14 @@ public class DepositCommand extends Command {
     Room currentRoom = gameClient.getHabbo().getHabboInfo().getCurrentRoom();
     if (currentRoom == null) {
       gameClient.getHabbo()
-          .whisper("You must be in a room to use banking commands!", RoomChatMessageBubbles.ALERT);
+          .whisper("Vous devez \u00eatre dans une salle pour utiliser les commandes bancaires.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     boolean nearATM = isNearATM(currentRoom, gameClient.getHabbo());
     if (!nearATM) {
       gameClient.getHabbo()
-          .whisper("You must be near an ATM to make deposits!", RoomChatMessageBubbles.ALERT);
+          .whisper("Vous devez \u00eatre pr\u00e8s d'un distributeur pour effectuer un d\u00e9p\u00f4t.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -88,7 +88,7 @@ public class DepositCommand extends Command {
       gameClient.getHabbo().whisper(successMessage, RoomChatMessageBubbles.ALERT);
     } else {
       gameClient.getHabbo()
-          .whisper("Deposit failed. Please try again later.", RoomChatMessageBubbles.ALERT);
+          .whisper("Le d\u00e9p\u00f4t a \u00e9chou\u00e9. R\u00e9essayez plus tard.", RoomChatMessageBubbles.ALERT);
     }
 
     return true;

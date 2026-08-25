@@ -22,7 +22,7 @@ public class KickOrganizationCommand extends Command {
     @Override
     public boolean handle(GameClient gameClient, String[] params) {
         if (params.length < 2) {
-            gameClient.getHabbo().whisper(":remove <username>", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":exclureorganisation <pseudo>", RoomChatMessageBubbles.ALERT);
             return true;
         }
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
@@ -34,12 +34,12 @@ public class KickOrganizationCommand extends Command {
 
         Organization org = RolePlay.getOrganizationManager().getOrganization(data.getOrganizationId());
         if (org == null) {
-            gameClient.getHabbo().whisper("You do not own an organization!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous n'\u00eates pas propri\u00e9taire d'une organisation.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         List<OrganizationMember> members = org.getMembers();
         if (members == null || members.isEmpty() || members.stream().noneMatch(member -> member.getUserId() == gameClient.getHabbo().getHabboInfo().getId() && member.getRank().isAdministrator())) {
-            gameClient.getHabbo().whisper("You are not an admin of your organization!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous n'\u00eates pas administrateur de cette organisation.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -47,13 +47,13 @@ public class KickOrganizationCommand extends Command {
         Habbo targetUser = Emulator.getGameEnvironment().getHabboManager().getHabbo(params[1]);
         target = targetUser == null ? HabboManager.getOfflineHabboInfo(params[1]) : targetUser.getHabboInfo();
         if (target == null) {
-            gameClient.getHabbo().whisper("This user does not exist!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Ce joueur est introuvable.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         Integer userOrg = RolePlay.getOrganizationManager().getUserOrganization(target.getId());
         if (userOrg == null || userOrg != org.getId()) {
-            gameClient.getHabbo().whisper("This user is not in your organization!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Ce joueur n'appartient pas \u00e0 votre organisation.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -62,7 +62,7 @@ public class KickOrganizationCommand extends Command {
             RpAvatar targetData = RolePlay.getAvatarManager().getRpAvatar(targetUser);
             targetData.setOrganizationId(0);
         }
-        gameClient.getHabbo().whisper("You have kicked " + params[1] + " from the organization!", RoomChatMessageBubbles.ALERT);
+        gameClient.getHabbo().whisper("Vous avez exclu " + params[1] + " de l'organisation.", RoomChatMessageBubbles.ALERT);
 
         return true;
     }

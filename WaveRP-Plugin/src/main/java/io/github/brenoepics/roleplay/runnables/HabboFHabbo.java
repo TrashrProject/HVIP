@@ -8,6 +8,7 @@ import com.eu.habbo.habbohotel.rooms.RoomTile;
 import com.eu.habbo.habbohotel.rooms.RoomUnit;
 import com.eu.habbo.habbohotel.rooms.RoomUserRotation;
 import com.eu.habbo.habbohotel.users.Habbo;
+import io.github.brenoepics.roleplay.RolePlay;
 
 /**
  * @author BrenoEpic
@@ -42,9 +43,12 @@ public class HabboFHabbo implements Runnable {
 
   @Override
   public void run() {
-    if (!canRun(this.follower, this.followed)) return;
-
-    // TODO: teleport to room
+    if (!canRun(this.follower, this.followed)) {
+      if (this.follower != null && this.follower.getHabboInfo() != null) {
+        RolePlay.getEscortManager().stopEscorting(this.follower.getHabboInfo().getId());
+      }
+      return;
+    }
 
     RoomUnit followedUnit = this.followed.getRoomUnit();
     RoomUnit followerUnit = this.follower.getRoomUnit();
@@ -63,10 +67,13 @@ public class HabboFHabbo implements Runnable {
     RoomTile target = getTileInFront(this.room, followedUnit.getCurrentLocation(), direction);
 
     if (target == null || !target.isWalkable()) {
-      target = followedUnit.getCurrentLocation();
+      target = room.getLayout().getWalkableTilesAround(followedUnit.getCurrentLocation(), direction)
+          .stream().findFirst().orElse(null);
     }
 
-    followerUnit.setGoalLocation(target);
+    if (target != null && !target.equals(followerUnit.getCurrentLocation())) {
+      followerUnit.setGoalLocation(target);
+    }
     followerUnit.setCanWalk(true);
 
     Emulator.getThreading().run(this, 200);
@@ -79,15 +86,20 @@ public class HabboFHabbo implements Runnable {
   }
 
   private boolean canRun(Habbo follower, Habbo followed) {
-    if (follower == null || followed == null) return false;
+    if (follower == null || followed == null || follower.getHabboInfo() == null
+        || followed.getHabboInfo() == null) return false;
 
     int escortingUser = (int) this.follower.getHabboStats().cache.getOrDefault(ESCORT_VARIABLE, 0);
-    if (escortingUser != this.followed.getHabboInfo().getId()) {
+    int followerId = follower.getHabboInfo().getId();
+    int followedId = followed.getHabboInfo().getId();
+    if (escortingUser != followedId
+        || !RolePlay.getEscortManager().stillEscorting(followedId, followerId)) {
       return false;
     }
 
-    // is at any room?
-    return followed.getRoomUnit() != null && this.follower.getRoomUnit() != null;
+    return followed.getRoomUnit() != null && follower.getRoomUnit() != null
+        && followed.getHabboInfo().getCurrentRoom() == room
+        && follower.getHabboInfo().getCurrentRoom() == room;
   }
 
   private RoomTile getTileInFront(Room room, RoomTile tile, int rotation) {

@@ -27,22 +27,22 @@ public class ApplyCommand extends Command {
   public boolean handle(GameClient gameClient, String[] params) {
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
     if (params.length != 2) {
-      gameClient.getHabbo().whisper(":apply <item>", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper(":utiliser <objet>", RoomChatMessageBubbles.ALERT);
       return true;
     }
     Timeout timeout = RolePlay.getCommandsCounter().getCoolDown("apply")
         .getTimeOut(gameClient.getHabbo().getHabboInfo().getId());
     if (timeout != null) {
       gameClient.getHabbo().whisper(
-          "You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to use this command again!");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
       return true;
     }
 
     RPItem item = data.getInventory().getSlotItem(params[1]);
     if (item == null) {
       gameClient.getHabbo()
-          .whisper("You do not have any item called " + params[1], RoomChatMessageBubbles.ALERT);
+          .whisper("Vous ne poss\u00e9dez aucun objet nomm\u00e9 " + params[1] + ".", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -50,7 +50,7 @@ public class ApplyCommand extends Command {
       data.updateLife();
       data.getInventory().removeItem(item, 1);
       data.getInventory().updateInventory(gameClient.getHabbo());
-      gameClient.getHabbo().whisper("You successfully consumed a " + item.getDisplayName(),
+      gameClient.getHabbo().whisper("Vous avez utilis\u00e9 " + item.getDisplayName() + ".",
           RoomChatMessageBubbles.ALERT);
       RolePlay.getCommandsCounter().getCoolDown("apply")
           .addTimeOut(gameClient.getHabbo().getHabboInfo().getId(), APPLY_TIMEOUT);
@@ -67,7 +67,7 @@ public class ApplyCommand extends Command {
       case "food" -> applyFoodItem(item, data, habbo);
       case "drug" -> applyDrugItem(item, data, habbo);
       default -> {
-        habbo.whisper("This item cannot be applied", RoomChatMessageBubbles.ALERT);
+        habbo.whisper("Cet objet ne peut pas \u00eatre utilis\u00e9.", RoomChatMessageBubbles.ALERT);
         yield false;
       }
     };
@@ -78,7 +78,7 @@ public class ApplyCommand extends Command {
    */
   private boolean applyHealthItem(RPItem item, RpAvatar data, Habbo habbo) {
     if (data.getHealth() >= data.getMaxHealth()) {
-      habbo.whisper("You already have full health", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Votre sant\u00e9 est d\u00e9j\u00e0 au maximum.", RoomChatMessageBubbles.ALERT);
       return false;
     }
 
@@ -90,7 +90,7 @@ public class ApplyCommand extends Command {
 
   private static String getApplyMessage(RPItem item) {
     return Emulator.getTexts()
-        .getValue(getApplyKey(item), "Started consuming a " + item.getDisplayName() + "...");
+        .getValue(getApplyKey(item), "Commence \u00e0 utiliser " + item.getDisplayName() + "...");
   }
 
   private static @NotNull String getApplyKey(RPItem item) {
@@ -102,7 +102,7 @@ public class ApplyCommand extends Command {
    */
   private boolean applyEnergyItem(RPItem item, RpAvatar data, Habbo habbo) {
     if (data.getEnergy() >= data.getMaxEnergy()) {
-      habbo.whisper("You already have full energy", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Votre \u00e9nergie est d\u00e9j\u00e0 au maximum.", RoomChatMessageBubbles.ALERT);
       return false;
     }
 
@@ -110,8 +110,8 @@ public class ApplyCommand extends Command {
     int newEnergy = Math.min(data.getEnergy() + targetEnergy, data.getMaxEnergy());
 
     habbo.whisper(
-        "You consumed " + item.getDisplayName() + " and gained " + (newEnergy - data.getEnergy())
-            + " energy!", RoomChatMessageBubbles.ALERT);
+        "Vous avez utilis\u00e9 " + item.getDisplayName() + " et r\u00e9cup\u00e9r\u00e9 "
+            + (newEnergy - data.getEnergy()) + " point(s) d'\u00e9nergie.", RoomChatMessageBubbles.ALERT);
 
     data.setEnergy(newEnergy);
     return true;
@@ -122,7 +122,7 @@ public class ApplyCommand extends Command {
    */
   private boolean applyShieldItem(RPItem item, RpAvatar data, Habbo habbo) {
     if (data.getShield() >= data.getMaxShield()) {
-      habbo.whisper("You already have full shield", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Votre protection est d\u00e9j\u00e0 au maximum.", RoomChatMessageBubbles.ALERT);
       return false;
     }
 
@@ -140,7 +140,7 @@ public class ApplyCommand extends Command {
    */
   private boolean applyFoodItem(RPItem item, RpAvatar data, Habbo habbo) {
     if (data.getHunger() >= data.getMaxHunger()) {
-      habbo.whisper("You already have full hunger", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Vous n'avez plus faim.", RoomChatMessageBubbles.ALERT);
       return false;
     }
 
@@ -148,8 +148,8 @@ public class ApplyCommand extends Command {
     int newHunger = Math.min(data.getHunger() + restorationAmount, data.getMaxHunger());
 
     habbo.whisper(
-        "You consumed " + item.getDisplayName() + " and restored " + (newHunger - data.getHunger())
-            + " hunger!", RoomChatMessageBubbles.ALERT);
+        "Vous avez consomm\u00e9 " + item.getDisplayName() + " et r\u00e9cup\u00e9r\u00e9 "
+            + (newHunger - data.getHunger()) + " point(s) de sati\u00e9t\u00e9.", RoomChatMessageBubbles.ALERT);
 
     data.setHunger(newHunger);
     return true;
@@ -160,7 +160,7 @@ public class ApplyCommand extends Command {
    */
   private boolean applyDrugItem(RPItem item, RpAvatar data, Habbo habbo) {
     habbo.whisper(Emulator.getTexts().getValue(getApplyKey(item),
-            "Lights up a joint and smokes " + item.getDisplayName() + " - you're high!"),
+            "* Allume et consomme " + item.getDisplayName() + " *"),
         RoomChatMessageBubbles.ALERT);
 
     useDrug(item.getInteractionType(), data, habbo, item.getExtraData().split("_"));

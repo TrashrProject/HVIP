@@ -364,7 +364,7 @@ INSERT IGNORE INTO `job_ranks` (`job_id`, `name`, `display_name`, `level`, `is_m
 -- Police ranks
 INSERT IGNORE INTO `job_ranks` (`job_id`, `name`, `display_name`, `level`, `is_manager`, `salary`, `permissions`) VALUES
 ((SELECT id FROM jobs WHERE name = 'police'), 'police_cadet', 'Police Cadet', 0, FALSE, 50.00, '["police.patrol"]'),
-((SELECT id FROM jobs WHERE name = 'police'), 'police_officer', 'Police Officer', 1, FALSE, 75.00, '["police.patrol", "police.arrest", "police.search", "police.cuff"]'),
+((SELECT id FROM jobs WHERE name = 'police'), 'police_officer', 'Police Officer', 1, FALSE, 75.00, '["police.patrol", "police.arrest", "police.search", "police.cuff", "police.taze"]'),
 ((SELECT id FROM jobs WHERE name = 'police'), 'police_sergeant', 'Police Sergeant', 2, FALSE, 100.00, '["police.patrol", "police.arrest", "police.search", "police.cuff", "police.taze", "police.investigate"]'),
 ((SELECT id FROM jobs WHERE name = 'police'), 'police_lieutenant', 'Police Lieutenant', 3, TRUE, 125.00, '["police.patrol", "police.arrest", "police.search", "police.cuff", "police.taze", "police.investigate", "police.wanted.access", "job.hire"]'),
 ((SELECT id FROM jobs WHERE name = 'police'), 'police_captain', 'Police Captain', 4, TRUE, 150.00, '["police.patrol", "police.arrest", "police.search", "police.cuff", "police.taze", "police.investigate", "police.wanted.access", "job.hire", "job.fire", "job.promote", "job.demote"]'),

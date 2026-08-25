@@ -22,7 +22,7 @@ public class HotRoomsCommand extends Command {
   public boolean handle(GameClient gameClient, String[] params) {
     // Only accepts :hotrooms (no args)
     if (params.length != 1) {
-      gameClient.getHabbo().whisper(":hotrooms", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper(":salles", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -30,7 +30,7 @@ public class HotRoomsCommand extends Command {
     List<Room> rooms = rm.getActiveRooms();
 
     if (rooms.isEmpty()) {
-      gameClient.getHabbo().whisper("No active rooms found.", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper("Aucune salle active n'a \u00e9t\u00e9 trouv\u00e9e.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -42,12 +42,12 @@ public class HotRoomsCommand extends Command {
 
     if (top.isEmpty()) {
       gameClient.getHabbo()
-          .whisper("No rooms with occupants right now.", RoomChatMessageBubbles.ALERT);
+          .whisper("Aucune salle n'est actuellement occup\u00e9e.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     StringBuilder sb = new StringBuilder();
-    sb.append("Top rooms right now:\n");
+    sb.append("Salles les plus fr\u00e9quent\u00e9es :\n");
     int i = 1;
     for (Room r : top) {
       int count = r.getHabbos().size();
@@ -56,12 +56,12 @@ public class HotRoomsCommand extends Command {
       }
       sb.append(i++).append(". ").append(r.getName()).append(" (ID ").append(r.getId())
           .append(") - ")
-          .append(count).append(count == 1 ? " user" : " users").append("\n");
+          .append(count).append(count == 1 ? " joueur" : " joueurs").append("\n");
     }
 
-    if (sb.toString().trim().equals("Top rooms right now:")) {
+    if (sb.toString().trim().equals("Salles les plus fr\u00e9quent\u00e9es :")) {
       gameClient.getHabbo()
-          .whisper("No rooms with occupants right now.", RoomChatMessageBubbles.ALERT);
+          .whisper("Aucune salle n'est actuellement occup\u00e9e.", RoomChatMessageBubbles.ALERT);
     } else {
       gameClient.getHabbo().whisper(sb.toString().trim(), RoomChatMessageBubbles.ALERT);
     }

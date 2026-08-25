@@ -38,7 +38,7 @@ public class CombatStatsCommand extends Command {
     Habbo target = room.getHabbo(targetName);
 
     if (target == null) {
-      requester.whisper("User not found in this room!", RoomChatMessageBubbles.ALERT);
+      requester.whisper("Ce joueur est introuvable dans cette salle.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -51,7 +51,7 @@ public class CombatStatsCommand extends Command {
 
     if (rpAvatar == null) {
       requester.whisper(
-          "Cannot find roleplay data for " + target.getHabboInfo().getUsername() + "!",
+          "Les donn\u00e9es RP de " + target.getHabboInfo().getUsername() + " sont introuvables.",
           RoomChatMessageBubbles.ALERT);
       return;
     }
@@ -59,58 +59,58 @@ public class CombatStatsCommand extends Command {
     CombatStats stats = rpAvatar.getCombatStats();
     StringBuilder sb = new StringBuilder();
 
-    sb.append("<h4>Combat Statistics for ").append(target.getHabboInfo().getUsername())
+    sb.append("<h4>Statistiques de combat de ").append(target.getHabboInfo().getUsername())
         .append("</h2>");
 
     sb.append("<table border='1' style='width:100%'>");
 
-    sb.append("<tr><th colspan='2' style='background-color:#E0E0E0'>Combat Performance</th></tr>");
-    sb.append("<tr><td>Kills</td><td>").append(stats.getKills()).append(TD).append(TR);
-    sb.append("<tr><td>Deaths</td><td>").append(stats.getDeaths()).append(TD).append(TR);
-    sb.append("<tr><td>K/D Ratio</td><td>").append(DECIMAL_FORMAT.format(stats.getKdRatio()))
+    sb.append("<tr><th colspan='2' style='background-color:#E0E0E0'>Performances</th></tr>");
+    sb.append("<tr><td>Victoires</td><td>").append(stats.getKills()).append(TD).append(TR);
+    sb.append("<tr><td>D\u00e9faites</td><td>").append(stats.getDeaths()).append(TD).append(TR);
+    sb.append("<tr><td>Ratio V/D</td><td>").append(DECIMAL_FORMAT.format(stats.getKdRatio()))
         .append(TD).append(
             TR);
 
-    sb.append("<tr><th colspan='2' style='background-color:#E0E0E0'>Damage Statistics</th></tr>");
-    sb.append("<tr><td>Total Damage Dealt</td><td>").append(stats.getDamageDealt()).append(TD)
+    sb.append("<tr><th colspan='2' style='background-color:#E0E0E0'>D\u00e9g\u00e2ts</th></tr>");
+    sb.append("<tr><td>D\u00e9g\u00e2ts inflig\u00e9s</td><td>").append(stats.getDamageDealt()).append(TD)
         .append(
             TR);
-    sb.append("<tr><td>Total Damage Received</td><td>").append(stats.getDamageReceived()).append(TD)
+    sb.append("<tr><td>D\u00e9g\u00e2ts re\u00e7us</td><td>").append(stats.getDamageReceived()).append(TD)
         .append(
             TR);
 
     if (stats.getKills() > 0) {
       double avgDamagePerKill = (double) stats.getDamageDealt() / stats.getKills();
-      sb.append("<tr><td>Avg. Damage Per Kill</td><td>")
+      sb.append("<tr><td>D\u00e9g\u00e2ts moyens par victoire</td><td>")
           .append(DECIMAL_FORMAT.format(avgDamagePerKill)).append(TD).append(
               TR);
     }
 
-    sb.append("<tr><th colspan='2' style='background-color:#E0E0E0'>Combat Actions</th></tr>");
-    sb.append("<tr><td>Punches Thrown</td><td>").append(stats.getPunchesThrown()).append(TD).append(
+    sb.append("<tr><th colspan='2' style='background-color:#E0E0E0'>Actions de combat</th></tr>");
+    sb.append("<tr><td>Coups port\u00e9s</td><td>").append(stats.getPunchesThrown()).append(TD).append(
         TR);
-    sb.append("<tr><td>Punches Received</td><td>").append(stats.getPunchesReceived()).append(TD)
+    sb.append("<tr><td>Coups re\u00e7us</td><td>").append(stats.getPunchesReceived()).append(TD)
         .append(
             TR);
 
     if (stats.getArrests() > 0) {
-      sb.append("<tr><th colspan='2' style='background-color:#E0E0E0'>Law Enforcement</th></tr>");
-      sb.append("<tr><td>Total Arrests</td><td>").append(stats.getArrests()).append(TD).append(
+      sb.append("<tr><th colspan='2' style='background-color:#E0E0E0'>Forces de l'ordre</th></tr>");
+      sb.append("<tr><td>Arrestations</td><td>").append(stats.getArrests()).append(TD).append(
           TR);
     }
 
-    sb.append("<tr><th colspan='2' style='background-color:#E0E0E0'>Current Status</th></tr>");
-    sb.append("<tr><td>Health</td><td>").append(rpAvatar.getHealth()).append("/")
+    sb.append("<tr><th colspan='2' style='background-color:#E0E0E0'>\u00c9tat actuel</th></tr>");
+    sb.append("<tr><td>Sant\u00e9</td><td>").append(rpAvatar.getHealth()).append("/")
         .append(rpAvatar.getMaxHealth()).append(TD).append(
             TR);
-    sb.append("<tr><td>Shield</td><td>").append(rpAvatar.getShield()).append("/25").append(TD)
+    sb.append("<tr><td>Protection</td><td>").append(rpAvatar.getShield()).append("/25").append(TD)
         .append(
             TR);
-    sb.append("<tr><td>Hunger</td><td>").append(rpAvatar.getHunger()).append("/")
+    sb.append("<tr><td>Faim</td><td>").append(rpAvatar.getHunger()).append("/")
         .append(rpAvatar.getMaxHunger()).append(TD).append(
             TR);
 
-    sb.append("<tr><td>Energy</td><td>").append(rpAvatar.getEnergy()).append("/")
+    sb.append("<tr><td>\u00c9nergie</td><td>").append(rpAvatar.getEnergy()).append("/")
         .append(rpAvatar.getMaxEnergy()).append(TD).append(
             TR);
 

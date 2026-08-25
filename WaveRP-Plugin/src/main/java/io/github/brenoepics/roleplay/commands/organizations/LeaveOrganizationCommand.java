@@ -19,20 +19,19 @@ public class LeaveOrganizationCommand extends Command {
 
 
         if (data.getOrganizationId() == 0) {
-            gameClient.getHabbo().whisper("You are not in an organization!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous n'appartenez \u00e0 aucune organisation.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         Organization org = RolePlay.getOrganizationManager().getOrganization(data.getOrganizationId());
         if (org != null && org.getAdminId() == gameClient.getHabbo().getHabboInfo().getId()) {
-            gameClient.getHabbo().whisper("You cannot leave the organization because you are the owner! use :delete instead or give the ownership to someone else!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous devez transmettre la propri\u00e9t\u00e9 ou dissoudre l'organisation avant de la quitter.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         if(org == null) return true;
         RolePlay.getOrganizationManager().removeMember(org.getId(), gameClient.getHabbo().getHabboInfo().getId());
         data.setOrganizationId(0);
-        gameClient.getHabbo().whisper("You have left the organization!", RoomChatMessageBubbles.ALERT);
+        gameClient.getHabbo().whisper("Vous avez quitt\u00e9 l'organisation.", RoomChatMessageBubbles.ALERT);
 
         return true;
     }
 }
-

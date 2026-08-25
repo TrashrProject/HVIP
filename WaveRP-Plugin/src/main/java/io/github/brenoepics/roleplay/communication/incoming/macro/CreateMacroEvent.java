@@ -21,18 +21,18 @@ public class CreateMacroEvent extends IncomingWebMessage<JSONCreateMacroEvent> {
     MacroManager macroManager = RolePlay.getMacroManager();
     if (macroManager.habboHasMacro(client.getHabbo().getHabboInfo().getId(), message.name)) {
       client.getHabbo().alert(Emulator.getTexts()
-          .getValue("macro.duplicate", "You already have a Macro config with that name!"));
+          .getValue("macro.duplicate", "Vous possédez déjà une macro portant ce nom."));
       return;
     }
     if (message.name.length() < 4 || message.name.length() > 15) {
       client.getHabbo().alert(Emulator.getTexts()
-          .getValue("macro.size", "Your macro must have a name between 4-15 characters."));
+          .getValue("macro.size", "Le nom de votre macro doit contenir entre 4 et 15 caractères."));
       return;
     }
     if (macroManager.getUserMacros(client.getHabbo().getHabboInfo().getId()).size()
         >= Emulator.getConfig().getInt("macro.configs.limit", 5)) {
       client.getHabbo().alert(Emulator.getTexts()
-          .getValue("macro.limit", "Sorry, You have too many macro settings, delete some!"));
+          .getValue("macro.limit", "Vous avez trop de macros. Supprimez-en avant d'en créer une nouvelle."));
       return;
     }
 

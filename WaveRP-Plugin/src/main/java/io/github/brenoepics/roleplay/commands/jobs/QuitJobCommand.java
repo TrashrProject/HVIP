@@ -19,11 +19,11 @@ public class QuitJobCommand extends Command {
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
 
     if (data.getJobEntity() == null || data.getJobEntity().equals(RolePlay.getJobService().getUnemployedJob())) {
-      habbo.whisper("You are currently unemployeed!", RoomChatMessageBubbles.ALERT);
+      habbo.whisper("Vous n'avez aucun m\u00e9tier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (params.length != 1) {
-      habbo.whisper(":quitjob", RoomChatMessageBubbles.ALERT);
+      habbo.whisper(":demissionner", RoomChatMessageBubbles.ALERT);
       return true;
     }
 

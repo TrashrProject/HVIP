@@ -28,13 +28,13 @@ public class ShootCommand extends Command {
     Habbo attacker = gameClient.getHabbo();
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(attacker);
     if (data.isPassive()) {
-      attacker.whisper("You cannot execute RolePlay commands while passive mode is on!",
+      attacker.whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (params.length != 2) {
-      attacker.whisper(":shoot <player>", RoomChatMessageBubbles.ALERT);
+      attacker.whisper(":tirer <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -46,16 +46,16 @@ public class ShootCommand extends Command {
     Habbo habbo = attacker.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     RoomUnit roomUnit = attacker.getRoomUnit();
     if (roomUnit.getEffectId() != 164) {
-      attacker.whisper("You dont have a pistol equipped", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Vous n'avez pas \u00e9quip\u00e9 de pistolet.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (habbo == null) {
-      attacker.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (habbo == attacker) {
-      attacker.whisper("You cannot shoot yourself!", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Vous ne pouvez pas vous tirer dessus.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     int distanceX = habbo.getRoomUnit().getX() - attacker.getRoomUnit().getX();
@@ -69,21 +69,21 @@ public class ShootCommand extends Command {
 
     RpAvatar targetData = RolePlay.getAvatarManager().getRpAvatar(habbo);
     if (targetData.isPassive() && !targetData.isAggressive()) {
-      gameClient.getHabbo().whisper("You can't hit " + habbo.getHabboInfo().getUsername()
-          + " because they are in passive mode.", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper("Vous ne pouvez pas tirer sur " + habbo.getHabboInfo().getUsername()
+          + " car ce joueur est en mode passif.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (data.isAtSafeZone() && (!targetData.isAggressive() || !data.isAggressive())) {
-      gameClient.getHabbo().whisper("Sorry you can not use this command while in a safe zone.",
+      gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser cette commande dans une zone prot\u00e9g\u00e9e.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!Emulator.getConfig().getBoolean("features.organizations.friendly_fire")
         && data.getOrganizationId() == targetData.getOrganizationId()) {
-      attacker.whisper("You can't shoot " + habbo.getHabboInfo().getUsername()
-          + " because they are in the same organization as you.", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Vous ne pouvez pas tirer sur " + habbo.getHabboInfo().getUsername()
+          + " car vous appartenez \u00e0 la m\u00eame organisation.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -91,13 +91,13 @@ public class ShootCommand extends Command {
         .getTimeOut(attacker.getHabboInfo().getId());
     if (timeout != null) {
       attacker.whisper(
-          "You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to use this command again!");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
       return true;
     }
 
     if (targetData.isDead()) {
-      attacker.whisper(habbo.getHabboInfo().getUsername() + " is already dead!",
+      attacker.whisper(habbo.getHabboInfo().getUsername() + " est d\u00e9j\u00e0 inconscient.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
@@ -106,11 +106,11 @@ public class ShootCommand extends Command {
     targetData.takeDamage(damage, attacker);
     if (targetData.isDead()) {
       attacker.getHabboInfo().getCurrentRoom().sendComposer(getMessage(
-          "Lands the final blow on " + habbo.getHabboInfo().getUsername() + ", knocking them out*",
+          "* Porte le coup final \u00e0 " + habbo.getHabboInfo().getUsername() + " et le met K.-O. *",
           attacker));
     } else {
       attacker.getHabboInfo().getCurrentRoom().sendComposer(getMessage(
-          "Shoots at " + habbo.getHabboInfo().getUsername() + " and causes " + damage + " damage*",
+          "* Tire sur " + habbo.getHabboInfo().getUsername() + " et inflige " + damage + " d\u00e9g\u00e2t(s) *",
           attacker));
     }
 

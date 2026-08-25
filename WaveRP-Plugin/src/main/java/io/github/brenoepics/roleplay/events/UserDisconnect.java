@@ -6,6 +6,8 @@ import com.eu.habbo.plugin.EventHandler;
 import com.eu.habbo.plugin.EventListener;
 import com.eu.habbo.plugin.events.users.UserDisconnectEvent;
 import io.github.brenoepics.roleplay.RolePlay;
+import io.github.brenoepics.roleplay.features.crime.PoliceHandcuffService;
+import io.github.brenoepics.roleplay.features.crime.PoliceTaserService;
 import io.github.brenoepics.roleplay.features.job.JobsDelegate;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import java.sql.Connection;
@@ -29,8 +31,12 @@ public class UserDisconnect implements EventListener {
       JobsDelegate.resetLook(habbo);
     }
 
-    RolePlay.getAvatarManager().getCachedData().remove(habbo);
     RolePlay.getJobsManager().onLogout(habbo);
+    RolePlay.getEscortManager().stopEscorting(habbo.getHabboInfo().getId());
+    RolePlay.getEscortManager().stopEscortingByOfficer(habbo.getHabboInfo().getId());
+    RolePlay.getAvatarManager().getCachedData().remove(habbo);
+    PoliceHandcuffService.clear(habbo.getHabboInfo().getId());
+    PoliceTaserService.clear(habbo.getHabboInfo().getId());
     saveMacro(habbo);
   }
 

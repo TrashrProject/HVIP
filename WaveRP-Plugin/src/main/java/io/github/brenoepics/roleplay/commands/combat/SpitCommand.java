@@ -33,13 +33,13 @@ public class SpitCommand extends Command {
     RpAvatar attackerData = RolePlay.getAvatarManager().getRpAvatar(attacker);
 
     if (attackerData.isPassive()) {
-      attacker.whisper("Sorry you can not use this command while in passive mode.",
+      attacker.whisper("Vous ne pouvez pas utiliser cette commande en mode passif.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (params.length != 2) {
-      attacker.whisper(":spit <player>", RoomChatMessageBubbles.ALERT);
+      attacker.whisper(":cracher <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -50,31 +50,31 @@ public class SpitCommand extends Command {
 
     Habbo target = attacker.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
     if (target == null) {
-      attacker.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     if (target == attacker) {
-      attacker.whisper("You can't hit yourself!", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Vous ne pouvez pas vous viser vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     RpAvatar targetData = RolePlay.getAvatarManager().getRpAvatar(target);
     if (targetData.isPassive() && !targetData.isAggressive()) {
-      attacker.whisper("You can't hit " + target.getHabboInfo().getUsername()
-          + " because they are in passive mode.", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Vous ne pouvez pas viser " + target.getHabboInfo().getUsername()
+          + " car ce joueur est en mode passif.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (attackerData.isAtSafeZone() && (!targetData.isAggressive() || !attackerData.isAggressive())) {
-      attacker.whisper("Sorry you can not use this command while in a safe zone.",
+      attacker.whisper("Vous ne pouvez pas utiliser cette commande dans une zone prot\u00e9g\u00e9e.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!Emulator.getConfig().getBoolean("features.organizations.friendly_fire")
         && attackerData.getOrganizationId() == targetData.getOrganizationId()) {
-      attacker.whisper("You can't hit " + target.getHabboInfo().getUsername()
-          + " because they are in the same organization as you.", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Vous ne pouvez pas viser " + target.getHabboInfo().getUsername()
+          + " car vous appartenez \u00e0 la m\u00eame organisation.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -82,8 +82,8 @@ public class SpitCommand extends Command {
         .getTimeOut(attacker.getHabboInfo().getId());
     if (timeout != null) {
       attacker.whisper(
-          "You must wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to spit again");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de cracher de nouveau.");
       return true;
     }
 
@@ -95,7 +95,7 @@ public class SpitCommand extends Command {
 
     if (!isAttackAllowed(attacker, target, nonDiag, middleTile)) {
       attacker.getHabboInfo().getCurrentRoom().sendComposer(
-          createActionMessage("spits at " + target.getHabboInfo().getUsername() + ", but misses*",
+          createActionMessage("* Crache sur " + target.getHabboInfo().getUsername() + ", mais le rate *",
               attacker).compose());
       RolePlay.getCommandsCounter().getCoolDown("spit")
           .addTimeOut(attacker.getHabboInfo().getId(), HIT_TIMEOUT);
@@ -104,7 +104,7 @@ public class SpitCommand extends Command {
 
     if (!allowedTiles.contains(attacker.getRoomUnit().getCurrentLocation())) {
       attacker.getHabboInfo().getCurrentRoom().sendComposer(
-          createActionMessage("spits at " + target.getHabboInfo().getUsername() + ", but misses*",
+          createActionMessage("* Crache sur " + target.getHabboInfo().getUsername() + ", mais le rate *",
               attacker).compose());
       RolePlay.getCommandsCounter().getCoolDown("spit")
           .addTimeOut(attacker.getHabboInfo().getId(), HIT_TIMEOUT);
@@ -112,7 +112,7 @@ public class SpitCommand extends Command {
     }
 
     if (targetData.isDead()) {
-      attacker.whisper(target.getHabboInfo().getUsername() + " is already dead!",
+      attacker.whisper(target.getHabboInfo().getUsername() + " est d\u00e9j\u00e0 inconscient.",
           RoomChatMessageBubbles.ALERT);
       RolePlay.getCommandsCounter().getCoolDown("spit")
           .addTimeOut(attacker.getHabboInfo().getId(), HIT_TIMEOUT);

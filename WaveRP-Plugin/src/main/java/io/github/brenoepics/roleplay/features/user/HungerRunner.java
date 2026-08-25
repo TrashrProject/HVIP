@@ -14,8 +14,8 @@ public class HungerRunner implements Runnable {
 
   private static final long DELAY_MS =
       (long) Emulator.getConfig().getInt("features.hunger.delay.minutes", 1) * 60 * 1000;
-  private static final String HUNGER_MESSAGE = "Hunger Level decreased by %amount%, consume food to regain! (%current%/%max%)";
-  public static final String MISSING_ENERGY = "You don't have enough energy for this action.";
+  private static final String HUNGER_MESSAGE = "Votre faim a diminué de %amount%. Mangez pour la récupérer ! (%current%/%max%)";
+  public static final String MISSING_ENERGY = "Vous n'avez pas assez d'énergie pour cette action.";
 
   private static void processOnlinePlayers() {
     for (Entry<Habbo, RpAvatar> entry : RolePlay.getAvatarManager().getCachedData().entrySet()) {

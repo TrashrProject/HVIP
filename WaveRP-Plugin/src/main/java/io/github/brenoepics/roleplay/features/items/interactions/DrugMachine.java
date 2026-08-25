@@ -49,7 +49,7 @@ public class DrugMachine extends InteractionDefault {
 
         Organization organization = RolePlay.getOrganizationManager().getOrganization(data.getOrganizationId());
         if (organization == null) {
-            client.getHabbo().whisper("You must be in a organization to use this machine");
+            client.getHabbo().whisper("Vous devez appartenir à une organisation pour utiliser cette machine.");
             return;
         }
         RPItem drugItem = RolePlay.getItemManager().getItemByName(this.getBaseItem().getCustomParams());
@@ -58,11 +58,11 @@ public class DrugMachine extends InteractionDefault {
             return;
         }
         if (!drugItem.getCrafterOrganizations().contains(organization.getType())) {
-            client.getHabbo().whisper("Your organization cannot craft this drug");
+            client.getHabbo().whisper("Votre organisation ne peut pas fabriquer cette drogue.");
             return;
         }
         if (this.crafted) {
-            client.getHabbo().whisper("This drug machine has already been used, try again later");
+            client.getHabbo().whisper("Cette machine a déjà été utilisée. Réessayez plus tard.");
             return;
         }
 
@@ -73,7 +73,7 @@ public class DrugMachine extends InteractionDefault {
 
         this.occupied = true;
         room.updateItem(this);
-        client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserShoutComposer(new RoomChatMessage("Starts crafting drugs", client.getHabbo(), client.getHabbo(), RoomChatMessageBubbles.NORMAL)).compose());
+        client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserShoutComposer(new RoomChatMessage("*Commence à fabriquer de la drogue*", client.getHabbo(), client.getHabbo(), RoomChatMessageBubbles.NORMAL)).compose());
         Emulator.getThreading().run(() -> {
             if (client.getHabbo() == null || !client.getHabbo().getHabboInfo().getCurrentRoom().getLayout().getTilesAround(location, 0, false).contains(client.getHabbo().getRoomUnit().getCurrentLocation()))
                 return;
@@ -94,7 +94,7 @@ public class DrugMachine extends InteractionDefault {
 
     private void handleCraft(RPItem drugItem, Habbo habbo, RpAvatar data) {
         data.getInventory().addItem(habbo, drugItem, 1);
-        habbo.getHabboInfo().getCurrentRoom().sendComposer(new RoomUserShoutComposer(new RoomChatMessage(Emulator.getTexts().getValue("features.drugmachine.craft." + drugItem.getDisplayName().toLowerCase() + ".message", "Crafts a %drug%").replace("%user%", habbo.getHabboInfo().getUsername()).replace("%drug%", drugItem.getDisplayName()), habbo, habbo, RoomChatMessageBubbles.NORMAL)).compose());
+        habbo.getHabboInfo().getCurrentRoom().sendComposer(new RoomUserShoutComposer(new RoomChatMessage(Emulator.getTexts().getValue("features.drugmachine.craft." + drugItem.getDisplayName().toLowerCase() + ".message", "*Fabrique : %drug%*").replace("%user%", habbo.getHabboInfo().getUsername()).replace("%drug%", drugItem.getDisplayName()), habbo, habbo, RoomChatMessageBubbles.NORMAL)).compose());
     }
 
     @Override

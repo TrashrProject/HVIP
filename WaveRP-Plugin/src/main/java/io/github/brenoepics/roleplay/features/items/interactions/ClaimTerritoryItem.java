@@ -38,7 +38,7 @@ public class ClaimTerritoryItem extends InteractionDefault {
 
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(client.getHabbo());
         if (data.isPassive()) {
-            client.getHabbo().whisper("You cannot execute RolePlay commands while passive mode is on!", RoomChatMessageBubbles.ALERT);
+            client.getHabbo().whisper("Vous ne pouvez pas effectuer cette action en mode passif !", RoomChatMessageBubbles.ALERT);
             return;
         }
         Territory territory = RolePlay.getOrganizationManager().getOrganizationTerritories().get(room.getId());
@@ -51,7 +51,7 @@ public class ClaimTerritoryItem extends InteractionDefault {
 
         Timeout timeout = territory.getClaimCountDown().getTimeOut(0);
         if (timeout != null) {
-            client.getHabbo().whisper("You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis()).getEpochSecond() + " seconds to claim this territory!", RoomChatMessageBubbles.ALERT);
+            client.getHabbo().whisper("Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis()).getEpochSecond() + " secondes avant de revendiquer ce territoire !", RoomChatMessageBubbles.ALERT);
             return;
         }
 
@@ -68,22 +68,22 @@ public class ClaimTerritoryItem extends InteractionDefault {
         }
 
         if (territory.getType() != userOrg.getType()) {
-            client.getHabbo().whisper("You cannot claim this territory!", RoomChatMessageBubbles.ALERT);
+            client.getHabbo().whisper("Vous ne pouvez pas revendiquer ce territoire !", RoomChatMessageBubbles.ALERT);
             return false;
         }
 
         if (territory.isClaimedBy(userOrg.getId())) {
-            client.getHabbo().whisper("Your organization already owns this territory!", RoomChatMessageBubbles.ALERT);
+            client.getHabbo().whisper("Votre organisation possède déjà ce territoire !", RoomChatMessageBubbles.ALERT);
             return false;
         }
 
         if (RolePlay.getOrganizationManager().getOrganizationWars().containsKey(room.getId())) {
-            client.getHabbo().whisper("This territory is already being attacked!", RoomChatMessageBubbles.ALERT);
+            client.getHabbo().whisper("Ce territoire est déjà attaqué !", RoomChatMessageBubbles.ALERT);
             return false;
         }
 
         if (territory.getClaimCountDown().getTimeOut(0) != null) {
-            client.getHabbo().whisper("You have to wait " + territory.getClaimCountDown().getTimeOut(0).getFinish().minusMillis(System.currentTimeMillis()).getEpochSecond() + " seconds to claim this territory!", RoomChatMessageBubbles.ALERT);
+            client.getHabbo().whisper("Vous devez attendre " + territory.getClaimCountDown().getTimeOut(0).getFinish().minusMillis(System.currentTimeMillis()).getEpochSecond() + " secondes avant de revendiquer ce territoire !", RoomChatMessageBubbles.ALERT);
             return false;
         }
 

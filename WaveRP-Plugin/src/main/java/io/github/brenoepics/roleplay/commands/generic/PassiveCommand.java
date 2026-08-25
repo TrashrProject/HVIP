@@ -26,26 +26,26 @@ public class PassiveCommand extends Command {
         .getTimeOut(gameClient.getHabbo().getHabboInfo().getId());
     if (timeout != null) {
       gameClient.getHabbo().whisper(
-          "You have to wait " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconds to use this command again!");
+          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
       return true;
     }
 
     if (data.isAggressive()) {
       long end = data.getAggressionUntil().minusMillis(System.currentTimeMillis()).getEpochSecond();
       gameClient.getHabbo().whisper(
-          "You cannot execute RolePlay commands while aggressive mode is on! wait for" + end
-              + " seconds to use this command again!", RoomChatMessageBubbles.ALERT);
+          "Vous ne pouvez pas activer le mode passif pendant une agression. Attendez " + end
+              + " seconde(s).", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!data.isPassive()) {
       data.setDuty(false);
       data.setEquippedWeapon(0);
-      gameClient.getHabbo().whisper("You have enabled passive mode.", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper("Le mode passif est activ\u00e9.", RoomChatMessageBubbles.ALERT);
     } else {
       gameClient.getHabbo()
-          .whisper("You have disabled passive mode.", RoomChatMessageBubbles.ALERT);
+          .whisper("Le mode passif est d\u00e9sactiv\u00e9.", RoomChatMessageBubbles.ALERT);
     }
 
     data.setPassive(!data.isPassive());

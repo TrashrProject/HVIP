@@ -20,19 +20,19 @@ public class StaffArrestCommand extends Command {
   @Override
   public boolean handle(GameClient gameClient, String[] params) throws Exception {
     if (params.length < 3) {
-      gameClient.getHabbo().whisper(":arrest <user> <minutes>", RoomChatMessageBubbles.ALERT);
+      gameClient.getHabbo().whisper(":emprisonnerstaff <pseudo> <minutes>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     Habbo policeStaff = gameClient.getHabbo();
     Habbo criminal = Emulator.getGameEnvironment().getHabboManager().getHabbo(params[1]);
     if (criminal == null) {
-      policeStaff.whisper("Player " + params[1] + " not found", RoomChatMessageBubbles.ALERT);
+      policeStaff.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (criminal == policeStaff) {
-      policeStaff.whisper("You cannot arrest yourself!", RoomChatMessageBubbles.ALERT);
+      policeStaff.whisper("Vous ne pouvez pas vous emprisonner vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -41,13 +41,13 @@ public class StaffArrestCommand extends Command {
     int minutes = getMinutes(params);
 
     if (minutes <= 0) {
-      policeStaff.whisper("Please specify a valid amount of minutes", RoomChatMessageBubbles.ALERT);
+      policeStaff.whisper("Indiquez un nombre de minutes valide.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     Duration duration = Duration.ofMinutes(minutes);
 
-    executeArrest(policeStaff, criminal, "Staff requested", criminalData, duration);
+    executeArrest(policeStaff, criminal, "Intervention du staff", criminalData, duration);
     return true;
   }
 

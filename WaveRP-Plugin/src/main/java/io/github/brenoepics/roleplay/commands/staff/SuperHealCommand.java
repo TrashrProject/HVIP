@@ -19,7 +19,7 @@ public class SuperHealCommand extends Command {
     Habbo healer = gameClient.getHabbo();
 
     if (strings.length <= 1) {
-      healer.whisper(":superheal <username>", RoomChatMessageBubbles.ALERT);
+      healer.whisper(":superheal <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -27,7 +27,7 @@ public class SuperHealCommand extends Command {
     Habbo target = Emulator.getGameEnvironment().getHabboManager().getHabbo(username);
 
     if (target == null) {
-      healer.whisper("Player " + username + " not found.", RoomChatMessageBubbles.ALERT);
+      healer.whisper("Le joueur " + username + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -35,10 +35,10 @@ public class SuperHealCommand extends Command {
     if (avatar != null) {
       avatar.heal();
       avatar.resetHungry();
-      target.whisper("You have been super-healed by staff!", RoomChatMessageBubbles.NORMAL);
-      healer.whisper("You have healed " + username + ".", RoomChatMessageBubbles.NORMAL);
+      target.whisper("Un membre du staff vous a enti\u00e8rement soign\u00e9.", RoomChatMessageBubbles.NORMAL);
+      healer.whisper("Vous avez soign\u00e9 " + username + ".", RoomChatMessageBubbles.NORMAL);
     } else {
-      healer.whisper("Could not heal " + username + ".", RoomChatMessageBubbles.ALERT);
+      healer.whisper("Impossible de soigner " + username + ".", RoomChatMessageBubbles.ALERT);
     }
 
     return true;

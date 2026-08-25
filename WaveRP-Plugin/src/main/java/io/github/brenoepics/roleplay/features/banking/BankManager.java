@@ -122,13 +122,13 @@ public class BankManager {
     public String getFormattedBalance(int userId) {
         Optional<BankAccount> accountOpt = getBankAccount(userId);
         if (accountOpt.isEmpty()) {
-            return "No bank account";
+            return "Aucun compte bancaire";
         }
         
         // Get wallet balance from currency type 200
         Habbo habbo = Emulator.getGameEnvironment().getHabboManager().getHabbo(userId);
         if (habbo == null) {
-            return "User not online";
+            return "Joueur hors ligne";
         }
         
         BankAccount account = accountOpt.get();
@@ -136,32 +136,32 @@ public class BankManager {
         BigDecimal walletBalanceDecimal = BigDecimal.valueOf(walletBalance);
         BigDecimal totalBalance = account.getBankBalance().add(walletBalanceDecimal);
         
-        return String.format("Bank: %s | Wallet: %s | Total: %s", 
+        return String.format("Banque : %s | Esp\u00e8ces : %s | Total : %s",
                            formatCurrency(account.getBankBalance()),
                            formatCurrency(walletBalanceDecimal),
                            formatCurrency(totalBalance));
     }
 
     // Error Messages for Commands
-    public static final String ERROR_NO_BANK_ACCOUNT = "Sorry, you don't have a bank account, visit the bank to open one!";
-    public static final String ERROR_INSUFFICIENT_WALLET = "You don't have this amount to deposit!";
-    public static final String ERROR_INSUFFICIENT_BANK = "You don't have this amount to withdraw!";
-    public static final String ERROR_INSUFFICIENT_FUNDS = "You don't have enough money for this transfer!";
-    public static final String ERROR_INVALID_AMOUNT = "Please enter a valid amount!";
-    public static final String ERROR_INVALID_USER = "User not found or doesn't have a bank account!";
-    public static final String ERROR_SAME_USER = "You cannot transfer money to yourself!";
-    public static final String ERROR_ROBBERY_NO_WEAPON = "You need to have a bat equipped to rob an ATM!";
-    public static final String ERROR_ROBBERY_FAILED = "Your robbery attempt failed!";
+    public static final String ERROR_NO_BANK_ACCOUNT = "Vous n'avez pas de compte bancaire. Rendez-vous \u00e0 la banque pour en ouvrir un.";
+    public static final String ERROR_INSUFFICIENT_WALLET = "Vous n'avez pas assez d'esp\u00e8ces pour effectuer ce d\u00e9p\u00f4t.";
+    public static final String ERROR_INSUFFICIENT_BANK = "Votre compte ne contient pas assez d'argent pour ce retrait.";
+    public static final String ERROR_INSUFFICIENT_FUNDS = "Vous n'avez pas assez d'argent pour effectuer ce virement.";
+    public static final String ERROR_INVALID_AMOUNT = "Saisissez un montant valide.";
+    public static final String ERROR_INVALID_USER = "Ce joueur est introuvable ou ne poss\u00e8de pas de compte bancaire.";
+    public static final String ERROR_SAME_USER = "Vous ne pouvez pas vous envoyer de l'argent \u00e0 vous-m\u00eame.";
+    public static final String ERROR_ROBBERY_NO_WEAPON = "Vous devez \u00e9quiper une batte pour braquer un distributeur.";
+    public static final String ERROR_ROBBERY_FAILED = "Votre tentative de braquage a \u00e9chou\u00e9.";
 
     // Success Messages
-    public static final String SUCCESS_ACCOUNT_CREATED = "Bank account created successfully! Welcome to the banking system!";
-    public static final String SUCCESS_DEPOSIT = "Successfully deposited %s to your bank account!";
-    public static final String SUCCESS_WITHDRAW = "Successfully withdrew %s from your bank account! (Fee: %s)";
-    public static final String SUCCESS_TRANSFER = "Successfully transferred %s to %s!";
-    public static final String SUCCESS_ROBBERY = "You successfully robbed the ATM and got %s!";
+    public static final String SUCCESS_ACCOUNT_CREATED = "Votre compte bancaire a \u00e9t\u00e9 ouvert.";
+    public static final String SUCCESS_DEPOSIT = "Vous avez d\u00e9pos\u00e9 %s sur votre compte bancaire.";
+    public static final String SUCCESS_WITHDRAW = "Vous avez retir\u00e9 %s de votre compte bancaire. Frais : %s.";
+    public static final String SUCCESS_TRANSFER = "Vous avez envoy\u00e9 %s \u00e0 %s.";
+    public static final String SUCCESS_ROBBERY = "Vous avez braqu\u00e9 le distributeur et obtenu %s.";
 
     // Balance check message format
-    public static final String BALANCE_CHECK_FORMAT = "Checks their account balance and notices they have %s.";
+    public static final String BALANCE_CHECK_FORMAT = "consulte son compte et constate un solde total de %s.";
 
     private boolean validateBankingOperation(int userId, String operation) {
         if (!hasBankAccount(userId)) {

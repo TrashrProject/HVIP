@@ -19,7 +19,7 @@ public class StaffReleaseCommand extends Command {
     Habbo staff = gameClient.getHabbo();
 
     if (params.length < 2) {
-      staff.whisper(":staffrelease <username>", RoomChatMessageBubbles.ALERT);
+      staff.whisper(":libererstaff <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -27,20 +27,20 @@ public class StaffReleaseCommand extends Command {
     Habbo target = Emulator.getGameEnvironment().getHabboManager().getHabbo(username);
 
     if (target == null) {
-      staff.whisper("Player " + username + " not found.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Le joueur " + username + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     RpAvatar targetData = RolePlay.getAvatarManager().getRpAvatar(target);
     if (!targetData.isJailed()) {
-      staff.whisper("This user is not jailed!", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Ce joueur n'est pas emprisonn\u00e9.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     RolePlay.getPrisonService().releaseFromJail(target, targetData);
-    staff.whisper("You have released " + username + " from jail.", RoomChatMessageBubbles.NORMAL);
+    staff.whisper("Vous avez lib\u00e9r\u00e9 " + username + " de prison.", RoomChatMessageBubbles.NORMAL);
     target.whisper(
-        "You have been released from jail by the staff " + staff.getHabboInfo().getUsername(),
+        "Vous avez \u00e9t\u00e9 lib\u00e9r\u00e9 de prison par " + staff.getHabboInfo().getUsername() + ".",
         RoomChatMessageBubbles.ALERT);
 
     return true;

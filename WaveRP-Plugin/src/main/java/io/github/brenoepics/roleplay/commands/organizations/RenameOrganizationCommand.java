@@ -16,14 +16,14 @@ public class RenameOrganizationCommand extends Command {
     @Override
     public boolean handle(GameClient gameClient, String[] params) {
         if (params.length < 2) {
-            gameClient.getHabbo().whisper(":rename <name>", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":renommerorganisation <nom>", RoomChatMessageBubbles.ALERT);
             return true;
         }
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
 
 
         if (data.getOrganizationId() == 0) {
-            gameClient.getHabbo().whisper("You are not in an organization!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous n'appartenez \u00e0 aucune organisation.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -35,12 +35,12 @@ public class RenameOrganizationCommand extends Command {
 
         Organization org = RolePlay.getOrganizationManager().getOrganization(data.getOrganizationId());
         if (org == null || org.getAdminId() != gameClient.getHabbo().getHabboInfo().getId()) {
-            gameClient.getHabbo().whisper("You do not own an organization!", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous n'\u00eates pas propri\u00e9taire d'une organisation.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
         RolePlay.getOrganizationManager().changeName(org.getId(), name.toString());
-        gameClient.getHabbo().whisper("You have changed the name of the organization to " + name, RoomChatMessageBubbles.ALERT);
+        gameClient.getHabbo().whisper("L'organisation porte maintenant le nom " + name + ".", RoomChatMessageBubbles.ALERT);
         return true;
     }
 }

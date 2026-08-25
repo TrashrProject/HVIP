@@ -55,13 +55,13 @@ public class InteractionATM extends InteractionDefault {
         
         // Check if user is in passive mode
         if (rpAvatar.isPassive()) {
-            habbo.whisper("You cannot use ATM while in passive mode!", RoomChatMessageBubbles.ALERT);
+            habbo.whisper("Vous ne pouvez pas utiliser le distributeur en mode passif !", RoomChatMessageBubbles.ALERT);
             return;
         }
 
         // Check proximity - user must be close to the ATM
         if (!isUserInRange(habbo, room)) {
-            habbo.whisper("You need to be closer to the ATM to use it!", RoomChatMessageBubbles.ALERT);
+            habbo.whisper("Vous devez vous rapprocher du distributeur pour l'utiliser !", RoomChatMessageBubbles.ALERT);
             return;
         }
 
@@ -77,7 +77,7 @@ public class InteractionATM extends InteractionDefault {
         // Get bank account and send ATM composer
         Optional<BankAccount> accountOpt = bankManager.getBankAccount(userId);
         if (accountOpt.isEmpty()) {
-            habbo.whisper("Error accessing your bank account. Please try again later.", RoomChatMessageBubbles.ALERT);
+            habbo.whisper("Impossible d'accéder à votre compte bancaire. Réessayez plus tard.", RoomChatMessageBubbles.ALERT);
             return;
         }
 

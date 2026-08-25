@@ -25,7 +25,7 @@ public class WantedListCommand extends Command {
         .getOnlineUsersCrimes();
 
     if (onlineCrimes.isEmpty()) {
-      gameClient.getHabbo().whisper("There are no users on the wanted list.",
+      gameClient.getHabbo().whisper("Aucun joueur n'est actuellement recherch\u00e9.",
           com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles.ALERT);
       return true;
     }

@@ -132,7 +132,7 @@ public class OrganizationManager {
         Organization defenders = organizations.get(territory.getOrganizationOwnerId());
         if (defenders == null) {
             captureTerritory(attackers.getId(), territory.getRoomId());
-            getOrganizationOnlineUsers(attackers).forEach(habbo -> habbo.whisper("Your organization has claimed a territory!", RoomChatMessageBubbles.ALERT));
+            getOrganizationOnlineUsers(attackers).forEach(habbo -> habbo.whisper("Votre organisation a revendiqu\u00e9 un territoire.", RoomChatMessageBubbles.ALERT));
             return;
         }
 

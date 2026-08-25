@@ -31,7 +31,7 @@ public class TaxiCommand extends Command {
 
         if (data == null || origin == null) return true;
         if (data.isDead() || data.isJailed()) {
-            habbo.whisper("Tu ne peux pas appeler un taxi lorsque tu es mort ou en prison!", RoomChatMessageBubbles.ALERT);
+            habbo.whisper("Tu ne peux pas appeler un taxi lorsque tu es inconscient ou en prison.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -44,7 +44,7 @@ public class TaxiCommand extends Command {
         try {
             roomId = Integer.parseInt(params[1]);
         } catch (NumberFormatException e) {
-            habbo.whisper("L'ID de la salle doit etre un nombre.", RoomChatMessageBubbles.ALERT);
+            habbo.whisper("L'ID de la salle doit \u00eatre un nombre.", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -58,19 +58,19 @@ public class TaxiCommand extends Command {
             return true;
         }
         if (origin.getId() == roomId) {
-            habbo.whisper("Tu es deja dans cette salle.", RoomChatMessageBubbles.ALERT);
+            habbo.whisper("Tu es d\u00e9j\u00e0 dans cette salle.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         if (habbo.getHabboInfo().getCredits() < COST) {
-            habbo.whisper("Tu n'as pas assez de credits.", RoomChatMessageBubbles.ALERT);
+            habbo.whisper("Tu n'as pas assez de cr\u00e9dits.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         if (!PENDING.add(habbo.getHabboInfo().getId())) {
-            habbo.whisper("Tu as deja appele un taxi.", RoomChatMessageBubbles.ALERT);
+            habbo.whisper("Tu as d\u00e9j\u00e0 appel\u00e9 un taxi.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         int effect = Emulator.getConfig().getInt("features.taxi.effectid", DEFAULT_TAXI_EFFECT);
-        habbo.shout("* Appelle le taxi pour se rendre a [" + roomId + "] " + room.getName() + " *", RoomChatMessageBubbles.YELLOW);
+        habbo.shout("* Appelle le taxi pour se rendre \u00e0 [" + roomId + "] " + room.getName() + " *", RoomChatMessageBubbles.YELLOW);
         habbo.whisper("Ton taxi arrive dans 10 secondes...");
         origin.giveEffect(habbo, effect, -1);
         Emulator.getThreading().run(() -> complete(habbo.getHabboInfo().getId(), origin.getId(), roomId, effect), DELAY_SECONDS * 1000L);
@@ -90,7 +90,7 @@ public class TaxiCommand extends Command {
             }
             synchronized (habbo) {
                 if (habbo.getHabboInfo().getCredits() < COST) {
-                    habbo.whisper("Tu n'as pas assez de credits.", RoomChatMessageBubbles.ALERT);
+                    habbo.whisper("Tu n'as pas assez de cr\u00e9dits.", RoomChatMessageBubbles.ALERT);
                     return;
                 }
                 habbo.giveCredits(-COST);

@@ -19,24 +19,30 @@ public class SetStatsCommand extends Command {
     Habbo staff = gameClient.getHabbo();
 
     if (params.length < 4) {
-      staff.whisper(":setstats <username> <health|energy|hunger|shield> <amount>",
+      staff.whisper(":statistiques <pseudo> <sante|energie|faim|protection> <valeur>",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     String username = params[1];
-    String stat = params[2].toLowerCase();
+    String stat = switch (params[2].toLowerCase()) {
+      case "sante" -> "health";
+      case "energie" -> "energy";
+      case "faim" -> "hunger";
+      case "protection" -> "shield";
+      default -> params[2].toLowerCase();
+    };
     String amountStr = params[3];
 
     Habbo target = Emulator.getGameEnvironment().getHabboManager().getHabbo(username);
     if (target == null) {
-      staff.whisper("Player " + username + " not found.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("Le joueur " + username + " est introuvable.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     RpAvatar avatar = RolePlay.getAvatarManager().getRpAvatar(target);
     if (avatar == null) {
-      staff.whisper("Could not find avatar data for " + username + ".",
+      staff.whisper("Les donn\u00e9es RP de " + username + " sont introuvables.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
@@ -45,7 +51,7 @@ public class SetStatsCommand extends Command {
     try {
       amount = Integer.parseInt(amountStr);
     } catch (NumberFormatException e) {
-      staff.whisper("Amount must be a number.", RoomChatMessageBubbles.ALERT);
+      staff.whisper("La valeur doit \u00eatre un nombre.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -68,15 +74,22 @@ public class SetStatsCommand extends Command {
         avatar.updateLife();
         break;
       default:
-        staff.whisper("Invalid stat. Valid options: health, energy, hunger, shield.",
+        staff.whisper("Statistique invalide : sante, energie, faim ou protection.",
             RoomChatMessageBubbles.ALERT);
         return true;
     }
 
     avatar.updateDatabase();
-    staff.whisper("Set " + stat + " of " + username + " to " + amount + ".",
+    String displayedStat = switch (stat) {
+      case "health" -> "sant\u00e9";
+      case "energy" -> "\u00e9nergie";
+      case "hunger" -> "faim";
+      case "shield" -> "protection";
+      default -> stat;
+    };
+    staff.whisper("La statistique " + displayedStat + " de " + username + " vaut maintenant " + amount + ".",
         RoomChatMessageBubbles.NORMAL);
-    target.whisper("Your " + stat + " has been set to " + amount + " by staff.",
+    target.whisper("Le staff a d\u00e9fini votre statistique " + displayedStat + " sur " + amount + ".",
         RoomChatMessageBubbles.ALERT);
 
     return true;

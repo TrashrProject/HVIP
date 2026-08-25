@@ -20,7 +20,7 @@ public class GlobalHealCommand extends Command {
 
     Habbo healer = gameClient.getHabbo();
 
-    String msg = PassiveTemplates.HEAL.format(healer.getHabboInfo().getUsername(), "everyone");
+    String msg = PassiveTemplates.HEAL.format(healer.getHabboInfo().getUsername(), "tout le monde");
     LiveFeed.sendGlobalAlert(LiveFeed.alert(msg));
 
     for (Habbo habbo : Emulator.getGameEnvironment().getHabboManager().getOnlineHabbos().values()) {
