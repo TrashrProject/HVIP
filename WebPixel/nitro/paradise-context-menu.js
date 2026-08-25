@@ -7,6 +7,11 @@
     var ENHANCED_CLASS = 'paradise-player-context-menu';
     var MISSING_ACHIEVEMENTS_KEY = 'achievements.title';
     var ACHIEVEMENTS_FALLBACK = 'Succès';
+    var COMPACT_LABELS = {
+        "Décorer l'appartement": 'Décoration',
+        'Décorer l’appartement': 'Décoration',
+        'Mes vêtements': 'Tenues'
+    };
     var scheduled = false;
 
     function normalize(value) {
@@ -40,16 +45,23 @@
         return matches >= 3;
     }
 
-    function replaceMissingAchievementsKey(menu) {
+    function replaceExactText(menu, source, replacement) {
         var walker = document.createTreeWalker(menu, NodeFilter.SHOW_TEXT);
         var node;
 
         while ((node = walker.nextNode())) {
-            if (node.nodeValue.trim() !== MISSING_ACHIEVEMENTS_KEY) continue;
+            if (node.nodeValue.trim() !== source) continue;
 
-            node.nodeValue = node.nodeValue.replace(MISSING_ACHIEVEMENTS_KEY, ACHIEVEMENTS_FALLBACK);
-            menu.dataset.paradiseAchievementsFallback = 'true';
+            node.nodeValue = node.nodeValue.replace(source, replacement);
         }
+    }
+
+    function updateVisibleLabels(menu) {
+        replaceExactText(menu, MISSING_ACHIEVEMENTS_KEY, ACHIEVEMENTS_FALLBACK);
+
+        Object.keys(COMPACT_LABELS).forEach(function (label) {
+            replaceExactText(menu, label, COMPACT_LABELS[label]);
+        });
     }
 
     function makeKeyboardClickable(element) {
@@ -65,7 +77,7 @@
             menu.classList.add(ENHANCED_CLASS);
         }
 
-        replaceMissingAchievementsKey(menu);
+        updateVisibleLabels(menu);
 
         var rows = Array.prototype.slice.call(menu.querySelectorAll('.menu-item.list-item'));
         var backIcon = menu.querySelector('.menu-item.list-item .fa-icon.left');
