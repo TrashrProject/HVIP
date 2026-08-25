@@ -46,6 +46,7 @@ public class CommandsWindowComposer extends MessageComposer {
             item.addProperty("category", details.category);
             item.addProperty("subcategory", details.subcategory);
             item.addProperty("access", details.access);
+            item.addProperty("permission", command.permission == null ? "" : command.permission);
             commandItems.add(item);
             usedCategories.add(details.category);
         }

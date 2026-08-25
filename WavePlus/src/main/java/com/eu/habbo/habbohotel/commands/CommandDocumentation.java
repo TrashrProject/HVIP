@@ -19,6 +19,9 @@ public final class CommandDocumentation {
 
     private static final List<Rule> RULES = Arrays.asList(
             prefix("cmd_ems_", ROLEPLAY, "EMS", "EMS en service"),
+            permissions(ROLEPLAY, "EMS", "Selon la commande : patient ou EMS en service",
+                    "cmd_ems", "cmd_cancel_ems", "cmd_accept_ems", "cmd_close_ems", "cmd_bandage",
+                    "cmd_stabilize", "cmd_revive", "cmd_transport_hospital"),
             permissions(ROLEPLAY, "Police", "Police en service",
                     "cmd_tazor", "cmd_detaser", "cmd_handcuff", "cmd_unhandcuff", "cmd_escort",
                     "cmd_stopescort", "cmd_prison", "cmd_release", "cmd_charge", "cmd_pardon",
@@ -99,6 +102,15 @@ public final class CommandDocumentation {
         describe("cmd_ems_diagnostic", "Permet à un membre EMS en service de consulter la santé et l'état d'un joueur proche.");
         describe("cmd_ems_carry", "Permet à un membre EMS en service de transporter un patient situé à proximité.");
         describe("cmd_ems_drop", "Arrête le transport du patient actuellement pris en charge.");
+        describe("cmd_ems", "Envoie une demande d'intervention aux membres EMS actuellement en service.");
+        describe("cmd_cancel_ems", "Annule votre demande d'intervention EMS encore ouverte.");
+        describe("cmd_ems_calls", "Affiche aux membres EMS en service la liste des demandes médicales ouvertes.");
+        describe("cmd_accept_ems", "Permet à un membre EMS en service de prendre en charge l'appel médical indiqué.");
+        describe("cmd_close_ems", "Permet à un membre EMS de clôturer l'intervention médicale en cours.");
+        describe("cmd_bandage", "Pose un bandage sur un patient proche afin de traiter ses blessures.");
+        describe("cmd_stabilize", "Stabilise un patient inconscient situé à proximité avant son transport.");
+        describe("cmd_revive", "Réanime un patient inconscient selon les règles du service médical.");
+        describe("cmd_transport_hospital", "Transporte le patient pris en charge vers l'hôpital.");
         describe("cmd_tazor", "Permet à un policier en service d'immobiliser pendant 40 secondes un joueur situé à deux cases maximum.");
         describe("cmd_detaser", "Retire immédiatement l'effet du taser appliqué à un joueur.");
         describe("cmd_handcuff", "Permet à un policier en service de menotter un joueur neutralisé situé à proximité.");
@@ -139,6 +151,18 @@ public final class CommandDocumentation {
         describe("cmd_passive", "Active ou désactive le mode passif qui bloque les actions de combat RP.");
         describe("cmd_combat_stats", "Affiche vos statistiques de combat ou celles du joueur indiqué.");
         describe("cmd_target_lock", "Verrouille ou libère la cible RP actuellement sélectionnée.");
+        describe("cmd_bucks", "Affiche le montant d'argent RP actuellement disponible sur votre personnage.");
+        describe("cmd_sell_item", "Vend la quantité indiquée d'un objet éligible de votre inventaire RP.");
+        describe("cmd_open_macro", "Ouvre l'interface des raccourcis et actions rapides RP.");
+        describe("cmd_org_create", "Crée une organisation RP avec les informations demandées.");
+        describe("cmd_org_join", "Rejoint l'organisation RP correspondant à votre invitation en attente.");
+        describe("cmd_org_leave", "Quitte votre organisation RP actuelle.");
+        describe("cmd_org_invite", "Invite le joueur indiqué à rejoindre votre organisation RP.");
+        describe("cmd_org_kick", "Exclut le membre indiqué de votre organisation RP.");
+        describe("cmd_org_rename", "Renomme votre organisation RP lorsque votre rôle vous y autorise.");
+        describe("cmd_org_delete", "Dissout définitivement l'organisation RP que vous dirigez.");
+        describe("cmd_org_rankup", "Promeut le membre indiqué au rôle supérieur de l'organisation.");
+        describe("cmd_org_rankdown", "Rétrograde le membre indiqué au rôle inférieur de l'organisation.");
         describe("cmd_superhire", "Permet à un staff de niveau 5 à 9 d'attribuer directement un métier et un grade à un joueur.");
         describe("cmd_staff_kill", "Permet à un staff autorisé de rendre immédiatement inconscient le joueur indiqué.");
         describe("cmd_staff_revive", "Permet à un staff autorisé de réanimer immédiatement le joueur indiqué.");
@@ -173,6 +197,19 @@ public final class CommandDocumentation {
         describe("cmd_summon", "Téléporte le joueur indiqué jusqu'à votre appartement actuel.");
         describe("cmd_shutdown", "Arrête proprement l'émulateur après confirmation.");
         describe("cmd_plugins", "Affiche les extensions actuellement chargées par l'émulateur.");
+        describe("cmd_make_territory", "Transforme l'appartement actuel en territoire RP pour l'organisation autorisée.");
+        describe("cmd_room_heal", "Soigne les joueurs présents dans l'appartement selon les droits staff accordés.");
+        describe("cmd_room_release", "Libère les joueurs concernés dans l'appartement actuel.");
+        describe("cmd_global_heal", "Soigne tous les joueurs concernés sur l'ensemble de l'hôtel.");
+        describe("cmd_super_heal", "Soigne immédiatement le joueur indiqué sans les restrictions médicales habituelles.");
+        describe("cmd_staff_arrest", "Place immédiatement le joueur indiqué en état d'arrestation.");
+        describe("cmd_staff_release", "Libère immédiatement le joueur indiqué d'une arrestation RP.");
+        describe("cmd_staff_hit", "Applique au joueur indiqué une attaque RP avec les privilèges staff.");
+        describe("cmd_set_stats", "Modifie la statistique RP indiquée pour le joueur ciblé.");
+        describe("cmd_send_room", "Envoie le joueur indiqué dans l'appartement précisé.");
+        describe("cmd_goto_room", "Rejoint directement l'appartement indiqué.");
+        describe("cmd_reload_farm", "Recharge la configuration et les données du système de ferme RP.");
+        describe("cmd_update_item_marketplace", "Recharge la liste des objets pouvant être vendus sur le marché RP.");
     }
 
     private CommandDocumentation() {
