@@ -1,0 +1,160 @@
+.nitro-context-menu.paradise-player-context-menu {
+    box-sizing: border-box;
+    width: 188px;
+    min-width: 188px !important;
+    max-width: calc(100vw - 20px);
+    padding: 5px;
+    color: #f3fbfc;
+    background: linear-gradient(180deg, #132f38 0%, #0d232b 100%);
+    border: 1px solid rgba(65, 191, 186, 0.46);
+    border-radius: 8px;
+    box-shadow: 0 10px 24px rgba(0, 10, 15, 0.34), 0 2px 6px rgba(0, 10, 15, 0.32);
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+.nitro-context-menu.paradise-player-context-menu:not(.name-only)::after {
+    bottom: -6px;
+    border-width: 5px;
+    border-color: transparent rgba(65, 191, 186, 0.46) rgba(65, 191, 186, 0.46) transparent;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-header {
+    position: relative;
+    min-width: 0;
+    height: 34px;
+    max-height: 34px;
+    margin: 0 0 4px;
+    padding: 0 12px !important;
+    overflow: hidden;
+    color: #f7ffff;
+    background: #193d47;
+    border: 1px solid rgba(111, 215, 209, 0.2);
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-overflow: ellipsis;
+    text-shadow: none;
+    white-space: nowrap;
+}
+
+.nitro-context-menu.paradise-player-context-menu[data-paradise-view="submenu"] .menu-header {
+    border-left: 3px solid #35b9b2;
+    padding-left: 10px !important;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item {
+    min-height: 34px;
+    height: 34px;
+    max-height: 34px;
+    margin: 0;
+    padding: 0 32px 0 12px !important;
+    justify-content: flex-start !important;
+    overflow: hidden;
+    color: #eaf7f8;
+    background: rgba(6, 20, 27, 0.5);
+    border-bottom: 1px solid rgba(121, 201, 199, 0.12);
+    border-radius: 3px;
+    text-align: left;
+    text-overflow: ellipsis;
+    text-shadow: none;
+    white-space: nowrap;
+    transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:last-of-type {
+    border-bottom-color: transparent;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):hover,
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):focus-visible {
+    color: #ffffff;
+    background: #1b4a53;
+    box-shadow: inset 3px 0 0 #37bbb4;
+    outline: none;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item.disabled {
+    color: rgba(224, 240, 242, 0.56);
+    background: rgba(6, 20, 27, 0.3);
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon,
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon {
+    right: 12px;
+    color: #82d5d1;
+    font-size: 11px;
+    opacity: 0.82;
+    transition: transform 140ms ease, color 120ms ease, opacity 120ms ease;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon.left,
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon.left {
+    left: 12px;
+    right: auto;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item.paradise-back-item {
+    padding-left: 32px !important;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item.paradise-item-opening .fa-icon.right {
+    color: #bafffb;
+    opacity: 1;
+    transform: rotate(90deg);
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-list-split-3 {
+    gap: 3px;
+    margin-bottom: 3px;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-list-split-3 .menu-item.list-item {
+    min-height: 30px;
+    height: 30px;
+    max-height: 30px;
+    margin: 0 !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-bottom: 0;
+    text-align: center;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-footer {
+    min-height: 24px;
+    margin-top: 4px;
+    padding: 3px 0 0 !important;
+    color: rgba(218, 247, 247, 0.82);
+    border-top: 1px solid rgba(121, 201, 199, 0.14);
+    font-size: 12px;
+    transition: color 120ms ease, background-color 120ms ease;
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-footer:hover,
+.nitro-context-menu.paradise-player-context-menu .menu-footer:focus-visible {
+    color: #ffffff;
+    background: rgba(53, 185, 178, 0.09);
+    outline: none;
+}
+
+.nitro-context-menu.paradise-player-context-menu.menu-hidden .menu-footer {
+    margin-top: 0;
+    padding-top: 2px !important;
+    border-top: 0;
+}
+
+@media (max-width: 460px) {
+    .nitro-context-menu.paradise-player-context-menu {
+        width: 176px;
+        min-width: 176px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nitro-context-menu.paradise-player-context-menu .menu-item.list-item,
+    .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon,
+    .nitro-context-menu.paradise-player-context-menu .menu-footer {
+        transition: none;
+    }
+}
