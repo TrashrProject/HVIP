@@ -11,6 +11,8 @@ $ErrorActionPreference = "Stop"
 $Branch = "quality/paradise-core-v1-fixes"
 $JavaHome = "C:\Program Files\Android\openjdk\jdk-21.0.8"
 $MavenRelativePath = "WavePlus\_tools\apache-maven-3.9.11\bin\mvn.cmd"
+$MavenDownloadUrl = "https://archive.apache.org/dist/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.zip"
+$MavenSha512 = "03e2d65d4483a3396980629f260e25cac0d8b6f7f2791e4dc20bc83f9514db8d0f05b0479e699a5f34679250c49c8e52e961262ded468a20de0be254d8207076"
 $BuiltJarRelativePath = "WavePlus\target\RPHabbo-3.5.4-jar-with-dependencies.jar"
 $RuntimeJarRelativePath = "runtime\WavePlus\WaveRP-Arcturus.jar"
 $Ports = @(30000, 30001, 2096)
@@ -51,7 +53,34 @@ try {
         throw "Java 21 est absent : $JavaHome"
     }
     if (-not (Test-Path -LiteralPath $Maven -PathType Leaf)) {
-        throw "Maven 3.9.11 est absent : $Maven"
+        $InstalledMaven = Get-Command mvn.cmd -ErrorAction SilentlyContinue
+        if ($InstalledMaven) {
+            $Maven = $InstalledMaven.Source
+            Write-Host "Maven deja installe detecte : $Maven" -ForegroundColor Green
+        }
+        else {
+            Write-Host "Maven 3.9.11 est absent. Telechargement officiel Apache..." -ForegroundColor Cyan
+            $MavenToolsDirectory = Join-Path $RepositoryRoot "WavePlus\_tools"
+            $MavenArchive = Join-Path ([System.IO.Path]::GetTempPath()) "apache-maven-3.9.11-bin.zip"
+            New-Item -ItemType Directory -Path $MavenToolsDirectory -Force | Out-Null
+
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Invoke-WebRequest -Uri $MavenDownloadUrl -OutFile $MavenArchive -UseBasicParsing
+
+            $DownloadedHash = (Get-FileHash -LiteralPath $MavenArchive -Algorithm SHA512).Hash.ToLowerInvariant()
+            if ($DownloadedHash -ne $MavenSha512) {
+                Remove-Item -LiteralPath $MavenArchive -Force
+                throw "Le controle SHA-512 de Maven a echoue. Archive refusee."
+            }
+
+            Expand-Archive -LiteralPath $MavenArchive -DestinationPath $MavenToolsDirectory -Force
+            Remove-Item -LiteralPath $MavenArchive -Force
+
+            if (-not (Test-Path -LiteralPath $Maven -PathType Leaf)) {
+                throw "Maven a ete telecharge mais mvn.cmd reste introuvable : $Maven"
+            }
+            Write-Host "Maven 3.9.11 installe dans WavePlus\_tools." -ForegroundColor Green
+        }
     }
     if (-not (Test-Path -LiteralPath $RuntimeDirectory -PathType Container)) {
         throw "Runtime WavePlus absent : $RuntimeDirectory"
