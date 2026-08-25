@@ -5,11 +5,7 @@
 
     var MENU_SELECTOR = '.nitro-context-menu';
     var ENHANCED_CLASS = 'paradise-player-context-menu';
-    var MISSING_ACHIEVEMENTS_KEY = 'achievements.title';
-    var ACHIEVEMENTS_FALLBACK = 'Succès';
     var COMPACT_LABELS = {
-        "Décorer l'appartement": 'Décoration',
-        'Décorer l’appartement': 'Décoration',
         'Mes vêtements': 'Tenues'
     };
     var scheduled = false;
@@ -25,18 +21,14 @@
     }
 
     function isPlayerRootMenu(menu) {
-        var rawText = menu.textContent || '';
-        var text = normalize(rawText);
-
-        if (rawText.indexOf(MISSING_ACHIEVEMENTS_KEY) !== -1) return true;
+        var text = normalize(menu.textContent || '');
 
         var playerLabels = [
-            'decorer l appartement',
             'mes vetements',
+            'tenues',
             'danser',
             'actions',
-            'panneaux',
-            'succes'
+            'panneaux'
         ];
         var matches = playerLabels.filter(function (label) {
             return text.indexOf(label) !== -1;
@@ -57,8 +49,6 @@
     }
 
     function updateVisibleLabels(menu) {
-        replaceExactText(menu, MISSING_ACHIEVEMENTS_KEY, ACHIEVEMENTS_FALLBACK);
-
         Object.keys(COMPACT_LABELS).forEach(function (label) {
             replaceExactText(menu, label, COMPACT_LABELS[label]);
         });
