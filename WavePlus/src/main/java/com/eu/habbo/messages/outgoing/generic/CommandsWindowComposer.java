@@ -7,6 +7,8 @@ import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -17,9 +19,11 @@ import java.util.List;
 import java.util.Set;
 
 public class CommandsWindowComposer extends MessageComposer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandsWindowComposer.class);
     private static final int LINK_EVENT_PACKET_ID = 2023;
     private static final int MAX_INLINE_BYTES = 60000;
     private static final int CHUNK_SIZE = 45000;
+    private static final int LEGACY_BOOTSTRAP_COMMANDS = 20;
 
     private final String linkEvent;
 
@@ -39,7 +43,13 @@ public class CommandsWindowComposer extends MessageComposer {
                 .encodeToString(payload.getBytes(StandardCharsets.UTF_8));
         int total = (encoded.length() + CHUNK_SIZE - 1) / CHUNK_SIZE;
         String transferId = Long.toHexString(System.nanoTime());
-        List<CommandsWindowComposer> responses = new ArrayList<>(total);
+        List<CommandsWindowComposer> responses = new ArrayList<>(total + 1);
+
+        // Open the window first with a small valid payload. Older cached Nitro bundles do not
+        // understand chunked transfers, but can still display this compatible command subset.
+        int bootstrapSize = Math.min(LEGACY_BOOTSTRAP_COMMANDS, commands.size());
+        String bootstrap = buildPayload(commands.subList(0, bootstrapSize)).toString();
+        responses.add(new CommandsWindowComposer("habblet/open/" + bootstrap.replace("/", "&#47;")));
 
         for (int index = 0; index < total; index++) {
             int start = index * CHUNK_SIZE;
@@ -68,22 +78,26 @@ public class CommandsWindowComposer extends MessageComposer {
         payload.addProperty("header", "commands");
 
         for (Command command : commands) {
-            CommandDetails details = getDetails(command);
-            JsonObject item = new JsonObject();
-            JsonArray aliases = new JsonArray();
+            try {
+                CommandDetails details = getDetails(command);
+                JsonObject item = new JsonObject();
+                JsonArray aliases = new JsonArray();
 
-            item.addProperty("name", details.name);
-            for (String alias : details.aliases) {
-                aliases.add(alias);
+                item.addProperty("name", details.name);
+                for (String alias : details.aliases) {
+                    aliases.add(alias);
+                }
+                item.add("aliases", aliases);
+                item.addProperty("description", details.description);
+                item.addProperty("usage", details.usage);
+                item.addProperty("category", details.category);
+                item.addProperty("subcategory", details.subcategory);
+                item.addProperty("access", details.access);
+                commandItems.add(item);
+                usedCategories.add(details.category);
+            } catch (RuntimeException exception) {
+                LOGGER.warn("Unable to document command with permission {}", command.permission, exception);
             }
-            item.add("aliases", aliases);
-            item.addProperty("description", details.description);
-            item.addProperty("usage", details.usage);
-            item.addProperty("category", details.category);
-            item.addProperty("subcategory", details.subcategory);
-            item.addProperty("access", details.access);
-            commandItems.add(item);
-            usedCategories.add(details.category);
         }
 
         JsonArray categories = new JsonArray();
