@@ -18,6 +18,7 @@ $RuntimeJarRelativePath = "runtime\WavePlus\WaveRP-Arcturus.jar"
 $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $StoppedService = $false
+$StoppedProcess = $false
 
 function Invoke-CheckedCommand {
     param(
@@ -48,6 +49,7 @@ try {
     $BuiltJar = Join-Path $RepositoryRoot $BuiltJarRelativePath
     $RuntimeJar = Join-Path $RepositoryRoot $RuntimeJarRelativePath
     $RuntimeDirectory = Split-Path -Parent $RuntimeJar
+    $JavaExecutable = Join-Path $JavaHome "bin\java.exe"
 
     if (-not (Test-Path -LiteralPath $JavaHome -PathType Container)) {
         throw "Java 21 est absent : $JavaHome"
@@ -131,9 +133,28 @@ try {
         }
     }
     else {
-        $Answer = Read-Host "Arrete WavePlus, puis saisis O pour deployer le JAR"
-        if ($Answer -notin @("O", "o", "Oui", "oui")) {
-            throw "Deploiement annule avant le remplacement du JAR."
+        $WaveProcesses = @(
+            Get-CimInstance Win32_Process |
+                Where-Object {
+                    ($_.Name -eq "java.exe" -or $_.Name -eq "javaw.exe") -and
+                    $_.CommandLine -like "*WaveRP-Arcturus.jar*"
+                }
+        )
+        if ($WaveProcesses.Count -gt 1) {
+            throw "Plusieurs processus WaveRP ont ete trouves. Arrete-les manuellement."
+        }
+        if ($WaveProcesses.Count -eq 1) {
+            $WaveProcessId = $WaveProcesses[0].ProcessId
+            Write-Host "Arret automatique de WaveRP, processus $WaveProcessId..." -ForegroundColor Cyan
+            Stop-Process -Id $WaveProcessId
+            $StopLimit = (Get-Date).AddSeconds(30)
+            while (Get-Process -Id $WaveProcessId -ErrorAction SilentlyContinue) {
+                if ((Get-Date) -gt $StopLimit) {
+                    throw "WaveRP ne s'est pas arrete apres 30 secondes."
+                }
+                Start-Sleep -Seconds 1
+            }
+            $StoppedProcess = $true
         }
     }
 
@@ -151,7 +172,28 @@ try {
         Start-Sleep -Seconds 5
     }
     else {
-        Read-Host "Redemarre WavePlus, puis appuie sur Entree"
+        $LogsDirectory = Join-Path $RuntimeDirectory "logs"
+        New-Item -ItemType Directory -Path $LogsDirectory -Force | Out-Null
+        $OutputLog = Join-Path $LogsDirectory "console-update.out.log"
+        $ErrorLog = Join-Path $LogsDirectory "console-update.error.log"
+
+        Write-Host "Redemarrage automatique de WaveRP..." -ForegroundColor Cyan
+        $StartedProcess = Start-Process `
+            -FilePath $JavaExecutable `
+            -ArgumentList "-jar WaveRP-Arcturus.jar" `
+            -WorkingDirectory $RuntimeDirectory `
+            -WindowStyle Hidden `
+            -RedirectStandardOutput $OutputLog `
+            -RedirectStandardError $ErrorLog `
+            -PassThru
+        Start-Sleep -Seconds 10
+        $StartedProcess.Refresh()
+        if ($StartedProcess.HasExited) {
+            Get-Content -LiteralPath $ErrorLog -Tail 50 -ErrorAction SilentlyContinue
+            throw "WaveRP s'est arrete pendant son redemarrage."
+        }
+        $StoppedProcess = $false
+        Write-Host "WaveRP redemarre, processus $($StartedProcess.Id)." -ForegroundColor Green
     }
 
     foreach ($Port in $Ports) {
@@ -182,6 +224,15 @@ catch {
         }
         catch {
             Write-Warning "Le service $ServiceName n'a pas pu etre redemarre."
+        }
+    }
+    elseif ($StoppedProcess) {
+        Write-Warning "Tentative de redemarrage de WaveRP apres l'erreur."
+        try {
+            Start-Process -FilePath $JavaExecutable -ArgumentList "-jar WaveRP-Arcturus.jar" -WorkingDirectory $RuntimeDirectory -WindowStyle Hidden
+        }
+        catch {
+            Write-Warning "WaveRP n'a pas pu etre redemarre automatiquement."
         }
     }
     exit 1
