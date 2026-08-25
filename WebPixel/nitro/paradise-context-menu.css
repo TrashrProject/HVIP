@@ -1,7 +1,7 @@
 .nitro-context-menu.paradise-player-context-menu {
     box-sizing: border-box;
-    width: 82px;
-    min-width: 82px !important;
+    width: 65px;
+    min-width: 65px !important;
     max-width: calc(100vw - 20px);
     padding: 1px;
     color: #f4f6f7;
@@ -51,7 +51,7 @@
     height: 30px;
     max-height: 30px;
     margin: 0;
-    padding: 0 17px 0 5px !important;
+    padding: 0 12px 0 4px !important;
     justify-content: flex-start !important;
     overflow: hidden;
     color: #f1f3f4;
@@ -84,7 +84,7 @@
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon {
-    right: 5px;
+    right: 3px;
     color: #c8d0d4;
     font-size: 9px;
     opacity: 0.9;
@@ -148,8 +148,8 @@
 
 @media (max-width: 460px) {
     .nitro-context-menu.paradise-player-context-menu {
-        width: 78px;
-        min-width: 78px !important;
+        width: 65px;
+        min-width: 65px !important;
     }
 }
 
