@@ -14,15 +14,17 @@
     <meta name="csrf-token" content="vDd2f87t7d1JiOyDc3VoJSZKT6tRbszQB1aEtSMv">
 
     <link href="https://fonts.googleapis.com/css?family=Ubuntu:400,700&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWrX2MZw1T" crossorigin="anonymous">
     <!-- CORS-safe Font Awesome mirrors. FA4 stays loaded for legacy templates still using `fa`. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" referrerpolicy="no-referrer">
 
+    <!-- Load critical production overrides first. Their !important asset rules
+         prevent the legacy stylesheet from ever selecting dead remote hosts. -->
+    <link rel="stylesheet" href="<?php echo CSS; ?>/vps-fixes.css?<?php echo time(); ?>">
     <link rel="stylesheet" href="<?php echo CSS; ?>/pixelzone.css?<?php echo time(); ?>">
     <link rel="stylesheet" href="<?php echo CSS; ?>/dynamics.css?<?php echo time(); ?>">
     <link rel="stylesheet" href="<?php echo CSS; ?>/retro-cms.css?<?php echo time(); ?>">
-    <link rel="stylesheet" href="<?php echo CSS; ?>/vps-fixes.css?<?php echo time(); ?>">
 
     <?php if($PageName == "Tienda"): ?>
         <script src="https://www.paypal.com/sdk/js?client-id=<?php echo (Config::$SandBox)? Config::$S_PAYPAL_API : Config::$PAYPAL_API; ?>&amp;disable-funding=credit,card"></script>
