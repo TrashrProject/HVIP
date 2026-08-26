@@ -1,49 +1,88 @@
-/* ParadiseRP VPS production fixes.
-   Keep browser-facing assets on paradiserp.fr/local CMS paths; never localhost. */
+/* ParadiseRP production asset fixes.
+ * Browser-facing CMS assets must stay on local ParadiseRP paths.
+ * This stylesheet intentionally overrides legacy PixelZone/RDP remote hosts.
+ */
 
-/* Replace dead legacy HabboVIP/PeakRP asset hosts with files already shipped by the CMS. */
+/* Dashboard / user statistics */
 .user-pz-banco {
     background-image: url('../img/logos/icon/banque.png') !important;
     background-size: 18px 18px !important;
 }
+
 .user-pz-dinero,
 .stats-pz-money {
     background-image: url('../img/logos/icon/portefeuille.png') !important;
     background-size: 18px 18px !important;
 }
+
 .user-pz-platinos {
     background-image: url('../img/extras/platinos_icon_s.png') !important;
+    background-size: 18px 18px !important;
 }
+
 .user-pz-level {
     background-image: url('../img/logos/icon/niveau.png') !important;
     background-size: 18px 18px !important;
 }
+
+/* Server statistics */
 .stats-pz-users,
 .stats-pz-onlines {
     background-image: url('../img/logos/icon/stat.png') !important;
     background-size: 18px 18px !important;
 }
+
 .stats-pz-apts {
     background-image: url('../img/extras/room_icon_2.gif') !important;
     background-size: 16px 16px !important;
 }
+
 .stats-pz-gangs {
     background-image: url('../img/logos/mafia.png') !important;
     background-size: 18px 18px !important;
 }
+
 .stats-pz-business {
     background-image: url('../img/logos/icon/banque.png') !important;
     background-size: 18px 18px !important;
 }
+
 .stats-pz-build {
     background-image: url('../img/logos/icon/speaker.png') !important;
     background-size: 18px 18px !important;
 }
-.character-vip {
+
+/* Legacy ranking assets used wrong root-relative paths. */
+.leaderboard-user:nth-child(1) {
+    background-image: url('../img/extras/leader_1st.gif') !important;
+}
+
+.leaderboard-user:nth-child(2) {
+    background-image: url('../img/extras/leader_2nd.gif') !important;
+}
+
+.leaderboard-user:nth-child(3) {
+    background-image: url('../img/extras/leader_3rd.gif') !important;
+}
+
+/* These old PeakRP/HabboVIP decorations no longer have a valid source.
+ * Keep the layout/background colour and remove only the dead image request.
+ */
+.character-vip,
+.online-user-vip,
+.online-user-staff,
+.profile-vip,
+.profile-staff,
+.employee.rank-0,
+.employee.rank-1,
+.employee.rank-2,
+.employee.rank-3,
+.employee.rank-4,
+.profile-grid {
     background-image: none !important;
 }
 
-/* A broken avatar must not collapse the navigation/dashboard layout. */
+/* A broken avatar must never collapse the CMS layout. */
 .pixel-wrapper img,
 .dashboard-welcome img,
 .staff-member-avatar img,
@@ -51,7 +90,6 @@
     object-fit: contain;
 }
 
-/* Avoid visible broken-image glyphs while the official Habbo imager is unavailable. */
 img[src*="habbo-imaging/avatarimage"] {
     min-width: 1px;
     min-height: 1px;
