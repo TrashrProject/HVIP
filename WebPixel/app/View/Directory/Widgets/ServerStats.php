@@ -1,19 +1,12 @@
 <?php
 /**
- * PixelZone by RDP Services, Emulated by Retro Development Server.
- * The use of this program is restricted to clients and owners of RDP Services.
- * Any unauthorized use of this code it'll end up on deletion of the program.
- * Developers P3x & Jeihden.
- * Copyrights © 2020
- * Last Modified: $file.lastModefied
+ * ParadiseRP server statistics widget.
  */
-
-
 ?>
 
 <div class="content-box">
     <div class="title">
-        <i class="fa fa-bar-chart text-secondary"></i> Statistiques de <?php echo Config::$WName; ?>
+        <i class="fas fa-chart-bar text-secondary"></i> Statistiques de <?php echo Config::$WName; ?>
     </div>
     <div class="box-content">
         <div class="user-info-pz">
@@ -71,7 +64,7 @@
                         <div><div class="stats-pz-business"></div></div>
                     </div>
                     <div class="post-info mr-auto ml-2">
-                        <b>Empresas:</b> <?php echo $UserMG->GetStatData("business_count"); ?>
+                        <b>Entreprises :</b> <?php echo $UserMG->GetStatData("business_count"); ?>
                     </div>
                     <div class="ml-2 mr-2"><i class="fas fa-certificate"></i></div>
                 </div>
