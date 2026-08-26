@@ -60,7 +60,7 @@
 
     var previewTimer = null;
     function updateLoginPreview() {
-        var username = $('#pz-login-uname').val().trim();
+        var username = String($('#pz-login-uname').val() || '').trim();
         var $preview = $('#login-avatar-preview');
         if (!$preview.length) return;
 
@@ -77,14 +77,18 @@
                 dataType: 'json',
                 data: { preview_username: username }
             }).done(function (response) {
-                if ($('#pz-login-uname').val().trim() !== username) return;
+                if (String($('#pz-login-uname').val() || '').trim() !== username) return;
                 if (!response || !response.found || !response.look) {
                     $preview.removeClass('ready').html('<i class="fas fa-user"></i>');
                     return;
                 }
-                var avatarUrl = 'http://127.0.0.1:5000/habbo-imaging/avatarimage?figure=' +
+
+                // Same-origin PHP proxy: the browser must never contact a VPS
+                // loopback address directly. avatar-image.php talks to the local
+                // Nitro imager server-side and returns the image over HTTPS.
+                var avatarUrl = baseUrl + 'avatar-image.php?figure=' +
                     encodeURIComponent(response.look) + '&direction=2&head_direction=3&headonly=1&size=l';
-                var safeName = $('<div>').text(response.username).html();
+                var safeName = $('<div>').text(response.username || username).html();
                 $preview.addClass('ready').html('<img src="' + avatarUrl + '" alt="Look de ' + safeName + '">');
             }).fail(function () {
                 $preview.removeClass('ready').html('<i class="fas fa-user"></i>');
@@ -93,8 +97,8 @@
     }
 
     function login() {
-        var username = $('#pz-login-uname').val().trim();
-        var password = $('#pz-login-pass').val();
+        var username = String($('#pz-login-uname').val() || '').trim();
+        var password = String($('#pz-login-pass').val() || '');
 
         $('#e-login-message, #login-message').hide();
 
@@ -133,10 +137,10 @@
     }
 
     function register() {
-        var username = $('#register-username').val().trim();
-        var email = $('#email').val().trim();
-        var password = $('#register-password').val();
-        var confirm = $('#register-password-confirm').val();
+        var username = String($('#register-username').val() || '').trim();
+        var email = String($('#email').val() || '').trim();
+        var password = String($('#register-password').val() || '');
+        var confirm = String($('#register-password-confirm').val() || '');
         var rulesAccepted = $('#rp-rules').is(':checked');
 
         $('#e-register-message, #register-message').hide();
