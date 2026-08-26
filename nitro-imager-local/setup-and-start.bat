@@ -30,6 +30,9 @@ if not exist "nitro-imager\package.json" (
 
 cd /d "%~dp0nitro-imager"
 
+echo [RDP Imager] Application du correctif de robustesse ParadiseRP...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0patch-nitro-imager.ps1" -Root "%~dp0nitro-imager" || goto :error
+
 > .env echo API_HOST=127.0.0.1
 >> .env echo API_PORT=3030
 >> .env echo AVATAR_SAVE_PATH=C:/HVIP/nitro-imager-local/cache
