@@ -1,6 +1,27 @@
 @echo off
-setlocal
-cd /d %~dp0
+setlocal EnableExtensions
+cd /d "%~dp0"
+
+rem ParadiseRP Nitro Imager uses canvas 2.8.0. That native dependency ships a
+rem Windows x64 prebuilt binary for Node ABI v93 (Node 16), but not Node 24.
+rem Keep the VPS global Node installation untouched and run this legacy,
+rem loopback-only service with an isolated portable Node 16 runtime.
+set "NODE_VERSION=16.20.2"
+set "NODE_DIST=node-v%NODE_VERSION%-win-x64"
+set "RUNTIME_DIR=%~dp0.runtime"
+set "NODE_DIR=%RUNTIME_DIR%\%NODE_DIST%"
+set "NODE_ZIP=%TEMP%\%NODE_DIST%.zip"
+set "NODE_URL=https://nodejs.org/dist/v%NODE_VERSION%/%NODE_DIST%.zip"
+
+if not exist "%NODE_DIR%\node.exe" (
+  echo [RDP Imager] Installation du runtime Node %NODE_VERSION% isole...
+  if not exist "%RUNTIME_DIR%" mkdir "%RUNTIME_DIR%"
+  powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; Invoke-WebRequest -Uri '%NODE_URL%' -OutFile '%NODE_ZIP%'; Expand-Archive -Path '%NODE_ZIP%' -DestinationPath '%RUNTIME_DIR%' -Force; Remove-Item '%NODE_ZIP%' -Force" || goto :error
+)
+
+set "PATH=%NODE_DIR%;%PATH%"
+for /f "delims=" %%V in ('"%NODE_DIR%\node.exe" -v') do set "ACTIVE_NODE=%%V"
+echo [RDP Imager] Runtime: %ACTIVE_NODE% ^(isole - Node global non modifie^)
 
 if not exist "nitro-imager\package.json" (
   echo [RDP Imager] Installation de nitro-imager...
@@ -11,7 +32,7 @@ cd /d "%~dp0nitro-imager"
 
 > .env echo API_HOST=127.0.0.1
 >> .env echo API_PORT=3030
->> .env echo AVATAR_SAVE_PATH=C:/xampp/htdocs/nitro-imager-local/cache
+>> .env echo AVATAR_SAVE_PATH=C:/HVIP/nitro-imager-local/cache
 >> .env echo AVATAR_ACTIONS_URL=http://localhost/swf_pz/V5-0-2/gamedata/json/HabboAvatarActions.json
 >> .env echo AVATAR_FIGUREDATA_URL=http://localhost/swf_pz/V5-0-2/gamedata/json/FigureData.json
 >> .env echo AVATAR_FIGUREMAP_URL=http://localhost/swf_pz/V5-0-2/gamedata/json/FigureMap.json
@@ -21,25 +42,40 @@ cd /d "%~dp0nitro-imager"
 
 if not exist "..\cache" mkdir "..\cache"
 
-if not exist "node_modules" (
-  echo [RDP Imager] npm install...
-  call npm install || goto :error
+rem A previous npm install under Node 24 leaves an unusable native canvas tree.
+rem Verify the existing install with Node 16; if it cannot load canvas, rebuild
+rem node_modules from scratch under the compatible ABI.
+if exist "node_modules" (
+  "%NODE_DIR%\node.exe" -e "require('canvas')" >nul 2>&1
+  if errorlevel 1 (
+    echo [RDP Imager] Nettoyage des dependances natives incompatibles...
+    rmdir /s /q "node_modules"
+  )
 )
 
-if not exist "dist" (
-  echo [RDP Imager] build...
-  call npm run build || goto :error
+if not exist "node_modules" (
+  echo [RDP Imager] npm install avec Node %NODE_VERSION%...
+  call "%NODE_DIR%\npm.cmd" install || goto :error
 )
+
+"%NODE_DIR%\node.exe" -e "require('canvas')" >nul 2>&1 || (
+  echo [RDP Imager] ERREUR: canvas ne se charge toujours pas avec Node %NODE_VERSION%.
+  goto :error
+)
+
+echo [RDP Imager] Build...
+call "%NODE_DIR%\npm.cmd" run build || goto :error
 
 echo.
 echo [RDP Imager] Assets locaux: C:\xampp\htdocs\swf_pz\V5-0-2
 echo [RDP Imager] API avatar: http://127.0.0.1:3030/
+echo [RDP Imager] Node global du VPS laisse intact.
 echo.
-call npm start
-exit /b 0
+"%NODE_DIR%\node.exe" ".\dist\index.js"
+exit /b %ERRORLEVEL%
 
 :error
 echo.
-echo [RDP Imager] ERREUR. Verifie que Git et Node.js/npm sont installes.
+echo [RDP Imager] ERREUR. Consulte les lignes ci-dessus; le Node global du VPS n'a pas ete modifie.
 pause
 exit /b 1
