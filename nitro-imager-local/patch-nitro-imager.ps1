@@ -36,11 +36,7 @@ function Patch-File {
 $effectManager = Join-Path $Root 'src\app\avatar\EffectAssetDownloadManager.ts'
 $animationManager = Join-Path $Root 'src\app\avatar\animation\AnimationManager.ts'
 
-Patch-File \
-    -Path $effectManager \
-    -Old '        this._structure.registerAnimation(library.animation);' \
-    -New '        if(library.animation) this._structure.registerAnimation(library.animation);' \
-    -AlreadyPatchedMarker 'if(library.animation) this._structure.registerAnimation(library.animation);'
+Patch-File -Path $effectManager -Old '        this._structure.registerAnimation(library.animation);' -New '        if(library.animation) this._structure.registerAnimation(library.animation);' -AlreadyPatchedMarker 'if(library.animation) this._structure.registerAnimation(library.animation);'
 
 $oldAnimationBlock = @'
     public registerAnimation(structure: AvatarStructure, animations: { [index: string]: IAssetAnimation }): boolean
@@ -76,10 +72,6 @@ $newAnimationBlock = @'
     }
 '@
 
-Patch-File \
-    -Path $animationManager \
-    -Old $oldAnimationBlock \
-    -New $newAnimationBlock \
-    -AlreadyPatchedMarker 'if(!animations) return false;'
+Patch-File -Path $animationManager -Old $oldAnimationBlock -New $newAnimationBlock -AlreadyPatchedMarker 'if(!animations) return false;'
 
 Write-Host '[RDP Imager Patch] Missing/empty effect animations are now ignored safely.'
