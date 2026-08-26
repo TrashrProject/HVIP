@@ -1,8 +1,8 @@
 .nitro-context-menu.paradise-player-context-menu {
     box-sizing: border-box !important;
-    width: 112px !important;
-    min-width: 112px !important;
-    max-width: 112px !important;
+    width: 185px !important;
+    min-width: 185px !important;
+    max-width: 185px !important;
     padding: 1px !important;
     overflow: hidden !important;
     color: #f4f6f7;
@@ -179,9 +179,9 @@
 
 @media (max-width: 460px) {
     .nitro-context-menu.paradise-player-context-menu {
-        width: 112px !important;
-        min-width: 112px !important;
-        max-width: 112px !important;
+        width: 185px !important;
+        min-width: 185px !important;
+        max-width: 185px !important;
     }
 }
 
