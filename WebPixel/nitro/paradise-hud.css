@@ -3,7 +3,7 @@
     z-index: 2147482900;
     left: var(--phud-left, 40px);
     top: var(--phud-top, 8px);
-    width: 224px;
+    width: min(236px, calc(100vw - 16px));
     font-family: Ubuntu, Arial, sans-serif;
     color: #20313b;
     pointer-events: auto;
@@ -18,14 +18,13 @@
     position: relative;
     overflow: hidden;
     padding: 7px;
-    border: 1px solid rgba(117, 151, 169, .26);
+    border: 1px solid rgba(117, 151, 169, .24);
     border-radius: 13px;
-    background:
-        linear-gradient(145deg, rgba(255,255,255,.98), rgba(240,247,251,.96));
+    background: linear-gradient(145deg, rgba(255,255,255,.985), rgba(240,247,251,.965));
     box-shadow:
-        0 10px 28px rgba(45, 73, 87, .14),
-        0 2px 6px rgba(45, 73, 87, .08),
-        inset 0 1px 0 rgba(255,255,255,.95);
+        0 10px 28px rgba(45, 73, 87, .13),
+        0 2px 6px rgba(45, 73, 87, .07),
+        inset 0 1px 0 rgba(255,255,255,.96);
     backdrop-filter: blur(10px);
 }
 
@@ -38,7 +37,7 @@
     height: 2px;
     border-radius: 0 0 8px 8px;
     background: linear-gradient(90deg, transparent, #59b7d4 25%, #7dd6df 75%, transparent);
-    opacity: .9;
+    opacity: .88;
     pointer-events: none;
 }
 
@@ -57,7 +56,7 @@
     flex: 0 0 8px;
     border-radius: 50%;
     background: #62bdd3;
-    box-shadow: 0 0 0 4px rgba(98, 189, 211, .13);
+    box-shadow: 0 0 0 4px rgba(98, 189, 211, .12);
 }
 
 .phud-room-name {
@@ -93,18 +92,18 @@
 .phud-money {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 5px;
+    gap: 4px;
     margin-top: 3px;
 }
 
 .phud-money-item {
     min-width: 0;
-    height: 32px;
+    height: 31px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 0 6px;
+    gap: 4px;
+    padding: 0 4px;
     border: 1px solid rgba(137, 154, 164, .18);
     border-radius: 9px;
     background: rgba(255,255,255,.72);
@@ -127,9 +126,9 @@
 }
 
 .phud-money-icon {
-    width: 14px;
-    height: 14px;
-    flex: 0 0 14px;
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -138,14 +137,14 @@
 
 .phud-money-icon img,
 .phud-money-icon svg {
-    max-width: 14px !important;
-    max-height: 14px !important;
+    max-width: 13px !important;
+    max-height: 13px !important;
     image-rendering: pixelated;
 }
 
 .phud-money-dot {
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: #d7aa2d;
     box-shadow: 0 1px 2px rgba(120, 84, 0, .18);
@@ -161,11 +160,11 @@
 
 .phud-money-value {
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    flex: 0 1 auto;
+    overflow: visible;
     white-space: nowrap;
     color: #2f4149;
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
@@ -174,7 +173,7 @@
     height: 31px;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     margin-top: 6px;
 }
 
@@ -182,38 +181,41 @@
 .phud-vip,
 .phud-action {
     border: 1px solid rgba(122, 151, 166, .20);
-    background: rgba(255,255,255,.78);
+    background: rgba(255,255,255,.80);
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.98),
         0 1px 2px rgba(40, 73, 88, .05);
 }
 
 .phud-time {
-    min-width: 55px;
+    width: 58px;
     height: 27px;
+    flex: 0 0 58px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 8px;
+    padding: 0 5px;
     border-radius: 9px;
     color: #48606b;
-    font-size: 9px;
+    font-size: 8.5px;
     font-weight: 800;
-    line-height: 1.05;
+    line-height: 1;
+    white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
 
 .phud-vip {
-    min-width: 49px;
+    width: 46px;
     height: 27px;
+    flex: 0 0 46px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    padding: 0 8px;
+    gap: 4px;
+    padding: 0 5px;
     border-radius: 9px;
     color: #7f8e95;
-    font-size: 8px;
+    font-size: 7.5px;
     font-weight: 900;
     text-transform: uppercase;
     white-space: nowrap;
@@ -221,8 +223,9 @@
 
 .phud-vip::before {
     content: "";
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
+    flex: 0 0 5px;
     border-radius: 50%;
     background: #aeb9be;
 }
@@ -241,12 +244,14 @@
 .phud-actions {
     margin-left: auto;
     display: flex;
-    gap: 4px;
+    gap: 3px;
+    min-width: 0;
 }
 
 .phud-action {
-    width: 27px;
+    width: 26px;
     height: 27px;
+    flex: 0 0 26px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -272,9 +277,9 @@
 .phud-action img,
 .phud-action svg,
 .phud-action i {
-    max-width: 17px !important;
-    max-height: 17px !important;
-    font-size: 14px !important;
+    max-width: 16px !important;
+    max-height: 16px !important;
+    font-size: 13px !important;
     image-rendering: pixelated;
     pointer-events: none;
 }
@@ -287,7 +292,7 @@
 
 @media (max-width: 560px) {
     #paradise-hud-v2 {
-        width: 214px;
+        width: min(224px, calc(100vw - 16px));
     }
 }
 
