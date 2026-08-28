@@ -1,15 +1,15 @@
 .nitro-context-menu.paradise-player-context-menu {
     box-sizing: border-box !important;
-    width: 178px !important;
-    min-width: 178px !important;
-    max-width: 178px !important;
-    padding: 2px !important;
+    width: 188px !important;
+    min-width: 188px !important;
+    max-width: 188px !important;
+    padding: 3px !important;
     overflow: visible !important;
-    color: #f4f7f8;
-    background: #1d262b;
-    border: 1px solid rgba(0, 0, 0, .55);
-    border-radius: 5px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255,255,255,.04);
+    color: #eef8ff;
+    background: linear-gradient(180deg, rgba(10,25,36,.985) 0%, rgba(7,18,27,.985) 100%);
+    border: 1px solid rgba(74,171,219,.42);
+    border-radius: 7px;
+    box-shadow: 0 7px 20px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.04);
     font-size: 10px;
     line-height: 1.1;
 }
@@ -26,107 +26,114 @@
 }
 
 .nitro-context-menu.paradise-player-context-menu:not(.name-only)::after {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     bottom: -4px;
     border-width: 3px;
-    border-color: transparent #1d262b #1d262b transparent;
-    filter: drop-shadow(1px 1px 0 rgba(0,0,0,.22));
+    border-color: transparent rgba(17,39,52,.98) rgba(17,39,52,.98) transparent;
+    filter: drop-shadow(1px 1px 0 rgba(0,0,0,.24));
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-header {
     position: relative;
-    min-height: 22px !important;
-    height: 22px !important;
-    max-height: 22px !important;
-    margin: 0 0 2px;
-    padding: 0 6px !important;
+    min-height: 24px !important;
+    height: 24px !important;
+    max-height: 24px !important;
+    margin: 0 0 3px;
+    padding: 0 8px !important;
     overflow: hidden;
     color: #ffffff;
-    background: linear-gradient(180deg, #49616c 0%, #3c5059 100%);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: 3px;
+    background: linear-gradient(180deg, #1594d0 0%, #0a6fa8 100%);
+    border: 1px solid rgba(124,210,247,.45);
+    border-radius: 5px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14);
     font-size: 10px;
-    font-weight: 700;
-    line-height: 20px;
+    font-weight: 800;
+    line-height: 22px;
     text-align: center;
     text-overflow: ellipsis;
-    text-shadow: 0 1px 0 rgba(0,0,0,.28);
+    text-shadow: 0 1px 0 rgba(0,0,0,.26);
     white-space: nowrap;
 }
 
-.nitro-context-menu.paradise-player-context-menu[data-paradise-view="submenu"] .menu-header {
-    padding-left: 6px !important;
-}
-
 .nitro-context-menu.paradise-player-context-menu .menu-list {
-    overflow: hidden;
-    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: visible;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item {
     position: relative;
-    min-height: 22px !important;
-    height: 22px !important;
-    max-height: 22px !important;
+    min-height: 24px !important;
+    height: 24px !important;
+    max-height: 24px !important;
     margin: 0 !important;
-    padding: 0 19px 0 6px !important;
+    padding: 0 20px 0 8px !important;
     justify-content: flex-start !important;
     overflow: hidden !important;
-    color: #eef2f4;
-    background: #222d32;
-    border: 0;
-    border-bottom: 1px solid rgba(255,255,255,.045);
-    border-radius: 0;
+    color: #e7f1f6;
+    background: linear-gradient(180deg, rgba(24,43,54,.96) 0%, rgba(18,34,44,.96) 100%);
+    border: 1px solid rgba(255,255,255,.045);
+    border-radius: 4px;
     font-size: 10px;
-    font-weight: 600;
+    font-weight: 650;
     line-height: 22px;
     text-align: left;
     text-overflow: ellipsis;
     text-shadow: none;
     white-space: nowrap;
-    transition: background-color 80ms ease, color 80ms ease;
+    transition: background 90ms ease, border-color 90ms ease, color 90ms ease, transform 90ms ease;
 }
 
-.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:first-child {
-    border-radius: 2px 2px 0 0;
-}
-
-.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:last-child {
-    border-bottom: 0;
-    border-radius: 0 0 2px 2px;
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    border-radius: 2px;
+    background: transparent;
+    transition: background-color 90ms ease;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):hover,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):focus-visible {
     color: #ffffff;
-    background: #304047;
-    box-shadow: inset 2px 0 0 #8fb3c4;
+    background: linear-gradient(90deg, rgba(19,91,129,.96) 0%, rgba(20,61,83,.96) 100%);
+    border-color: rgba(91,188,232,.30);
     outline: none;
+    transform: translateX(1px);
+}
+
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):hover::before,
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):focus-visible::before {
+    background: #52c7f7;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item.disabled {
-    color: rgba(230,236,239,.42);
-    background: #20292e;
+    color: rgba(223,235,241,.38);
+    background: rgba(15,27,35,.78);
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon {
-    right: 5px;
-    color: #c7d1d6;
-    font-size: 7px;
-    opacity: .9;
-    transition: transform 90ms ease, color 80ms ease;
+    right: 6px;
+    color: #9edcf6;
+    font-size: 8px;
+    opacity: .92;
+    transition: transform 90ms ease, color 90ms ease;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon.left,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon.left {
-    left: 5px;
+    left: 6px;
     right: auto;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item.paradise-back-item {
-    padding-left: 17px !important;
+    padding-left: 18px !important;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item.paradise-item-opening .fa-icon.right {
@@ -135,43 +142,41 @@
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-list-split-3 {
-    gap: 1px;
-    margin-bottom: 1px;
+    gap: 2px;
+    margin-bottom: 2px;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-list-split-3 .menu-item.list-item {
-    min-height: 20px !important;
-    height: 20px !important;
-    max-height: 20px !important;
-    margin: 0 !important;
-    padding: 0 2px !important;
+    min-height: 21px !important;
+    height: 21px !important;
+    max-height: 21px !important;
+    padding: 0 3px !important;
     justify-content: center !important;
-    border: 0;
-    border-radius: 2px;
-    line-height: 20px;
+    border-radius: 4px;
+    line-height: 19px;
     text-align: center;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-footer {
-    min-height: 10px !important;
-    height: 10px !important;
-    max-height: 10px !important;
-    margin-top: 2px;
+    min-height: 11px !important;
+    height: 11px !important;
+    max-height: 11px !important;
+    margin-top: 3px;
     padding: 0 !important;
     overflow: hidden;
-    color: #9aaab1;
-    background: #182126;
-    border: 0;
-    border-radius: 2px;
+    color: #6f9caf;
+    background: rgba(8,20,28,.86);
+    border: 1px solid rgba(255,255,255,.035);
+    border-radius: 3px;
     font-size: 6px;
-    line-height: 10px;
+    line-height: 9px;
     transition: color 80ms ease, background-color 80ms ease;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-footer:hover,
 .nitro-context-menu.paradise-player-context-menu .menu-footer:focus-visible {
-    color: #ffffff;
-    background: #222f35;
+    color: #cdefff;
+    background: rgba(17,57,76,.88);
     outline: none;
 }
 
@@ -181,9 +186,9 @@
 
 @media (max-width: 460px) {
     .nitro-context-menu.paradise-player-context-menu {
-        width: 178px !important;
-        min-width: 178px !important;
-        max-width: 178px !important;
+        width: 188px !important;
+        min-width: 188px !important;
+        max-width: 188px !important;
     }
 }
 
