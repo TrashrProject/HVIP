@@ -3,7 +3,7 @@
     z-index: 2147482900;
     left: var(--phud-left, 40px);
     top: var(--phud-top, 8px);
-    width: min(240px, calc(100vw - 16px));
+    width: min(248px, calc(100vw - 16px));
     font-family: Ubuntu, Arial, sans-serif;
     color: #20313b;
     pointer-events: auto;
@@ -17,16 +17,16 @@
 .phud-shell {
     position: relative;
     overflow: hidden;
-    padding: 9px;
-    border: 1px solid rgba(104, 146, 166, .22);
+    padding: 10px;
+    border: 1px solid rgba(104, 146, 166, .20);
     border-radius: 16px;
     background:
-        radial-gradient(circle at 100% 0%, rgba(98, 197, 220, .08), transparent 36%),
-        linear-gradient(150deg, rgba(255, 255, 255, .985), rgba(244, 249, 252, .97));
+        radial-gradient(circle at 100% 0%, rgba(98, 197, 220, .09), transparent 34%),
+        linear-gradient(150deg, rgba(255, 255, 255, .99), rgba(243, 249, 252, .975));
     box-shadow:
-        0 16px 34px rgba(39, 66, 80, .14),
-        0 3px 8px rgba(39, 66, 80, .07),
-        inset 0 1px 0 rgba(255, 255, 255, .96);
+        0 18px 36px rgba(39, 66, 80, .14),
+        0 4px 10px rgba(39, 66, 80, .07),
+        inset 0 1px 0 rgba(255, 255, 255, .98);
     backdrop-filter: blur(12px);
 }
 
@@ -34,30 +34,30 @@
     content: "";
     position: absolute;
     top: 0;
-    left: 22px;
-    right: 22px;
+    left: 24px;
+    right: 24px;
     height: 2px;
     border-radius: 0 0 8px 8px;
-    background: linear-gradient(90deg, transparent, #54bdd7 28%, #74d3de 72%, transparent);
-    opacity: .88;
+    background: linear-gradient(90deg, transparent, #4eb9d4 26%, #76d4df 74%, transparent);
+    opacity: .9;
     pointer-events: none;
 }
 
 .phud-room {
-    height: 29px;
+    height: 32px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 0 2px 0 3px;
+    gap: 9px;
+    padding: 0 3px;
 }
 
 .phud-room::before {
     content: "";
-    width: 3px;
-    height: 15px;
-    flex: 0 0 3px;
+    width: 4px;
+    height: 17px;
+    flex: 0 0 4px;
     border-radius: 4px;
-    background: linear-gradient(180deg, #68d0df 0%, #4aaecb 100%);
+    background: linear-gradient(180deg, #6ad5e2 0%, #43a9ca 100%);
     box-shadow: 0 0 0 3px rgba(89, 186, 211, .08);
 }
 
@@ -67,26 +67,26 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #213640;
-    font-size: 11.5px;
+    color: #1f333d;
+    font-size: 12.5px;
     font-weight: 800;
     line-height: 1;
-    letter-spacing: -.12px;
+    letter-spacing: -.14px;
 }
 
 .phud-version {
     flex: 0 0 auto;
-    min-width: 27px;
-    height: 18px;
+    min-width: 29px;
+    height: 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 7px;
+    padding: 0 8px;
     color: #347389;
-    background: rgba(224, 243, 248, .88);
+    background: rgba(224, 243, 248, .90);
     border: 1px solid rgba(77, 154, 181, .20);
     border-radius: 999px;
-    font-size: 8px;
+    font-size: 8.5px;
     font-weight: 900;
     line-height: 1;
 }
@@ -95,24 +95,26 @@
     position: relative;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin-top: 4px;
-    padding: 3px;
-    border: 1px solid rgba(117, 151, 167, .16);
-    border-radius: 11px;
-    background: rgba(239, 246, 249, .82);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .92);
+    margin-top: 5px;
+    padding: 4px;
+    border: 1px solid rgba(117, 151, 167, .15);
+    border-radius: 12px;
+    background: rgba(239, 246, 249, .84);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .94),
+        0 1px 2px rgba(41, 73, 88, .025);
 }
 
 .phud-money-item {
     position: relative;
     min-width: 0;
-    height: 28px;
+    height: 31px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    padding: 0 4px;
-    border-radius: 8px;
+    gap: 6px;
+    padding: 0 5px;
+    border-radius: 9px;
     background: transparent;
 }
 
@@ -120,28 +122,28 @@
     content: "";
     position: absolute;
     left: 0;
-    top: 6px;
-    bottom: 6px;
+    top: 7px;
+    bottom: 7px;
     width: 1px;
-    background: rgba(111, 145, 159, .15);
+    background: rgba(111, 145, 159, .14);
 }
 
 .phud-money-item:nth-child(1) {
-    background: linear-gradient(180deg, rgba(255, 249, 228, .68), rgba(255, 247, 219, .45));
+    background: linear-gradient(180deg, rgba(255, 249, 228, .72), rgba(255, 247, 219, .48));
 }
 
 .phud-money-item:nth-child(2) {
-    background: linear-gradient(180deg, rgba(249, 238, 252, .64), rgba(247, 233, 250, .42));
+    background: linear-gradient(180deg, rgba(249, 238, 252, .68), rgba(247, 233, 250, .45));
 }
 
 .phud-money-item:nth-child(3) {
-    background: linear-gradient(180deg, rgba(230, 248, 250, .70), rgba(221, 244, 247, .46));
+    background: linear-gradient(180deg, rgba(230, 248, 250, .74), rgba(221, 244, 247, .49));
 }
 
 .phud-money-icon {
-    width: 13px;
-    height: 13px;
-    flex: 0 0 13px;
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -150,14 +152,14 @@
 
 .phud-money-icon img,
 .phud-money-icon svg {
-    max-width: 13px !important;
-    max-height: 13px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
     image-rendering: pixelated;
 }
 
 .phud-money-dot {
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     background: #d6a72b;
     box-shadow: 0 1px 2px rgba(120, 84, 0, .14);
@@ -176,35 +178,37 @@
     flex: 0 1 auto;
     overflow: visible;
     white-space: nowrap;
-    color: #31444d;
-    font-size: 10px;
+    color: #2d414a;
+    font-size: 10.8px;
     font-weight: 850;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -.1px;
+    letter-spacing: -.08px;
 }
 
 .phud-bottom {
-    height: 31px;
+    height: 33px;
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin-top: 7px;
+    gap: 5px;
+    margin-top: 8px;
 }
 
 .phud-time {
-    width: 57px;
-    height: 27px;
-    flex: 0 0 57px;
+    width: 61px;
+    height: 29px;
+    flex: 0 0 61px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 5px;
-    border: 1px solid rgba(113, 146, 162, .16);
-    border-radius: 9px;
-    color: #435b66;
-    background: rgba(245, 249, 251, .88);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .94);
-    font-size: 8.5px;
+    padding: 0 6px;
+    border: 1px solid rgba(113, 146, 162, .15);
+    border-radius: 10px;
+    color: #3f5863;
+    background: rgba(245, 249, 251, .90);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .96),
+        0 1px 2px rgba(41, 73, 88, .03);
+    font-size: 9px;
     font-weight: 800;
     line-height: 1;
     white-space: nowrap;
@@ -212,20 +216,22 @@
 }
 
 .phud-vip {
-    width: 48px;
-    height: 27px;
-    flex: 0 0 48px;
+    width: 50px;
+    height: 29px;
+    flex: 0 0 50px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
     padding: 0 5px;
-    border: 1px solid rgba(113, 146, 162, .14);
-    border-radius: 9px;
-    color: #819097;
-    background: rgba(247, 250, 251, .78);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95);
-    font-size: 7.4px;
+    border: 1px solid rgba(113, 146, 162, .13);
+    border-radius: 10px;
+    color: #7b8b93;
+    background: rgba(247, 250, 251, .82);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .96),
+        0 1px 2px rgba(41, 73, 88, .025);
+    font-size: 7.8px;
     font-weight: 900;
     text-transform: uppercase;
     white-space: nowrap;
@@ -233,16 +239,16 @@
 
 .phud-vip::before {
     content: "";
-    width: 5px;
-    height: 5px;
-    flex: 0 0 5px;
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
     border-radius: 50%;
-    background: #aeb8bd;
+    background: #aab6bb;
 }
 
 .phud-vip.is-active {
     color: #397553;
-    background: rgba(235, 249, 240, .92);
+    background: rgba(235, 249, 240, .94);
     border-color: rgba(84, 157, 108, .20);
 }
 
@@ -259,20 +265,20 @@
 }
 
 .phud-action {
-    width: 27px;
-    height: 27px;
-    flex: 0 0 27px;
+    width: 29px;
+    height: 29px;
+    flex: 0 0 29px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    border: 1px solid rgba(111, 146, 163, .16);
-    border-radius: 9px;
-    color: #415965;
-    background: rgba(255, 255, 255, .88);
+    border: 1px solid rgba(111, 146, 163, .15);
+    border-radius: 10px;
+    color: #3e5864;
+    background: rgba(255, 255, 255, .91);
     box-shadow:
-        0 2px 5px rgba(43, 73, 86, .07),
-        inset 0 1px 0 rgba(255, 255, 255, .98);
+        0 3px 7px rgba(43, 73, 86, .07),
+        inset 0 1px 0 rgba(255, 255, 255, .99);
     cursor: pointer;
     transition:
         transform 110ms ease,
@@ -283,25 +289,25 @@
 
 .phud-action:hover {
     transform: translateY(-1px);
-    background: rgba(231, 246, 251, .98);
-    border-color: rgba(74, 164, 194, .32);
+    background: rgba(230, 247, 252, .99);
+    border-color: rgba(74, 164, 194, .34);
     box-shadow:
-        0 5px 11px rgba(53, 122, 145, .13),
-        inset 0 1px 0 rgba(255, 255, 255, .98);
+        0 6px 13px rgba(53, 122, 145, .14),
+        inset 0 1px 0 rgba(255, 255, 255, .99);
 }
 
 .phud-action:active {
     transform: translateY(0);
-    background: rgba(220, 240, 247, .98);
+    background: rgba(219, 240, 247, .99);
     box-shadow: inset 0 1px 2px rgba(55, 93, 108, .10);
 }
 
 .phud-action img,
 .phud-action svg,
 .phud-action i {
-    max-width: 16px !important;
-    max-height: 16px !important;
-    font-size: 13px !important;
+    max-width: 17px !important;
+    max-height: 17px !important;
+    font-size: 14px !important;
     image-rendering: pixelated;
     pointer-events: none;
 }
@@ -314,11 +320,15 @@
 
 @media (max-width: 560px) {
     #paradise-hud-v2 {
-        width: min(228px, calc(100vw - 16px));
+        width: min(236px, calc(100vw - 16px));
     }
 
     .phud-shell {
-        padding: 8px;
+        padding: 9px;
+    }
+
+    .phud-room-name {
+        font-size: 12px;
     }
 }
 
