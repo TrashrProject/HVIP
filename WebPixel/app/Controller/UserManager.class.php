@@ -1,11 +1,6 @@
 <?php
 /**
- * PixelZone by RDP Services, Emulated by Retro Development Server.
- * The use of this program is restricted to clients and owners of RDP Services.
- * Any unauthorized use of this code it'll end up on deletion of the program.
- * Developers P3x & Jeihden.
- * Copyrights © 2020
- * Last Modified: $file.lastModefied
+ * ParadiseRP / WavePlus user manager.
  */
 
 class UserManager
@@ -43,7 +38,7 @@ class UserManager
 
     // Generates a Token for client
     public function GenerateAUTH($I){
-        $T = AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(12) . '-RDP';
+        $T = AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(12) . '-WAVE';
         // The database uses ID 0 for the initial account. It is a valid user,
         // not a missing value, and must receive an SSO ticket too.
         if($I !== null && is_numeric($I) && (int)$I >= 0):
@@ -394,7 +389,7 @@ class UserManager
     }
 
     public static function DateFormat_NoT($timestamp){
-        $d = date('d \d\e F \d\e Y', $timestamp);
+        $d = date('d \\d\\e F \\d\\e Y', $timestamp);
 
         $d = str_replace("January", "Enero", $d);
         $d = str_replace("February", "Febrero", $d);

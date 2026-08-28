@@ -1,8 +1,7 @@
 <?php
 /**
- * ParadiseRP clean play entry.
- * Only the Nitro iframe is rendered here.
- * Room restoration is handled by WaveRP from users_roleplay.last_pos.
+ * ParadiseRP / WaveRP play entry.
+ * Nitro authentication is handled exclusively through WavePlus users.auth_ticket.
  */
 
 require_once "app/init.pz.php";
@@ -39,66 +38,52 @@ function pr_play_columns(mysqli $con, string $table): array {
     return $cols;
 }
 
-function pr_play_ticket_columns(mysqli $con): array {
-    $cols = pr_play_columns($con, 'users');
-    $candidates = ['rdpticket', 'auth_ticket', 'sso_ticket', 'sso', 'ticket', 'login_ticket', 'client_ticket', 'auth_token'];
-    $found = [];
-    foreach ($candidates as $candidate) if (isset($cols[$candidate])) $found[] = $cols[$candidate];
-    return array_values(array_unique($found));
-}
-
 function pr_play_read_ticket(mysqli $con, int $userId): string {
     if ($userId < 0 || !pr_play_table_exists($con, 'users')) return '';
-    $cols = pr_play_ticket_columns($con);
-    if (!$cols) return '';
-    $select = implode(',', array_map(fn($c) => '`' . $c . '`', $cols));
-    $res = @mysqli_query($con, "SELECT " . $select . " FROM `users` WHERE `id` = '" . $userId . "' LIMIT 1");
+    $cols = pr_play_columns($con, 'users');
+    if (!isset($cols['auth_ticket'])) return '';
+    $res = @mysqli_query($con, "SELECT `auth_ticket` FROM `users` WHERE `id` = '" . $userId . "' LIMIT 1");
     if (!$res) return '';
     $row = mysqli_fetch_assoc($res);
-    if (!$row) return '';
-    foreach ($cols as $col) {
-        $value = trim((string)($row[$col] ?? ''));
-        if ($value !== '') return $value;
-    }
-    return '';
+    return $row ? trim((string)($row['auth_ticket'] ?? '')) : '';
 }
 
 function pr_play_store_ticket(mysqli $con, int $userId, string $ticket): bool {
     if ($userId < 0 || $ticket === '' || !pr_play_table_exists($con, 'users')) return false;
-    $cols = pr_play_ticket_columns($con);
-    if (!$cols) return false;
-    $safeTicket = mysqli_real_escape_string($con, $ticket);
-    $sets = [];
-    foreach ($cols as $col) $sets[] = '`' . $col . "` = '" . $safeTicket . "'";
+    $cols = pr_play_columns($con, 'users');
+    if (!isset($cols['auth_ticket'])) return false;
 
-    $userCols = pr_play_columns($con, 'users');
-    if (isset($userCols['online'])) $sets[] = '`' . $userCols['online'] . "` = '0'";
+    $safeTicket = mysqli_real_escape_string($con, $ticket);
+    $sets = ["`auth_ticket` = '" . $safeTicket . "'"];
+    if (isset($cols['online'])) $sets[] = '`online` = \'0\'';
 
     $sql = "UPDATE `users` SET " . implode(', ', $sets) . " WHERE `id` = '" . $userId . "' LIMIT 1";
     return (bool) @mysqli_query($con, $sql);
 }
 
 function pr_play_fresh_ticket(): string {
-    try { return AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(12) . '-RDP'; }
-    catch (Throwable $e) { return 'PRP-' . sha1(uniqid('', true) . mt_rand()) . '-RDP'; }
+    try {
+        return AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(4) . '-' . AppFunctions::Random(12) . '-WAVE';
+    } catch (Throwable $e) {
+        return 'WAVE-' . sha1(uniqid('', true) . mt_rand()) . '-WAVE';
+    }
 }
 
 function pr_play_generate_ticket(mysqli $con, int $userId, $UserMG): string {
     $ticket = '';
 
     if (isset($UserMG) && method_exists($UserMG, 'GenerateAUTH') && $userId >= 0) {
-        try { $ticket = trim((string)$UserMG->GenerateAUTH($userId)); }
-        catch (Throwable $e) {
-            try { $ticket = trim((string)$UserMG->GenerateAUTH()); }
-            catch (Throwable $ignored) { $ticket = ''; }
+        try {
+            $ticket = trim((string)$UserMG->GenerateAUTH($userId));
+        } catch (Throwable $e) {
+            $ticket = '';
         }
     }
 
-    $dbTicket = pr_play_read_ticket($con, $userId);
-    if ($ticket === '' && $dbTicket !== '') $ticket = $dbTicket;
+    if ($ticket === '') $ticket = pr_play_read_ticket($con, $userId);
     if ($ticket === '') $ticket = pr_play_fresh_ticket();
 
-    pr_play_store_ticket($con, $userId, $ticket);
+    if (!pr_play_store_ticket($con, $userId, $ticket)) return '';
 
     if (isset($UserMG) && $userId >= 0) {
         try { if (method_exists($UserMG, 'GenerateMachineId')) $UserMG->GenerateMachineId($userId); } catch (Throwable $e) {}
@@ -109,22 +94,25 @@ function pr_play_generate_ticket(mysqli $con, int $userId, $UserMG): string {
 }
 
 function pr_play_auth_debug(mysqli $con, int $userId, string $ticket): array {
-    $result = ['userId' => $userId, 'ticketLength' => strlen($ticket), 'ticketSuffix' => substr($ticket, -4), 'columns' => [], 'rdpticketMatches' => false, 'online' => null];
+    $result = [
+        'userId' => $userId,
+        'ticketLength' => strlen($ticket),
+        'ticketSuffix' => substr($ticket, -4),
+        'authTicketMatches' => false,
+        'online' => null
+    ];
     if ($userId < 0 || $ticket === '' || !pr_play_table_exists($con, 'users')) return $result;
+
     $cols = pr_play_columns($con, 'users');
-    $select = [];
-    foreach (['rdpticket', 'auth_ticket', 'sso_ticket', 'sso', 'ticket', 'online'] as $candidate) if (isset($cols[$candidate])) $select[] = '`' . $cols[$candidate] . '`';
-    if (!$select) return $result;
-    $res = @mysqli_query($con, "SELECT " . implode(',', $select) . " FROM `users` WHERE `id` = '" . $userId . "' LIMIT 1");
+    if (!isset($cols['auth_ticket'])) return $result;
+    $select = '`auth_ticket`' . (isset($cols['online']) ? ',`online`' : '');
+    $res = @mysqli_query($con, "SELECT " . $select . " FROM `users` WHERE `id` = '" . $userId . "' LIMIT 1");
     $row = $res ? mysqli_fetch_assoc($res) : null;
     if (!$row) return $result;
-    foreach ($row as $key => $value) {
-        if (strtolower($key) === 'online') { $result['online'] = (string)$value; continue; }
-        $value = (string)$value;
-        $matches = hash_equals($ticket, $value);
-        $result['columns'][$key] = ['present' => $value !== '', 'length' => strlen($value), 'matchesSentTicket' => $matches];
-        if (strtolower($key) === 'rdpticket') $result['rdpticketMatches'] = $matches;
-    }
+
+    $stored = (string)($row['auth_ticket'] ?? '');
+    $result['authTicketMatches'] = $stored !== '' && hash_equals($ticket, $stored);
+    if (array_key_exists('online', $row)) $result['online'] = (string)$row['online'];
     return $result;
 }
 
@@ -133,17 +121,12 @@ $userId = isset($UData['id']) ? (int)$UData['id'] : -1;
 unset($_SESSION['paradise_last_room_id']);
 
 $ticket = pr_play_generate_ticket($con, $userId, $UserMG ?? null);
-
 if ($ticket === '') {
-    ob_start();
-    try { require CLIENT . 'client.php'; } catch (Throwable $e) {}
-    ob_end_clean();
-    $ticket = isset($ClientAUTH) ? (string)$ClientAUTH : '';
-    if ($ticket !== '') pr_play_store_ticket($con, $userId, $ticket);
+    http_response_code(500);
+    exit('Impossible de générer le ticket WavePlus.');
 }
 
 $authDebug = pr_play_auth_debug($con, $userId, $ticket);
-
 $bootNonce = time() . '-' . mt_rand(1000, 9999);
 $nitroParams = ['sso' => $ticket, '_boot' => $bootNonce];
 if (isset($_GET['prdebug']) && $_GET['prdebug'] === '1') $nitroParams['prdebug'] = '1';
@@ -163,7 +146,7 @@ $authDebugJs = json_encode($authDebug, JSON_UNESCAPED_SLASHES);
     <title>ParadiseRP - Client</title>
     <style>
         html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #000; }
-        #RdpNitroFrame { position: fixed; inset: 0; width: 100vw; height: 100vh; border: 0; display: block; background: #000; }
+        #WaveNitroFrame { position: fixed; inset: 0; width: 100vw; height: 100vh; border: 0; display: block; background: #000; }
         #ParadiseBootNotice {
             position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 10; display: none;
             padding: 10px 14px; border-radius: 12px; color: #dff8ff; font: 800 13px/1.2 Arial, sans-serif;
@@ -172,13 +155,13 @@ $authDebugJs = json_encode($authDebug, JSON_UNESCAPED_SLASHES);
     </style>
 </head>
 <body>
-    <iframe id="RdpNitroFrame" src="<?php echo $nitroSrcHtml; ?>" allow="camera none; microphone *"></iframe>
+    <iframe id="WaveNitroFrame" src="<?php echo $nitroSrcHtml; ?>" allow="camera none; microphone *"></iframe>
     <div id="ParadiseBootNotice">Reconnexion à l'appart...</div>
     <script>
     (function () {
         window.__PARADISE_PLAY_AUTH__ = <?php echo $authDebugJs; ?>;
 
-        const frame = document.getElementById('RdpNitroFrame');
+        const frame = document.getElementById('WaveNitroFrame');
         const notice = document.getElementById('ParadiseBootNotice');
         const autoRoomId = <?php echo $autoRoomJs; ?>;
         const ticket = <?php echo $ticketJs; ?>;

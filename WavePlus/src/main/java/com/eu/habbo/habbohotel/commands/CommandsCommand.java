@@ -2,7 +2,7 @@ package com.eu.habbo.habbohotel.commands;
 
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
-import com.eu.habbo.messages.outgoing.generic.alerts.MessagesForYouComposer;
+import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +61,7 @@ public class CommandsCommand extends Command {
             message.append("\r\n");
         }
 
-        gameClient.sendResponse(new MessagesForYouComposer(new String[]{message.toString()}));
+        gameClient.sendResponse(new GenericAlertComposer(message.toString()));
 
         return true;
     }
