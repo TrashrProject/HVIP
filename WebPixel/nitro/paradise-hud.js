@@ -1,6 +1,6 @@
 (()=>{
     const ID='paradise-hud-v2';
-    const BUILD='paradise-hud-modern-v6';
+    const BUILD='paradise-hud-modern-v7';
 
     let source=null;
     let sourceRect=null;
@@ -92,7 +92,10 @@
             !/^ParadiseRP$/i.test(value)
         );
 
-        let room=usable.find(value=>/[A-Za-zÀ-ÿ]/.test(value)&&/\[\d+\]/.test(value));
+        let room=usable.find(value=>
+            /[A-Za-zÀ-ÿ]/.test(value)&&
+            /\[[^\]]+\]/.test(value)
+        );
 
         if(!room){
             for(let i=0;i<usable.length;i++){
@@ -100,7 +103,7 @@
                 const next=usable[i+1]||'';
                 const after=usable[i+2]||'';
 
-                if(/[A-Za-zÀ-ÿ]/.test(current)&&/^\[\d+\]$/.test(next)){
+                if(/[A-Za-zÀ-ÿ]/.test(current)&&/^\[[^\]]+\]$/.test(next)){
                     room=`${current} ${next}`;
                     if(/^\[v\d+\]$/i.test(after))room+=` ${after}`;
                     break;
@@ -109,7 +112,10 @@
         }
 
         if(!room){
-            room=usable.find(value=>/[A-Za-zÀ-ÿ]/.test(value)&&/\[v\d+\]/i.test(value));
+            room=usable.find(value=>
+                /[A-Za-zÀ-ÿ]/.test(value)&&
+                !/^(VIP|ON|OFF)$/i.test(value)
+            );
         }
 
         if(!room)return null;
