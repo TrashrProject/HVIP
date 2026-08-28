@@ -18,11 +18,10 @@ if(!$Session->Exist(Config::$SessionName)):
 endif;
 
 //Page Name
-$PageName = "Mapa de la Ciudad";
+$PageName = "Carte RP - IDs des lieux publics";
 
 // Load Pages
 require_once HEADER . 'main.php';
 require_once NAVBAR . 'navbar.php';
 require_once BODY . 'map.php';
 require_once FOOTER . 'main.php';
-

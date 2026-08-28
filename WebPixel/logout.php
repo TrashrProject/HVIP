@@ -1,18 +1,11 @@
 <?php
-/**
- * PixelZone by RDP Services, Emulated by Retro Development Server.
- * The use of this program is restricted to clients and owners of RDP Services.
- * Any unauthorized use of this code it'll end up on deletion of the program.
- * Developers P3x & Jeihden.
- * Copyrights © 2020
- * Last Modified: $file.lastModefied
- */
-
-require_once "app/init.pz.php";
-
-
+require_once __DIR__ . '/app/init.pz.php';
 $Session->Delete(Config::$SessionName);
+$_SESSION = [];
+if(ini_get('session.use_cookies')):
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'] ?? '', (bool)$params['secure'], (bool)$params['httponly']);
+endif;
 $Session->Destroy();
-header("Location: /?logout=success");
-
-
+header('Location: ' . Config::$URL . '/?logout=success');
+exit;

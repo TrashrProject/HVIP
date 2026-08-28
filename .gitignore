@@ -1,45 +1,65 @@
-@'
-# IDE
+# IDE and operating system
 **/.vs/
 **/.idea/
 **/.vscode/
+Thumbs.db
+.DS_Store
 
-# Builds
+# Build outputs and dependencies
+**/target/
 **/bin/
 **/obj/
 **/Debug/
 **/Release/
-
-# Dépendances lourdes régénérables
 **/node_modules/
+**/vendor/
 **/packages/
+.m2/
+_tools/
 
-# Cache / temporaire
+# Runtime, logs and generated data
+runtime/
+backups/
+cache/
 **/cache/
 **/temp/
 **/tmp/
 **/logs/
 **/log/
+**/logging/
 *.log
+WebPixel/Dynamics/uploads/
 
-# Windows / macOS
-Thumbs.db
-.DS_Store
-
-# Secrets
+# Local secrets and server configuration
 .env
 .env.*
 !.env.example
 secrets.*
 *.key
-'@ | Set-Content -Path ".gitignore" -Encoding UTF8
+*.pfx
+*.jks
+config.ini
 
-# Emulator local/runtime files
-/RDP EMU header change/bin/
-/RDP EMU header change/obj/
-/RDP EMU header change/.vs/
-/RDP EMU header change/config.ini
-/RDP EMU header change/**/*.log
-/RDP EMU header change/**/*.pdb
-/RDP EMU header change/**/*.user
-/RDP EMU header change/**/*.suo
+# Archives, binaries and database dumps
+*.zip
+*.rar
+*.7z
+*.exe
+hv_rp.sql
+pz_clean.sql
+
+# Imported staging and retired packs
+_waverp_arcturus_stage_*/
+_cmsparadiseWave_stage_*/
+WebPixel_backup_*/
+WebPixel_previous_*/
+WebPixel/nitro-last/
+WebPixel/nitroo/
+WebPixel/SWF/
+WebPixel/powder/
+RDP EMU header change/
+Torontov1/
+pz_api/
+rdp.js
+rdp.c.js
+services/

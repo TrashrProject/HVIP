@@ -50,7 +50,7 @@
 ?>
 <div class="content-box mb-2">
     <div class="title">
-        <i class="fas fa-skull text-success"></i> Eventos Halloween
+        <i class="fas fa-skull text-success"></i> Événements Halloween
     </div>
     <div class="box-content">
         <div class="current-potw p-2 text-center">

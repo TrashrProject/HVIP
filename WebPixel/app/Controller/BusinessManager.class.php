@@ -21,10 +21,10 @@ class BusinessManager
     }
 
     public function GetUserPrimaryBusiness($ID) {
-        $R = $this->DB->Query("SELECT * FROM `group_memberships` WHERE `type` = '1' AND `user_id` = ". $ID ." LIMIT 1");
+        $R = $this->DB->Query("SELECT gm.*, gm.level AS rank, g.group_type AS type FROM group_memberships gm INNER JOIN groups g ON g.id=gm.group_id WHERE g.group_type IN (1,5) AND gm.user_id=". (int)$ID ." ORDER BY gm.id ASC LIMIT 1");
         if(mysqli_num_rows($R) == 1):
             $BusinessID = mysqli_fetch_assoc($R);
-            $R_ = $this->DB->Query("SELECT groups.name, groups.badge, groups.id, play_jobs_ranks.job, groups.type, play_jobs_ranks.rank, play_jobs_ranks.name as RankName, play_jobs_ranks.pay  FROM groups, play_jobs_ranks WHERE groups.id = play_jobs_ranks.job AND groups.id= ". $BusinessID['group_id'] ." AND  groups.type = '1' AND play_jobs_ranks.rank = ". $BusinessID['rank'] ." LIMIT 1");
+            $R_ = $this->DB->Query("SELECT g.name,g.badge,g.id,g.id AS job,g.group_type AS type,gm.level AS rank,COALESCE(gr.name,'Grade non configure') AS RankName,COALESCE(gr.shift_pay,0) AS pay FROM group_memberships gm INNER JOIN groups g ON g.id=gm.group_id LEFT JOIN group_roles gr ON gr.group_id=gm.group_id AND gr.level=gm.level WHERE gm.id=".(int)$BusinessID['id']." AND g.group_type IN (1,5) LIMIT 1");
             return mysqli_fetch_assoc($R_);
         else:
             return null;
@@ -32,10 +32,10 @@ class BusinessManager
     }
 
     public function GetUserSecondaryBusiness($ID) {
-        $R = $this->DB->Query("SELECT * FROM group_memberships WHERE type = '2' AND user_id = ". $ID ." LIMIT 1");
+        $R = $this->DB->Query("SELECT gm.*, gm.level AS rank, g.group_type AS type FROM group_memberships gm INNER JOIN groups g ON g.id=gm.group_id WHERE g.group_type IN (1,5) AND gm.user_id=". (int)$ID ." ORDER BY gm.id ASC LIMIT 1,1");
         if(mysqli_num_rows($R) == 1):
             $BusinessID = mysqli_fetch_assoc($R);
-            $R_ = $this->DB->Query("SELECT groups.name, groups.badge, groups.id, play_jobs_ranks.job, groups.type, play_jobs_ranks.rank, play_jobs_ranks.name as RankName, play_jobs_ranks.pay  FROM groups, play_jobs_ranks WHERE groups.type = '2' AND  groups.id= ". $BusinessID['group_id'] ." AND play_jobs_ranks.job = ". $BusinessID['group_id'] ." AND play_jobs_ranks.rank = ". $BusinessID['rank'] ." LIMIT 1");
+            $R_ = $this->DB->Query("SELECT g.name,g.badge,g.id,g.id AS job,g.group_type AS type,gm.level AS rank,COALESCE(gr.name,'Grade non configure') AS RankName,COALESCE(gr.shift_pay,0) AS pay FROM group_memberships gm INNER JOIN groups g ON g.id=gm.group_id LEFT JOIN group_roles gr ON gr.group_id=gm.group_id AND gr.level=gm.level WHERE gm.id=".(int)$BusinessID['id']." AND g.group_type IN (1,5) LIMIT 1");
             return mysqli_fetch_assoc($R_);
         else:
             return null;

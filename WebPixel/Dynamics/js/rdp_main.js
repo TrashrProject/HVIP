@@ -1,67 +1,72 @@
-/* ParadiseRP CMS core helpers.
- * Keep this file dependency-light: it is loaded on every authenticated CMS page.
+/*
+ * PixelZone by RDP Services, Emulated by Retro Development Server.
+ * The use of this program is restricted to clients and owners of RDP Services.
+ * Any unauthorized use of this code it'll end up on deletion of the program.
+ * Developers P3x & Jeihden.
+ * Copyrights © 2020
+ * Last Modified: $file.lastModefied
  */
 
-(function ($) {
-    'use strict';
 
-    if (!$) {
-        console.error('[ParadiseRP CMS] jQuery is required by the legacy CMS helpers.');
-        return;
-    }
+console.log("%c      ################################################################################################", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #                                                                                              #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  ##########################################################################################  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,,_ _ _ _ ,,,,,_________,,,,, _ _ _ _ ,,,,,___________,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,|   ___  \\  ,|   ____  \\   ,|   ___  \\  ,|  _________|,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,|  |   \\  \\ ,|  |    \\  \\  ,|  |   \\  \\ ,|  |,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,|  |    \\  \\,|  |     \\  \\ ,|  |    \\  \\,|  |,,,,,,,,,,,_____,,,,,,,_____,,_,,,,,,,,_,,#  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,|  |____/  /,|  |      \\  @,|  |____/  /,|  |________ ,|  __ \\,,,,,/ __  || |      | | #  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,|   _   __/ ,|  |      @  @,|   ______/ ,|   ________|,| |,,\\ \\,,,/ /,,| || |      | | #  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,|  | \\  \\   ,|  |      /  @,|  |        ,|  |         ,| |,,,\\ \\_/ /,,,| || |      | | #  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,|  |  \\  \\  ,|  |     /  / ,|  |        ,|  |         ,| |,,,,\\___/,,,,| || |      | | #  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,|  |   \\  \\ ,|  |____/  /  ,|  |        ,|  |________ ,| |,,,,,,,,,,,,,| |\\ \\_____ / / #  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,|__|    \\__\\,|_________/   ,|__|        ,|___________|,|_|,,,,,,,,,,,,,|_|,\\________/,,#  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,V:1.0.0.1,,,#  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  #,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  ##########################################################################################  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      #  Licensed To: PZN2020                                                        Jeihden & Zedd  #", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("%c      ################################################################################################", 'color: #daddef;text-shadow: 1px 1px 1px rgba(29, 44, 154, 0.8), -1px -1px 1px rgba(33, 52, 187, 0.8), 1px -1px 1px rgba(28, 51, 162, 0.8), -1px 1px 1px rgba(16, 42, 169, 0.8);');
+console.log("");
+console.log("");
 
-    console.info('[ParadiseRP CMS] Interface initialisée');
+console.log("[Init] -> Inicializando systema RDP");
 
-    function safeInputValue($input) {
-        if (!$input || !$input.length) return '';
-        var value = $input.val();
-        return value === undefined || value === null ? '' : String(value);
-    }
+function LOG(STR){
+    console.log("[RDP] -> " + STR);
+}
 
-    // Users lookup
-    $(function () {
-        var usernameInput = $('input[name="username-lookup"]');
+// Users Look Up
+$(document).ready(function(){
+    // Verify Username
+    $('input[name=\"username-lookup\"]').keyup(function(){
+        var U = $("input[name=\"username-lookup\"]").val();
         var results = $('#lookup-results');
-
-        if (!usernameInput.length || !results.length) return;
-
-        usernameInput.on('keyup', function () {
-            var username = safeInputValue(usernameInput);
-            var searchUrl = results.data('search-url') || '/search_users';
-
-            $.post(searchUrl, { uname: username })
-                .done(function (data) {
-                    results.html(data);
-                })
-                .fail(function () {
-                    results.empty();
-                });
-        });
-
-        // Do not call trim() on a possibly undefined jQuery value.
-        var initialValue = safeInputValue(usernameInput);
-        if (initialValue.replace(/^\s+|\s+$/g, '').length > 0) {
-            usernameInput.trigger('keyup');
-        }
+        var searchUrl = results.data('search-url') || '/search_users';
+        $.post(searchUrl,
+            {
+                uname: '' + U
+            },
+            function(data){
+                results.html(data);
+            });
     });
+    if ($('input[name=\"username-lookup\"]').val().trim().length) {
+        $('input[name=\"username-lookup\"]').trigger('keyup');
+    }
+});
 
-    // Gangs lookup
-    $(function () {
-        var gangInput = $('input[name="gang-lookup"]');
-        var gangResults = $('#gangs-results');
-
-        if (!gangInput.length || !gangResults.length) return;
-
-        gangInput.on('keyup', function () {
-            var gangName = safeInputValue(gangInput);
-
-            $.post('/gangs', { gname: gangName })
-                .done(function (data) {
-                    gangResults.html(data);
-                })
-                .fail(function () {
-                    gangResults.empty();
-                });
-        });
+// Gangs Look Up
+$(document).ready(function(){
+    // Verify Username
+    $('input[name=\"gang-lookup\"]').keyup(function(){
+        var G = $("input[name=\"gang-lookup\"]").val();
+        $.post("/gangs",
+            {
+                gname: '' + G
+            },
+            function(data){
+                $('#gangs-results').html(data);
+            });
     });
-}(window.jQuery));
+});

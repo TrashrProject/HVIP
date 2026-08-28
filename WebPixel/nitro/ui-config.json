@@ -428,7 +428,7 @@
             "colorMatrix": [],
             "minLevel": 0,
             "blendMode": 2,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "color_1",
@@ -489,21 +489,21 @@
             "colorMatrix": [],
             "minLevel": 1,
             "blendMode": 9,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "texture_overlay",
             "colorMatrix": [],
             "minLevel": 1,
             "blendMode": 4,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "pinky_nrm",
             "colorMatrix": [],
             "minLevel": 1,
             "blendMode": 0,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "color_2",
@@ -564,35 +564,35 @@
             "colorMatrix": [],
             "minLevel": 2,
             "blendMode": 9,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "coffee_mpl",
             "colorMatrix": [],
             "minLevel": 2,
             "blendMode": 2,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "security_hardlight",
             "colorMatrix": [],
             "minLevel": 3,
             "blendMode": 9,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "bluemood_mpl",
             "colorMatrix": [],
             "minLevel": 3,
             "blendMode": 2,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "rusty_mpl",
             "colorMatrix": [],
             "minLevel": 3,
             "blendMode": 2,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "decr_conrast",
@@ -653,7 +653,7 @@
             "colorMatrix": [],
             "minLevel": 4,
             "blendMode": 9,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "color_3",
@@ -714,7 +714,7 @@
             "colorMatrix": [],
             "minLevel": 5,
             "blendMode": 9,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "hypersaturated",
@@ -775,7 +775,7 @@
             "colorMatrix": [],
             "minLevel": 6,
             "blendMode": 9,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "x_ray",
@@ -836,56 +836,56 @@
             "colorMatrix": [],
             "minLevel": 8,
             "blendMode": 2,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "shiny_hrd",
             "colorMatrix": [],
             "minLevel": 9,
             "blendMode": 9,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "glitter_hrd",
             "colorMatrix": [],
             "minLevel": 10,
             "blendMode": 9,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "frame_gold",
             "colorMatrix": [],
             "minLevel": 10,
             "blendMode": 0,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "frame_gray_4",
             "colorMatrix": [],
             "minLevel": 10,
             "blendMode": 0,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "frame_black_2",
             "colorMatrix": [],
             "minLevel": 10,
             "blendMode": 0,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "frame_wood_2",
             "colorMatrix": [],
             "minLevel": 10,
             "blendMode": 0,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "finger_nrm",
             "colorMatrix": [],
             "minLevel": 10,
             "blendMode": 0,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "color_5",

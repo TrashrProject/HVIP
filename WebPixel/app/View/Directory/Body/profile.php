@@ -49,7 +49,7 @@ $FrenchBusiness = array(1 => 'Hopital', 2 => 'Eboueurs', 3 => 'Garage mecanique'
                         <hr>
                         <div><span class="float-right font-weight-bold"><?php echo date('d/m/Y', $User_['account_created']); ?></span><img src="<?php echo DY; ?>/img/extras/account_created.gif"> Inscription</div>
                         <div>
-                            <img src="<?php echo DY; ?>/img/extras/logout.gif"> <span class="text-success font-weight-bold">&Uacute;ltima conexi&oacute;n</span>
+                            <img src="<?php echo DY; ?>/img/extras/logout.gif"> <span class="text-success font-weight-bold">Dernière connexion</span>
                             <span class="float-right font-weight-bold"><?php echo AppFunctions::GetTime($User_['last_online']); ?></span>
                         </div>
                         <div><span class="float-right font-weight-bold">$<?php echo number_format($User_['credits'] + $User_['bank']); ?></span><img src="<?php echo DY; ?>/img/extras/credit.png"> Valeur du compte</div>
@@ -59,7 +59,7 @@ $FrenchBusiness = array(1 => 'Hopital', 2 => 'Eboueurs', 3 => 'Garage mecanique'
                 <?php if($Gang_ != null): ?>
                     <div class="content-box mb-4">
                         <div class="title">
-                            <i class="fas fa-adjust text-success"></i> Banda
+                            <i class="fas fa-adjust text-success"></i> Gang
                         </div>
                         <div class="box-content">
                             <a class="leaderboard-gang no-link-styling justify-content-center align-items-center p-1" href="<?php echo Config::$URL; ?>/gang/<?php echo $Gang_['id']; ?>">

@@ -219,7 +219,7 @@ endif;*/
 		</div>
 		<?php endif; ?>-->
 
-		<iframe src="https://nitro.habbovip.us/index.html?sso=<?php echo $ClientAUTH; ?>" class="Nitro" allow="camera none; microphone *">
+		<iframe src="https://paradiserp.fr/nitro/?sso=<?php echo $ClientAUTH; ?>" class="Nitro" allow="camera none; microphone *">
 		</iframe>
 
 
@@ -247,7 +247,7 @@ endif;*/
 			<div class="body" style=""></div>
 		</div>
 
-        <div id="app"><?php require 'ws_overlays.tpl'; ?></div>
+        <!-- WaveRP Nitro client UI: legacy RDP overlay disabled. -->
 
 		<script type="text/javascript"  charset="utf-8">
 			// Place this code snippet near the footer of your page before the close of the /body tag
@@ -290,10 +290,6 @@ function gtag_report_conversion(url) {
     <script type="text/javascript" src="<?php echo WS_DY;?>/secure/app.sanitize.js?<?= time(); ?>"></script>
 
     <!-- Scripts -->
-    <script type="module"> 
-    	import rdp_app from '<?php echo WS_DY;?>/rdp.js?<?= time(); ?>';
-    	rdp_app.initialize(habboId, habboName, habboFigure);
-    </script>
 
     <script type="text/javascript">
     	// To Draw Windows

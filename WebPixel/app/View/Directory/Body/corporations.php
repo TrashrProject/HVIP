@@ -1,57 +1,35 @@
-<?php
-/**
- * PixelZone by RDP Services, Emulated by Retro Development Server.
- * The use of this program is restricted to clients and owners of RDP Services.
- * Any unauthorized use of this code it'll end up on deletion of the program.
- * Developers P3x & Jeihden.
- * Copyrights © 2020
- * Last Modified: $file.lastModefied
- */
-
-?>
-
-<div class="content">
-
-    <div class="container">
-
-
-        <div class="corporation-index-grid">
-
-            <?php
-            // Group names are also used internally by the roleplay emulator.
-            // Keep those database keys unchanged and localise only their CMS label.
-            $FrenchCorporations = array(
-                1 => 'Hopital', 2 => 'Eboueurs', 3 => 'Garage mecanique', 4 => 'Armurerie',
-                6 => 'Routiers', 7 => 'Gardes du corps', 8 => 'Mineurs', 9 => 'Police',
-                10 => "McDonald's", 11 => 'Gouvernement central', 12 => 'Gouvernement federal',
-                13 => 'Cafeteria Bobba Ball', 14 => 'Subway', 15 => 'Glacier', 16 => 'Bubble Juice'
-            );
-            $Corporations = $DB->Query("SELECT * FROM groups WHERE type = '1' OR type = '2'");
-            while ($Cor = mysqli_fetch_assoc($Corporations)):
-                $ECount = mysqli_num_rows($DB->Query("SELECT null FROM group_memberships WHERE group_id = ". $Cor['id'] ." "));
-                ?>
-            <div class="corp">
-                <div class="content-box">
-                    <div class="title"><?php echo isset($FrenchCorporations[(int)$Cor['id']]) ? $FrenchCorporations[(int)$Cor['id']] : utf8_encode($Cor['name']); ?> <span class="title-small float-right"><small><?php echo $ECount; ?> employ&eacute;(s)</small></span></div>
-                    <div class="box-content d-flex justify-content-center align-items-center p-0">
-                        <div class="" style="margin-left: -15px;">
-                            <div class="manager-wrapper" style="display: block;overflow: hidden;width: 110px;margin-left: 50px; margin-top: 0px; height: 40px;">
-                                <img class="corporation-badge" src="<?php echo Config::$SWF; ?>/habbo-imaging/corp/<?php echo $Cor['badge']; ?>.gif">
-                            </div>
-                        </div>
-                        <div class="mr-auto">
-
-                        </div>
-                        <div class="pr-3 d-flex">
-                            <div class="mr-1"><a class="button blue pr-1" href="<?php echo Config::$URL; ?>/corporation/<?php echo $Cor['id']; ?>">Voir l'entreprise <i class="far fa-arrow-alt-circle-right"></i></a></div>
-                        </div>
-                    </div>
+<div class="content"><div class="container">
+    <div class="profession-page-heading">
+        <div><small>PARADISE ROLEPLAY</small><h1>Metiers</h1><p>Retrouve les entreprises et services publics de la ville.</p></div>
+        <span class="profession-heading-icon"><i class="fas fa-briefcase"></i></span>
+    </div>
+    <div class="corporation-index-grid profession-index-grid">
+    <?php
+    $Jobs = $DB->Query("SELECT j.id,j.name,j.display_name,j.description,
+        COUNT(DISTINCT ur.user_id) AS employee_count,
+        COUNT(DISTINCT jr.id) AS rank_count
+        FROM jobs j
+        LEFT JOIN users_roleplay ur ON ur.job_id=j.id
+        LEFT JOIN job_ranks jr ON jr.job_id=j.id AND jr.active=1
+        WHERE j.active=1
+        GROUP BY j.id,j.name,j.display_name,j.description
+        ORDER BY CASE WHEN j.name='unemployed' THEN 1 ELSE 0 END,j.display_name ASC");
+    if(mysqli_num_rows($Jobs)): while($Job=mysqli_fetch_assoc($Jobs)):
+        $name = $Job['display_name'] ?: $Job['name'];
+    ?>
+        <div class="corp profession-card"><div class="content-box">
+            <div class="title"><?php echo htmlspecialchars($name,ENT_QUOTES,'UTF-8'); ?><span class="title-small float-right"><small><?php echo (int)$Job['employee_count']; ?> employe(s)</small></span></div>
+            <div class="box-content profession-card-body">
+                <span class="corporation-letter-badge"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($name,0,1,'UTF-8'),'UTF-8'),ENT_QUOTES,'UTF-8'); ?></span>
+                <div class="profession-card-copy">
+                    <b><?php echo htmlspecialchars($name,ENT_QUOTES,'UTF-8'); ?></b>
+                    <span><?php echo htmlspecialchars($Job['description'] ?: 'Metier disponible en ville',ENT_QUOTES,'UTF-8'); ?></span>
+                    <small><?php echo (int)$Job['rank_count']; ?> grade(s) disponible(s)</small>
                 </div>
             </div>
-            <?php endwhile; ?>
-
-        </div>
-
-
+        </div></div>
+    <?php endwhile; else: ?>
+        <div class="content-box"><div class="title">Aucun metier</div><div class="box-content">Aucun metier n'est disponible actuellement.</div></div>
+    <?php endif; ?>
     </div>
-</div>
+</div></div>

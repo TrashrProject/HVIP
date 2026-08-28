@@ -1,72 +1,36 @@
 <?php
-require_once "app/init.pz.php";
-
-if(!$Session->Exist(Config::$SessionName)) {
-    header("Location: " . Config::$URL . "/");
-    exit;
+require_once __DIR__.'/app/init.pz.php';
+if(!$Session->Exist(Config::$SessionName)){header('Location: '.Config::$URL.'/');exit;}
+if((int)$UData['rank']<3){http_response_code(403);exit('Accès staff refusé.');}
+require_once __DIR__.'/app/Controller/AdminService.class.php';
+require_once __DIR__.'/app/Controller/ArticleService.class.php';
+$Admin=new AdminService($DB->Con(),$UData);$AdminNotice='';$AdminError='';
+$Articles=new ArticleService($DB->Con());
+if(empty($_SESSION['cms_admin_logged'])){$Admin->log('admin.login','cms','admin');$_SESSION['cms_admin_logged']=time();}
+if(empty($_SESSION['cms_admin_csrf']))$_SESSION['cms_admin_csrf']=bin2hex(random_bytes(32));
+if($_SERVER['REQUEST_METHOD']==='POST'){
+ try{
+  if(!hash_equals($_SESSION['cms_admin_csrf'],(string)($_POST['csrf']??''))){http_response_code(419);throw new RuntimeException('Formulaire expiré. Recharge la page.');}
+  $action=(string)($_POST['action']??'');$target=trim((string)($_POST['target']??$_POST['username']??''));$user=$target!==''?$Admin->user($target):null;
+  if(in_array($action,['ban','unban','economy','identity','jail','release'],true)&&!$user)throw new RuntimeException('Joueur introuvable.');
+  if($action==='ban'){$Admin->ban($user,trim((string)($_POST['reason']??'Sanction staff')),(int)($_POST['hours']??24),!empty($_POST['permanent']),(string)($_POST['ban_type']??'account'));$AdminNotice='Bannissement enregistré.';}
+  elseif($action==='unban'){$Admin->unban((int)$user['id'],(string)($_POST['ban_type']??'account'));$AdminNotice='Bannissement retiré.';}
+  elseif($action==='economy'){$Admin->updateEconomy($user,(int)$_POST['credits'],(int)$_POST['duckets'],(int)$_POST['diamonds'],(int)$_POST['bank']);$AdminNotice='Économie du joueur mise à jour.';}
+  elseif($action==='identity'){$Admin->updateIdentity($user,(string)$_POST['motto'],(string)$_POST['look'],(int)$_POST['rank']);$AdminNotice='Profil du joueur mis à jour.';}
+  elseif($action==='jail'||$action==='release'){$Admin->jail($user,(int)($_POST['minutes']??1),$action==='release');$AdminNotice=$action==='release'?'Joueur libéré.':'Joueur envoyé en prison RP.';}
+  elseif($action==='maintenance'){$Admin->requireRank(5);$settings=['maintenance'=>!empty($_POST['enabled']),'title'=>substr(trim((string)$_POST['title']),0,100),'message'=>substr(trim((string)$_POST['message']),0,500),'estimated_at'=>(int)($_POST['estimated_at']??0)];file_put_contents(__DIR__.'/app/runtime-settings.json',json_encode($settings,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE),LOCK_EX);$Admin->log('maintenance.update','cms','maintenance',$settings);$AdminNotice='Paramètres de maintenance enregistrés.';}
+  elseif($action==='article_save'){$Admin->requireRank(5);$id=(int)($_POST['id']??0);$old=$id?$Articles->find($id):null;if($id&&!$old)throw new RuntimeException('Article introuvable.');$uploaded=$Articles->upload($_FILES['cover']??[],__DIR__);$image=$uploaded?:trim((string)($_POST['existing_image']??$_POST['image_url']??''));$publishedAt=trim((string)($_POST['published_at']??''));$timestamp=$publishedAt!==''?strtotime($publishedAt):time();$id=$Articles->save($id,['title'=>$_POST['title']??'','summary'=>$_POST['summary']??'','content'=>$_POST['content']??'','image_url'=>$image,'published'=>($_POST['status']??'draft')==='published','published_at'=>$timestamp?:time()],(int)$UData['id']);if($uploaded&&!empty($old['image_url'])&&preg_match('#^Dynamics/uploads/articles/[a-f0-9]{32}\.(jpg|png|webp|gif)$#',$old['image_url'])){@unlink(__DIR__.'/'.$old['image_url']);}$Admin->log('article.save','cms_article',(string)$id,['status'=>$_POST['status']??'draft']);$AdminNotice='Article enregistré.';}
+  elseif($action==='article_delete'){$Admin->requireRank(6);$id=(int)$_POST['id'];$old=$Articles->find($id);$Articles->delete($id);if(!empty($old['image_url'])&&preg_match('#^Dynamics/uploads/articles/[a-f0-9]{32}\.(jpg|png|webp|gif)$#',$old['image_url'])){@unlink(__DIR__.'/'.$old['image_url']);}$Admin->log('article.delete','cms_article',(string)$id);$AdminNotice='Article supprimé.';}
+  elseif($action==='catalogue'){$Admin->requireRank(5);$id=(int)$_POST['item_id'];$price=max(0,(int)$_POST['price']);$active=!empty($_POST['active'])?'1':'0';$Admin->query('UPDATE catalog_items SET cost_credits=?,offer_active=? WHERE id=?','isi',[$price,$active,$id]);$Admin->log('catalog.update','catalog_item',(string)$id,['credits'=>$price,'active'=>$active]);$AdminNotice='Objet catalogue mis à jour.';}
+  elseif($action==='shop_product_save'){$Admin->requireRank(5);$id=(int)($_POST['id']??0);$currencies=['credits','duckets','diamonds'];$rewards=['credits','duckets','diamonds','vip'];$currency=in_array($_POST['currency']??'',$currencies,true)?$_POST['currency']:'credits';$reward=in_array($_POST['reward_type']??'',$rewards,true)?$_POST['reward_type']:'credits';$name=substr(trim((string)($_POST['name']??'')),0,120);if($name==='')throw new RuntimeException('Nom du produit obligatoire.');$data=[(int)$_POST['category_id'],$name,substr(trim((string)$_POST['description']),0,500),substr(trim((string)$_POST['image_url']),0,500),max(0,(int)$_POST['price']),$currency,$reward,max(1,(int)$_POST['reward_amount']),max(0,(int)$_POST['duration_days']),substr(trim((string)$_POST['badge']),0,30),!empty($_POST['featured'])?1:0,!empty($_POST['active'])?1:0,($_POST['stock']??'')===''?null:max(0,(int)$_POST['stock']),($_POST['per_user_limit']??'')===''?null:max(1,(int)$_POST['per_user_limit']),time()];if($id){$data[]=$id;$Admin->query('UPDATE cms_shop_products SET category_id=?,name=?,description=?,image_url=?,price=?,currency=?,reward_type=?,reward_amount=?,duration_days=?,badge=?,featured=?,active=?,stock=?,per_user_limit=?,updated_at=? WHERE id=?','isssissiisiiiiii',$data);}else{$data[] = time();$Admin->query('INSERT INTO cms_shop_products(category_id,name,description,image_url,price,currency,reward_type,reward_amount,duration_days,badge,featured,active,stock,per_user_limit,updated_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)','isssissiisiiiiii',$data);$id=$DB->Con()->insert_id;}$Admin->log('shop.product.save','shop_product',(string)$id);$AdminNotice='Produit enregistré.';}
+  elseif($action==='shop_product_toggle'){$Admin->requireRank(5);$id=(int)$_POST['id'];$Admin->query('UPDATE cms_shop_products SET active=1-active,updated_at=? WHERE id=?','ii',[time(),$id]);$Admin->log('shop.product.toggle','shop_product',(string)$id);$AdminNotice='Disponibilité modifiée.';}
+  elseif($action==='shop_category_save'){$Admin->requireRank(5);$name=substr(trim((string)$_POST['name']),0,80);if($name==='')throw new RuntimeException('Nom de catégorie obligatoire.');$slug=strtolower(trim(preg_replace('/[^a-z0-9]+/i','-',iconv('UTF-8','ASCII//TRANSLIT//IGNORE',$name)?:$name),'-'));$Admin->query('INSERT INTO cms_shop_categories(name,slug,display_order,active) VALUES(?,?,?,1)','ssi',[$name,$slug,(int)$_POST['display_order']]);$Admin->log('shop.category.create','shop_category',$slug);$AdminNotice='Catégorie créée.';}
+ }catch(Throwable $e){$AdminError=$e instanceof RuntimeException?$e->getMessage():'Action impossible.';}
 }
-
-if((int)$UData['rank'] < 3) {
-    header("Location: " . Config::$URL . "/me");
-    exit;
-}
-
-if(empty($_SESSION['cms_admin_csrf'])) $_SESSION['cms_admin_csrf'] = bin2hex(random_bytes(32));
-$AdminNotice = '';
-if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if((int)$UData['rank'] < 5 || !hash_equals($_SESSION['cms_admin_csrf'], $_POST['csrf'] ?? '')) {
-        http_response_code(403);
-        exit('Action non autorisee.');
-    }
-    $db = $DB->Con();
-    $action = $_POST['action'] ?? '';
-    $username = trim($_POST['username'] ?? '');
-    $safeUser = mysqli_real_escape_string($db, $username);
-    if($action === 'catalogue') {
-        $offer = max(1, (int)($_POST['offer_id'] ?? 0));
-        $price = max(0, min(999999, (int)($_POST['price'] ?? 0)));
-        $active = empty($_POST['active']) ? 0 : 1;
-        $DB->Query("UPDATE catalog_items SET cost_credits=$price, offer_active='$active' WHERE id=$offer LIMIT 1");
-        $AdminNotice = 'Offre catalogue mise a jour.';
-    } elseif($action === 'badge') {
-        $badge = strtoupper(trim($_POST['badge'] ?? ''));
-        $slot = max(0, min(4, (int)($_POST['slot'] ?? 0)));
-        $user = mysqli_fetch_assoc($DB->Query("SELECT id FROM users WHERE username='$safeUser' LIMIT 1"));
-        if(!$user || !preg_match('/^[A-Z0-9_]{1,100}$/', $badge)) throw new RuntimeException('Joueur ou badge invalide.');
-        $uid = (int)$user['id']; $safeBadge = mysqli_real_escape_string($db, $badge);
-        $DB->Query("DELETE FROM user_badges WHERE user_id=$uid AND badge_slot=$slot");
-        $DB->Query("INSERT INTO user_badges (user_id,badge_id,badge_slot) VALUES ($uid,'$safeBadge',$slot)");
-        $AdminNotice = 'Badge attribue.';
-    } elseif($action === 'look') {
-        $look = substr(trim($_POST['look'] ?? ''), 0, 700);
-        if($username === '' || $look === '') throw new RuntimeException('Look ou joueur invalide.');
-        $safeLook = mysqli_real_escape_string($db, $look);
-        $DB->Query("UPDATE users SET look='$safeLook' WHERE username='$safeUser' LIMIT 1");
-        $AdminNotice = 'Look du joueur mis a jour.';
-    } elseif($action === 'ban' || $action === 'unban') {
-        if($username === '') throw new RuntimeException('Joueur invalide.');
-        if($action === 'unban') {
-            $DB->Query("DELETE FROM bans WHERE bantype='user' AND value='$safeUser'");
-            $AdminNotice = 'Joueur debanni. Il peut se reconnecter.';
-        } else {
-            $days = max(1, min(3650, (int)($_POST['days'] ?? 1)));
-            $reason = substr(trim($_POST['reason'] ?? 'Sanction staff'), 0, 250);
-            $safeReason = mysqli_real_escape_string($db, $reason);
-            $by = mysqli_real_escape_string($db, $UData['username']);
-            $expire = time() + ($days * 86400);
-            $DB->Query("DELETE FROM bans WHERE bantype='user' AND value='$safeUser'");
-            $DB->Query("INSERT INTO bans (bantype,value,reason,expire,added_by,added_date) VALUES ('user','$safeUser','$safeReason',$expire,'$by','" . time() . "')");
-            $AdminNotice = 'Joueur banni pour ' . $days . ' jour(s).';
-        }
-    } elseif($action === 'maintenance' || $action === 'maintenance_on' || $action === 'maintenance_off') {
-        $enabled = ($action === 'maintenance_on') ? true : (($action === 'maintenance_off') ? false : !empty($_POST['enabled']));
-        file_put_contents(__DIR__ . '/app/runtime-settings.json', json_encode(array('maintenance' => $enabled), JSON_PRETTY_PRINT), LOCK_EX);
-        $AdminNotice = $enabled ? 'Maintenance CMS activee.' : 'Maintenance CMS desactivee.';
-    }
-}
-
-$PageName = "Espace staff";
-require_once HEADER . 'main.php';
-require_once NAVBAR . 'navbar.php';
-require_once BODY . 'admin.php';
-require_once FOOTER . 'main.php';
+$PageName='Administration';
+require_once HEADER.'main.php';
+// The regular navbar normally closes the header wrapper. The administration
+// has its own sidebar, so close that wrapper here before rendering the panel.
+echo '</div>';
+require_once BODY.'admin.php';
+require_once FOOTER.'main.php';

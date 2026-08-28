@@ -1,3 +1,6 @@
 {
-    "maintenance": true
+    "maintenance": true,
+    "title": "ParadiseRP en maintenance",
+    "message": "Maintenance technique en cours.",
+    "estimated_at": 0
 }

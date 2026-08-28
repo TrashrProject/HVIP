@@ -125,5 +125,3 @@ if(isset($_GET['fb_login']) || isset($_GET['code'])):
     require_once 'Controller/FBManager.class.php';
     $FBManager = new FBManager($DB, $USession);
 endif;
-
-

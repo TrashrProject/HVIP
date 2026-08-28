@@ -14,12 +14,11 @@
 <div class="footer">
     <div class="container d-flex justify-content-center align-items-center text-center">
         <div class="cms">
-            RDPCms <?php echo Config::$V; ?>
+            ParadiseCMS 1.0.0
         </div>
         <div class="footer-links mr-auto ml-auto">
             <a href="<?php echo Config::$URL; ?>/rules" class="footer-link no-link-styling">R&egrave;gles</a>
             <a href="<?php echo Config::$DiscordInvite; ?>" target="_blank" class="footer-link no-link-styling">Discord officiel</a>
-            <a href="<?php echo Config::$FB_PAGE_LINK ; ?>" target="_blank" class="footer-link no-link-styling">Facebook officiel</a>
             <a href="<?php echo Config::$URL; ?>/play" target="_blank" class="footer-link no-link-styling">Entrer dans le jeu</a>
         </div>
         <div class="footer-logo">
