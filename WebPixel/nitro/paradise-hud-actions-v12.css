@@ -1,0 +1,69 @@
+/* ParadiseRP HUD action controls v12 */
+#paradise-hud-v2 .phud-actions {
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+#paradise-hud-v2 .phud-action {
+    width: 31px;
+    height: 31px;
+    flex: 0 0 31px;
+    border: 1px solid rgba(105, 142, 159, .16);
+    border-radius: 10px;
+    background: rgba(255,255,255,.90);
+    box-shadow:
+        0 3px 8px rgba(42, 76, 92, .07),
+        inset 0 1px 0 rgba(255,255,255,.98);
+    color: #315a6b;
+}
+
+#paradise-hud-v2 .phud-action + .phud-action::before {
+    display: none;
+}
+
+#paradise-hud-v2 .phud-action-icon {
+    width: 18px !important;
+    height: 18px !important;
+    max-width: none !important;
+    max-height: none !important;
+    display: block !important;
+    overflow: visible;
+    pointer-events: none;
+}
+
+#paradise-hud-v2 .phud-action-0 {
+    color: #237a99;
+    background: linear-gradient(180deg, rgba(250,254,255,.98), rgba(232,247,251,.94));
+}
+
+#paradise-hud-v2 .phud-action-1 {
+    color: #d15b50;
+    background: linear-gradient(180deg, rgba(255,253,252,.98), rgba(255,241,238,.94));
+}
+
+#paradise-hud-v2 .phud-action-2 {
+    color: #5d6e78;
+    background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(241,245,247,.94));
+}
+
+#paradise-hud-v2 .phud-action:hover {
+    transform: translateY(-1px);
+    border-color: rgba(71, 154, 184, .30);
+    box-shadow:
+        0 6px 14px rgba(44, 100, 122, .12),
+        inset 0 1px 0 rgba(255,255,255,.99);
+}
+
+#paradise-hud-v2 .phud-action-1:hover {
+    border-color: rgba(214, 93, 82, .28);
+    box-shadow:
+        0 6px 14px rgba(177, 74, 64, .10),
+        inset 0 1px 0 rgba(255,255,255,.99);
+}
+
+#paradise-hud-v2 .phud-action:active {
+    transform: translateY(0);
+}
