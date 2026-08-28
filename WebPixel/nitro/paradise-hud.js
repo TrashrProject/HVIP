@@ -1,5 +1,6 @@
 (()=>{
     const ID='paradise-hud-v2';
+    const BUILD='paradise-hud-modern-v6';
 
     let source=null;
     let sourceRect=null;
@@ -42,15 +43,18 @@
         return rect.width>0&&rect.height>0;
     }
 
-    function findSource(){
-        if(source&&source.isConnected)return source;
-
+    function resetSource(){
         source=null;
         sourceRect=null;
         lastSig='';
         cachedImages=[];
         cachedActions=[];
+    }
 
+    function findSource(){
+        if(source&&source.isConnected)return source;
+
+        resetSource();
         let best=null;
 
         for(const element of document.querySelectorAll('body div, body section, body aside')){
@@ -64,7 +68,7 @@
             if(tokens.filter(isNumber).length<3)continue;
 
             const rect=element.getBoundingClientRect();
-            if(rect.width<120||rect.width>380||rect.height<80||rect.height>380)continue;
+            if(rect.width<120||rect.width>420||rect.height<70||rect.height>420)continue;
 
             if(!best||rect.width*rect.height<best.rect.width*best.rect.height){
                 best={element,rect};
@@ -75,7 +79,7 @@
 
         source=best.element;
         sourceRect=best.rect;
-        source.dataset.paradiseHudSource='1';
+        source.dataset.paradiseHudSource=BUILD;
         return source;
     }
 
@@ -185,7 +189,7 @@
             if(html)return html;
         }
 
-        return `<span class="phud-action-fallback">${index===1?'!':'•'}</span>`;
+        return `<span class="phud-action-fallback">${index===0?'💬':index===1?'🚨':'⚙'}</span>`;
     }
 
     function render(data){
@@ -194,6 +198,7 @@
         if(!hud){
             hud=document.createElement('div');
             hud.id=ID;
+            hud.dataset.build=BUILD;
             document.body.appendChild(hud);
         }
 
@@ -254,9 +259,7 @@
         const data=extract(element,firstPass);
 
         if(!data.valid){
-            if(firstPass){
-                document.getElementById(ID)?.remove();
-            }
+            if(firstPass)document.getElementById(ID)?.remove();
             return;
         }
 
