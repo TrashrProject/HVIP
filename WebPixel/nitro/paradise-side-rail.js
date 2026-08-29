@@ -1,5 +1,5 @@
 (() => {
-    const BUILD = 'paradise-side-rail-v1';
+    const BUILD = 'paradise-side-rail-v2';
     const HANDLE_ID = 'paradise-side-rail-handle';
     const STORAGE_KEY = 'paradise.sideRail.collapsed';
 
@@ -19,14 +19,14 @@
     let raf = 0;
 
     const railImageSelector = [
-        'img[src*="/side-rail/rail-icon-"]',
-        'img[src*="/side-rail/inventory.png"]',
-        'img[src*="/side-rail/catalog.png"]',
-        'img[src*="/side-rail/rooms.png"]',
-        'img[src*="/side-rail/me-profile.png"]',
-        'img[src*="/side-rail/friendall.png"]',
-        'img[src*="/side-rail/me-rooms.png"]',
-        'img[src*="/side-rail/me-settings.png"]'
+        'img[src*="/side-rail/"]',
+        'img[src*="rail-icon-"]',
+        'img[src*="inventory"]',
+        'img[src*="catalog"]',
+        'img[src*="rooms"]',
+        'img[src*="profile"]',
+        'img[src*="friend"]',
+        'img[src*="settings"]'
     ].join(',');
 
     function isVisible(node) {
@@ -37,101 +37,162 @@
         return rect.width > 0 && rect.height > 0;
     }
 
-    function railImagesWithin(node) {
-        if (!node || !node.querySelectorAll) return [];
-        return [...node.querySelectorAll(railImageSelector)].filter(isVisible);
+    function isClickable(node) {
+        if (!node || !node.matches) return false;
+        if (node.matches('button, a, [role="button"], .cursor-pointer')) return true;
+        if (node.tabIndex >= 0) return true;
+        if (typeof node.onclick === 'function') return true;
+        try { return getComputedStyle(node).cursor === 'pointer'; } catch (_) { return false; }
     }
 
-    function findRail() {
+    function rectFor(node) {
+        try { return node.getBoundingClientRect(); } catch (_) { return null; }
+    }
+
+    function squareClickableDescendants(root) {
+        if (!root?.querySelectorAll) return [];
+        const rootRect = rectFor(root);
+        if (!rootRect) return [];
+
+        const raw = [...root.querySelectorAll('*')]
+            .filter(isVisible)
+            .filter(isClickable)
+            .map(node => ({ node, rect: rectFor(node) }))
+            .filter(entry => entry.rect)
+            .filter(({ rect }) =>
+                rect.width >= 34 && rect.width <= 72 &&
+                rect.height >= 34 && rect.height <= 72 &&
+                rect.left >= rootRect.left - 4 &&
+                rect.right <= rootRect.right + 8
+            )
+            .sort((a, b) => a.rect.top - b.rect.top || a.rect.left - b.rect.left || (a.rect.width * a.rect.height) - (b.rect.width * b.rect.height));
+
+        const rows = [];
+        for (const entry of raw) {
+            const cy = entry.rect.top + entry.rect.height / 2;
+            const existing = rows.find(row => Math.abs(row.cy - cy) < 12);
+            if (!existing) {
+                rows.push({ ...entry, cy });
+                continue;
+            }
+            const currentArea = existing.rect.width * existing.rect.height;
+            const nextArea = entry.rect.width * entry.rect.height;
+            if (nextArea < currentArea) Object.assign(existing, entry, { cy });
+        }
+
+        return rows.sort((a, b) => a.rect.top - b.rect.top).map(row => row.node);
+    }
+
+    function imageDrivenRail() {
         const images = [...document.querySelectorAll(railImageSelector)].filter(isVisible);
         if (images.length < 5) return null;
 
-        const candidates = new Map();
-
+        const candidates = [];
         for (const image of images) {
             let node = image.parentElement;
             let depth = 0;
-
-            while (node && node !== document.body && depth < 8) {
-                const rect = node.getBoundingClientRect();
-                const count = railImagesWithin(node).length;
-
-                if (
-                    count >= 5 &&
-                    rect.left < 130 &&
-                    rect.width >= 40 && rect.width <= 180 &&
-                    rect.height >= 180 && rect.height <= window.innerHeight
-                ) {
-                    const area = rect.width * rect.height;
-                    const current = candidates.get(node);
-                    if (!current || area < current.area) candidates.set(node, { node, area, count });
+            while (node && node !== document.body && depth < 9) {
+                const rect = rectFor(node);
+                if (rect && rect.left < 130 && rect.width >= 44 && rect.width <= 130 && rect.height >= 220 && rect.height <= Math.min(window.innerHeight, 720)) {
+                    const imageCount = node.querySelectorAll(railImageSelector).length;
+                    const clickCount = squareClickableDescendants(node).length;
+                    if (imageCount >= 5 || clickCount >= 5) candidates.push({ node, rect, imageCount, clickCount });
                 }
-
                 node = node.parentElement;
                 depth++;
             }
         }
 
-        if (!candidates.size) return null;
-
-        return [...candidates.values()]
-            .sort((a, b) => {
-                if (b.count !== a.count) return b.count - a.count;
-                return a.area - b.area;
-            })[0].node;
+        if (!candidates.length) return null;
+        candidates.sort((a, b) =>
+            (b.imageCount + b.clickCount) - (a.imageCount + a.clickCount) ||
+            (a.rect.width * a.rect.height) - (b.rect.width * b.rect.height)
+        );
+        return candidates[0].node;
     }
 
-    function clickableForImage(image, root) {
-        let node = image.parentElement;
-        let fallback = image.parentElement;
-        let depth = 0;
+    function geometryDrivenRail() {
+        const roots = [...document.querySelectorAll('div, nav, aside, section')];
+        let best = null;
 
-        while (node && node !== root && depth < 5) {
-            if (
-                node.matches('button, a, [role="button"], .cursor-pointer') ||
-                typeof node.onclick === 'function'
-            ) return node;
+        for (const node of roots) {
+            if (!isVisible(node)) continue;
+            const rect = rectFor(node);
+            if (!rect) continue;
 
-            const rect = node.getBoundingClientRect();
-            if (rect.width >= 34 && rect.width <= 70 && rect.height >= 34 && rect.height <= 70) fallback = node;
+            if (rect.left > 28 || rect.right < 42) continue;
+            if (rect.width < 48 || rect.width > 105) continue;
+            if (rect.height < 250 || rect.height > Math.min(window.innerHeight - 20, 680)) continue;
 
-            node = node.parentElement;
-            depth++;
+            const items = squareClickableDescendants(node);
+            if (items.length < 6 || items.length > 10) continue;
+
+            const itemRects = items.map(rectFor).filter(Boolean);
+            if (itemRects.length < 6) continue;
+            const centers = itemRects.map(r => r.left + r.width / 2);
+            const spread = Math.max(...centers) - Math.min(...centers);
+            if (spread > 18) continue;
+
+            const top = Math.min(...itemRects.map(r => r.top));
+            const bottom = Math.max(...itemRects.map(r => r.bottom));
+            const verticalCoverage = bottom - top;
+            if (verticalCoverage < 240) continue;
+
+            const score = items.length * 1000 - rect.width * rect.height * 0.01 - rect.left * 25 - spread * 20;
+            if (!best || score > best.score) best = { node, score };
         }
 
-        return fallback;
+        return best?.node || null;
     }
 
-    function sourceIndex(image, fallbackIndex) {
-        const src = String(image.currentSrc || image.src || '');
+    function findRail() {
+        return imageDrivenRail() || geometryDrivenRail();
+    }
+
+    function sourceIndexFromImage(item, fallbackIndex) {
+        const image = item.querySelector?.('img');
+        const src = String(image?.currentSrc || image?.src || '');
         const match = src.match(/rail-icon-(\d+)\.png/i);
         if (match) return Math.max(0, Number(match[1]) - 1);
-
-        if (/inventory\.png/i.test(src)) return 0;
-        if (/catalog\.png/i.test(src)) return 1;
-        if (/\/rooms\.png/i.test(src)) return 2;
-        if (/me-profile\.png/i.test(src)) return 3;
-        if (/friendall\.png/i.test(src)) return 4;
-        if (/me-rooms\.png/i.test(src)) return 5;
-        if (/me-settings\.png/i.test(src)) return 6;
-
+        if (/inventory/i.test(src)) return 0;
+        if (/catalog/i.test(src)) return 1;
+        if (/\/rooms/i.test(src)) return 2;
+        if (/profile/i.test(src)) return 3;
+        if (/friend/i.test(src)) return 4;
+        if (/me-rooms/i.test(src)) return 5;
+        if (/settings/i.test(src)) return 6;
         return fallbackIndex;
     }
 
     function decorateItems(root) {
-        const images = railImagesWithin(root);
-        const seen = new Set();
+        let items = squareClickableDescendants(root);
 
-        images.forEach((image, fallbackIndex) => {
-            const item = clickableForImage(image, root);
-            if (!item || seen.has(item)) return;
-            seen.add(item);
+        if (items.length < 5) {
+            const images = [...root.querySelectorAll(railImageSelector)].filter(isVisible);
+            items = images.map(image => {
+                let node = image.parentElement;
+                let fallback = node;
+                let depth = 0;
+                while (node && node !== root && depth < 5) {
+                    if (isClickable(node)) return node;
+                    const rect = rectFor(node);
+                    if (rect && rect.width >= 34 && rect.width <= 72 && rect.height >= 34 && rect.height <= 72) fallback = node;
+                    node = node.parentElement;
+                    depth++;
+                }
+                return fallback;
+            }).filter(Boolean);
+        }
 
-            const index = sourceIndex(image, fallbackIndex);
+        items = [...new Set(items)]
+            .sort((a, b) => rectFor(a).top - rectFor(b).top)
+            .slice(0, 7);
+
+        items.forEach((item, fallbackIndex) => {
+            const index = sourceIndexFromImage(item, fallbackIndex);
             item.classList.add('paradise-side-rail-item');
             item.dataset.paradiseIndex = String(index);
-            item.dataset.paradiseLabel = LABELS[index] || `Menu ${index + 1}`;
-
+            item.dataset.paradiseLabel = LABELS[index] || LABELS[fallbackIndex] || `Menu ${fallbackIndex + 1}`;
             if (!item.getAttribute('aria-label')) item.setAttribute('aria-label', item.dataset.paradiseLabel);
 
             if (!item.dataset.paradiseBound) {
@@ -145,32 +206,30 @@
             }
         });
 
-        return [...seen];
+        return items;
     }
 
     function findNativeToggle(root, items) {
-        const rootRect = root.getBoundingClientRect();
+        const rootRect = rectFor(root);
+        if (!rootRect) return null;
         const itemSet = new Set(items);
         let best = null;
 
-        const candidates = [...document.querySelectorAll('button, [role="button"], .cursor-pointer')]
-            .filter(node => !itemSet.has(node))
-            .filter(node => !node.closest('#' + HANDLE_ID))
-            .filter(isVisible);
+        for (const node of document.querySelectorAll('button, [role="button"], .cursor-pointer, div')) {
+            if (!isVisible(node) || itemSet.has(node) || root.contains(node) || node.id === HANDLE_ID) continue;
+            const rect = rectFor(node);
+            if (!rect) continue;
+            if (rect.width < 16 || rect.width > 38 || rect.height < 34 || rect.height > 64) continue;
+            if (rect.left < rootRect.right - 6 || rect.left > rootRect.right + 36) continue;
 
-        for (const node of candidates) {
-            if (node.contains(root) || root.contains(node) && node.querySelector(railImageSelector)) continue;
+            const rootMid = rootRect.top + rootRect.height / 2;
+            const itemMid = rect.top + rect.height / 2;
+            if (Math.abs(itemMid - rootMid) > 85) continue;
 
-            const rect = node.getBoundingClientRect();
-            if (rect.width < 14 || rect.width > 46 || rect.height < 26 || rect.height > 72) continue;
-
-            const nearRight = rect.left >= rootRect.right - 12 && rect.left <= rootRect.right + 42;
-            const nearMiddle = Math.abs((rect.top + rect.height / 2) - (rootRect.top + rootRect.height / 2)) < 100;
-
-            if (!nearRight || !nearMiddle) continue;
-
-            const distance = Math.abs(rect.left - rootRect.right) + Math.abs((rect.top + rect.height / 2) - (rootRect.top + rootRect.height / 2));
-            if (!best || distance < best.distance) best = { node, distance };
+            const style = getComputedStyle(node);
+            const blueish = /rgb\((?:0|1?\d?\d),\s*(?:8\d|9\d|1\d\d),\s*(?:1\d\d|2\d\d)\)/.test(style.backgroundColor || '');
+            const score = Math.abs(rect.left - rootRect.right) + Math.abs(itemMid - rootMid) - (blueish ? 25 : 0);
+            if (!best || score < best.score) best = { node, score };
         }
 
         return best?.node || null;
@@ -182,13 +241,12 @@
 
     function updateHandlePosition() {
         if (!rail || !handle || !rail.isConnected || !handle.isConnected) return;
-
-        const rect = rail.getBoundingClientRect();
+        const rect = rectFor(rail);
+        if (!rect) return;
         const collapsed = isCollapsed();
-        const handleHeight = handle.offsetHeight || 46;
-        const left = collapsed ? 4 : Math.max(4, Math.round(rect.right + 3));
+        const handleHeight = handle.offsetHeight || 38;
+        const left = collapsed ? 5 : Math.max(5, Math.round(rect.right + 2));
         const top = Math.max(8, Math.min(window.innerHeight - handleHeight - 8, Math.round(rect.top + rect.height / 2 - handleHeight / 2)));
-
         handle.style.left = left + 'px';
         handle.style.top = top + 'px';
         handle.classList.toggle('is-collapsed', collapsed);
@@ -203,7 +261,6 @@
 
     function createHandle() {
         if (handle?.isConnected) return handle;
-
         handle = document.getElementById(HANDLE_ID);
         if (handle) return handle;
 
@@ -212,17 +269,13 @@
         handle.type = 'button';
         handle.setAttribute('aria-label', 'Afficher ou réduire le menu latéral');
         handle.innerHTML = '<span class="paradise-side-rail-chevron" aria-hidden="true"></span>';
-
         handle.addEventListener('click', () => {
             if (!rail) return;
             rail.classList.toggle('is-collapsed');
-            try {
-                localStorage.setItem(STORAGE_KEY, rail.classList.contains('is-collapsed') ? '1' : '0');
-            } catch (_) {}
+            try { localStorage.setItem(STORAGE_KEY, rail.classList.contains('is-collapsed') ? '1' : '0'); } catch (_) {}
             scheduleHandlePosition();
-            setTimeout(scheduleHandlePosition, 200);
+            setTimeout(scheduleHandlePosition, 220);
         });
-
         document.body.appendChild(handle);
         return handle;
     }
@@ -262,8 +315,9 @@
     observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'class', 'style'] });
 
     window.addEventListener('resize', scheduleHandlePosition, { passive: true });
-    window.addEventListener('scroll', scheduleHandlePosition, { passive: true });
+    setInterval(decorate, 1000);
+    setTimeout(decorate, 50);
+    setTimeout(decorate, 600);
 
-    setInterval(decorate, 800);
-    setTimeout(decorate, 0);
+    console.info('[ParadiseRP] side rail enhancer loaded', BUILD);
 })();
