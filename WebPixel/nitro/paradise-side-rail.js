@@ -1,5 +1,5 @@
 (() => {
-    const BUILD = 'paradise-side-rail-native-v5';
+    const BUILD = 'paradise-side-rail-native-v6';
     const LABELS = [
         'Inventaire',
         'Catalogue',
@@ -155,7 +155,16 @@
         });
 
         const toggle = findNativeToggle(shell, items);
-        if (toggle) toggle.classList.add('paradise-side-rail-native-toggle');
+        if (toggle) {
+            toggle.classList.add('paradise-side-rail-native-toggle');
+
+            if (!toggle.dataset.paradiseChevronBound) {
+                toggle.dataset.paradiseChevronBound = '1';
+                toggle.addEventListener('click', () => {
+                    toggle.classList.toggle('is-paradise-collapsed');
+                }, { passive: true });
+            }
+        }
 
         installed = true;
         console.info('[ParadiseRP] side rail ready', BUILD, {
