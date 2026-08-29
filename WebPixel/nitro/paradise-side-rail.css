@@ -1,5 +1,6 @@
-/* ParadiseRP side rail — final polish native v6
- * Keeps Nitro's existing pixel icons and click handlers; visual polish only.
+/* ParadiseRP side rail — transparent native v7
+ * Keeps Nitro's native pixel icons and click handlers.
+ * The rail is lighter/transparent and the collapse tab keeps a white chevron in both states.
  */
 
 .paradise-side-rail-shell {
@@ -8,17 +9,14 @@
     min-width: 60px !important;
     max-width: 60px !important;
     padding: 6px 5px !important;
-    border: 1px solid rgba(78, 140, 162, .16) !important;
+    border: 1px solid rgba(78, 140, 162, .13) !important;
     border-radius: 17px !important;
-    background:
-        radial-gradient(circle at 88% 2%, rgba(74, 194, 216, .085), transparent 28%),
-        linear-gradient(160deg, rgba(255,255,255,.995), rgba(242,249,251,.985)) !important;
+    background: rgba(244, 250, 252, .34) !important;
     box-shadow:
-        0 15px 32px rgba(35, 68, 82, .12),
-        0 3px 8px rgba(35, 68, 82, .05),
-        inset 0 1px 0 rgba(255,255,255,1) !important;
-    backdrop-filter: blur(9px);
-    -webkit-backdrop-filter: blur(9px);
+        0 12px 28px rgba(35, 68, 82, .075),
+        inset 0 1px 0 rgba(255,255,255,.58) !important;
+    backdrop-filter: blur(7px) saturate(112%);
+    -webkit-backdrop-filter: blur(7px) saturate(112%);
     overflow: visible !important;
 }
 
@@ -30,8 +28,8 @@
     width: 3px;
     height: 27px;
     border-radius: 0 5px 5px 0;
-    background: linear-gradient(180deg, #73dbe7, #43acc9);
-    box-shadow: 0 0 0 3px rgba(72, 178, 205, .055);
+    background: linear-gradient(180deg, rgba(115,219,231,.88), rgba(67,172,201,.88));
+    box-shadow: 0 0 0 3px rgba(72, 178, 205, .035);
     pointer-events: none;
 }
 
@@ -46,12 +44,12 @@
     max-height: 48px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    border: 1px solid rgba(88, 135, 153, .14) !important;
+    border: 1px solid rgba(88, 135, 153, .105) !important;
     border-radius: 13px !important;
-    background: linear-gradient(180deg, rgba(255,255,255,.99), rgba(239,247,250,.965)) !important;
+    background: rgba(255,255,255,.43) !important;
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,1),
-        0 2px 5px rgba(42, 74, 88, .05) !important;
+        inset 0 1px 0 rgba(255,255,255,.72),
+        0 2px 5px rgba(42, 74, 88, .03) !important;
     overflow: visible !important;
     cursor: pointer !important;
     transition:
@@ -64,11 +62,11 @@
 .paradise-side-rail-item:hover,
 .paradise-side-rail-item:focus-visible {
     transform: translateX(2px) translateY(-1px) !important;
-    border-color: rgba(57, 165, 195, .32) !important;
-    background: linear-gradient(180deg, #ffffff, #e9f8fb) !important;
+    border-color: rgba(57, 165, 195, .28) !important;
+    background: rgba(239, 251, 254, .82) !important;
     box-shadow:
-        0 7px 15px rgba(43, 111, 134, .12),
-        inset 0 1px 0 #fff !important;
+        0 7px 15px rgba(43, 111, 134, .09),
+        inset 0 1px 0 rgba(255,255,255,.94) !important;
     outline: none !important;
 }
 
@@ -77,15 +75,15 @@
 }
 
 .paradise-side-rail-item.is-active {
-    border-color: rgba(49, 161, 191, .38) !important;
-    background: linear-gradient(180deg, #f9feff, #dcf3f8) !important;
+    border-color: rgba(49, 161, 191, .34) !important;
+    background: rgba(224, 246, 250, .80) !important;
     box-shadow:
         inset 3px 0 0 #47b8d2,
-        0 5px 12px rgba(43, 111, 134, .09),
-        inset 0 1px 0 #fff !important;
+        0 5px 12px rgba(43, 111, 134, .07),
+        inset 0 1px 0 rgba(255,255,255,.92) !important;
 }
 
-/* Preserve the native pixel art but give it a little more presence. */
+/* Preserve the native pixel art and let it remain the visual focus. */
 .paradise-side-rail-item img,
 .paradise-side-rail-item canvas,
 .paradise-side-rail-item svg {
@@ -96,7 +94,6 @@
     image-rendering: pixelated !important;
 }
 
-/* Settings is visually separated from the main actions. */
 .paradise-side-rail-item[data-paradise-index="6"] {
     margin-top: 7px !important;
 }
@@ -108,11 +105,10 @@
     left: 10px;
     right: 10px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(83, 130, 148, .22), transparent);
+    background: linear-gradient(90deg, transparent, rgba(83, 130, 148, .17), transparent);
     pointer-events: none;
 }
 
-/* Modern hover label. */
 .paradise-side-rail-item::after {
     content: attr(data-paradise-label);
     position: absolute;
@@ -121,11 +117,13 @@
     z-index: 2147483100;
     transform: translate(6px, -50%) scale(.98);
     padding: 7px 10px 8px;
-    border: 1px solid rgba(83, 135, 154, .16);
+    border: 1px solid rgba(83, 135, 154, .14);
     border-radius: 9px;
-    background: rgba(255,255,255,.985);
+    background: rgba(255,255,255,.94);
     color: #28434e;
-    box-shadow: 0 9px 22px rgba(35, 65, 80, .13);
+    box-shadow: 0 9px 22px rgba(35, 65, 80, .11);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     font: 800 11px/1 Ubuntu, Arial, sans-serif;
     letter-spacing: -.05px;
     white-space: nowrap;
@@ -143,33 +141,33 @@
 }
 
 /*
- * Final collapse-tab treatment.
- * Nitro keeps the native click target/behaviour, but its old blue artwork is hidden
- * and replaced by a small white/cyan control matching the Paradise HUD.
+ * Native collapse tab: keep Nitro's click behaviour, but own the visual entirely.
+ * The tab stays cyan/blue and the chevron is always white, including after a collapse/expand rerender.
  */
 .paradise-side-rail-native-toggle {
     position: relative !important;
     isolation: isolate !important;
-    width: 18px !important;
-    min-width: 18px !important;
-    max-width: 18px !important;
-    height: 34px !important;
-    min-height: 34px !important;
-    max-height: 34px !important;
+    width: 19px !important;
+    min-width: 19px !important;
+    max-width: 19px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
     padding: 0 !important;
     overflow: hidden !important;
-    border: 1px solid rgba(73, 157, 183, .22) !important;
+    border: 1px solid rgba(13, 126, 169, .34) !important;
     border-radius: 0 9px 9px 0 !important;
-    background: linear-gradient(180deg, rgba(255,255,255,.998), rgba(231,247,250,.99)) !important;
-    color: transparent !important;
+    background: linear-gradient(180deg, #149dca 0%, #0d82b4 100%) !important;
+    background-color: #0d8fbd !important;
+    color: #ffffff !important;
     box-shadow:
-        4px 5px 12px rgba(36, 83, 100, .09),
-        inset 0 1px 0 rgba(255,255,255,1) !important;
+        3px 5px 12px rgba(24, 105, 136, .14),
+        inset 0 1px 0 rgba(255,255,255,.22) !important;
     cursor: pointer !important;
     transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, box-shadow 120ms ease !important;
 }
 
-/* Hide Nitro's old blue visual while preserving the clickable parent. */
+/* Hide the old Nitro artwork without removing the native click target. */
 .paradise-side-rail-native-toggle > *,
 .paradise-side-rail-native-toggle > *::before,
 .paradise-side-rail-native-toggle > *::after {
@@ -180,22 +178,7 @@
     box-shadow: none !important;
 }
 
-/* Tiny cyan seam tying the tab visually to the rail. */
-.paradise-side-rail-native-toggle::before {
-    content: "" !important;
-    position: absolute !important;
-    z-index: 2 !important;
-    left: 0 !important;
-    top: 7px !important;
-    bottom: 7px !important;
-    width: 2px !important;
-    border-radius: 0 2px 2px 0 !important;
-    background: linear-gradient(180deg, #7bdce7, #43abc8) !important;
-    opacity: .78 !important;
-    pointer-events: none !important;
-}
-
-/* Our crisp chevron replaces the old icon. */
+/* Crisp white chevron. */
 .paradise-side-rail-native-toggle::after {
     content: "" !important;
     position: absolute !important;
@@ -205,26 +188,42 @@
     width: 6px !important;
     height: 6px !important;
     margin-top: -4px !important;
-    border-left: 2px solid #2786a5 !important;
-    border-bottom: 2px solid #2786a5 !important;
+    border-left: 2px solid #ffffff !important;
+    border-bottom: 2px solid #ffffff !important;
     transform: rotate(45deg) !important;
     transform-origin: center !important;
     opacity: 1 !important;
+    visibility: visible !important;
     pointer-events: none !important;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.12));
     transition: transform 160ms ease !important;
 }
 
-.paradise-side-rail-native-toggle.is-paradise-collapsed::after {
+.paradise-side-rail-native-toggle.is-paradise-collapsed,
+.paradise-side-rail-native-toggle[aria-expanded="false"] {
+    border-color: rgba(13, 126, 169, .34) !important;
+    background: linear-gradient(180deg, #149dca 0%, #0d82b4 100%) !important;
+    background-color: #0d8fbd !important;
+    color: #ffffff !important;
+}
+
+.paradise-side-rail-native-toggle.is-paradise-collapsed::after,
+.paradise-side-rail-native-toggle[aria-expanded="false"]::after {
+    border-left-color: #ffffff !important;
+    border-bottom-color: #ffffff !important;
     transform: rotate(225deg) !important;
 }
 
-.paradise-side-rail-native-toggle:hover {
+.paradise-side-rail-native-toggle:hover,
+.paradise-side-rail-native-toggle.is-paradise-collapsed:hover,
+.paradise-side-rail-native-toggle[aria-expanded="false"]:hover {
     transform: translateX(1px) !important;
-    border-color: rgba(48, 157, 190, .34) !important;
-    background: linear-gradient(180deg, #ffffff, #e7f8fb) !important;
+    border-color: rgba(8, 116, 157, .44) !important;
+    background: linear-gradient(180deg, #1aa8d4 0%, #0f8aba 100%) !important;
+    background-color: #118fbc !important;
     box-shadow:
-        5px 7px 15px rgba(36, 83, 100, .11),
-        inset 0 1px 0 #fff !important;
+        4px 7px 14px rgba(24, 105, 136, .17),
+        inset 0 1px 0 rgba(255,255,255,.28) !important;
 }
 
 .paradise-side-rail-native-toggle:active {
@@ -262,12 +261,12 @@
     }
 
     .paradise-side-rail-native-toggle {
-        width: 17px !important;
-        min-width: 17px !important;
-        max-width: 17px !important;
-        height: 32px !important;
-        min-height: 32px !important;
-        max-height: 32px !important;
+        width: 18px !important;
+        min-width: 18px !important;
+        max-width: 18px !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        max-height: 34px !important;
     }
 }
 
