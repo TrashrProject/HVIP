@@ -1,4 +1,4 @@
-/* ParadiseRP side rail — polished native v5
+/* ParadiseRP side rail — final polish native v6
  * Keeps Nitro's existing pixel icons and click handlers; visual polish only.
  */
 
@@ -142,43 +142,93 @@
     transform: translate(0, -50%) scale(1);
 }
 
-/* Modernize Nitro's native collapse tab instead of replacing its behavior. */
+/*
+ * Final collapse-tab treatment.
+ * Nitro keeps the native click target/behaviour, but its old blue artwork is hidden
+ * and replaced by a small white/cyan control matching the Paradise HUD.
+ */
 .paradise-side-rail-native-toggle {
-    width: 20px !important;
-    min-width: 20px !important;
-    max-width: 20px !important;
-    height: 38px !important;
-    min-height: 38px !important;
-    max-height: 38px !important;
-    border: 1px solid rgba(72, 155, 181, .22) !important;
-    border-radius: 0 10px 10px 0 !important;
-    background: linear-gradient(180deg, rgba(255,255,255,.995), rgba(229,246,250,.985)) !important;
-    color: #2588a7 !important;
+    position: relative !important;
+    isolation: isolate !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(73, 157, 183, .22) !important;
+    border-radius: 0 9px 9px 0 !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.998), rgba(231,247,250,.99)) !important;
+    color: transparent !important;
     box-shadow:
-        4px 6px 14px rgba(36, 83, 100, .10),
+        4px 5px 12px rgba(36, 83, 100, .09),
         inset 0 1px 0 rgba(255,255,255,1) !important;
+    cursor: pointer !important;
     transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, box-shadow 120ms ease !important;
 }
 
-.paradise-side-rail-native-toggle *,
-.paradise-side-rail-native-toggle svg,
-.paradise-side-rail-native-toggle svg * {
-    color: #2588a7 !important;
-    fill: currentColor !important;
-    stroke: currentColor !important;
+/* Hide Nitro's old blue visual while preserving the clickable parent. */
+.paradise-side-rail-native-toggle > *,
+.paradise-side-rail-native-toggle > *::before,
+.paradise-side-rail-native-toggle > *::after {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
 }
 
-.paradise-side-rail-native-toggle img {
+/* Tiny cyan seam tying the tab visually to the rail. */
+.paradise-side-rail-native-toggle::before {
+    content: "" !important;
+    position: absolute !important;
+    z-index: 2 !important;
+    left: 0 !important;
+    top: 7px !important;
+    bottom: 7px !important;
+    width: 2px !important;
+    border-radius: 0 2px 2px 0 !important;
+    background: linear-gradient(180deg, #7bdce7, #43abc8) !important;
     opacity: .78 !important;
+    pointer-events: none !important;
+}
+
+/* Our crisp chevron replaces the old icon. */
+.paradise-side-rail-native-toggle::after {
+    content: "" !important;
+    position: absolute !important;
+    z-index: 3 !important;
+    left: 6px !important;
+    top: 50% !important;
+    width: 6px !important;
+    height: 6px !important;
+    margin-top: -4px !important;
+    border-left: 2px solid #2786a5 !important;
+    border-bottom: 2px solid #2786a5 !important;
+    transform: rotate(45deg) !important;
+    transform-origin: center !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    transition: transform 160ms ease !important;
+}
+
+.paradise-side-rail-native-toggle.is-paradise-collapsed::after {
+    transform: rotate(225deg) !important;
 }
 
 .paradise-side-rail-native-toggle:hover {
     transform: translateX(1px) !important;
-    border-color: rgba(48, 157, 190, .36) !important;
-    background: linear-gradient(180deg, #ffffff, #e4f6fa) !important;
+    border-color: rgba(48, 157, 190, .34) !important;
+    background: linear-gradient(180deg, #ffffff, #e7f8fb) !important;
     box-shadow:
-        5px 8px 16px rgba(36, 83, 100, .12),
+        5px 7px 15px rgba(36, 83, 100, .11),
         inset 0 1px 0 #fff !important;
+}
+
+.paradise-side-rail-native-toggle:active {
+    transform: translateX(0) scale(.97) !important;
 }
 
 /* Remove artifacts from older experimental overlay versions. */
@@ -210,11 +260,21 @@
         max-width: 40px !important;
         max-height: 40px !important;
     }
+
+    .paradise-side-rail-native-toggle {
+        width: 17px !important;
+        min-width: 17px !important;
+        max-width: 17px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .paradise-side-rail-item,
-    .paradise-side-rail-native-toggle {
+    .paradise-side-rail-native-toggle,
+    .paradise-side-rail-native-toggle::after {
         transition: none !important;
     }
 }
