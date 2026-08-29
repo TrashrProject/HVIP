@@ -1,0 +1,110 @@
+/* ParadiseRP side rail toggle v9
+ * Dedicated visual override for Nitro's collapse tab.
+ * The native click target is preserved; every surrounding blue surface is neutralized.
+ */
+
+.paradise-side-rail-toggle-host-v9,
+.paradise-side-rail-toggle-host-v9::before,
+.paradise-side-rail-toggle-host-v9::after {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9,
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9.is-paradise-collapsed,
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9[aria-expanded="false"] {
+    position: relative !important;
+    isolation: isolate !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(54, 166, 197, .22) !important;
+    border-radius: 0 9px 9px 0 !important;
+    background: rgba(231, 248, 252, .16) !important;
+    background-color: rgba(231, 248, 252, .16) !important;
+    background-image: none !important;
+    color: #fff !important;
+    box-shadow:
+        3px 5px 12px rgba(32, 102, 126, .055),
+        inset 0 1px 0 rgba(255, 255, 255, .55) !important;
+    backdrop-filter: blur(7px) saturate(108%);
+    -webkit-backdrop-filter: blur(7px) saturate(108%);
+}
+
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9 > *,
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9 > *::before,
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9 > *::after {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* White chevron. A tiny cyan shadow keeps it readable on white rooms. */
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9::after {
+    content: "" !important;
+    position: absolute !important;
+    z-index: 5 !important;
+    left: 6px !important;
+    top: 50% !important;
+    width: 6px !important;
+    height: 6px !important;
+    margin-top: -4px !important;
+    border-left: 2px solid #fff !important;
+    border-bottom: 2px solid #fff !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: rotate(45deg) !important;
+    transform-origin: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    filter: drop-shadow(0 0 1px rgba(18, 131, 166, .95)) drop-shadow(0 1px 1px rgba(18, 105, 136, .35)) !important;
+}
+
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9.is-paradise-collapsed::after,
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9[aria-expanded="false"]::after {
+    transform: rotate(225deg) !important;
+}
+
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9:hover,
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9.is-paradise-collapsed:hover,
+.paradise-side-rail-native-toggle.paradise-side-rail-toggle-v9[aria-expanded="false"]:hover {
+    background: rgba(219, 245, 251, .30) !important;
+    background-color: rgba(219, 245, 251, .30) !important;
+    border-color: rgba(48, 157, 190, .32) !important;
+    transform: translateX(1px) !important;
+}
+
+/* Make the rest of the rail feel less like a white card. */
+.paradise-side-rail-shell {
+    background: rgba(244, 250, 252, .10) !important;
+    background-image: none !important;
+    border-color: rgba(78, 140, 162, .075) !important;
+    box-shadow: 0 10px 24px rgba(35, 68, 82, .045) !important;
+}
+
+.paradise-side-rail-item {
+    background: rgba(255, 255, 255, .20) !important;
+    background-image: none !important;
+    border-color: rgba(88, 135, 153, .07) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .38) !important;
+}
+
+.paradise-side-rail-item:hover,
+.paradise-side-rail-item:focus-visible {
+    background: rgba(235, 249, 252, .62) !important;
+    border-color: rgba(57, 165, 195, .22) !important;
+}
