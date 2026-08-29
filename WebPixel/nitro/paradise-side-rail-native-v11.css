@@ -1,0 +1,244 @@
+/* ParadiseRP side rail v11 — deterministic native Nitro styling
+ * Targets WaveRP/Nitro's real classes directly.
+ * No geometric DOM probing and no legacy blue toggle artwork.
+ */
+
+.roleplay-left-menu {
+    box-sizing: border-box !important;
+    gap: 4px !important;
+    padding: 6px 5px !important;
+    border: 1px solid rgba(77, 137, 157, .10) !important;
+    border-left: 0 !important;
+    border-radius: 0 16px 16px 0 !important;
+    background: rgba(245, 250, 252, .16) !important;
+    background-image: none !important;
+    box-shadow:
+        0 10px 24px rgba(31, 66, 80, .055),
+        inset 0 1px 0 rgba(255, 255, 255, .42) !important;
+    backdrop-filter: blur(7px) saturate(108%) !important;
+    -webkit-backdrop-filter: blur(7px) saturate(108%) !important;
+    overflow: visible !important;
+}
+
+.roleplay-left-menu .roleplay-background {
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    opacity: 0 !important;
+}
+
+.roleplay-left-menu-buttons {
+    gap: 4px !important;
+}
+
+.roleplay-left-menu .left-menu-button {
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+    padding: 2px !important;
+    border: 1px solid rgba(79, 132, 150, .10) !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, .24) !important;
+    background-image: none !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .50),
+        0 2px 5px rgba(39, 72, 85, .025) !important;
+    filter: none !important;
+    transition:
+        transform 120ms cubic-bezier(.2, .8, .2, 1),
+        border-color 120ms ease,
+        background 120ms ease,
+        box-shadow 120ms ease !important;
+}
+
+.roleplay-left-menu .left-menu-button:hover,
+.roleplay-left-menu .left-menu-button:focus-visible {
+    transform: translateX(2px) translateY(-1px) !important;
+    border-color: rgba(52, 156, 185, .24) !important;
+    background: rgba(240, 250, 252, .70) !important;
+    box-shadow:
+        0 7px 15px rgba(43, 104, 126, .07),
+        inset 0 1px 0 rgba(255, 255, 255, .88) !important;
+    filter: none !important;
+    outline: none !important;
+}
+
+.roleplay-left-menu .left-menu-button:active {
+    transform: translateX(1px) scale(.98) !important;
+    filter: none !important;
+}
+
+.roleplay-left-menu .left-menu-button.is-active,
+.roleplay-left-menu .paradise-side-rail-item.is-active {
+    border-color: rgba(51, 158, 187, .28) !important;
+    background: rgba(224, 245, 249, .68) !important;
+    box-shadow:
+        inset 3px 0 0 rgba(70, 181, 207, .90),
+        0 5px 12px rgba(43, 105, 126, .055),
+        inset 0 1px 0 rgba(255, 255, 255, .84) !important;
+}
+
+.roleplay-left-menu .left-menu-icon {
+    width: 43px !important;
+    height: 43px !important;
+}
+
+.roleplay-left-menu .left-menu-icon img {
+    max-width: 43px !important;
+    max-height: 43px !important;
+    opacity: 1 !important;
+    filter: none !important;
+    image-rendering: pixelated !important;
+}
+
+/* Small separator before the final/settings action when labels are installed. */
+.roleplay-left-menu .paradise-side-rail-item[data-paradise-index="6"] {
+    margin-top: 7px !important;
+}
+
+.roleplay-left-menu .paradise-side-rail-item[data-paradise-index="6"]::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 9px;
+    right: 9px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(75, 127, 145, .16), transparent);
+    pointer-events: none;
+}
+
+/* Compact native collapse control: neutral glass, not the original solid blue block. */
+.roleplay-left-menu .roleplay-left-menu-toggle,
+.roleplay-left-menu .roleplay-left-menu-toggle:hover,
+.roleplay-left-menu .roleplay-left-menu-toggle:active {
+    box-sizing: border-box !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    padding: 0 !important;
+    color: #ffffff !important;
+    background: rgba(241, 250, 252, .22) !important;
+    background-color: rgba(241, 250, 252, .22) !important;
+    background-image: none !important;
+    border: 1px solid rgba(68, 145, 169, .18) !important;
+    border-left-color: rgba(255, 255, 255, .38) !important;
+    border-radius: 0 8px 8px 0 !important;
+    box-shadow:
+        3px 5px 11px rgba(24, 83, 104, .055),
+        inset 0 1px 0 rgba(255, 255, 255, .42) !important;
+    backdrop-filter: blur(7px) saturate(108%) !important;
+    -webkit-backdrop-filter: blur(7px) saturate(108%) !important;
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+.roleplay-left-menu .roleplay-left-menu-toggle:hover {
+    background: rgba(235, 249, 252, .44) !important;
+    background-color: rgba(235, 249, 252, .44) !important;
+    border-color: rgba(55, 151, 180, .28) !important;
+    transform: translateY(-50%) translateX(1px) !important;
+}
+
+.roleplay-left-menu .roleplay-left-menu-toggle:active {
+    background: rgba(225, 245, 250, .36) !important;
+    transform: translateY(-50%) scale(.97) !important;
+}
+
+.roleplay-left-menu .roleplay-left-menu-toggle,
+.roleplay-left-menu .roleplay-left-menu-toggle *,
+.roleplay-left-menu .left-menu-toggle-right-icon,
+.roleplay-left-menu .left-menu-toggle-right-icon *,
+.roleplay-left-menu .left-menu-toggle-left-icon,
+.roleplay-left-menu .left-menu-toggle-left-icon * {
+    color: #ffffff !important;
+    fill: currentColor !important;
+    stroke: currentColor !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: transparent !important;
+    background-image: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+.roleplay-left-menu .left-menu-toggle-right-icon,
+.roleplay-left-menu .left-menu-toggle-left-icon,
+.roleplay-left-menu .roleplay-left-menu-toggle svg {
+    filter:
+        drop-shadow(0 0 1px rgba(13, 110, 142, .95))
+        drop-shadow(0 1px 1px rgba(10, 73, 96, .28)) !important;
+}
+
+/* Tooltip enhancement; native click behavior remains untouched. */
+.roleplay-left-menu .paradise-side-rail-item::after {
+    content: attr(data-paradise-label);
+    position: absolute;
+    left: 55px;
+    top: 50%;
+    z-index: 2147483100;
+    transform: translate(6px, -50%) scale(.98);
+    padding: 7px 10px 8px;
+    border: 1px solid rgba(80, 132, 151, .13);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .92);
+    color: #28434e;
+    box-shadow: 0 9px 22px rgba(35, 65, 80, .10);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font: 800 11px/1 Ubuntu, Arial, sans-serif;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 100ms ease, transform 100ms ease, visibility 100ms ease;
+}
+
+.roleplay-left-menu .paradise-side-rail-item:hover::after,
+.roleplay-left-menu .paradise-side-rail-item:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(0, -50%) scale(1);
+}
+
+@media (max-height: 650px) {
+    .roleplay-left-menu {
+        padding: 5px 4px !important;
+    }
+
+    .roleplay-left-menu .left-menu-button {
+        width: 46px !important;
+        min-width: 46px !important;
+        max-width: 46px !important;
+        height: 46px !important;
+        min-height: 46px !important;
+        max-height: 46px !important;
+    }
+
+    .roleplay-left-menu .left-menu-icon,
+    .roleplay-left-menu .left-menu-icon img {
+        width: 41px !important;
+        height: 41px !important;
+        max-width: 41px !important;
+        max-height: 41px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .roleplay-left-menu,
+    .roleplay-left-menu .left-menu-button,
+    .roleplay-left-menu .roleplay-left-menu-toggle,
+    .roleplay-left-menu .paradise-side-rail-item::after {
+        transition: none !important;
+    }
+}
