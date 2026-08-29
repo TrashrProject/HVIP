@@ -1,23 +1,22 @@
-/* ParadiseRP side rail — native v4
- * Pure restyle of Nitro's existing shell/buttons/toggle.
- * No overlay is placed above the client, so native pixel icons remain visible.
+/* ParadiseRP side rail — polished native v5
+ * Keeps Nitro's existing pixel icons and click handlers; visual polish only.
  */
 
 .paradise-side-rail-shell {
     box-sizing: border-box !important;
-    width: 64px !important;
-    min-width: 64px !important;
-    max-width: 64px !important;
-    padding: 7px 6px !important;
-    border: 1px solid rgba(91, 150, 170, .18) !important;
-    border-radius: 18px !important;
+    width: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+    padding: 6px 5px !important;
+    border: 1px solid rgba(78, 140, 162, .16) !important;
+    border-radius: 17px !important;
     background:
-        radial-gradient(circle at 94% 3%, rgba(75, 193, 216, .10), transparent 30%),
-        linear-gradient(160deg, rgba(255,255,255,.99), rgba(240,248,251,.975)) !important;
+        radial-gradient(circle at 88% 2%, rgba(74, 194, 216, .085), transparent 28%),
+        linear-gradient(160deg, rgba(255,255,255,.995), rgba(242,249,251,.985)) !important;
     box-shadow:
-        0 16px 34px rgba(35, 68, 82, .14),
-        0 3px 9px rgba(35, 68, 82, .06),
-        inset 0 1px 0 rgba(255,255,255,.98) !important;
+        0 15px 32px rgba(35, 68, 82, .12),
+        0 3px 8px rgba(35, 68, 82, .05),
+        inset 0 1px 0 rgba(255,255,255,1) !important;
     backdrop-filter: blur(9px);
     -webkit-backdrop-filter: blur(9px);
     overflow: visible !important;
@@ -27,36 +26,36 @@
     content: "";
     position: absolute;
     left: -1px;
-    top: 14px;
+    top: 15px;
     width: 3px;
-    height: 30px;
+    height: 27px;
     border-radius: 0 5px 5px 0;
-    background: linear-gradient(180deg, #6ed8e5, #43aac8);
-    box-shadow: 0 0 0 3px rgba(72, 178, 205, .07);
+    background: linear-gradient(180deg, #73dbe7, #43acc9);
+    box-shadow: 0 0 0 3px rgba(72, 178, 205, .055);
     pointer-events: none;
 }
 
 .paradise-side-rail-item {
     position: relative !important;
     box-sizing: border-box !important;
-    width: 50px !important;
-    height: 50px !important;
-    min-width: 50px !important;
-    min-height: 50px !important;
-    max-width: 50px !important;
-    max-height: 50px !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    border: 1px solid rgba(94, 139, 157, .12) !important;
-    border-radius: 14px !important;
-    background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(242,248,250,.94)) !important;
+    border: 1px solid rgba(88, 135, 153, .14) !important;
+    border-radius: 13px !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.99), rgba(239,247,250,.965)) !important;
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,1),
-        0 2px 6px rgba(42, 74, 88, .05) !important;
+        0 2px 5px rgba(42, 74, 88, .05) !important;
     overflow: visible !important;
     cursor: pointer !important;
     transition:
-        transform 120ms ease,
+        transform 120ms cubic-bezier(.2,.8,.2,1),
         border-color 120ms ease,
         background 120ms ease,
         box-shadow 120ms ease !important;
@@ -65,62 +64,70 @@
 .paradise-side-rail-item:hover,
 .paradise-side-rail-item:focus-visible {
     transform: translateX(2px) translateY(-1px) !important;
-    border-color: rgba(60, 166, 196, .34) !important;
-    background: linear-gradient(180deg, #ffffff, #e8f7fb) !important;
+    border-color: rgba(57, 165, 195, .32) !important;
+    background: linear-gradient(180deg, #ffffff, #e9f8fb) !important;
     box-shadow:
-        0 7px 16px rgba(43, 111, 134, .14),
+        0 7px 15px rgba(43, 111, 134, .12),
         inset 0 1px 0 #fff !important;
     outline: none !important;
 }
 
-.paradise-side-rail-item.is-active {
-    border-color: rgba(56, 164, 193, .34) !important;
-    background: linear-gradient(180deg, #f8feff, #dff4f9) !important;
-    box-shadow:
-        inset 3px 0 0 #48b8d2,
-        0 5px 13px rgba(43, 111, 134, .10) !important;
+.paradise-side-rail-item:active {
+    transform: translateX(1px) !important;
 }
 
-/* Keep Nitro's original icon rendering intact; only cap oversized media. */
+.paradise-side-rail-item.is-active {
+    border-color: rgba(49, 161, 191, .38) !important;
+    background: linear-gradient(180deg, #f9feff, #dcf3f8) !important;
+    box-shadow:
+        inset 3px 0 0 #47b8d2,
+        0 5px 12px rgba(43, 111, 134, .09),
+        inset 0 1px 0 #fff !important;
+}
+
+/* Preserve the native pixel art but give it a little more presence. */
 .paradise-side-rail-item img,
 .paradise-side-rail-item canvas,
 .paradise-side-rail-item svg {
-    max-width: 40px !important;
-    max-height: 40px !important;
+    max-width: 42px !important;
+    max-height: 42px !important;
     opacity: 1 !important;
     filter: none !important;
     image-rendering: pixelated !important;
 }
 
+/* Settings is visually separated from the main actions. */
 .paradise-side-rail-item[data-paradise-index="6"] {
-    margin-top: 5px !important;
+    margin-top: 7px !important;
 }
 
 .paradise-side-rail-item[data-paradise-index="6"]::before {
     content: "";
     position: absolute;
-    top: -8px;
-    left: 11px;
-    right: 11px;
+    top: -10px;
+    left: 10px;
+    right: 10px;
     height: 1px;
-    background: rgba(91, 133, 150, .14);
+    background: linear-gradient(90deg, transparent, rgba(83, 130, 148, .22), transparent);
     pointer-events: none;
 }
 
+/* Modern hover label. */
 .paradise-side-rail-item::after {
     content: attr(data-paradise-label);
     position: absolute;
-    left: 57px;
+    left: 56px;
     top: 50%;
     z-index: 2147483100;
-    transform: translate(5px, -50%);
-    padding: 7px 10px;
-    border: 1px solid rgba(95, 136, 154, .17);
+    transform: translate(6px, -50%) scale(.98);
+    padding: 7px 10px 8px;
+    border: 1px solid rgba(83, 135, 154, .16);
     border-radius: 9px;
     background: rgba(255,255,255,.985);
-    color: #263c47;
-    box-shadow: 0 9px 22px rgba(35, 65, 80, .14);
-    font: 800 10px/1 Ubuntu, Arial, sans-serif;
+    color: #28434e;
+    box-shadow: 0 9px 22px rgba(35, 65, 80, .13);
+    font: 800 11px/1 Ubuntu, Arial, sans-serif;
+    letter-spacing: -.05px;
     white-space: nowrap;
     opacity: 0;
     visibility: hidden;
@@ -132,32 +139,49 @@
 .paradise-side-rail-item:focus-visible::after {
     opacity: 1;
     visibility: visible;
-    transform: translate(0, -50%);
+    transform: translate(0, -50%) scale(1);
 }
 
-/* Keep Nitro's own collapse control and only modernize its shape. */
+/* Modernize Nitro's native collapse tab instead of replacing its behavior. */
 .paradise-side-rail-native-toggle {
-    width: 22px !important;
-    min-width: 22px !important;
-    max-width: 22px !important;
-    height: 42px !important;
-    min-height: 42px !important;
-    max-height: 42px !important;
-    border: 1px solid rgba(36, 143, 177, .30) !important;
-    border-radius: 0 11px 11px 0 !important;
-    background: linear-gradient(180deg, #29a7cf, #1789b6) !important;
+    width: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    border: 1px solid rgba(72, 155, 181, .22) !important;
+    border-radius: 0 10px 10px 0 !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.995), rgba(229,246,250,.985)) !important;
+    color: #2588a7 !important;
     box-shadow:
-        4px 6px 14px rgba(32, 101, 126, .16),
-        inset 0 1px 0 rgba(255,255,255,.24) !important;
-    transition: transform 120ms ease, filter 120ms ease !important;
+        4px 6px 14px rgba(36, 83, 100, .10),
+        inset 0 1px 0 rgba(255,255,255,1) !important;
+    transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, box-shadow 120ms ease !important;
+}
+
+.paradise-side-rail-native-toggle *,
+.paradise-side-rail-native-toggle svg,
+.paradise-side-rail-native-toggle svg * {
+    color: #2588a7 !important;
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
+
+.paradise-side-rail-native-toggle img {
+    opacity: .78 !important;
 }
 
 .paradise-side-rail-native-toggle:hover {
     transform: translateX(1px) !important;
-    filter: brightness(1.06) !important;
+    border-color: rgba(48, 157, 190, .36) !important;
+    background: linear-gradient(180deg, #ffffff, #e4f6fa) !important;
+    box-shadow:
+        5px 8px 16px rgba(36, 83, 100, .12),
+        inset 0 1px 0 #fff !important;
 }
 
-/* Remove artifacts from the previous overlay versions if a cached DOM survived a SPA reload. */
+/* Remove artifacts from older experimental overlay versions. */
 #paradise-side-rail-backdrop,
 #paradise-side-rail-handle {
     display: none !important;
@@ -165,19 +189,26 @@
 
 @media (max-height: 650px) {
     .paradise-side-rail-shell {
-        width: 60px !important;
-        min-width: 60px !important;
-        max-width: 60px !important;
-        padding: 6px 5px !important;
+        width: 57px !important;
+        min-width: 57px !important;
+        max-width: 57px !important;
+        padding: 5px 4px !important;
     }
 
     .paradise-side-rail-item {
-        width: 48px !important;
-        height: 48px !important;
-        min-width: 48px !important;
-        min-height: 48px !important;
-        max-width: 48px !important;
-        max-height: 48px !important;
+        width: 46px !important;
+        height: 46px !important;
+        min-width: 46px !important;
+        min-height: 46px !important;
+        max-width: 46px !important;
+        max-height: 46px !important;
+    }
+
+    .paradise-side-rail-item img,
+    .paradise-side-rail-item canvas,
+    .paradise-side-rail-item svg {
+        max-width: 40px !important;
+        max-height: 40px !important;
     }
 }
 
