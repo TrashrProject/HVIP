@@ -1,6 +1,5 @@
-/* ParadiseRP side rail — transparent native v7
- * Keeps Nitro's native pixel icons and click handlers.
- * The rail is lighter/transparent and the collapse tab keeps a white chevron in both states.
+/* ParadiseRP side rail — transparent native v8
+ * Native Nitro actions are preserved. Visual layer only.
  */
 
 .paradise-side-rail-shell {
@@ -9,14 +8,15 @@
     min-width: 60px !important;
     max-width: 60px !important;
     padding: 6px 5px !important;
-    border: 1px solid rgba(78, 140, 162, .13) !important;
+    border: 1px solid rgba(78, 140, 162, .09) !important;
     border-radius: 17px !important;
-    background: rgba(244, 250, 252, .34) !important;
+    background: rgba(244, 250, 252, .18) !important;
+    background-image: none !important;
     box-shadow:
-        0 12px 28px rgba(35, 68, 82, .075),
-        inset 0 1px 0 rgba(255,255,255,.58) !important;
-    backdrop-filter: blur(7px) saturate(112%);
-    -webkit-backdrop-filter: blur(7px) saturate(112%);
+        0 11px 26px rgba(35, 68, 82, .06),
+        inset 0 1px 0 rgba(255,255,255,.42) !important;
+    backdrop-filter: blur(7px) saturate(108%);
+    -webkit-backdrop-filter: blur(7px) saturate(108%);
     overflow: visible !important;
 }
 
@@ -28,8 +28,8 @@
     width: 3px;
     height: 27px;
     border-radius: 0 5px 5px 0;
-    background: linear-gradient(180deg, rgba(115,219,231,.88), rgba(67,172,201,.88));
-    box-shadow: 0 0 0 3px rgba(72, 178, 205, .035);
+    background: linear-gradient(180deg, rgba(115,219,231,.78), rgba(67,172,201,.78));
+    box-shadow: 0 0 0 3px rgba(72,178,205,.025);
     pointer-events: none;
 }
 
@@ -44,29 +44,26 @@
     max-height: 48px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    border: 1px solid rgba(88, 135, 153, .105) !important;
+    border: 1px solid rgba(88,135,153,.085) !important;
     border-radius: 13px !important;
-    background: rgba(255,255,255,.43) !important;
+    background: rgba(255,255,255,.29) !important;
+    background-image: none !important;
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.72),
-        0 2px 5px rgba(42, 74, 88, .03) !important;
+        inset 0 1px 0 rgba(255,255,255,.54),
+        0 2px 5px rgba(42,74,88,.025) !important;
     overflow: visible !important;
     cursor: pointer !important;
-    transition:
-        transform 120ms cubic-bezier(.2,.8,.2,1),
-        border-color 120ms ease,
-        background 120ms ease,
-        box-shadow 120ms ease !important;
+    transition: transform 120ms cubic-bezier(.2,.8,.2,1), border-color 120ms ease, background 120ms ease, box-shadow 120ms ease !important;
 }
 
 .paradise-side-rail-item:hover,
 .paradise-side-rail-item:focus-visible {
     transform: translateX(2px) translateY(-1px) !important;
-    border-color: rgba(57, 165, 195, .28) !important;
-    background: rgba(239, 251, 254, .82) !important;
+    border-color: rgba(57,165,195,.24) !important;
+    background: rgba(238,250,253,.70) !important;
     box-shadow:
-        0 7px 15px rgba(43, 111, 134, .09),
-        inset 0 1px 0 rgba(255,255,255,.94) !important;
+        0 7px 15px rgba(43,111,134,.075),
+        inset 0 1px 0 rgba(255,255,255,.88) !important;
     outline: none !important;
 }
 
@@ -75,15 +72,14 @@
 }
 
 .paradise-side-rail-item.is-active {
-    border-color: rgba(49, 161, 191, .34) !important;
-    background: rgba(224, 246, 250, .80) !important;
+    border-color: rgba(49,161,191,.28) !important;
+    background: rgba(220,244,249,.66) !important;
     box-shadow:
-        inset 3px 0 0 #47b8d2,
-        0 5px 12px rgba(43, 111, 134, .07),
-        inset 0 1px 0 rgba(255,255,255,.92) !important;
+        inset 3px 0 0 rgba(71,184,210,.92),
+        0 5px 12px rgba(43,111,134,.055),
+        inset 0 1px 0 rgba(255,255,255,.85) !important;
 }
 
-/* Preserve the native pixel art and let it remain the visual focus. */
 .paradise-side-rail-item img,
 .paradise-side-rail-item canvas,
 .paradise-side-rail-item svg {
@@ -105,7 +101,7 @@
     left: 10px;
     right: 10px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(83, 130, 148, .17), transparent);
+    background: linear-gradient(90deg, transparent, rgba(83,130,148,.14), transparent);
     pointer-events: none;
 }
 
@@ -115,13 +111,13 @@
     left: 56px;
     top: 50%;
     z-index: 2147483100;
-    transform: translate(6px, -50%) scale(.98);
+    transform: translate(6px,-50%) scale(.98);
     padding: 7px 10px 8px;
-    border: 1px solid rgba(83, 135, 154, .14);
+    border: 1px solid rgba(83,135,154,.13);
     border-radius: 9px;
-    background: rgba(255,255,255,.94);
+    background: rgba(255,255,255,.91);
     color: #28434e;
-    box-shadow: 0 9px 22px rgba(35, 65, 80, .11);
+    box-shadow: 0 9px 22px rgba(35,65,80,.10);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     font: 800 11px/1 Ubuntu, Arial, sans-serif;
@@ -137,14 +133,13 @@
 .paradise-side-rail-item:focus-visible::after {
     opacity: 1;
     visibility: visible;
-    transform: translate(0, -50%) scale(1);
+    transform: translate(0,-50%) scale(1);
 }
 
-/*
- * Native collapse tab: keep Nitro's click behaviour, but own the visual entirely.
- * The tab stays cyan/blue and the chevron is always white, including after a collapse/expand rerender.
- */
-.paradise-side-rail-native-toggle {
+/* Native collapse tab — transparent glass in BOTH states. */
+.paradise-side-rail-native-toggle,
+.paradise-side-rail-native-toggle.is-paradise-collapsed,
+.paradise-side-rail-native-toggle[aria-expanded="false"] {
     position: relative !important;
     isolation: isolate !important;
     width: 19px !important;
@@ -155,30 +150,34 @@
     max-height: 36px !important;
     padding: 0 !important;
     overflow: hidden !important;
-    border: 1px solid rgba(13, 126, 169, .34) !important;
+    border: 1px solid rgba(40,153,187,.18) !important;
     border-radius: 0 9px 9px 0 !important;
-    background: linear-gradient(180deg, #149dca 0%, #0d82b4 100%) !important;
-    background-color: #0d8fbd !important;
-    color: #ffffff !important;
+    background: rgba(29,156,196,.15) !important;
+    background-color: rgba(29,156,196,.15) !important;
+    background-image: none !important;
+    color: #fff !important;
     box-shadow:
-        3px 5px 12px rgba(24, 105, 136, .14),
-        inset 0 1px 0 rgba(255,255,255,.22) !important;
+        3px 5px 12px rgba(24,105,136,.07),
+        inset 0 1px 0 rgba(255,255,255,.38) !important;
+    backdrop-filter: blur(8px) saturate(115%);
+    -webkit-backdrop-filter: blur(8px) saturate(115%);
     cursor: pointer !important;
     transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, box-shadow 120ms ease !important;
 }
 
-/* Hide the old Nitro artwork without removing the native click target. */
+/* Hide Nitro's old blue artwork but retain its click target. */
 .paradise-side-rail-native-toggle > *,
 .paradise-side-rail-native-toggle > *::before,
 .paradise-side-rail-native-toggle > *::after {
     opacity: 0 !important;
     visibility: hidden !important;
     background: transparent !important;
+    background-image: none !important;
     border-color: transparent !important;
     box-shadow: none !important;
 }
 
-/* Crisp white chevron. */
+/* White chevron with a tiny cyan outline so it stays visible on bright rooms. */
 .paradise-side-rail-native-toggle::after {
     content: "" !important;
     position: absolute !important;
@@ -188,29 +187,21 @@
     width: 6px !important;
     height: 6px !important;
     margin-top: -4px !important;
-    border-left: 2px solid #ffffff !important;
-    border-bottom: 2px solid #ffffff !important;
+    border-left: 2px solid #fff !important;
+    border-bottom: 2px solid #fff !important;
     transform: rotate(45deg) !important;
     transform-origin: center !important;
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: none !important;
-    filter: drop-shadow(0 1px 0 rgba(0,0,0,.12));
+    filter: drop-shadow(0 0 1px #147fa5) drop-shadow(0 1px 1px rgba(12,91,119,.34));
     transition: transform 160ms ease !important;
-}
-
-.paradise-side-rail-native-toggle.is-paradise-collapsed,
-.paradise-side-rail-native-toggle[aria-expanded="false"] {
-    border-color: rgba(13, 126, 169, .34) !important;
-    background: linear-gradient(180deg, #149dca 0%, #0d82b4 100%) !important;
-    background-color: #0d8fbd !important;
-    color: #ffffff !important;
 }
 
 .paradise-side-rail-native-toggle.is-paradise-collapsed::after,
 .paradise-side-rail-native-toggle[aria-expanded="false"]::after {
-    border-left-color: #ffffff !important;
-    border-bottom-color: #ffffff !important;
+    border-left-color: #fff !important;
+    border-bottom-color: #fff !important;
     transform: rotate(225deg) !important;
 }
 
@@ -218,19 +209,19 @@
 .paradise-side-rail-native-toggle.is-paradise-collapsed:hover,
 .paradise-side-rail-native-toggle[aria-expanded="false"]:hover {
     transform: translateX(1px) !important;
-    border-color: rgba(8, 116, 157, .44) !important;
-    background: linear-gradient(180deg, #1aa8d4 0%, #0f8aba 100%) !important;
-    background-color: #118fbc !important;
+    border-color: rgba(34,149,184,.28) !important;
+    background: rgba(29,156,196,.24) !important;
+    background-color: rgba(29,156,196,.24) !important;
+    background-image: none !important;
     box-shadow:
-        4px 7px 14px rgba(24, 105, 136, .17),
-        inset 0 1px 0 rgba(255,255,255,.28) !important;
+        4px 7px 14px rgba(24,105,136,.09),
+        inset 0 1px 0 rgba(255,255,255,.48) !important;
 }
 
 .paradise-side-rail-native-toggle:active {
     transform: translateX(0) scale(.97) !important;
 }
 
-/* Remove artifacts from older experimental overlay versions. */
 #paradise-side-rail-backdrop,
 #paradise-side-rail-handle {
     display: none !important;
