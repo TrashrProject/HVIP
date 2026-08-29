@@ -1,5 +1,5 @@
 (() => {
-    const BUILD = 'paradise-side-rail-native-v6';
+    const BUILD = 'paradise-side-rail-native-v7';
     const LABELS = [
         'Inventaire',
         'Catalogue',
@@ -11,6 +11,11 @@
     ];
 
     let installed = false;
+    let shellRef = null;
+    let toggleRef = null;
+    let railItemsRef = [];
+    let collapsed = false;
+    let lastToggleRect = null;
 
     const rect = node => {
         try { return node.getBoundingClientRect(); } catch (_) { return null; }
@@ -128,18 +133,31 @@
         return best?.node || null;
     }
 
-    function install() {
-        if (installed) return true;
+    function findToggleNearLastPosition() {
+        if (!lastToggleRect) return null;
+        const targetX = lastToggleRect.left + lastToggleRect.width / 2;
+        const targetY = lastToggleRect.top + lastToggleRect.height / 2;
+        let best = null;
 
-        const items = findRailItems();
-        if (items.length < 6) return false;
+        for (const node of document.querySelectorAll('button, [role="button"], .cursor-pointer, div')) {
+            if (!visible(node)) continue;
+            const r = rect(node);
+            if (!r) continue;
+            if (r.width < 14 || r.width > 42 || r.height < 28 || r.height > 68) continue;
+            if (r.left < -4 || r.left > 120) continue;
 
-        const shell = findNativeShell(items);
-        if (!shell) return false;
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height / 2;
+            const distance = Math.hypot(cx - targetX, cy - targetY);
+            if (distance > 90) continue;
 
-        shell.classList.add('paradise-side-rail-shell');
-        shell.dataset.paradiseBuild = BUILD;
+            if (!best || distance < best.distance) best = { node, distance };
+        }
 
+        return best?.node || null;
+    }
+
+    function applyItemHooks(items) {
         items.forEach((item, index) => {
             item.classList.add('paradise-side-rail-item');
             item.dataset.paradiseIndex = String(index);
@@ -153,18 +171,77 @@
                 }, { passive: true });
             }
         });
+    }
 
-        const toggle = findNativeToggle(shell, items);
-        if (toggle) {
-            toggle.classList.add('paradise-side-rail-native-toggle');
+    function bindToggle(toggle) {
+        if (!toggle) return;
 
-            if (!toggle.dataset.paradiseChevronBound) {
-                toggle.dataset.paradiseChevronBound = '1';
-                toggle.addEventListener('click', () => {
-                    toggle.classList.toggle('is-paradise-collapsed');
-                }, { passive: true });
+        toggleRef = toggle;
+        const tr = rect(toggle);
+        if (tr) lastToggleRect = tr;
+
+        toggle.classList.add('paradise-side-rail-native-toggle');
+        toggle.classList.toggle('is-paradise-collapsed', collapsed);
+
+        if (!toggle.dataset.paradiseChevronBound) {
+            toggle.dataset.paradiseChevronBound = '1';
+            toggle.addEventListener('click', () => {
+                const currentRect = rect(toggle);
+                if (currentRect) lastToggleRect = currentRect;
+
+                collapsed = !collapsed;
+                toggle.classList.toggle('is-paradise-collapsed', collapsed);
+
+                // Nitro can repaint/replace its collapse control. Re-apply our classes
+                // a few times after the native click, then stop. No observer or interval.
+                [40, 140, 320, 650].forEach(delay => {
+                    window.setTimeout(refreshAfterToggle, delay);
+                });
+            }, { passive: true });
+        }
+    }
+
+    function refreshAfterToggle() {
+        if (shellRef?.isConnected) shellRef.classList.add('paradise-side-rail-shell');
+
+        let nextToggle = toggleRef?.isConnected && visible(toggleRef) ? toggleRef : null;
+        if (!nextToggle) nextToggle = findToggleNearLastPosition();
+
+        if (nextToggle) bindToggle(nextToggle);
+
+        // On expand the item nodes can be recreated too, so retag them once they exist.
+        if (!collapsed) {
+            const items = findRailItems();
+            if (items.length >= 6) {
+                railItemsRef = items;
+                applyItemHooks(items);
+                const shell = findNativeShell(items);
+                if (shell) {
+                    shellRef = shell;
+                    shellRef.classList.add('paradise-side-rail-shell');
+                    const nativeToggle = findNativeToggle(shell, items);
+                    if (nativeToggle) bindToggle(nativeToggle);
+                }
             }
         }
+    }
+
+    function install() {
+        const items = findRailItems();
+        if (items.length < 6) return false;
+
+        const shell = findNativeShell(items);
+        if (!shell) return false;
+
+        shellRef = shell;
+        railItemsRef = items;
+        shell.classList.add('paradise-side-rail-shell');
+        shell.dataset.paradiseBuild = BUILD;
+
+        applyItemHooks(items);
+
+        const toggle = findNativeToggle(shell, items);
+        if (toggle) bindToggle(toggle);
 
         installed = true;
         console.info('[ParadiseRP] side rail ready', BUILD, {
@@ -175,7 +252,7 @@
         return true;
     }
 
-    // Finite retries only. No MutationObserver, no interval, no overlay above Nitro.
+    // Finite retries only. No MutationObserver, no interval, no permanent DOM scan.
     [1400, 2800, 4800, 7200].forEach(delay => {
         window.setTimeout(() => {
             if (!installed) install();
