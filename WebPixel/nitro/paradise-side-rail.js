@@ -1,5 +1,5 @@
 (() => {
-    const BUILD = 'paradise-side-rail-native-v4';
+    const BUILD = 'paradise-side-rail-native-v5';
     const LABELS = [
         'Inventaire',
         'Catalogue',
