@@ -32,22 +32,17 @@ import io.github.brenoepics.roleplay.commands.jobs.QuitJobCommand;
 import io.github.brenoepics.roleplay.commands.jobs.SendHomeCommand;
 import io.github.brenoepics.roleplay.commands.jobs.StartWorkCommand;
 import io.github.brenoepics.roleplay.commands.jobs.StopWorkCommand;
-<<<<<<< HEAD
 import io.github.brenoepics.roleplay.commands.jobs.hospital.BandageCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.CarryPatientCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.DiagnosticCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.DropPatientCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.EmsAcceptCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.EmsCallsCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.EmsCloseCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.HealCommand;
-import io.github.brenoepics.roleplay.commands.jobs.hospital.ReviveCommand;
+import io.github.brenoepics.roleplay.commands.jobs.hospital.MedicalReviveCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.StabilizeCommand;
 import io.github.brenoepics.roleplay.commands.jobs.hospital.TransportHospitalCommand;
-=======
-import io.github.brenoepics.roleplay.commands.jobs.hospital.CarryPatientCommand;
-import io.github.brenoepics.roleplay.commands.jobs.hospital.DiagnosticCommand;
-import io.github.brenoepics.roleplay.commands.jobs.hospital.DropPatientCommand;
-import io.github.brenoepics.roleplay.commands.jobs.hospital.HealCommand;
-import io.github.brenoepics.roleplay.commands.jobs.hospital.MedicalReviveCommand;
->>>>>>> 39dc96e65 (Modifications collègue ParadiseRP)
 import io.github.brenoepics.roleplay.commands.jobs.offer.AcceptOfferCommand;
 import io.github.brenoepics.roleplay.commands.jobs.offer.ClearOffersCommand;
 import io.github.brenoepics.roleplay.commands.jobs.offer.DeclineOfferCommand;
@@ -180,7 +175,8 @@ public class LoadPlayerCommands {
           new StabilizeCommand("cmd_stabilize", new String[]{"stabiliser"}),
           new String[]{"stabiliser"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
-          new ReviveCommand("cmd_revive", new String[]{"reanimer", "revive"}),
+          new io.github.brenoepics.roleplay.commands.jobs.hospital.ReviveCommand(
+              "cmd_revive", new String[]{"reanimer", "revive"}),
           new String[]{"reanimer", "revive"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
           new TransportHospitalCommand("cmd_transport_hospital",
