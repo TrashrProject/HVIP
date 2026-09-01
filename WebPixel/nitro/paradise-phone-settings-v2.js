@@ -1,14 +1,15 @@
 /* ParadiseRP — ParadisePhone Settings V3
- * Live DOM adapter: finds the real Settings screen by its visible labels instead of relying on a fixed phone root.
- * Existing controls, handlers, values and persistence remain authoritative.
+ * Visual redesign only. Existing controls remain in place and keep their own handlers/state.
  */
 (() => {
   'use strict';
 
+  if (window.ParadisePhoneSettingsV3) return;
+
+  const ROOT = '#paradise-rp-hud .pp-device';
+  const SETTINGS = '.pp-settings';
   const VERSION = '3.0.0';
-  const ROOT_CLASS = 'pp-settings-v3';
-  const resetBypass = new WeakSet();
-  let scheduled = false;
+  let raf = 0;
 
   const normalize = value => String(value || '')
     .normalize('NFD')
@@ -18,319 +19,181 @@
     .trim()
     .toLowerCase();
 
-  const txt = node => normalize(node?.textContent);
-  const all = (root, selector) => Array.from(root?.querySelectorAll?.(selector) || []);
+  const ownText = node => normalize(node?.textContent);
 
-  function exactTextNode(root, tests) {
-    return all(root, 'h1,h2,h3,h4,h5,h6,label,legend,p,small,strong,span,div')
-      .filter(node => {
-        const value = txt(node);
-        return value && value.length < 100 && tests.some(test => test(value));
-      })
-      .sort((a, b) => a.children.length - b.children.length)[0] || null;
-  }
-
-  function scoreCandidate(node) {
-    if (!(node instanceof HTMLElement)) return 0;
-    const t = txt(node);
-    let score = 0;
-    if (t.includes('couleur de la bordure')) score += 3;
-    if (t.includes('theme')) score += 2;
-    if (t.includes("fonds d'ecran predefinis")) score += 3;
-    if (t.includes("fond d'ecran personnalise")) score += 3;
-    if (t.includes('reinitialiser')) score += 2;
-    if (t.includes('parametres sont enregistres localement')) score += 1;
-    if (node.querySelector('input,select,button,[role="button"]')) score += 1;
-    return score;
-  }
-
-  function findSettingsRoot() {
-    const obvious = all(document, '.pp-settings,[class*="phone"] [class*="settings"],[class*="Phone"] [class*="Settings"],[class*="phone"] form,[class*="phone"] main')
-      .filter(node => scoreCandidate(node) >= 8)
-      .sort((a, b) => {
-        const scoreDiff = scoreCandidate(b) - scoreCandidate(a);
-        if (scoreDiff) return scoreDiff;
-        return a.querySelectorAll('*').length - b.querySelectorAll('*').length;
-      });
-    if (obvious[0]) return obvious[0];
-
-    const label = all(document, 'label,legend,h1,h2,h3,h4,h5,h6,p,span,strong,div')
-      .find(node => txt(node) === 'couleur de la bordure');
-    if (!label) return null;
-
-    let current = label.parentElement;
+  function findLabel(root, tests) {
+    const nodes = root.querySelectorAll('label,legend,h1,h2,h3,h4,h5,h6,p,span,strong,small,div');
     let best = null;
-    while (current && current !== document.body) {
-      const score = scoreCandidate(current);
-      if (score >= 10) best = current;
-      if (score >= 13) return current;
-      current = current.parentElement;
+    for (const node of nodes) {
+      const text = ownText(node);
+      if (!text || text.length > 90) continue;
+      if (!tests.some(test => test(text))) continue;
+      if (!best || node.children.length < best.children.length) best = node;
     }
     return best;
   }
 
   function interactiveCount(node) {
-    return all(node, 'button,input,select,textarea,[role="button"],[tabindex]').length;
+    return node?.querySelectorAll?.('button,input,select,textarea,[role="button"]').length || 0;
   }
 
-  function resolveGroup(root, label, otherLabels) {
+  function findGroup(root, label, otherLabels) {
     if (!label) return null;
-    let current = label;
-    let fallback = label.parentElement;
-    while (current && current !== root) {
-      const parent = current.parentElement;
-      if (!parent || parent === root) break;
-      const containsOther = otherLabels.some(other => other && other !== label && parent.contains(other));
-      if (!containsOther && interactiveCount(parent) > 0) return parent;
-      if (!containsOther) fallback = parent;
-      current = parent;
+    let node = label.parentElement;
+    let fallback = node;
+    while (node && node !== root) {
+      const containsOther = otherLabels.some(other => other && other !== label && node.contains(other));
+      if (!containsOther && interactiveCount(node) > 0) return node;
+      if (!containsOther) fallback = node;
+      node = node.parentElement;
     }
     return fallback && fallback !== root ? fallback : null;
   }
 
-  function selected(node) {
-    if (!node) return false;
-    if (node.matches?.(':checked,[aria-pressed="true"],[aria-selected="true"],[data-selected="true"],[data-active="true"],.active,.selected,.is-active')) return true;
-    return Boolean(node.querySelector?.('input:checked'));
-  }
-
-  function decorateChoiceGroup(group, kind) {
-    if (!group) return;
-    let controls = all(group, 'button,[role="button"],label,input[type="radio"],input[type="checkbox"],input[type="color"]');
-    controls = controls.filter(node => !(node.matches('input') && node.closest('label') && controls.includes(node.closest('label'))));
-    controls.forEach(control => {
-      control.classList.add('ppsv3-choice', `ppsv3-${kind}-choice`);
-      control.classList.toggle('ppsv3-active', selected(control));
-    });
-  }
-
-  function makeThemeSegments(group) {
-    if (!group || group.querySelector('.ppsv3-theme-segments')) return;
-    const select = group.querySelector('select');
-    if (!select || select.options.length < 2 || select.options.length > 3) return;
-
-    select.classList.add('ppsv3-native-theme-select');
-    const wrap = document.createElement('div');
-    wrap.className = 'ppsv3-theme-segments';
-
-    Array.from(select.options).forEach(option => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'ppsv3-theme-segment';
-      button.textContent = option.textContent?.trim() || option.value;
-      button.dataset.value = option.value;
-      button.addEventListener('click', () => {
-        if (select.value === option.value) return;
-        select.value = option.value;
-        select.dispatchEvent(new Event('input', { bubbles: true }));
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-        syncThemeSegments(group);
-      });
-      wrap.appendChild(button);
-    });
-
-    select.insertAdjacentElement('afterend', wrap);
-    select.addEventListener('change', () => syncThemeSegments(group));
-    syncThemeSegments(group);
-  }
-
-  function syncThemeSegments(group) {
-    const select = group?.querySelector('select');
-    if (!select) return;
-    all(group, '.ppsv3-theme-segment').forEach(button => {
-      const active = button.dataset.value === select.value;
-      button.classList.toggle('ppsv3-active', active);
-      button.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
-  }
-
-  function isSafeUrl(value) {
-    const raw = String(value || '').trim();
-    if (!raw) return true;
-    try {
-      const url = new URL(raw);
-      return url.protocol === 'http:' || url.protocol === 'https:';
-    } catch (_) {
-      return false;
-    }
-  }
-
-  function validateUrl(input, showError) {
-    if (!input) return true;
-    const valid = isSafeUrl(input.value);
-    input.setAttribute('aria-invalid', valid ? 'false' : 'true');
-    const host = input.parentElement || input;
-    let error = host.querySelector?.('.ppsv3-url-error');
-    if (!valid && showError && !error) {
-      error = document.createElement('small');
-      error.className = 'ppsv3-url-error';
-      error.textContent = 'Utilisez uniquement une URL http:// ou https://.';
-      host.appendChild(error);
-    }
-    if (valid && error) error.remove();
-    return valid;
-  }
-
-  function makeSection(title) {
-    const section = document.createElement('section');
-    section.className = 'ppsv3-section';
+  function addSectionBefore(group, title, key) {
+    if (!group || group.parentElement?.querySelector(`:scope > [data-ppsv3-section="${key}"]`)) return;
     const heading = document.createElement('div');
     heading.className = 'ppsv3-section-title';
+    heading.dataset.ppsv3Section = key;
     heading.textContent = title;
-    const card = document.createElement('div');
-    card.className = 'ppsv3-card';
-    section.append(heading, card);
-    return { section, card };
+    group.parentElement?.insertBefore(heading, group);
   }
 
-  function showResetConfirm(root, resetButton) {
-    if (root.querySelector('.ppsv3-confirm')) return;
-    const overlay = document.createElement('div');
-    overlay.className = 'ppsv3-confirm';
-    overlay.innerHTML = `
-      <div class="ppsv3-confirm-card" role="dialog" aria-modal="true" aria-label="Confirmer la réinitialisation">
-        <strong>Réinitialiser ?</strong>
-        <p>Le ParadisePhone retrouvera ses paramètres par défaut.</p>
-        <div><button type="button" data-cancel>Annuler</button><button type="button" data-confirm>Réinitialiser</button></div>
-      </div>`;
-    const close = () => overlay.remove();
-    overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
-    overlay.querySelector('[data-cancel]').addEventListener('click', close);
-    overlay.querySelector('[data-confirm]').addEventListener('click', () => {
-      close();
-      resetBypass.add(resetButton);
-      resetButton.click();
-      setTimeout(() => resetBypass.delete(resetButton), 0);
+  function isSelected(node) {
+    if (!node) return false;
+    if (node.matches?.(':checked,[aria-pressed="true"],[aria-selected="true"],[data-selected="true"],[data-active="true"],.active,.selected,.is-active')) return true;
+    const input = node.querySelector?.('input');
+    return Boolean(input?.checked);
+  }
+
+  function decorateChoices(group, kind) {
+    if (!group) return;
+    const raw = Array.from(group.querySelectorAll('button,[role="button"],label,input[type="radio"],input[type="checkbox"],input[type="color"]'));
+    const controls = raw.filter(node => !(node.matches('input') && node.closest('label') && raw.includes(node.closest('label'))));
+    controls.forEach(control => {
+      control.classList.add('ppsv3-choice', `ppsv3-${kind}-choice`);
+      control.classList.toggle('ppsv3-active', isSelected(control));
     });
-    root.appendChild(overlay);
   }
 
-  function enhance(root) {
-    if (!(root instanceof HTMLElement) || root.dataset.ppSettingsV3 === VERSION) return;
+  function refreshActive(root) {
+    decorateChoices(root.querySelector('.ppsv3-theme-group'), 'theme');
+    decorateChoices(root.querySelector('.ppsv3-border-group'), 'border');
+    decorateChoices(root.querySelector('.ppsv3-wallpaper-group'), 'wallpaper');
+  }
 
-    const labelBorder = exactTextNode(root, [t => t === 'couleur de la bordure']);
-    const labelTheme = exactTextNode(root, [t => t === 'theme']);
-    const labelPresets = exactTextNode(root, [t => t.includes("fonds d'ecran predefinis")]);
-    const labelCustom = exactTextNode(root, [t => t.includes("fond d'ecran personnalise")]);
-    const localInfo = exactTextNode(root, [t => t.includes('parametres sont enregistres localement')]);
-    const resetButton = all(root, 'button,[role="button"]').find(node => txt(node).startsWith('reinitialiser')) || null;
-    const labels = [labelBorder, labelTheme, labelPresets, labelCustom, localInfo];
+  function makeHeader(root, originalTitle) {
+    if (root.querySelector(':scope > .ppsv3-header')) return;
+    if (originalTitle) originalTitle.classList.add('ppsv3-original-title');
 
-    const borderGroup = resolveGroup(root, labelBorder, labels);
-    const themeGroup = resolveGroup(root, labelTheme, labels);
-    const presetsGroup = resolveGroup(root, labelPresets, labels);
-    const customGroup = resolveGroup(root, labelCustom, labels);
-    const resetGroup = resetButton ? resolveGroup(root, resetButton, labels) : null;
-
-    if (![borderGroup, themeGroup, presetsGroup, customGroup].every(Boolean)) return;
-    const groups = [themeGroup, borderGroup, presetsGroup, customGroup, resetGroup].filter(Boolean);
-    if (new Set(groups).size !== groups.length) return;
-
-    root.dataset.ppSettingsV3 = VERSION;
-    root.classList.add(ROOT_CLASS);
-
-    [labelTheme, labelBorder, labelPresets, labelCustom].forEach(label => label?.classList.add('ppsv3-label'));
-    themeGroup.classList.add('ppsv3-group', 'ppsv3-theme-group');
-    borderGroup.classList.add('ppsv3-group', 'ppsv3-border-group');
-    presetsGroup.classList.add('ppsv3-group', 'ppsv3-presets-group');
-    customGroup.classList.add('ppsv3-group', 'ppsv3-custom-group');
-    resetGroup?.classList.add('ppsv3-group', 'ppsv3-reset-group');
-    resetButton?.classList.add('ppsv3-reset-button');
-
-    const header = document.createElement('header');
+    const header = document.createElement('div');
     header.className = 'ppsv3-header';
-    header.innerHTML = '<div class="ppsv3-title"><span aria-hidden="true">‹</span><div><strong>Paramètres</strong><small>Personnalisez votre ParadisePhone</small></div></div>';
-
-    const layout = document.createElement('div');
-    layout.className = 'ppsv3-layout';
-    const appearance = makeSection('Apparence');
-    const personalization = makeSection('Personnalisation');
-    const other = makeSection('Autres');
-
-    appearance.card.append(themeGroup, borderGroup);
-    personalization.card.append(presetsGroup, customGroup);
-    if (resetGroup) other.card.append(resetGroup);
-
-    const info = document.createElement('p');
-    info.className = 'ppsv3-info';
-    info.innerHTML = '<span aria-hidden="true">ⓘ</span><span>Préférences enregistrées localement sur cet appareil.</span>';
-    if (localInfo) localInfo.classList.add('ppsv3-original-info');
-
-    layout.append(appearance.section, personalization.section);
-    if (resetGroup) layout.append(other.section);
-    layout.append(info);
-
-    const childrenToHide = Array.from(root.children).filter(child => !groups.includes(child));
-    childrenToHide.forEach(child => {
-      if (child !== header && child !== layout && child.contains?.(labelBorder) === false && child.contains?.(themeGroup) === false) {
-        const t = txt(child);
-        if (t === 'parametres' || t === 'settings') child.classList.add('ppsv3-original-title');
-      }
-    });
-
+    header.innerHTML = `
+      <div class="ppsv3-header-copy">
+        <strong>Paramètres</strong>
+        <span>Personnalisez votre ParadisePhone</span>
+      </div>`;
     root.prepend(header);
-    root.appendChild(layout);
+  }
 
-    makeThemeSegments(themeGroup);
-    decorateChoiceGroup(borderGroup, 'border');
-    decorateChoiceGroup(presetsGroup, 'wallpaper');
+  function decorate(root) {
+    if (!(root instanceof HTMLElement)) return;
 
-    const urlInput = customGroup.querySelector('input[type="url"],input[type="text"],input:not([type])');
-    if (urlInput) {
-      urlInput.classList.add('ppsv3-url-input');
-      urlInput.setAttribute('inputmode', 'url');
-      urlInput.setAttribute('autocomplete', 'off');
-      urlInput.addEventListener('input', () => validateUrl(urlInput, false));
-      urlInput.addEventListener('blur', () => validateUrl(urlInput, true));
-      urlInput.addEventListener('change', event => {
-        if (!validateUrl(urlInput, true)) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      }, true);
-      urlInput.addEventListener('keydown', event => {
-        if (event.key === 'Enter' && !validateUrl(urlInput, true)) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      }, true);
+    const originalTitle = findLabel(root, [t => t === 'parametres']);
+    const borderLabel = findLabel(root, [t => t.includes('couleur de la bordure'), t => t === 'bordure']);
+    const themeLabel = findLabel(root, [t => t === 'theme']);
+    const presetLabel = findLabel(root, [t => t.includes("fonds d'ecran predefinis")]);
+    const customLabel = findLabel(root, [t => t.includes("fond d'ecran personnalise")]);
+    const localInfo = findLabel(root, [t => t.includes('parametres sont enregistres localement')]);
+    const reset = Array.from(root.querySelectorAll('button,[role="button"]')).find(node => ownText(node).startsWith('reinitialiser')) || null;
+
+    const labels = [borderLabel, themeLabel, presetLabel, customLabel, localInfo];
+    const themeGroup = findGroup(root, themeLabel, labels);
+    const borderGroup = findGroup(root, borderLabel, labels);
+    const presetGroup = findGroup(root, presetLabel, labels);
+    const customGroup = findGroup(root, customLabel, labels);
+
+    root.classList.add('pp-settings-v3');
+    root.dataset.ppSettingsV3 = VERSION;
+    makeHeader(root, originalTitle);
+
+    [themeLabel, borderLabel, presetLabel, customLabel].filter(Boolean).forEach(label => label.classList.add('ppsv3-setting-label'));
+    themeGroup?.classList.add('ppsv3-card', 'ppsv3-theme-group');
+    borderGroup?.classList.add('ppsv3-card', 'ppsv3-border-group');
+    presetGroup?.classList.add('ppsv3-card', 'ppsv3-wallpaper-group');
+    customGroup?.classList.add('ppsv3-card', 'ppsv3-custom-group');
+
+    if (themeGroup || borderGroup) addSectionBefore(themeGroup || borderGroup, 'Apparence', 'appearance');
+    if (presetGroup || customGroup) addSectionBefore(presetGroup || customGroup, 'Personnalisation', 'personalization');
+
+    if (localInfo) {
+      localInfo.classList.add('ppsv3-local-info');
+      if (!localInfo.querySelector('.ppsv3-info-dot')) {
+        const dot = document.createElement('span');
+        dot.className = 'ppsv3-info-dot';
+        dot.setAttribute('aria-hidden', 'true');
+        localInfo.prepend(dot);
+      }
     }
 
-    root.addEventListener('click', event => {
-      const target = event.target instanceof Element ? event.target : null;
-      if (!target) return;
-      const choice = target.closest('.ppsv3-choice');
-      if (choice) {
-        const group = choice.closest('.ppsv3-border-group,.ppsv3-presets-group');
-        if (group) {
-          all(group, '.ppsv3-choice').forEach(item => item.classList.remove('ppsv3-active'));
-          choice.classList.add('ppsv3-active');
-        }
+    if (reset) {
+      reset.classList.add('ppsv3-reset');
+      const parent = reset.parentElement;
+      if (parent && parent !== root && !parent.querySelector(':scope > [data-ppsv3-section="other"]')) {
+        const heading = document.createElement('div');
+        heading.className = 'ppsv3-section-title ppsv3-other-title';
+        heading.dataset.ppsv3Section = 'other';
+        heading.textContent = 'Autres';
+        parent.insertBefore(heading, reset);
       }
-      if (resetButton && (target === resetButton || resetButton.contains(target)) && !resetBypass.has(resetButton)) {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation?.();
-        showResetConfirm(root, resetButton);
+    }
+
+    const customInput = customGroup?.querySelector('input[type="url"],input[type="text"],input:not([type])');
+    if (customInput) {
+      customInput.classList.add('ppsv3-url');
+      customInput.setAttribute('inputmode', 'url');
+      customInput.setAttribute('autocomplete', 'off');
+      customInput.setAttribute('spellcheck', 'false');
+      customInput.setAttribute('pattern', 'https?://.*');
+      customInput.setAttribute('title', 'Utilisez une URL http:// ou https://');
+      const validate = () => {
+        const value = String(customInput.value || '').trim();
+        const safe = !value || /^https?:\/\//i.test(value);
+        customInput.classList.toggle('ppsv3-url-invalid', !safe);
+        customInput.setAttribute('aria-invalid', safe ? 'false' : 'true');
+      };
+      if (!customInput.dataset.ppsv3Bound) {
+        customInput.dataset.ppsv3Bound = 'true';
+        customInput.addEventListener('input', validate, { passive: true });
+        customInput.addEventListener('change', validate, { passive: true });
+        customInput.addEventListener('blur', validate, { passive: true });
       }
-    }, true);
+      validate();
+    }
+
+    if (!root.dataset.ppsv3Bound) {
+      root.dataset.ppsv3Bound = 'true';
+      root.addEventListener('click', () => setTimeout(() => refreshActive(root), 0), false);
+      root.addEventListener('change', () => setTimeout(() => refreshActive(root), 0), false);
+    }
+
+    refreshActive(root);
   }
 
-  function refresh() {
-    scheduled = false;
-    const root = findSettingsRoot();
-    if (root) enhance(root);
+  function run() {
+    raf = 0;
+    document.querySelectorAll(`${ROOT} ${SETTINGS}`).forEach(decorate);
   }
 
   function schedule() {
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(() => requestAnimationFrame(refresh));
+    if (raf) return;
+    raf = requestAnimationFrame(run);
   }
 
-  new MutationObserver(schedule).observe(document.documentElement, { childList: true, subtree: true });
-  window.addEventListener('paradise:phone', schedule);
+  const observer = new MutationObserver(schedule);
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener('paradise:phone', schedule, false);
   schedule();
 
-  window.ParadisePhoneSettingsV3 = Object.freeze({ version: VERSION, refresh: schedule, isSafeUrl });
+  window.ParadisePhoneSettingsV3 = Object.freeze({ version: VERSION, refresh: schedule });
 })();
