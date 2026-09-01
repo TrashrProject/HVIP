@@ -1,0 +1,315 @@
+/* ParadiseRP player HUD — approved dark compact direction v1 */
+
+#paradise-player-hud {
+    position: fixed;
+    top: 18px;
+    left: 14px;
+    z-index: 2147482400;
+    box-sizing: border-box;
+    width: 366px;
+    min-height: 128px;
+    padding: 14px 18px 14px 14px;
+    display: grid;
+    grid-template-columns: 82px minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: center;
+    border: 1px solid rgba(146, 174, 194, .24);
+    border-radius: 27px;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(45, 160, 196, .13), transparent 34%),
+        linear-gradient(135deg, rgba(20, 27, 37, .975), rgba(13, 18, 26, .965));
+    box-shadow:
+        0 17px 42px rgba(0, 0, 0, .28),
+        0 3px 10px rgba(0, 0, 0, .16),
+        inset 1px 0 0 rgba(69, 198, 232, .52),
+        inset 0 1px 0 rgba(255, 255, 255, .055);
+    backdrop-filter: blur(14px) saturate(115%);
+    -webkit-backdrop-filter: blur(14px) saturate(115%);
+    font-family: Ubuntu, Arial, sans-serif;
+    color: #f6f8fa;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-3px);
+    transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
+}
+
+#paradise-player-hud[data-ready="1"] {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+#paradise-player-hud::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(115deg, rgba(255,255,255,.035), transparent 37%);
+    pointer-events: none;
+}
+
+.paradise-player-hud__avatar {
+    position: relative;
+    box-sizing: border-box;
+    width: 78px;
+    height: 78px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid rgba(122, 150, 171, .19);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 48% 40%, rgba(52, 65, 80, .76), rgba(16, 22, 30, .96) 70%);
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.025),
+        0 7px 18px rgba(0,0,0,.20);
+}
+
+.paradise-player-hud__avatar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 1px 0 0 rgba(72, 191, 222, .22);
+    pointer-events: none;
+}
+
+.paradise-player-hud__avatar-image {
+    width: 88px;
+    height: 94px;
+    margin-top: 12px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,.25));
+}
+
+.paradise-player-hud__avatar-fallback {
+    display: none;
+    width: 34px;
+    height: 34px;
+    opacity: .48;
+}
+
+.paradise-player-hud__avatar.is-fallback .paradise-player-hud__avatar-image {
+    display: none;
+}
+
+.paradise-player-hud__avatar.is-fallback .paradise-player-hud__avatar-fallback {
+    display: block;
+}
+
+.paradise-player-hud__content {
+    min-width: 0;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+.paradise-player-hud__header {
+    min-width: 0;
+    height: 27px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.paradise-player-hud__name {
+    max-width: 152px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -.25px;
+    color: #f7f8fa;
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+
+.paradise-player-hud__role {
+    min-width: 0;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    color: rgba(226, 230, 235, .74);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.paradise-player-hud__role[data-visible="1"] {
+    display: flex;
+}
+
+.paradise-player-hud__role-badge {
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 18px;
+    border: 1px solid rgba(244, 181, 35, .54);
+    border-radius: 50%;
+    color: #f4b523;
+    box-shadow: inset 0 0 0 2px rgba(244,181,35,.08);
+}
+
+.paradise-player-hud__role-badge svg {
+    width: 10px;
+    height: 10px;
+    fill: currentColor;
+}
+
+.paradise-player-hud__role-text {
+    max-width: 92px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paradise-player-hud__stats {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.paradise-player-hud__row {
+    min-width: 0;
+    height: 18px;
+    display: grid;
+    grid-template-columns: 23px minmax(80px, 1fr) 68px;
+    align-items: center;
+    gap: 9px;
+}
+
+.paradise-player-hud__stat-icon {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+}
+
+.paradise-player-hud__stat-icon svg {
+    width: 20px;
+    height: 20px;
+    overflow: visible;
+}
+
+.paradise-player-hud__stat-icon--health {
+    color: #ff4e63;
+    filter: drop-shadow(0 2px 3px rgba(255, 59, 82, .14));
+}
+
+.paradise-player-hud__stat-icon--health svg {
+    fill: currentColor;
+}
+
+.paradise-player-hud__stat-icon--shield {
+    color: #20aee7;
+    filter: drop-shadow(0 2px 3px rgba(22, 157, 211, .13));
+}
+
+.paradise-player-hud__stat-icon--shield svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.paradise-player-hud__track {
+    position: relative;
+    height: 7px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: rgba(61, 82, 97, .52);
+    box-shadow:
+        inset 0 1px 2px rgba(0,0,0,.34),
+        0 1px 0 rgba(255,255,255,.025);
+}
+
+.paradise-player-hud__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    border-radius: inherit;
+    transition: width 180ms cubic-bezier(.2,.8,.2,1);
+}
+
+.paradise-player-hud__fill--health {
+    background: linear-gradient(90deg, #ff465b, #f45168);
+    box-shadow: 0 0 8px rgba(255, 70, 91, .18);
+}
+
+.paradise-player-hud__fill--shield {
+    background: linear-gradient(90deg, #159bd3, #22b7ec);
+    box-shadow: 0 0 8px rgba(34, 183, 236, .15);
+}
+
+.paradise-player-hud__value {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    white-space: nowrap;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -.15px;
+    color: #f5f7f9;
+    text-shadow: 0 1px 2px rgba(0,0,0,.3);
+}
+
+.paradise-player-hud__value-max {
+    margin-left: 1px;
+    color: rgba(219, 225, 231, .58);
+    font-weight: 600;
+}
+
+@media (max-width: 720px), (max-height: 620px) {
+    #paradise-player-hud {
+        width: 330px;
+        min-height: 116px;
+        grid-template-columns: 72px minmax(0, 1fr);
+        padding: 12px 15px 12px 12px;
+        column-gap: 13px;
+        border-radius: 23px;
+    }
+
+    .paradise-player-hud__avatar {
+        width: 68px;
+        height: 68px;
+    }
+
+    .paradise-player-hud__avatar-image {
+        width: 78px;
+        height: 84px;
+    }
+
+    .paradise-player-hud__name {
+        font-size: 17px;
+        max-width: 130px;
+    }
+
+    .paradise-player-hud__content {
+        gap: 8px;
+    }
+
+    .paradise-player-hud__stats {
+        gap: 8px;
+    }
+
+    .paradise-player-hud__row {
+        grid-template-columns: 21px minmax(70px, 1fr) 62px;
+        gap: 7px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #paradise-player-hud,
+    .paradise-player-hud__fill {
+        transition: none !important;
+    }
+}

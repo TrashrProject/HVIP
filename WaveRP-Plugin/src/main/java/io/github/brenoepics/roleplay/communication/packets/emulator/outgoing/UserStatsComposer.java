@@ -1,10 +1,13 @@
 package io.github.brenoepics.roleplay.communication.packets.emulator.outgoing;
 
 import com.eu.habbo.Emulator;
+import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
 import io.github.brenoepics.roleplay.RolePlay;
+import io.github.brenoepics.roleplay.communication.outgoing.roleplay.PlayerHudComposer;
+import io.github.brenoepics.roleplay.communication.packets.js.JavascriptCallbackComposer;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,6 +34,7 @@ public class UserStatsComposer extends MessageComposer {
       appendUserStats(otherUser);
     }
 
+    pushParadisePlayerHud();
     return this.response;
   }
 
@@ -54,5 +58,34 @@ public class UserStatsComposer extends MessageComposer {
         : (int) Math.max(0, Duration.between(Instant.now(), aggressionUntil).getSeconds());
     this.response.appendInt(aggressionRemaining);
     this.response.appendInt(Emulator.getConfig().getInt("features.aggression.seconds", 600));
+  }
+
+  /**
+   * Mirror the authoritative RP stats to the browser overlay channel. This is deliberately tied to
+   * the existing 6004 composer so every native stats refresh also refreshes the Paradise HUD.
+   */
+  private void pushParadisePlayerHud() {
+    if (ownUser == null) {
+      return;
+    }
+
+    GameClient client = ownUser.getClient();
+    if (client == null) {
+      return;
+    }
+
+    Emulator.getThreading().run(() -> {
+      if (ownUser.getClient() != client) {
+        return;
+      }
+
+      RpAvatar avatar = RolePlay.getAvatarManager().getRpAvatar(ownUser);
+      if (avatar == null) {
+        return;
+      }
+
+      client.sendResponse(
+          new JavascriptCallbackComposer(new PlayerHudComposer(ownUser, avatar)));
+    }, 10);
   }
 }

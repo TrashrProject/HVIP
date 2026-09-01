@@ -82,6 +82,10 @@ public class DeathHandler {
     stabilizedUntil.remove(userId);
   }
 
+  public void cancelPendingHospitalTransfer(Habbo habbo) {
+    cancelHospitalTransfer(habbo);
+  }
+
   public void onDisconnect(Habbo habbo) {
     cancelHospitalTransfer(habbo);
   }
@@ -89,15 +93,4 @@ public class DeathHandler {
   public void sendToHospitalAsync(Habbo habbo) {
     CompletableFuture.runAsync(() -> sendToHospital(habbo));
   }
-<<<<<<< HEAD
 }
-
-=======
-
-  public void cancelPendingHospitalTransfer(Habbo habbo) {
-    if (habbo != null) {
-      usersBeingSentToHospital.remove(habbo.getHabboInfo().getId());
-    }
-  }
-}
->>>>>>> 39dc96e65 (Modifications collègue ParadiseRP)

@@ -60,8 +60,8 @@ public class BankService {
     }
 
     // Banking Operations
-    public boolean deposit(int userId, BigDecimal amount, int roomId) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+    public synchronized boolean deposit(int userId, BigDecimal amount, int roomId) {
+        if (!isValidWholeAmount(amount)) {
             return false;
         }
 
@@ -86,8 +86,8 @@ public class BankService {
         BankAccount account = accountOpt.get();
         try {
             // Deduct from currency type 200 and add to bank balance
-            habbo.getHabboInfo().addCurrencyAmount(200, -depositAmount);
             account.depositToBank(amount);
+            habbo.getHabboInfo().addCurrencyAmount(200, -depositAmount);
             
             if (bankRepository.updateBankAccount(account)) {
                 // Log transaction
@@ -97,14 +97,15 @@ public class BankService {
                 log.info("User {} deposited ${} to bank account", userId, amount);
                 return true;
             }
+            habbo.getHabboInfo().addCurrencyAmount(200, depositAmount);
         } catch (IllegalArgumentException e) {
             log.warn("Deposit failed for user {}: {}", userId, e.getMessage());
         }
         return false;
     }
 
-    public boolean withdraw(int userId, BigDecimal amount, int roomId) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+    public synchronized boolean withdraw(int userId, BigDecimal amount, int roomId) {
+        if (!isValidWholeAmount(amount)) {
             return false;
         }
 
@@ -126,8 +127,9 @@ public class BankService {
             
             // Deduct from bank balance and add to currency type 200 (wallet)
             account.withdrawFromBank(amount, ATM_FEE_PERCENTAGE);
-            habbo.getHabboInfo().addCurrencyAmount(200, amountAfterFee.intValue());
-            
+            int creditedAmount = amountAfterFee.intValue();
+            habbo.getHabboInfo().addCurrencyAmount(200, creditedAmount);
+
             if (bankRepository.updateBankAccount(account)) {
                 // Log withdrawal transaction
                 BankTransaction transaction = BankTransaction.createWithdrawal(userId, amount, fee, roomId);
@@ -142,14 +144,15 @@ public class BankService {
                 log.info("User {} withdrew ${} from bank account (fee: ${})", userId, amount, fee);
                 return true;
             }
+            habbo.getHabboInfo().addCurrencyAmount(200, -creditedAmount);
         } catch (IllegalArgumentException e) {
             log.warn("Withdrawal failed for user {}: {}", userId, e.getMessage());
         }
         return false;
     }
 
-    public boolean transfer(int fromUserId, int toUserId, BigDecimal amount, int roomId) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+    public synchronized boolean transfer(int fromUserId, int toUserId, BigDecimal amount, int roomId) {
+        if (!isValidWholeAmount(amount)) {
             return false;
         }
 
@@ -183,7 +186,8 @@ public class BankService {
             return false; // Insufficient funds
         }
 
-        int transferAmount = amount.intValue();
+        int transferAmount = amount.intValueExact();
+        int walletDebited = Math.min(fromWallet, transferAmount);
         
         try {
             if (fromWallet >= transferAmount) {
@@ -213,6 +217,8 @@ public class BankService {
                 log.info("User {} transferred ${} to user {}", fromUserId, amount, toUserId);
                 return true;
             }
+            fromHabbo.getHabboInfo().addCurrencyAmount(200, walletDebited);
+            toHabbo.getHabboInfo().addCurrencyAmount(200, -transferAmount);
         } catch (IllegalArgumentException e) {
             log.warn("Transfer failed for users {} -> {}: {}", fromUserId, toUserId, e.getMessage());
         }
@@ -281,10 +287,23 @@ public class BankService {
         return String.format("$%.2f", amount);
     }
 
+    private boolean isValidWholeAmount(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            return false;
+        }
+        try {
+            amount.toBigIntegerExact();
+            amount.intValueExact();
+            return true;
+        } catch (ArithmeticException ignored) {
+            return false;
+        }
+    }
+
     // Validation Methods
     public boolean canDeposit(int userId, BigDecimal amount) {
         Optional<BankAccount> accountOpt = getBankAccount(userId);
-        if (accountOpt.isEmpty() || amount.compareTo(BigDecimal.ZERO) <= 0) {
+        if (accountOpt.isEmpty() || !isValidWholeAmount(amount)) {
             return false;
         }
         
@@ -300,8 +319,8 @@ public class BankService {
 
     public boolean canWithdraw(int userId, BigDecimal amount) {
         Optional<BankAccount> accountOpt = getBankAccount(userId);
-        return accountOpt.isPresent() && 
-               amount.compareTo(BigDecimal.ZERO) > 0 && 
+        return accountOpt.isPresent() &&
+               isValidWholeAmount(amount) &&
                accountOpt.get().hasEnoughBankBalance(amount);
     }
 
@@ -309,8 +328,8 @@ public class BankService {
         Optional<BankAccount> fromAccountOpt = getBankAccount(fromUserId);
         Optional<BankAccount> toAccountOpt = getBankAccount(toUserId);
         
-        if (fromUserId == toUserId || fromAccountOpt.isEmpty() || toAccountOpt.isEmpty() || 
-            amount.compareTo(BigDecimal.ZERO) <= 0) {
+        if (fromUserId == toUserId || fromAccountOpt.isEmpty() || toAccountOpt.isEmpty() ||
+            !isValidWholeAmount(amount)) {
             return false;
         }
         

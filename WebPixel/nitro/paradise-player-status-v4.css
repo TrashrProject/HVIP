@@ -1,0 +1,206 @@
+/* ParadiseRP player HUD v4 — Habbo RP plate
+ * Keeps WaveRP's real avatar, values and native HUD elements.
+ * Goal: game HUD, not web dashboard.
+ */
+
+#paradise-player-plate-v4 {
+    position: fixed;
+    box-sizing: border-box;
+    z-index: 2147480000;
+    min-width: 206px;
+    min-height: 58px;
+    border: 1px solid rgba(69, 131, 151, .18);
+    border-radius: 11px 17px 17px 11px;
+    background:
+        linear-gradient(135deg, rgba(255,255,255,.94), rgba(241,248,250,.88) 48%, rgba(229,241,245,.84));
+    box-shadow:
+        0 11px 24px rgba(25, 59, 72, .105),
+        0 2px 5px rgba(25, 59, 72, .045),
+        inset 0 1px 0 rgba(255,255,255,.96);
+    backdrop-filter: blur(8px) saturate(110%);
+    -webkit-backdrop-filter: blur(8px) saturate(110%);
+    pointer-events: none;
+    overflow: hidden;
+}
+
+#paradise-player-plate-v4::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: linear-gradient(180deg, #74dce8, #3ca7c4);
+    box-shadow: 0 0 10px rgba(62, 174, 202, .18);
+}
+
+#paradise-player-plate-v4::after {
+    content: "";
+    position: absolute;
+    right: -16px;
+    top: -18px;
+    width: 58px;
+    height: 58px;
+    border: 1px solid rgba(67, 168, 194, .08);
+    border-radius: 50%;
+    background: rgba(84, 190, 211, .035);
+}
+
+.paradise-player-status,
+.paradise-player-avatar,
+.paradise-player-name,
+.paradise-player-health,
+.paradise-player-energy,
+.paradise-player-gauge {
+    position: relative !important;
+    z-index: 2147480010 !important;
+}
+
+/* Avatar: still recognisably Habbo, but no old double-circle frame. */
+.paradise-player-avatar {
+    box-sizing: border-box !important;
+    border: 1px solid rgba(45, 111, 132, .42) !important;
+    border-radius: 17px !important;
+    background:
+        linear-gradient(145deg, rgba(255,255,255,.98), rgba(224,239,244,.95)) !important;
+    box-shadow:
+        0 0 0 3px rgba(255,255,255,.86),
+        0 7px 16px rgba(31, 75, 91, .13),
+        inset 0 1px 0 #fff !important;
+    overflow: hidden !important;
+}
+
+.paradise-player-avatar img,
+.paradise-player-avatar canvas {
+    image-rendering: pixelated !important;
+    filter: none !important;
+}
+
+.paradise-player-name {
+    color: #243c46 !important;
+    font-family: Ubuntu, Arial, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    letter-spacing: -.18px !important;
+    text-shadow: 0 1px 0 rgba(255,255,255,.95) !important;
+}
+
+/* Real game bars: neutral track + dynamic coloured fill. */
+.paradise-player-health,
+.paradise-player-energy {
+    box-sizing: border-box !important;
+    width: 174px !important;
+    max-width: 174px !important;
+    min-width: 174px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    border: 1px solid rgba(69, 103, 116, .31) !important;
+    border-radius: 6px !important;
+    background: linear-gradient(180deg, #edf4f6, #dbe7eb) !important;
+    background-color: #e3edf0 !important;
+    background-image: linear-gradient(180deg, #edf4f6, #dbe7eb) !important;
+    box-shadow:
+        inset 0 1px 2px rgba(32, 65, 77, .10),
+        inset 0 1px 0 rgba(255,255,255,.80),
+        0 1px 2px rgba(28, 59, 71, .06) !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+}
+
+.paradise-player-health::before,
+.paradise-player-energy::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--paradise-fill, 0%);
+    min-width: 3px;
+    border-radius: 5px;
+    pointer-events: none;
+    transition: width 180ms ease;
+}
+
+.paradise-player-health::before {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.27), rgba(255,255,255,0) 42%),
+        linear-gradient(90deg, #28b750, #35c85d 58%, #229b44);
+    box-shadow: inset 0 -1px 0 rgba(7, 85, 30, .14);
+}
+
+.paradise-player-energy::before {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,0) 42%),
+        linear-gradient(90deg, #2d94be, #42afd6 58%, #287fa8);
+    box-shadow: inset 0 -1px 0 rgba(7, 61, 87, .14);
+}
+
+.paradise-player-health::after,
+.paradise-player-energy::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    left: 3px;
+    right: 3px;
+    top: 1px;
+    height: 35%;
+    border-radius: 5px 5px 2px 2px;
+    background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0));
+    pointer-events: none;
+}
+
+.paradise-player-health > *,
+.paradise-player-energy > * {
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+.paradise-player-stat-value {
+    color: #ffffff !important;
+    font-family: Ubuntu, Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    letter-spacing: -.15px !important;
+    text-shadow:
+        0 1px 1px rgba(0,0,0,.55),
+        0 0 2px rgba(0,0,0,.12) !important;
+}
+
+/* When a bar is empty, keep the value readable on the neutral track. */
+.paradise-player-health[data-paradise-empty="1"] .paradise-player-stat-value,
+.paradise-player-energy[data-paradise-empty="1"] .paradise-player-stat-value {
+    color: #39515b !important;
+    text-shadow: 0 1px 0 rgba(255,255,255,.75) !important;
+}
+
+.paradise-player-stat-icon {
+    filter: drop-shadow(0 1px 0 rgba(255,255,255,.25)) !important;
+}
+
+/* Third gauge: part of the panel, not an isolated yellow stick. */
+.paradise-player-gauge {
+    box-sizing: border-box !important;
+    width: 9px !important;
+    min-width: 9px !important;
+    max-width: 9px !important;
+    border: 1px solid rgba(107, 77, 20, .40) !important;
+    border-radius: 5px !important;
+    background:
+        linear-gradient(90deg, rgba(255,255,255,.34), transparent 42%, rgba(112,72,10,.09)),
+        linear-gradient(180deg, #ffd05a, #f3ad2f 55%, #dc8f19) !important;
+    box-shadow:
+        0 0 0 3px rgba(255,255,255,.48),
+        0 2px 5px rgba(103, 72, 18, .10),
+        inset 0 1px 0 rgba(255,255,255,.52) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .paradise-player-health::before,
+    .paradise-player-energy::before {
+        transition: none !important;
+    }
+}

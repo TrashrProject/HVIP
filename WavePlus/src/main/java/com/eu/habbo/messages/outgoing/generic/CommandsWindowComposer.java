@@ -2,6 +2,7 @@ package com.eu.habbo.messages.outgoing.generic;
 
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.commands.Command;
+import com.eu.habbo.habbohotel.commands.CommandDocumentation;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
 import com.google.gson.JsonArray;
@@ -13,14 +14,8 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
-/**
- * Opens the native WaveRP command centre already bundled in the Nitro client.
- * The payload is sent through LinkEvent (packet 2023), matching the historical
- * WaveRP implementation used by the commands UI.
- */
 public class CommandsWindowComposer extends MessageComposer {
     private static final int LINK_EVENT_PACKET_ID = 2023;
     private static final int MAX_INLINE_BYTES = 60000;
@@ -74,13 +69,13 @@ public class CommandsWindowComposer extends MessageComposer {
 
         for (Command command : commands) {
             CommandDetails details = getDetails(command);
-            if (details == null) continue;
-
             JsonObject item = new JsonObject();
             JsonArray aliases = new JsonArray();
-            for (String alias : details.aliases) aliases.add(alias);
 
             item.addProperty("name", details.name);
+            for (String alias : details.aliases) {
+                aliases.add(alias);
+            }
             item.add("aliases", aliases);
             item.addProperty("description", details.description);
             item.addProperty("usage", details.usage);
@@ -92,89 +87,75 @@ public class CommandsWindowComposer extends MessageComposer {
         }
 
         JsonArray categories = new JsonArray();
-        categories.add("All");
-        addCategory(categories, usedCategories, "Roleplay");
-        addCategory(categories, usedCategories, "Work");
-        addCategory(categories, usedCategories, "Police");
-        addCategory(categories, usedCategories, "General");
+        categories.add("Toutes");
+        addCategory(categories, usedCategories, "RP");
+        addCategory(categories, usedCategories, "Appartement");
+        addCategory(categories, usedCategories, "Personnage");
         addCategory(categories, usedCategories, "Staff");
+        addCategory(categories, usedCategories, "Général");
 
         data.add("commands", commandItems);
         data.add("categories", categories);
         payload.add("data", data);
+
         return payload;
     }
 
     private static void addCategory(JsonArray categories, Set<String> usedCategories, String category) {
-        if (usedCategories.contains(category)) categories.add(category);
+        if (usedCategories.contains(category)) {
+            categories.add(category);
+        }
     }
 
     private static CommandDetails getDetails(Command command) {
-        if (command == null || command.keys == null) return null;
-
         List<String> keys = new ArrayList<>();
-        for (String key : command.keys) {
-            if (key != null && !key.trim().isEmpty() && !containsIgnoreCase(keys, key.trim())) {
-                keys.add(key.trim());
+        if (command.keys != null) {
+            for (String key : command.keys) {
+                if (key != null && !key.trim().isEmpty() && !containsIgnoreCase(keys, key.trim())) {
+                    keys.add(key.trim());
+                }
             }
         }
-        if (keys.isEmpty()) return null;
 
-        String name = ":" + keys.get(0);
-        String permission = command.permission == null ? "" : command.permission;
-        String translationKey = "commands.description." + permission;
-        String localized = Emulator.getTexts().getValue(translationKey, "").trim();
+        String fallbackKey = command.permission == null ? "commande" : command.permission.replaceFirst("^cmd_", "");
+        String name = ":" + (keys.isEmpty() ? fallbackKey : keys.get(0));
+        String localized = Emulator.getTexts().getValue(
+                "commands.description." + command.permission,
+                name
+        ).trim();
+        String usage = localized.startsWith(":") ? firstLine(localized) : name;
+        String description = localized.startsWith(":") ? "" : localized;
 
-        String usage = name;
-        String description = "Use this command in the room chat.";
+        int separator = usage.indexOf(" - ");
+        if (separator > 0) {
+            description = usage.substring(separator + 3).trim();
+            usage = usage.substring(0, separator).trim();
+        }
 
-        if (!localized.isEmpty() && !localized.equalsIgnoreCase(translationKey)) {
-            String firstLine = firstLine(localized);
-            if (firstLine.startsWith(":")) {
-                usage = firstLine;
-                int separator = firstLine.indexOf(" - ");
-                if (separator > 0) {
-                    usage = firstLine.substring(0, separator).trim();
-                    description = firstLine.substring(separator + 3).trim();
-                }
-            } else {
-                description = firstLine;
-            }
+        String usageCommand = usage.split("\\s+", 2)[0];
+        if (usageCommand.startsWith(":")) {
+            name = usageCommand;
+        }
+
+        usage = normalizeUsage(usage);
+        CommandDocumentation.Metadata metadata = CommandDocumentation.resolve(command.permission, name);
+        String descriptionOverride = CommandDocumentation.descriptionOverride(command.permission);
+        if (descriptionOverride != null) {
+            description = descriptionOverride;
+        } else if (description.isEmpty() || description.equals("commands.description." + command.permission)) {
+            description = metadata.defaultDescription;
         }
 
         List<String> aliases = new ArrayList<>();
-        for (int i = 1; i < keys.size(); i++) aliases.add(":" + keys.get(i));
-
-        Category category = categoryFor(permission, keys.get(0));
-        return new CommandDetails(name, aliases, description, normalizeUsage(usage),
-                category.category, category.subcategory, category.access);
-    }
-
-    private static Category categoryFor(String permission, String key) {
-        String value = (permission + " " + key).toLowerCase(Locale.ROOT);
-
-        if (containsAny(value, "911", "police", "tazor", "taser", "handcuff", "escort", "prison", "release", "arrest", "wanted", "charge", "pardon", "detaser")) {
-            return new Category("Police", "Police", "Police on duty");
+        for (String key : keys) {
+            String alias = ":" + key;
+            if (!alias.equalsIgnoreCase(name) && !containsIgnoreCase(aliases, alias)) {
+                aliases.add(alias);
+            }
         }
 
-        if (containsAny(value, "job", "work", "hire", "fire", "promote", "demote", "apply", "sell_rpitem", "offer_rpitem", "accept_offer", "decline_offer", "send_home")) {
-            return new Category("Work", "Jobs", "Depends on job and rank");
-        }
-
-        if (containsAny(value, "ems", "balance", "deposit", "withdraw", "transactions", "openaccount", "bucks", "rob", "shoot", "hit", "spit", "equip", "unequip", "passive", "combat", "taxi", "org_", "rpitem")) {
-            return new Category("Roleplay", "Roleplay", "Roleplay access");
-        }
-
-        if (containsAny(value, "ban", "mute", "alert", "staff", "shutdown", "update_", "super", "give_rank", "mass", "userinfo", "invisible", "summon", "stalk")) {
-            return new Category("Staff", "Staff", "Staff only");
-        }
-
-        return new Category("General", "General", "Available to your rank");
-    }
-
-    private static boolean containsAny(String value, String... needles) {
-        for (String needle : needles) if (value.contains(needle)) return true;
-        return false;
+        return new CommandDetails(name, aliases, description, usage, metadata.category,
+                metadata.subcategory, metadata.access);
     }
 
     private static String firstLine(String value) {
@@ -183,7 +164,11 @@ public class CommandsWindowComposer extends MessageComposer {
     }
 
     private static boolean containsIgnoreCase(List<String> values, String expected) {
-        for (String value : values) if (value.equalsIgnoreCase(expected)) return true;
+        for (String value : values) {
+            if (value.equalsIgnoreCase(expected)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -196,20 +181,13 @@ public class CommandsWindowComposer extends MessageComposer {
                 .replace("<montant>", "[montant]")
                 .replace("<message>", "[message]")
                 .replace("<text>", "[message]")
+                .replace("<time in seconds>", "[durée en secondes]")
                 .replace("<minutes>", "[minutes]")
-                .replace("<code>", "[code]");
-    }
-
-    private static class Category {
-        private final String category;
-        private final String subcategory;
-        private final String access;
-
-        private Category(String category, String subcategory, String access) {
-            this.category = category;
-            this.subcategory = subcategory;
-            this.access = access;
-        }
+                .replace("<raison>", "[raison]")
+                .replace("<rank>", "[rang]")
+                .replace("<metier|id>", "[métier|ID]")
+                .replace("<code>", "[code]")
+                .replace("<objet>", "[objet]");
     }
 
     private static class CommandDetails {

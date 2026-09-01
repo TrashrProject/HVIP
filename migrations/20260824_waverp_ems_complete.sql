@@ -36,14 +36,9 @@ CREATE TABLE IF NOT EXISTS `rp_ems_treatments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `jobs` (`name`, `display_name`, `description`, `active`)
-<<<<<<< HEAD
-VALUES ('hospital', 'Hospital', 'Service medical et urgences de ParadiseRP', TRUE)
-ON DUPLICATE KEY UPDATE
-=======
 VALUES ('hospital', 'EMS - Services médicaux', 'Services médicaux et urgences de ParadiseRP', TRUE)
 ON DUPLICATE KEY UPDATE
   `display_name` = VALUES(`display_name`),
->>>>>>> 39dc96e65 (Modifications collègue ParadiseRP)
   `description` = VALUES(`description`),
   `active` = TRUE;
 
@@ -53,19 +48,11 @@ INSERT INTO `job_ranks`
 (`job_id`, `name`, `display_name`, `level`, `is_manager`, `salary`, `permissions`, `active`) VALUES
 (@hospital_job_id, 'hospital_nurse', 'Infirmier', 0, FALSE, 40.00,
  '["medical.heal","medical.bandage","medical.stabilize"]', TRUE),
-<<<<<<< HEAD
-(@hospital_job_id, 'hospital_supervisor', 'Medecin urgentiste', 1, FALSE, 60.00,
- '["medical.heal","medical.bandage","medical.stabilize","medical.revive"]', TRUE),
-(@hospital_job_id, 'hospital_asst_manager', 'Ambulancier superviseur', 2, TRUE, 80.00,
- '["medical.heal","medical.bandage","medical.stabilize","medical.revive","medical.ambulance","medical.dispatch","job.hire"]', TRUE),
-(@hospital_job_id, 'hospital_manager', 'Directeur de l''hopital', 3, TRUE, 120.00,
-=======
 (@hospital_job_id, 'hospital_supervisor', 'Médecin urgentiste', 1, FALSE, 60.00,
  '["medical.heal","medical.bandage","medical.stabilize","medical.revive"]', TRUE),
 (@hospital_job_id, 'hospital_asst_manager', 'Ambulancier superviseur', 2, TRUE, 80.00,
  '["medical.heal","medical.bandage","medical.stabilize","medical.revive","medical.ambulance","medical.dispatch","job.hire"]', TRUE),
 (@hospital_job_id, 'hospital_manager', 'Directeur des services médicaux', 3, TRUE, 120.00,
->>>>>>> 39dc96e65 (Modifications collègue ParadiseRP)
  '["medical.heal","medical.bandage","medical.stabilize","medical.revive","medical.ambulance","medical.dispatch","medical.surgery","job.hire","job.fire","job.promote","job.demote","job.schedule"]', TRUE)
 ON DUPLICATE KEY UPDATE
   `display_name` = VALUES(`display_name`),
@@ -84,8 +71,3 @@ INSERT INTO `emulator_settings` (`key`, `value`) VALUES
 ('features.ems.treatment.range', '1'),
 ('features.ems.treatment.cooldown.seconds', '3')
 ON DUPLICATE KEY UPDATE `value` = VALUES(`value`);
-<<<<<<< HEAD
-
-=======
-
->>>>>>> 39dc96e65 (Modifications collègue ParadiseRP)

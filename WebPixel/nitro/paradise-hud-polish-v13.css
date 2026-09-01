@@ -1,0 +1,242 @@
+/* ParadiseRP HUD - final visual polish v13
+ * Keeps the working V12 structure and only refines proportions,
+ * hierarchy, spacing and action-control balance.
+ */
+
+#paradise-hud-v2 {
+    width: min(254px, calc(100vw - 16px));
+}
+
+#paradise-hud-v2 .phud-shell {
+    padding: 10px;
+    border-color: rgba(91, 137, 159, .19);
+    border-radius: 15px;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(91, 197, 218, .105), transparent 35%),
+        linear-gradient(150deg, rgba(255, 255, 255, .995), rgba(243, 249, 252, .98));
+    box-shadow:
+        0 17px 34px rgba(37, 67, 82, .135),
+        0 3px 9px rgba(37, 67, 82, .065),
+        inset 0 1px 0 rgba(255, 255, 255, .99);
+}
+
+#paradise-hud-v2 .phud-shell::before {
+    left: 26px;
+    right: 26px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #42b7d2 25%, #73d7df 75%, transparent);
+    opacity: .94;
+}
+
+/* Room identity */
+#paradise-hud-v2 .phud-room {
+    height: 34px;
+    gap: 9px;
+    padding: 0 3px;
+}
+
+#paradise-hud-v2 .phud-room::before {
+    width: 4px;
+    height: 18px;
+    flex-basis: 4px;
+    background: linear-gradient(180deg, #67d8e4 0%, #36a7ca 100%);
+    box-shadow: 0 0 0 3px rgba(69, 176, 205, .075);
+}
+
+#paradise-hud-v2 .phud-room-name {
+    font-size: 13px;
+    font-weight: 850;
+    letter-spacing: -.15px;
+    color: #1d333d;
+}
+
+#paradise-hud-v2 .phud-version {
+    min-width: 30px;
+    height: 21px;
+    padding: 0 8px;
+    font-size: 8.8px;
+    color: #2f7189;
+    background: rgba(225, 245, 250, .94);
+    border-color: rgba(69, 150, 180, .22);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+}
+
+/* Currency strip */
+#paradise-hud-v2 .phud-money {
+    margin-top: 5px;
+    padding: 4px;
+    border-radius: 12px;
+    border-color: rgba(103, 145, 163, .16);
+    background: rgba(239, 247, 250, .87);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.96),
+        0 1px 3px rgba(43, 74, 88, .03);
+}
+
+#paradise-hud-v2 .phud-money-item {
+    height: 32px;
+    gap: 6px;
+    padding: 0 5px;
+    border-radius: 9px;
+    transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+#paradise-hud-v2 .phud-money-item:nth-child(1) {
+    background: linear-gradient(180deg, rgba(255, 249, 226, .79), rgba(255, 247, 217, .54));
+}
+
+#paradise-hud-v2 .phud-money-item:nth-child(2) {
+    background: linear-gradient(180deg, rgba(250, 238, 253, .75), rgba(247, 233, 251, .51));
+}
+
+#paradise-hud-v2 .phud-money-item:nth-child(3) {
+    background: linear-gradient(180deg, rgba(229, 249, 251, .80), rgba(220, 245, 248, .55));
+}
+
+#paradise-hud-v2 .phud-money-icon {
+    width: 14px;
+    height: 14px;
+    flex-basis: 14px;
+}
+
+#paradise-hud-v2 .phud-money-dot {
+    width: 9px;
+    height: 9px;
+}
+
+#paradise-hud-v2 .phud-money-value {
+    font-size: 11px;
+    font-weight: 850;
+    color: #293f49;
+    letter-spacing: -.06px;
+}
+
+/* Footer: slightly larger without making the HUD bulky */
+#paradise-hud-v2 .phud-bottom {
+    height: 33px;
+    gap: 6px;
+    margin-top: 7px;
+}
+
+#paradise-hud-v2 .phud-time {
+    width: 64px;
+    height: 31px;
+    flex-basis: 64px;
+    padding: 0 6px;
+    border-radius: 10px;
+    font-size: 9.2px;
+    font-weight: 850;
+    color: #3c5662;
+    background: rgba(246, 250, 252, .94);
+    border-color: rgba(105, 145, 163, .15);
+}
+
+#paradise-hud-v2 .phud-vip {
+    width: 52px;
+    height: 31px;
+    flex-basis: 52px;
+    gap: 4px;
+    padding: 0 5px;
+    border-radius: 10px;
+    font-size: 8.1px;
+    font-weight: 900;
+    color: #71848d;
+    background: rgba(248, 251, 252, .91);
+    border-color: rgba(105, 145, 163, .14);
+}
+
+#paradise-hud-v2 .phud-vip::before {
+    width: 6px;
+    height: 6px;
+    flex-basis: 6px;
+    background: #a7b5bb;
+}
+
+#paradise-hud-v2 .phud-vip.is-active {
+    color: #35744f;
+    background: rgba(235, 250, 241, .96);
+    border-color: rgba(76, 154, 103, .22);
+}
+
+/* Three primary controls: same weight, slightly larger hit area */
+#paradise-hud-v2 .phud-actions {
+    margin-left: auto;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+#paradise-hud-v2 .phud-action {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    border-radius: 10px;
+    border-width: 1px;
+    box-shadow:
+        0 3px 8px rgba(42, 76, 92, .065),
+        inset 0 1px 0 rgba(255,255,255,.99);
+}
+
+#paradise-hud-v2 .phud-action-icon {
+    width: 17px !important;
+    height: 17px !important;
+    stroke-width: 1.9;
+}
+
+#paradise-hud-v2 .phud-action-1 .phud-action-icon {
+    width: 18px !important;
+    height: 18px !important;
+}
+
+#paradise-hud-v2 .phud-action-2 .phud-action-icon {
+    width: 17px !important;
+    height: 17px !important;
+}
+
+#paradise-hud-v2 .phud-action:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 6px 13px rgba(44, 100, 122, .11),
+        inset 0 1px 0 rgba(255,255,255,.99);
+}
+
+#paradise-hud-v2 .phud-action:focus-visible {
+    outline: 2px solid rgba(62, 173, 206, .28);
+    outline-offset: 1px;
+}
+
+@media (max-width: 560px) {
+    #paradise-hud-v2 {
+        width: min(242px, calc(100vw - 16px));
+    }
+
+    #paradise-hud-v2 .phud-room-name {
+        font-size: 12.4px;
+    }
+
+    #paradise-hud-v2 .phud-time {
+        width: 61px;
+        flex-basis: 61px;
+    }
+
+    #paradise-hud-v2 .phud-vip {
+        width: 49px;
+        flex-basis: 49px;
+        font-size: 7.7px;
+    }
+
+    #paradise-hud-v2 .phud-action {
+        width: 30px;
+        height: 30px;
+        flex-basis: 30px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #paradise-hud-v2 .phud-money-item,
+    #paradise-hud-v2 .phud-action {
+        transition: none;
+    }
+}
