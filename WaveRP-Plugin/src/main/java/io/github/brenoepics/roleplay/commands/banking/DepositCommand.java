@@ -27,8 +27,9 @@ public class DepositCommand extends Command {
       return true;
     }
 
-    if (params.length != 2) {
-      gameClient.getHabbo().whisper(":depot <montant>", RoomChatMessageBubbles.ALERT);
+    boolean mobile = params.length == 3 && "phone".equalsIgnoreCase(params[2]);
+    if (params.length != 2 && !mobile) {
+      gameClient.getHabbo().whisper(":deposer <montant>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -67,7 +68,7 @@ public class DepositCommand extends Command {
     }
 
     boolean nearATM = isNearATM(currentRoom, gameClient.getHabbo());
-    if (!nearATM) {
+    if (!mobile && !nearATM) {
       gameClient.getHabbo()
           .whisper("Vous devez \u00eatre pr\u00e8s d'un distributeur pour effectuer un d\u00e9p\u00f4t.", RoomChatMessageBubbles.ALERT);
       return true;
@@ -80,12 +81,23 @@ public class DepositCommand extends Command {
       return true;
     }
 
+    if (mobile) {
+      long remaining = bankManager.getMobileDepositCooldownSeconds(userId);
+      if (remaining > 0) {
+        long minutes = Math.max(1, (remaining + 59) / 60);
+        gameClient.getHabbo().whisper("Le dépôt mobile est limité à un toutes les 30 minutes. Réessayez dans " + minutes + " minute(s), ou rendez-vous au guichet.", RoomChatMessageBubbles.ALERT);
+        return true;
+      }
+    }
+
     // Perform deposit
     int roomId = currentRoom.getId();
-    if (bankManager.deposit(userId, amount, roomId)) {
+    boolean success = mobile ? bankManager.mobileDeposit(userId, amount, roomId) : bankManager.deposit(userId, amount, roomId);
+    if (success) {
       String formattedAmount = bankManager.formatCurrency(amount);
       String successMessage = String.format(BankManager.SUCCESS_DEPOSIT, formattedAmount);
       gameClient.getHabbo().whisper(successMessage, RoomChatMessageBubbles.ALERT);
+      if (mobile) gameClient.getHabbo().whisper("Prochain dépôt mobile disponible dans 30 minutes. Les dépôts au guichet restent disponibles.", RoomChatMessageBubbles.NORMAL);
     } else {
       gameClient.getHabbo()
           .whisper("Le d\u00e9p\u00f4t a \u00e9chou\u00e9. R\u00e9essayez plus tard.", RoomChatMessageBubbles.ALERT);

@@ -13,6 +13,7 @@ import io.github.brenoepics.roleplay.features.banking.BankManager;
 import io.github.brenoepics.roleplay.features.banking.entities.BankAccount;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.communication.packets.emulator.outgoing.AtmBankComposer;
+import io.github.brenoepics.roleplay.communication.packets.emulator.outgoing.ClientLinkEventComposer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +21,13 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class InteractionATM extends InteractionDefault {
 
     private static final Logger log = LoggerFactory.getLogger(InteractionATM.class);
     private static final int MAX_INTERACTION_DISTANCE = 2; // Maximum distance to interact with ATM
+    private static final ConcurrentHashMap<Integer, Long> LAST_OPEN = new ConcurrentHashMap<>();
 
     public InteractionATM(ResultSet set, Item baseItem) throws SQLException {
         super(set, baseItem);
@@ -51,6 +54,9 @@ public class InteractionATM extends InteractionDefault {
         }
 
         Habbo habbo = client.getHabbo();
+        long now = System.currentTimeMillis();
+        Long previous = LAST_OPEN.put(habbo.getHabboInfo().getId(), now);
+        if (previous != null && now - previous < 750L) return;
         RpAvatar rpAvatar = RolePlay.getAvatarManager().getRpAvatar(habbo);
         
         // Check if user is in passive mode
@@ -85,7 +91,7 @@ public class InteractionATM extends InteractionDefault {
         BigDecimal bankBalance = account.getBankBalance();
         int walletInt = 0;
         try {
-            walletInt = habbo.getHabboInfo().getCurrencyAmount(200);
+            walletInt = habbo.getHabboInfo().getCredits();
         } catch (Exception ignored) {}
         BigDecimal walletBalance = BigDecimal.valueOf(walletInt);
         BigDecimal feePercentage = bankManager.getATMFeePercentage();
@@ -102,6 +108,8 @@ public class InteractionATM extends InteractionDefault {
                 canDeposit,
                 canWithdraw
         ));
+        habbo.getClient().sendResponse(new ClientLinkEventComposer("atm/show"));
+        habbo.shout("* Utilise le distributeur automatique *", RoomChatMessageBubbles.NORMAL);
 
         log.info("User {} accessed ATM {} in room {} - Balance total:{}",
                 userId, this.getId(), room.getId(), bankManager.formatCurrency(bankBalance.add(walletBalance)));

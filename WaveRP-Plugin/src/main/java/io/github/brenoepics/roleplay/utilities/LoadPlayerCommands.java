@@ -80,6 +80,7 @@ import io.github.brenoepics.roleplay.commands.staff.SuperHealCommand;
 import io.github.brenoepics.roleplay.commands.staff.SuperHireCommand;
 import io.github.brenoepics.roleplay.commands.wanted.WantedListCommand;
 import io.github.brenoepics.roleplay.commands.banking.BalanceCommand;
+import io.github.brenoepics.roleplay.commands.banking.BankEmployeeCommand;
 import io.github.brenoepics.roleplay.commands.banking.DepositCommand;
 import io.github.brenoepics.roleplay.commands.banking.GiveCommand;
 import io.github.brenoepics.roleplay.commands.banking.OpenAccountCommand;
@@ -149,10 +150,10 @@ public class LoadPlayerCommands {
       LoadPlayerCommands.addCommand(
           new CarryPatientCommand("cmd_ems_carry", new String[]{"porter", "carry"}),
           new String[]{"porter", "carry"}, CheckDatabase.PermissionState.ALLOWED);
-      setDescription("cmd_ems_drop", ":deposer [pseudo] - Arr\u00eater le transport d'un joueur.");
+      setDescription("cmd_ems_drop", ":deposerpatient [pseudo] - Arr\u00eater le transport d'un joueur.");
       LoadPlayerCommands.addCommand(
-          new DropPatientCommand("cmd_ems_drop", new String[]{"deposer", "drop"}),
-          new String[]{"deposer", "drop"}, CheckDatabase.PermissionState.ALLOWED);
+          new DropPatientCommand("cmd_ems_drop", new String[]{"deposerpatient", "poserpatient", "drop"}),
+          new String[]{"deposerpatient", "poserpatient", "drop"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
           new EmsCallCommand("cmd_ems", new String[]{"ems", "medecin", "ambulance"}),
           new String[]{"ems", "medecin", "ambulance"}, CheckDatabase.PermissionState.ALLOWED);
@@ -222,24 +223,38 @@ public class LoadPlayerCommands {
           new String[]{"ping"}, CheckDatabase.PermissionState.ALLOWED);
 
       // Banking commands
+      setDescription("cmd_openaccount", ":ouvrircompte [pseudo] - Ouvre le compte d'un client au guichet.");
+      setDescription("cmd_balance", ":solde - Consulte votre solde bancaire et vos espèces.");
+      setDescription("cmd_give", ":virement [pseudo] [montant] - Effectue un virement bancaire.");
+      setDescription("cmd_transactions", ":historique [limite] - Affiche vos dernières opérations.");
+      setDescription("cmd_deposit", ":deposer [montant] - Dépose des espèces depuis un ATM.");
+      setDescription("cmd_withdraw", ":retirer [montant] - Retire des espèces depuis un ATM.");
+      setDescription("cmd_bank_account", ":compte [pseudo] - Consulte le compte d'un client.");
+      setDescription("cmd_bank_close", ":fermercompte [pseudo] - Ferme le compte d'un client.");
+      setDescription("cmd_bank_counter_deposit", ":versement [pseudo] [montant] - Dépôt au guichet.");
+      setDescription("cmd_bank_counter_withdraw", ":retraitclient [pseudo] [montant] - Retrait au guichet.");
       LoadPlayerCommands.addCommand(
-          new OpenAccountCommand("cmd_openaccount", getSplit("commands.cmd_openaccount.keys")),
-          new String[]{"openaccount"}, CheckDatabase.PermissionState.ALLOWED);
+          new BankEmployeeCommand("cmd_openaccount", new String[]{"ouvrircompte", "openaccount"}, BankEmployeeCommand.Action.OPEN),
+          new String[]{"ouvrircompte", "openaccount"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
-          new BalanceCommand("cmd_balance", getSplit("commands.cmd_balance.keys")),
-          new String[]{"balance"}, CheckDatabase.PermissionState.ALLOWED);
+          new BalanceCommand("cmd_balance", new String[]{"solde", "balance"}),
+          new String[]{"solde", "balance"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
-          new GiveCommand("cmd_give", getSplit("commands.cmd_give.keys")),
-          new String[]{"give"}, CheckDatabase.PermissionState.ALLOWED);
+          new GiveCommand("cmd_give", new String[]{"virement", "give"}),
+          new String[]{"virement", "give"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
-          new TransactionHistoryCommand("cmd_transactions", getSplit("commands.cmd_transactions.keys")),
-          new String[]{"transactions", "history"}, CheckDatabase.PermissionState.ALLOWED);
+          new TransactionHistoryCommand("cmd_transactions", new String[]{"historique", "transactions", "history"}),
+          new String[]{"historique", "transactions", "history"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
-          new DepositCommand("cmd_deposit", getSplit("commands.cmd_deposit.keys")),
-          new String[]{"deposit"}, CheckDatabase.PermissionState.ALLOWED);
+          new DepositCommand("cmd_deposit", new String[]{"deposer", "depot", "deposit"}),
+          new String[]{"deposer", "depot", "deposit"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(
-          new WithdrawCommand("cmd_withdraw", getSplit("commands.cmd_withdraw.keys")),
-          new String[]{"withdraw"}, CheckDatabase.PermissionState.ALLOWED);
+          new WithdrawCommand("cmd_withdraw", new String[]{"retirer", "withdraw"}),
+          new String[]{"retirer", "withdraw"}, CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new BankEmployeeCommand("cmd_bank_account",new String[]{"compte"},BankEmployeeCommand.Action.ACCOUNT),new String[]{"compte"},CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new BankEmployeeCommand("cmd_bank_close",new String[]{"fermercompte"},BankEmployeeCommand.Action.CLOSE),new String[]{"fermercompte"},CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new BankEmployeeCommand("cmd_bank_counter_deposit",new String[]{"versement"},BankEmployeeCommand.Action.DEPOSIT),new String[]{"versement"},CheckDatabase.PermissionState.ALLOWED);
+      LoadPlayerCommands.addCommand(new BankEmployeeCommand("cmd_bank_counter_withdraw",new String[]{"retraitclient"},BankEmployeeCommand.Action.WITHDRAW),new String[]{"retraitclient"},CheckDatabase.PermissionState.ALLOWED);
 
       LoadPlayerCommands.addCommand(
           new SellCommand("cmd_sell_rpitem", getSplit("commands.cmd_sell_rpitem.keys")),

@@ -43,6 +43,14 @@ public class BankManager {
         }
     }
 
+    public boolean closeBankAccount(int userId) { return bankService.closeBankAccount(userId); }
+    public boolean bankerDeposit(int userId, BigDecimal amount, int roomId, int employeeId) {
+        boolean ok = bankService.bankerDeposit(userId, amount, roomId, employeeId); if (ok) pushBankSnapshot(userId); return ok;
+    }
+    public boolean bankerWithdraw(int userId, BigDecimal amount, int roomId, int employeeId) {
+        boolean ok = bankService.bankerWithdraw(userId, amount, roomId, employeeId); if (ok) pushBankSnapshot(userId); return ok;
+    }
+
     // Banking Operations
     public boolean deposit(int userId, BigDecimal amount, int roomId) {
         if (!validateBankingOperation(userId, "deposit")) {
@@ -54,6 +62,10 @@ public class BankManager {
         }
         return success;
     }
+    public boolean mobileDeposit(int userId, BigDecimal amount, int roomId) {
+        boolean success = bankService.mobileDeposit(userId, amount, roomId); if (success) pushBankSnapshot(userId); return success;
+    }
+    public long getMobileDepositCooldownSeconds(int userId) { return bankService.getMobileDepositCooldownSeconds(userId); }
 
     public boolean withdraw(int userId, BigDecimal amount, int roomId) {
         if (!validateBankingOperation(userId, "withdraw")) {
@@ -132,7 +144,7 @@ public class BankManager {
         }
         
         BankAccount account = accountOpt.get();
-        int walletBalance = habbo.getHabboInfo().getCurrencyAmount(200);
+        int walletBalance = habbo.getHabboInfo().getCredits();
         BigDecimal walletBalanceDecimal = BigDecimal.valueOf(walletBalance);
         BigDecimal totalBalance = account.getBankBalance().add(walletBalanceDecimal);
         
@@ -196,7 +208,7 @@ public class BankManager {
 
         int walletInt = 0;
         try {
-            walletInt = habbo.getHabboInfo().getCurrencyAmount(200);
+            walletInt = habbo.getHabboInfo().getCredits();
         } catch (Exception ignored) {}
         BigDecimal walletBalance = BigDecimal.valueOf(walletInt);
         BigDecimal feePercentage = getATMFeePercentage();

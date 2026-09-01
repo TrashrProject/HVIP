@@ -9,6 +9,7 @@ import com.eu.habbo.plugin.events.emulator.EmulatorLoadItemsManagerEvent;
 import io.github.brenoepics.roleplay.features.items.interactions.ClaimTerritoryItem;
 import io.github.brenoepics.roleplay.features.items.interactions.DrugMachine;
 import io.github.brenoepics.roleplay.features.items.interactions.InteractionATM;
+import io.github.brenoepics.roleplay.features.items.interactions.InteractionBankComputer;
 import io.github.brenoepics.roleplay.features.items.interactions.InteractionFarmable;
 import io.github.brenoepics.roleplay.features.items.interactions.InteractionJobGate;
 import io.github.brenoepics.roleplay.features.items.interactions.InteractionRPBed;
@@ -31,6 +32,7 @@ public class EmulatorLoadItemsManagerListener implements EventListener {
     addInteraction("rp_jobgate", InteractionJobGate.class);
     addInteraction("farmable", InteractionFarmable.class);
     addInteraction("rp_atm", InteractionATM.class);
+    addInteraction("rp_bank_computer", InteractionBankComputer.class);
 
   }
 

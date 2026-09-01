@@ -122,7 +122,6 @@ public class WithdrawCommand extends Command {
     private boolean isATMItem(HabboItem item) {
         // For now, check if the item has "atm" in its name (case insensitive)
         // This can be enhanced to check against specific base item IDs from the database
-        String itemName = item.getBaseItem().getName().toLowerCase();
-        return itemName.contains("atm") || itemName.contains("bank");
+        return item.getBaseItem().getInteractionType().getType().equals(InteractionATM.class);
     }
 }

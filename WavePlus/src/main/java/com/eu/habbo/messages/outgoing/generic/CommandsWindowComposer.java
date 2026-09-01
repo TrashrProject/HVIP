@@ -92,10 +92,9 @@ public class CommandsWindowComposer extends MessageComposer {
         }
 
         JsonArray categories = new JsonArray();
-        categories.add("All");
+        categories.add("Toutes");
         addCategory(categories, usedCategories, "Roleplay");
-        addCategory(categories, usedCategories, "Work");
-        addCategory(categories, usedCategories, "Police");
+        addCategory(categories, usedCategories, "Métiers");
         addCategory(categories, usedCategories, "General");
         addCategory(categories, usedCategories, "Staff");
 
@@ -153,15 +152,33 @@ public class CommandsWindowComposer extends MessageComposer {
     private static Category categoryFor(String permission, String key) {
         String value = (permission + " " + key).toLowerCase(Locale.ROOT);
 
+        if (containsAny(value, "bank", "solde", "virement", "deposer", "depot", "deposit", "retirer", "withdraw", "historique", "transactions", "openaccount", "ouvrircompte", "versement", "retraitclient", "fermercompte")) {
+            boolean employee = permission.startsWith("cmd_bank_") || permission.equals("cmd_openaccount");
+            return new Category(employee ? "Métiers" : "Roleplay", "Banque",
+                    employee ? "Banque en service · grade autorisé · ordinateur connecté" : "Compte bancaire actif");
+        }
+
         if (containsAny(value, "911", "police", "tazor", "taser", "handcuff", "escort", "prison", "release", "arrest", "wanted", "charge", "pardon", "detaser")) {
-            return new Category("Police", "Police", "Police on duty");
+            return new Category("Métiers", "Police", "Policier en service au lieu de travail · grade autorisé");
+        }
+
+        if (containsAny(value, "ems", "medical", "medecin", "ambulance", "heal", "bandage", "stabil", "revive", "patient", "diagnostic")) {
+            return new Category("Métiers", "Hôpital", "Personnel médical en service au lieu de travail · grade autorisé");
+        }
+
+        if (containsAny(value, "taxi")) {
+            return new Category("Métiers", "Taxi", "Chauffeur en service · grade autorisé");
         }
 
         if (containsAny(value, "job", "work", "hire", "fire", "promote", "demote", "apply", "sell_rpitem", "offer_rpitem", "accept_offer", "decline_offer", "send_home")) {
-            return new Category("Work", "Jobs", "Depends on job and rank");
+            return new Category("Métiers", "Gestion et service", "Métier en service au lieu de travail · grade autorisé");
         }
 
-        if (containsAny(value, "ems", "balance", "deposit", "withdraw", "transactions", "openaccount", "bucks", "rob", "shoot", "hit", "spit", "equip", "unequip", "passive", "combat", "taxi", "org_", "rpitem")) {
+        if (containsAny(value, "business", "cashregister", "inventory", "security")) {
+            return new Category("Métiers", "Entreprise", "Employé en service au lieu de travail · grade autorisé");
+        }
+
+        if (containsAny(value, "bucks", "rob", "shoot", "hit", "spit", "equip", "unequip", "passive", "combat", "org_", "rpitem")) {
             return new Category("Roleplay", "Roleplay", "Roleplay access");
         }
 

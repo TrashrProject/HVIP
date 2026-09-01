@@ -3,6 +3,7 @@ package com.eu.habbo.habbohotel.commands;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
+import com.eu.habbo.messages.outgoing.generic.CommandsWindowComposer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,30 +39,9 @@ public class CommandsCommand extends Command {
             }
         });
 
-        String title = Emulator.getTexts().getValue(
-                "commands.generic.cmd_commands.text",
-                "Vos commandes"
-        );
-
-        StringBuilder message = new StringBuilder();
-        message.append(title)
-                .append(" (")
-                .append(commands.size())
-                .append("):\r\n\r\n");
-
-        for (Command command : commands) {
-            String primaryKey = getPrimaryKey(command);
-            message.append(":").append(primaryKey);
-
-            String description = getDescription(command);
-            if (description != null) {
-                message.append(" - ").append(description);
-            }
-
-            message.append("\r\n");
+        for (CommandsWindowComposer response : CommandsWindowComposer.createResponses(commands)) {
+            gameClient.sendResponse(response);
         }
-
-        gameClient.sendResponse(new GenericAlertComposer(message.toString()));
 
         return true;
     }
