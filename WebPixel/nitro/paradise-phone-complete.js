@@ -453,6 +453,14 @@
             });
             const formTitle = bank.querySelector('.bank-action-form .title');
             if (formTitle && /Retirer/i.test(formTitle.textContent)) bank.querySelector('.bank-action-form .back-btn')?.click();
+            const summary = bank.querySelector('.bank-summary');
+            if (summary && !summary.querySelector('[data-mobile-bank-policy]')) {
+                const policy = document.createElement('div');
+                policy.dataset.mobileBankPolicy = '1';
+                policy.className = 'phone-bank-mobile-policy';
+                policy.textContent = 'Dépôt mobile : une opération toutes les 30 minutes. Pour déposer plus souvent ou retirer des espèces, rendez-vous à Paradise Bank ou à un ATM.';
+                summary.append(policy);
+            }
         });
         select('.phone-camera-shell').forEach(enhanceCamera);
     }

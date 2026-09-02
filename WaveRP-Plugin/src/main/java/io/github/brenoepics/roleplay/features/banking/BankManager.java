@@ -27,6 +27,7 @@ public class BankManager {
     public Optional<BankAccount> getBankAccount(int userId) {
         return bankService.getBankAccount(userId);
     }
+    public Optional<BankAccount> getAnyBankAccount(int userId) { return bankService.getAnyBankAccount(userId); }
 
     public boolean hasBankAccount(int userId) {
         return bankService.hasBankAccount(userId);

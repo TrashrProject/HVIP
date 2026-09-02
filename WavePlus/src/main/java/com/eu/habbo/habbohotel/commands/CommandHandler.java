@@ -46,7 +46,11 @@ public class CommandHandler {
         if (command == null)
             return;
 
-        commands.put(command.getClass().getName(), command);
+        // Several roleplay commands deliberately share one implementation class
+        // with different permissions/actions. Keying only by class silently replaced
+        // all but the last instance (notably the Paradise Bank counter commands).
+        String permission = command.permission == null ? "none" : command.permission;
+        commands.put(command.getClass().getName() + ":" + permission, command);
     }
 
 

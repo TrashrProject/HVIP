@@ -5,6 +5,7 @@ import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.banking.BankManager;
+import io.github.brenoepics.roleplay.features.banking.BankComputerSessionManager;
 import io.github.brenoepics.roleplay.features.banking.entities.BankTransaction;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 
@@ -27,6 +28,10 @@ public class TransactionHistoryCommand extends Command {
             gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.", RoomChatMessageBubbles.ALERT);
             return true;
         }
+        if (!BankComputerSessionManager.mayUsePersonalBankCommand(gameClient.getHabbo())) {
+            gameClient.getHabbo().whisper("En service Banque, connectez-vous à un ordinateur bancaire pour consulter l'historique.", RoomChatMessageBubbles.ALERT);
+            return true;
+        }
         
         // Parse parameters - allow optional limit parameter
         int limit = DEFAULT_HISTORY_LIMIT;
@@ -38,11 +43,11 @@ public class TransactionHistoryCommand extends Command {
                     return true;
                 }
             } catch (NumberFormatException e) {
-                gameClient.getHabbo().whisper(":transactions [limite] - Exemple : :transactions 5", RoomChatMessageBubbles.ALERT);
+                    gameClient.getHabbo().whisper(":historique [limite] - Exemple : :historique 5", RoomChatMessageBubbles.ALERT);
                 return true;
             }
         } else if (params.length > 2) {
-            gameClient.getHabbo().whisper(":transactions [limite] - Exemple : :transactions 5", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper(":historique [limite] - Exemple : :historique 5", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
@@ -103,6 +108,12 @@ public class TransactionHistoryCommand extends Command {
                     // Received money
                     message.append("Re\u00e7u : +").append(amount).append(" (Virement entrant)");
                 }
+                break;
+            case BANKER_DEPOSIT:
+                message.append("Versement au guichet : +").append(amount);
+                break;
+            case BANKER_WITHDRAWAL:
+                message.append("Retrait au guichet : -").append(amount);
                 break;
             case ROBBERY:
                 message.append("Braquage de distributeur : +").append(amount);

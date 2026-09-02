@@ -15,6 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
   private final Map<Integer,ReentrantLock> locks=new ConcurrentHashMap<>();
   private final Map<Integer,Long> lastOperation=new ConcurrentHashMap<>();
   public Optional<BankAccount> getBankAccount(int id){return repository.findBankAccountByUserId(id).filter(BankAccount::isActive);}
+  public Optional<BankAccount> getAnyBankAccount(int id){return repository.findBankAccountByUserId(id);}
   public boolean hasBankAccount(int id){return getBankAccount(id).isPresent();}
   public BankAccount createBankAccount(int id){try{return repository.createOrReactivateAccount(id);}catch(Exception e){throw new IllegalStateException("Ouverture du compte impossible",e);}}
   public boolean closeBankAccount(int id){return repository.setAccountActive(id,false);}

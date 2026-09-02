@@ -20,9 +20,14 @@ public class InteractionBankComputer extends InteractionDefault {
     if(!BankComputerSessionManager.isConfigured(getId())){super.onClick(client,room,objects);return;}
     RpAvatar rp=RolePlay.getAvatarManager().getRpAvatar(client.getHabbo());
     if(rp==null||!rp.isDuty()||rp.getJobEntity()==null||!"bank".equalsIgnoreCase(rp.getJobEntity().getName())){client.getHabbo().whisper("Vous devez être employé de banque en service pour utiliser ce poste.",RoomChatMessageBubbles.ALERT);return;}
-    if(client.getHabbo().getRoomUnit()==null||Math.max(Math.abs(client.getHabbo().getRoomUnit().getCurrentLocation().x-getX()),Math.abs(client.getHabbo().getRoomUnit().getCurrentLocation().y-getY()))>2){client.getHabbo().whisper("Rapprochez-vous de l'ordinateur bancaire.",RoomChatMessageBubbles.ALERT);return;}
-    BankComputerSessionManager.connect(client.getHabbo(),room,this);
-    client.getHabbo().shout("* Se connecte au poste informatique de Paradise Bank *",RoomChatMessageBubbles.NORMAL);
-    client.getHabbo().whisper("Session bancaire ouverte pendant 10 minutes. Restez près de ce poste.",RoomChatMessageBubbles.ALERT);
+    if(client.getHabbo().getRoomUnit()==null||Math.max(Math.abs(client.getHabbo().getRoomUnit().getCurrentLocation().x-getX()),Math.abs(client.getHabbo().getRoomUnit().getCurrentLocation().y-getY()))>1){client.getHabbo().whisper("Placez-vous juste à côté de l'ordinateur bancaire.",RoomChatMessageBubbles.ALERT);return;}
+    boolean connected=BankComputerSessionManager.toggle(client.getHabbo(),room,this);
+    if(connected){
+      client.getHabbo().shout("* Se connecte au poste informatique de Paradise Bank *",RoomChatMessageBubbles.NORMAL);
+      client.getHabbo().whisper("Session bancaire ouverte pendant 10 minutes. Restez près de ce poste.",RoomChatMessageBubbles.ALERT);
+    }else{
+      client.getHabbo().shout("* Se déconnecte du poste informatique de Paradise Bank *",RoomChatMessageBubbles.NORMAL);
+      client.getHabbo().whisper("Session bancaire fermée.",RoomChatMessageBubbles.ALERT);
+    }
   }
 }
