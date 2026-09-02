@@ -41,8 +41,10 @@ public class EquipCommand extends Command {
             gameClient.getHabbo().whisper("Vous n'avez pas la permission d'\u00e9quiper cet objet.", RoomChatMessageBubbles.ALERT);
             return true;
         }
-        if (item.getEnableId() != -1) {
-            gameClient.getHabbo().getHabboInfo().getCurrentRoom().giveEffect(gameClient.getHabbo(), item.getEnableId(), -1);
+        int visualEffect = RolePlay.getWeaponSkinService().getEquippedEffect(
+            gameClient.getHabbo().getHabboInfo().getId(), item.getDisplayName(), item.getEnableId());
+        if (visualEffect != -1) {
+            gameClient.getHabbo().getHabboInfo().getCurrentRoom().giveEffect(gameClient.getHabbo(), visualEffect, -1);
         }
 
         data.getInventory().equipWeapon(item);

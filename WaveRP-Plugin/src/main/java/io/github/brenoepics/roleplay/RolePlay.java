@@ -37,6 +37,7 @@ import io.github.brenoepics.roleplay.features.hospital.DeathHandler;
 import io.github.brenoepics.roleplay.features.crime.wantedlist.WantedSystemManager;
 import io.github.brenoepics.roleplay.features.macro.MacroManager;
 import io.github.brenoepics.roleplay.features.banking.BankManager;
+import io.github.brenoepics.roleplay.features.skins.WeaponSkinService;
 import java.lang.reflect.Field;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -79,6 +80,8 @@ public class RolePlay extends HabboPlugin implements EventListener {
   private static final MarketplaceManager marketplaceManager = new MarketplaceManager();
   @Getter
   private static final BankManager bankManager = new BankManager();
+  @Getter
+  private static final WeaponSkinService weaponSkinService = new WeaponSkinService();
 
   @Override
   public void onEnable() {

@@ -15,6 +15,9 @@ $MavenDownloadUrl = "https://archive.apache.org/dist/maven/maven-3/3.9.11/binari
 $MavenSha512 = "03e2d65d4483a3396980629f260e25cac0d8b6f7f2791e4dc20bc83f9514db8d0f05b0479e699a5f34679250c49c8e52e961262ded468a20de0be254d8207076"
 $BuiltJarRelativePath = "WavePlus\target\RPHabbo-3.5.4-jar-with-dependencies.jar"
 $RuntimeJarRelativePath = "runtime\WavePlus\WaveRP-Arcturus.jar"
+$BuiltPluginRelativePath = "WaveRP-Plugin\target\Roleplay-1.0.45-jar-with-dependencies.jar"
+$RuntimePluginRelativePath = "runtime\WavePlus\plugins\WaveRP-Roleplay.jar"
+$WeaponSkinsMigrationRelativePath = "migrations\20260902_paradise_weapon_skins.sql"
 $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $StoppedService = $false
@@ -30,6 +33,14 @@ function Invoke-CheckedCommand {
     if ($LASTEXITCODE -ne 0) {
         throw "Commande echouee (code $LASTEXITCODE) : $Command $($CommandArguments -join ' ')"
     }
+}
+
+function Get-IniValue {
+    param([string]$Path, [string]$Key, [string]$Default = "")
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return $Default }
+    $Line = Get-Content -LiteralPath $Path | Where-Object { $_ -match "^\s*$([regex]::Escape($Key))\s*=" } | Select-Object -Last 1
+    if (-not $Line) { return $Default }
+    return (($Line -split '=', 2)[1]).Trim()
 }
 
 try {
@@ -48,6 +59,9 @@ try {
     $Maven = Join-Path $RepositoryRoot $MavenRelativePath
     $BuiltJar = Join-Path $RepositoryRoot $BuiltJarRelativePath
     $RuntimeJar = Join-Path $RepositoryRoot $RuntimeJarRelativePath
+    $BuiltPlugin = Join-Path $RepositoryRoot $BuiltPluginRelativePath
+    $RuntimePlugin = Join-Path $RepositoryRoot $RuntimePluginRelativePath
+    $WeaponSkinsMigration = Join-Path $RepositoryRoot $WeaponSkinsMigrationRelativePath
     $RuntimeDirectory = Split-Path -Parent $RuntimeJar
     $JavaExecutable = Join-Path $JavaHome "bin\java.exe"
 
@@ -110,6 +124,8 @@ try {
         $env:JAVA_HOME = $JavaHome
         Set-Location (Join-Path $RepositoryRoot "WavePlus")
         Invoke-CheckedCommand $Maven -DskipTests clean install
+        Set-Location (Join-Path $RepositoryRoot "WaveRP-Plugin")
+        Invoke-CheckedCommand $Maven -DskipTests clean package
     }
     finally {
         Pop-Location
@@ -117,6 +133,37 @@ try {
 
     if (-not (Test-Path -LiteralPath $BuiltJar -PathType Leaf)) {
         throw "JAR compile introuvable : $BuiltJar"
+    }
+    if (-not (Test-Path -LiteralPath $BuiltPlugin -PathType Leaf)) {
+        throw "JAR du plugin compile introuvable : $BuiltPlugin"
+    }
+
+    if (Test-Path -LiteralPath $WeaponSkinsMigration -PathType Leaf) {
+        $RuntimeConfig = Join-Path $RuntimeDirectory "Config\config.ini"
+        $DatabaseHost = Get-IniValue $RuntimeConfig 'db.hostname' '127.0.0.1'
+        $DatabasePort = Get-IniValue $RuntimeConfig 'db.port' '3306'
+        $DatabaseName = Get-IniValue $RuntimeConfig 'db.name' 'waveplus'
+        $DatabaseUser = Get-IniValue $RuntimeConfig 'db.username' 'root'
+        $DatabasePassword = Get-IniValue $RuntimeConfig 'db.password' ''
+        $Mysql = @('C:\xampp\mysql\bin\mysql.exe','C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe') |
+            Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+        if (-not $Mysql) {
+            $MysqlCommand = Get-Command mysql.exe -ErrorAction SilentlyContinue
+            if ($MysqlCommand) { $Mysql = $MysqlCommand.Source }
+        }
+        if (-not $Mysql) { throw 'mysql.exe introuvable pour appliquer la migration des skins.' }
+        try {
+            $env:MYSQL_PWD = $DatabasePassword
+            $MigrationProcess = Start-Process -FilePath $Mysql -ArgumentList @(
+                "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
+                "--database=$DatabaseName", '--default-character-set=utf8mb4'
+            ) -RedirectStandardInput $WeaponSkinsMigration -NoNewWindow -Wait -PassThru
+            if ($MigrationProcess.ExitCode -ne 0) { throw 'La migration SQL des skins a echoue.' }
+            Write-Host "Migration des skins appliquee sur $DatabaseName." -ForegroundColor Green
+        }
+        finally {
+            $env:MYSQL_PWD = $null
+        }
     }
 
     $BackupDirectory = Join-Path $RuntimeDirectory "deploy-backups\$Timestamp"
@@ -159,8 +206,14 @@ try {
     if (Test-Path -LiteralPath $RuntimeJar -PathType Leaf) {
         Copy-Item -LiteralPath $RuntimeJar -Destination (Join-Path $BackupDirectory "WaveRP-Arcturus.jar") -Force
     }
+    if (Test-Path -LiteralPath $RuntimePlugin -PathType Leaf) {
+        Copy-Item -LiteralPath $RuntimePlugin -Destination (Join-Path $BackupDirectory "WaveRP-Roleplay.jar") -Force
+    }
     Copy-Item -LiteralPath $BuiltJar -Destination $RuntimeJar -Force
+    New-Item -ItemType Directory -Path (Split-Path -Parent $RuntimePlugin) -Force | Out-Null
+    Copy-Item -LiteralPath $BuiltPlugin -Destination $RuntimePlugin -Force
     Write-Host "JAR deploye : $RuntimeJar" -ForegroundColor Green
+    Write-Host "Plugin deploye : $RuntimePlugin" -ForegroundColor Green
     Write-Host "WebPixel\nitro a ete actualise par git pull." -ForegroundColor Green
 
     if ($ServiceName) {

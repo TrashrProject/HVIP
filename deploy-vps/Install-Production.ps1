@@ -3,6 +3,7 @@ $root=Split-Path -Parent $PSScriptRoot
 $source=Join-Path $root 'WavePlus'
 $sql=Join-Path $source 'waveplus.sql'
 $migrations=Join-Path $source 'database\production-migrations.sql'
+$weaponSkinsMigration=Join-Path $root 'migrations\20260902_paradise_weapon_skins.sql'
 $out=Join-Path $root 'runtime\WavePlus'
 Write-Host 'Installation WavePlus + base ParadiseRP' -ForegroundColor Cyan
 $mysql=@('C:\xampp\mysql\bin\mysql.exe','C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe')|Where-Object{Test-Path $_}|Select-Object -First 1
@@ -24,6 +25,10 @@ try{
  if(Test-Path $migrations){
   $mig=Start-Process $mysql -ArgumentList @("--host=$h","--port=$p","--user=$u","--database=$n",'--default-character-set=utf8mb4') -RedirectStandardInput $migrations -NoNewWindow -Wait -PassThru
   if($mig.ExitCode){throw 'Migration SQL echouee'}
+ }
+ if(Test-Path $weaponSkinsMigration){
+  $skinMig=Start-Process $mysql -ArgumentList @("--host=$h","--port=$p","--user=$u","--database=$n",'--default-character-set=utf8mb4') -RedirectStandardInput $weaponSkinsMigration -NoNewWindow -Wait -PassThru
+  if($skinMig.ExitCode){throw 'Migration des skins echouee'}
  }
  $cp=Join-Path $source 'Config\config.ini';$cfg=[IO.File]::ReadAllText($cp)
  $rconPort=30001
