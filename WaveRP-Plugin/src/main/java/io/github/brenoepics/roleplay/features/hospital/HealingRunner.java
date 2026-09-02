@@ -14,6 +14,7 @@ public class HealingRunner implements Runnable {
 
   private static final long DELAY_MS = 5_000L;
   private static final long FULL_HEAL_DURATION_MS = 7 * 60 * 1000L;
+  private static final long PROGRESS_MESSAGE_INTERVAL_MS = 60_000L;
 
   private static void processHospitalUsers(Collection<Habbo> entries) {
     for (Habbo habbo : entries) {
@@ -41,7 +42,7 @@ public class HealingRunner implements Runnable {
       habbo.getRoomUnit().setCanWalk(willWalk);
     }
 
-    return habbo.getHabboInfo().isOnline();
+    return habbo.getHabboInfo().isOnline() && knockedOut;
   }
 
   private static boolean isAtBed(Habbo habbo) {
@@ -58,6 +59,12 @@ public class HealingRunner implements Runnable {
     newHealth = Math.max(avatar.getHealth(), newHealth);
     avatar.setHealth(newHealth);
 
+    int progressMinute = (int) (elapsed / PROGRESS_MESSAGE_INTERVAL_MS);
+    if (progressMinute > 0
+        && RolePlay.getHospitalService().markProgressMinute(habbo, progressMinute)) {
+      habbo.whisper("Votre sante se regenere : " + newHealth + "/" + avatar.getMaxHealth() + ".");
+    }
+
     if (newHealth < avatar.getMaxHealth()) {
       avatar.updateLife();
       return;
@@ -68,8 +75,11 @@ public class HealingRunner implements Runnable {
     }
 
     avatar.heal();
+    avatar.updateLife();
     avatar.updateDatabase();
     RolePlay.getHospitalService().finishHealing(habbo);
+    habbo.whisper("Votre sante est completement regeneree : " + avatar.getHealth() + "/"
+        + avatar.getMaxHealth() + ".");
   }
 
   @Override
