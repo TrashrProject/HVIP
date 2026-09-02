@@ -6,21 +6,12 @@
     var MENU_SELECTOR = '.nitro-context-menu.paradise-player-context-menu';
     var scheduled = false;
     var ROOT_ITEMS = [
-        { match: ['changer de nom', 'change name'], kind: 'identity', icon: '✎', label: 'Changer de nom', hint: 'Modifier votre identité' },
-        { match: ['mes vetements', 'tenues', 'my clothes'], kind: 'outfits', icon: 'T', label: 'Tenues', hint: 'Modifier votre apparence' },
-        { match: ['danser', 'danses', 'dance'], kind: 'dance', icon: '♫', label: 'Danses', hint: 'Choisir un mouvement' },
-        { match: ['actions', 'expressions'], kind: 'actions', icon: '✦', label: 'Actions', hint: 'Postures et expressions' },
-        { match: ['panneaux', 'signs'], kind: 'signs', icon: '#', label: 'Panneaux', hint: 'Afficher un panneau' },
-        { match: ['poser l objet', 'drop hand item', 'lacher'], kind: 'drop', icon: '↓', label: null, hint: 'Déposer l’objet tenu' }
-    ];
-    var ACTION_ICONS = [
-        { match: ['asseoir', 'assoir', 'sit'], icon: '▰' },
-        { match: ['lever', 'debout', 'stand'], icon: '↑' },
-        { match: ['saluer', 'wave'], icon: '◒' },
-        { match: ['rire', 'laugh'], icon: ':)' },
-        { match: ['baiser', 'kiss', 'blow'], icon: '♥' },
-        { match: ['idle', 'afk', 'reposer'], icon: '…' },
-        { match: ['67'], icon: '67' }
+        { match: ['changer de nom', 'change name'], kind: 'identity', label: 'Changer de nom', hint: 'Modifier votre identité' },
+        { match: ['mes vetements', 'tenues', 'my clothes'], kind: 'outfits', label: 'Tenues', hint: 'Modifier votre apparence' },
+        { match: ['danser', 'danses', 'dance'], kind: 'dance', label: 'Danses', hint: 'Choisir un mouvement' },
+        { match: ['actions', 'expressions'], kind: 'actions', label: 'Actions', hint: 'Postures et expressions' },
+        { match: ['panneaux', 'signs'], kind: 'signs', label: 'Panneaux', hint: 'Afficher un panneau' },
+        { match: ['poser l objet', 'drop hand item', 'lacher'], kind: 'drop', label: null, hint: 'Déposer l’objet tenu' }
     ];
 
     function normalize(value) {
@@ -56,42 +47,11 @@
         if (textNode && textNode.nodeValue.trim() !== replacement) textNode.nodeValue = ' ' + replacement + ' ';
     }
 
-    function addIcon(row, value) {
-        var icon = row.querySelector(':scope > .paradise-menu-icon');
-        if (!icon) {
-            icon = document.createElement('span');
-            icon.className = 'paradise-menu-icon';
-            icon.setAttribute('aria-hidden', 'true');
-            row.insertBefore(icon, row.firstChild);
-        }
-        if (icon.textContent !== value) icon.textContent = value;
-    }
-
     function classifyView(menu, rows) {
         if (menu.querySelectorAll('.menu-list-split-3').length >= 3) return 'signs';
         if (!rows.some(function (row) { return row.querySelector('.fa-icon.left'); })) return 'root';
         var labels = rows.map(function (row) { return normalize(directText(row)); }).join(' | ');
         return /danse|dance/.test(labels) ? 'dance' : 'actions';
-    }
-
-    function ensureViewHeading(menu, view) {
-        var titles = {
-            root: ['MENU PERSONNEL', 'Que voulez-vous faire ?'],
-            dance: ['DANSES', 'Choisissez votre style'],
-            actions: ['ACTIONS', 'Postures et expressions'],
-            signs: ['PANNEAUX', 'Choisissez un panneau']
-        };
-        var heading = menu.querySelector(':scope > .paradise-menu-view-heading');
-        if (!heading) {
-            heading = document.createElement('div');
-            heading.className = 'paradise-menu-view-heading';
-            var header = menu.querySelector(':scope > .menu-header');
-            if (header) header.insertAdjacentElement('afterend', heading);
-        }
-        if (heading.dataset.paradiseHeading !== view) {
-            heading.innerHTML = '<span>' + titles[view][0] + '</span><small>' + titles[view][1] + '</small>';
-            heading.dataset.paradiseHeading = view;
-        }
     }
 
     function decorateRootRow(row) {
@@ -101,7 +61,6 @@
         row.dataset.paradiseKind = item.kind;
         row.dataset.paradiseHint = item.hint;
         replaceDirectText(row, item.label);
-        addIcon(row, item.icon);
     }
 
     function decorateSubmenuRow(row, view) {
@@ -113,13 +72,10 @@
         }
         if (view === 'dance') {
             row.dataset.paradiseKind = text.indexOf('arreter') !== -1 || text.indexOf('stop') !== -1 ? 'stop' : 'dance-choice';
-            addIcon(row, row.dataset.paradiseKind === 'stop' ? '■' : '♫');
             return;
         }
         if (view === 'actions') {
-            var action = ACTION_ICONS.find(function (candidate) { return matchesAny(text, candidate.match); });
             row.dataset.paradiseKind = 'action-choice';
-            addIcon(row, action ? action.icon : '✦');
         }
     }
 
@@ -136,7 +92,6 @@
         menu.dataset.paradiseView = view;
         menu.setAttribute('role', 'menu');
         menu.setAttribute('aria-label', view === 'root' ? 'Actions de mon avatar' : 'Sous-menu des actions de mon avatar');
-        ensureViewHeading(menu, view);
         rows.forEach(function (row) {
             row.setAttribute('role', 'menuitem');
             makeKeyboardClickable(row);
