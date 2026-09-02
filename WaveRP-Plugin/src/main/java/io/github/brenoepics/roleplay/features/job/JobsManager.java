@@ -30,6 +30,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JobsManager {
 
+  public enum StopReason {
+    MANUAL,
+    LEFT_WORKPLACE,
+    AFK,
+    DEATH,
+    LOGOUT,
+    FORCED,
+    JAILED,
+    SEND_HOME
+  }
+
   private static final String ORIGINAL_MOTTO_CACHE_KEY = "roleplay.original_motto";
   private static final String DEFAULT_MOTTO = "Citoyen";
 
@@ -74,9 +85,16 @@ public class JobsManager {
     return false;
   }
 
-  public void startWork(GameClient gameClient, RpAvatar data, Habbo habbo) {
+  public boolean startWork(GameClient gameClient, RpAvatar data, Habbo habbo) {
+    if (gameClient == null || data == null || habbo == null
+        || data.getJobEntity() == null || data.getJobEntity().isUnemployed()
+        || data.getJobRankEntity() == null) {
+      return false;
+    }
+
     addEmployee(gameClient, data, habbo);
     applyWorkMotto(habbo, data);
+
     boolean isPolice = "police".equalsIgnoreCase(data.getJobEntity().getName());
     boolean isMedical = "hospital".equalsIgnoreCase(data.getJobEntity().getName());
     RoomChatMessageBubbles bubble = isPolice
@@ -86,16 +104,28 @@ public class JobsManager {
     String message = "* Commence à travailler en tant que "
         + displayedJob + " "
         + data.getJobRankEntity().getDisplayName() + " *";
+
     Room room = habbo.getHabboInfo().getCurrentRoom();
     if (room != null) {
       room.sendComposer(getRoomUserShoutComposer(message, habbo, bubble).compose());
     }
+
     workCountDown.addTimeOut(habbo.getHabboInfo().getId(), JobsDelegate.START_WORK_TIMEOUT);
     data.updateDatabase();
+    return true;
   }
 
   public void stopWork(Habbo habbo, RpAvatar data) {
+    stopWork(habbo, data, StopReason.MANUAL);
+  }
+
+  public void stopWork(Habbo habbo, RpAvatar data, StopReason reason) {
+    if (habbo == null) {
+      return;
+    }
+
     BankComputerSessionManager.disconnect(habbo);
+
     if (data == null) {
       restoreMotto(habbo);
       return;
@@ -110,9 +140,9 @@ public class JobsManager {
     RolePlay.getEscortManager().stopEscortingByOfficer(habbo.getHabboInfo().getId());
     removeEmployee(habbo);
     restoreMotto(habbo);
-    Room room = habbo.getHabboInfo().getCurrentRoom();
 
-    if (room != null) {
+    Room room = habbo.getHabboInfo().getCurrentRoom();
+    if (room != null && reason != StopReason.LOGOUT) {
       room.sendComposer(getRoomUserShoutComposer("* Arrête de travailler *", habbo).compose());
     }
 
@@ -273,18 +303,11 @@ public class JobsManager {
 
   public void onLogout(Habbo habbo) {
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
-    restoreMotto(habbo);
-    if (data == null || !data.isDuty()) {
+    if (data != null && data.isDuty()) {
+      stopWork(habbo, data, StopReason.LOGOUT);
       return;
     }
-
-    JobEntity job = data.getJobEntity();
-    Set<Habbo> employees = onDutyEmployees.get(job);
-    if (employees != null) {
-      employees.remove(habbo);
-    }
-    data.setDuty(false);
-    data.updateDatabase();
+    restoreMotto(habbo);
   }
 
   private void applyWorkMotto(Habbo habbo, RpAvatar data) {
