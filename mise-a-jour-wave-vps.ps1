@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$RepositoryPath = $PSScriptRoot,
+    [string]$RepositoryPath = "",
     [string]$ServiceName = ""
 )
 
@@ -22,6 +22,10 @@ $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $StoppedService = $false
 $StoppedProcess = $false
+
+if ([string]::IsNullOrWhiteSpace($RepositoryPath)) {
+    $RepositoryPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+}
 
 function Invoke-CheckedCommand {
     param(
@@ -268,7 +272,7 @@ try {
     Write-Host "Teste maintenant :commands dans le jeu." -ForegroundColor Yellow
 }
 catch {
-    Write-Error $_
+    Write-Error ("{0}`nLigne d'origine : {1}`n{2}" -f $_.Exception.Message, $_.InvocationInfo.PositionMessage, $_.ScriptStackTrace)
     if ($ServiceName -and $StoppedService) {
         try {
             Start-Service -Name $ServiceName
