@@ -1,30 +1,30 @@
-/* Menu avatar compact, aligné sur la direction artistique pixel de Nitro. */
+/* Menu contextuel avatar : format pixel natif, sans habillage web. */
 .nitro-context-menu.paradise-player-context-menu {
     box-sizing: border-box !important;
-    width: 142px !important;
-    min-width: 142px !important;
-    max-width: 142px !important;
-    padding: 3px !important;
+    width: 108px !important;
+    min-width: 108px !important;
+    max-width: 108px !important;
+    padding: 2px !important;
     overflow: visible !important;
-    color: #f1f1f1;
-    background: #202428;
-    border: 1px solid #0c0e10;
-    border-radius: 4px;
-    box-shadow: 0 0 0 1px #566069, 0 3px 7px rgba(0, 0, 0, .42);
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 9px;
+    color: #eee;
+    background: #1c1e20;
+    border: 1px solid #08090a;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px #4a5055, 1px 2px 2px rgba(0, 0, 0, .45);
+    font-family: Ubuntu, Arial, sans-serif;
+    font-size: 8px;
     line-height: 1;
     image-rendering: pixelated;
     -webkit-font-smoothing: none;
 }
 
 .nitro-context-menu.paradise-player-context-menu:not(.name-only)::after {
-    width: 6px;
-    height: 6px;
-    bottom: -4px;
-    border-width: 3px;
-    border-color: transparent #202428 #202428 transparent;
-    filter: drop-shadow(1px 1px 0 #0c0e10);
+    width: 4px;
+    height: 4px;
+    bottom: -3px;
+    border-width: 2px;
+    border-color: transparent #1c1e20 #1c1e20 transparent;
+    filter: drop-shadow(1px 1px 0 #08090a);
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-header,
@@ -39,20 +39,20 @@
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-header {
-    min-height: 20px !important;
-    height: 20px !important;
-    max-height: 20px !important;
-    margin: 0 0 2px !important;
-    padding: 0 5px !important;
+    min-height: 16px !important;
+    height: 16px !important;
+    max-height: 16px !important;
+    margin: 0 0 1px !important;
+    padding: 0 4px !important;
     overflow: hidden;
     color: #fff;
-    background: #343a40;
-    border: 1px solid #4b535a;
-    border-bottom-color: #15191c;
-    border-radius: 2px;
-    font-size: 9px;
+    background: #363a3d;
+    border: 1px solid #4c5257;
+    border-bottom-color: #111315;
+    border-radius: 1px;
+    font-size: 8px;
     font-weight: 700;
-    line-height: 18px;
+    line-height: 14px;
     text-align: center;
     text-overflow: ellipsis;
     text-shadow: 0 1px #000;
@@ -75,21 +75,21 @@
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item {
     position: relative;
-    min-height: 19px !important;
-    height: 19px !important;
-    max-height: 19px !important;
+    min-height: 16px !important;
+    height: 16px !important;
+    max-height: 16px !important;
     margin: 0 !important;
-    padding: 0 14px 0 6px !important;
+    padding: 0 11px 0 4px !important;
     justify-content: flex-start !important;
     align-items: center !important;
     overflow: hidden !important;
-    color: #f0f0f0;
-    background: #292e32;
-    border: 1px solid #3a4147;
-    border-radius: 2px;
-    font-size: 9px;
+    color: #ededed;
+    background: #292c2e;
+    border: 1px solid #393e42;
+    border-radius: 1px;
+    font-size: 8px;
     font-weight: 700;
-    line-height: 17px;
+    line-height: 14px;
     text-align: left;
     text-overflow: ellipsis;
     text-shadow: 0 1px #000;
@@ -103,74 +103,74 @@
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):hover,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):focus-visible {
     color: #fff;
-    background: #3a4147;
-    border-color: #65717b;
+    background: #3a3f43;
+    border-color: #5c646a;
     outline: none;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item.disabled {
-    color: #777e83;
-    background: #24282c;
-    border-color: #33393e;
+    color: #70767a;
+    background: #232628;
+    border-color: #303437;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon {
-    right: 5px;
-    color: #e9ac37;
-    font-size: 7px;
+    right: 3px;
+    color: #cf9e39;
+    font-size: 6px;
     opacity: 1;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon.left,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon.left {
-    left: 5px;
+    left: 3px;
     right: auto;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item.paradise-back-item {
-    padding-left: 15px !important;
-    color: #d9dde0;
-    background: #24292d;
+    padding-left: 12px !important;
+    color: #d5d8da;
+    background: #242729;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-list-split-3 {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2px !important;
+    gap: 1px !important;
     margin: 0 !important;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-list-split-3 .menu-item.list-item {
-    min-height: 19px !important;
-    height: 19px !important;
-    max-height: 19px !important;
+    min-height: 16px !important;
+    height: 16px !important;
+    max-height: 16px !important;
     padding: 0 !important;
     justify-content: center !important;
-    font-size: 8px;
-    line-height: 17px;
+    font-size: 7px;
+    line-height: 14px;
     text-align: center;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-footer {
-    min-height: 7px !important;
-    height: 7px !important;
-    max-height: 7px !important;
-    margin-top: 2px !important;
+    min-height: 5px !important;
+    height: 5px !important;
+    max-height: 5px !important;
+    margin-top: 1px !important;
     padding: 0 !important;
     overflow: hidden;
-    color: #848b91;
-    background: #15191c;
-    border: 1px solid #30363b;
-    border-radius: 2px;
-    font-size: 5px;
-    line-height: 5px;
+    color: #777d81;
+    background: #121416;
+    border: 1px solid #292d30;
+    border-radius: 1px;
+    font-size: 4px;
+    line-height: 3px;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-footer:hover,
 .nitro-context-menu.paradise-player-context-menu .menu-footer:focus-visible {
-    color: #d8dcdf;
-    background: #252a2e;
+    color: #ddd;
+    background: #25282a;
     outline: none;
 }
 
@@ -180,8 +180,8 @@
 
 @media (max-width: 460px) {
     .nitro-context-menu.paradise-player-context-menu {
-        width: 138px !important;
-        min-width: 138px !important;
-        max-width: 138px !important;
+        width: 108px !important;
+        min-width: 108px !important;
+        max-width: 108px !important;
     }
 }

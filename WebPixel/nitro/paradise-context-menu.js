@@ -29,6 +29,16 @@
         return matches.some(function (match) { return text.indexOf(match) !== -1; });
     }
 
+    function translateNativeLabels(menu) {
+        var walker = document.createTreeWalker(menu, NodeFilter.SHOW_TEXT);
+        var node;
+        while ((node = walker.nextNode())) {
+            var label = normalize(node.nodeValue);
+            if (label === 'mes vetements') node.nodeValue = 'Tenues';
+            else if (label === 'danser') node.nodeValue = 'Danses';
+        }
+    }
+
     function replaceDirectText(row, replacement) {
         if (!replacement) return;
         var textNode = Array.prototype.find.call(row.childNodes, function (node) {
@@ -86,6 +96,7 @@
     }
 
     function enhanceMenu(menu) {
+        translateNativeLabels(menu);
         var rows = Array.prototype.slice.call(menu.querySelectorAll('.menu-item.list-item'));
         if (!rows.length) return;
         var view = classifyView(menu, rows);
