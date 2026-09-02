@@ -1,4 +1,3 @@
-
 package io.github.brenoepics.roleplay.features.job;
 
 import static io.github.brenoepics.roleplay.features.job.JobsDelegate.findLook;
@@ -32,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JobsManager {
 
   private static final String ORIGINAL_MOTTO_CACHE_KEY = "roleplay.original_motto";
+  private static final String DEFAULT_MOTTO = "Citoyen";
 
   @Getter
   private final JobService jobService;
@@ -54,7 +54,6 @@ public class JobsManager {
     jobsDelegate.loadJobsLooks();
     paydayTimer.init();
 
-    // Initialize lists for all job types
     for (JobEntity job : jobService.getAllJobs()) {
       onDutyEmployees.put(job, new HashSet<>());
     }
@@ -84,18 +83,24 @@ public class JobsManager {
         ? RoomChatMessageBubbles.BLUE
         : RoomChatMessageBubbles.NORMAL;
     String displayedJob = isMedical ? "EMS" : data.getJobEntity().getDisplayName();
-    String message = "* Commence \u00e0 travailler en tant que "
+    String message = "* Commence à travailler en tant que "
         + displayedJob + " "
         + data.getJobRankEntity().getDisplayName() + " *";
-    habbo.getHabboInfo().getCurrentRoom()
-        .sendComposer(getRoomUserShoutComposer(message, habbo, bubble).compose());
-    RolePlay.getJobsManager().getWorkCountDown()
-        .addTimeOut(habbo.getHabboInfo().getId(), JobsDelegate.START_WORK_TIMEOUT);
+    Room room = habbo.getHabboInfo().getCurrentRoom();
+    if (room != null) {
+      room.sendComposer(getRoomUserShoutComposer(message, habbo, bubble).compose());
+    }
+    workCountDown.addTimeOut(habbo.getHabboInfo().getId(), JobsDelegate.START_WORK_TIMEOUT);
     data.updateDatabase();
   }
 
   public void stopWork(Habbo habbo, RpAvatar data) {
     BankComputerSessionManager.disconnect(habbo);
+    if (data == null) {
+      restoreMotto(habbo);
+      return;
+    }
+
     if (!data.isDuty() || data.getJobEntity() == null || data.getJobEntity().isUnemployed()) {
       restoreMotto(habbo);
       return;
@@ -108,11 +113,10 @@ public class JobsManager {
     Room room = habbo.getHabboInfo().getCurrentRoom();
 
     if (room != null) {
-      room.sendComposer(getRoomUserShoutComposer("* Arr\u00eate de travailler *", habbo).compose());
+      room.sendComposer(getRoomUserShoutComposer("* Arrête de travailler *", habbo).compose());
     }
 
-    RolePlay.getJobsManager().getWorkCountDown()
-        .addTimeOut(habbo.getHabboInfo().getId(), JobsDelegate.STOP_WORK_TIMEOUT);
+    workCountDown.addTimeOut(habbo.getHabboInfo().getId(), JobsDelegate.STOP_WORK_TIMEOUT);
     data.updateDatabase();
   }
 
@@ -121,24 +125,37 @@ public class JobsManager {
     targetData.setDuty(false);
 
     JobEntity job = targetData.getJobEntity();
-    onDutyEmployees.get(job).remove(target);
+    Set<Habbo> employees = onDutyEmployees.get(job);
+    if (employees != null) {
+      employees.remove(target);
+    }
 
     removeEmployee(target);
-    habbo.getHabboInfo().getCurrentRoom().sendComposer(getRoomUserShoutComposer(
-        "* Renvoie " + target.getHabboInfo().getUsername() + " chez lui pour " + minutes + " minute(s) *",
-        habbo).compose());
-    target.getHabboInfo().getCurrentRoom()
-        .sendComposer(getRoomUserShoutComposer("* Arr\u00eate de travailler *", target).compose());
+    restoreMotto(target);
+
+    Room managerRoom = habbo.getHabboInfo().getCurrentRoom();
+    if (managerRoom != null) {
+      managerRoom.sendComposer(getRoomUserShoutComposer(
+          "* Renvoie " + target.getHabboInfo().getUsername() + " chez lui pour " + minutes + " minute(s) *",
+          habbo).compose());
+    }
+
+    Room targetRoom = target.getHabboInfo().getCurrentRoom();
+    if (targetRoom != null) {
+      targetRoom.sendComposer(getRoomUserShoutComposer("* Arrête de travailler *", target).compose());
+    }
+
     if (target.getHabboInfo().getHabboStats().cache.containsKey("lastlook")) {
       JobsDelegate.resetLook(target);
     }
-    RolePlay.getJobsManager().getWorkCountDown()
-        .addTimeOut(target.getHabboInfo().getId(), minutes * 60);
+    workCountDown.addTimeOut(target.getHabboInfo().getId(), minutes * 60);
+    targetData.updateDatabase();
   }
 
   public void quitJob(Habbo habbo, RpAvatar data) {
     BankComputerSessionManager.disconnect(habbo);
     removeEmployee(habbo);
+    restoreMotto(habbo);
 
     JobEntity unemployedJob = jobService.getUnemployedJob();
     JobRankEntity unemployedRank = jobService.getUnemployedRank();
@@ -147,12 +164,13 @@ public class JobsManager {
     data.setJobRankEntity(unemployedRank);
     data.setDuty(false);
     removeEmployee(habbo);
-    habbo.whisper("Vous avez d\u00e9missionn\u00e9. Vous \u00eates maintenant sans emploi.", RoomChatMessageBubbles.ALERT);
+    data.updateDatabase();
+    habbo.whisper("Vous avez démissionné. Vous êtes maintenant sans emploi.", RoomChatMessageBubbles.ALERT);
   }
 
   public void promoteUser(Habbo manager, RpAvatar managerData, Habbo habbo) {
     if (!managerData.getJobRankEntity().isManager()) {
-      manager.whisper("Votre grade ne vous autorise pas \u00e0 promouvoir.", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Votre grade ne vous autorise pas à promouvoir.", RoomChatMessageBubbles.ALERT);
       return;
     }
 
@@ -177,14 +195,14 @@ public class JobsManager {
     targetData.setJobRankEntity(nextRank);
     manager.whisper("Vous avez promu " + employeeName + ".", RoomChatMessageBubbles.ALERT);
     String managerName = manager.getHabboInfo().getUsername();
-    habbo.whisper("Vous avez \u00e9t\u00e9 promu par " + managerName + ".", RoomChatMessageBubbles.ALERT);
+    habbo.whisper("Vous avez été promu par " + managerName + ".", RoomChatMessageBubbles.ALERT);
     LiveFeed.sendGlobalAlert(LiveFeed.alert(
         PassiveTemplates.PROMOTE.format(managerName, employeeName, nextRank.getDisplayName())));
   }
 
   public void demoteUser(Habbo manager, RpAvatar managerData, Habbo habbo) {
     if (!managerData.getJobRankEntity().isManager()) {
-      manager.whisper("Votre grade ne vous autorise pas \u00e0 r\u00e9trograder.", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Votre grade ne vous autorise pas à rétrograder.", RoomChatMessageBubbles.ALERT);
       return;
     }
 
@@ -202,21 +220,21 @@ public class JobsManager {
     String employeeName = habbo.getHabboInfo().getUsername();
     if (previousRank == null || !isSameJob
         || targetData.getJobRankEntity().isHigherOrEqualThan(managerData.getJobRankEntity())) {
-      manager.whisper("Vous ne pouvez pas r\u00e9trograder " + employeeName + ".", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Vous ne pouvez pas rétrograder " + employeeName + ".", RoomChatMessageBubbles.ALERT);
       return;
     }
 
     targetData.setJobRankEntity(previousRank);
-    manager.whisper("Vous avez r\u00e9trograd\u00e9 " + employeeName + ".", RoomChatMessageBubbles.ALERT);
+    manager.whisper("Vous avez rétrogradé " + employeeName + ".", RoomChatMessageBubbles.ALERT);
     String managerName = manager.getHabboInfo().getUsername();
-    habbo.whisper("Vous avez \u00e9t\u00e9 r\u00e9trograd\u00e9 par " + managerName + ".", RoomChatMessageBubbles.ALERT);
+    habbo.whisper("Vous avez été rétrogradé par " + managerName + ".", RoomChatMessageBubbles.ALERT);
     LiveFeed.sendGlobalAlert(LiveFeed.alert(
         PassiveTemplates.DEMOTE.format(managerName, employeeName, previousRank.getDisplayName())));
   }
 
   public void fireUser(Habbo manager, RpAvatar managerData, Habbo habbo) {
     if (!managerData.getJobRankEntity().isManager()) {
-      manager.whisper("Votre grade ne vous autorise pas \u00e0 licencier.", RoomChatMessageBubbles.ALERT);
+      manager.whisper("Votre grade ne vous autorise pas à licencier.", RoomChatMessageBubbles.ALERT);
       return;
     }
 
@@ -234,15 +252,18 @@ public class JobsManager {
     }
 
     removeEmployee(habbo);
+    restoreMotto(habbo);
 
     JobEntity unemployedJob = jobService.getUnemployedJob();
     JobRankEntity unemployedRank = jobService.getUnemployedRank();
 
     targetData.setJobEntity(unemployedJob);
     targetData.setJobRankEntity(unemployedRank);
-    manager.whisper("Vous avez licenci\u00e9 " + habbo.getHabboInfo().getUsername() + ".",
+    targetData.setDuty(false);
+    targetData.updateDatabase();
+    manager.whisper("Vous avez licencié " + habbo.getHabboInfo().getUsername() + ".",
         RoomChatMessageBubbles.ALERT);
-    habbo.whisper("Vous avez \u00e9t\u00e9 licenci\u00e9 par " + manager.getHabboInfo().getUsername() + ".",
+    habbo.whisper("Vous avez été licencié par " + manager.getHabboInfo().getUsername() + ".",
         RoomChatMessageBubbles.ALERT);
     String managerName = manager.getHabboInfo().getUsername();
     String employeeName = habbo.getHabboInfo().getUsername();
@@ -258,32 +279,35 @@ public class JobsManager {
     }
 
     JobEntity job = data.getJobEntity();
-    onDutyEmployees.get(job).remove(habbo);
+    Set<Habbo> employees = onDutyEmployees.get(job);
+    if (employees != null) {
+      employees.remove(habbo);
+    }
     data.setDuty(false);
+    data.updateDatabase();
   }
 
   private void applyWorkMotto(Habbo habbo, RpAvatar data) {
     if (!habbo.getHabboStats().cache.containsKey(ORIGINAL_MOTTO_CACHE_KEY)) {
+      String currentMotto = habbo.getHabboInfo().getMotto();
       habbo.getHabboStats().cache.put(ORIGINAL_MOTTO_CACHE_KEY,
-          habbo.getHabboInfo().getMotto() == null ? "" : habbo.getHabboInfo().getMotto());
+          currentMotto == null || currentMotto.trim().isEmpty() ? DEFAULT_MOTTO : currentMotto);
     }
 
     String displayedJob = "hospital".equalsIgnoreCase(data.getJobEntity().getName())
         ? "EMS" : data.getJobEntity().getDisplayName();
-    String workMotto = displayedJob + " - "
-        + data.getJobRankEntity().getDisplayName();
-    int maxLength = 38;
-    if (workMotto.length() > maxLength) {
-      workMotto = workMotto.substring(0, maxLength);
-    }
-    habbo.getHabboInfo().setMotto(workMotto);
+    String workMotto = displayedJob + " " + data.getJobRankEntity().getDisplayName();
+    habbo.getHabboInfo().setMotto(workMotto.trim());
     sendMottoUpdate(habbo);
   }
 
   private void restoreMotto(Habbo habbo) {
     Object originalMotto = habbo.getHabboStats().cache.remove(ORIGINAL_MOTTO_CACHE_KEY);
-    if (originalMotto == null) return;
-    habbo.getHabboInfo().setMotto(originalMotto.toString());
+    String restoredMotto = originalMotto == null ? DEFAULT_MOTTO : originalMotto.toString().trim();
+    if (restoredMotto.isEmpty()) {
+      restoredMotto = DEFAULT_MOTTO;
+    }
+    habbo.getHabboInfo().setMotto(restoredMotto);
     sendMottoUpdate(habbo);
   }
 
@@ -299,11 +323,16 @@ public class JobsManager {
 
   public void removeEmployee(Habbo habbo) {
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
-    JobEntity job = data.getJobEntity();
-    onDutyEmployees.get(job).remove(habbo);
+    if (data != null) {
+      JobEntity job = data.getJobEntity();
+      Set<Habbo> employees = onDutyEmployees.get(job);
+      if (employees != null) {
+        employees.remove(habbo);
+      }
+    }
     RoomUnit unit = habbo.getRoomUnit();
-    if (unit != null && habbo.getRoomUnit().getRoom() != null) {
-      habbo.getRoomUnit().getRoom().giveEffect(habbo, -1, -1);
+    if (unit != null && unit.getRoom() != null) {
+      unit.getRoom().giveEffect(habbo, -1, -1);
     }
   }
 
@@ -316,13 +345,12 @@ public class JobsManager {
     data.setDuty(true);
 
     JobEntity job = data.getJobEntity();
-    onDutyEmployees.get(job).add(habbo);
+    onDutyEmployees.computeIfAbsent(job, ignored -> new HashSet<>()).add(habbo);
   }
 
   public void reloadJobs() {
     jobService.loadAllJobs();
 
-    // Reinitialize employee tracking
     onDutyEmployees.clear();
     for (JobEntity job : jobService.getAllJobs()) {
       onDutyEmployees.put(job, new HashSet<>());
