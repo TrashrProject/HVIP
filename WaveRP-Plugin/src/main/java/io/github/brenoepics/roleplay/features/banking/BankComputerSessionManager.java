@@ -3,61 +3,125 @@ package io.github.brenoepics.roleplay.features.banking;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomTile;
+import com.eu.habbo.habbohotel.rooms.RoomTileState;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
+import com.eu.habbo.util.pathfinding.Rotation;
+import io.github.brenoepics.roleplay.RolePlay;
+import io.github.brenoepics.roleplay.features.crime.PoliceHandcuffService;
+import io.github.brenoepics.roleplay.features.crime.PoliceTaserService;
+import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Session courte et liée au poste physique : quitter la salle ou s'éloigner coupe l'accès. */
+/** Session physique liee a un ordinateur et a la chaise placee devant celui-ci. */
 public final class BankComputerSessionManager {
   private static final long SESSION_MS = 10 * 60 * 1000L;
-  private static final int MAX_DISTANCE = 1;
   private static final Map<Integer, Session> SESSIONS = new ConcurrentHashMap<>();
-  private record Session(int roomId, int itemId, long expiresAt) {}
+
+  private record Session(int roomId, int itemId, short chairX, short chairY, long expiresAt) {}
+
   private BankComputerSessionManager() {}
 
   public static boolean isConfigured(int itemId) {
     String sql = "SELECT 1 FROM rp_bank_computer_items WHERE item_id=? AND active=1";
-    try (Connection c=Emulator.getDatabase().getDataSource().getConnection(); PreparedStatement s=c.prepareStatement(sql)) {
-      s.setInt(1,itemId); try(ResultSet r=s.executeQuery()){return r.next();}
-    } catch(Exception e){return false;}
+    try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
+        PreparedStatement statement = connection.prepareStatement(sql)) {
+      statement.setInt(1, itemId);
+      try (ResultSet result = statement.executeQuery()) {
+        return result.next();
+      }
+    } catch (Exception exception) {
+      return false;
+    }
   }
-  /** @return true when connected, false when the existing session was closed. */
+
+  /** @return true quand la session vient d'etre ouverte, false quand elle a ete fermee. */
   public static boolean toggle(Habbo habbo, Room room, HabboItem computer) {
-    int userId=habbo.getHabboInfo().getId(); Session current=SESSIONS.get(userId);
-    if(current!=null&&current.roomId==room.getId()&&current.itemId==computer.getId()&&current.expiresAt>=System.currentTimeMillis()){
-      SESSIONS.remove(userId);return false;
+    int userId = habbo.getHabboInfo().getId();
+    Session current = SESSIONS.get(userId);
+    if (current != null && current.roomId == room.getId() && current.itemId == computer.getId()
+        && current.expiresAt >= System.currentTimeMillis()) {
+      disconnect(habbo);
+      return false;
     }
-    SESSIONS.put(userId,new Session(room.getId(),computer.getId(),System.currentTimeMillis()+SESSION_MS));return true;
+
+    RoomTile chair = habbo.getRoomUnit().getCurrentLocation();
+    SESSIONS.put(userId, new Session(room.getId(), computer.getId(), chair.x, chair.y,
+        System.currentTimeMillis() + SESSION_MS));
+    habbo.getRoomUnit().setCanWalk(false);
+    habbo.getRoomUnit().cmdSit = true;
+    habbo.getRoomUnit().statusUpdate(true);
+    return true;
   }
-  public static void disconnect(int userId){SESSIONS.remove(userId);}
-  public static boolean isBankEmployeeOnDuty(Habbo habbo){
-    if(habbo==null)return false;
-    io.github.brenoepics.roleplay.features.user.RpAvatar rp=io.github.brenoepics.roleplay.RolePlay.getAvatarManager().getRpAvatar(habbo);
-    return rp!=null&&rp.isDuty()&&rp.getJobEntity()!=null&&"bank".equalsIgnoreCase(rp.getJobEntity().getName());
+
+  public static void disconnect(int userId) {
+    SESSIONS.remove(userId);
   }
-  public static boolean mayUsePersonalBankCommand(Habbo habbo){return !isBankEmployeeOnDuty(habbo)||hasActiveSession(habbo);}
-  public static void disconnectIfGoalIsFar(Habbo habbo, RoomTile goal){
-    if(habbo==null||goal==null)return; Session session=SESSIONS.get(habbo.getHabboInfo().getId()); Room room=habbo.getHabboInfo().getCurrentRoom();
-    if(session==null||room==null||session.roomId!=room.getId())return;
-    for(HabboItem item:room.getFloorItems())if(item.getId()==session.itemId){
-      if(Math.max(Math.abs(goal.x-item.getX()),Math.abs(goal.y-item.getY()))>=2){SESSIONS.remove(habbo.getHabboInfo().getId());habbo.whisper("Vous vous êtes éloigné du poste : session Paradise Bank déconnectée.",com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles.ALERT);}return;
+
+  public static void disconnect(Habbo habbo) {
+    if (habbo == null || SESSIONS.remove(habbo.getHabboInfo().getId()) == null) return;
+    int userId = habbo.getHabboInfo().getId();
+    if (habbo.getRoomUnit() != null && !PoliceTaserService.isTased(userId)
+        && !PoliceHandcuffService.isHandcuffed(userId)
+        && !RolePlay.getEscortManager().isPrisonerEscorted(userId)) {
+      habbo.getRoomUnit().setCanWalk(true);
+      habbo.getRoomUnit().statusUpdate(true);
     }
-    SESSIONS.remove(habbo.getHabboInfo().getId());
   }
+
+  public static boolean isAtAssignedChair(Habbo habbo, HabboItem computer) {
+    if (habbo == null || computer == null || habbo.getRoomUnit() == null) return false;
+    RoomTile chair = habbo.getRoomUnit().getCurrentLocation();
+    if (chair == null || chair.state != RoomTileState.SIT) return false;
+    if (Math.max(Math.abs(chair.x - computer.getX()), Math.abs(chair.y - computer.getY())) != 1) {
+      return false;
+    }
+    int facing = Rotation.Calculate(chair.x, chair.y, computer.getX(), computer.getY());
+    return habbo.getRoomUnit().getBodyRotation().getValue() == facing;
+  }
+
+  public static boolean isBankEmployeeOnDuty(Habbo habbo) {
+    if (habbo == null) return false;
+    RpAvatar avatar = RolePlay.getAvatarManager().getRpAvatar(habbo);
+    return avatar != null && avatar.isDuty() && avatar.getJobEntity() != null
+        && "bank".equalsIgnoreCase(avatar.getJobEntity().getName());
+  }
+
+  public static boolean mayUsePersonalBankCommand(Habbo habbo) {
+    return !isBankEmployeeOnDuty(habbo) || hasActiveSession(habbo);
+  }
+
+  public static boolean isUsingComputer(Habbo habbo) {
+    return hasActiveSession(habbo);
+  }
+
   public static boolean hasActiveSession(Habbo habbo) {
-    if(habbo==null||habbo.getRoomUnit()==null)return false;
-    int userId=habbo.getHabboInfo().getId(); Session session=SESSIONS.get(userId);
-    Room room=habbo.getHabboInfo().getCurrentRoom();
-    if(session==null||room==null||session.expiresAt<System.currentTimeMillis()||session.roomId!=room.getId()){SESSIONS.remove(userId);return false;}
-    for(HabboItem item:room.getFloorItems())if(item.getId()==session.itemId){
-      RoomTile user=habbo.getRoomUnit().getCurrentLocation(); RoomTile device=room.getLayout().getTile((short)item.getX(),(short)item.getY());
-      boolean near=user!=null&&device!=null&&Math.max(Math.abs(user.x-device.x),Math.abs(user.y-device.y))<=MAX_DISTANCE;
-      if(!near)SESSIONS.remove(userId); return near;
+    if (habbo == null || habbo.getRoomUnit() == null) return false;
+    int userId = habbo.getHabboInfo().getId();
+    Session session = SESSIONS.get(userId);
+    if (session == null) return false;
+
+    Room room = habbo.getHabboInfo().getCurrentRoom();
+    if (room == null || session.expiresAt < System.currentTimeMillis()
+        || session.roomId != room.getId() || !isBankEmployeeOnDuty(habbo)) {
+      disconnect(habbo);
+      return false;
     }
-    SESSIONS.remove(userId);return false;
+
+    for (HabboItem item : room.getFloorItems()) {
+      if (item.getId() != session.itemId) continue;
+      RoomTile current = habbo.getRoomUnit().getCurrentLocation();
+      boolean valid = current != null && current.x == session.chairX && current.y == session.chairY
+          && isAtAssignedChair(habbo, item);
+      if (!valid) disconnect(habbo);
+      return valid;
+    }
+
+    disconnect(habbo);
+    return false;
   }
 }

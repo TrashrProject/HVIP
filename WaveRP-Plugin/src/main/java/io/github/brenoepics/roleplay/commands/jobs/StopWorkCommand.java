@@ -6,7 +6,6 @@ import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
-import io.github.brenoepics.roleplay.features.banking.BankComputerSessionManager;
 import io.github.brenoepics.roleplay.utilities.types.Timeout;
 
 public class StopWorkCommand extends Command {
@@ -46,7 +45,6 @@ public class StopWorkCommand extends Command {
     }
 
     RolePlay.getJobsManager().stopWork(habbo, data);
-    BankComputerSessionManager.disconnect(habbo.getHabboInfo().getId());
     return true;
   }
 }

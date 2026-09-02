@@ -175,10 +175,8 @@ public class LoadPlayerCommands {
       LoadPlayerCommands.addCommand(
           new StabilizeCommand("cmd_stabilize", new String[]{"stabiliser"}),
           new String[]{"stabiliser"}, CheckDatabase.PermissionState.ALLOWED);
-      LoadPlayerCommands.addCommand(
-          new io.github.brenoepics.roleplay.commands.jobs.hospital.ReviveCommand(
-              "cmd_revive", new String[]{"reanimer", "revive"}),
-          new String[]{"reanimer", "revive"}, CheckDatabase.PermissionState.ALLOWED);
+      // :reanimer is the EMS action registered above. Keep :revive exclusively for staff;
+      // registering the same aliases twice makes the command selected depend on load order.
       LoadPlayerCommands.addCommand(
           new TransportHospitalCommand("cmd_transport_hospital",
               new String[]{"transporthopital", "evacuer"}),
@@ -410,7 +408,8 @@ public class LoadPlayerCommands {
           new String[]{"kill"}, PermissionState.DENIED);
       CheckDatabase.allowPermissionForRankRange("cmd_staff_kill", 5, 9);
 
-      Emulator.getTexts().register("commands.description.cmd_staff_revive", ":revive <pseudo>");
+      Emulator.getTexts().register("commands.description.cmd_staff_revive",
+          ":revive <pseudo> - Réanime entièrement n'importe quel joueur connecté (staff uniquement).");
       LoadPlayerCommands.addCommand(
           new ReviveCommand("cmd_staff_revive", new String[]{"revive"}),
           new String[]{"revive"}, PermissionState.DENIED);

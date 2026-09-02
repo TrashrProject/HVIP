@@ -2,19 +2,23 @@ package com.eu.habbo.messages.outgoing.generic;
 
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.commands.Command;
+import com.eu.habbo.habbohotel.commands.CommandViewRegistry;
+import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.MessageComposer;
+import com.eu.habbo.messages.outgoing.Outgoing;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Opens the native WaveRP command centre already bundled in the Nitro client.
@@ -22,9 +26,8 @@ import java.util.Set;
  * WaveRP implementation used by the commands UI.
  */
 public class CommandsWindowComposer extends MessageComposer {
-    private static final int LINK_EVENT_PACKET_ID = 2023;
-    private static final int MAX_INLINE_BYTES = 60000;
-    private static final int CHUNK_SIZE = 45000;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandsWindowComposer.class);
+    private static final int CHUNK_SIZE = 30000;
 
     private final String linkEvent;
 
@@ -32,14 +35,8 @@ public class CommandsWindowComposer extends MessageComposer {
         this.linkEvent = linkEvent;
     }
 
-    public static List<CommandsWindowComposer> createResponses(List<Command> commands) {
-        String payload = buildPayload(commands).toString();
-        String inlineEvent = "habblet/open/" + payload.replace("/", "&#47;");
-
-        if (inlineEvent.getBytes(StandardCharsets.UTF_8).length <= MAX_INLINE_BYTES) {
-            return Collections.singletonList(new CommandsWindowComposer(inlineEvent));
-        }
-
+    public static List<CommandsWindowComposer> createResponses(List<Command> commands, GameClient client) {
+        String payload = buildPayload(commands, client).toString();
         String encoded = Base64.getUrlEncoder().withoutPadding()
                 .encodeToString(payload.getBytes(StandardCharsets.UTF_8));
         int total = (encoded.length() + CHUNK_SIZE - 1) / CHUNK_SIZE;
@@ -49,7 +46,7 @@ public class CommandsWindowComposer extends MessageComposer {
         for (int index = 0; index < total; index++) {
             int start = index * CHUNK_SIZE;
             int end = Math.min(start + CHUNK_SIZE, encoded.length());
-            String event = "habblet/open/commands-chunk/" + transferId + "/" + index + "/" + total + "/"
+            String event = "commands/chunk/" + transferId + "/" + index + "/" + total + "/"
                     + encoded.substring(start, end);
             responses.add(new CommandsWindowComposer(event));
         }
@@ -59,12 +56,12 @@ public class CommandsWindowComposer extends MessageComposer {
 
     @Override
     protected ServerMessage composeInternal() {
-        this.response.init(LINK_EVENT_PACKET_ID);
+        this.response.init(Outgoing.NuxAlertComposer);
         this.response.appendString(this.linkEvent);
         return this.response;
     }
 
-    private static JsonObject buildPayload(List<Command> commands) {
+    private static JsonObject buildPayload(List<Command> commands, GameClient client) {
         JsonObject payload = new JsonObject();
         JsonObject data = new JsonObject();
         JsonArray commandItems = new JsonArray();
@@ -73,8 +70,21 @@ public class CommandsWindowComposer extends MessageComposer {
         payload.addProperty("header", "commands");
 
         for (Command command : commands) {
-            CommandDetails details = getDetails(command);
-            if (details == null) continue;
+            CommandDetails details;
+            try {
+                details = getDetails(command, client);
+            } catch (RuntimeException exception) {
+                LOGGER.error("Unable to serialize command {} ({}) for :commands",
+                        command == null ? "<null>" : command.getClass().getName(),
+                        command == null ? "no permission" : command.permission, exception);
+                continue;
+            }
+            if (details == null) {
+                LOGGER.warn("Skipping invalid command entry {} ({}) in :commands",
+                        command == null ? "<null>" : command.getClass().getName(),
+                        command == null ? "no permission" : command.permission);
+                continue;
+            }
 
             JsonObject item = new JsonObject();
             JsonArray aliases = new JsonArray();
@@ -93,10 +103,16 @@ public class CommandsWindowComposer extends MessageComposer {
 
         JsonArray categories = new JsonArray();
         categories.add("Toutes");
-        addCategory(categories, usedCategories, "Roleplay");
+        addCategory(categories, usedCategories, "Général");
+        addCategory(categories, usedCategories, "RP");
+        addCategory(categories, usedCategories, "Économie");
+        addCategory(categories, usedCategories, "Social");
+        addCategory(categories, usedCategories, "Déplacements");
+        addCategory(categories, usedCategories, "Utilitaires");
         addCategory(categories, usedCategories, "Métiers");
-        addCategory(categories, usedCategories, "General");
         addCategory(categories, usedCategories, "Staff");
+        addCategory(categories, usedCategories, "Administration");
+        for (String category : usedCategories) addCategory(categories, usedCategories, category);
 
         data.add("commands", commandItems);
         data.add("categories", categories);
@@ -105,10 +121,14 @@ public class CommandsWindowComposer extends MessageComposer {
     }
 
     private static void addCategory(JsonArray categories, Set<String> usedCategories, String category) {
-        if (usedCategories.contains(category)) categories.add(category);
+        if (!usedCategories.contains(category)) return;
+        for (int index = 0; index < categories.size(); index++) {
+            if (category.equals(categories.get(index).getAsString())) return;
+        }
+        categories.add(category);
     }
 
-    private static CommandDetails getDetails(Command command) {
+    private static CommandDetails getDetails(Command command, GameClient client) {
         if (command == null || command.keys == null) return null;
 
         List<String> keys = new ArrayList<>();
@@ -125,7 +145,7 @@ public class CommandsWindowComposer extends MessageComposer {
         String localized = Emulator.getTexts().getValue(translationKey, "").trim();
 
         String usage = name;
-        String description = "Use this command in the room chat.";
+        String description = "Utilisez cette commande dans le chat de l'appartement.";
 
         if (!localized.isEmpty() && !localized.equalsIgnoreCase(translationKey)) {
             String firstLine = firstLine(localized);
@@ -145,6 +165,12 @@ public class CommandsWindowComposer extends MessageComposer {
         for (int i = 1; i < keys.size(); i++) aliases.add(":" + keys.get(i));
 
         Category category = categoryFor(permission, keys.get(0));
+        String customCategory = CommandViewRegistry.category(client, command);
+        String customSubcategory = CommandViewRegistry.subcategory(client, command);
+        String customAccess = CommandViewRegistry.access(client, command);
+        if (customCategory != null) category = new Category(customCategory,
+                customSubcategory == null ? customCategory : customSubcategory,
+                customAccess == null ? category.access : customAccess);
         return new CommandDetails(name, aliases, description, normalizeUsage(usage),
                 category.category, category.subcategory, category.access);
     }
@@ -154,7 +180,7 @@ public class CommandsWindowComposer extends MessageComposer {
 
         if (containsAny(value, "bank", "solde", "virement", "deposer", "depot", "deposit", "retirer", "withdraw", "historique", "transactions", "openaccount", "ouvrircompte", "versement", "retraitclient", "fermercompte")) {
             boolean employee = permission.startsWith("cmd_bank_") || permission.equals("cmd_openaccount");
-            return new Category(employee ? "Métiers" : "Roleplay", "Banque",
+            return new Category(employee ? "Métiers" : "Économie", "Banque",
                     employee ? "Banque en service · grade autorisé · ordinateur connecté" : "Compte bancaire actif");
         }
 
@@ -179,14 +205,14 @@ public class CommandsWindowComposer extends MessageComposer {
         }
 
         if (containsAny(value, "bucks", "rob", "shoot", "hit", "spit", "equip", "unequip", "passive", "combat", "org_", "rpitem")) {
-            return new Category("Roleplay", "Roleplay", "Roleplay access");
+            return new Category("RP", "Roleplay", "Accessible selon votre situation RP");
         }
 
         if (containsAny(value, "ban", "mute", "alert", "staff", "shutdown", "update_", "super", "give_rank", "mass", "userinfo", "invisible", "summon", "stalk")) {
-            return new Category("Staff", "Staff", "Staff only");
+            return new Category("Staff", "Staff", "R\u00e9serv\u00e9 au staff");
         }
 
-        return new Category("General", "General", "Available to your rank");
+        return new Category("Général", "Général", "Accessible à votre rang");
     }
 
     private static boolean containsAny(String value, String... needles) {

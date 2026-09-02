@@ -2,15 +2,21 @@ package com.eu.habbo.habbohotel.commands;
 
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
-import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
 import com.eu.habbo.messages.outgoing.generic.CommandsWindowComposer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class CommandsCommand extends Command {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandsCommand.class);
+
     public CommandsCommand() {
         super("cmd_commands", Emulator.getTexts().getValue("commands.keys.cmd_commands").split(";"));
     }
@@ -21,13 +27,16 @@ public class CommandsCommand extends Command {
                 .getCommandHandler()
                 .getCommandsForRank(gameClient.getHabbo().getHabboInfo().getRank().getId());
 
-        List<Command> commands = new ArrayList<>();
+        Map<String, Command> uniqueCommands = new LinkedHashMap<>();
 
         for (Command command : rankCommands) {
-            if (getPrimaryKey(command) != null) {
-                commands.add(command);
+            String primaryKey = getPrimaryKey(command);
+            if (primaryKey != null && CommandViewRegistry.isVisible(gameClient, command)) {
+                uniqueCommands.putIfAbsent(primaryKey.toLowerCase(Locale.ROOT), command);
             }
         }
+
+        List<Command> commands = new ArrayList<>(uniqueCommands.values());
 
         Collections.sort(commands, new Comparator<Command>() {
             @Override
@@ -39,7 +48,11 @@ public class CommandsCommand extends Command {
             }
         });
 
-        for (CommandsWindowComposer response : CommandsWindowComposer.createResponses(commands)) {
+        List<CommandsWindowComposer> responses = CommandsWindowComposer.createResponses(commands, gameClient);
+        LOGGER.info(":commands requested by {} (rank {}, {} commands, {} packets)",
+                gameClient.getHabbo().getHabboInfo().getUsername(),
+                gameClient.getHabbo().getHabboInfo().getRank().getId(), commands.size(), responses.size());
+        for (CommandsWindowComposer response : responses) {
             gameClient.sendResponse(response);
         }
 

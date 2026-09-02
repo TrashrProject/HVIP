@@ -14,6 +14,7 @@ import com.eu.habbo.messages.outgoing.rooms.users.RoomUserDataComposer;
 import com.eu.habbo.messages.outgoing.users.UserDataComposer;
 import gnu.trove.map.hash.THashMap;
 import io.github.brenoepics.roleplay.RolePlay;
+import io.github.brenoepics.roleplay.features.banking.BankComputerSessionManager;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.utilities.LiveFeed;
 import io.github.brenoepics.roleplay.utilities.template.PassiveTemplates;
@@ -94,6 +95,7 @@ public class JobsManager {
   }
 
   public void stopWork(Habbo habbo, RpAvatar data) {
+    BankComputerSessionManager.disconnect(habbo);
     if (!data.isDuty() || data.getJobEntity() == null || data.getJobEntity().isUnemployed()) {
       restoreMotto(habbo);
       return;
@@ -115,6 +117,7 @@ public class JobsManager {
   }
 
   public void sendHome(RpAvatar targetData, Habbo target, Habbo habbo, int minutes) {
+    BankComputerSessionManager.disconnect(target);
     targetData.setDuty(false);
 
     JobEntity job = targetData.getJobEntity();
@@ -134,6 +137,7 @@ public class JobsManager {
   }
 
   public void quitJob(Habbo habbo, RpAvatar data) {
+    BankComputerSessionManager.disconnect(habbo);
     removeEmployee(habbo);
 
     JobEntity unemployedJob = jobService.getUnemployedJob();

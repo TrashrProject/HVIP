@@ -1,6 +1,7 @@
 package io.github.brenoepics.roleplay.events;
 
 import com.eu.habbo.Emulator;
+import com.eu.habbo.habbohotel.commands.CommandViewRegistry;
 import com.eu.habbo.messages.PacketManager;
 import com.eu.habbo.messages.incoming.Incoming;
 import com.eu.habbo.messages.incoming.MessageHandler;
@@ -27,6 +28,7 @@ import io.github.brenoepics.roleplay.features.hospital.HealingRunner;
 import io.github.brenoepics.roleplay.features.user.HungerRunner;
 import io.github.brenoepics.roleplay.utilities.LoadConfig;
 import io.github.brenoepics.roleplay.utilities.LoadPlayerCommands;
+import io.github.brenoepics.roleplay.utilities.RoleplayCommandViewProvider;
 import java.lang.reflect.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,7 @@ public class EmulatorLoad implements EventListener {
   public static void onEmulatorLoaded(EmulatorLoadedEvent event) {
     try {
       LoadPlayerCommands.loadCommands();
+      CommandViewRegistry.setProvider(new RoleplayCommandViewProvider());
       LoadConfig.ILoadConfig();
       PacketManager packetManager = Emulator.getGameServer().getPacketManager();
       Field f = PacketManager.class.getDeclaredField("incoming");

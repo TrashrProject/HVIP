@@ -14,10 +14,10 @@ public class RoomUserWalkEventPlugin extends RoomUserWalkEvent {
 
     @Override
     public void handle() throws Exception {
+        if (BankComputerSessionManager.isUsingComputer(this.client.getHabbo())) return;
         Object escorting = this.client.getHabbo().getHabboStats().cache.get(ESCORT_VARIABLE);
         if (escorting instanceof Number && ((Number) escorting).intValue() > 0) return;
 
         super.handle();
-        if(this.client.getHabbo().getRoomUnit()!=null)BankComputerSessionManager.disconnectIfGoalIsFar(this.client.getHabbo(),this.client.getHabbo().getRoomUnit().getGoal());
     }
 }

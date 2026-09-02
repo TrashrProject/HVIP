@@ -102,6 +102,9 @@ public class GiveCommand extends Command {
                                                  formattedAmount, 
                                                  gameClient.getHabbo().getHabboInfo().getUsername());
             targetHabbo.whisper(receiveMessage, RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().shout("* Effectue un virement bancaire de "
+                    + amount.toPlainString() + " crédits à " + targetHabbo.getHabboInfo().getUsername() + " *",
+                    RoomChatMessageBubbles.NORMAL);
         } else {
             gameClient.getHabbo().whisper("Le virement a \u00e9chou\u00e9. R\u00e9essayez plus tard.", RoomChatMessageBubbles.ALERT);
         }

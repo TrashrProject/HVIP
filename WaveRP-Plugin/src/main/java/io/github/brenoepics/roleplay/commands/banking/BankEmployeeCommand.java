@@ -8,7 +8,6 @@ import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.banking.BankComputerSessionManager;
 import io.github.brenoepics.roleplay.features.banking.BankManager;
 import io.github.brenoepics.roleplay.features.banking.entities.BankAccount;
-import io.github.brenoepics.roleplay.features.job.JobPermissions;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -23,9 +22,6 @@ public class BankEmployeeCommand extends Command {
     if(rp==null||!rp.isDuty()||rp.getJobEntity()==null||!"bank".equalsIgnoreCase(rp.getJobEntity().getName())){
       employee.whisper("Vous devez être employé de banque en service pour utiliser cette commande.",RoomChatMessageBubbles.ALERT);return true;
     }
-    if(rp.getJobRankEntity()==null||!rp.getJobRankEntity().hasPermission(requiredPermission())){
-      employee.whisper("Vous n'avez pas le grade nécessaire pour cette opération.",RoomChatMessageBubbles.ALERT);return true;
-    }
     if(!BankComputerSessionManager.hasActiveSession(employee)){
       employee.whisper("Connectez-vous à un ordinateur de Paradise Bank en double-cliquant dessus et restez à proximité.",RoomChatMessageBubbles.ALERT);return true;
     }
@@ -39,18 +35,19 @@ public class BankEmployeeCommand extends Command {
       Optional<BankAccount> account=bank.getAnyBankAccount(targetId);
       if(account.isEmpty()){employee.whisper("Ce client ne possède aucun compte Paradise Bank.",RoomChatMessageBubbles.ALERT);return true;}
       BankAccount value=account.get();
-      employee.whisper("Compte de "+target.getHabboInfo().getUsername()+" | N° "+value.getAccountNumber()+" | Statut : "+(value.isActive()?"actif":"fermé")+" | Banque : "+bank.formatCurrency(value.getBankBalance())+" | Espèces : "+bank.formatCurrency(BigDecimal.valueOf(target.getHabboInfo().getCredits())),RoomChatMessageBubbles.ALERT);return true;
+      employee.whisper("Compte de "+target.getHabboInfo().getUsername()+" | N° "+value.getAccountNumber()+" | Statut : "+(value.isActive()?"actif":"fermé")+" | Banque : "+bank.formatCurrency(value.getBankBalance())+" | Espèces : "+bank.formatCurrency(BigDecimal.valueOf(target.getHabboInfo().getCredits())),RoomChatMessageBubbles.ALERT);
+      employee.shout("* Consulte le compte bancaire de "+target.getHabboInfo().getUsername()+" *",RoomChatMessageBubbles.NORMAL);return true;
     }
     if(action==Action.OPEN){
       if(bank.hasBankAccount(targetId)){employee.whisper("Ce client possède déjà un compte actif.",RoomChatMessageBubbles.ALERT);return true;}
       BankAccount account=bank.createBankAccount(targetId);
-      employee.shout("* Ouvre ou réactive le compte bancaire de "+params[1]+" *",RoomChatMessageBubbles.NORMAL);
+      employee.shout("* Ouvre un compte bancaire pour "+target.getHabboInfo().getUsername()+" *",RoomChatMessageBubbles.NORMAL);
       target.whisper("Votre compte Paradise Bank est actif. Numéro : "+account.getAccountNumber()+". Aucun argent n'a été ajouté.",RoomChatMessageBubbles.ALERT);return true;
     }
     if(action==Action.CLOSE){
       if(bank.getAnyBankAccount(targetId).isEmpty()){employee.whisper("Ce client ne possède aucun compte bancaire.",RoomChatMessageBubbles.ALERT);return true;}
       if(!bank.closeBankAccount(targetId)){employee.whisper("Ce compte est déjà fermé ou la fermeture a échoué.",RoomChatMessageBubbles.ALERT);return true;}
-      employee.shout("* Ferme le compte bancaire de "+params[1]+" *",RoomChatMessageBubbles.NORMAL);
+      employee.shout("* Ferme le compte bancaire de "+target.getHabboInfo().getUsername()+" *",RoomChatMessageBubbles.NORMAL);
       target.whisper("Votre compte bancaire est fermé. Votre argent est intégralement conservé.",RoomChatMessageBubbles.ALERT);return true;
     }
 
@@ -61,10 +58,10 @@ public class BankEmployeeCommand extends Command {
     boolean success=action==Action.DEPOSIT?bank.bankerDeposit(targetId,amount,roomId,employeeId):bank.bankerWithdraw(targetId,amount,roomId,employeeId);
     if(!success){employee.whisper(action==Action.DEPOSIT?"Versement refusé : espèces insuffisantes ou compte inactif.":"Retrait refusé : solde bancaire insuffisant ou compte inactif.",RoomChatMessageBubbles.ALERT);return true;}
     String operation=action==Action.DEPOSIT?"versement":"retrait client";
-    employee.shout("* Effectue un "+operation+" de "+bank.formatCurrency(amount)+" pour "+params[1]+" *",RoomChatMessageBubbles.NORMAL);
+    String actionLabel=action==Action.DEPOSIT?"versement bancaire":"retrait bancaire";
+    employee.shout("* Effectue un "+actionLabel+" de "+amount.toPlainString()+" crédits pour "+target.getHabboInfo().getUsername()+" *",RoomChatMessageBubbles.NORMAL);
     target.whisper("Paradise Bank : "+operation+" de "+bank.formatCurrency(amount)+" validé par "+employee.getHabboInfo().getUsername()+".",RoomChatMessageBubbles.ALERT);return true;
   }
 
-  private String requiredPermission(){return switch(action){case ACCOUNT->JobPermissions.BANK_ACCOUNT_VIEW;case OPEN,CLOSE->JobPermissions.BANK_ACCOUNT_MANAGE;case DEPOSIT->JobPermissions.BANK_COUNTER_DEPOSIT;case WITHDRAW->JobPermissions.BANK_COUNTER_WITHDRAW;};}
   private String usage(){return switch(action){case ACCOUNT->":compte [pseudo]";case OPEN->":ouvrircompte [pseudo]";case CLOSE->":fermercompte [pseudo]";case DEPOSIT->":versement [pseudo] [montant]";case WITHDRAW->":retraitclient [pseudo] [montant]";};}
 }

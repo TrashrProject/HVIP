@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HealingRunner implements Runnable {
 
-  private static final long DELAY_MS =
-      (long) Emulator.getConfig().getInt("features.heal.delay.seconds", 15) * 1000;
+  private static final long DELAY_MS = 5_000L;
+  private static final long FULL_HEAL_DURATION_MS = 7 * 60 * 1000L;
 
   private static void processHospitalUsers(Collection<Habbo> entries) {
     for (Habbo habbo : entries) {
@@ -49,8 +49,13 @@ public class HealingRunner implements Runnable {
   }
 
   private static void increaseHealth(Habbo habbo, RpAvatar avatar) {
-    int healthGain = 5 + Emulator.getRandom().nextInt(5);
-    int newHealth = Math.min(avatar.getMaxHealth(), avatar.getHealth() + healthGain);
+    long startedAt = RolePlay.getHospitalService().getHealingStartedAt(habbo);
+    long elapsed = Math.max(0L, System.currentTimeMillis() - startedAt);
+    double progress = Math.min(1.0d, (double) elapsed / FULL_HEAL_DURATION_MS);
+    int newHealth = Math.min(avatar.getMaxHealth(),
+        (int) Math.floor(avatar.getMaxHealth() * progress));
+    // Never lower health if another treatment healed the player during regeneration.
+    newHealth = Math.max(avatar.getHealth(), newHealth);
     avatar.setHealth(newHealth);
 
     if (newHealth < avatar.getMaxHealth()) {

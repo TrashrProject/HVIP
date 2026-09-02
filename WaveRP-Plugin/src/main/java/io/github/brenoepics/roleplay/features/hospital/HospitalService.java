@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 public class HospitalService {
 
   private final ConcurrentHashMap<Integer, RpAvatar> healingUsers = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Integer, Long> healingStartedAt = new ConcurrentHashMap<>();
   private final HospitalBedCache bedCache = new HospitalBedCache();
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -145,6 +146,7 @@ public class HospitalService {
     giveGlow(habbo);
 
     healingUsers.put(habbo.getHabboInfo().getId(), avatar);
+    healingStartedAt.put(habbo.getHabboInfo().getId(), System.currentTimeMillis());
   }
 
   public void giveGlow(Habbo habbo) {
@@ -173,6 +175,12 @@ public class HospitalService {
     }
 
     this.healingUsers.remove(habbo.getHabboInfo().getId());
+    this.healingStartedAt.remove(habbo.getHabboInfo().getId());
+  }
+
+  public long getHealingStartedAt(Habbo habbo) {
+    return healingStartedAt.getOrDefault(habbo.getHabboInfo().getId(),
+        System.currentTimeMillis());
   }
 
 

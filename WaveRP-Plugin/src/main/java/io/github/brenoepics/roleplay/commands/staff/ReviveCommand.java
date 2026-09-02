@@ -17,6 +17,12 @@ public class ReviveCommand extends Command {
   @Override
   public boolean handle(GameClient gameClient, String[] params) {
     Habbo staff = gameClient.getHabbo();
+    // Permission is already checked by CommandHandler. This explicit guard prevents an
+    // accidental permission-table change from exposing this sensitive command to players.
+    if (staff.getHabboInfo().getRank().getId() < 5) {
+      staff.whisper("Cette commande est réservée au staff.", RoomChatMessageBubbles.ALERT);
+      return true;
+    }
     if (params.length != 2) {
       staff.whisper(":revive <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
@@ -34,11 +40,6 @@ public class ReviveCommand extends Command {
           RoomChatMessageBubbles.ALERT);
       return true;
     }
-    if (!avatar.isDead()) {
-      staff.whisper("Ce joueur n'est pas inconscient.", RoomChatMessageBubbles.ALERT);
-      return true;
-    }
-
     avatar.heal();
     RolePlay.getHospitalService().finishHealing(target);
     avatar.updateDatabase();

@@ -60,6 +60,9 @@ public class TransactionHistoryCommand extends Command {
             return true;
         }
 
+        gameClient.getHabbo().shout("* Consulte l'historique de son compte bancaire *",
+                RoomChatMessageBubbles.NORMAL);
+
         // Get transaction history
         List<BankTransaction> transactions = bankManager.getTransactionHistory(userId, limit);
         

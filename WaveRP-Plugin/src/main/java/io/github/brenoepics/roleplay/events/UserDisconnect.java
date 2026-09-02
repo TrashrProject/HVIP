@@ -8,6 +8,7 @@ import com.eu.habbo.plugin.events.users.UserDisconnectEvent;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.crime.PoliceHandcuffService;
 import io.github.brenoepics.roleplay.features.crime.PoliceTaserService;
+import io.github.brenoepics.roleplay.features.banking.BankComputerSessionManager;
 import io.github.brenoepics.roleplay.features.job.JobsDelegate;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import java.sql.Connection;
@@ -21,6 +22,7 @@ public class UserDisconnect implements EventListener {
   @EventHandler
   public static void onUserDisconnect(UserDisconnectEvent e) {
     Habbo habbo = e.habbo;
+    BankComputerSessionManager.disconnect(habbo);
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
     data.updateDatabase();
     RolePlay.getEmsService().onDisconnect(habbo);

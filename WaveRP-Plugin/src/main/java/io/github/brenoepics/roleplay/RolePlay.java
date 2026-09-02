@@ -2,6 +2,7 @@ package io.github.brenoepics.roleplay;
 
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.users.Habbo;
+import com.eu.habbo.habbohotel.commands.CommandViewRegistry;
 import com.eu.habbo.messages.PacketManager;
 import com.eu.habbo.messages.incoming.Incoming;
 import com.eu.habbo.messages.incoming.MessageHandler;
@@ -99,6 +100,7 @@ public class RolePlay extends HabboPlugin implements EventListener {
   @Override
   public void onDisable() {
     try {
+      CommandViewRegistry.setProvider(null);
       PacketManager packetManager = Emulator.getGameServer().getPacketManager();
       Field f = PacketManager.class.getDeclaredField("incoming");
       f.setAccessible(true);

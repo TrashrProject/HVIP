@@ -14,6 +14,7 @@ import com.eu.habbo.plugin.events.users.UserEnterRoomEvent;
 import com.eu.habbo.plugin.events.users.UserIdleEvent;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.crime.PoliceHandcuffService;
+import io.github.brenoepics.roleplay.features.banking.BankComputerSessionManager;
 import io.github.brenoepics.roleplay.features.job.JobsDelegate;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.features.user.inventory.InventorySlot;
@@ -26,6 +27,7 @@ public class UserEnterRoomListener implements EventListener {
   @EventHandler
   public static void onRoomChange(UserEnterRoomEvent event) {
     Habbo habbo = event.habbo;
+    BankComputerSessionManager.disconnect(habbo);
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
     RolePlay.getEscortManager().stopEscorting(habbo.getHabboInfo().getId());
     RolePlay.getEscortManager().stopEscortingByOfficer(habbo.getHabboInfo().getId());
