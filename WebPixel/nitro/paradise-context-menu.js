@@ -43,6 +43,16 @@
         var textNode = Array.prototype.find.call(row.childNodes, function (node) {
             return node.nodeType === Node.TEXT_NODE && node.nodeValue.trim();
         });
+        if (!textNode) {
+            var walker = document.createTreeWalker(row, NodeFilter.SHOW_TEXT);
+            var candidate;
+            while ((candidate = walker.nextNode())) {
+                var parent = candidate.parentElement;
+                if (!candidate.nodeValue.trim() || (parent && parent.closest('.fa-icon, .paradise-menu-icon'))) continue;
+                textNode = candidate;
+                break;
+            }
+        }
         if (textNode && textNode.nodeValue.trim() !== replacement) textNode.nodeValue = ' ' + replacement + ' ';
     }
 
