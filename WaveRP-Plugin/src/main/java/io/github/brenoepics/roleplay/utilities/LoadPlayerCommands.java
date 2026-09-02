@@ -388,9 +388,14 @@ public class LoadPlayerCommands {
           new SetStatsCommand("cmd_set_stats", getSplit("commands.cmd_set_stats.keys")),
           new String[]{"set_stats"}, PermissionState.DENIED);
 
+      Emulator.getTexts().register("commands.description.cmd_global_heal",
+          ":revivertous - Remet la vie de tous les joueurs connectés au maximum.");
       LoadPlayerCommands.addCommand(
-          new GlobalHealCommand("cmd_global_heal", getSplit("commands.cmd_global_heal.keys")),
-          new String[]{"global_heal"}, PermissionState.DENIED);
+          new GlobalHealCommand("cmd_global_heal",
+              new String[]{"revivertous", "reviveall", "soignertous", "global_heal"}),
+          new String[]{"revivertous", "reviveall", "soignertous", "global_heal"},
+          PermissionState.DENIED);
+      CheckDatabase.allowPermissionForRankRange("cmd_global_heal", 5, 9);
 
       Emulator.getTexts().register("commands.description.cmd_superhire",
           ":superhire <pseudo> <metier|id> <rank>");
