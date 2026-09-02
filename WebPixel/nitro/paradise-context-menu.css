@@ -1,208 +1,288 @@
 .nitro-context-menu.paradise-player-context-menu {
+    --pm-bg: #111820;
+    --pm-panel: #19232d;
+    --pm-panel-hover: #223240;
+    --pm-line: #344453;
+    --pm-accent: #efad35;
+    --pm-accent-soft: #ffd77d;
     box-sizing: border-box !important;
-    width: 150px !important;
-    min-width: 150px !important;
-    max-width: 150px !important;
-    padding: 3px !important;
+    width: 194px !important;
+    min-width: 194px !important;
+    max-width: 194px !important;
+    padding: 5px !important;
     overflow: visible !important;
-    color: #f3f4f5;
-    background: #15191d;
-    border: 1px solid #31373c;
-    border-radius: 5px;
-    box-shadow: 0 5px 13px rgba(0, 0, 0, .34);
+    color: #f4f7fa;
+    background: linear-gradient(180deg, #17222c 0%, var(--pm-bg) 100%);
+    border: 1px solid #080c10;
+    border-radius: 8px;
+    box-shadow: 0 0 0 2px #34414b, 0 8px 20px rgba(0, 0, 0, .44);
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 10.5px;
+    font-size: 11px;
     line-height: 1;
-    -webkit-font-smoothing: auto;
-    text-rendering: geometricPrecision;
-}
-
-.nitro-context-menu.paradise-player-context-menu .menu-header,
-.nitro-context-menu.paradise-player-context-menu .menu-list,
-.nitro-context-menu.paradise-player-context-menu .menu-list-split-3,
-.nitro-context-menu.paradise-player-context-menu .menu-item.list-item,
-.nitro-context-menu.paradise-player-context-menu .menu-footer {
-    box-sizing: border-box !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
+    -webkit-font-smoothing: antialiased;
 }
 
 .nitro-context-menu.paradise-player-context-menu:not(.name-only)::after {
-    width: 6px;
-    height: 6px;
-    bottom: -4px;
-    border-width: 3px;
-    border-color: transparent #15191d #15191d transparent;
-    filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, .25));
+    width: 8px;
+    height: 8px;
+    bottom: -6px;
+    border-width: 4px;
+    border-color: transparent #18232c #18232c transparent;
+    filter: drop-shadow(2px 2px 0 #080c10);
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-header {
-    position: relative;
-    min-height: 23px !important;
-    height: 23px !important;
-    max-height: 23px !important;
-    margin: 0 0 3px !important;
-    padding: 0 7px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 29px !important;
+    height: 29px !important;
+    margin: 0 !important;
+    padding: 0 10px !important;
     overflow: hidden;
-    color: #ffffff;
-    background: #292e33;
-    border: 1px solid #40464b;
-    border-bottom-color: #9b7840;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0;
-    line-height: 21px;
-    text-align: center;
+    color: #fff;
+    background: linear-gradient(180deg, #344452, #263540);
+    border: 1px solid #4b5e6c;
+    border-bottom-color: #171f26;
+    border-radius: 5px 5px 3px 3px;
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 27px;
+    text-align: left;
     text-overflow: ellipsis;
-    text-shadow: none;
+    text-shadow: 0 1px #000;
     white-space: nowrap;
 }
 
-.nitro-context-menu.paradise-player-context-menu[data-paradise-view="submenu"] .menu-header {
-    padding-left: 7px !important;
+.nitro-context-menu.paradise-player-context-menu .menu-header.cursor-pointer::after {
+    content: "PROFIL";
+    float: right;
+    margin-top: 7px;
+    padding: 0 5px;
+    color: var(--pm-accent-soft);
+    background: #182129;
+    border: 1px solid #4a3d24;
+    border-radius: 3px;
+    font-size: 7px;
+    line-height: 12px;
+    text-shadow: none;
+}
+
+.nitro-context-menu.paradise-player-context-menu .paradise-menu-view-heading {
+    display: flex;
+    min-height: 30px;
+    margin: 4px 1px;
+    padding: 4px 7px 3px;
+    flex-direction: column;
+    justify-content: center;
+    background: rgba(7, 12, 16, .58);
+    border-left: 2px solid var(--pm-accent);
+    border-radius: 2px;
+}
+
+.nitro-context-menu.paradise-player-context-menu .paradise-menu-view-heading span {
+    color: var(--pm-accent-soft);
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .65px;
+    line-height: 10px;
+}
+
+.nitro-context-menu.paradise-player-context-menu .paradise-menu-view-heading small {
+    margin-top: 1px;
+    color: #9faebb;
+    font-size: 8.5px;
+    font-weight: 600;
+    line-height: 11px;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-list {
     display: flex;
+    width: 100% !important;
+    min-width: 0 !important;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
     overflow: visible;
     background: transparent;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item {
     position: relative;
-    min-height: 22px !important;
-    height: 22px !important;
-    max-height: 22px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 29px !important;
+    height: 29px !important;
+    max-height: 29px !important;
     margin: 0 !important;
-    padding: 0 17px 0 7px !important;
+    padding: 0 22px 0 34px !important;
     justify-content: flex-start !important;
     align-items: center !important;
     overflow: hidden !important;
-    color: #f0f1f2;
-    background: #20252a;
-    border: 1px solid #2c3237;
-    border-radius: 3px;
+    color: #eef4f7;
+    background: linear-gradient(180deg, #202c36, var(--pm-panel));
+    border: 1px solid #31404c;
+    border-radius: 4px;
     font-size: 10.5px;
-    font-weight: 700;
-    line-height: 20px;
+    font-weight: 800;
+    line-height: 27px;
     text-align: left;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px #000;
+    white-space: nowrap;
+    transition: transform 80ms ease, background-color 80ms ease, border-color 80ms ease;
+}
+
+.nitro-context-menu.paradise-player-context-menu[data-paradise-view="root"] .menu-item.list-item[data-paradise-hint] {
+    min-height: 39px !important;
+    height: 39px !important;
+    max-height: 39px !important;
+    padding-top: 4px !important;
+    align-items: flex-start !important;
+    line-height: 15px;
+}
+
+.nitro-context-menu.paradise-player-context-menu[data-paradise-view="root"] .menu-item.list-item[data-paradise-hint]::after {
+    content: attr(data-paradise-hint);
+    position: absolute;
+    left: 34px;
+    right: 18px;
+    bottom: 5px;
+    overflow: hidden;
+    color: #8999a5;
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 9px;
     text-overflow: ellipsis;
     text-shadow: none;
     white-space: nowrap;
-    transition: background-color 70ms ease, border-color 70ms ease, color 70ms ease;
-}
-
-.nitro-context-menu.paradise-player-context-menu .menu-item.list-item::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 4px;
-    bottom: 4px;
-    width: 2px;
-    background: transparent;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):hover,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):focus-visible {
-    color: #ffffff;
-    background: #2a3035;
-    border-color: #4a4f53;
+    color: #fff;
+    background: linear-gradient(180deg, #2b4050, var(--pm-panel-hover));
+    border-color: #62788a;
     outline: none;
+    transform: translateX(1px);
 }
 
-.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):hover::before,
-.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):focus-visible::before {
-    background: #d2a85d;
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):active,
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item.paradise-item-opening {
+    transform: translate(1px, 1px);
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item.disabled {
-    color: #777d82;
-    background: #1c2024;
+    color: #73808a;
+    background: #151d24;
+    border-color: #252f37;
+    filter: grayscale(.5);
+}
+
+.nitro-context-menu.paradise-player-context-menu .paradise-menu-icon {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    display: flex;
+    width: 21px;
+    height: 21px;
+    align-items: center;
+    justify-content: center;
+    color: var(--pm-accent-soft);
+    background: #101820;
+    border: 1px solid #3b4b57;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 19px;
+    text-shadow: none;
+    transform: translateY(-50%);
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon,
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon {
-    right: 5px;
-    color: #d2a85d;
-    font-size: 7px;
+    right: 7px;
+    color: var(--pm-accent);
+    font-size: 8px;
     opacity: 1;
 }
 
-.nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon.left,
-.nitro-context-menu.paradise-player-context-menu .menu-item.list-item .nitro-currency-icon.left {
-    left: 5px;
+.nitro-context-menu.paradise-player-context-menu .menu-item.list-item .fa-icon.left {
+    left: 8px;
     right: auto;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-item.list-item.paradise-back-item {
-    padding-left: 16px !important;
+    min-height: 25px !important;
+    height: 25px !important;
+    max-height: 25px !important;
+    margin-top: 2px !important;
+    padding: 0 8px 0 25px !important;
+    color: #c8d2d9;
+    background: #151e25;
+    line-height: 23px;
 }
 
-.nitro-context-menu.paradise-player-context-menu .menu-item.list-item.paradise-item-opening .fa-icon.right,
-.nitro-context-menu.paradise-player-context-menu .menu-item.list-item:not(.disabled):hover .fa-icon.right {
-    color: #f0c979;
-}
+.nitro-context-menu.paradise-player-context-menu[data-paradise-view="signs"] .menu-list { gap: 4px; }
 
 .nitro-context-menu.paradise-player-context-menu .menu-list-split-3 {
-    gap: 2px;
-    margin-bottom: 2px;
+    display: grid !important;
+    width: 100% !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px !important;
+    margin: 0 !important;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-list-split-3 .menu-item.list-item {
-    min-height: 20px !important;
-    height: 20px !important;
-    max-height: 20px !important;
-    margin: 0 !important;
-    padding: 0 2px !important;
+    min-height: 31px !important;
+    height: 31px !important;
+    max-height: 31px !important;
+    padding: 0 !important;
     justify-content: center !important;
-    line-height: 18px;
+    color: #fff;
+    font-size: 10px;
+    line-height: 29px;
     text-align: center;
 }
 
-.nitro-context-menu.paradise-player-context-menu .menu-list-split-3 .menu-item.list-item::before {
-    display: none;
+.nitro-context-menu.paradise-player-context-menu .menu-list-split-3 .menu-item.list-item:hover {
+    color: var(--pm-accent-soft);
+    transform: translateY(-1px);
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-footer {
-    min-height: 9px !important;
-    height: 9px !important;
-    max-height: 9px !important;
-    margin-top: 3px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 11px !important;
+    height: 11px !important;
+    margin-top: 4px !important;
     padding: 0 !important;
     overflow: hidden;
-    color: #969da2;
-    background: #111519;
-    border: 1px solid #242a2f;
-    border-radius: 2px;
+    color: #7f909c;
+    background: #0b1116;
+    border: 1px solid #26323b;
+    border-radius: 3px;
     font-size: 6px;
-    line-height: 7px;
+    line-height: 9px;
 }
 
 .nitro-context-menu.paradise-player-context-menu .menu-footer:hover,
 .nitro-context-menu.paradise-player-context-menu .menu-footer:focus-visible {
-    color: #d7d9db;
-    background: #1c2125;
+    color: var(--pm-accent-soft);
+    background: #172129;
     outline: none;
 }
 
-.nitro-context-menu.paradise-player-context-menu.menu-hidden .menu-footer {
-    margin-top: 0 !important;
-}
+.nitro-context-menu.paradise-player-context-menu.menu-hidden .paradise-menu-view-heading { display: none; }
+.nitro-context-menu.paradise-player-context-menu.menu-hidden .menu-footer { margin-top: 0 !important; }
 
 @media (max-width: 460px) {
     .nitro-context-menu.paradise-player-context-menu {
-        width: 150px !important;
-        min-width: 150px !important;
-        max-width: 150px !important;
+        width: 184px !important;
+        min-width: 184px !important;
+        max-width: 184px !important;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .nitro-context-menu.paradise-player-context-menu .menu-item.list-item {
-        transition: none;
-    }
+    .nitro-context-menu.paradise-player-context-menu .menu-item.list-item { transition: none; }
 }
