@@ -1,0 +1,163 @@
+/* ParadiseRP HUD - action dock polish v11
+ * Keeps the existing V10 HUD layout but turns the three bottom-right
+ * controls into one coherent modern action dock.
+ */
+
+#paradise-hud-v2 .phud-bottom {
+    height: 36px;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+#paradise-hud-v2 .phud-time {
+    width: 62px;
+    height: 30px;
+    flex-basis: 62px;
+    border-radius: 10px;
+    font-size: 9px;
+}
+
+#paradise-hud-v2 .phud-vip {
+    width: 51px;
+    height: 30px;
+    flex-basis: 51px;
+    border-radius: 10px;
+    font-size: 7.8px;
+}
+
+#paradise-hud-v2 .phud-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    min-width: 0;
+    border: 1px solid rgba(103, 142, 160, .15);
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(239, 246, 249, .92), rgba(232, 241, 245, .78));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .96),
+        0 2px 6px rgba(45, 77, 91, .05);
+}
+
+#paradise-hud-v2 .phud-action {
+    position: relative;
+    width: 29px;
+    height: 29px;
+    flex: 0 0 29px;
+    padding: 0;
+    border: 0;
+    border-radius: 9px;
+    color: #38515d;
+    background: transparent;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition:
+        transform 120ms ease,
+        background-color 120ms ease,
+        box-shadow 120ms ease;
+}
+
+#paradise-hud-v2 .phud-action + .phud-action::before {
+    content: "";
+    position: absolute;
+    left: -2px;
+    top: 7px;
+    bottom: 7px;
+    width: 1px;
+    background: rgba(89, 126, 143, .12);
+    pointer-events: none;
+}
+
+#paradise-hud-v2 .phud-action:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, .96);
+    box-shadow:
+        0 4px 10px rgba(42, 93, 113, .11),
+        inset 0 0 0 1px rgba(74, 164, 194, .15);
+}
+
+#paradise-hud-v2 .phud-action:active {
+    transform: translateY(0);
+    background: rgba(221, 241, 248, .96);
+    box-shadow: inset 0 1px 3px rgba(49, 87, 103, .10);
+}
+
+/* Normalize original Nitro pixel assets so all three controls have
+ * the same visual weight instead of looking randomly sized. */
+#paradise-hud-v2 .phud-action img,
+#paradise-hud-v2 .phud-action svg,
+#paradise-hud-v2 .phud-action i {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+    margin: 0 !important;
+    transform: none !important;
+    opacity: .96;
+    font-size: 15px !important;
+    line-height: 1 !important;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+/* Chat icon is naturally wide. */
+#paradise-hud-v2 .phud-action:nth-child(1) img,
+#paradise-hud-v2 .phud-action:nth-child(1) svg,
+#paradise-hud-v2 .phud-action:nth-child(1) i {
+    max-width: 19px !important;
+    max-height: 18px !important;
+}
+
+/* Alert/lighthouse sprite is naturally tall. */
+#paradise-hud-v2 .phud-action:nth-child(2) img,
+#paradise-hud-v2 .phud-action:nth-child(2) svg,
+#paradise-hud-v2 .phud-action:nth-child(2) i {
+    max-width: 18px !important;
+    max-height: 20px !important;
+}
+
+/* Settings icon needs a touch less scale to avoid looking heavier. */
+#paradise-hud-v2 .phud-action:nth-child(3) img,
+#paradise-hud-v2 .phud-action:nth-child(3) svg,
+#paradise-hud-v2 .phud-action:nth-child(3) i {
+    max-width: 17px !important;
+    max-height: 17px !important;
+}
+
+#paradise-hud-v2 .phud-action-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 14px;
+    line-height: 1;
+}
+
+@media (max-width: 560px) {
+    #paradise-hud-v2 .phud-bottom {
+        gap: 4px;
+    }
+
+    #paradise-hud-v2 .phud-actions {
+        gap: 1px;
+        padding: 2px;
+    }
+
+    #paradise-hud-v2 .phud-action {
+        width: 28px;
+        height: 28px;
+        flex-basis: 28px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #paradise-hud-v2 .phud-action {
+        transition: none;
+    }
+}

@@ -6,6 +6,7 @@ import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import io.github.brenoepics.roleplay.features.banking.BankComputerSessionManager;
 import io.github.brenoepics.roleplay.utilities.types.Timeout;
 
 public class StopWorkCommand extends Command {
@@ -22,13 +23,6 @@ public class StopWorkCommand extends Command {
     if (data.getJobEntity() == null || data.getJobEntity()
         .equals(RolePlay.getJobService().getUnemployedJob())) {
       habbo.whisper("Vous n'avez aucun metier.", RoomChatMessageBubbles.ALERT);
-      return true;
-    }
-
-    if (!RolePlay.getJobsManager()
-        .canWorkAtRoom(data.getJobEntity(), habbo.getHabboInfo().getCurrentRoom().getId())) {
-      habbo.whisper("Vous devez etre dans la salle de votre metier pour arreter de travailler.",
-          RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -52,6 +46,7 @@ public class StopWorkCommand extends Command {
     }
 
     RolePlay.getJobsManager().stopWork(habbo, data);
+    BankComputerSessionManager.disconnect(habbo.getHabboInfo().getId());
     return true;
   }
 }

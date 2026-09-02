@@ -42,6 +42,10 @@ public final class JobPermissions {
   public static final String BANK_TRANSFER = "bank.transfer";
   public static final String BANK_LOAN = "bank.loan";
   public static final String BANK_ACCOUNT_ACCESS = "bank.account.access";
+  public static final String BANK_ACCOUNT_VIEW = "bank.account.view";
+  public static final String BANK_ACCOUNT_MANAGE = "bank.account.manage";
+  public static final String BANK_COUNTER_DEPOSIT = "bank.counter.deposit";
+  public static final String BANK_COUNTER_WITHDRAW = "bank.counter.withdraw";
 
   private JobPermissions() {
     // Utility class

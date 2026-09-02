@@ -15,6 +15,11 @@ import io.github.brenoepics.roleplay.communication.outgoing.common.GuildRemoveFa
 import io.github.brenoepics.roleplay.communication.outgoing.common.GuildSetFavoriteEvent;
 import io.github.brenoepics.roleplay.communication.packets.emulator.incoming.RequestWearingBadgesEvent;
 import io.github.brenoepics.roleplay.communication.packets.emulator.incoming.RequestBankDataEvent; // Added import
+import io.github.brenoepics.roleplay.communication.packets.emulator.incoming.CreateGangEvent;
+import io.github.brenoepics.roleplay.communication.packets.emulator.incoming.DeleteGangEvent;
+import io.github.brenoepics.roleplay.communication.packets.emulator.incoming.RequestGangDataEvent;
+import io.github.brenoepics.roleplay.communication.packets.emulator.incoming.SaveGangBadgeEvent;
+import io.github.brenoepics.roleplay.communication.packets.emulator.incoming.SaveGangColorsEvent;
 import io.github.brenoepics.roleplay.communication.packets.js.JavascriptCallbackEvent;
 import io.github.brenoepics.roleplay.features.crime.prison.JailTimeRunner;
 import io.github.brenoepics.roleplay.features.crime.wantedlist.WantedRunner;
@@ -30,6 +35,11 @@ public class EmulatorLoad implements EventListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EmulatorLoad.class);
   private static final int REQUEST_BANK_DATA_PACKET_ID = 3325; // Custom packet id for bank snapshot request
+  private static final int REQUEST_GANG_DATA_PACKET_ID = 6112;
+  private static final int CREATE_GANG_PACKET_ID = 6113;
+  private static final int SAVE_GANG_COLORS_PACKET_ID = 6114;
+  private static final int DELETE_GANG_PACKET_ID = 6119;
+  private static final int SAVE_GANG_BADGE_PACKET_ID = 6123;
 
   @EventHandler
   public static void onEmulatorLoaded(EmulatorLoadedEvent event) {
@@ -62,6 +72,17 @@ public class EmulatorLoad implements EventListener {
       // Register custom bank data request packet (no existing constant available)
       incoming.remove(REQUEST_BANK_DATA_PACKET_ID); // ensure clean override if previously registered
       packetManager.registerHandler(REQUEST_BANK_DATA_PACKET_ID, RequestBankDataEvent.class);
+
+      incoming.remove(REQUEST_GANG_DATA_PACKET_ID);
+      incoming.remove(CREATE_GANG_PACKET_ID);
+      incoming.remove(SAVE_GANG_COLORS_PACKET_ID);
+      incoming.remove(DELETE_GANG_PACKET_ID);
+      incoming.remove(SAVE_GANG_BADGE_PACKET_ID);
+      packetManager.registerHandler(REQUEST_GANG_DATA_PACKET_ID, RequestGangDataEvent.class);
+      packetManager.registerHandler(CREATE_GANG_PACKET_ID, CreateGangEvent.class);
+      packetManager.registerHandler(SAVE_GANG_COLORS_PACKET_ID, SaveGangColorsEvent.class);
+      packetManager.registerHandler(DELETE_GANG_PACKET_ID, DeleteGangEvent.class);
+      packetManager.registerHandler(SAVE_GANG_BADGE_PACKET_ID, SaveGangBadgeEvent.class);
 
       JavascriptCallbackEvent javascriptCallbackEvent = new JavascriptCallbackEvent();
       Emulator.getGameServer().getPacketManager().registerCallable(314, javascriptCallbackEvent);

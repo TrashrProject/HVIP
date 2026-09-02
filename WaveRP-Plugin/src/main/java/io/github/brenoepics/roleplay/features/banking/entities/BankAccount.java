@@ -1,7 +1,5 @@
 package io.github.brenoepics.roleplay.features.banking.entities;
 
-import com.eu.habbo.Emulator;
-import com.eu.habbo.habbohotel.users.Habbo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +14,7 @@ public class BankAccount {
     private int userId;
     private String accountNumber;
     private BigDecimal bankBalance;
+    private boolean active;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
@@ -23,6 +22,7 @@ public class BankAccount {
         this.userId = userId;
         this.accountNumber = accountNumber;
         this.bankBalance = BigDecimal.ZERO;
+        this.active = true;
         this.createdAt = new Timestamp(System.currentTimeMillis());
         this.updatedAt = new Timestamp(System.currentTimeMillis());
     }
@@ -76,24 +76,4 @@ public class BankAccount {
         updatedAt = new Timestamp(System.currentTimeMillis());
     }
 
-    /**
-     * Gets the wallet balance from Habbo's currency system (type 200)
-     * @return wallet balance as BigDecimal
-     */
-    public BigDecimal getWalletBalance() {
-        Habbo habbo = Emulator.getGameEnvironment().getHabboManager().getHabbo(userId);
-        if (habbo == null) {
-            return BigDecimal.ZERO;
-        }
-        int walletBalance = habbo.getHabboInfo().getCurrencyAmount(200);
-        return BigDecimal.valueOf(walletBalance);
-    }
-
-    /**
-     * Gets the total balance (bank balance + wallet balance)
-     * @return total balance as BigDecimal
-     */
-    public BigDecimal getTotalBalance() {
-        return bankBalance.add(getWalletBalance());
-    }
 }

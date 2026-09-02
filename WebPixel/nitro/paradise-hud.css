@@ -1,0 +1,339 @@
+#paradise-hud-v2 {
+    position: fixed;
+    z-index: 2147482900;
+    left: var(--phud-left, 40px);
+    top: var(--phud-top, 8px);
+    width: min(248px, calc(100vw - 16px));
+    font-family: Ubuntu, Arial, sans-serif;
+    color: #20313b;
+    pointer-events: auto;
+}
+
+#paradise-hud-v2,
+#paradise-hud-v2 * {
+    box-sizing: border-box;
+}
+
+.phud-shell {
+    position: relative;
+    overflow: hidden;
+    padding: 10px;
+    border: 1px solid rgba(104, 146, 166, .20);
+    border-radius: 16px;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(98, 197, 220, .09), transparent 34%),
+        linear-gradient(150deg, rgba(255, 255, 255, .99), rgba(243, 249, 252, .975));
+    box-shadow:
+        0 18px 36px rgba(39, 66, 80, .14),
+        0 4px 10px rgba(39, 66, 80, .07),
+        inset 0 1px 0 rgba(255, 255, 255, .98);
+    backdrop-filter: blur(12px);
+}
+
+.phud-shell::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 24px;
+    right: 24px;
+    height: 2px;
+    border-radius: 0 0 8px 8px;
+    background: linear-gradient(90deg, transparent, #4eb9d4 26%, #76d4df 74%, transparent);
+    opacity: .9;
+    pointer-events: none;
+}
+
+.phud-room {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 3px;
+}
+
+.phud-room::before {
+    content: "";
+    width: 4px;
+    height: 17px;
+    flex: 0 0 4px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #6ad5e2 0%, #43a9ca 100%);
+    box-shadow: 0 0 0 3px rgba(89, 186, 211, .08);
+}
+
+.phud-room-name {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #1f333d;
+    font-size: 12.5px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -.14px;
+}
+
+.phud-version {
+    flex: 0 0 auto;
+    min-width: 29px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    color: #347389;
+    background: rgba(224, 243, 248, .90);
+    border: 1px solid rgba(77, 154, 181, .20);
+    border-radius: 999px;
+    font-size: 8.5px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.phud-money {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 5px;
+    padding: 4px;
+    border: 1px solid rgba(117, 151, 167, .15);
+    border-radius: 12px;
+    background: rgba(239, 246, 249, .84);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .94),
+        0 1px 2px rgba(41, 73, 88, .025);
+}
+
+.phud-money-item {
+    position: relative;
+    min-width: 0;
+    height: 31px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: transparent;
+}
+
+.phud-money-item + .phud-money-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    bottom: 7px;
+    width: 1px;
+    background: rgba(111, 145, 159, .14);
+}
+
+.phud-money-item:nth-child(1) {
+    background: linear-gradient(180deg, rgba(255, 249, 228, .72), rgba(255, 247, 219, .48));
+}
+
+.phud-money-item:nth-child(2) {
+    background: linear-gradient(180deg, rgba(249, 238, 252, .68), rgba(247, 233, 250, .45));
+}
+
+.phud-money-item:nth-child(3) {
+    background: linear-gradient(180deg, rgba(230, 248, 250, .74), rgba(221, 244, 247, .49));
+}
+
+.phud-money-icon {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    image-rendering: pixelated;
+}
+
+.phud-money-icon img,
+.phud-money-icon svg {
+    max-width: 14px !important;
+    max-height: 14px !important;
+    image-rendering: pixelated;
+}
+
+.phud-money-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #d6a72b;
+    box-shadow: 0 1px 2px rgba(120, 84, 0, .14);
+}
+
+.phud-money-item:nth-child(2) .phud-money-dot {
+    background: #b55ac9;
+}
+
+.phud-money-item:nth-child(3) .phud-money-dot {
+    background: #54c2cf;
+}
+
+.phud-money-value {
+    min-width: 0;
+    flex: 0 1 auto;
+    overflow: visible;
+    white-space: nowrap;
+    color: #2d414a;
+    font-size: 10.8px;
+    font-weight: 850;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.08px;
+}
+
+.phud-bottom {
+    height: 33px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.phud-time {
+    width: 61px;
+    height: 29px;
+    flex: 0 0 61px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    border: 1px solid rgba(113, 146, 162, .15);
+    border-radius: 10px;
+    color: #3f5863;
+    background: rgba(245, 249, 251, .90);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .96),
+        0 1px 2px rgba(41, 73, 88, .03);
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.phud-vip {
+    width: 50px;
+    height: 29px;
+    flex: 0 0 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 5px;
+    border: 1px solid rgba(113, 146, 162, .13);
+    border-radius: 10px;
+    color: #7b8b93;
+    background: rgba(247, 250, 251, .82);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .96),
+        0 1px 2px rgba(41, 73, 88, .025);
+    font-size: 7.8px;
+    font-weight: 900;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.phud-vip::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+    border-radius: 50%;
+    background: #aab6bb;
+}
+
+.phud-vip.is-active {
+    color: #397553;
+    background: rgba(235, 249, 240, .94);
+    border-color: rgba(84, 157, 108, .20);
+}
+
+.phud-vip.is-active::before {
+    background: #5fbd7e;
+    box-shadow: 0 0 0 3px rgba(95, 189, 126, .10);
+}
+
+.phud-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+    min-width: 0;
+}
+
+.phud-action {
+    width: 29px;
+    height: 29px;
+    flex: 0 0 29px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid rgba(111, 146, 163, .15);
+    border-radius: 10px;
+    color: #3e5864;
+    background: rgba(255, 255, 255, .91);
+    box-shadow:
+        0 3px 7px rgba(43, 73, 86, .07),
+        inset 0 1px 0 rgba(255, 255, 255, .99);
+    cursor: pointer;
+    transition:
+        transform 110ms ease,
+        background-color 110ms ease,
+        border-color 110ms ease,
+        box-shadow 110ms ease;
+}
+
+.phud-action:hover {
+    transform: translateY(-1px);
+    background: rgba(230, 247, 252, .99);
+    border-color: rgba(74, 164, 194, .34);
+    box-shadow:
+        0 6px 13px rgba(53, 122, 145, .14),
+        inset 0 1px 0 rgba(255, 255, 255, .99);
+}
+
+.phud-action:active {
+    transform: translateY(0);
+    background: rgba(219, 240, 247, .99);
+    box-shadow: inset 0 1px 2px rgba(55, 93, 108, .10);
+}
+
+.phud-action img,
+.phud-action svg,
+.phud-action i {
+    max-width: 17px !important;
+    max-height: 17px !important;
+    font-size: 14px !important;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+
+.paradise-hud-source-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+@media (max-width: 560px) {
+    #paradise-hud-v2 {
+        width: min(236px, calc(100vw - 16px));
+    }
+
+    .phud-shell {
+        padding: 9px;
+    }
+
+    .phud-room-name {
+        font-size: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .phud-action {
+        transition: none;
+    }
+}

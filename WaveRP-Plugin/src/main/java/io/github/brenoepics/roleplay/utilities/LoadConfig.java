@@ -59,6 +59,9 @@ public class LoadConfig {
             Emulator.getConfig().register("features.organizations.gang.price", "20");
             Emulator.getConfig().register("features.organizations.mafia.price", "20");
             Emulator.getConfig().register("features.organizations.cartel.price", "20");
+            Emulator.getConfig().register("features.organizations.gang.kills", "0");
+            Emulator.getConfig().register("features.organizations.mafia.kills", "0");
+            Emulator.getConfig().register("features.organizations.cartel.kills", "0");
             Emulator.getConfig().register("features.taxi.seconds_delay", "5");
             Emulator.getConfig().register("features.inventory.image.url", "https://example.com/inventory/%item%.png");
             Emulator.getConfig().register("features.payday.timer_minutes", "10");

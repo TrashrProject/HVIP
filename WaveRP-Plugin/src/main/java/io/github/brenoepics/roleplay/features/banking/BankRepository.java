@@ -5,231 +5,63 @@ import io.github.brenoepics.roleplay.features.banking.entities.ATMRobbery;
 import io.github.brenoepics.roleplay.features.banking.entities.BankAccount;
 import io.github.brenoepics.roleplay.features.banking.entities.BankTransaction;
 import lombok.extern.slf4j.Slf4j;
-
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-@Slf4j
-public class BankRepository {
+/** Source unique: users.credits = espèces, users_currency/type 200 = banque. */
+@Slf4j public class BankRepository {
+  public record BalanceSnapshot(int bank,int cash){}
+  private static final SecureRandom RANDOM=new SecureRandom();
+  private Connection db() throws SQLException{return Emulator.getDatabase().getDataSource().getConnection();}
 
-    // Bank Account Operations
-    public Optional<BankAccount> findBankAccountByUserId(int userId) {
-        String sql = "SELECT user_id, account_number, bank_balance, created_at, updated_at " +
-                    "FROM bank_accounts WHERE user_id = ?";
-        
-        try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
-            
-            stmt.setInt(1, userId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(new BankAccount(
-                        rs.getInt("user_id"),
-                        rs.getString("account_number"),
-                        rs.getBigDecimal("bank_balance"),
-                        rs.getTimestamp("created_at"),
-                        rs.getTimestamp("updated_at")
-                    ));
-                }
-            }
-        } catch (SQLException e) {
-            log.error("Error finding bank account for user {}", userId, e);
-        }
-        return Optional.empty();
-    }
+  public Optional<BankAccount> findBankAccountByUserId(int id){
+    String q="SELECT ba.user_id,ba.account_number,ba.is_active,ba.created_at,ba.updated_at,COALESCE(uc.amount,0) balance FROM bank_accounts ba LEFT JOIN users_currency uc ON uc.user_id=ba.user_id AND uc.type=200 WHERE ba.user_id=?";
+    try(Connection c=db();PreparedStatement s=c.prepareStatement(q)){s.setInt(1,id);try(ResultSet r=s.executeQuery()){if(r.next())return Optional.of(new BankAccount(r.getInt(1),r.getString(2),BigDecimal.valueOf(r.getInt(6)),r.getBoolean(3),r.getTimestamp(4),r.getTimestamp(5)));}}catch(SQLException e){log.error("Lecture compte {}",id,e);}return Optional.empty();
+  }
+  public BankAccount createOrReactivateAccount(int id)throws SQLException{
+    try(Connection c=db()){c.setAutoCommit(false);try{
+      String number=null;try(PreparedStatement s=c.prepareStatement("SELECT account_number FROM bank_accounts WHERE user_id=? FOR UPDATE")){s.setInt(1,id);try(ResultSet r=s.executeQuery()){if(r.next())number=r.getString(1);}}
+      if(number==null){number=number(c);try(PreparedStatement s=c.prepareStatement("INSERT INTO bank_accounts(user_id,account_number,is_active) VALUES(?,?,1)")){s.setInt(1,id);s.setString(2,number);s.executeUpdate();}}
+      else try(PreparedStatement s=c.prepareStatement("UPDATE bank_accounts SET is_active=1,updated_at=CURRENT_TIMESTAMP WHERE user_id=?")){s.setInt(1,id);s.executeUpdate();}
+      ensureCurrency(c,id);c.commit();return new BankAccount(id,number);
+    }catch(Exception e){rollback(c);throw e;}}
+  }
+  public boolean setAccountActive(int id,boolean active){try(Connection c=db();PreparedStatement s=c.prepareStatement("UPDATE bank_accounts SET is_active=?,updated_at=CURRENT_TIMESTAMP WHERE user_id=?")){s.setBoolean(1,active);s.setInt(2,id);return s.executeUpdate()==1;}catch(SQLException e){log.error("Fermeture compte {}",id,e);return false;}}
 
-    public boolean createBankAccount(BankAccount account) {
-        String sql = "INSERT INTO bank_accounts (user_id, account_number, bank_balance) " +
-                    "VALUES (?, ?, ?)";
-        
-        try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
-            
-            stmt.setInt(1, account.getUserId());
-            stmt.setString(2, account.getAccountNumber());
-            stmt.setBigDecimal(3, account.getBankBalance());
-            
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            log.error("Error creating bank account for user {}", account.getUserId(), e);
-            return false;
-        }
-    }
-
-    public boolean updateBankAccount(BankAccount account) {
-        String sql = "UPDATE bank_accounts SET bank_balance = ?, updated_at = CURRENT_TIMESTAMP " +
-                    "WHERE user_id = ?";
-        
-        try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
-            
-            stmt.setBigDecimal(1, account.getBankBalance());
-            stmt.setInt(2, account.getUserId());
-            
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            log.error("Error updating bank account for user {}", account.getUserId(), e);
-            return false;
-        }
-    }
-
-    // Transaction Operations
-    public boolean saveTransaction(BankTransaction transaction) {
-        String sql = "INSERT INTO bank_transactions (from_user_id, to_user_id, transaction_type, amount, fee_amount, description, room_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        
-        try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            stmt.setObject(1, transaction.getFromUserId());
-            stmt.setObject(2, transaction.getToUserId());
-            stmt.setString(3, transaction.getTransactionType().name().toLowerCase());
-            stmt.setBigDecimal(4, transaction.getAmount());
-            stmt.setBigDecimal(5, transaction.getFeeAmount());
-            stmt.setString(6, transaction.getDescription());
-            stmt.setObject(7, transaction.getRoomId());
-            
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected > 0) {
-                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        transaction.setId(generatedKeys.getInt(1));
-                    }
-                }
-                return true;
-            }
-        } catch (SQLException e) {
-            log.error("Error saving transaction", e);
-        }
-        return false;
-    }
-
-    public List<BankTransaction> getTransactionsByUserId(int userId, int limit) {
-        String sql = "SELECT id, from_user_id, to_user_id, transaction_type, amount, fee_amount, description, room_id, created_at " +
-                    "FROM bank_transactions WHERE from_user_id = ? OR to_user_id = ? " +
-                    "ORDER BY created_at DESC LIMIT ?";
-        
-        List<BankTransaction> transactions = new ArrayList<>();
-        try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
-            
-            stmt.setInt(1, userId);
-            stmt.setInt(2, userId);
-            stmt.setInt(3, limit);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    BankTransaction transaction = new BankTransaction();
-                    transaction.setId(rs.getInt("id"));
-                    transaction.setFromUserId(rs.getObject("from_user_id", Integer.class));
-                    transaction.setToUserId(rs.getObject("to_user_id", Integer.class));
-                    transaction.setTransactionType(BankTransaction.TransactionType.valueOf(rs.getString("transaction_type").toUpperCase()));
-                    transaction.setAmount(rs.getBigDecimal("amount"));
-                    transaction.setFeeAmount(rs.getBigDecimal("fee_amount"));
-                    transaction.setDescription(rs.getString("description"));
-                    transaction.setRoomId(rs.getObject("room_id", Integer.class));
-                    transaction.setCreatedAt(rs.getTimestamp("created_at"));
-                    transactions.add(transaction);
-                }
-            }
-        } catch (SQLException e) {
-            log.error("Error getting transactions for user {}", userId, e);
-        }
-        return transactions;
-    }
-
-    // ATM Robbery Operations
-    public boolean saveATMRobbery(ATMRobbery robbery) {
-        String sql = "INSERT INTO atm_robberies (user_id, room_id, furni_id, amount_stolen, success, weapon_used, police_alerted) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        
-        try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            stmt.setInt(1, robbery.getUserId());
-            stmt.setInt(2, robbery.getRoomId());
-            stmt.setInt(3, robbery.getFurniId());
-            stmt.setBigDecimal(4, robbery.getAmountStolen());
-            stmt.setBoolean(5, robbery.isSuccess());
-            stmt.setString(6, robbery.getWeaponUsed());
-            stmt.setBoolean(7, robbery.isPoliceAlerted());
-            
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected > 0) {
-                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        robbery.setId(generatedKeys.getInt(1));
-                    }
-                }
-                return true;
-            }
-        } catch (SQLException e) {
-            log.error("Error saving ATM robbery", e);
-        }
-        return false;
-    }
-
-    public List<ATMRobbery> getATMRobberiesByUserId(int userId, int limit) {
-        String sql = "SELECT id, user_id, room_id, furni_id, amount_stolen, success, weapon_used, police_alerted, created_at " +
-                    "FROM atm_robberies WHERE user_id = ? ORDER BY created_at DESC LIMIT ?";
-        
-        List<ATMRobbery> robberies = new ArrayList<>();
-        try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
-            
-            stmt.setInt(1, userId);
-            stmt.setInt(2, limit);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    ATMRobbery robbery = new ATMRobbery();
-                    robbery.setId(rs.getInt("id"));
-                    robbery.setUserId(rs.getInt("user_id"));
-                    robbery.setRoomId(rs.getInt("room_id"));
-                    robbery.setFurniId(rs.getInt("furni_id"));
-                    robbery.setAmountStolen(rs.getBigDecimal("amount_stolen"));
-                    robbery.setSuccess(rs.getBoolean("success"));
-                    robbery.setWeaponUsed(rs.getString("weapon_used"));
-                    robbery.setPoliceAlerted(rs.getBoolean("police_alerted"));
-                    robbery.setCreatedAt(rs.getTimestamp("created_at"));
-                    robberies.add(robbery);
-                }
-            }
-        } catch (SQLException e) {
-            log.error("Error getting ATM robberies for user {}", userId, e);
-        }
-        return robberies;
-    }
-
-    // Utility method to generate unique account numbers
-    public String generateAccountNumber() {
-        String sql = "SELECT account_number FROM bank_accounts WHERE account_number = ?";
-        String accountNumber;
-        
-        do {
-            // Generate a 10-digit account number
-            accountNumber = String.valueOf(System.currentTimeMillis() % 10000000000L);
-            // Pad with leading zeros if necessary
-            accountNumber = String.format("%010d", Long.parseLong(accountNumber));
-            
-            try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
-                 PreparedStatement stmt = connection.prepareStatement(sql)) {
-                
-                stmt.setString(1, accountNumber);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (!rs.next()) {
-                        break; // Account number is unique
-                    }
-                }
-            } catch (SQLException e) {
-                log.error("Error checking account number uniqueness", e);
-                return null;
-            }
-        } while (true);
-        
-        return accountNumber;
-    }
+  public Optional<BalanceSnapshot> move(int id,int amount,boolean deposit,int room,BankTransaction.TransactionType type,Integer employee,boolean mobile){
+    try(Connection c=db()){c.setAutoCommit(false);try{
+      if(!active(c,id)){rollback(c);return Optional.empty();}ensureCurrency(c,id);
+      if(mobile){ensureMobileCooldown(c,id);if(mobileCooldownSeconds(c,id)>0){rollback(c);return Optional.empty();}}
+      int cash=value(c,"SELECT credits FROM users WHERE id=? FOR UPDATE",id), bank=value(c,"SELECT amount FROM users_currency WHERE user_id=? AND type=200 FOR UPDATE",id);
+      if(deposit?cash<amount:bank<amount){rollback(c);return Optional.empty();}
+      int nc=deposit?cash-amount:cash+amount, nb=deposit?bank+amount:bank-amount;
+      update(c,"UPDATE users SET credits=? WHERE id=?",nc,id);update(c,"UPDATE users_currency SET amount=? WHERE user_id=? AND type=200",nb,id);
+      if(mobile)try(PreparedStatement s=c.prepareStatement("UPDATE bank_mobile_deposit_cooldowns SET last_deposit_at=CURRENT_TIMESTAMP WHERE user_id=?")){s.setInt(1,id);s.executeUpdate();}
+      transaction(c,id,id,type,amount,room,bank,nb,employee);c.commit();return Optional.of(new BalanceSnapshot(nb,nc));
+    }catch(Exception e){rollback(c);log.error("Mouvement bancaire atomique {}",id,e);return Optional.empty();}}catch(SQLException e){log.error("Connexion banque",e);return Optional.empty();}
+  }
+  public long getMobileCooldownSeconds(int id){try(Connection c=db()){ensureMobileCooldown(c,id);return mobileCooldownSeconds(c,id);}catch(SQLException e){log.error("Cooldown dépôt mobile {}",id,e);return 1800;}}
+  public Optional<BalanceSnapshot[]> transfer(int from,int to,int amount,int room){
+    try(Connection c=db()){c.setAutoCommit(false);try{
+      int a=Math.min(from,to),b=Math.max(from,to);if(!active(c,a)||!active(c,b)){rollback(c);return Optional.empty();}ensureCurrency(c,from);ensureCurrency(c,to);
+      int fb=value(c,"SELECT amount FROM users_currency WHERE user_id=? AND type=200 FOR UPDATE",from),tb=value(c,"SELECT amount FROM users_currency WHERE user_id=? AND type=200 FOR UPDATE",to);if(fb<amount){rollback(c);return Optional.empty();}
+      update(c,"UPDATE users_currency SET amount=? WHERE user_id=? AND type=200",fb-amount,from);update(c,"UPDATE users_currency SET amount=? WHERE user_id=? AND type=200",tb+amount,to);
+      transaction(c,from,to,BankTransaction.TransactionType.TRANSFER,amount,room,fb,fb-amount,null);int fc=value(c,"SELECT credits FROM users WHERE id=?",from),tc=value(c,"SELECT credits FROM users WHERE id=?",to);c.commit();return Optional.of(new BalanceSnapshot[]{new BalanceSnapshot(fb-amount,fc),new BalanceSnapshot(tb+amount,tc)});
+    }catch(Exception e){rollback(c);log.error("Virement atomique {} -> {}",from,to,e);return Optional.empty();}}catch(SQLException e){log.error("Connexion banque",e);return Optional.empty();}
+  }
+  public List<BankTransaction> getTransactionsByUserId(int id,int limit){String q="SELECT id,from_user_id,to_user_id,transaction_type,amount,fee_amount,description,room_id,created_at FROM bank_transactions WHERE from_user_id=? OR to_user_id=? ORDER BY id DESC LIMIT ?";List<BankTransaction> out=new ArrayList<>();try(Connection c=db();PreparedStatement s=c.prepareStatement(q)){s.setInt(1,id);s.setInt(2,id);s.setInt(3,limit);try(ResultSet r=s.executeQuery()){while(r.next()){BankTransaction t=new BankTransaction();t.setId(r.getInt(1));t.setFromUserId((Integer)r.getObject(2));t.setToUserId((Integer)r.getObject(3));t.setTransactionType(BankTransaction.TransactionType.valueOf(r.getString(4).toUpperCase()));t.setAmount(r.getBigDecimal(5));t.setFeeAmount(r.getBigDecimal(6));t.setDescription(r.getString(7));t.setRoomId((Integer)r.getObject(8));t.setCreatedAt(r.getTimestamp(9));out.add(t);}}}catch(SQLException e){log.error("Historique {}",id,e);}return out;}
+  public boolean saveTransaction(BankTransaction t){try(Connection c=db()){transaction(c,t.getFromUserId(),t.getToUserId(),t.getTransactionType(),t.getAmount().intValue(),t.getRoomId(),null,null,null);return true;}catch(SQLException e){log.error("Transaction journal",e);return false;}}
+  public boolean saveATMRobbery(ATMRobbery r){String q="INSERT INTO atm_robberies(user_id,room_id,furni_id,amount_stolen,success,weapon_used,police_alerted) VALUES(?,?,?,?,?,?,?)";try(Connection c=db();PreparedStatement s=c.prepareStatement(q)){s.setInt(1,r.getUserId());s.setInt(2,r.getRoomId());s.setInt(3,r.getFurniId());s.setBigDecimal(4,r.getAmountStolen());s.setBoolean(5,r.isSuccess());s.setString(6,r.getWeaponUsed());s.setBoolean(7,r.isPoliceAlerted());return s.executeUpdate()==1;}catch(SQLException e){log.error("Braquage journal",e);return false;}}
+  public List<ATMRobbery> getATMRobberiesByUserId(int id,int limit){return List.of();}
+  private void ensureCurrency(Connection c,int id)throws SQLException{try(PreparedStatement s=c.prepareStatement("INSERT IGNORE INTO users_currency(user_id,type,amount) VALUES(?,200,0)")){s.setInt(1,id);s.executeUpdate();}}
+  private void ensureMobileCooldown(Connection c,int id)throws SQLException{try(PreparedStatement s=c.prepareStatement("INSERT IGNORE INTO bank_mobile_deposit_cooldowns(user_id,last_deposit_at) VALUES(?,NULL)")){s.setInt(1,id);s.executeUpdate();}}
+  private long mobileCooldownSeconds(Connection c,int id)throws SQLException{try(PreparedStatement s=c.prepareStatement("SELECT GREATEST(0,1800-TIMESTAMPDIFF(SECOND,last_deposit_at,CURRENT_TIMESTAMP)) FROM bank_mobile_deposit_cooldowns WHERE user_id=? FOR UPDATE")){s.setInt(1,id);try(ResultSet r=s.executeQuery()){return r.next()?r.getLong(1):0;}}}
+  private boolean active(Connection c,int id)throws SQLException{try(PreparedStatement s=c.prepareStatement("SELECT is_active FROM bank_accounts WHERE user_id=? FOR UPDATE")){s.setInt(1,id);try(ResultSet r=s.executeQuery()){return r.next()&&r.getBoolean(1);}}}
+  private int value(Connection c,String q,int id)throws SQLException{try(PreparedStatement s=c.prepareStatement(q)){s.setInt(1,id);try(ResultSet r=s.executeQuery()){if(!r.next())throw new SQLException("Utilisateur absent");return r.getInt(1);}}}
+  private void update(Connection c,String q,int v,int id)throws SQLException{try(PreparedStatement s=c.prepareStatement(q)){s.setInt(1,v);s.setInt(2,id);if(s.executeUpdate()!=1)throw new SQLException("Solde non modifié");}}
+  private void transaction(Connection c,Integer from,Integer to,BankTransaction.TransactionType type,int amount,Integer room,Integer oldB,Integer newB,Integer employee)throws SQLException{String q="INSERT INTO bank_transactions(from_user_id,to_user_id,transaction_type,amount,fee_amount,description,room_id,old_balance,new_balance,employee_user_id) VALUES(?,?,?,?,0,?,?,?,?,?)";try(PreparedStatement s=c.prepareStatement(q)){s.setObject(1,from);s.setObject(2,to);s.setString(3,type.name().toLowerCase());s.setInt(4,amount);s.setString(5,type.name());s.setObject(6,room);s.setObject(7,oldB);s.setObject(8,newB);s.setObject(9,employee);s.executeUpdate();}}
+  private String number(Connection c)throws SQLException{for(int i=0;i<30;i++){String n=String.format("%010d",Math.floorMod(RANDOM.nextLong(),10_000_000_000L));try(PreparedStatement s=c.prepareStatement("SELECT 1 FROM bank_accounts WHERE account_number=?")){s.setString(1,n);try(ResultSet r=s.executeQuery()){if(!r.next())return n;}}}throw new SQLException("Numéro unique indisponible");}
+  private void rollback(Connection c){try{c.rollback();}catch(SQLException ignored){}}
 }

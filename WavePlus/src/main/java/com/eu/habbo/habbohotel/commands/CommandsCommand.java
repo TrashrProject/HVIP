@@ -2,8 +2,12 @@ package com.eu.habbo.habbohotel.commands;
 
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
-import com.eu.habbo.messages.outgoing.generic.alerts.MessagesForYouComposer;
+import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
+import com.eu.habbo.messages.outgoing.generic.CommandsWindowComposer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class CommandsCommand extends Command {
@@ -13,22 +17,74 @@ public class CommandsCommand extends Command {
 
     @Override
     public boolean handle(GameClient gameClient, String[] params) throws Exception {
-        List<Command> commands = Emulator.getGameEnvironment().getCommandHandler().getCommandsForRank(gameClient.getHabbo().getHabboInfo().getRank().getId());
+        List<Command> rankCommands = Emulator.getGameEnvironment()
+                .getCommandHandler()
+                .getCommandsForRank(gameClient.getHabbo().getHabboInfo().getRank().getId());
 
-        StringBuilder message = new StringBuilder(
-                Emulator.getTexts().getValue("commands.generic.cmd_commands.text", "Vos commandes")
-        );
-        message.append(" (").append(commands.size()).append("):\r\n");
+        List<Command> commands = new ArrayList<>();
 
-        for (Command command : commands) {
-            message.append(Emulator.getTexts().getValue(
-                    "commands.description." + command.permission,
-                    "commands.description." + command.permission
-            )).append("\r");
+        for (Command command : rankCommands) {
+            if (getPrimaryKey(command) != null) {
+                commands.add(command);
+            }
         }
 
-        gameClient.sendResponse(new MessagesForYouComposer(new String[]{message.toString()}));
+        Collections.sort(commands, new Comparator<Command>() {
+            @Override
+            public int compare(Command first, Command second) {
+                return String.CASE_INSENSITIVE_ORDER.compare(
+                        getPrimaryKey(first),
+                        getPrimaryKey(second)
+                );
+            }
+        });
+
+        for (CommandsWindowComposer response : CommandsWindowComposer.createResponses(commands)) {
+            gameClient.sendResponse(response);
+        }
 
         return true;
+    }
+
+    private static String getPrimaryKey(Command command) {
+        if (command == null || command.keys == null) {
+            return null;
+        }
+
+        for (String key : command.keys) {
+            if (key != null && !key.trim().isEmpty()) {
+                return key.trim();
+            }
+        }
+
+        return null;
+    }
+
+    private static String getDescription(Command command) {
+        if (command == null || command.permission == null || command.permission.trim().isEmpty()) {
+            return null;
+        }
+
+        String translationKey = "commands.description." + command.permission;
+        String description = Emulator.getTexts().getValue(translationKey, "");
+
+        if (description == null) {
+            return null;
+        }
+
+        description = description
+                .replace('\r', ' ')
+                .replace('\n', ' ')
+                .trim();
+
+        while (description.contains("  ")) {
+            description = description.replace("  ", " ");
+        }
+
+        if (description.isEmpty() || description.equalsIgnoreCase(translationKey)) {
+            return null;
+        }
+
+        return description;
     }
 }

@@ -4,6 +4,7 @@ import static io.github.brenoepics.roleplay.features.escort.EscortManager.ESCORT
 
 import com.eu.habbo.Emulator;
 import com.eu.habbo.messages.incoming.rooms.users.RoomUserWalkEvent;
+import io.github.brenoepics.roleplay.features.banking.BankComputerSessionManager;
 
 public class RoomUserWalkEventPlugin extends RoomUserWalkEvent {
     @Override
@@ -17,5 +18,6 @@ public class RoomUserWalkEventPlugin extends RoomUserWalkEvent {
         if (escorting instanceof Number && ((Number) escorting).intValue() > 0) return;
 
         super.handle();
+        if(this.client.getHabbo().getRoomUnit()!=null)BankComputerSessionManager.disconnectIfGoalIsFar(this.client.getHabbo(),this.client.getHabbo().getRoomUnit().getGoal());
     }
 }

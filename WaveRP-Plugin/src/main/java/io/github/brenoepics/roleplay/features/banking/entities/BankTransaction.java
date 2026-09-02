@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class BankTransaction {
     public enum TransactionType {
-        DEPOSIT, WITHDRAW, TRANSFER, ATM_FEE, ROBBERY
+        DEPOSIT, WITHDRAW, TRANSFER, BANKER_DEPOSIT, BANKER_WITHDRAWAL, ATM_FEE, ROBBERY
     }
 
     private int id;

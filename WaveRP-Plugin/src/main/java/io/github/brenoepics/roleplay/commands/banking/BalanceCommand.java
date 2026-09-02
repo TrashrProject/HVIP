@@ -46,7 +46,7 @@ public class BalanceCommand extends Command {
         BankAccount account = accountOpt.get();
         
         // Get wallet balance from currency type 200
-        int walletBalance = gameClient.getHabbo().getHabboInfo().getCurrencyAmount(200);
+        int walletBalance = gameClient.getHabbo().getHabboInfo().getCredits();
         
         // Calculate total balance (bank + wallet)
         java.math.BigDecimal totalBalance = account.getBankBalance().add(java.math.BigDecimal.valueOf(walletBalance));

@@ -8,6 +8,7 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboInfo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.banking.BankManager;
+import io.github.brenoepics.roleplay.features.banking.BankComputerSessionManager;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 
 import java.math.BigDecimal;
@@ -23,6 +24,10 @@ public class GiveCommand extends Command {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
         if (data.isPassive()) {
             gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.", RoomChatMessageBubbles.ALERT);
+            return true;
+        }
+        if (!BankComputerSessionManager.mayUsePersonalBankCommand(gameClient.getHabbo())) {
+            gameClient.getHabbo().whisper("En service Banque, connectez-vous à un ordinateur bancaire pour effectuer un virement.", RoomChatMessageBubbles.ALERT);
             return true;
         }
         

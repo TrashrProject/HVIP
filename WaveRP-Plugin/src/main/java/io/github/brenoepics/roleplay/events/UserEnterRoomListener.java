@@ -43,6 +43,9 @@ public class UserEnterRoomListener implements EventListener {
     handleSpecialRooms(event, habbo, data);
     Emulator.getThreading().run(() -> {
       data.updateState();
+      // Re-push the authoritative player HUD after the room transition. This keeps HP/shield,
+      // username and role synchronized without requiring a browser refresh.
+      data.updateLife();
       PoliceHandcuffService.enforce(habbo);
       Optional<InventorySlot> equippedWeapon = data.getEquippedWeapon();
       if (!data.isPassive() && !data.isDead() && equippedWeapon.isPresent()) {
