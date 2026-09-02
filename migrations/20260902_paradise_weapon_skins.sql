@@ -19,9 +19,7 @@ CREATE TABLE IF NOT EXISTS `rp_user_weapon_skins` (
   `equipped` TINYINT(1) NOT NULL DEFAULT 0,
   `unlocked_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`, `skin_id`),
-  KEY `idx_rp_user_skin_equipped` (`user_id`, `equipped`),
-  CONSTRAINT `fk_rp_user_weapon_skin_skin` FOREIGN KEY (`skin_id`)
-    REFERENCES `rp_weapon_skins` (`id`) ON DELETE CASCADE
+  KEY `idx_rp_user_skin_equipped` (`user_id`, `equipped`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `rp_weapon_skins`
