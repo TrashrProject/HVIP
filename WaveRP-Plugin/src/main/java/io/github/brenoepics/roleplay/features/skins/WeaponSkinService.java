@@ -14,8 +14,8 @@ public class WeaponSkinService {
     String key = normalizeWeaponKey(weaponName);
     if (key == null) return fallbackEffect;
 
-    String sql = "SELECT s.effect_id FROM rp_user_weapon_skins us "
-        + "INNER JOIN rp_weapon_skins s ON s.id=us.skin_id "
+    String sql = "SELECT s.effect_id FROM paradise_user_weapon_skins us "
+        + "INNER JOIN paradise_weapon_skins s ON s.id=us.skin_id "
         + "WHERE us.user_id=? AND us.equipped=1 AND s.weapon_key=? LIMIT 1";
     try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
          PreparedStatement statement = connection.prepareStatement(sql)) {

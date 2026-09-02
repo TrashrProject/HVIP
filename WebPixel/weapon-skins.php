@@ -32,7 +32,7 @@ if ($method === 'POST') {
     $skinId = (int)($payload['skin_id'] ?? 0);
     if ($skinId < 1) skin_reply(422, ['ok' => false, 'error' => 'Skin invalide.']);
 
-    $stmt = mysqli_prepare($db, 'SELECT s.id, s.weapon_key FROM rp_weapon_skins s INNER JOIN rp_user_weapon_skins us ON us.skin_id=s.id AND us.user_id=? WHERE s.id=? LIMIT 1');
+    $stmt = mysqli_prepare($db, 'SELECT s.id, s.weapon_key FROM paradise_weapon_skins s INNER JOIN paradise_user_weapon_skins us ON us.skin_id=s.id AND us.user_id=? WHERE s.id=? LIMIT 1');
     mysqli_stmt_bind_param($stmt, 'ii', $userId, $skinId);
     mysqli_stmt_execute($stmt);
     $owned = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
@@ -41,11 +41,11 @@ if ($method === 'POST') {
 
     mysqli_begin_transaction($db);
     try {
-        $off = mysqli_prepare($db, 'UPDATE rp_user_weapon_skins us INNER JOIN rp_weapon_skins s ON s.id=us.skin_id SET us.equipped=0 WHERE us.user_id=? AND s.weapon_key=?');
+        $off = mysqli_prepare($db, 'UPDATE paradise_user_weapon_skins us INNER JOIN paradise_weapon_skins s ON s.id=us.skin_id SET us.equipped=0 WHERE us.user_id=? AND s.weapon_key=?');
         mysqli_stmt_bind_param($off, 'is', $userId, $owned['weapon_key']);
         mysqli_stmt_execute($off);
         mysqli_stmt_close($off);
-        $on = mysqli_prepare($db, 'UPDATE rp_user_weapon_skins SET equipped=1 WHERE user_id=? AND skin_id=?');
+        $on = mysqli_prepare($db, 'UPDATE paradise_user_weapon_skins SET equipped=1 WHERE user_id=? AND skin_id=?');
         mysqli_stmt_bind_param($on, 'ii', $userId, $skinId);
         mysqli_stmt_execute($on);
         mysqli_stmt_close($on);
@@ -59,12 +59,12 @@ if ($method === 'POST') {
 
 if ($method !== 'GET') skin_reply(405, ['ok' => false, 'error' => 'Méthode refusée.']);
 
-$grant = mysqli_prepare($db, 'INSERT IGNORE INTO rp_user_weapon_skins(user_id,skin_id,equipped) SELECT ?,id,is_default FROM rp_weapon_skins');
+$grant = mysqli_prepare($db, 'INSERT IGNORE INTO paradise_user_weapon_skins(user_id,skin_id,equipped) SELECT ?,id,is_default FROM paradise_weapon_skins');
 mysqli_stmt_bind_param($grant, 'i', $userId);
 mysqli_stmt_execute($grant);
 mysqli_stmt_close($grant);
 
-$stmt = mysqli_prepare($db, 'SELECT s.id,s.weapon_key,s.name,s.effect_id,s.image,s.avatar_image,s.is_default,IF(us.user_id IS NULL,0,1) owned,COALESCE(us.equipped,0) equipped FROM rp_weapon_skins s LEFT JOIN rp_user_weapon_skins us ON us.skin_id=s.id AND us.user_id=? ORDER BY FIELD(s.weapon_key,\'tazor\',\'ak47\',\'akm\',\'g36\'),s.sort_order,s.id');
+$stmt = mysqli_prepare($db, 'SELECT s.id,s.weapon_key,s.name,s.effect_id,s.image,s.avatar_image,s.is_default,IF(us.user_id IS NULL,0,1) owned,COALESCE(us.equipped,0) equipped FROM paradise_weapon_skins s LEFT JOIN paradise_user_weapon_skins us ON us.skin_id=s.id AND us.user_id=? ORDER BY FIELD(s.weapon_key,\'tazor\',\'ak47\',\'akm\',\'g36\'),s.sort_order,s.id');
 mysqli_stmt_bind_param($stmt, 'i', $userId);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);

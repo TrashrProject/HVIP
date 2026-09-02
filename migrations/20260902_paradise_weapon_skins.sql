@@ -1,5 +1,5 @@
 -- ParadiseRP weapon skins (idempotent production migration)
-CREATE TABLE IF NOT EXISTS `rp_weapon_skins` (
+CREATE TABLE IF NOT EXISTS `paradise_weapon_skins` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `weapon_key` VARCHAR(32) NOT NULL,
   `name` VARCHAR(64) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `rp_weapon_skins` (
   KEY `idx_rp_weapon_skin_weapon` (`weapon_key`, `sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `rp_user_weapon_skins` (
+CREATE TABLE IF NOT EXISTS `paradise_user_weapon_skins` (
   `user_id` INT NOT NULL,
   `skin_id` INT UNSIGNED NOT NULL,
   `equipped` TINYINT(1) NOT NULL DEFAULT 0,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `rp_user_weapon_skins` (
   KEY `idx_rp_user_skin_equipped` (`user_id`, `equipped`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `rp_weapon_skins`
+INSERT INTO `paradise_weapon_skins`
 (`weapon_key`,`name`,`effect_id`,`image`,`avatar_image`,`is_default`,`sort_order`) VALUES
 ('tazor','Standard',592,'stun_592.png','avatar_stun_592.png',1,10),
 ('tazor','Cyber',101,'stun_101.png','avatar_stun_101.png',0,20),
@@ -45,5 +45,5 @@ ON DUPLICATE KEY UPDATE
 
 -- The requested complete pack ships every current skin unlocked. The ownership
 -- table remains separate so future shop/event skins can still be restricted.
-INSERT IGNORE INTO `rp_user_weapon_skins` (`user_id`,`skin_id`,`equipped`)
-SELECT u.`id`, s.`id`, s.`is_default` FROM `users` u CROSS JOIN `rp_weapon_skins` s;
+INSERT IGNORE INTO `paradise_user_weapon_skins` (`user_id`,`skin_id`,`equipped`)
+SELECT u.`id`, s.`id`, s.`is_default` FROM `users` u CROSS JOIN `paradise_weapon_skins` s;
