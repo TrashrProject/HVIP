@@ -1,6 +1,7 @@
 $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 $sql=Join-Path $root 'WavePlus\database\production-migrations.sql'
+$weaponSkinsSql=Join-Path $root 'migrations\20260902_paradise_weapon_skins.sql'
 $mysql=@('C:\xampp\mysql\bin\mysql.exe','C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe')|Where-Object{Test-Path $_}|Select-Object -First 1
 if(!$mysql){$c=Get-Command mysql.exe -ErrorAction SilentlyContinue;if($c){$mysql=$c.Source}}
 if(!$mysql){throw 'mysql.exe introuvable'}
@@ -13,8 +14,11 @@ $ptr=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($s)
 $pw=[Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
 try{
  $env:MYSQL_PWD=$pw
- $mig=Start-Process $mysql -ArgumentList @("--host=$h","--port=$p","--user=$u","--database=$n",'--default-character-set=utf8mb4') -RedirectStandardInput $sql -NoNewWindow -Wait -PassThru
- if($mig.ExitCode){throw 'Migration SQL echouee'}
+ foreach($migrationFile in @($sql,$weaponSkinsSql)){
+  if(!(Test-Path -LiteralPath $migrationFile)){continue}
+  $mig=Start-Process $mysql -ArgumentList @("--host=$h","--port=$p","--user=$u","--database=$n",'--default-character-set=utf8mb4') -RedirectStandardInput $migrationFile -NoNewWindow -Wait -PassThru
+  if($mig.ExitCode){throw "Migration SQL echouee : $migrationFile"}
+ }
  $cmsConfigPath=Join-Path $root 'WebPixel\app\Controller\Config.class.php'
  if(Test-Path $cmsConfigPath){
   $cms=[IO.File]::ReadAllText($cmsConfigPath)

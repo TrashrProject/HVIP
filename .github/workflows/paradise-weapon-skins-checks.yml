@@ -1,0 +1,31 @@
+name: Paradise weapon skins checks
+
+on:
+  push:
+    paths:
+      - 'WaveRP-Plugin/**'
+      - 'WebPixel/weapon-skins.php'
+      - 'WebPixel/nitro/paradise-weapon-skins.*'
+      - 'migrations/20260902_paradise_weapon_skins.sql'
+  pull_request:
+    paths:
+      - 'WaveRP-Plugin/**'
+      - 'WebPixel/weapon-skins.php'
+      - 'WebPixel/nitro/paradise-weapon-skins.*'
+      - 'migrations/20260902_paradise_weapon_skins.sql'
+
+jobs:
+  validate-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: php -l WebPixel/weapon-skins.php
+      - run: node --check WebPixel/nitro/paradise-weapon-skins.js
+      - name: Refuse destructive migration statements
+        run: '! grep -Eiq "^[[:space:]]*(DROP[[:space:]]+(TABLE|DATABASE)|TRUNCATE[[:space:]])" migrations/20260902_paradise_weapon_skins.sql'
