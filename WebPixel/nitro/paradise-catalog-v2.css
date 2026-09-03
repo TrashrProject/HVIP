@@ -1,382 +1,199 @@
-/* ParadiseRP Catalogue V5 — compact Habbo-style UI. Backend/catalog logic remains untouched. */
-:root {
-  --prc-bg: #071727;
-  --prc-bg-2: #0b2138;
-  --prc-panel: #102e4b;
-  --prc-panel-soft: #d9e4eb;
-  --prc-line: #3f5e73;
-  --prc-blue: #119ee8;
-  --prc-blue-dark: #0873b4;
-  --prc-cyan: #55d3ff;
-  --prc-text: #f4fbff;
-  --prc-muted: #a9c0cf;
-  --prc-gold: #ffd24a;
-  --prc-green: #22b85f;
-  --prc-green-dark: #148543;
-}
+/* ParadiseRP Catalogue V5.1 — compact safe layout */
+:root{--prc-blue:#0e8fd2;--prc-blue2:#075e91;--prc-dark:#08253d;--prc-panel:#e9f0f4;--prc-line:#8aa3b2;--prc-green:#1ea95a;--prc-green2:#147d43}
 
-.nitro-catalog.paradise-catalog-v5 {
-  width: min(1060px, calc(100vw - 44px));
-  max-width: 1060px;
-  min-width: 760px;
-  height: min(660px, calc(100vh - 44px));
-  max-height: 660px;
-  border: 2px solid #176a9e;
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--prc-bg);
-  color: var(--prc-text);
-  box-shadow: 0 14px 34px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.08);
+.nitro-catalog.paradise-catalog-v5{
+  width:min(930px,calc(100vw - 90px));
+  max-width:930px;
+  min-width:720px;
+  height:min(570px,calc(100vh - 90px));
+  max-height:570px;
+  border:2px solid #1377ad;
+  border-radius:10px;
+  overflow:hidden;
+  background:#dce6ec;
+  box-shadow:0 12px 28px rgba(0,0,0,.34);
 }
 
 .paradise-catalog-v5 .prc-header,
-.paradise-catalog-v5 > .nitro-card-header {
-  min-height: 48px;
-  padding: 8px 46px 8px 16px;
-  display: flex;
-  align-items: center;
-  border: 0;
-  border-bottom: 2px solid #0a5f94;
-  background: linear-gradient(180deg, #0f4167 0%, #0b3151 100%);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: .6px;
-  text-shadow: 0 1px 0 #000;
+.paradise-catalog-v5>.nitro-card-header{
+  min-height:38px;
+  height:38px;
+  padding:0 42px 0 14px;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  white-space:nowrap;
+  border:0;
+  border-bottom:1px solid #0a5b88;
+  background:linear-gradient(#103f62,#0a2f4d);
+  color:#fff;
+  font-size:15px;
+  font-weight:800;
+  line-height:38px;
 }
 
-.paradise-catalog-v5 .prc-header::after {
-  content: 'PARADISERP';
-  margin-left: 8px;
-  padding: 2px 6px;
-  border: 1px solid rgba(117,220,255,.48);
-  border-radius: 4px;
-  color: #85e2ff;
-  background: #082741;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: .8px;
+.paradise-catalog-v5 .prc-header::after{
+  content:'PARADISERP';
+  margin-left:8px;
+  font-size:9px;
+  color:#71d9ff;
+  line-height:1;
 }
 
-.paradise-catalog-v5 .nitro-card-content {
-  min-height: 0;
-  padding: 0;
-  overflow: hidden;
-  background: #dbe5eb;
+.paradise-catalog-v5 .nitro-card-content{
+  min-height:0;
+  padding:0;
+  overflow:hidden;
+  background:#dce6ec;
 }
 
-/* Navigation principale */
-.paradise-catalog-v5 .prc-topnav {
-  width: 100%;
-  min-height: 43px;
-  display: flex;
-  align-items: stretch;
-  gap: 4px;
-  padding: 5px 8px 0;
-  margin: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  border-bottom: 1px solid #0a567f;
-  background: #08223a;
-  box-sizing: border-box;
-}
-
-.paradise-catalog-v5 .prc-topnav > * {
-  flex: 1 0 118px;
-  min-width: 118px;
-  max-width: 168px;
-  margin: 0;
+/* Ne jamais transformer le conteneur global des onglets en grosse barre qui recouvre le header. */
+.paradise-catalog-v5 .prc-topnav{
+  max-width:100%;
+  min-height:36px;
+  height:auto;
+  margin:0;
+  padding:0 8px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  border-bottom:1px solid #214b67;
+  background:#092640;
+  box-sizing:border-box;
 }
 
 .paradise-catalog-v5 .prc-topnav button,
 .paradise-catalog-v5 .prc-topnav [role="button"],
 .paradise-catalog-v5 .prc-topnav .nav-link,
-.paradise-catalog-v5 .prc-topnav .list-group-item {
-  width: 100%;
-  min-height: 37px;
-  padding: 7px 11px;
-  border: 1px solid #274d68;
-  border-bottom: 0;
-  border-radius: 6px 6px 0 0;
-  background: linear-gradient(180deg, #17415f, #102f48);
-  color: #e8f5fc;
-  font-weight: 700;
-  text-align: center;
-  box-shadow: inset 0 1px rgba(255,255,255,.06);
-  transition: transform .14s ease, background .14s ease, border-color .14s ease;
-}
-
-.paradise-catalog-v5 .prc-topnav button:hover,
-.paradise-catalog-v5 .prc-topnav [role="button"]:hover,
-.paradise-catalog-v5 .prc-topnav .nav-link:hover,
-.paradise-catalog-v5 .prc-topnav .list-group-item:hover {
-  transform: translateY(-1px);
-  background: linear-gradient(180deg, #1f567e, #153b58);
-  border-color: #3d8ab5;
+.paradise-catalog-v5 .prc-topnav .list-group-item{
+  min-height:34px;
+  padding:6px 10px;
+  border:0;
+  border-bottom:3px solid transparent;
+  border-radius:0;
+  background:transparent;
+  color:#eaf6fc;
+  font-weight:700;
+  text-align:center;
+  box-shadow:none;
 }
 
 .paradise-catalog-v5 .prc-topnav .active,
-.paradise-catalog-v5 .prc-topnav [aria-selected="true"] {
-  background: linear-gradient(180deg, #16a6ed, #0b7fc4);
-  border-color: #65d7ff;
-  color: #fff;
+.paradise-catalog-v5 .prc-topnav [aria-selected="true"]{
+  color:#fff;
+  border-bottom-color:#40c9ff;
+  background:rgba(20,149,218,.22);
 }
 
-/* Champs recherche et voucher séparés */
 .paradise-catalog-v5 .prc-search,
-.paradise-catalog-v5 .prc-voucher {
-  min-width: 0;
-  max-width: 100%;
-}
-
+.paradise-catalog-v5 .prc-voucher{min-width:0;max-width:100%}
 .paradise-catalog-v5 .prc-search-input,
-.paradise-catalog-v5 .prc-voucher-input {
-  min-height: 36px;
-  border: 1px solid #6c8798;
-  border-radius: 5px;
-  background: #f7fbfd;
-  color: #1f2e39;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,.15);
+.paradise-catalog-v5 .prc-voucher-input{
+  min-height:32px;
+  border:1px solid #718b9a;
+  border-radius:5px;
+  background:#f8fbfd;
+  color:#24313a;
 }
+.paradise-catalog-v5 .prc-voucher{margin:6px 8px;padding:4px;background:#eef4f7;border:1px solid #b0c0ca;border-radius:5px}
 
-.paradise-catalog-v5 .prc-search-input:focus,
-.paradise-catalog-v5 .prc-voucher-input:focus {
-  outline: 0;
-  border-color: #129de7;
-  box-shadow: 0 0 0 2px rgba(18,157,231,.14);
+/* Pages produits */
+.paradise-catalog-v5.prc-products .nitro-card-content{padding:8px;overflow:hidden}
+.paradise-catalog-v5.prc-products .prc-product-layout{
+  display:grid;
+  grid-template-columns:190px minmax(0,1fr) 215px;
+  gap:8px;
+  height:100%;
+  min-width:0;
+  min-height:0;
 }
-
-.paradise-catalog-v5 .prc-voucher {
-  margin: 8px 10px;
-  padding: 6px;
-  border: 1px solid #b2c1cb;
-  border-radius: 6px;
-  background: #eef4f7;
-}
-
-/* Accueil : conserver les promos sans les laisser prendre toute la fenêtre */
-.paradise-catalog-v5.prc-front .nitro-card-content {
-  overflow: auto;
-  padding: 10px;
-}
-
-.paradise-catalog-v5.prc-front .prc-promo-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  align-items: start;
-}
-
-.paradise-catalog-v5.prc-front .prc-promo-card {
-  display: block;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  border: 1px solid #8aa1b0;
-  border-radius: 7px;
-  background: #f3f7f9;
-  box-shadow: 0 2px 5px rgba(38,62,79,.18);
-}
-
-.paradise-catalog-v5.prc-front .prc-promo-card img {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  max-height: 175px;
-  object-fit: contain;
-  object-position: center;
-  image-rendering: auto;
-}
-
-.paradise-catalog-v5.prc-front img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Pages furnis : 3 zones utiles, sans reparenting React */
-.paradise-catalog-v5.prc-products .nitro-card-content {
-  padding: 10px;
-  overflow: hidden;
-}
-
-.paradise-catalog-v5.prc-products .prc-product-layout {
-  display: grid;
-  grid-template-columns: minmax(180px, 210px) minmax(0, 1fr) minmax(220px, 250px);
-  gap: 10px;
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  align-items: stretch;
-}
-
 .paradise-catalog-v5.prc-products .prc-col-categories,
 .paradise-catalog-v5.prc-products .prc-col-products,
-.paradise-catalog-v5.prc-products .prc-col-preview {
-  min-width: 0;
-  min-height: 0;
-}
+.paradise-catalog-v5.prc-products .prc-col-preview{min-width:0;min-height:0}
 
-.paradise-catalog-v5.prc-products .prc-category-panel {
-  height: 100%;
-  max-height: 100%;
-  overflow-y: auto;
-  padding: 7px;
-  border: 1px solid #7c96a7;
-  border-radius: 7px;
-  background: #edf3f6;
-  color: #24343f;
+.paradise-catalog-v5.prc-products .prc-category-panel{
+  height:100%;
+  overflow-y:auto;
+  padding:5px;
+  border:1px solid var(--prc-line);
+  border-radius:6px;
+  background:#edf3f6;
+  color:#263640;
 }
-
 .paradise-catalog-v5.prc-products .prc-category-panel button,
 .paradise-catalog-v5.prc-products .prc-category-panel [role="button"],
-.paradise-catalog-v5.prc-products .prc-category-panel .list-group-item {
-  width: 100%;
-  margin-bottom: 3px;
-  padding: 7px 8px;
-  border: 1px solid transparent;
-  border-radius: 5px;
-  background: transparent;
-  color: #24343f;
-  text-align: left;
-  transition: background .13s ease, border-color .13s ease, transform .13s ease;
+.paradise-catalog-v5.prc-products .prc-category-panel .list-group-item{
+  width:100%;
+  margin-bottom:2px;
+  padding:5px 6px;
+  border:0;
+  border-radius:4px;
+  background:transparent;
+  color:#263640;
+  text-align:left;
 }
-
-.paradise-catalog-v5.prc-products .prc-category-panel button:hover,
-.paradise-catalog-v5.prc-products .prc-category-panel [role="button"]:hover,
-.paradise-catalog-v5.prc-products .prc-category-panel .list-group-item:hover {
-  transform: translateX(1px);
-  background: #dcebf3;
-  border-color: #9ab8c9;
-}
-
 .paradise-catalog-v5.prc-products .prc-category-panel .active,
-.paradise-catalog-v5.prc-products .prc-category-panel [aria-selected="true"] {
-  background: #158fd3;
-  border-color: #0c6fa8;
-  color: #fff;
-}
+.paradise-catalog-v5.prc-products .prc-category-panel [aria-selected="true"]{background:#138fd0;color:#fff}
 
-.paradise-catalog-v5.prc-products .prc-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  grid-auto-rows: minmax(102px, auto);
-  gap: 7px;
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  padding: 8px;
-  overflow-y: auto;
-  align-content: start;
-  border: 1px solid #7893a6;
-  border-radius: 7px;
-  background: #e9f0f4;
+.paradise-catalog-v5.prc-products .prc-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(82px,1fr));
+  grid-auto-rows:minmax(86px,auto);
+  gap:5px;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  padding:6px;
+  overflow-y:auto;
+  border:1px solid var(--prc-line);
+  border-radius:6px;
+  background:#e8eff3;
+  align-content:start;
 }
-
-.paradise-catalog-v5.prc-products .prc-item {
-  min-width: 0;
-  min-height: 98px;
-  padding: 6px;
-  overflow: hidden;
-  border: 1px solid #9bb0bd;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #f9fcfd, #dfe8ed);
-  color: #1d2d38;
-  box-shadow: inset 0 1px #fff, 0 1px 2px rgba(0,0,0,.08);
-  transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+.paradise-catalog-v5.prc-products .prc-item{
+  min-width:0;
+  min-height:84px;
+  padding:5px;
+  overflow:hidden;
+  border:1px solid #9eb2bd;
+  border-radius:5px;
+  background:linear-gradient(#fff,#e3ebef);
+  color:#23323c;
+  transition:transform .13s ease,border-color .13s ease;
 }
+.paradise-catalog-v5.prc-products .prc-item:hover{transform:translateY(-1px);border-color:#238fc7}
+.paradise-catalog-v5.prc-products .prc-item img{max-width:64px;max-height:58px;object-fit:contain;image-rendering:pixelated}
 
-.paradise-catalog-v5.prc-products .prc-item:hover {
-  transform: translateY(-2px);
-  border-color: #329bd1;
-  background: #f5fbfe;
-  box-shadow: 0 3px 7px rgba(39,93,124,.2);
+.paradise-catalog-v5.prc-products .prc-purchase{
+  height:100%;
+  overflow-y:auto;
+  padding:8px;
+  border:1px solid #3d6985;
+  border-radius:6px;
+  background:linear-gradient(#0e3557,#0a2945);
+  color:#fff;
 }
-
-.paradise-catalog-v5.prc-products .prc-item.active,
-.paradise-catalog-v5.prc-products .prc-item.selected,
-.paradise-catalog-v5.prc-products .prc-item[aria-selected="true"] {
-  border-color: #0b8dd3;
-  box-shadow: 0 0 0 2px rgba(11,141,211,.18);
-}
-
-.paradise-catalog-v5.prc-products .prc-item img,
-.paradise-catalog-v5.prc-products .prc-purchase img {
-  image-rendering: pixelated;
-  object-fit: contain;
-}
-
-.paradise-catalog-v5.prc-products .prc-purchase {
-  height: 100%;
-  max-height: 100%;
-  padding: 10px;
-  overflow-y: auto;
-  border: 1px solid #426d8a;
-  border-radius: 7px;
-  background: linear-gradient(180deg, #0e3557, #0a2945);
-  color: #fff;
-  box-shadow: inset 0 1px rgba(255,255,255,.07);
-}
-
-.paradise-catalog-v5.prc-products .prc-purchase img {
-  display: block;
-  max-width: 150px;
-  max-height: 150px;
-  margin: 4px auto 10px;
-}
-
+.paradise-catalog-v5.prc-products .prc-purchase img{display:block;max-width:120px;max-height:120px;margin:2px auto 8px;object-fit:contain;image-rendering:pixelated}
 .paradise-catalog-v5 .prc-buy-button,
-.paradise-catalog-v5 .prc-purchase .btn-success {
-  min-height: 38px;
-  border: 1px solid #0d7138;
-  border-bottom-width: 3px;
-  border-radius: 6px;
-  background: linear-gradient(180deg, var(--prc-green), var(--prc-green-dark));
-  color: #fff;
-  font-weight: 800;
-  text-shadow: 0 1px #07562a;
-  box-shadow: inset 0 1px rgba(255,255,255,.18);
-  transition: transform .12s ease, filter .12s ease;
+.paradise-catalog-v5 .prc-purchase .btn-success{
+  min-height:34px;
+  border:1px solid #0c6c36;
+  border-radius:5px;
+  background:linear-gradient(var(--prc-green),var(--prc-green2));
+  color:#fff;
+  font-weight:800;
 }
 
-.paradise-catalog-v5 .prc-buy-button:hover,
-.paradise-catalog-v5 .prc-purchase .btn-success:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.06);
-}
+/* Accueil et pages spéciales : garder la structure Nitro, mais limiter l'encombrement. */
+.paradise-catalog-v5.prc-front .nitro-card-content,
+.paradise-catalog-v5.prc-other .nitro-card-content{padding:8px;overflow:auto}
+.paradise-catalog-v5.prc-front img,
+.paradise-catalog-v5.prc-other img{max-width:100%;height:auto;object-fit:contain}
+.paradise-catalog-v5.prc-front .prc-promo-card img{max-height:145px}
 
-.paradise-catalog-v5 [class*="credits"],
-.paradise-catalog-v5 [class*="currency"] {
-  color: var(--prc-gold);
-}
+.paradise-catalog-v5 :where(.prc-topnav,.prc-category-panel,.prc-grid,.prc-purchase,.nitro-card-content)::-webkit-scrollbar{width:6px;height:6px}
+.paradise-catalog-v5 :where(.prc-topnav,.prc-category-panel,.prc-grid,.prc-purchase,.nitro-card-content)::-webkit-scrollbar-thumb{background:#648da5;border-radius:6px}
 
-.paradise-catalog-v5 :where(.prc-topnav,.prc-category-panel,.prc-grid,.prc-purchase,.nitro-card-content)::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-
-.paradise-catalog-v5 :where(.prc-topnav,.prc-category-panel,.prc-grid,.prc-purchase,.nitro-card-content)::-webkit-scrollbar-track {
-  background: rgba(29,53,69,.12);
-}
-
-.paradise-catalog-v5 :where(.prc-topnav,.prc-category-panel,.prc-grid,.prc-purchase,.nitro-card-content)::-webkit-scrollbar-thumb {
-  border-radius: 7px;
-  background: #5f8ba7;
-}
-
-@media (max-width: 900px) {
-  .nitro-catalog.paradise-catalog-v5 {
-    min-width: calc(100vw - 20px);
-    width: calc(100vw - 20px);
-    height: calc(100vh - 20px);
-    max-height: calc(100vh - 20px);
-  }
-
-  .paradise-catalog-v5.prc-products .prc-product-layout {
-    grid-template-columns: 170px minmax(0, 1fr) 210px;
-    gap: 7px;
-  }
-
-  .paradise-catalog-v5.prc-products .prc-grid {
-    grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
-  }
+@media(max-width:980px){
+  .nitro-catalog.paradise-catalog-v5{width:calc(100vw - 34px);min-width:680px;height:min(540px,calc(100vh - 34px))}
+  .paradise-catalog-v5.prc-products .prc-product-layout{grid-template-columns:175px minmax(0,1fr) 200px;gap:6px}
 }
