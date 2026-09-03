@@ -71,6 +71,12 @@ public class CommandHandler {
             command = new SetZCommand();
         } else if ("buildmode".equalsIgnoreCase(parts[0])) {
             command = new BuildModeCommand();
+        } else if ("autofloor".equalsIgnoreCase(parts[0])) {
+            command = new AutoFloorCommand();
+        } else if ("maxifloor".equalsIgnoreCase(parts[0]) || "maxfloor".equalsIgnoreCase(parts[0])) {
+            command = new MaxiFloorCommand();
+        } else if ("noitemfloor".equalsIgnoreCase(parts[0])) {
+            command = new NoItemFloorCommand();
         }
 
         if (command == null) {
@@ -89,7 +95,7 @@ public class CommandHandler {
             return true;
         } catch (Exception e) {
             LOGGER.error("Paradise build command failed: {}", parts[0], e);
-            // Still consume the chat message so :setz/:buildmode never leak as room text.
+            // Always consume ParadiseRP build commands so they never leak as room chat.
             return true;
         }
     }
@@ -102,7 +108,7 @@ public class CommandHandler {
                 String[] parts = commandLine.trim().split("\\s+");
 
                 // ParadiseRP build commands are routed before plugin command events and
-                // permission-table checks. The commands perform their own rights/rank check.
+                // permission-table checks. Each command performs its own room ownership check.
                 Boolean paradiseBuildResult = handleParadiseBuildCommand(gameClient, parts);
                 if (paradiseBuildResult != null) {
                     return paradiseBuildResult;
@@ -225,6 +231,7 @@ public class CommandHandler {
         addCommand(new AlertCommand());
         addCommand(new AllowTradingCommand());
         addCommand(new ArcturusCommand());
+        addCommand(new AutoFloorCommand());
         addCommand(new BadgeCommand());
         addCommand(new BanCommand());
         addCommand(new BlockAlertCommand());
@@ -269,12 +276,14 @@ public class CommandHandler {
         addCommand(new MassGiftCommand());
         addCommand(new MassPixelsCommand());
         addCommand(new MassPointsCommand());
+        addCommand(new MaxiFloorCommand());
         addCommand(new MimicCommand());
         addCommand(new MoonwalkCommand());
         addCommand(new MultiCommand());
         addCommand(new MuteBotsCommand());
         addCommand(new MuteCommand());
         addCommand(new MutePetsCommand());
+        addCommand(new NoItemFloorCommand());
         addCommand(new PetInfoCommand());
         addCommand(new PickallCommand());
         addCommand(new PixelCommand());
