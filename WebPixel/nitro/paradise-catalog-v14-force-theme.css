@@ -1,0 +1,67 @@
+/* ParadiseRP Catalogue V14 — final paint layer. Loaded last on purpose. */
+.nitro-catalog,
+.nitro-catalog .nitro-card-content,
+.nitro-catalog .nitro-card-content > div,
+.nitro-catalog .nitro-card-content > div > div,
+.nitro-catalog [class*="catalog"]:not(img):not(button):not(input),
+.nitro-catalog [class*="purchase"]:not(button),
+.nitro-catalog [class*="grid"]:not(img),
+.nitro-catalog [class*="page"]:not(img),
+.nitro-catalog [class*="layout"]:not(img) {
+  background-color:#0b2850 !important;
+  color:#f3f8ff !important;
+}
+.nitro-catalog .nitro-card-content{
+  background:linear-gradient(135deg,#0b2850 0%,#10265a 48%,#332268 100%) !important;
+}
+/* Main native content: never allow the old light catalogue canvas back. */
+.nitro-catalog .nitro-card-content :is(.bg-white,.bg-light,.bg-secondary,.bg-body,.bg-body-secondary,.card,.card-body,.container,.container-fluid,.row,.col,.d-flex,.flex-column,.position-relative){
+  background-color:transparent !important;
+  color:#f3f8ff !important;
+}
+.nitro-catalog .nitro-card-content :is([style*="background: rgb(255"],[style*="background-color: rgb(255"],[style*="background:#fff"],[style*="background: #fff"],[style*="background-color:#fff"],[style*="background-color: #fff"],[style*="background: white"],[style*="background-color: white"]){
+  background:#0b2850 !important;
+  color:#f3f8ff !important;
+}
+/* Left categories + search use the same header palette. */
+.nitro-catalog .prc-search,
+.nitro-catalog .prc-category-panel,
+.nitro-catalog [class*="navigation-grid"],
+.nitro-catalog [class*="catalog-navigation-grid"]{
+  background:linear-gradient(145deg,#0d3971,#17285f 58%,#39236c) !important;
+  border:1px solid #168ed6 !important;
+  color:#fff !important;
+}
+.nitro-catalog .prc-search-input,
+.nitro-catalog input[type="text"],
+.nitro-catalog input[type="search"]{
+  background:#0b2850 !important;
+  border:1px solid #168ed6 !important;
+  color:#fff !important;
+}
+.nitro-catalog input::placeholder{color:#9fc4e7 !important;opacity:1 !important}
+/* Product canvas and preview. Keep only the small room preview itself light/blue if Nitro draws it. */
+.nitro-catalog .prc-grid,
+.nitro-catalog .prc-col-products,
+.nitro-catalog .prc-col-preview,
+.nitro-catalog .prc-purchase{
+  background:linear-gradient(145deg,#0a2a54,#10285c 58%,#2e2266) !important;
+  color:#fff !important;
+}
+.nitro-catalog .prc-grid{border:1px solid #168ed6 !important;border-radius:8px !important}
+.nitro-catalog .prc-purchase{border:1px solid #168ed6 !important;border-radius:8px !important}
+.nitro-catalog .prc-purchase :is(p,span,div,label,strong),
+.nitro-catalog .prc-col-preview :is(p,span,div,label,strong){color:#fff !important}
+/* Furni cells remain individually readable. */
+.nitro-catalog .prc-item,
+.nitro-catalog .nitro-catalog-grid-item{
+  background:linear-gradient(#123d6d,#0c2f58) !important;
+  border:1px solid #2a7fba !important;
+  color:#fff !important;
+}
+.nitro-catalog .prc-item:hover,
+.nitro-catalog .nitro-catalog-grid-item:hover{background:linear-gradient(#18558b,#103b69) !important;border-color:#4bd7ff !important}
+/* Native labels/buttons that used to inherit black text from the white skin. */
+.nitro-catalog .nitro-card-content :is(p,span,label,strong,h1,h2,h3,h4,h5,h6){color:inherit}
+.nitro-catalog .prc-category-panel :is(button,[role="button"],.list-group-item){color:#eef7ff !important;background:#10345e !important;border-color:#1b5e94 !important}
+.nitro-catalog .prc-category-panel :is(.active,[aria-selected="true"]){background:linear-gradient(90deg,#168ed6,#5740c9) !important;color:#fff !important}
