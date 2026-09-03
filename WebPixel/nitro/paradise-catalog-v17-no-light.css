@@ -1,0 +1,95 @@
+/* ParadiseRP Catalogue V17 — zero black text, zero light gutters. LOAD LAST. */
+
+/* One continuous dark ParadiseRP surface from edge to edge. */
+.nitro-catalog,
+.nitro-catalog > .nitro-card-content,
+.nitro-catalog > .nitro-card-content > *,
+.nitro-catalog > .nitro-card-content > * > * {
+  background-color:#0b2a56 !important;
+}
+
+.nitro-catalog > .nitro-card-content {
+  background:linear-gradient(135deg,#0a2c5b 0%,#12265f 58%,#3b246f 100%) !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  outline:0 !important;
+  box-shadow:none !important;
+}
+
+/* Remove the remaining legacy white/grey gutters and sheets. */
+.nitro-catalog .nitro-card-content :where(div,section,article,main,aside,form,ul,li){
+  border-color:#174d83 !important;
+}
+.nitro-catalog .nitro-card-content :where(
+  .bg-white,.bg-light,.bg-secondary,.bg-body,.bg-body-secondary,
+  .card,.card-body,.container,.container-fluid,.row,
+  [class*="catalog-page"],[class*="catalog-content"],[class*="purchase"],[class*="preview"]
+){
+  background:#0b2a56 !important;
+  background-color:#0b2a56 !important;
+}
+
+/* If Nitro injects an inline light background, our theme wins. */
+.nitro-catalog .nitro-card-content [style*="background"]:not(img):not(canvas):not(svg),
+.nitro-catalog .nitro-card-content [style*="background-color"]:not(img):not(canvas):not(svg){
+  background-color:#0b2a56 !important;
+}
+
+/* No black text anywhere in the catalogue body. This intentionally includes plain DIV text nodes. */
+.nitro-catalog .nitro-card-content,
+.nitro-catalog .nitro-card-content *:not(img):not(canvas):not(svg):not(path) {
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+}
+
+/* Explicit native product labels / quantity / descriptions which still inherited black. */
+.nitro-catalog .nitro-card-content :is(
+  p,span,label,strong,b,small,div,li,a,
+  [class*="product"],[class*="description"],[class*="quantity"],[class*="amount"],[class*="price"],[class*="name"]
+){
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+}
+
+/* Left/right seams: cover them with the catalogue's own dark surface. */
+.nitro-catalog > .nitro-card-content::before,
+.nitro-catalog > .nitro-card-content::after{
+  content:'' !important;
+  position:absolute !important;
+  top:0 !important;
+  bottom:0 !important;
+  width:10px !important;
+  z-index:0 !important;
+  pointer-events:none !important;
+  background:#0b2a56 !important;
+}
+.nitro-catalog > .nitro-card-content::before{left:0 !important}
+.nitro-catalog > .nitro-card-content::after{right:0 !important}
+.nitro-catalog > .nitro-card-content{position:relative !important}
+.nitro-catalog > .nitro-card-content > *{position:relative;z-index:1}
+
+/* Preview rectangle must also be dark instead of the old white/grey card. */
+.nitro-catalog .prc-col-preview,
+.nitro-catalog .prc-purchase,
+.nitro-catalog [class*="preview"],
+.nitro-catalog [class*="purchase"]{
+  background:linear-gradient(145deg,#0b315f 0%,#13295e 58%,#352369 100%) !important;
+  color:#fff !important;
+  border-color:#168fd7 !important;
+}
+
+/* Keep furni tiles readable. */
+.nitro-catalog .prc-item,
+.nitro-catalog .nitro-catalog-grid-item,
+.nitro-catalog [class*="catalog-grid-item"]{
+  background:linear-gradient(180deg,#123f72,#0b2e58) !important;
+  border:1px solid #317fba !important;
+  color:#fff !important;
+}
+
+/* Buttons stay buttons. */
+.nitro-catalog button,
+.nitro-catalog [role="button"]{
+  -webkit-text-fill-color:currentColor !important;
+}
