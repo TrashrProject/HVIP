@@ -9,7 +9,7 @@ public class SetZCommand extends Command {
     private static final double MAX_HEIGHT = 100.0D;
 
     public SetZCommand() {
-        super("acc_placefurni", new String[]{"setz"});
+        super(null, new String[]{"setz"});
     }
 
     @Override
@@ -19,7 +19,9 @@ public class SetZCommand extends Command {
             return true;
         }
 
-        boolean canBuild = room.hasRights(gameClient.getHabbo()) || gameClient.getHabbo().hasPermission("acc_placefurni");
+        boolean canBuild = room.hasRights(gameClient.getHabbo())
+                || gameClient.getHabbo().getHabboInfo().getRank().getLevel() > 1;
+
         if (!canBuild) {
             gameClient.getHabbo().whisper("Tu n'as pas la permission d'utiliser :setz ici.", RoomChatMessageBubbles.ALERT);
             return true;
@@ -53,11 +55,6 @@ public class SetZCommand extends Command {
         ParadiseBuildState.setForcedZ(gameClient.getHabbo(), height);
         gameClient.getHabbo().whisper("SetZ activé à " + formatHeight(height) + ". :setz stop pour désactiver.", RoomChatMessageBubbles.ALERT);
         return true;
-    }
-
-    @Override
-    public boolean handlePermissionDenied(GameClient gameClient, String[] params) throws Exception {
-        return handle(gameClient, params);
     }
 
     private static String formatHeight(double height) {
