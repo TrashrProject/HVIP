@@ -1,0 +1,31 @@
+name: WavePlus Java build
+
+on:
+  push:
+    branches:
+      - quality/paradise-core-v1-fixes
+    paths:
+      - 'WavePlus/**'
+      - '.github/workflows/waveplus-java-build.yml'
+  pull_request:
+    paths:
+      - 'WavePlus/**'
+      - '.github/workflows/waveplus-java-build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: WavePlus/pom.xml
+
+      - name: Compile and package WavePlus
+        working-directory: WavePlus
+        run: mvn -B -DskipTests clean package
