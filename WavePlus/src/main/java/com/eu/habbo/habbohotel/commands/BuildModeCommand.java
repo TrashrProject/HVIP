@@ -6,7 +6,9 @@ import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 
 public class BuildModeCommand extends Command {
     public BuildModeCommand() {
-        super("cmd_buildmode", new String[]{"buildmode"});
+        // Reuse the existing furniture-placement permission so the command is
+        // immediately available with the current permissions table.
+        super("acc_placefurni", new String[]{"buildmode"});
     }
 
     @Override
