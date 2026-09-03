@@ -26,6 +26,7 @@ import io.github.brenoepics.roleplay.features.crime.prison.JailTimeRunner;
 import io.github.brenoepics.roleplay.features.crime.wantedlist.WantedRunner;
 import io.github.brenoepics.roleplay.features.hospital.HealingRunner;
 import io.github.brenoepics.roleplay.features.user.HungerRunner;
+import io.github.brenoepics.roleplay.utilities.HabboBrItemCommandRegistrar;
 import io.github.brenoepics.roleplay.utilities.LoadConfig;
 import io.github.brenoepics.roleplay.utilities.LoadPlayerCommands;
 import io.github.brenoepics.roleplay.utilities.RoleplayCommandViewProvider;
@@ -47,6 +48,7 @@ public class EmulatorLoad implements EventListener {
   public static void onEmulatorLoaded(EmulatorLoadedEvent event) {
     try {
       LoadPlayerCommands.loadCommands();
+      HabboBrItemCommandRegistrar.register();
       CommandViewRegistry.setProvider(new RoleplayCommandViewProvider());
       LoadConfig.ILoadConfig();
       PacketManager packetManager = Emulator.getGameServer().getPacketManager();
