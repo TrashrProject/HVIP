@@ -2,17 +2,22 @@
   'use strict';
 
   const ROOT = '.nitro-catalog';
+  const VERSION = 'v6';
   let queued = false;
 
   const exactTranslations = new Map([
     ['Front Page', 'Accueil'],
-    ['Furni', 'Furnis'],
+    ['Furni', 'Mobilier'],
+    ['Furniture', 'Mobilier'],
     ['Clothing', 'Vêtements'],
     ['Pets', 'Animaux'],
     ['Building', 'Construction'],
     ['Clothes Shop', 'Boutique de vêtements'],
     ['Redeem a voucher code here:', 'Utiliser un code promotionnel'],
-    ['Redeem a voucher code here', 'Utiliser un code promotionnel']
+    ['Redeem a voucher code here', 'Utiliser un code promotionnel'],
+    ['Search', 'Rechercher'],
+    ['Buy', 'Acheter'],
+    ['Purchase', 'Acheter']
   ]);
 
   const text = (node) => (node?.textContent || '').replace(/\s+/g, ' ').trim();
@@ -27,9 +32,10 @@
     const translated = exactTranslations.get(clean);
     if (!translated || node.dataset.prcTranslation === translated) return;
 
+    const suffix = current.match(/\s*\(\d+\)\s*$/)?.[0] || '';
     node.dataset.prcOriginalText = current;
     node.dataset.prcTranslation = translated;
-    node.textContent = translated;
+    node.textContent = `${translated}${suffix}`;
   };
 
   const translateVisibleText = (root) => {
@@ -44,17 +50,41 @@
     });
   };
 
+  const ensureBrandBanner = (root) => {
+    let banner = root.querySelector(':scope > .prc-brand-banner');
+    if (banner) return banner;
+
+    banner = document.createElement('div');
+    banner.className = 'prc-brand-banner';
+    banner.setAttribute('aria-hidden', 'true');
+    banner.innerHTML = `
+      <div class="prc-brand-left">
+        <span class="prc-brand-mark">▥</span>
+        <span class="prc-brand-copy"><strong>CATALOGUE</strong><em>ParadiseRP</em></span>
+      </div>
+      <div class="prc-brand-tagline">Des milliers de furnis<br>pour rendre votre ville unique !</div>
+      <div class="prc-brand-glow"></div>`;
+
+    const content = root.querySelector(':scope > .nitro-card-content');
+    if (content) root.insertBefore(banner, content);
+    else root.prepend(banner);
+    return banner;
+  };
+
   const getTopNav = (root) => {
+    const direct = root.querySelector('.nitro-catalog-navigation, [class*="catalog-navigation"], [class*="catalog-tabs"]');
+    if (direct) return direct;
+
     const candidates = [...root.querySelectorAll('div, nav, ul')];
     let best = null;
     let score = 0;
-    const labels = [/Front Page|Accueil/i, /Furni/i, /Clothing|Vêtements/i, /Pets|Animaux/i, /Building|Construction/i, /Staff/i];
+    const labels = [/Front Page|Accueil/i, /Furni|Mobilier/i, /Clothing|Vêtements/i, /Pets|Animaux/i, /Building|Construction/i, /Staff/i];
 
     for (const node of candidates) {
       const value = text(node);
-      if (!value || value.length > 280) continue;
+      if (!value || value.length > 320) continue;
       const current = labels.reduce((sum, re) => sum + (re.test(value) ? 1 : 0), 0);
-      if (current >= 4 && current > score) {
+      if (current >= 3 && current > score) {
         best = node;
         score = current;
       }
@@ -63,16 +93,25 @@
   };
 
   const getCategoryPanel = (root) => {
+    const direct = root.querySelector('.nitro-catalog-navigation-grid, [class*="catalog-navigation-grid"], [class*="catalog-category"]');
+    if (direct && direct.querySelectorAll('button,[role="button"],.list-group-item').length >= 2) return direct;
+
     const labels = [...root.querySelectorAll('div,span,p,h1,h2,h3,h4')];
     const label = labels.find((node) => /^(cat[eé]gories|categories)$/i.test(text(node)));
-    if (!label) return null;
-
-    let node = label.parentElement;
-    for (let i = 0; node && node !== root && i < 6; i += 1, node = node.parentElement) {
-      const buttons = node.querySelectorAll('button,[role="button"],.list-group-item').length;
-      if (buttons >= 3 || (node.children.length >= 3 && node.scrollHeight > 120)) return node;
+    if (label) {
+      let node = label.parentElement;
+      for (let i = 0; node && node !== root && i < 6; i += 1, node = node.parentElement) {
+        const buttons = node.querySelectorAll('button,[role="button"],.list-group-item').length;
+        if (buttons >= 2 || (node.children.length >= 3 && node.scrollHeight > 120)) return node;
+      }
     }
-    return label.parentElement;
+
+    const grid = getGrid(root);
+    if (!grid) return null;
+    const candidates = [...root.querySelectorAll('div, ul')]
+      .filter((node) => node !== grid && !node.contains(grid))
+      .filter((node) => node.querySelectorAll('button,[role="button"],.list-group-item').length >= 3);
+    return candidates.find((node) => node.getBoundingClientRect().left < grid.getBoundingClientRect().left) || null;
   };
 
   const getGrid = (root) => {
@@ -80,7 +119,7 @@
     if (direct && direct.children.length >= 2) return direct;
 
     return [...root.querySelectorAll('[class*="catalog-grid"]')]
-      .find((node) => !String(node.className).includes('grid-item') && node.children.length >= 4) || null;
+      .find((node) => !String(node.className).includes('grid-item') && node.children.length >= 3) || null;
   };
 
   const getPurchase = (root) => {
@@ -91,9 +130,9 @@
     if (!buy) return null;
 
     let node = buy.parentElement;
-    for (let i = 0; node && node !== root && i < 5; i += 1, node = node.parentElement) {
+    for (let i = 0; node && node !== root && i < 6; i += 1, node = node.parentElement) {
       const value = text(node);
-      if (value.length > 20 && value.length < 900) return node;
+      if (value.length > 20 && value.length < 1200) return node;
     }
     return buy.parentElement;
   };
@@ -134,6 +173,18 @@
     add(purchaseBranch, 'prc-col-preview');
   };
 
+  const decorateItems = (root) => {
+    root.querySelectorAll('.nitro-catalog-grid-item,[class*="catalog-grid-item"]').forEach((node) => {
+      add(node, 'prc-item');
+      if (node.matches('.active,.selected,[aria-selected="true"]')) add(node, 'prc-item-selected');
+      else node.classList.remove('prc-item-selected');
+    });
+
+    root.querySelectorAll('button').forEach((button) => {
+      if (/acheter|buy|purchase/i.test(text(button))) add(button, 'prc-buy-button');
+    });
+  };
+
   const markPromoCards = (root) => {
     const images = [...root.querySelectorAll('img')].filter((img) => {
       const rect = img.getBoundingClientRect();
@@ -158,11 +209,12 @@
   const decorate = (root) => {
     if (!(root instanceof HTMLElement)) return;
 
-    root.classList.add('paradise-catalog-v5');
-    root.classList.remove('paradise-catalog-v4', 'prc-front', 'prc-products', 'prc-other');
-    root.dataset.paradiseCatalog = 'v5';
+    root.classList.add('paradise-catalog-v6');
+    root.classList.remove('paradise-catalog-v4', 'paradise-catalog-v5', 'prc-front', 'prc-products', 'prc-other');
+    root.dataset.paradiseCatalog = VERSION;
 
-    add(root.querySelector('.nitro-card-header, .nitro-catalog-header'), 'prc-header');
+    ensureBrandBanner(root);
+    add(root.querySelector(':scope > .nitro-card-header, .nitro-catalog-header'), 'prc-native-header');
     add(getTopNav(root), 'prc-topnav');
     translateVisibleText(root);
 
@@ -177,10 +229,7 @@
       }
     });
 
-    root.querySelectorAll('.nitro-catalog-grid-item,[class*="catalog-grid-item"]').forEach((node) => add(node, 'prc-item'));
-    root.querySelectorAll('button').forEach((button) => {
-      if (/acheter|buy|purchase/i.test(text(button))) add(button, 'prc-buy-button');
-    });
+    decorateItems(root);
 
     const grid = getGrid(root);
     const purchase = getPurchase(root);
@@ -211,7 +260,7 @@
 
   const boot = () => {
     scan();
-    new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'aria-selected'] });
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
