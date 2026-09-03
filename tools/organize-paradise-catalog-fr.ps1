@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [string]$RepositoryRoot = "",
     [string]$HabboRpRoot = "C:\xampp\htdocs\HabboRPbr",
@@ -222,7 +222,7 @@ $chunkSize=300
 for($offset=0;$offset -lt $all.Count;$offset+=$chunkSize) {
     $chunk=@($all|Select-Object -Skip $offset -First $chunkSize)
     [void]$sb.AppendLine('UPDATE catalog_items SET page_id = CASE id')
-    foreach($r in $chunk) { $pid=if($r.Valid){[int]$pages[$r.Category]}else{$quarantinePage}; [void]$sb.AppendLine(" WHEN $($r.CatalogItemId) THEN $pid") }
+    foreach($r in $chunk) { $targetPageId=if($r.Valid){[int]$pages[$r.Category]}else{$quarantinePage}; [void]$sb.AppendLine(" WHEN $($r.CatalogItemId) THEN $targetPageId") }
     [void]$sb.AppendLine(' ELSE page_id END, catalog_name = CASE id')
     foreach($r in $chunk) { [void]$sb.AppendLine(" WHEN $($r.CatalogItemId) THEN '$(Escape-Sql $r.FrenchName)'") }
     [void]$sb.AppendLine(" ELSE catalog_name END WHERE id IN ($($chunk.CatalogItemId -join ','));")
@@ -257,3 +257,4 @@ if($Apply) {
     if($proc.ExitCode -ne 0){throw "Application SQL echouee (code $($proc.ExitCode))."}
     Write-Host 'Migration appliquee avec succes.' -ForegroundColor Green
 }
+
