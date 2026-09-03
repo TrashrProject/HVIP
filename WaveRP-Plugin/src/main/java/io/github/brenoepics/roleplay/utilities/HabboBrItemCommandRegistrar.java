@@ -6,6 +6,7 @@ import com.eu.habbo.habbohotel.commands.CommandHandler;
 import io.github.brenoepics.roleplay.commands.combat.ReloadCommand;
 import io.github.brenoepics.roleplay.commands.generic.FishingCommand;
 import io.github.brenoepics.roleplay.commands.generic.PlantCommand;
+import io.github.brenoepics.roleplay.features.user.CheckDatabase;
 
 /** Registers the ParadiseRP adaptations of the useful HabboRPbr item actions. */
 public final class HabboBrItemCommandRegistrar {
