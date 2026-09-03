@@ -17,7 +17,10 @@ $BuiltJarRelativePath = "WavePlus\target\RPHabbo-3.5.4-jar-with-dependencies.jar
 $RuntimeJarRelativePath = "runtime\WavePlus\WaveRP-Arcturus.jar"
 $BuiltPluginRelativePath = "WaveRP-Plugin\target\Roleplay-1.0.45-jar-with-dependencies.jar"
 $RuntimePluginRelativePath = "runtime\WavePlus\plugins\WaveRP-Roleplay.jar"
-$WeaponSkinsMigrationRelativePath = "migrations\20260902_paradise_weapon_skins.sql"
+$MigrationRelativePaths = @(
+    "migrations\20260902_paradise_weapon_skins.sql",
+    "migrations\20260903_paradise_complete_inventory.sql"
+)
 $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $StoppedService = $false
@@ -65,7 +68,7 @@ try {
     $RuntimeJar = Join-Path $RepositoryRoot $RuntimeJarRelativePath
     $BuiltPlugin = Join-Path $RepositoryRoot $BuiltPluginRelativePath
     $RuntimePlugin = Join-Path $RepositoryRoot $RuntimePluginRelativePath
-    $WeaponSkinsMigration = Join-Path $RepositoryRoot $WeaponSkinsMigrationRelativePath
+    $Migrations = @($MigrationRelativePaths | ForEach-Object { Join-Path $RepositoryRoot $_ })
     $RuntimeDirectory = Split-Path -Parent $RuntimeJar
     $JavaExecutable = Join-Path $JavaHome "bin\java.exe"
 
@@ -142,7 +145,7 @@ try {
         throw "JAR du plugin compile introuvable : $BuiltPlugin"
     }
 
-    if (Test-Path -LiteralPath $WeaponSkinsMigration -PathType Leaf) {
+    if ($Migrations | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf }) {
         $RuntimeConfig = Join-Path $RuntimeDirectory "Config\config.ini"
         $DatabaseHost = Get-IniValue $RuntimeConfig 'db.hostname' '127.0.0.1'
         $DatabasePort = Get-IniValue $RuntimeConfig 'db.port' '3306'
@@ -155,15 +158,20 @@ try {
             $MysqlCommand = Get-Command mysql.exe -ErrorAction SilentlyContinue
             if ($MysqlCommand) { $Mysql = $MysqlCommand.Source }
         }
-        if (-not $Mysql) { throw 'mysql.exe introuvable pour appliquer la migration des skins.' }
+        if (-not $Mysql) { throw 'mysql.exe introuvable pour appliquer les migrations SQL.' }
         try {
             $env:MYSQL_PWD = $DatabasePassword
-            $MigrationProcess = Start-Process -FilePath $Mysql -ArgumentList @(
-                "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
-                "--database=$DatabaseName", '--default-character-set=utf8mb4'
-            ) -RedirectStandardInput $WeaponSkinsMigration -NoNewWindow -Wait -PassThru
-            if ($MigrationProcess.ExitCode -ne 0) { throw 'La migration SQL des skins a echoue.' }
-            Write-Host "Migration des skins appliquee sur $DatabaseName." -ForegroundColor Green
+            foreach ($Migration in $Migrations) {
+                if (-not (Test-Path -LiteralPath $Migration -PathType Leaf)) { continue }
+                $MigrationProcess = Start-Process -FilePath $Mysql -ArgumentList @(
+                    "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
+                    "--database=$DatabaseName", '--default-character-set=utf8mb4'
+                ) -RedirectStandardInput $Migration -NoNewWindow -Wait -PassThru
+                if ($MigrationProcess.ExitCode -ne 0) {
+                    throw "La migration SQL a echoue : $Migration"
+                }
+                Write-Host "Migration appliquee : $(Split-Path -Leaf $Migration)" -ForegroundColor Green
+            }
         }
         finally {
             $env:MYSQL_PWD = $null
