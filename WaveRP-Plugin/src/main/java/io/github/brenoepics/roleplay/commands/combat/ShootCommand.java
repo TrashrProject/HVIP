@@ -115,8 +115,10 @@ public class ShootCommand extends Command {
       return true;
     }
 
+    int shieldBefore = targetData.getShield();
     int damage = weaponProfile.rollDamage();
     targetData.takeDamage(damage, attacker);
+    syncArmorAfterDamage(target, targetData, shieldBefore);
 
     String targetName = target.getHabboInfo().getUsername();
     if (targetData.isDead()) {
@@ -138,6 +140,28 @@ public class ShootCommand extends Command {
     RolePlay.getCommandsCounter().getCoolDown("shoot")
         .addTimeOut(attacker.getHabboInfo().getId(), SHOOT_TIMEOUT);
     return true;
+  }
+
+  private static void syncArmorAfterDamage(Habbo target, RpAvatar targetData, int shieldBefore) {
+    InventorySlot armorSlot = targetData.getInventory().getSecondaryArmorSlot();
+    if (armorSlot == null || armorSlot.isEmpty() || armorSlot.getItem() == null
+        || !"shield".equalsIgnoreCase(armorSlot.getItem().getInteractionType())) {
+      return;
+    }
+
+    if (shieldBefore <= targetData.getShield()) {
+      return;
+    }
+
+    armorSlot.setDurability(Math.max(0, Math.min(100, targetData.getShield())));
+    if (armorSlot.getDurability() <= 0) {
+      RPItem brokenArmor = armorSlot.getItem();
+      targetData.getInventory().unEquipArmor();
+      targetData.setShield(0);
+      target.whisper("Votre " + brokenArmor.getDisplayName() + " est détruit et doit être réparé.",
+          RoomChatMessageBubbles.ALERT);
+    }
+    targetData.getInventory().updateInventory(target);
   }
 
   private static ServerMessage getMessage(String message, Habbo hitter) {
