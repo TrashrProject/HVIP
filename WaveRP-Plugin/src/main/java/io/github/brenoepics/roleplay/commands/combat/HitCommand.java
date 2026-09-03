@@ -14,8 +14,8 @@ import com.eu.habbo.messages.outgoing.rooms.users.RoomUserShoutComposer;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.features.user.inventory.InventorySlot;
-import io.github.brenoepics.roleplay.utilities.types.RPItem;
 import io.github.brenoepics.roleplay.utilities.types.Timeout;
+import io.github.brenoepics.roleplay.utilities.types.WeaponProfile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +23,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.jetbrains.annotations.NotNull;
 
 public class HitCommand extends Command {
-
-  public static final int DECREASE_DURABILITY_AMOUNT = 1;
 
   public HitCommand(String permission, String[] keys) {
     super(permission, keys);
@@ -55,7 +53,7 @@ public class HitCommand extends Command {
       return true;
     }
     if (habbo == attacker) {
-      attacker.whisper("Vous ne pouvez pas vous frapper vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
+      attacker.whisper("Vous ne pouvez pas vous frapper vous-même.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -68,7 +66,7 @@ public class HitCommand extends Command {
 
     if (attackerData.isAtSafeZone() && (!targetData.isAggressive()
         || !attackerData.isAggressive())) {
-      attacker.whisper("Vous ne pouvez pas utiliser cette commande dans une zone prot\u00e9g\u00e9e.",
+      attacker.whisper("Vous ne pouvez pas utiliser cette commande dans une zone protégée.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
@@ -76,7 +74,7 @@ public class HitCommand extends Command {
     if (!Emulator.getConfig().getBoolean("features.organizations.friendly_fire")
         && attackerData.getOrganizationId() == targetData.getOrganizationId()) {
       attacker.whisper("Vous ne pouvez pas frapper " + habbo.getHabboInfo().getUsername()
-          + " car vous appartenez \u00e0 la m\u00eame organisation.", RoomChatMessageBubbles.ALERT);
+          + " car vous appartenez à la même organisation.", RoomChatMessageBubbles.ALERT);
       return true;
     }
     Timeout timeout = RolePlay.getCommandsCounter().getCoolDown("hit")
@@ -106,16 +104,14 @@ public class HitCommand extends Command {
       attacker.getHabboInfo().getCurrentRoom().sendComposer(
           createKnockoutMessage("* Frappe " + habbo.getHabboInfo().getUsername() + ", mais le rate *",
               attacker).compose());
-      // Apply cooldown on miss
       RolePlay.getCommandsCounter().getCoolDown("hit")
           .addTimeOut(attacker.getHabboInfo().getId(), HIT_TIMEOUT);
       return true;
     }
 
     if (targetData.isDead()) {
-      attacker.whisper(habbo.getHabboInfo().getUsername() + " est d\u00e9j\u00e0 inconscient.",
+      attacker.whisper(habbo.getHabboInfo().getUsername() + " est déjà inconscient.",
           RoomChatMessageBubbles.ALERT);
-      // Apply cooldown even if target is dead
       RolePlay.getCommandsCounter().getCoolDown("hit")
           .addTimeOut(attacker.getHabboInfo().getId(), HIT_TIMEOUT);
       return true;
@@ -123,81 +119,44 @@ public class HitCommand extends Command {
 
     int damage = ThreadLocalRandom.current().nextInt(1, 4);
     Optional<InventorySlot> equippedWeapon = attackerData.getEquippedWeapon();
-    if (equippedWeapon.isPresent()) {
-      damage = getDamage(equippedWeapon.get().getItem());
-      equippedWeapon.get().decreaseDurability(DECREASE_DURABILITY_AMOUNT);
+    if (equippedWeapon.isPresent() && equippedWeapon.get().getItem() != null) {
+      WeaponProfile profile = WeaponProfile.from(equippedWeapon.get().getItem());
+      // Firearms are handled by :tirer. A firearm in hand must not silently turn
+      // :frapper into a ranged-damage melee attack.
+      if (!profile.isRanged()) {
+        damage = profile.rollDamage();
+        if (profile.getDurabilityLoss() > 0) {
+          attackerData.getInventory().decreaseWeaponDurability(attacker,
+              profile.getDurabilityLoss());
+          attackerData.getInventory().updateInventory(attacker);
+        }
+      }
     }
 
-    attackerData.getInventory().decreaseWeaponDurability(attacker, DECREASE_DURABILITY_AMOUNT);
     damage = (int) Math.round(damage * attackerData.getStrength());
     hitUser(attacker, targetData, damage, habbo);
     attackerData.getCombatStats().recordPunchThrown();
     attackerData.executeAction();
-    // Apply cooldown on hit
     RolePlay.getCommandsCounter().getCoolDown("hit")
         .addTimeOut(attacker.getHabboInfo().getId(), HIT_TIMEOUT);
     return true;
   }
 
-  private static boolean isAttackAllowed(Habbo attacker, Habbo target, List<RoomTile> nonDiag, RoomTile middleTile) {
+  private static boolean isAttackAllowed(Habbo attacker, Habbo target, List<RoomTile> nonDiag,
+      RoomTile middleTile) {
     RoomTile attackerTile = attacker.getRoomUnit().getCurrentLocation();
-    // If attacker is on the same or non-diagonal tile, allow
     if (attackerTile.equals(middleTile) || nonDiag.contains(attackerTile)) {
       return true;
     }
-    // If attacker is on a diagonal tile
     boolean attackerWalking = attacker.getRoomUnit().isWalking();
     boolean targetWalking = target.getRoomUnit().isWalking();
-    // Check if both are walking and are adjacent diagonally
     return attackerWalking && targetWalking && isAdjacentDiagonal(attackerTile, middleTile);
-    // Otherwise, diagonal attack not allowed
   }
 
   private static boolean isAdjacentDiagonal(RoomTile a, RoomTile b) {
     int dx = Math.abs(a.x - b.x);
     int dy = Math.abs(a.y - b.y);
     return dx == 1 && dy == 1;
-  }
-
-  private static int getDamage(RPItem item) {
-    String data = item.getExtraData();
-    if (data == null || data.isEmpty()) {
-      return getDefaultDamage();
-    }
-    try {
-      if (data.contains(",")) {
-        String[] parts = data.split(",");
-        int min = Integer.parseInt(parts[0].trim());
-        int max = Integer.parseInt(parts[1].trim());
-        if (min > max) { // swap if out of order
-          int temp = min;
-          min = max;
-          max = temp;
-        }
-        return ThreadLocalRandom.current().nextInt(min, max + 1);
-      } else {
-        return Integer.parseInt(data.trim());
-      }
-    } catch (NumberFormatException e) {
-      return getDefaultDamage();
-    }
-  }
-
-  private static int getDefaultDamage() {
-    return ThreadLocalRandom.current().nextInt(1, 4);
-  }
-
-  private static boolean isNotAround(List<RoomTile> diagOnly, Habbo hitter, RoomTile middleTile) {
-    if (hitter.getRoomUnit().getCurrentLocation().equals(middleTile)) {
-      return false;
-    }
-    if (!diagOnly.contains(hitter.getRoomUnit().getCurrentLocation())) {
-      return false;
-    }
-    return !hitter.getRoomUnit().isWalking() || (!hitter.getRoomUnit().isFastWalk() && (
-        !hitter.getRoomUnit().getCurrentLocation().equals(middleTile) || !hitter.getRoomUnit()
-            .getPreviousLocation().equals(middleTile) || !hitter.getRoomUnit().getStartLocation()
-            .equals(middleTile)));
   }
 
   private static List<RoomTile> getAround(Habbo habbo) {
@@ -229,16 +188,16 @@ public class HitCommand extends Command {
 
     if (targetData.isDead()) {
       actor.getHabboInfo().getCurrentRoom().sendComposer(createKnockoutMessage(
-          "* Porte le coup final \u00e0 " + victimUsername + " et le met K.-O. *", actor).compose());
+          "* Porte le coup final à " + victimUsername + " et le met K.-O. *", actor).compose());
     } else {
       actor.getHabboInfo().getCurrentRoom().sendComposer(
-          createKnockoutMessage("* Frappe " + victimUsername + " et inflige " + damage + " d\u00e9g\u00e2t(s) *",
+          createKnockoutMessage("* Frappe " + victimUsername + " et inflige " + damage + " dégât(s) *",
               actor).compose());
     }
   }
 
-  private static RoomUserShoutComposer createKnockoutMessage(String habbo, Habbo hitter) {
+  private static RoomUserShoutComposer createKnockoutMessage(String message, Habbo hitter) {
     return new RoomUserShoutComposer(
-        new RoomChatMessage(habbo, hitter, hitter, RoomChatMessageBubbles.NORMAL));
+        new RoomChatMessage(message, hitter, hitter, RoomChatMessageBubbles.NORMAL));
   }
 }
