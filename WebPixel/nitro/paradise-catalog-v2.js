@@ -2,7 +2,6 @@
   'use strict';
 
   const ROOT = '.nitro-catalog';
-  let timer = 0;
   const text = node => (node?.textContent || '').replace(/\s+/g, ' ').trim();
   const add = (node, cls) => { if (node instanceof HTMLElement) node.classList.add(cls); return node; };
   const translations = new Map([
@@ -25,10 +24,10 @@
   function closeCatalog(root) {
     const native = findNativeClose(root);
     if (native) {
-      native.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      native.click();
       return;
     }
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
   }
 
   function ensureBanner(root) {
@@ -36,7 +35,7 @@
     if (!banner) {
       banner = document.createElement('div');
       banner.className = 'prc-brand-banner';
-      banner.innerHTML = '<div class="prc-brand-left"><span class="prc-brand-mark">▥</span><span class="prc-brand-copy"><strong>CATALOGUE</strong><em>ParadiseRP</em></span></div><div class="prc-brand-tagline">Des milliers de furnis<br>pour rendre votre ville unique !</div><button type="button" class="prc-close" aria-label="Fermer" title="Fermer">×</button>';
+      banner.innerHTML = '<div class="prc-brand-left"><span class="prc-brand-mark"><img src="/Dynamics/img/logos/hv_logo_p.png" alt="ParadiseRP" draggable="false"></span><span class="prc-brand-copy"><strong>CATALOGUE</strong><em>ParadiseRP</em></span></div><div class="prc-brand-tagline">Des milliers de furnis<br>pour rendre votre ville unique !</div><button type="button" class="prc-close" aria-label="Fermer" title="Fermer">×</button>';
       const content = root.querySelector(':scope > .nitro-card-content');
       content ? root.insertBefore(banner, content) : root.prepend(banner);
     }
@@ -62,7 +61,8 @@
     });
     root.querySelectorAll('input[type="text"],input[type="search"]').forEach(input => {
       if (/search|recherch/i.test(input.placeholder || '')) input.placeholder = 'Rechercher un furni...';
-      add(input, 'prc-search-input'); add(input.parentElement, 'prc-search');
+      add(input, 'prc-search-input');
+      add(input.parentElement, 'prc-search');
     });
   }
 
@@ -88,56 +88,55 @@
     return direct && direct !== g ? direct : null;
   }
 
-  function commonAncestor(a, b, c, root) {
-    let node = a?.parentElement;
-    while (node && node !== root) {
-      if (node.contains(b) && node.contains(c)) return node;
-      node = node.parentElement;
-    }
-    return null;
-  }
-
-  function branch(ancestor, node) {
-    if (!ancestor || !node) return null;
-    while (node.parentElement && node.parentElement !== ancestor) node = node.parentElement;
-    return node.parentElement === ancestor ? node : null;
-  }
-
   function decorate(root) {
     if (!(root instanceof HTMLElement)) return;
-    root.classList.add('paradise-catalog-v7', 'paradise-catalog-v9', 'paradise-catalog-v11');
+    if (root.dataset.paradiseDecorated === '1') return;
+    root.dataset.paradiseDecorated = '1';
+    root.classList.add('paradise-catalog-v18');
     ensureBanner(root);
     add(findNativeHeader(root), 'prc-native-header');
     add(nav(root), 'prc-topnav');
     translate(root);
 
+    const g = grid(root);
+    const p = purchase(root);
+    const c = category(root, g);
+    add(g, 'prc-grid');
+    add(p, 'prc-purchase');
+    add(c, 'prc-category-panel');
     root.querySelectorAll('.nitro-catalog-grid-item,[class*="catalog-grid-item"]').forEach(item => add(item, 'prc-item'));
     root.querySelectorAll('button').forEach(button => {
       if (/acheter|buy|purchase|offrir/i.test(text(button))) add(button, 'prc-buy-button');
     });
-
-    const g = grid(root), p = purchase(root), c = category(root, g);
-    const product = !!(g && p && c);
-    root.classList.toggle('prc-products', product);
-    root.classList.toggle('prc-info-page', !product);
-    add(g, 'prc-grid'); add(p, 'prc-purchase'); add(c, 'prc-category-panel');
-    if (!product) return;
-
-    const ancestor = commonAncestor(c, g, p, root);
-    const bc = branch(ancestor, c), bg = branch(ancestor, g), bp = branch(ancestor, p);
-    if (ancestor && bc && bg && bp && new Set([bc, bg, bp]).size === 3) {
-      add(ancestor, 'prc-product-layout'); add(bc, 'prc-col-categories'); add(bg, 'prc-col-products'); add(bp, 'prc-col-preview');
-    }
   }
 
-  function scan() { document.querySelectorAll(ROOT).forEach(decorate); }
-  function schedule() { clearTimeout(timer); timer = window.setTimeout(scan, 120); }
+  function decorateWhenReady(root) {
+    decorate(root);
+    window.setTimeout(() => {
+      if (!root.isConnected) return;
+      root.dataset.paradiseDecorated = '';
+      decorate(root);
+    }, 120);
+  }
+
+  function scanExisting() {
+    document.querySelectorAll(ROOT).forEach(decorateWhenReady);
+  }
+
   function boot() {
-    scan();
+    scanExisting();
     new MutationObserver(mutations => {
-      if (mutations.some(m => m.addedNodes.length || m.removedNodes.length)) schedule();
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (!(node instanceof Element)) continue;
+          if (node.matches(ROOT)) decorateWhenReady(node);
+          node.querySelectorAll?.(ROOT).forEach(decorateWhenReady);
+        }
+      }
     }).observe(document.body, { childList: true, subtree: true });
   }
 
-  document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', boot, { once: true }) : boot();
+  document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', boot, { once: true })
+    : boot();
 })();
