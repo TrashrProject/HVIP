@@ -14,6 +14,7 @@ import com.eu.habbo.messages.outgoing.rooms.users.RoomUserShoutComposer;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.features.user.inventory.InventorySlot;
+import io.github.brenoepics.roleplay.utilities.types.RPItem;
 import io.github.brenoepics.roleplay.utilities.types.Timeout;
 import io.github.brenoepics.roleplay.utilities.types.WeaponProfile;
 import java.util.ArrayList;
@@ -121,8 +122,6 @@ public class HitCommand extends Command {
     Optional<InventorySlot> equippedWeapon = attackerData.getEquippedWeapon();
     if (equippedWeapon.isPresent() && equippedWeapon.get().getItem() != null) {
       WeaponProfile profile = WeaponProfile.from(equippedWeapon.get().getItem());
-      // Firearms are handled by :tirer. A firearm in hand must not silently turn
-      // :frapper into a ranged-damage melee attack.
       if (!profile.isRanged()) {
         damage = profile.rollDamage();
         if (profile.getDurabilityLoss() > 0) {
@@ -182,7 +181,10 @@ public class HitCommand extends Command {
   }
 
   public static void hitUser(Habbo actor, RpAvatar targetData, int damage, Habbo habbo) {
+    int shieldBefore = targetData.getShield();
     targetData.takeDamage(damage, actor);
+    syncArmorAfterDamage(habbo, targetData, shieldBefore);
+
     String victimUsername = habbo.getHabboInfo().getUsername();
     targetData.getCombatStats().recordPunchReceived();
 
@@ -194,6 +196,27 @@ public class HitCommand extends Command {
           createKnockoutMessage("* Frappe " + victimUsername + " et inflige " + damage + " dégât(s) *",
               actor).compose());
     }
+  }
+
+  private static void syncArmorAfterDamage(Habbo target, RpAvatar targetData, int shieldBefore) {
+    InventorySlot armorSlot = targetData.getInventory().getSecondaryArmorSlot();
+    if (armorSlot == null || armorSlot.isEmpty() || armorSlot.getItem() == null
+        || !"shield".equalsIgnoreCase(armorSlot.getItem().getInteractionType())) {
+      return;
+    }
+    if (shieldBefore <= targetData.getShield()) {
+      return;
+    }
+
+    armorSlot.setDurability(Math.max(0, Math.min(100, targetData.getShield())));
+    if (armorSlot.getDurability() <= 0) {
+      RPItem brokenArmor = armorSlot.getItem();
+      targetData.getInventory().unEquipArmor();
+      targetData.setShield(0);
+      target.whisper("Votre " + brokenArmor.getDisplayName() + " est détruit et doit être réparé.",
+          RoomChatMessageBubbles.ALERT);
+    }
+    targetData.getInventory().updateInventory(target);
   }
 
   private static RoomUserShoutComposer createKnockoutMessage(String message, Habbo hitter) {
