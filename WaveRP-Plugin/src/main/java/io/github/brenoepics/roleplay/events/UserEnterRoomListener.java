@@ -56,8 +56,11 @@ public class UserEnterRoomListener implements EventListener {
       PoliceHandcuffService.enforce(habbo);
       Optional<InventorySlot> equippedWeapon = data.getEquippedWeapon();
       if (!data.isPassive() && !data.isDead() && equippedWeapon.isPresent()) {
-        event.room.giveEffect(habbo, equippedWeapon.get().getItem().getEnableId(),
-            Integer.MAX_VALUE);
+        int visualEffect = RolePlay.getWeaponSkinService().getEquippedEffect(
+            habbo.getHabboInfo().getId(),
+            equippedWeapon.get().getItem().getDisplayName(),
+            equippedWeapon.get().getItem().getEnableId());
+        event.room.giveEffect(habbo, visualEffect, Integer.MAX_VALUE);
       }
     }, 500);
   }
