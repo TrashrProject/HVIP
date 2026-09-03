@@ -33,8 +33,11 @@ public class UserTakeStepListener implements EventListener {
     }
 
     if (canEnable(habbo.getRoomUnit().getRoom(), data) && equippedWeapon.isPresent()) {
-      habbo.getRoomUnit().getRoom()
-          .giveEffect(habbo, equippedWeapon.get().getItem().getEnableId(), Integer.MAX_VALUE);
+      int visualEffect = RolePlay.getWeaponSkinService().getEquippedEffect(
+          habbo.getHabboInfo().getId(),
+          equippedWeapon.get().getItem().getDisplayName(),
+          equippedWeapon.get().getItem().getEnableId());
+      habbo.getRoomUnit().getRoom().giveEffect(habbo, visualEffect, Integer.MAX_VALUE);
     }
   }
 
