@@ -1,0 +1,98 @@
+/* ParadiseRP Catalogue V16 — final text + edge cleanup. Load LAST. */
+
+/* Absolutely no legacy light canvas/edge inside the catalogue. */
+.nitro-catalog,
+.nitro-catalog > .nitro-card-content,
+.nitro-catalog > .nitro-card-content::before,
+.nitro-catalog > .nitro-card-content::after {
+    background:#0a2c5b !important;
+    background-color:#0a2c5b !important;
+}
+
+.nitro-catalog {
+    padding:0 !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+    border-color:#1599e7 !important;
+    box-shadow:0 22px 48px rgba(0,0,0,.40), inset 0 0 0 1px rgba(77,209,255,.18) !important;
+}
+
+.nitro-catalog > .nitro-card-content {
+    margin:0 !important;
+    padding:0 !important;
+    width:100% !important;
+    max-width:none !important;
+    border:0 !important;
+    border-radius:0 0 13px 13px !important;
+    overflow:hidden !important;
+    background:linear-gradient(135deg,#0a2c5b 0%,#12265f 58%,#3b246f 100%) !important;
+}
+
+/* Kill remaining white/grey strips created by native wrapper gutters. */
+.nitro-catalog > .nitro-card-content > *,
+.nitro-catalog > .nitro-card-content > * > *,
+.nitro-catalog .nitro-card-content .row,
+.nitro-catalog .nitro-card-content [class*="col-"],
+.nitro-catalog .nitro-card-content .container,
+.nitro-catalog .nitro-card-content .container-fluid {
+    border-left-color:#143d72 !important;
+    border-right-color:#143d72 !important;
+}
+
+/* ALL native catalogue copy on dark surfaces is white. */
+.nitro-catalog .nitro-card-content,
+.nitro-catalog .nitro-card-content *:not(img):not(canvas):not(svg):not(path):not(option) {
+    color:#ffffff !important;
+}
+
+/* Links and native clickable labels must not fall back to black. */
+.nitro-catalog .nitro-card-content :is(a,p,span,label,strong,b,em,i,small,h1,h2,h3,h4,h5,h6,div,li) {
+    color:#ffffff !important;
+}
+
+/* Category tree text was still inheriting black from Nitro. */
+.nitro-catalog .prc-category-panel,
+.nitro-catalog .prc-category-panel *,
+.nitro-catalog [class*="navigation-grid"],
+.nitro-catalog [class*="navigation-grid"] * {
+    color:#ffffff !important;
+}
+
+.nitro-catalog .prc-category-panel :is(button,[role="button"],.list-group-item),
+.nitro-catalog [class*="navigation-grid"] :is(button,[role="button"],.list-group-item) {
+    color:#ffffff !important;
+    text-shadow:0 1px 1px rgba(0,0,0,.25) !important;
+}
+
+/* Selected rows keep contrast in Paradise blue/violet. */
+.nitro-catalog .prc-category-panel :is(.active,[aria-selected="true"]),
+.nitro-catalog [class*="navigation-grid"] :is(.active,[aria-selected="true"]) {
+    background:linear-gradient(90deg,#168fd7,#6545d6) !important;
+    color:#ffffff !important;
+}
+
+/* Product information/description text on the right. */
+.nitro-catalog .prc-col-preview,
+.nitro-catalog .prc-col-preview *,
+.nitro-catalog .prc-purchase,
+.nitro-catalog .prc-purchase * {
+    color:#ffffff !important;
+}
+
+/* Preserve readable form controls. */
+.nitro-catalog input,
+.nitro-catalog textarea,
+.nitro-catalog select {
+    color:#ffffff !important;
+    background:#0a2a55 !important;
+}
+
+.nitro-catalog option {
+    color:#111 !important;
+    background:#fff !important;
+}
+
+/* Prevent tiny light gutters on both sides of the catalogue body. */
+.nitro-catalog > .nitro-card-content {
+    box-shadow:inset 7px 0 0 #0a2c5b, inset -7px 0 0 #0a2c5b !important;
+}
