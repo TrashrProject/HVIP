@@ -39,10 +39,15 @@
     root.querySelectorAll('.nitro-catalog-grid-item,[class*="catalog-grid-item"]').forEach(n=>add(n,'prc-item'));
     root.querySelectorAll('button').forEach(b=>{if(/acheter|buy|purchase/i.test(text(b)))add(b,'prc-buy-button')});
     const g=grid(root),p=purchase(root),c=category(root,g);
-    root.classList.toggle('prc-products',!!g);root.classList.toggle('prc-info-page',!g);
-    if(!g)return;
-    add(g,'prc-grid');add(p,'prc-purchase');add(c,'prc-category-panel');
-    if(p&&c){const a=common(c,g,p,root),bc=branch(a,c),bg=branch(a,g),bp=branch(a,p);if(a&&bc&&bg&&bp&&new Set([bc,bg,bp]).size===3){add(a,'prc-product-layout');add(bc,'prc-col-categories');add(bg,'prc-col-products');add(bp,'prc-col-preview')}}
+    const isProductLayout=!!(g&&p&&c);
+    root.classList.toggle('prc-products',isProductLayout);
+    root.classList.toggle('prc-info-page',!isProductLayout);
+    if(g)add(g,'prc-grid');
+    if(p)add(p,'prc-purchase');
+    if(c)add(c,'prc-category-panel');
+    if(!isProductLayout)return;
+    const a=common(c,g,p,root),bc=branch(a,c),bg=branch(a,g),bp=branch(a,p);
+    if(a&&bc&&bg&&bp&&new Set([bc,bg,bp]).size===3){add(a,'prc-product-layout');add(bc,'prc-col-categories');add(bg,'prc-col-products');add(bp,'prc-col-preview')}
   }
   const scan=()=>document.querySelectorAll(ROOT).forEach(decorate);
   const schedule=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;scan()})};
