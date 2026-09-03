@@ -1,0 +1,37 @@
+/* ParadiseRP Catalogue V9 — coherence, close button and draggable header polish */
+.paradise-catalog-v9>.prc-brand-banner{cursor:grab!important;user-select:none!important;position:relative!important}
+.paradise-catalog-v9>.prc-brand-banner:active{cursor:grabbing!important}
+.paradise-catalog-v9 .prc-close{position:absolute!important;right:14px!important;top:14px!important;z-index:200!important;width:36px!important;height:36px!important;display:grid!important;place-items:center!important;padding:0!important;border:1px solid #2baeea!important;border-radius:9px!important;background:linear-gradient(180deg,#123b70,#081f43)!important;color:#fff!important;font:900 24px/1 Arial,sans-serif!important;box-shadow:0 4px 12px rgba(0,0,0,.28),0 0 12px rgba(43,174,234,.2)!important;cursor:pointer!important}
+.paradise-catalog-v9 .prc-close:hover{background:linear-gradient(180deg,#17518f,#0c315d)!important;border-color:#52d8ff!important;transform:translateY(-1px)!important}
+.paradise-catalog-v9>.prc-native-header{opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;overflow:hidden!important}
+
+/* Elimine les grands fonds gris/blancs du catalogue natif, sans supprimer le contenu. */
+.paradise-catalog-v9>.nitro-card-content,
+.paradise-catalog-v9>.nitro-card-content>div,
+.paradise-catalog-v9>.nitro-card-content>div>div,
+.paradise-catalog-v9>.nitro-card-content section,
+.paradise-catalog-v9>.nitro-card-content main,
+.paradise-catalog-v9>.nitro-card-content aside{background-color:#06182e!important;color:#eaf5ff!important;border-color:#174f7d!important}
+.paradise-catalog-v9>.nitro-card-content div:not(.prc-topnav):not(.prc-category-panel):not(.prc-grid):not(.prc-purchase),
+.paradise-catalog-v9>.nitro-card-content section:not(.prc-category-panel):not(.prc-grid):not(.prc-purchase){background-image:none!important}
+
+/* Layout principal plus proche de la maquette. */
+.paradise-catalog-v9.prc-products .prc-product-layout{grid-template-columns:230px minmax(420px,1fr) 290px!important;gap:10px!important;padding:10px!important;background:#06182e!important}
+.paradise-catalog-v9 .prc-col-categories,
+.paradise-catalog-v9 .prc-col-products,
+.paradise-catalog-v9 .prc-col-preview{background:#06182e!important}
+.paradise-catalog-v9 .prc-category-panel{background:linear-gradient(180deg,#0b2345,#081a35)!important;border-color:#1a5f96!important;box-shadow:inset 0 0 18px rgba(0,0,0,.18)!important}
+.paradise-catalog-v9 .prc-grid{background:linear-gradient(180deg,#071f3a,#06172c)!important;border-color:#1b5a8e!important;grid-template-columns:repeat(5,minmax(78px,1fr))!important;grid-auto-rows:92px!important}
+.paradise-catalog-v9 .prc-item{background:linear-gradient(180deg,#0e3d68,#092946)!important;border-color:#1d619a!important;color:#f5fbff!important}
+.paradise-catalog-v9 .prc-purchase{background:radial-gradient(circle at 50% 24%,rgba(22,77,145,.44),transparent 32%),linear-gradient(180deg,#0b2a56,#07182f)!important;border-color:#1b9be4!important;color:#fff!important;box-shadow:inset 0 0 28px rgba(0,0,0,.16)!important}
+.paradise-catalog-v9 .prc-purchase :is(div,section,p,span,label){color:#e9f5ff!important;background-color:transparent!important}
+.paradise-catalog-v9 .prc-purchase :is(input,select){background:#0c2a4d!important;color:#fff!important;border:1px solid #2a679c!important}
+.paradise-catalog-v9 .prc-purchase .btn-danger{background:#9c3e4d!important;border-color:#d15b69!important;color:#fff!important}
+.paradise-catalog-v9 .prc-buy-button{background:linear-gradient(#2bdb72,#16ac55)!important;border-color:#43e889!important;color:#fff!important}
+
+/* Les pages spéciales gardent les vraies données mais utilisent le même fond bleu nuit. */
+.paradise-catalog-v9.prc-info-page>.nitro-card-content :is(div,section,article,main,aside,ul,li,.card,.row,.col,.container,.container-fluid,.bg-light,.bg-white,.bg-secondary,.list-group,.list-group-item){background-color:#081e39!important;color:#e7f4ff!important;border-color:#174f7d!important}
+
+@media(max-width:1150px){
+  .paradise-catalog-v9.prc-products .prc-product-layout{grid-template-columns:205px minmax(330px,1fr) 245px!important}
+}
