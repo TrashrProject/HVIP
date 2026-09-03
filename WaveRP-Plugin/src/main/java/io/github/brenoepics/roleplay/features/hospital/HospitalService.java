@@ -405,7 +405,12 @@ public class HospitalService {
       }
 
       String configured = Emulator.getConfig()
-          .getValue("features.hospital.bed.interactions", "rp_bed");
+          .getValue("features.hospital.bed.interactions", "");
+      if (configured == null || configured.trim().isEmpty()) {
+        // In the hospital room, the furnidata allow_lay flag is the canonical bed marker.
+        // An interaction allow-list remains available for installations that need to narrow it.
+        return true;
+      }
       Set<String> interactionNames = Arrays.stream(configured.split("[,;]"))
           .map(String::trim)
           .filter(value -> !value.isEmpty())
