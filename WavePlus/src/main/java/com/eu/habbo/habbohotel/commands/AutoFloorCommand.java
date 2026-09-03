@@ -55,6 +55,13 @@ public class AutoFloorCommand extends Command {
             map.append('\r');
         }
 
+        // The room is unloaded/reloaded by applyLayout(), so acknowledge the command before
+        // the reload. A success whisper sent afterwards can be lost by Nitro during forwarding.
+        gameClient.getHabbo().whisper(
+                "AutoFloor : " + keptTiles + " cases utiles détectées. Application en cours, l'appart va se recharger...",
+                RoomChatMessageBubbles.ALERT
+        );
+
         boolean applied = ParadiseFloorLayoutSupport.applyLayout(
                 gameClient,
                 room,
@@ -67,9 +74,7 @@ public class AutoFloorCommand extends Command {
                 room.getWallHeight()
         );
 
-        if (applied) {
-            gameClient.getHabbo().whisper("AutoFloor terminé : seules les cases utiles autour des mobis ont été conservées (" + keptTiles + " cases).", RoomChatMessageBubbles.ALERT);
-        } else {
+        if (!applied) {
             gameClient.getHabbo().whisper("AutoFloor n'a pas pu appliquer le nouveau floor.", RoomChatMessageBubbles.ALERT);
         }
 
