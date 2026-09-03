@@ -10,6 +10,7 @@ import com.eu.habbo.habbohotel.rooms.RoomUserRotation;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.plugin.EventHandler;
 import com.eu.habbo.plugin.EventListener;
+import com.eu.habbo.plugin.events.users.HabboAddedToRoomEvent;
 import com.eu.habbo.plugin.events.users.UserEnterRoomEvent;
 import com.eu.habbo.plugin.events.users.UserIdleEvent;
 import io.github.brenoepics.roleplay.RolePlay;
@@ -32,6 +33,10 @@ public class UserEnterRoomListener implements EventListener {
     RolePlay.getEscortManager().stopEscorting(habbo.getHabboInfo().getId());
     RolePlay.getEscortManager().stopEscortingByOfficer(habbo.getHabboInfo().getId());
     resetPosition(event, data);
+
+    if (event.room.getId() != HOSPITAL_ROOM_ID) {
+      RolePlay.getHospitalService().onLeaveHospital(habbo);
+    }
 
     if (data.isPassive()) {
       data.setEquippedWeapon(0);
@@ -60,7 +65,6 @@ public class UserEnterRoomListener implements EventListener {
   private static boolean handleSpecialRooms(UserEnterRoomEvent event, Habbo habbo, RpAvatar data) {
     if (event.room.getId() == HOSPITAL_ROOM_ID) {
       log.info("User {} entered hospital room", habbo.getHabboInfo().getUsername());
-      RolePlay.getHospitalService().onEnterHospital(event, event.habbo);
       return true;
     } else if (event.room.getId() == JAIL_ROOM_ID) {
       log.info("User {} entered jail room", habbo.getHabboInfo().getUsername());
@@ -78,6 +82,13 @@ public class UserEnterRoomListener implements EventListener {
     }
 
     return true;
+  }
+
+  @EventHandler
+  public static void onHabboAddedToRoom(HabboAddedToRoomEvent event) {
+    if (event.room.getId() == HOSPITAL_ROOM_ID) {
+      RolePlay.getHospitalService().onEnterHospital(event, event.habbo);
+    }
   }
 
   private static void resetPosition(UserEnterRoomEvent event, RpAvatar data) {

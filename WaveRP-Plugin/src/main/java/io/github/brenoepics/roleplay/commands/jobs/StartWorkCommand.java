@@ -31,6 +31,12 @@ public class StartWorkCommand extends Command {
       return true;
     }
 
+    if (data.isDead()) {
+      habbo.whisper("Vous ne pouvez pas travailler tant que vous etes inconscient.",
+          RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
     if (!data.hasEnergy()) {
       gameClient.getHabbo().whisper(MISSING_ENERGY, RoomChatMessageBubbles.ALERT);
       return true;

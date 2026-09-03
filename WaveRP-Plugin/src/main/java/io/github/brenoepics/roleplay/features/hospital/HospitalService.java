@@ -11,7 +11,7 @@ import com.eu.habbo.habbohotel.rooms.RoomUnitStatus;
 import com.eu.habbo.habbohotel.rooms.RoomUserRotation;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
-import com.eu.habbo.plugin.events.users.UserEnterRoomEvent;
+import com.eu.habbo.plugin.events.users.HabboAddedToRoomEvent;
 import gnu.trove.set.hash.THashSet;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.items.interactions.InteractionRPBed;
@@ -22,6 +22,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,8 +34,6 @@ import org.jetbrains.annotations.Nullable;
 
 @Slf4j
 public class HospitalService {
-
-  private static final long BED_PLACEMENT_DELAY_MS = 500L;
 
   private final ConcurrentHashMap<Integer, RpAvatar> healingUsers = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Integer, Long> healingStartedAt = new ConcurrentHashMap<>();
@@ -111,21 +112,19 @@ public class HospitalService {
     return bed.getOccupyingTiles(layout).stream().anyMatch(RoomTile::hasUnits);
   }
 
-  public void onEnterHospital(UserEnterRoomEvent event, Habbo habbo) {
+  public void onEnterHospital(HabboAddedToRoomEvent event, Habbo habbo) {
     RpAvatar avatar = RolePlay.getAvatarManager().getRpAvatar(habbo);
-    Optional<Room> optionalHospital = getHospital();
+    Room hospital = event.room;
 
-    Emulator.getThreading().run(() -> {
-      if (avatar != null) {
-        alertRegen(habbo, avatar);
-      }
-    }, 250);
-
-    if (optionalHospital.isEmpty() || avatar == null || !avatar.isDead()) {
+    if (hospital == null || hospital.getId() != HOSPITAL_ROOM_ID || avatar == null) {
       return;
     }
 
-    Room hospital = optionalHospital.get();
+    alertRegen(habbo, avatar);
+    if (!avatar.isDead()) {
+      return;
+    }
+
     int userId = habbo.getHabboInfo().getId();
     Optional<HabboItem> bed = getFirstAvailableBed(hospital, userId);
 
@@ -134,8 +133,7 @@ public class HospitalService {
       log.warn("Aucun lit d'hopital disponible pour le joueur {}.",
           habbo.getHabboInfo().getUsername());
       // Keep the normal hospital spawn as a safe fallback and preserve the existing recovery.
-      Emulator.getThreading().run(() -> startHealingWhenReady(habbo, avatar),
-          BED_PLACEMENT_DELAY_MS);
+      startHealingWhenReady(habbo, avatar);
       return;
     }
 
@@ -145,20 +143,15 @@ public class HospitalService {
       releaseBedReservation(userId);
       log.warn("Aucun emplacement valide sur le lit d'hopital {} pour le joueur {}.",
           hospitalBed.getId(), habbo.getHabboInfo().getUsername());
-      Emulator.getThreading().run(() -> startHealingWhenReady(habbo, avatar),
-          BED_PLACEMENT_DELAY_MS);
+      startHealingWhenReady(habbo, avatar);
       return;
     }
 
     RoomTile tile = patientTile.get();
-    // Select the bed as the authoritative spawn while the room entry is still being prepared.
-    event.setDoorTile(tile);
-    event.setRotation(RoomUserRotation.fromValue(hospitalBed.getRotation()));
-
-    // Finalize only after Arcturus has created the RoomUnit in the destination room.
-    Emulator.getThreading().run(
-        () -> placeDeadPatientOnBed(habbo, avatar, hospital, hospitalBed, tile),
-        BED_PLACEMENT_DELAY_MS);
+    // HabboAddedToRoomEvent fires after the RoomUnit exists and belongs to the destination room,
+    // but before user positions are sent. Other clients therefore see the patient on the bed
+    // immediately, without a second room-entry or delayed teleport system.
+    placeDeadPatientOnBed(habbo, avatar, hospital, hospitalBed, tile);
   }
 
   private void placeDeadPatientOnBed(Habbo habbo, RpAvatar avatar, Room hospital,
@@ -179,10 +172,11 @@ public class HospitalService {
     }
 
     RoomUnit unit = habbo.getRoomUnit();
-    if (unit == null) {
-      // One retry is enough: never manipulate a RoomUnit before the destination room owns it.
-      Emulator.getThreading().run(
-          () -> placeDeadPatientOnBed(habbo, avatar, hospital, bed, tile), 300);
+    if (unit == null || unit.getRoom() == null || unit.getRoom().getId() != hospital.getId()) {
+      releaseBedReservation(userId);
+      log.warn("RoomUser indisponible a l'entree de l'hopital pour le joueur {}.",
+          habbo.getHabboInfo().getUsername());
+      startHealingWhenReady(habbo, avatar);
       return;
     }
 
@@ -329,6 +323,10 @@ public class HospitalService {
     finishHealing(habbo);
   }
 
+  public void onLeaveHospital(Habbo habbo) {
+    finishHealing(habbo);
+  }
+
   private void releaseBedReservation(int userId) {
     Integer bedId = userBedReservations.remove(userId);
     if (bedId != null) {
@@ -400,9 +398,21 @@ public class HospitalService {
     }
 
     private static boolean isABed(HabboItem habboItem) {
-      return habboItem != null && habboItem.getBaseItem() != null
-          && habboItem.getBaseItem().getInteractionType().getType() == InteractionRPBed.class
-          && habboItem.getBaseItem().allowLay();
+      if (habboItem == null || habboItem.getBaseItem() == null
+          || habboItem.getBaseItem().getInteractionType() == null
+          || !habboItem.getBaseItem().allowLay()) {
+        return false;
+      }
+
+      String configured = Emulator.getConfig()
+          .getValue("features.hospital.bed.interactions", "rp_bed");
+      Set<String> interactionNames = Arrays.stream(configured.split("[,;]"))
+          .map(String::trim)
+          .filter(value -> !value.isEmpty())
+          .collect(Collectors.toCollection(HashSet::new));
+      String interactionName = habboItem.getBaseItem().getInteractionType().getName();
+      return interactionNames.contains(interactionName)
+          || habboItem.getBaseItem().getInteractionType().getType() == InteractionRPBed.class;
     }
 
     private boolean isCacheValid() {
