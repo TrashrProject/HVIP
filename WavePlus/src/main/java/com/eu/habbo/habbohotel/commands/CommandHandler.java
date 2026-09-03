@@ -31,8 +31,10 @@ public class CommandHandler {
     private final static THashMap<String, Command> commands = new THashMap<>(5);
     private static final Comparator<Command> ALPHABETICAL_ORDER = new Comparator<Command>() {
         public int compare(Command c1, Command c2) {
-            int res = String.CASE_INSENSITIVE_ORDER.compare(c1.permission, c2.permission);
-            return (res != 0) ? res : c1.permission.compareTo(c2.permission);
+            String p1 = c1.permission == null ? "" : c1.permission;
+            String p2 = c2.permission == null ? "" : c2.permission;
+            int res = String.CASE_INSENSITIVE_ORDER.compare(p1, p2);
+            return (res != 0) ? res : p1.compareTo(p2);
         }
     };
 
@@ -46,13 +48,9 @@ public class CommandHandler {
         if (command == null)
             return;
 
-        // Several roleplay commands deliberately share one implementation class
-        // with different permissions/actions. Keying only by class silently replaced
-        // all but the last instance (notably the Paradise Bank counter commands).
         String permission = command.permission == null ? "none" : command.permission;
         commands.put(command.getClass().getName() + ":" + permission, command);
     }
-
 
     public static void addCommand(Class<? extends Command> command) {
         try {
@@ -63,13 +61,52 @@ public class CommandHandler {
         }
     }
 
+    private static Boolean handleParadiseBuildCommand(GameClient gameClient, String[] parts) {
+        if (parts == null || parts.length == 0) {
+            return null;
+        }
+
+        Command command = null;
+        if ("setz".equalsIgnoreCase(parts[0])) {
+            command = new SetZCommand();
+        } else if ("buildmode".equalsIgnoreCase(parts[0])) {
+            command = new BuildModeCommand();
+        }
+
+        if (command == null) {
+            return null;
+        }
+
+        try {
+            if (gameClient.getHabbo().getHabboInfo().getCurrentRoom() != null) {
+                gameClient.getHabbo().getHabboInfo().getCurrentRoom()
+                        .sendComposer(new RoomUserTypingComposer(gameClient.getHabbo().getRoomUnit(), false).compose());
+            }
+
+            boolean success = command.handle(gameClient, parts);
+            LOGGER.info("Paradise build command {} executed for {} => {}",
+                    parts[0], gameClient.getHabbo().getHabboInfo().getUsername(), success);
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("Paradise build command failed: {}", parts[0], e);
+            // Still consume the chat message so :setz/:buildmode never leak as room text.
+            return true;
+        }
+    }
 
     public static boolean handleCommand(GameClient gameClient, String commandLine) {
         if (gameClient != null && commandLine != null) {
             if (commandLine.startsWith(":")) {
                 commandLine = commandLine.replaceFirst(":", "");
 
-                String[] parts = commandLine.split(" ");
+                String[] parts = commandLine.trim().split("\\s+");
+
+                // ParadiseRP build commands are routed before plugin command events and
+                // permission-table checks. The commands perform their own rights/rank check.
+                Boolean paradiseBuildResult = handleParadiseBuildCommand(gameClient, parts);
+                if (paradiseBuildResult != null) {
+                    return paradiseBuildResult;
+                }
 
                 if (parts.length >= 1) {
                     for (Command command : commands.values()) {
@@ -319,7 +356,7 @@ public class CommandHandler {
                 if (allowedCommands.contains(command))
                     continue;
 
-                if (permissions.contains(command.permission) && permissions.get(command.permission).setting != PermissionSetting.DISALLOWED) {
+                if (command.permission == null || (permissions.contains(command.permission) && permissions.get(command.permission).setting != PermissionSetting.DISALLOWED)) {
                     allowedCommands.add(command);
                 }
             }
