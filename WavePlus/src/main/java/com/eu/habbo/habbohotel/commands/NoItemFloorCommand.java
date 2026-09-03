@@ -32,13 +32,19 @@ public class NoItemFloorCommand extends Command {
 
         enable(gameClient.getHabbo(), room);
 
+        // Acknowledge immediately. The Nitro client bridge then opens its native floor editor
+        // by executing Nitro's existing local :floor command after this server command is sent.
+        gameClient.getHabbo().whisper(
+                "NoItemFloor activé : ouverture de l'éditeur de sol. Les cases occupées par des mobis restent modifiables jusqu'à la sauvegarde.",
+                RoomChatMessageBubbles.ALERT
+        );
+
         // Feed the floor editor immediately with an unlocked tile list. If the editor asks
         // again after opening, FloorPlanEditorRequestBlockedTilesEvent applies the same mode.
         gameClient.sendResponse(new FloorPlanEditorBlockedTilesComposer(room, true));
         gameClient.sendResponse(new FloorPlanEditorDoorSettingsComposer(room));
         gameClient.sendResponse(new RoomFloorThicknessUpdatedComposer(room));
 
-        gameClient.getHabbo().whisper("NoItemFloor activé : les cases occupées par des mobis sont maintenant éditables. Le mode reste actif jusqu'à la sauvegarde du floor.", RoomChatMessageBubbles.ALERT);
         return true;
     }
 
