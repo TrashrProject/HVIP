@@ -30,13 +30,15 @@ public class UnequipCommand extends Command {
         || params[1].equalsIgnoreCase("armor") || params[1].equalsIgnoreCase("shield"));
     if (armor) {
       data.getInventory().unEquipArmor();
+      data.setShield(0);
+      data.updateLife();
     } else {
       data.getInventory().unEquipWeapon();
       habbo.getHabboInfo().getCurrentRoom().giveEffect(habbo, 0, -1);
       data.setEquippedWeapon(0);
     }
     data.getInventory().updateInventory(gameClient.getHabbo());
-    habbo.whisper(armor ? "Vous avez rang\u00e9 votre armure." : "Vous avez rang\u00e9 votre arme.",
+    habbo.whisper(armor ? "Vous avez rangé votre armure." : "Vous avez rangé votre arme.",
         RoomChatMessageBubbles.ALERT);
     return true;
   }
