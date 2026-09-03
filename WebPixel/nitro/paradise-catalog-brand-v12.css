@@ -1,0 +1,6 @@
+/* ParadiseRP Catalogue V12 — replace the temporary square mark with the real CMS logo */
+.paradise-catalog-v9 .prc-brand-left{gap:12px!important;min-width:0!important}
+.paradise-catalog-v9 .prc-brand-mark{width:132px!important;height:58px!important;min-width:132px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+.paradise-catalog-v9 .prc-brand-mark img{display:block!important;width:132px!important;height:auto!important;max-height:58px!important;object-fit:contain!important;image-rendering:auto!important;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35))!important;pointer-events:none!important}
+.paradise-catalog-v9 .prc-brand-copy{margin-left:0!important}
+@media(max-width:900px){.paradise-catalog-v9 .prc-brand-mark{width:112px!important;min-width:112px!important}.paradise-catalog-v9 .prc-brand-mark img{width:112px!important;max-height:50px!important}}
