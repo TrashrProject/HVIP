@@ -56,7 +56,6 @@ public class CommandHandler {
 
     public static void addCommand(Class<? extends Command> command) {
         try {
-            //command.getConstructor().setAccessible(true);
             addCommand(command.newInstance());
             LOGGER.debug("Added command: {}", command.getName());
         } catch (Exception e) {
@@ -193,6 +192,7 @@ public class CommandHandler {
         addCommand(new BanCommand());
         addCommand(new BlockAlertCommand());
         addCommand(new BotsCommand());
+        addCommand(new BuildModeCommand());
         addCommand(new CalendarCommand());
         addCommand(new ChangeNameCommand());
         addCommand(new ChatTypeCommand());
@@ -263,6 +263,7 @@ public class CommandHandler {
         addCommand(new SetMaxCommand());
         addCommand(new SetPollCommand());
         addCommand(new SetSpeedCommand());
+        addCommand(new SetZCommand());
         addCommand(new ShoutAllCommand());
         addCommand(new ShoutCommand());
         addCommand(new ShutdownCommand());
