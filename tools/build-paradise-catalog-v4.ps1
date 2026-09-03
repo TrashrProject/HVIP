@@ -35,20 +35,21 @@ function Escape-Sql([AllowNull()][string]$Value) {
 function Get-Category([string]$Name) {
     $n = $Name.ToLowerInvariant()
 
-    # Les categories RP passent avant l'annee de collection. Cela evite qu'un
-    # meuble recent de police, d'hopital ou de maison finisse dans "Recent".
-    if ($n -match 'police|prison|security|court|fire|rescue|army|military|cop_|jail|guard|swat') { return 9967108 }
-    if ($n -match 'hospital|clinic|medic|doctor|health|ambulance|pharmacy|nurse|surgery|dentist') { return 9967109 }
-    if ($n -match '(^|_)car(_|$)|vehicle|garage|taxi|(^|_)bus(_|$)|bike|bicycle|moto|train|metro|airport|plane|airplane|boat|ship|port|tram|rail') { return 9967105 }
-    if ($n -match 'shop|store|market|restaurant|cafe|coffee|food|bar_|mall|vending|bakery|diner|kiosk|supermarket|boutique') { return 9967107 }
-    if ($n -match 'computer|laptop|phone|screen|monitor|server|tech|robot|camera|television|speaker|console|arcade|radio|tablet|keyboard') { return 9967110 }
-    if ($n -match 'sport|game|music|disco|cinema|stage|gym|football|trophy|art_|pet|animal|dance|club|theatre|theater|basket|tennis|skate') { return 9967111 }
+    # Le pack source contient tres peu de meubles explicitement nommes police,
+    # hopital, transport, commerce, etc. Les conserver comme pages separees
+    # produisait des sous-pages de 1 a 50 offres. On les regroupe donc dans une
+    # seule famille RP urbaine, plus utile et jamais artificiellement vide.
+    if ($n -match 'police|prison|security|court|fire|rescue|army|military|cop_|jail|guard|swat|hospital|clinic|medic|medical|doctor|health|ambulance|pharmacy|nurse|surgery|dentist|firstaid|stretcher|wheelchair|xray|defib') { return 9967104 }
+    if ($n -match '(^|_)car(_|$)|vehicle|garage|taxi|(^|_)bus(_|$)|busstop|bike|bicycle|moto|scooter|train|metro|airport|plane|airplane|boat|ship|port|tram|rail|parking|petrol|fuel|traffic') { return 9967104 }
+    if ($n -match 'shop|store|market|restaurant|cafe|coffee|food|bar_|mall|vending|bakery|diner|kiosk|supermarket|boutique|cashier|checkout|register|counter|menu|pizza|burger|salon') { return 9967104 }
+    if ($n -match 'computer|laptop|phone|screen|monitor|server|tech|robot|camera|television|speaker|console|arcade|radio|tablet|keyboard|machine|device') { return 9967104 }
+    if ($n -match 'sport|game|music|disco|cinema|stage|gym|football|trophy|art_|pet|animal|dance|club|theatre|theater|basket|tennis|skate|ball|piano|guitar|drum|billiard|pooltable|foosball|dj_') { return 9967104 }
+    if ($n -match 'office|bank|school|city|urban|hotel|apartment|public|government|station|reception|lobby|library|museum|streetlight|elevator|lift|locker|mail|queue|barrier|sign_') { return 9967104 }
+
     if ($n -match 'xmas|christmas|hween|halloween|easter|valentine|newyear|winter|summer|party|birthday|spring|autumn|fall_|snow|festive') { return 9967112 }
     if ($n -match 'tree|plant|flower|bush|grass|rock|garden|forest|farm|beach|water|pool|nature|outdoor|park|pond|river|mountain|sand|soil') { return 9967106 }
-    if ($n -match 'office|bank|school|city|urban|hotel|apartment|public|government|station|reception|lobby|library|museum|streetlight|traffic') { return 9967104 }
     if ($n -match 'sofa|chair|seat|stool|bench|table|cabinet|shelf|bed|bath|toilet|shower|kitchen|lamp|rug|carpet|home|wardrobe|dresser|desk|couch|fridge|oven|sink|mirror') { return 9967103 }
     if ($n -match 'wall|floor|tile|roof|door|window|gate|fence|stair|column|pillar|block|build|construction|road|street|bridge|archi|brick|concrete|woodblock') { return 9967102 }
-    if ($n -match '(^|_)(20(2[0-6])|2[0-6])(_|$)|_24|_25|_26') { return 9967101 }
     return 9967113
 }
 
@@ -99,23 +100,28 @@ foreach ($item in $sourceEntries) {
     $iconPath = Join-Path $sourceIconDir ($assetName + '_icon.png')
     if (-not (Test-Path -LiteralPath $assetPath) -or -not (Test-Path -LiteralPath $iconPath)) { continue }
 
-    $lower = $className.ToLowerInvariant()
+    $entryName = if ($null -ne $item.Entry.name) { [string]$item.Entry.name } else { '' }
+    $entryDescription = if ($null -ne $item.Entry.description) { [string]$item.Entry.description } else { '' }
+    $searchText = "$className $($db[2]) $entryName $entryDescription"
+    $lower = $searchText.ToLowerInvariant()
     $score = 0
     if ($lower -match '(^|_)(20(2[0-6])|2[0-6])(_|$)|_24|_25|_26') { $score += 10000 }
-    if ($lower -match 'police|hospital|clinic|medic|fire|rescue|office|bank|school|shop|market|restaurant|cafe|hotel|garage|vehicle|farm') { $score += 1400 }
+    if ($lower -match 'police|hospital|clinic|medic|fire|rescue|office|bank|school|shop|market|restaurant|cafe|hotel|garage|vehicle|farm|computer|sport|music') { $score += 1400 }
     if ($lower -match 'sofa|chair|table|cabinet|shelf|bed|bath|kitchen|lamp|rug|plant|tree|water|pool') { $score += 900 }
     if ($lower -match 'wall|floor|tile|roof|door|window|gate|fence|stair|column|pillar|block|build|construction|road|bridge') { $score += 450 }
     $size = (Get-Item -LiteralPath $assetPath).Length
-    $candidates.Add([pscustomobject]@{ Kind=$item.Kind; Entry=$item.Entry; Db=$db; ClassName=$className; AssetName=$assetName; Score=$score; Size=$size; Category=(Get-Category $className) })
+    $candidates.Add([pscustomobject]@{ Kind=$item.Kind; Entry=$item.Entry; Db=$db; ClassName=$className; AssetName=$assetName; Score=$score; Size=$size; Category=(Get-Category $searchText) })
 }
 
-# 2000 offres reparties pour un catalogue RP varie. Construction n'est plus
-# la categorie dominante; maison, ville, transports, nature et commerces ont
-# volontairement davantage de place.
+# Six familles robustes, adaptees a ce que le pack contient reellement.
+# Le but est d'eviter les pages artificielles de 0, 1 ou 2 meubles.
 $quotas = [ordered]@{
-    '9967101'=180; '9967102'=220; '9967103'=300; '9967104'=170; '9967105'=170
-    '9967106'=180; '9967107'=170; '9967108'=120; '9967109'=110; '9967110'=110
-    '9967111'=130; '9967112'=90; '9967113'=50
+    '9967102'=320
+    '9967103'=430
+    '9967104'=280
+    '9967106'=300
+    '9967112'=300
+    '9967113'=370
 }
 
 $selectedList = [Collections.Generic.List[object]]::new()
@@ -135,9 +141,8 @@ foreach ($category in $quotas.Keys) {
     $remainingByCategory[$category] = @($orderedCandidates | Select-Object -Skip $taken)
 }
 
-# Si une categorie n'a pas assez de meubles, le reliquat est redistribue en
-# round-robin entre les autres categories au lieu de retomber sur une seule
-# grosse famille (ancien comportement qui remplissait surtout Construction).
+# Les quotas sont des cibles, pas des limites strictes. Si une famille manque
+# de candidats, le reliquat est redistribue de facon reguliere entre les autres.
 $remainingIndex = @{}
 foreach ($category in $quotas.Keys) { $remainingIndex[$category] = 0 }
 while ($selectedList.Count -lt $Limit) {
@@ -208,13 +213,12 @@ $json = $target | ConvertTo-Json -Depth 20 -Compress
 
 $pages = @(
     @(9967100,9967000,'Extension 2000 meubles',1),
-    @(9967101,9967100,'Collections recentes',1), @(9967102,9967100,'Construction et routes',2),
-    @(9967103,9967100,'Maison et decoration',3), @(9967104,9967100,'Ville et services',4),
-    @(9967105,9967100,'Transports',5), @(9967106,9967100,'Nature et exterieurs',6),
-    @(9967107,9967100,'Commerces et restauration',7), @(9967108,9967100,'Securite et justice',8),
-    @(9967109,9967100,'Sante et secours',9), @(9967110,9967100,'Technologie et medias',10),
-    @(9967111,9967100,'Loisirs sport et animaux',11), @(9967112,9967100,'Saisons et evenements',12),
-    @(9967113,9967100,'Collections diverses',13)
+    @(9967102,9967100,'Construction et routes',1),
+    @(9967103,9967100,'Maison et decoration',2),
+    @(9967104,9967100,'Vie urbaine, services et loisirs',3),
+    @(9967106,9967100,'Nature et exterieurs',4),
+    @(9967112,9967100,'Saisons et evenements',5),
+    @(9967113,9967100,'Collections diverses',6)
 )
 
 $sb = [Text.StringBuilder]::new()
@@ -226,6 +230,7 @@ $sb = [Text.StringBuilder]::new()
 $pageRows = foreach ($p in $pages) { "($($p[0]),$($p[1]),'$($p[2])',1,'1','1',1,0,$($p[3]),'','default_3x3','','')" }
 [void]$sb.AppendLine(($pageRows -join ",`n") + "`nON DUPLICATE KEY UPDATE parent_id=VALUES(parent_id),caption=VALUES(caption),visible='1',enabled='1',order_num=VALUES(order_num);")
 [void]$sb.AppendLine('DELETE FROM catalog_items WHERE page_id BETWEEN 9967100 AND 9967199;')
+[void]$sb.AppendLine('DELETE FROM catalog_pages WHERE id BETWEEN 9967101 AND 9967199 AND id NOT IN (9967102,9967103,9967104,9967106,9967112,9967113);')
 [void]$sb.AppendLine('')
 [void]$sb.AppendLine('INSERT INTO furniture (id,item_name,public_name,type,width,length,stack_height,can_stack,can_sit,is_walkable,sprite_id,allow_recycle,allow_trade,allow_marketplace_sell,allow_gift,allow_inventory_stack,interaction_type,behaviour_data,interaction_modes_count,vending_ids,height_adjustable,effect_id,wired_id,is_rare,clothing_id,extra_rot,allow_lay) VALUES')
 $furnitureRows = foreach ($item in $newEntries) {
@@ -258,6 +263,6 @@ Write-Host "Repartition finale :" -ForegroundColor Cyan
 foreach ($page in $pages | Where-Object { $_[0] -ne 9967100 }) {
     $count = @($newEntries | Where-Object Category -eq ([int]$page[0])).Count
     $available = @($candidates | Where-Object Category -eq ([int]$page[0])).Count
-    $color = if ($count -eq 0) { 'Red' } elseif ($count -lt 25) { 'Yellow' } else { 'Green' }
+    $color = if ($count -eq 0) { 'Red' } elseif ($count -lt 75) { 'Yellow' } else { 'Green' }
     Write-Host (" - {0}: {1} offres (sur {2} candidates)" -f $page[2], $count, $available) -ForegroundColor $color
 }
