@@ -35,26 +35,44 @@ $images = [
     16 => 'comida6.png', 18 => 'comida3.png', 19 => 'lagosta.png', 20 => 'comida6.png',
     21 => 'comida4.png', 1001 => 'bandage.png', 1002 => 'energy-drink.png',
     1003 => 'armor-kit.png', 1004 => 'deluxe-medkit.png',
+    6109 => 'usp-s.png', 6110 => 'ak47.png', 6111 => 'colete.png', 6112 => 'sniper.png',
+    6113 => 'mp5.png', 6114 => 'reparo.png', 6115 => 'vara.png', 6116 => 'g36.png',
+    6117 => 'akm.png', 6118 => 'semente.png', 6119 => 'atum.png', 6120 => 'salmao.png',
+    6121 => 'carrot.png', 6122 => 'munitions.png'
+];
 
-    // HabboRPbr items migrated to ParadiseRP.
-    6109 => 'usp-s.png',
-    6110 => 'ak47.png',
-    6111 => 'colete.png',
-    6112 => 'sniper.png',
-    6113 => 'mp5.png',
-    6114 => 'reparo.png',
-    6115 => 'vara.png',
-    6116 => 'g36.png',
-    6117 => 'akm.png',
-    6118 => 'semente.png',
-    6119 => 'atum.png',
-    6120 => 'salmao.png',
-    6121 => 'carrot.png',
-    6122 => 'munitions.png'
+// Only weapons that currently have ParadiseRP skin families are mapped here.
+$weaponKeys = [
+    6110 => 'ak47',
+    6116 => 'g36',
+    6117 => 'akm'
 ];
 
 $db = $DB->Con();
 $userId = (int)$UData['id'];
+
+$equippedSkins = [];
+$skinStmt = mysqli_prepare($db,
+    'SELECT s.weapon_key,s.id,s.name,s.effect_id,s.image,s.avatar_image '
+    . 'FROM paradise_user_weapon_skins us '
+    . 'INNER JOIN paradise_weapon_skins s ON s.id=us.skin_id '
+    . 'WHERE us.user_id=? AND us.equipped=1');
+if ($skinStmt) {
+    mysqli_stmt_bind_param($skinStmt, 'i', $userId);
+    mysqli_stmt_execute($skinStmt);
+    $skinResult = mysqli_stmt_get_result($skinStmt);
+    while ($skin = mysqli_fetch_assoc($skinResult)) {
+        $equippedSkins[(string)$skin['weapon_key']] = [
+            'id' => (int)$skin['id'],
+            'name' => (string)$skin['name'],
+            'effect_id' => (int)$skin['effect_id'],
+            'image' => (string)$skin['image'],
+            'avatar_image' => (string)$skin['avatar_image']
+        ];
+    }
+    mysqli_stmt_close($skinStmt);
+}
+
 $stmt = mysqli_prepare($db,
     'SELECT ui.slot_index, ui.item_id, ui.quantity, ui.durability, ui.is_deposit_box, '
     . 'i.name, i.interaction_type, i.extra_data, i.max '
@@ -71,6 +89,10 @@ while ($row = mysqli_fetch_assoc($result)) {
     $itemId = (int)$row['item_id'];
     $slotIndex = (int)$row['slot_index'];
     if ($slotIndex < 0 || $slotIndex > 11) continue;
+
+    $weaponKey = $weaponKeys[$itemId] ?? null;
+    $skin = $weaponKey !== null ? ($equippedSkins[$weaponKey] ?? null) : null;
+
     $slots[] = [
         'slot_index' => $slotIndex,
         'item_id' => $itemId,
@@ -81,7 +103,9 @@ while ($row = mysqli_fetch_assoc($result)) {
         'durability' => (int)$row['durability'],
         'is_broken' => (int)$row['durability'] <= 0,
         'equipped' => $slotIndex < 2,
-        'image_url' => 'inventory-items/' . ($images[$itemId] ?? 'unknown.svg')
+        'image_url' => 'inventory-items/' . ($images[$itemId] ?? 'unknown.svg'),
+        'weapon_key' => $weaponKey,
+        'skin' => $skin
     ];
 }
 mysqli_stmt_close($stmt);
