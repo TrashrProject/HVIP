@@ -1,0 +1,94 @@
+/* ParadiseRP Catalogue V18 — stable final skin. Load LAST. */
+.nitro-catalog.paradise-catalog-v18,
+.nitro-catalog.paradise-catalog-v18 > .nitro-card-content{
+  background:#0b2a56 !important;
+  color:#fff !important;
+}
+
+/* Remove the remaining light strip/gutters between the tabs and catalogue body. */
+.nitro-catalog.paradise-catalog-v18 > .nitro-card-content{
+  padding:0 !important;
+  margin:0 !important;
+  border:0 !important;
+  box-shadow:none !important;
+  overflow:hidden !important;
+}
+.nitro-catalog.paradise-catalog-v18 > .nitro-card-content > *,
+.nitro-catalog.paradise-catalog-v18 .prc-topnav + *,
+.nitro-catalog.paradise-catalog-v18 .prc-topnav + * > *{
+  background-color:#0b2a56 !important;
+  border-color:#174f84 !important;
+}
+
+/* The whole visible body is one continuous blue/violet surface. */
+.nitro-catalog.paradise-catalog-v18 .nitro-card-content :is(
+  .container,.container-fluid,.row,
+  [class*="catalog-content"],[class*="catalog-page"],[class*="purchase"],[class*="preview"],
+  [class*="product"],[class*="details"]
+){
+  background:linear-gradient(145deg,#0b315f 0%,#13295e 58%,#352369 100%) !important;
+  background-color:#0b2a56 !important;
+  border-color:#174f84 !important;
+}
+
+/* Native inline white/grey backgrounds may be injected when a furni/page changes. */
+.nitro-catalog.paradise-catalog-v18 .nitro-card-content [style*="background"]:not(img):not(canvas):not(svg),
+.nitro-catalog.paradise-catalog-v18 .nitro-card-content [style*="background-color"]:not(img):not(canvas):not(svg){
+  background:#0b2a56 !important;
+  background-color:#0b2a56 !important;
+}
+
+/* Force every real DOM text element to white, including legacy inline black text. */
+.nitro-catalog.paradise-catalog-v18 .nitro-card-content,
+.nitro-catalog.paradise-catalog-v18 .nitro-card-content :is(
+  div,span,p,label,strong,b,em,i,small,a,li,h1,h2,h3,h4,h5,h6,
+  [class*="name"],[class*="description"],[class*="quantity"],[class*="amount"],[class*="price"],[class*="text"]
+){
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+.nitro-catalog.paradise-catalog-v18 .nitro-card-content [style*="color"]{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+/* Left catalogue/search same palette as header. */
+.nitro-catalog.paradise-catalog-v18 .prc-search,
+.nitro-catalog.paradise-catalog-v18 .prc-category-panel,
+.nitro-catalog.paradise-catalog-v18 [class*="navigation-grid"]{
+  background:linear-gradient(145deg,#0b376b,#172b64 58%,#39236d) !important;
+  border-color:#168fd7 !important;
+  color:#fff !important;
+}
+.nitro-catalog.paradise-catalog-v18 input[type="text"],
+.nitro-catalog.paradise-catalog-v18 input[type="search"]{
+  background:#0a2a55 !important;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  border-color:#168fd7 !important;
+}
+.nitro-catalog.paradise-catalog-v18 input::placeholder{color:#a8cbed !important;-webkit-text-fill-color:#a8cbed !important;opacity:1 !important}
+
+/* Keep actual furni tiles distinct. */
+.nitro-catalog.paradise-catalog-v18 .prc-item,
+.nitro-catalog.paradise-catalog-v18 [class*="catalog-grid-item"]{
+  background:linear-gradient(180deg,#123f72,#0b2e58) !important;
+  border:1px solid #317fba !important;
+  color:#fff !important;
+}
+.nitro-catalog.paradise-catalog-v18 .prc-item:hover,
+.nitro-catalog.paradise-catalog-v18 [class*="catalog-grid-item"]:hover{
+  background:linear-gradient(180deg,#1a568f,#103d70) !important;
+  border-color:#50d7ff !important;
+}
+
+/* No fake repaint over rendered furni/room assets. */
+.nitro-catalog.paradise-catalog-v18 :is(img,canvas,svg,picture){background:transparent !important}
+
+/* Close button remains visible and clickable. */
+.nitro-catalog.paradise-catalog-v18 .prc-close{
+  pointer-events:auto !important;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  z-index:999 !important;
+}
