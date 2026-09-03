@@ -12,6 +12,7 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.rooms.users.RoomUserShoutComposer;
 import io.github.brenoepics.roleplay.RolePlay;
+import io.github.brenoepics.roleplay.features.items.WeaponAmmoService;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.features.user.inventory.InventorySlot;
 import io.github.brenoepics.roleplay.utilities.types.RPItem;
@@ -115,6 +116,17 @@ public class ShootCommand extends Command {
       return true;
     }
 
+    int remainingAmmo = WeaponAmmoService.consumeRound(
+        attacker.getHabboInfo().getId(), weapon.getId(), weaponProfile.getMagazineSize());
+    if (remainingAmmo == WeaponAmmoService.EMPTY) {
+      attacker.whisper("Chargeur vide. Utilisez :recharger.", RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+    if (remainingAmmo == WeaponAmmoService.ERROR) {
+      attacker.whisper("Le système de munitions est indisponible.", RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
     int shieldBefore = targetData.getShield();
     int damage = weaponProfile.rollDamage();
     targetData.takeDamage(damage, attacker);
@@ -129,6 +141,11 @@ public class ShootCommand extends Command {
       attacker.getHabboInfo().getCurrentRoom().sendComposer(getMessage(
           "* Tire avec " + weapon.getDisplayName() + " sur " + targetName + " et inflige "
               + damage + " dégât(s) *", attacker));
+    }
+
+    if (weaponProfile.getMagazineSize() > 0) {
+      attacker.whisper("Munitions : " + remainingAmmo + "/" + weaponProfile.getMagazineSize() + ".",
+          RoomChatMessageBubbles.ALERT);
     }
 
     if (weaponProfile.getDurabilityLoss() > 0) {
