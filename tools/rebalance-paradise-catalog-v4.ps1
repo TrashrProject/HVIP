@@ -87,22 +87,31 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
 }
 $content = $lines -join "`r`n"
 
+# Compter uniquement les lignes de l'INSERT catalog_items. Les anciennes
+# versions comptaient aussi les lignes catalog_pages, ajoutant exactement le
+# nombre de pages au total (ex. 2014 au lieu de 2000).
+$catalogItemsMatch = [regex]::Match(
+    $content,
+    "INSERT INTO catalog_items \([^;]+?\) VALUES\r?\n(?<rows>.*?);\r?\nCOMMIT;",
+    [System.Text.RegularExpressions.RegexOptions]::Singleline
+)
+if (-not $catalogItemsMatch.Success) {
+    throw 'Bloc INSERT INTO catalog_items introuvable dans la migration.'
+}
+$catalogRowsText = $catalogItemsMatch.Groups['rows'].Value
+
 [IO.File]::WriteAllText($MigrationPath, $content, [Text.UTF8Encoding]::new($false))
 
 Write-Host "Catalogue custom reequilibre : $MigrationPath" -ForegroundColor Green
 Write-Host "Offres custom deplacees : $changed" -ForegroundColor Green
 Write-Host "Repartition SQL finale :" -ForegroundColor Cyan
-foreach ($page in $pages | Where-Object { $_[0] -ne 9967100 }) {
-    $id = [int]$page[0]
-    $count = ([regex]::Matches($content, "(?m)^\($id,")).Count
-    $color = if ($count -eq 0) { 'Yellow' } else { 'Green' }
-    Write-Host (" - {0}: {1} offres" -f $page[2], $count) -ForegroundColor $color
-}
-
 $total = 0
 foreach ($page in $pages | Where-Object { $_[0] -ne 9967100 }) {
     $id = [int]$page[0]
-    $total += ([regex]::Matches($content, "(?m)^\($id,")).Count
+    $count = ([regex]::Matches($catalogRowsText, "(?m)^\($id,")).Count
+    $total += $count
+    $color = if ($count -eq 0) { 'Yellow' } else { 'Green' }
+    Write-Host (" - {0}: {1} offres" -f $page[2], $count) -ForegroundColor $color
 }
 Write-Host "Total offres catalogue : $total" -ForegroundColor Cyan
 if ($total -ne 2000) {
