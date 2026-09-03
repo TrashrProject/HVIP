@@ -1,6 +1,7 @@
 package com.eu.habbo.messages.incoming.floorplaneditor;
 
 import com.eu.habbo.Emulator;
+import com.eu.habbo.habbohotel.commands.NoItemFloorCommand;
 import com.eu.habbo.habbohotel.permissions.Permission;
 import com.eu.habbo.habbohotel.rooms.*;
 import com.eu.habbo.habbohotel.users.Habbo;
@@ -20,15 +21,15 @@ public class FloorPlanEditorSaveEvent extends MessageHandler {
 
     @Override
     public void handle() throws Exception {
-        if (!this.client.getHabbo().hasPermission(Permission.ACC_FLOORPLAN_EDITOR)) {
+        Room room = this.client.getHabbo().getHabboInfo().getCurrentRoom();
+        if (room == null)
+            return;
+
+        boolean noItemFloor = NoItemFloorCommand.isEnabled(this.client.getHabbo(), room);
+        if (!this.client.getHabbo().hasPermission(Permission.ACC_FLOORPLAN_EDITOR) && !noItemFloor) {
             this.client.sendResponse(new GenericAlertComposer(Emulator.getTexts().getValue("floorplan.permission")));
             return;
         }
-
-        Room room = this.client.getHabbo().getHabboInfo().getCurrentRoom();
-
-        if (room == null)
-            return;
 
         if (room.getOwnerId() == this.client.getHabbo().getHabboInfo().getId() || this.client.getHabbo().hasPermission(Permission.ACC_ANYROOMOWNER)) {
             StringJoiner errors = new StringJoiner("<br />");
@@ -97,43 +98,45 @@ public class FloorPlanEditorSaveEvent extends MessageHandler {
                 errors.add("${notification.floorplan_editor.error.message.invalid_walls_fixed_height}");
             }
 
-            THashSet<RoomTile> locked_tileList = room.getLockedTiles();
-            THashSet<RoomTile> new_tileList = new THashSet<>();
-            blockingRoomItemScan:
-            for (int y = 0; y < mapRows.length; y++) {
-                for (int x = 0; x < firstRowSize; x++) {
+            // Standard floor editor protection remains unchanged. :noitemfloor only bypasses
+            // the furniture/locked-tile checks for the owner who explicitly enabled the mode.
+            if (!noItemFloor) {
+                THashSet<RoomTile> lockedTileList = room.getLockedTiles();
+                THashSet<RoomTile> newTileList = new THashSet<>();
+                blockingRoomItemScan:
+                for (int y = 0; y < mapRows.length; y++) {
+                    for (int x = 0; x < firstRowSize; x++) {
 
-                    RoomTile tile = room.getLayout().getTile((short) x, (short) y);
-                    new_tileList.add(tile);
-                    String square = String.valueOf(mapRows[y].charAt(x));
-                    short height;
+                        RoomTile tile = room.getLayout().getTile((short) x, (short) y);
+                        newTileList.add(tile);
+                        String square = String.valueOf(mapRows[y].charAt(x));
+                        short height;
 
-                    if (square.equalsIgnoreCase("x") && room.getTopItemAt(x, y) != null) {
-                        errors.add("${notification.floorplan_editor.error.message.change_blocked_by_room_item}");
-                        break blockingRoomItemScan;
-                    } else {
-                        if (square.isEmpty()) {
-                            height = 0;
-                        } else if (Emulator.isNumeric(square)) {
-                            height = Short.parseShort(square);
+                        if (square.equalsIgnoreCase("x") && room.getTopItemAt(x, y) != null) {
+                            errors.add("${notification.floorplan_editor.error.message.change_blocked_by_room_item}");
+                            break blockingRoomItemScan;
                         } else {
-                            height = (short) (10 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(square.toUpperCase()));
+                            if (square.isEmpty()) {
+                                height = 0;
+                            } else if (Emulator.isNumeric(square)) {
+                                height = Short.parseShort(square);
+                            } else {
+                                height = (short) (10 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(square.toUpperCase()));
+                            }
+                        }
+
+                        if (tile != null && tile.state != RoomTileState.INVALID && height != tile.z && room.getTopItemAt(x, y) != null) {
+                            errors.add("${notification.floorplan_editor.error.message.change_blocked_by_room_item}");
+                            break blockingRoomItemScan;
                         }
                     }
+                }
 
-                    if (tile != null && tile.state != RoomTileState.INVALID && height != tile.z && room.getTopItemAt(x, y) != null) {
-                        errors.add("${notification.floorplan_editor.error.message.change_blocked_by_room_item}");
-                        break blockingRoomItemScan;
-                    }
+                lockedTileList.removeAll(newTileList);
+                if (!lockedTileList.isEmpty()) {
+                    errors.add("${notification.floorplan_editor.error.message.change_blocked_by_room_item}");
                 }
             }
-
-            locked_tileList.removeAll(new_tileList);
-            if (!locked_tileList.isEmpty()) {
-                errors.add("${notification.floorplan_editor.error.message.change_blocked_by_room_item}");
-            }
-
-
 
             if (errors.length() > 0) {
                 this.client.sendResponse(new BubbleAlertComposer(BubbleAlertKeys.FLOORPLAN_EDITOR_ERROR.key, errors.toString()));
@@ -169,6 +172,8 @@ public class FloorPlanEditorSaveEvent extends MessageHandler {
                 room.setFloorSize(floorSize);
                 room.setWallHeight(wallHeight);
                 room.save();
+                NoItemFloorCommand.disable(this.client.getHabbo());
+
                 Collection<Habbo> habbos = new ArrayList<>(room.getUserCount());
                 habbos.addAll(room.getHabbos());
                 Emulator.getGameEnvironment().getRoomManager().unloadRoom(room);
