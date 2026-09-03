@@ -88,11 +88,29 @@
     return direct && direct !== g ? direct : null;
   }
 
+  function commonAncestor(a, b, c, root) {
+    let node = a?.parentElement;
+    while (node && node !== root) {
+      if (node.contains(b) && node.contains(c)) return node;
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  function directBranch(ancestor, node) {
+    if (!ancestor || !node) return null;
+    let current = node;
+    while (current.parentElement && current.parentElement !== ancestor) current = current.parentElement;
+    return current.parentElement === ancestor ? current : null;
+  }
+
   function decorate(root) {
     if (!(root instanceof HTMLElement)) return;
     if (root.dataset.paradiseDecorated === '1') return;
     root.dataset.paradiseDecorated = '1';
-    root.classList.add('paradise-catalog-v18');
+
+    /* Keep the structural classes used by the stable base CSS, but no recurring rescans. */
+    root.classList.add('paradise-catalog-v7', 'paradise-catalog-v9', 'paradise-catalog-v18');
     ensureBanner(root);
     add(findNativeHeader(root), 'prc-native-header');
     add(nav(root), 'prc-topnav');
@@ -104,27 +122,42 @@
     add(g, 'prc-grid');
     add(p, 'prc-purchase');
     add(c, 'prc-category-panel');
+
     root.querySelectorAll('.nitro-catalog-grid-item,[class*="catalog-grid-item"]').forEach(item => add(item, 'prc-item'));
     root.querySelectorAll('button').forEach(button => {
       if (/acheter|buy|purchase|offrir/i.test(text(button))) add(button, 'prc-buy-button');
     });
+
+    const isProduct = !!(g && p && c);
+    root.classList.toggle('prc-products', isProduct);
+    root.classList.toggle('prc-info-page', !isProduct);
+
+    if (isProduct) {
+      const ancestor = commonAncestor(c, g, p, root);
+      const bc = directBranch(ancestor, c);
+      const bg = directBranch(ancestor, g);
+      const bp = directBranch(ancestor, p);
+      if (ancestor && bc && bg && bp && new Set([bc, bg, bp]).size === 3) {
+        add(ancestor, 'prc-product-layout');
+        add(bc, 'prc-col-categories');
+        add(bg, 'prc-col-products');
+        add(bp, 'prc-col-preview');
+      }
+    }
   }
 
   function decorateWhenReady(root) {
     decorate(root);
+    /* One delayed pass only, for Nitro elements mounted just after the window. */
     window.setTimeout(() => {
       if (!root.isConnected) return;
       root.dataset.paradiseDecorated = '';
       decorate(root);
-    }, 120);
-  }
-
-  function scanExisting() {
-    document.querySelectorAll(ROOT).forEach(decorateWhenReady);
+    }, 180);
   }
 
   function boot() {
-    scanExisting();
+    document.querySelectorAll(ROOT).forEach(decorateWhenReady);
     new MutationObserver(mutations => {
       for (const mutation of mutations) {
         for (const node of mutation.addedNodes) {
