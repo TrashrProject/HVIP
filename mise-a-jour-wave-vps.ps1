@@ -122,6 +122,7 @@ try {
 
         Invoke-CheckedCommand $Git switch $Branch
         Invoke-CheckedCommand $Git pull
+        Invoke-CheckedCommand $Git lfs pull
 
         $CurrentCommit = (& $Git rev-parse --short HEAD).Trim()
         if ($LASTEXITCODE -ne 0) {
