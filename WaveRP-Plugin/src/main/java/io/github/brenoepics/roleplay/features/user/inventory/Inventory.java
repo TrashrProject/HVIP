@@ -160,6 +160,14 @@ public class Inventory {
       return;
     }
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
+    // Keep the SQL representation in sync with the in-memory inventory. The web inventory reads
+    // this table, so waiting for disconnect or the periodic avatar save would display stale slots.
+    try (Connection connection = Emulator.getDatabase().getDataSource().getConnection()) {
+      updateDatabase(connection, habbo.getHabboInfo().getId());
+    } catch (SQLException e) {
+      log.error("Failed to persist inventory for user {}", habbo.getHabboInfo().getId(), e);
+    }
+
     OpenInventoryComposer openInventoryComposer = new OpenInventoryComposer(data.getInventory(),
         Emulator.getConfig().getValue("features.inventory.image.url"), false);
 

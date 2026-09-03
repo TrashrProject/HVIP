@@ -19,7 +19,7 @@ public class OfferCommand extends Command {
     public boolean handle(GameClient gameClient, String[] params) {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
 
-        if (params.length != 3) {
+        if (params.length < 3) {
             gameClient.getHabbo().whisper(":proposer <pseudo> <objet>", RoomChatMessageBubbles.ALERT);
             return true;
         }
@@ -53,7 +53,8 @@ public class OfferCommand extends Command {
             return true;
         }
 
-        if (RolePlay.getOfferManager().handleOfferItem(params[2], data, gameClient.getHabbo(), habbo))
+        String itemName = String.join(" ", java.util.Arrays.copyOfRange(params, 2, params.length));
+        if (RolePlay.getOfferManager().handleOfferItem(itemName, data, gameClient.getHabbo(), habbo))
             RolePlay.getCommandsCounter().getCoolDown("offer").addTimeOut(gameClient.getHabbo().getHabboInfo().getId(), OFFER_TIMEOUT);
 
         return true;

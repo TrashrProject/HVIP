@@ -22,18 +22,21 @@ public class EquipCommand extends Command {
             gameClient.getHabbo().whisper("Vous ne pouvez pas utiliser les commandes RP en mode passif.", RoomChatMessageBubbles.ALERT);
             return true;
         }
-        if (params.length != 2) {
-            gameClient.getHabbo().whisper(":equiper <arme>", RoomChatMessageBubbles.ALERT);
+        if (params.length < 2) {
+            gameClient.getHabbo().whisper(":equiper <arme ou armure>", RoomChatMessageBubbles.ALERT);
             return true;
         }
 
-        boolean isPolice = data.getJobRankEntity().hasPermission(POLICE_TAZE) && data.isDuty() && params[1].equalsIgnoreCase("tazor");
-        RPItem item = isPolice ? RolePlay.getItemManager().getItemByName(params[1]) : data.getInventory().getSlotItem(params[1]);
+        String itemName = String.join(" ", java.util.Arrays.copyOfRange(params, 1, params.length));
+        boolean isPolice = data.getJobRankEntity().hasPermission(POLICE_TAZE) && data.isDuty() && itemName.equalsIgnoreCase("tazor");
+        RPItem item = isPolice ? RolePlay.getItemManager().getItemByName(itemName) : data.getInventory().getSlotItem(itemName);
         if (item == null) {
-            gameClient.getHabbo().whisper("Vous ne poss\u00e9dez aucun objet nomm\u00e9 " + params[1] + ".", RoomChatMessageBubbles.ALERT);
+            gameClient.getHabbo().whisper("Vous ne poss\u00e9dez aucun objet nomm\u00e9 " + itemName + ".", RoomChatMessageBubbles.ALERT);
             return true;
         }
-        if (!item.getInteractionType().equals("weapon")) {
+        boolean isWeapon = item.getInteractionType().equals("weapon");
+        boolean isArmor = item.getInteractionType().equals("shield");
+        if (!isWeapon && !isArmor) {
             gameClient.getHabbo().whisper("Cet objet ne peut pas \u00eatre \u00e9quip\u00e9.", RoomChatMessageBubbles.ALERT);
             return true;
         }
@@ -41,13 +44,17 @@ public class EquipCommand extends Command {
             gameClient.getHabbo().whisper("Vous n'avez pas la permission d'\u00e9quiper cet objet.", RoomChatMessageBubbles.ALERT);
             return true;
         }
-        int visualEffect = RolePlay.getWeaponSkinService().getEquippedEffect(
-            gameClient.getHabbo().getHabboInfo().getId(), item.getDisplayName(), item.getEnableId());
-        if (visualEffect != -1) {
-            gameClient.getHabbo().getHabboInfo().getCurrentRoom().giveEffect(gameClient.getHabbo(), visualEffect, -1);
+        if (isWeapon) {
+            int visualEffect = RolePlay.getWeaponSkinService().getEquippedEffect(
+                gameClient.getHabbo().getHabboInfo().getId(), item.getDisplayName(), item.getEnableId());
+            if (visualEffect != -1) {
+                gameClient.getHabbo().getHabboInfo().getCurrentRoom().giveEffect(gameClient.getHabbo(), visualEffect, -1);
+            }
+            data.getInventory().equipWeapon(item);
+        } else {
+            data.getInventory().equipArmor(item);
         }
 
-        data.getInventory().equipWeapon(item);
         data.getInventory().updateInventory(gameClient.getHabbo());
         gameClient.getHabbo().whisper("Vous avez \u00e9quip\u00e9 " + item.getDisplayName() + ".", RoomChatMessageBubbles.ALERT);
         return true;

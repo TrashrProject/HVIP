@@ -22,15 +22,22 @@ public class UnequipCommand extends Command {
           RoomChatMessageBubbles.ALERT);
       return true;
     }
-    if (params.length != 1) {
-      habbo.whisper(":desequiper", RoomChatMessageBubbles.ALERT);
+    if (params.length > 2) {
+      habbo.whisper(":desequiper [arme|armure]", RoomChatMessageBubbles.ALERT);
       return true;
     }
-    data.getInventory().unEquipWeapon();
+    boolean armor = params.length == 2 && (params[1].equalsIgnoreCase("armure")
+        || params[1].equalsIgnoreCase("armor") || params[1].equalsIgnoreCase("shield"));
+    if (armor) {
+      data.getInventory().unEquipArmor();
+    } else {
+      data.getInventory().unEquipWeapon();
+      habbo.getHabboInfo().getCurrentRoom().giveEffect(habbo, 0, -1);
+      data.setEquippedWeapon(0);
+    }
     data.getInventory().updateInventory(gameClient.getHabbo());
-    habbo.getHabboInfo().getCurrentRoom().giveEffect(habbo, 0, -1);
-    habbo.whisper("Vous avez rang\u00e9 votre arme.", RoomChatMessageBubbles.ALERT);
-    data.setEquippedWeapon(0);
+    habbo.whisper(armor ? "Vous avez rang\u00e9 votre armure." : "Vous avez rang\u00e9 votre arme.",
+        RoomChatMessageBubbles.ALERT);
     return true;
   }
 }

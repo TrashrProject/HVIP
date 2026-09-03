@@ -26,7 +26,7 @@ public class ApplyCommand extends Command {
   @Override
   public boolean handle(GameClient gameClient, String[] params) {
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
-    if (params.length != 2) {
+    if (params.length < 2) {
       gameClient.getHabbo().whisper(":utiliser <objet>", RoomChatMessageBubbles.ALERT);
       return true;
     }
@@ -39,10 +39,11 @@ public class ApplyCommand extends Command {
       return true;
     }
 
-    RPItem item = data.getInventory().getSlotItem(params[1]);
+    String itemName = String.join(" ", java.util.Arrays.copyOfRange(params, 1, params.length));
+    RPItem item = data.getInventory().getSlotItem(itemName);
     if (item == null) {
       gameClient.getHabbo()
-          .whisper("Vous ne poss\u00e9dez aucun objet nomm\u00e9 " + params[1] + ".", RoomChatMessageBubbles.ALERT);
+          .whisper("Vous ne poss\u00e9dez aucun objet nomm\u00e9 " + itemName + ".", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -163,7 +164,7 @@ public class ApplyCommand extends Command {
             "* Allume et consomme " + item.getDisplayName() + " *"),
         RoomChatMessageBubbles.ALERT);
 
-    useDrug(item.getInteractionType(), data, habbo, item.getExtraData().split("_"));
+    useDrug(item.getDisplayName().toLowerCase(), data, habbo, item.getExtraData().split("_"));
     return true;
   }
 

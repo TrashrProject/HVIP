@@ -20,7 +20,7 @@ public class SellCommand extends Command {
     public boolean handle(GameClient gameClient, String[] params) {
         RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(gameClient.getHabbo());
 
-        if (params.length != 3) {
+        if (params.length < 3) {
             gameClient.getHabbo().whisper("Syntaxe : :vendre <pseudo> <objet>", RoomChatMessageBubbles.ALERT);
             return true;
         }
@@ -42,7 +42,8 @@ public class SellCommand extends Command {
             return true;
         }
 
-        RPItem item = data.getInventory().getSlotItem(params[2]);
+        String itemName = String.join(" ", java.util.Arrays.copyOfRange(params, 2, params.length));
+        RPItem item = data.getInventory().getSlotItem(itemName);
 
         if (item == null) {
             gameClient.getHabbo().whisper("Vous ne poss\u00e9dez pas cet objet.", RoomChatMessageBubbles.ALERT);
