@@ -20,7 +20,8 @@ $RuntimePluginRelativePath = "runtime\WavePlus\plugins\WaveRP-Roleplay.jar"
 $MigrationRelativePaths = @(
     "migrations\20260902_paradise_weapon_skins.sql",
     "migrations\20260903_paradise_complete_inventory.sql",
-    "migrations\20260903_paradise_catalogue_rp_v3.sql"
+    "migrations\20260903_paradise_catalogue_rp_v3.sql",
+    "migrations\20260903_paradise_catalogue_extension_v4.sql"
 )
 $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
