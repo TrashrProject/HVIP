@@ -9,6 +9,9 @@ import io.github.brenoepics.roleplay.utilities.types.RPItem;
 
 public class OpenInventoryComposer extends OutgoingWebMessage {
 
+  private static final String PARADISE_INVENTORY_BASE =
+      "https://paradiserp.fr/nitro/inventory-items/";
+
   public OpenInventoryComposer(Inventory inventory, String baseUrl, boolean shouldOpen) {
     super("open_inventory");
 
@@ -68,9 +71,46 @@ public class OpenInventoryComposer extends OutgoingWebMessage {
       itemObj.addProperty("is_broken", slot.getDurability() <= 0);
     }
 
-    // Image URL
-    itemObj.addProperty("image_url", baseUrl.replace("%item%", item.getDisplayName()));
+    itemObj.addProperty("image_url", resolveImageUrl(item, baseUrl));
 
     return itemObj;
+  }
+
+  private String resolveImageUrl(RPItem item, String baseUrl) {
+    String legacyFile = switch (item.getId()) {
+      case 6101 -> "matraque.png";
+      case 6102 -> "batte.png";
+      case 6103 -> "epee.png";
+      case 6104 -> "katana.png";
+      case 6105 -> "hache-rouge.png";
+      case 6106 -> "hache.png";
+      case 6107 -> "epee-vip.png";
+      case 6108 -> "hache-vip.png";
+      case 6109 -> "usp-s.png";
+      case 6110 -> "ak47.png";
+      case 6111 -> "colete.png";
+      case 6112 -> "sniper.png";
+      case 6113 -> "mp5.png";
+      case 6114 -> "reparo.png";
+      case 6115 -> "vara.png";
+      case 6116 -> "g36.png";
+      case 6117 -> "akm.png";
+      case 6118 -> "semente.png";
+      case 6119 -> "atum.png";
+      case 6120 -> "salmao.png";
+      case 6121 -> "carrot.png";
+      case 6122 -> "munitions.png";
+      default -> null;
+    };
+
+    if (legacyFile != null) {
+      return PARADISE_INVENTORY_BASE + legacyFile;
+    }
+
+    String configuredBase = baseUrl;
+    if (configuredBase == null || configuredBase.isBlank() || configuredBase.contains("example.com")) {
+      configuredBase = PARADISE_INVENTORY_BASE + "%item%.png";
+    }
+    return configuredBase.replace("%item%", item.getDisplayName());
   }
 }
