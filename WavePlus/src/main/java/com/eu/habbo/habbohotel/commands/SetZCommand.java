@@ -9,7 +9,9 @@ public class SetZCommand extends Command {
     private static final double MAX_HEIGHT = 100.0D;
 
     public SetZCommand() {
-        super("cmd_setz", new String[]{"setz"});
+        // Reuse the existing furniture-placement permission instead of introducing
+        // a new cmd_setz permission that is absent from the current permissions table.
+        super("acc_placefurni", new String[]{"setz"});
     }
 
     @Override
