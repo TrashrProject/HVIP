@@ -34,7 +34,23 @@ $images = [
     12 => 'comida4.png', 13 => 'comida5.png', 14 => 'taco.png', 15 => 'salmao.png',
     16 => 'comida6.png', 18 => 'comida3.png', 19 => 'lagosta.png', 20 => 'comida6.png',
     21 => 'comida4.png', 1001 => 'bandage.png', 1002 => 'energy-drink.png',
-    1003 => 'armor-kit.png', 1004 => 'deluxe-medkit.png'
+    1003 => 'armor-kit.png', 1004 => 'deluxe-medkit.png',
+
+    // HabboRPbr items migrated to ParadiseRP.
+    6109 => 'usp-s.png',
+    6110 => 'ak47.png',
+    6111 => 'colete.png',
+    6112 => 'sniper.png',
+    6113 => 'mp5.png',
+    6114 => 'reparo.png',
+    6115 => 'vara.png',
+    6116 => 'g36.png',
+    6117 => 'akm.png',
+    6118 => 'semente.png',
+    6119 => 'atum.png',
+    6120 => 'salmao.png',
+    6121 => 'carrot.png',
+    6122 => 'munitions.png'
 ];
 
 $db = $DB->Con();
