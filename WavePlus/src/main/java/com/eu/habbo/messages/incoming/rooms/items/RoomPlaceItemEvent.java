@@ -1,5 +1,6 @@
 package com.eu.habbo.messages.incoming.rooms.items;
 
+import com.eu.habbo.habbohotel.commands.ParadiseBuildState;
 import com.eu.habbo.habbohotel.items.FurnitureType;
 import com.eu.habbo.habbohotel.items.interactions.*;
 import com.eu.habbo.habbohotel.modtool.ScripterManager;
@@ -42,7 +43,6 @@ public class RoomPlaceItemEvent extends MessageHandler {
         if (room.getId() != item.getRoomId() && item.getRoomId() != 0)
             return;
 
-        //TODO move this to canStackAt() though find a way to handle the different bubble alert keys
         if (item instanceof InteractionMoodLight && !room.getRoomSpecialTypes().getItemsOfType(InteractionMoodLight.class).isEmpty()) {
             this.client.sendResponse(new BubbleAlertComposer(BubbleAlertKeys.FURNITURE_PLACEMENT_ERROR.key, FurnitureMovementError.MAX_DIMMERS.errorCode));
             return;
@@ -103,6 +103,8 @@ public class RoomPlaceItemEvent extends MessageHandler {
                 this.client.sendResponse(new BubbleAlertComposer(BubbleAlertKeys.FURNITURE_PLACEMENT_ERROR.key, error.errorCode));
                 return;
             }
+
+            ParadiseBuildState.applyHeight(room, item, this.client.getHabbo());
         } else {
             FurnitureMovementError error = room.placeWallFurniAt(item, values[1] + " " + values[2] + " " + values[3], this.client.getHabbo());
             if (!error.equals(FurnitureMovementError.NONE)) {
