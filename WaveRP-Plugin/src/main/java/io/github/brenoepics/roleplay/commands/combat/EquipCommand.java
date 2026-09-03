@@ -29,7 +29,10 @@ public class EquipCommand extends Command {
         }
 
         String itemName = String.join(" ", java.util.Arrays.copyOfRange(params, 1, params.length));
-        boolean isPolice = data.getJobRankEntity().hasPermission(POLICE_TAZE) && data.isDuty() && itemName.equalsIgnoreCase("tazor");
+        boolean isPolice = data.getJobRankEntity() != null
+            && data.getJobRankEntity().hasPermission(POLICE_TAZE)
+            && data.isDuty()
+            && itemName.equalsIgnoreCase("tazor");
         RPItem item = isPolice ? RolePlay.getItemManager().getItemByName(itemName) : data.getInventory().getSlotItem(itemName);
         if (item == null) {
             gameClient.getHabbo().whisper("Vous ne possédez aucun objet nommé " + itemName + ".", RoomChatMessageBubbles.ALERT);
