@@ -19,8 +19,8 @@ if (-not (Test-Path -LiteralPath $MigrationPath -PathType Leaf)) {
 
 $content = Get-Content -LiteralPath $MigrationPath -Raw
 
-# Pages finales : aucune sous-page vide. Yvess et Atlanta sont deja absorbees
-# par les categories semantiques du generateur lorsque leurs objets sont utiles.
+# Schema reel du VPS WavePlus : pas de min_vip ni page_strings_*.
+# On renseigne explicitement toutes les colonnes NOT NULL utiles.
 $pages = @(
     @(9967100,9967000,'Extension 2000 meubles',1),
     @(9967102,9967100,'Construction et architecture',1),
@@ -39,25 +39,30 @@ $pages = @(
 )
 
 $pageRows = foreach ($p in $pages) {
-    "($($p[0]),$($p[1]),'$($p[2])',1,'1','1',1,0,$($p[3]),'','default_3x3','','')"
+    "($($p[0]),$($p[1]),'$($p[2])','$($p[2])','default_3x3',1,1,1,$($p[3]),'1','1','0','0','','',NULL,NULL,NULL,NULL,NULL,0,'')"
 }
-$pageBlock = "INSERT INTO catalog_pages (id,parent_id,caption,icon_image,visible,enabled,min_rank,min_vip,order_num,page_link,page_layout,page_strings_1,page_strings_2) VALUES`r`n" +
+$pageBlock = "INSERT INTO catalog_pages (id,parent_id,caption_save,caption,page_layout,icon_color,icon_image,min_rank,order_num,visible,enabled,club_only,vip_only,page_headline,page_teaser,page_special,page_text1,page_text2,page_text_details,page_text_teaser,room_id,includes) VALUES`r`n" +
     ($pageRows -join ",`r`n") +
-    "`r`nON DUPLICATE KEY UPDATE parent_id=VALUES(parent_id),caption=VALUES(caption),visible='1',enabled='1',order_num=VALUES(order_num);"
+    "`r`nON DUPLICATE KEY UPDATE parent_id=VALUES(parent_id),caption_save=VALUES(caption_save),caption=VALUES(caption),page_layout=VALUES(page_layout),icon_color=VALUES(icon_color),icon_image=VALUES(icon_image),min_rank=VALUES(min_rank),order_num=VALUES(order_num),visible='1',enabled='1',club_only='0',vip_only='0';"
 
+# Remplace le bloc catalog_pages quelle que soit l'ancienne liste de colonnes.
 $content = [regex]::Replace(
     $content,
-    "INSERT INTO catalog_pages \(id,parent_id,caption,icon_image,visible,enabled,min_rank,min_vip,order_num,page_link,page_layout,page_strings_1,page_strings_2\) VALUES\r?\n.*?ON DUPLICATE KEY UPDATE parent_id=VALUES\(parent_id\),caption=VALUES\(caption\),visible='1',enabled='1',order_num=VALUES\(order_num\);",
+    "INSERT INTO catalog_pages \([^;]+?\) VALUES\r?\n.*?ON DUPLICATE KEY UPDATE .*?;",
     [System.Text.RegularExpressions.MatchEvaluator]{ param($m) $pageBlock },
     [System.Text.RegularExpressions.RegexOptions]::Singleline
 )
 
 $keepIds = ($pages | Where-Object { $_[0] -ne 9967100 } | ForEach-Object { $_[0] }) -join ','
-$content = [regex]::Replace(
-    $content,
-    "DELETE FROM catalog_pages WHERE id BETWEEN 9967101 AND 9967199 AND id NOT IN \([^;]+\);",
-    "DELETE FROM catalog_pages WHERE id BETWEEN 9967101 AND 9967199 AND id NOT IN ($keepIds);"
-)
+if ($content -match "DELETE FROM catalog_pages WHERE id BETWEEN 9967101 AND 9967199 AND id NOT IN \([^;]+\);") {
+    $content = [regex]::Replace(
+        $content,
+        "DELETE FROM catalog_pages WHERE id BETWEEN 9967101 AND 9967199 AND id NOT IN \([^;]+\);",
+        "DELETE FROM catalog_pages WHERE id BETWEEN 9967101 AND 9967199 AND id NOT IN ($keepIds);"
+    )
+} else {
+    $content = $content -replace "DELETE FROM catalog_items WHERE page_id BETWEEN 9967100 AND 9967199;", "DELETE FROM catalog_items WHERE page_id BETWEEN 9967100 AND 9967199;`r`nDELETE FROM catalog_pages WHERE id BETWEEN 9967101 AND 9967199 AND id NOT IN ($keepIds);"
+}
 
 function Get-CustomPage([string]$Name) {
     $n = $Name.ToLowerInvariant()
@@ -86,7 +91,6 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
 }
 $content = $lines -join "`r`n"
 
-# Compter uniquement les lignes de l'INSERT catalog_items.
 $catalogItemsMatch = [regex]::Match(
     $content,
     "INSERT INTO catalog_items \([^;]+?\) VALUES\r?\n(?<rows>.*?);\r?\nCOMMIT;",
