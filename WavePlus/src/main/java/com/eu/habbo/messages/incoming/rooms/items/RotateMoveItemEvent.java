@@ -1,5 +1,6 @@
 package com.eu.habbo.messages.incoming.rooms.items;
 
+import com.eu.habbo.habbohotel.commands.ParadiseBuildState;
 import com.eu.habbo.habbohotel.rooms.FurnitureMovementError;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomTile;
@@ -37,6 +38,9 @@ public class RotateMoveItemEvent extends MessageHandler {
         if (!error.equals(FurnitureMovementError.NONE)) {
             this.client.sendResponse(new BubbleAlertComposer(BubbleAlertKeys.FURNITURE_PLACEMENT_ERROR.key, error.errorCode));
             this.client.sendResponse(new FloorItemUpdateComposer(item));
+            return;
         }
+
+        ParadiseBuildState.applyHeight(room, item, this.client.getHabbo());
     }
 }
