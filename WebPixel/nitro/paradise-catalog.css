@@ -1,12 +1,16 @@
 /*
- * ParadiseRP catalogue — stable CSS-only skin
- * IMPORTANT:
- * - no catalogue JS
- * - no MutationObserver
- * - no DOM injection
- * - no wildcard/global descendant repaint
- * - no transform on furni items
- * Nitro keeps 100% control of selection, preview, purchase and close behaviour.
+ * ParadiseRP catalogue — STABLE CSS-ONLY THEME
+ *
+ * Rules for stability:
+ * - NO custom catalogue JavaScript
+ * - NO MutationObserver / DOM injection
+ * - NO click interception
+ * - NO transform on furni items
+ * - NO [style*=...] selectors
+ * - NO blanket `.nitro-catalog * { ... }` repaint
+ *
+ * Nitro keeps full control of categories, furni selection, preview, quantity,
+ * purchase, close and drag. This file changes visuals only.
  */
 
 .nitro-catalog {
@@ -35,7 +39,8 @@
     box-shadow: 0 24px 55px rgba(0,0,0,.45), inset 0 0 0 1px rgba(84,211,255,.14) !important;
 }
 
-/* Header ParadiseRP — visuel uniquement, comportement Nitro conservé. */
+/* ========================= HEADER ========================= */
+/* Real Nitro header: close/drag behaviour stays native. */
 .nitro-catalog > .nitro-card-header {
     position: relative !important;
     min-height: 82px !important;
@@ -81,7 +86,7 @@
     font-style: italic;
 }
 
-/* On masque uniquement le titre natif, jamais le bouton fermer. */
+/* Hide only Nitro's native header title. Never hide/replace the real close button. */
 .nitro-catalog > .nitro-card-header > :not(button):not(.close) {
     color: transparent !important;
     text-shadow: none !important;
@@ -104,7 +109,7 @@
     box-shadow: 0 5px 14px rgba(0,0,0,.25) !important;
 }
 
-/* Grande surface du catalogue : suppression du gros fond blanc. */
+/* ========================= MAIN BODY ========================= */
 .nitro-catalog > .nitro-card-content {
     height: calc(100% - 82px) !important;
     min-height: 0 !important;
@@ -117,28 +122,52 @@
     background: linear-gradient(145deg, #0b1838 0%, #102554 62%, #302064 100%) !important;
 }
 
-/* Seulement les wrappers Bootstrap connus du catalogue, pas tous les div du client. */
-.nitro-catalog > .nitro-card-content > .container,
-.nitro-catalog > .nitro-card-content > .container-fluid,
-.nitro-catalog > .nitro-card-content > .row,
-.nitro-catalog > .nitro-card-content > .d-flex,
-.nitro-catalog > .nitro-card-content > .flex-column {
-    background: transparent !important;
+/* Only known Bootstrap/layout wrappers inside the catalogue.
+   This removes the large grey/white sheet without repainting every div in Nitro. */
+.nitro-catalog .nitro-card-content .container,
+.nitro-catalog .nitro-card-content .container-fluid,
+.nitro-catalog .nitro-card-content .row,
+.nitro-catalog .nitro-card-content .col,
+.nitro-catalog .nitro-card-content .d-flex,
+.nitro-catalog .nitro-card-content .flex-column,
+.nitro-catalog .nitro-card-content .flex-grow-1,
+.nitro-catalog .nitro-card-content .position-relative,
+.nitro-catalog .nitro-card-content .overflow-auto,
+.nitro-catalog .nitro-card-content .overflow-hidden {
+    background-color: transparent !important;
     color: var(--pr-text) !important;
 }
 
-/* Les anciennes surfaces Bootstrap claires visibles dans le catalogue deviennent sombres. */
+/* Native Bootstrap light surfaces used by the old catalogue. */
 .nitro-catalog .nitro-card-content .bg-white,
 .nitro-catalog .nitro-card-content .bg-light,
 .nitro-catalog .nitro-card-content .bg-body,
 .nitro-catalog .nitro-card-content .bg-body-secondary,
-.nitro-catalog .nitro-card-content .bg-secondary {
-    background-color: #102554 !important;
+.nitro-catalog .nitro-card-content .bg-secondary,
+.nitro-catalog .nitro-card-content .card,
+.nitro-catalog .nitro-card-content .card-body,
+.nitro-catalog .nitro-card-content .list-group {
+    background: #102554 !important;
     color: var(--pr-text) !important;
+    border-color: var(--pr-border) !important;
 }
 
-/* Onglets du haut. */
-.nitro-catalog .nitro-catalog-navigation {
+/* Exact catalogue-ish wrappers only. No global div selector. */
+.nitro-catalog .nitro-card-content :is(
+    [class*="catalog-page"],
+    [class*="catalog-layout"],
+    [class*="catalog-content"],
+    [class*="catalog-main"],
+    [class*="catalog-column"],
+    [class*="catalog-wrapper"]
+) {
+    background: transparent !important;
+    color: var(--pr-text) !important;
+    border-color: var(--pr-border) !important;
+}
+
+/* ========================= TOP TABS ========================= */
+.nitro-catalog :is(.nitro-catalog-navigation,[class*="catalog-navigation"]):not([class*="grid"]) {
     min-height: 48px !important;
     box-sizing: border-box !important;
     color: #fff !important;
@@ -146,29 +175,27 @@
     border-color: #2879b7 !important;
 }
 
-.nitro-catalog .nitro-catalog-navigation .nav-link,
-.nitro-catalog .nitro-catalog-navigation .list-group-item {
+.nitro-catalog :is(.nitro-catalog-navigation,[class*="catalog-navigation"]):not([class*="grid"]) :is(button,a,.nav-link,[role="button"],.list-group-item) {
     color: #eaf5ff !important;
-    background: linear-gradient(180deg, #143966, #0b274c) !important;
+    background: linear-gradient(180deg,#143966,#0b274c) !important;
     border-color: #2b6fa8 !important;
     border-radius: 8px 8px 0 0 !important;
     font-weight: 700 !important;
 }
 
-.nitro-catalog .nitro-catalog-navigation .nav-link:hover,
-.nitro-catalog .nitro-catalog-navigation .list-group-item:hover,
-.nitro-catalog .nitro-catalog-navigation .active {
+.nitro-catalog :is(.nitro-catalog-navigation,[class*="catalog-navigation"]):not([class*="grid"]) :is(.active,[aria-selected="true"]),
+.nitro-catalog :is(.nitro-catalog-navigation,[class*="catalog-navigation"]):not([class*="grid"]) :is(button,a,.nav-link,[role="button"]):hover {
     color: #fff !important;
-    background: linear-gradient(180deg, #2aaef0 0%, #255ac7 65%, #5137b6 100%) !important;
+    background: linear-gradient(180deg,#2aaef0 0%,#255ac7 65%,#5137b6 100%) !important;
     border-color: var(--pr-hot) !important;
 }
 
-/* Recherche. */
+/* ========================= SEARCH ========================= */
 .nitro-catalog .form-control,
 .nitro-catalog input[type="text"],
 .nitro-catalog input[type="search"] {
     color: #fff !important;
-    background: linear-gradient(180deg, #0d2e5d, #0a2145) !important;
+    background: linear-gradient(180deg,#0d2e5d,#0a2145) !important;
     border: 1px solid #2b78b5 !important;
     border-radius: 7px !important;
     outline: none !important;
@@ -188,79 +215,104 @@
     opacity: 1 !important;
 }
 
-/* Colonne catégories. */
-.nitro-catalog .nitro-catalog-navigation-grid {
+/* Search button only: appearance, never behaviour. */
+.nitro-catalog .input-group button,
+.nitro-catalog .input-group .btn {
     color: #fff !important;
-    background: linear-gradient(180deg, #0f315f 0%, #142b61 62%, #33236a 100%) !important;
+    background: linear-gradient(180deg,#168fce,#0b67a3) !important;
+    border-color: #2c78ad !important;
+}
+
+/* ========================= LEFT CATEGORIES ========================= */
+.nitro-catalog :is(.nitro-catalog-navigation-grid,[class*="navigation-grid"]) {
+    color: #fff !important;
+    background: linear-gradient(180deg,#0f315f 0%,#142b61 62%,#33236a 100%) !important;
     border: 1px solid #2775af !important;
     border-radius: 9px !important;
 }
 
-.nitro-catalog .nitro-catalog-navigation-grid .list-group-item {
+.nitro-catalog :is(.nitro-catalog-navigation-grid,[class*="navigation-grid"]) :is(button,a,[role="button"],.list-group-item) {
     color: #edf6ff !important;
     background: #102d58 !important;
     border-color: #234e7e !important;
 }
 
-.nitro-catalog .nitro-catalog-navigation-grid .list-group-item:hover {
+.nitro-catalog :is(.nitro-catalog-navigation-grid,[class*="navigation-grid"]) :is(button,a,[role="button"],.list-group-item):hover {
     color: #fff !important;
-    background: linear-gradient(90deg, #213f8f, #43227c) !important;
+    background: linear-gradient(90deg,#213f8f,#43227c) !important;
 }
 
-.nitro-catalog .nitro-catalog-navigation-grid .list-group-item.active,
-.nitro-catalog .nitro-catalog-navigation-grid .active > .list-group-item,
-.nitro-catalog .nitro-catalog-navigation-grid .active {
+.nitro-catalog :is(.nitro-catalog-navigation-grid,[class*="navigation-grid"]) :is(.active,[aria-selected="true"]) {
     color: #fff !important;
-    background: linear-gradient(90deg, #228fd8 0%, #4d48d7 60%, #642b91 100%) !important;
+    background: linear-gradient(90deg,#228fd8 0%,#4d48d7 60%,#642b91 100%) !important;
     border-color: #51c8f7 !important;
 }
 
-/* Grille des furnis — aucune transformation CSS au clic/hover. */
-.nitro-catalog .nitro-catalog-grid {
+/* Some builds use generic list rows instead of list-group-item. Scope them to navigation only. */
+.nitro-catalog :is(.nitro-catalog-navigation-grid,[class*="navigation-grid"]) :is(li, .nav-item) {
+    color: #edf6ff !important;
+    background-color: rgba(16,45,88,.92) !important;
+    border-color: #234e7e !important;
+}
+
+/* ========================= FURNI GRID ========================= */
+.nitro-catalog :is(.nitro-catalog-grid,[class*="catalog-grid"]):not([class*="item"]) {
     color: #fff !important;
-    background: linear-gradient(180deg, #0f2f5b 0%, #0a2145 100%) !important;
+    background: linear-gradient(180deg,#0f2f5b 0%,#0a2145 100%) !important;
     border-color: #23689e !important;
 }
 
-.nitro-catalog .nitro-catalog-grid-item {
+.nitro-catalog :is(.nitro-catalog-grid-item,[class*="catalog-grid-item"]) {
     color: #fff !important;
-    background: linear-gradient(180deg, #143d71 0%, #0d2d56 100%) !important;
+    background: linear-gradient(180deg,#143d71 0%,#0d2d56 100%) !important;
     border: 1px solid #3478aa !important;
     border-radius: 7px !important;
 }
 
-.nitro-catalog .nitro-catalog-grid-item:hover {
+.nitro-catalog :is(.nitro-catalog-grid-item,[class*="catalog-grid-item"]):hover {
     border-color: #4dccff !important;
-    background: linear-gradient(180deg, #1a5289 0%, #113966 100%) !important;
-    box-shadow: 0 0 0 1px rgba(76,204,255,.14), 0 5px 12px rgba(0,0,0,.18) !important;
+    background: linear-gradient(180deg,#1a5289 0%,#113966 100%) !important;
+    box-shadow: 0 0 0 1px rgba(76,204,255,.14),0 5px 12px rgba(0,0,0,.18) !important;
 }
 
-.nitro-catalog .nitro-catalog-grid-item.active,
-.nitro-catalog .nitro-catalog-grid-item[aria-selected="true"] {
+.nitro-catalog :is(.nitro-catalog-grid-item,[class*="catalog-grid-item"]).active,
+.nitro-catalog :is(.nitro-catalog-grid-item,[class*="catalog-grid-item"])[aria-selected="true"] {
     border-color: #68d7ff !important;
-    background: linear-gradient(180deg, #2457a2 0%, #3c378f 100%) !important;
+    background: linear-gradient(180deg,#2457a2 0%,#3c378f 100%) !important;
 }
 
-/* Panneau achat / quantité / description. */
-.nitro-catalog .nitro-catalog-purchase-component {
+/* ========================= PREVIEW / DETAILS / PURCHASE ========================= */
+.nitro-catalog :is(
+    .nitro-catalog-purchase-component,
+    [class*="catalog-purchase"],
+    [class*="purchase-component"],
+    [class*="catalog-preview"],
+    [class*="catalog-details"],
+    [class*="catalog-description"]
+) {
     color: #fff !important;
-    background: linear-gradient(180deg, #113468 0%, #0c2851 64%, #28205f 100%) !important;
+    background: linear-gradient(180deg,#113468 0%,#0c2851 64%,#28205f 100%) !important;
     border-color: #2876af !important;
 }
 
-.nitro-catalog .nitro-catalog-purchase-component p,
-.nitro-catalog .nitro-catalog-purchase-component span,
-.nitro-catalog .nitro-catalog-purchase-component label,
-.nitro-catalog .nitro-catalog-purchase-component strong,
-.nitro-catalog .nitro-catalog-purchase-component small {
+/* Preview cards may be plain Bootstrap cards in this Nitro build. */
+.nitro-catalog :is(
+    .nitro-catalog-purchase-component,
+    [class*="catalog-purchase"],
+    [class*="purchase-component"]
+) :is(.card,.card-body) {
     color: #fff !important;
+    background: #102554 !important;
+    border-color: #2876af !important;
 }
 
-/* Textes noirs natifs : uniquement les classes de texte, sans repeindre tout le DOM. */
-.nitro-catalog .nitro-card-content .text-dark,
-.nitro-catalog .nitro-card-content .text-black,
-.nitro-catalog .nitro-card-content .text-body,
-.nitro-catalog .nitro-card-content .text-secondary {
+/* All human-readable catalogue copy becomes light.
+   Color-only selectors are safe and do not alter events/layout. */
+.nitro-catalog .nitro-card-content :is(p,span,label,strong,b,em,small,h1,h2,h3,h4,h5,h6) {
+    color: #f7fbff !important;
+}
+
+.nitro-catalog .nitro-card-content :is(.text-dark,.text-black,.text-body,.text-secondary) {
     color: #f7fbff !important;
 }
 
@@ -268,50 +320,50 @@
     color: #b9cce4 !important;
 }
 
-/* Boutons natifs : style seulement, aucun changement d'event ou de position. */
+/* ========================= NATIVE BUTTONS ========================= */
 .nitro-catalog .btn-primary,
 .nitro-catalog .btn-info {
     color: #fff !important;
-    background: linear-gradient(180deg, #168fce, #0b67a3) !important;
+    background: linear-gradient(180deg,#168fce,#0b67a3) !important;
     border-color: #2c78ad !important;
 }
 
 .nitro-catalog .btn-success {
     color: #fff !important;
-    background: linear-gradient(180deg, #27c86a, #15934c) !important;
+    background: linear-gradient(180deg,#27c86a,#15934c) !important;
     border-color: #3be986 !important;
 }
 
 .nitro-catalog .btn-danger {
     color: #fff !important;
-    background: linear-gradient(180deg, #b45663, #913844) !important;
+    background: linear-gradient(180deg,#b45663,#913844) !important;
     border-color: #d5757f !important;
 }
 
-/* Scrollbars seulement sur les trois zones catalogue connues. */
-.nitro-catalog .nitro-catalog-navigation-grid,
-.nitro-catalog .nitro-catalog-grid,
-.nitro-catalog .nitro-catalog-purchase-component {
+/* ========================= SCROLLBARS ========================= */
+.nitro-catalog :is(.nitro-catalog-navigation-grid,[class*="navigation-grid"]),
+.nitro-catalog :is(.nitro-catalog-grid,[class*="catalog-grid"]):not([class*="item"]),
+.nitro-catalog :is(.nitro-catalog-purchase-component,[class*="catalog-purchase"],[class*="purchase-component"]) {
     scrollbar-color: #553aa5 #0a2145;
     scrollbar-width: thin;
 }
 
-.nitro-catalog .nitro-catalog-navigation-grid::-webkit-scrollbar,
-.nitro-catalog .nitro-catalog-grid::-webkit-scrollbar,
-.nitro-catalog .nitro-catalog-purchase-component::-webkit-scrollbar {
+.nitro-catalog :is(.nitro-catalog-navigation-grid,[class*="navigation-grid"])::-webkit-scrollbar,
+.nitro-catalog :is(.nitro-catalog-grid,[class*="catalog-grid"]):not([class*="item"])::-webkit-scrollbar,
+.nitro-catalog :is(.nitro-catalog-purchase-component,[class*="catalog-purchase"],[class*="purchase-component"])::-webkit-scrollbar {
     width: 7px;
     height: 7px;
 }
 
-.nitro-catalog .nitro-catalog-navigation-grid::-webkit-scrollbar-track,
-.nitro-catalog .nitro-catalog-grid::-webkit-scrollbar-track,
-.nitro-catalog .nitro-catalog-purchase-component::-webkit-scrollbar-track {
+.nitro-catalog :is(.nitro-catalog-navigation-grid,[class*="navigation-grid"])::-webkit-scrollbar-track,
+.nitro-catalog :is(.nitro-catalog-grid,[class*="catalog-grid"]):not([class*="item"])::-webkit-scrollbar-track,
+.nitro-catalog :is(.nitro-catalog-purchase-component,[class*="catalog-purchase"],[class*="purchase-component"])::-webkit-scrollbar-track {
     background: #0a2145;
 }
 
-.nitro-catalog .nitro-catalog-navigation-grid::-webkit-scrollbar-thumb,
-.nitro-catalog .nitro-catalog-grid::-webkit-scrollbar-thumb,
-.nitro-catalog .nitro-catalog-purchase-component::-webkit-scrollbar-thumb {
+.nitro-catalog :is(.nitro-catalog-navigation-grid,[class*="navigation-grid"])::-webkit-scrollbar-thumb,
+.nitro-catalog :is(.nitro-catalog-grid,[class*="catalog-grid"]):not([class*="item"])::-webkit-scrollbar-thumb,
+.nitro-catalog :is(.nitro-catalog-purchase-component,[class*="catalog-purchase"],[class*="purchase-component"])::-webkit-scrollbar-thumb {
     background: linear-gradient(#245a9a,#5a35a0);
     border-radius: 8px;
 }
