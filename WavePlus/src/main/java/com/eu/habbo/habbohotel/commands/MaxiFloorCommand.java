@@ -46,6 +46,13 @@ public class MaxiFloorCommand extends Command {
             map.append('\r');
         }
 
+        // applyLayout() reloads the room. Send the confirmation first so Nitro always shows
+        // visible feedback instead of losing the whisper while the client is being forwarded.
+        gameClient.getHabbo().whisper(
+                "MaxiFloor : passage de l'appart en " + size + "x" + size + ". Rechargement en cours...",
+                RoomChatMessageBubbles.ALERT
+        );
+
         boolean applied = ParadiseFloorLayoutSupport.applyLayout(
                 gameClient,
                 room,
@@ -58,9 +65,7 @@ public class MaxiFloorCommand extends Command {
                 -1
         );
 
-        if (applied) {
-            gameClient.getHabbo().whisper("MaxiFloor terminé : l'appart a été agrandi en " + size + "x" + size + ".", RoomChatMessageBubbles.ALERT);
-        } else {
+        if (!applied) {
             gameClient.getHabbo().whisper("MaxiFloor n'a pas pu appliquer le nouveau floor.", RoomChatMessageBubbles.ALERT);
         }
 
