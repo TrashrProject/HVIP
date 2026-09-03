@@ -32,7 +32,7 @@ if ($method === 'POST') {
     $skinId = (int)($payload['skin_id'] ?? 0);
     if ($skinId < 1) skin_reply(422, ['ok' => false, 'error' => 'Skin invalide.']);
 
-    $stmt = mysqli_prepare($db, 'SELECT s.id, s.weapon_key FROM paradise_weapon_skins s INNER JOIN paradise_user_weapon_skins us ON us.skin_id=s.id AND us.user_id=? WHERE s.id=? LIMIT 1');
+    $stmt = mysqli_prepare($db, 'SELECT s.id, s.weapon_key, s.effect_id FROM paradise_weapon_skins s INNER JOIN paradise_user_weapon_skins us ON us.skin_id=s.id AND us.user_id=? WHERE s.id=? LIMIT 1');
     mysqli_stmt_bind_param($stmt, 'ii', $userId, $skinId);
     mysqli_stmt_execute($stmt);
     $owned = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
@@ -54,7 +54,16 @@ if ($method === 'POST') {
         mysqli_rollback($db);
         skin_reply(500, ['ok' => false, 'error' => 'Sauvegarde impossible.']);
     }
-    skin_reply(200, ['ok' => true, 'skin_id' => $skinId]);
+
+    // Le skin est une vraie variante de rendu d'arme. On renvoie l'effect_id sélectionné
+    // pour que le client / l'émulateur applique exactement cette variante, au lieu d'un
+    // effet décoratif générique (ex: coeur d'un :enable incorrect).
+    skin_reply(200, [
+        'ok' => true,
+        'skin_id' => $skinId,
+        'weapon_key' => (string)$owned['weapon_key'],
+        'effect_id' => (int)$owned['effect_id']
+    ]);
 }
 
 if ($method !== 'GET') skin_reply(405, ['ok' => false, 'error' => 'Méthode refusée.']);
