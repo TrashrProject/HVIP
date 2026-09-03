@@ -3,6 +3,7 @@ package io.github.brenoepics.roleplay.utilities;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.commands.CommandHandler;
+import io.github.brenoepics.roleplay.commands.combat.ReloadCommand;
 import io.github.brenoepics.roleplay.commands.generic.FishingCommand;
 import io.github.brenoepics.roleplay.commands.generic.PlantCommand;
 
@@ -13,6 +14,11 @@ public final class HabboBrItemCommandRegistrar {
   }
 
   public static void register() {
+    registerCommand(
+        new ReloadCommand("cmd_reload_weapon", new String[]{"recharger", "reload"}),
+        new String[]{"recharger", "reload"},
+        ":recharger - Recharge l'arme à feu équipée avec les Munitions de l'inventaire.");
+
     registerCommand(
         new FishingCommand("cmd_fishing", new String[]{"pecher", "pêcher", "fish"}),
         new String[]{"pecher", "pêcher", "fish"},
