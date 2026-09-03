@@ -4,63 +4,180 @@
   const ROOT = '.nitro-catalog';
   let queued = false;
 
+  const exactTranslations = new Map([
+    ['Front Page', 'Accueil'],
+    ['Furni', 'Furnis'],
+    ['Clothing', 'Vêtements'],
+    ['Pets', 'Animaux'],
+    ['Building', 'Construction'],
+    ['Clothes Shop', 'Boutique de vêtements'],
+    ['Redeem a voucher code here:', 'Utiliser un code promotionnel'],
+    ['Redeem a voucher code here', 'Utiliser un code promotionnel']
+  ]);
+
   const text = (node) => (node?.textContent || '').replace(/\s+/g, ' ').trim();
   const add = (node, name) => { if (node instanceof HTMLElement) node.classList.add(name); return node; };
 
+  const translateLeaf = (node) => {
+    if (!(node instanceof HTMLElement) || node.children.length) return;
+    const current = text(node);
+    if (!current) return;
+
+    const clean = current.replace(/\s*\(\d+\)\s*$/, '');
+    const translated = exactTranslations.get(clean);
+    if (!translated || node.dataset.prcTranslation === translated) return;
+
+    node.dataset.prcOriginalText = current;
+    node.dataset.prcTranslation = translated;
+    node.textContent = translated;
+  };
+
+  const translateVisibleText = (root) => {
+    root.querySelectorAll('button, a, span, div, p, label').forEach((node) => {
+      if (node.children.length === 0) translateLeaf(node);
+    });
+
+    root.querySelectorAll('input').forEach((input) => {
+      const placeholder = (input.getAttribute('placeholder') || '').trim();
+      if (/redeem a voucher code here:?/i.test(placeholder)) input.setAttribute('placeholder', 'Utiliser un code promotionnel');
+      else if (/search|recherch/i.test(placeholder)) input.setAttribute('placeholder', 'Rechercher un furni...');
+    });
+  };
+
   const getTopNav = (root) => {
     const candidates = [...root.querySelectorAll('div, nav, ul')];
-    return candidates.find((node) => {
-      const t = text(node);
-      return t.length < 260 && /Front Page/i.test(t) && /Furni/i.test(t) && /Clothing/i.test(t) && /Staff/i.test(t);
-    }) || null;
+    let best = null;
+    let score = 0;
+    const labels = [/Front Page|Accueil/i, /Furni/i, /Clothing|Vêtements/i, /Pets|Animaux/i, /Building|Construction/i, /Staff/i];
+
+    for (const node of candidates) {
+      const value = text(node);
+      if (!value || value.length > 280) continue;
+      const current = labels.reduce((sum, re) => sum + (re.test(value) ? 1 : 0), 0);
+      if (current >= 4 && current > score) {
+        best = node;
+        score = current;
+      }
+    }
+    return best;
   };
 
   const getCategoryPanel = (root) => {
     const labels = [...root.querySelectorAll('div,span,p,h1,h2,h3,h4')];
     const label = labels.find((node) => /^(cat[eé]gories|categories)$/i.test(text(node)));
     if (!label) return null;
+
     let node = label.parentElement;
-    for (let i = 0; node && node !== root && i < 5; i += 1, node = node.parentElement) {
-      if (node.children.length >= 3 && node.scrollHeight > 120) return node;
+    for (let i = 0; node && node !== root && i < 6; i += 1, node = node.parentElement) {
+      const buttons = node.querySelectorAll('button,[role="button"],.list-group-item').length;
+      if (buttons >= 3 || (node.children.length >= 3 && node.scrollHeight > 120)) return node;
     }
     return label.parentElement;
   };
 
   const getGrid = (root) => {
     const direct = root.querySelector('.nitro-catalog-grid');
-    if (direct) return direct;
+    if (direct && direct.children.length >= 2) return direct;
+
     return [...root.querySelectorAll('[class*="catalog-grid"]')]
-      .find((node) => !node.className.includes('grid-item') && node.children.length >= 4) || null;
+      .find((node) => !String(node.className).includes('grid-item') && node.children.length >= 4) || null;
   };
 
   const getPurchase = (root) => {
     const direct = root.querySelector('.nitro-catalog-purchase-component, [class*="catalog-purchase"], [class*="purchase-component"]');
     if (direct) return direct;
+
     const buy = [...root.querySelectorAll('button')].find((button) => /acheter|buy|purchase/i.test(text(button)));
     if (!buy) return null;
+
     let node = buy.parentElement;
-    for (let i = 0; node && node !== root && i < 4; i += 1, node = node.parentElement) {
-      if (text(node).length < 900) return node;
+    for (let i = 0; node && node !== root && i < 5; i += 1, node = node.parentElement) {
+      const value = text(node);
+      if (value.length > 20 && value.length < 900) return node;
     }
     return buy.parentElement;
+  };
+
+  const getCommonAncestor = (nodes, root) => {
+    const valid = nodes.filter(Boolean);
+    if (valid.length < 2) return null;
+
+    let current = valid[0].parentElement;
+    while (current && current !== root) {
+      if (valid.every((node) => current.contains(node))) return current;
+      current = current.parentElement;
+    }
+    return null;
+  };
+
+  const directBranch = (ancestor, target) => {
+    if (!ancestor || !target) return null;
+    let node = target;
+    while (node.parentElement && node.parentElement !== ancestor) node = node.parentElement;
+    return node.parentElement === ancestor ? node : null;
+  };
+
+  const markProductLayout = (root, categories, grid, purchase) => {
+    const common = getCommonAncestor([categories, grid, purchase], root);
+    if (!common) return;
+
+    const catBranch = directBranch(common, categories);
+    const gridBranch = directBranch(common, grid);
+    const purchaseBranch = directBranch(common, purchase);
+    const branches = [catBranch, gridBranch, purchaseBranch].filter(Boolean);
+
+    if (new Set(branches).size !== 3) return;
+
+    add(common, 'prc-product-layout');
+    add(catBranch, 'prc-col-categories');
+    add(gridBranch, 'prc-col-products');
+    add(purchaseBranch, 'prc-col-preview');
+  };
+
+  const markPromoCards = (root) => {
+    const images = [...root.querySelectorAll('img')].filter((img) => {
+      const rect = img.getBoundingClientRect();
+      return rect.width >= 180 || rect.height >= 100 || img.naturalWidth >= 180 || img.naturalHeight >= 100;
+    });
+
+    const cards = [];
+    images.forEach((img) => {
+      const card = img.closest('a,button') || img.parentElement;
+      if (card && card !== root && !cards.includes(card)) {
+        add(card, 'prc-promo-card');
+        cards.push(card);
+      }
+    });
+
+    if (cards.length >= 2) {
+      const parent = cards[0].parentElement;
+      if (parent && cards.every((card) => card.parentElement === parent)) add(parent, 'prc-promo-grid');
+    }
   };
 
   const decorate = (root) => {
     if (!(root instanceof HTMLElement)) return;
 
-    root.classList.add('paradise-catalog-v4');
-    root.classList.remove('prc-front', 'prc-products', 'prc-other');
-    root.dataset.paradiseCatalog = 'v4';
+    root.classList.add('paradise-catalog-v5');
+    root.classList.remove('paradise-catalog-v4', 'prc-front', 'prc-products', 'prc-other');
+    root.dataset.paradiseCatalog = 'v5';
 
     add(root.querySelector('.nitro-card-header, .nitro-catalog-header'), 'prc-header');
     add(getTopNav(root), 'prc-topnav');
+    translateVisibleText(root);
 
     root.querySelectorAll('input[type="text"],input[type="search"]').forEach((input) => {
-      add(input, 'prc-search-input');
-      add(input.parentElement, 'prc-search');
+      const hint = `${input.placeholder || ''} ${input.getAttribute('aria-label') || ''}`;
+      if (/voucher|promotionnel/i.test(hint)) {
+        add(input, 'prc-voucher-input');
+        add(input.parentElement, 'prc-voucher');
+      } else {
+        add(input, 'prc-search-input');
+        add(input.parentElement, 'prc-search');
+      }
     });
 
-    root.querySelectorAll('.nitro-catalog-grid-item').forEach((node) => add(node, 'prc-item'));
+    root.querySelectorAll('.nitro-catalog-grid-item,[class*="catalog-grid-item"]').forEach((node) => add(node, 'prc-item'));
     root.querySelectorAll('button').forEach((button) => {
       if (/acheter|buy|purchase/i.test(text(button))) add(button, 'prc-buy-button');
     });
@@ -74,12 +191,15 @@
       add(grid, 'prc-grid');
       add(purchase, 'prc-purchase');
       add(categories, 'prc-category-panel');
+      markProductLayout(root, categories, grid, purchase);
       return;
     }
 
     const hasPromoImages = root.querySelectorAll('img').length >= 2;
-    if (hasPromoImages) root.classList.add('prc-front');
-    else root.classList.add('prc-other');
+    if (hasPromoImages) {
+      root.classList.add('prc-front');
+      markPromoCards(root);
+    } else root.classList.add('prc-other');
   };
 
   const scan = () => document.querySelectorAll(ROOT).forEach(decorate);
