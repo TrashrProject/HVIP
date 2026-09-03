@@ -10,7 +10,6 @@ import io.github.brenoepics.roleplay.utilities.types.RPItem;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.extern.slf4j.Slf4j;
 
@@ -96,9 +95,6 @@ public class PlantCommand extends Command {
           insert.setInt(2, GROW_SECONDS);
           insert.executeUpdate();
         }
-
-        avatar.getInventory().removeItem(seed, 1);
-        avatar.getInventory().updateDatabase(connection, userId);
         connection.commit();
       } catch (Exception exception) {
         connection.rollback();
@@ -113,6 +109,7 @@ public class PlantCommand extends Command {
       return true;
     }
 
+    avatar.getInventory().removeItem(seed, 1);
     avatar.getInventory().updateInventory(gameClient.getHabbo());
     gameClient.getHabbo().whisper(
         "Graine plantée. Revenez dans " + GROW_SECONDS + " secondes puis utilisez :recolter.",
@@ -165,8 +162,6 @@ public class PlantCommand extends Command {
           delete.setInt(1, userId);
           delete.executeUpdate();
         }
-
-        avatar.getInventory().addItem(gameClient.getHabbo(), carrot, quantity);
         connection.commit();
       } catch (Exception exception) {
         connection.rollback();
@@ -174,13 +169,14 @@ public class PlantCommand extends Command {
       } finally {
         connection.setAutoCommit(true);
       }
-    } catch (SQLException exception) {
+    } catch (Exception exception) {
       log.error("Unable to harvest crop for user {}", userId, exception);
       gameClient.getHabbo().whisper(
           "Impossible de récolter pour le moment.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
+    avatar.getInventory().addItem(gameClient.getHabbo(), carrot, quantity);
     gameClient.getHabbo().whisper(
         "Récolte terminée : " + quantity + " × Carotte.", RoomChatMessageBubbles.ALERT);
     return true;
