@@ -100,7 +100,9 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
     }
 
     # Convertit les lignes catalog_items de l'ancien schema vers le schema reel WavePlus.
-    if ($line -match "^\((?<page>\d+),'(?<item>\d+)','(?<name>(?:''|[^'])*)',(?<credits>-?\d+),(?<pixels>-?\d+),(?<diamonds>-?\d+),(?<amount>\d+),(?<limitedSells>\d+),(?<limitedStack>\d+),'(?<active>[01])','(?<extra>(?:''|[^'])*)','(?<badge>(?:''|[^'])*)',(?<offer>-?\d+),(?<pointsType>-?\d+)\)(?<comma>,?)$") {
+    # La derniere ligne de l'INSERT se termine par ';' (et non par une virgule),
+    # donc on accepte et preserve les deux separateurs.
+    if ($line -match "^\((?<page>\d+),'(?<item>\d+)','(?<name>(?:''|[^'])*)',(?<credits>-?\d+),(?<pixels>-?\d+),(?<diamonds>-?\d+),(?<amount>\d+),(?<limitedSells>\d+),(?<limitedStack>\d+),'(?<active>[01])','(?<extra>(?:''|[^'])*)','(?<badge>(?:''|[^'])*)',(?<offer>-?\d+),(?<pointsType>-?\d+)\)(?<term>[,;]?)$") {
         $page = $Matches['page']
         $item = $Matches['item']
         $name = $Matches['name']
@@ -110,8 +112,8 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
         $limitedSells = $Matches['limitedSells']
         $extra = $Matches['extra']
         $offer = $Matches['offer']
-        $comma = $Matches['comma']
-        $line = "('$item',$page,'$name',$credits,0,0,$amount,$limitedStack,$limitedSells,1,$offer,0,'$extra','1','0')$comma"
+        $term = $Matches['term']
+        $line = "('$item',$page,'$name',$credits,0,0,$amount,$limitedStack,$limitedSells,1,$offer,0,'$extra','1','0')$term"
         $converted++
     }
 
