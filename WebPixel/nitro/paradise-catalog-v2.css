@@ -1,199 +1,373 @@
-/* ParadiseRP Catalogue V5.1 — compact safe layout */
-:root{--prc-blue:#0e8fd2;--prc-blue2:#075e91;--prc-dark:#08253d;--prc-panel:#e9f0f4;--prc-line:#8aa3b2;--prc-green:#1ea95a;--prc-green2:#147d43}
-
-.nitro-catalog.paradise-catalog-v5{
-  width:min(930px,calc(100vw - 90px));
-  max-width:930px;
-  min-width:720px;
-  height:min(570px,calc(100vh - 90px));
-  max-height:570px;
-  border:2px solid #1377ad;
-  border-radius:10px;
-  overflow:hidden;
-  background:#dce6ec;
-  box-shadow:0 12px 28px rgba(0,0,0,.34);
+/* ParadiseRP Catalogue V6 — visual redesign on top of the native Nitro catalogue.
+   No catalogue data, price, permission or purchase logic is duplicated here. */
+:root{
+  --prc-bg:#061a31;
+  --prc-bg-2:#082443;
+  --prc-panel:#0b2d52;
+  --prc-panel-2:#0e3762;
+  --prc-line:#1d75b8;
+  --prc-line-soft:#164d7b;
+  --prc-blue:#1aa7ff;
+  --prc-cyan:#46d8ff;
+  --prc-violet:#5c50da;
+  --prc-text:#f4f9ff;
+  --prc-muted:#a8c5df;
+  --prc-green:#28d96f;
+  --prc-green-2:#19ae58;
+  --prc-gold:#ffc932;
 }
 
-.paradise-catalog-v5 .prc-header,
-.paradise-catalog-v5>.nitro-card-header{
-  min-height:38px;
-  height:38px;
-  padding:0 42px 0 14px;
-  display:flex;
-  align-items:center;
+.nitro-catalog.paradise-catalog-v6{
+  width:min(1180px,calc(100vw - 72px));
+  max-width:1180px;
+  min-width:760px;
+  height:min(720px,calc(100vh - 58px));
+  max-height:720px;
   overflow:hidden;
-  white-space:nowrap;
+  border:2px solid #178bd2;
+  border-radius:18px;
+  background:linear-gradient(180deg,#071a33 0%,#06162a 100%);
+  color:var(--prc-text);
+  box-shadow:0 24px 60px rgba(0,0,0,.46),0 0 0 1px rgba(70,216,255,.15) inset,0 0 38px rgba(20,132,220,.18);
+}
+
+/* Keep the original Nitro header and therefore its real close control, but blend it into the banner. */
+.paradise-catalog-v6>.prc-native-header,
+.paradise-catalog-v6>.nitro-card-header{
+  position:absolute;
+  top:15px;
+  right:16px;
+  z-index:30;
+  width:auto;
+  min-width:42px;
+  height:42px;
+  min-height:42px;
+  padding:0;
+  overflow:visible;
   border:0;
-  border-bottom:1px solid #0a5b88;
-  background:linear-gradient(#103f62,#0a2f4d);
+  background:transparent;
+  box-shadow:none;
+  color:transparent;
+  pointer-events:none;
+}
+.paradise-catalog-v6>.prc-native-header button,
+.paradise-catalog-v6>.prc-native-header .close,
+.paradise-catalog-v6>.nitro-card-header button,
+.paradise-catalog-v6>.nitro-card-header .close{
+  pointer-events:auto;
   color:#fff;
-  font-size:15px;
-  font-weight:800;
-  line-height:38px;
+  border:1px solid #1a5c98;
+  border-radius:10px;
+  background:linear-gradient(180deg,#123b70,#0a2850);
+  box-shadow:0 5px 12px rgba(0,0,0,.24),0 0 0 1px rgba(70,216,255,.08) inset;
 }
 
-.paradise-catalog-v5 .prc-header::after{
-  content:'PARADISERP';
-  margin-left:8px;
-  font-size:9px;
-  color:#71d9ff;
-  line-height:1;
+.paradise-catalog-v6>.prc-brand-banner{
+  position:relative;
+  z-index:5;
+  height:102px;
+  min-height:102px;
+  display:grid;
+  grid-template-columns:1fr 1.2fr 1fr;
+  align-items:center;
+  padding:0 78px 0 28px;
+  overflow:hidden;
+  border-bottom:1px solid #1c5d96;
+  background:
+    radial-gradient(circle at 72% 35%,rgba(169,69,216,.38),transparent 26%),
+    radial-gradient(circle at 22% 10%,rgba(39,178,255,.32),transparent 25%),
+    linear-gradient(105deg,#0b2d63 0%,#17256c 45%,#44206d 76%,#0f2d69 100%);
 }
+.paradise-catalog-v6>.prc-brand-banner::before,
+.paradise-catalog-v6>.prc-brand-banner::after{
+  content:'';
+  position:absolute;
+  inset:auto 0 0 0;
+  height:100%;
+  pointer-events:none;
+}
+.paradise-catalog-v6>.prc-brand-banner::before{
+  opacity:.22;
+  background:
+    radial-gradient(ellipse at 8% 115%,#000 0 15%,transparent 16%),
+    radial-gradient(ellipse at 18% 116%,#000 0 12%,transparent 13%),
+    radial-gradient(ellipse at 88% 115%,#000 0 18%,transparent 19%),
+    linear-gradient(165deg,transparent 0 54%,rgba(1,9,26,.56) 55% 100%);
+}
+.paradise-catalog-v6>.prc-brand-banner::after{
+  opacity:.24;
+  background:repeating-linear-gradient(90deg,transparent 0 68px,rgba(75,210,255,.08) 69px 70px,transparent 71px 134px);
+  mix-blend-mode:screen;
+}
+.paradise-catalog-v6 .prc-brand-left,
+.paradise-catalog-v6 .prc-brand-tagline{position:relative;z-index:2}
+.paradise-catalog-v6 .prc-brand-left{display:flex;align-items:center;gap:13px;min-width:0}
+.paradise-catalog-v6 .prc-brand-mark{
+  width:58px;height:58px;display:grid;place-items:center;flex:0 0 58px;
+  border:2px solid #77e9ff;border-radius:14px;
+  background:linear-gradient(145deg,#46dcff,#257fe9 52%,#6248d8);
+  color:#fff;font-size:34px;font-weight:900;
+  box-shadow:0 0 22px rgba(61,207,255,.48),0 5px 16px rgba(0,0,0,.24);
+}
+.paradise-catalog-v6 .prc-brand-copy{display:flex;flex-direction:column;line-height:.95;text-shadow:0 2px 4px rgba(0,0,0,.35)}
+.paradise-catalog-v6 .prc-brand-copy strong{font-size:31px;letter-spacing:.8px;color:#f7fbff}
+.paradise-catalog-v6 .prc-brand-copy em{margin-top:7px;font-size:22px;font-style:italic;font-weight:700;color:#46d8ff}
+.paradise-catalog-v6 .prc-brand-tagline{text-align:center;font-size:20px;line-height:1.24;font-style:italic;font-weight:700;color:#f7f4ff;text-shadow:0 2px 4px rgba(0,0,0,.35)}
 
-.paradise-catalog-v5 .nitro-card-content{
+.paradise-catalog-v6>.nitro-card-content{
+  height:calc(100% - 102px);
   min-height:0;
   padding:0;
   overflow:hidden;
-  background:#dce6ec;
+  background:linear-gradient(180deg,#071a31 0%,#051428 100%);
+  color:var(--prc-text);
 }
 
-/* Ne jamais transformer le conteneur global des onglets en grosse barre qui recouvre le header. */
-.paradise-catalog-v5 .prc-topnav{
-  max-width:100%;
-  min-height:36px;
-  height:auto;
+/* Native catalogue top navigation, only reskinned. */
+.paradise-catalog-v6 .prc-topnav{
+  min-height:58px;
+  max-height:64px;
+  display:flex;
+  align-items:stretch;
+  gap:4px;
   margin:0;
-  padding:0 8px;
+  padding:8px 14px 0;
   overflow-x:auto;
   overflow-y:hidden;
-  border-bottom:1px solid #214b67;
-  background:#092640;
+  border-bottom:1px solid #14517f;
+  background:linear-gradient(180deg,#071f3b,#061a31);
   box-sizing:border-box;
 }
-
-.paradise-catalog-v5 .prc-topnav button,
-.paradise-catalog-v5 .prc-topnav [role="button"],
-.paradise-catalog-v5 .prc-topnav .nav-link,
-.paradise-catalog-v5 .prc-topnav .list-group-item{
-  min-height:34px;
-  padding:6px 10px;
-  border:0;
-  border-bottom:3px solid transparent;
-  border-radius:0;
-  background:transparent;
-  color:#eaf6fc;
-  font-weight:700;
+.paradise-catalog-v6 .prc-topnav button,
+.paradise-catalog-v6 .prc-topnav [role="button"],
+.paradise-catalog-v6 .prc-topnav .nav-link,
+.paradise-catalog-v6 .prc-topnav .list-group-item{
+  min-width:126px;
+  min-height:50px;
+  padding:9px 16px;
+  border:1px solid #174a78;
+  border-bottom:0;
+  border-radius:10px 10px 0 0;
+  background:linear-gradient(180deg,#0a294b,#071f3a);
+  color:#dcecff;
+  font-size:15px;
+  font-weight:800;
   text-align:center;
-  box-shadow:none;
+  box-shadow:0 0 0 1px rgba(79,204,255,.03) inset;
+  transition:background .14s ease,border-color .14s ease,transform .14s ease,color .14s ease;
 }
-
-.paradise-catalog-v5 .prc-topnav .active,
-.paradise-catalog-v5 .prc-topnav [aria-selected="true"]{
+.paradise-catalog-v6 .prc-topnav button:hover,
+.paradise-catalog-v6 .prc-topnav [role="button"]:hover,
+.paradise-catalog-v6 .prc-topnav .nav-link:hover,
+.paradise-catalog-v6 .prc-topnav .list-group-item:hover{transform:translateY(-1px);border-color:#248bc9;color:#fff;background:#0d3760}
+.paradise-catalog-v6 .prc-topnav .active,
+.paradise-catalog-v6 .prc-topnav [aria-selected="true"]{
   color:#fff;
-  border-bottom-color:#40c9ff;
-  background:rgba(20,149,218,.22);
+  border-color:#32b9ff;
+  background:linear-gradient(180deg,#23a9ef,#1681d2);
+  box-shadow:0 0 18px rgba(27,168,255,.25) inset,0 -1px 0 rgba(255,255,255,.12) inset;
 }
 
-.paradise-catalog-v5 .prc-search,
-.paradise-catalog-v5 .prc-voucher{min-width:0;max-width:100%}
-.paradise-catalog-v5 .prc-search-input,
-.paradise-catalog-v5 .prc-voucher-input{
-  min-height:32px;
-  border:1px solid #718b9a;
-  border-radius:5px;
-  background:#f8fbfd;
-  color:#24313a;
+.paradise-catalog-v6 .prc-search,
+.paradise-catalog-v6 .prc-voucher{min-width:0;max-width:100%}
+.paradise-catalog-v6 .prc-search-input,
+.paradise-catalog-v6 .prc-voucher-input{
+  width:100%;
+  min-height:38px;
+  padding:8px 12px;
+  border:1px solid #274f80;
+  border-radius:9px;
+  outline:none;
+  background:linear-gradient(180deg,#10244d,#111b46);
+  color:#eaf6ff;
+  box-shadow:0 0 0 1px rgba(102,215,255,.03) inset;
 }
-.paradise-catalog-v5 .prc-voucher{margin:6px 8px;padding:4px;background:#eef4f7;border:1px solid #b0c0ca;border-radius:5px}
+.paradise-catalog-v6 .prc-search-input::placeholder,
+.paradise-catalog-v6 .prc-voucher-input::placeholder{color:#7f9fc6}
+.paradise-catalog-v6 .prc-search-input:focus,
+.paradise-catalog-v6 .prc-voucher-input:focus{border-color:#3bc6ff;box-shadow:0 0 0 2px rgba(59,198,255,.11)}
+.paradise-catalog-v6 .prc-voucher{margin:7px;padding:5px;border:1px solid #244f79;border-radius:9px;background:#0a2646}
 
-/* Pages produits */
-.paradise-catalog-v5.prc-products .nitro-card-content{padding:8px;overflow:hidden}
-.paradise-catalog-v5.prc-products .prc-product-layout{
+/* Product pages: native category tree + native item grid + native purchase component. */
+.paradise-catalog-v6.prc-products .nitro-card-content{padding-bottom:0;overflow:hidden}
+.paradise-catalog-v6.prc-products .prc-product-layout{
   display:grid;
-  grid-template-columns:190px minmax(0,1fr) 215px;
+  grid-template-columns:236px minmax(360px,1fr) 292px;
+  gap:12px;
+  height:calc(100% - 58px);
+  min-width:0;
+  min-height:0;
+  padding:14px;
+  box-sizing:border-box;
+}
+.paradise-catalog-v6.prc-products .prc-col-categories,
+.paradise-catalog-v6.prc-products .prc-col-products,
+.paradise-catalog-v6.prc-products .prc-col-preview{min-width:0;min-height:0;overflow:hidden}
+
+.paradise-catalog-v6.prc-products .prc-category-panel{
+  height:100%;
+  overflow-y:auto;
+  padding:8px;
+  border:1px solid #1c4e7b;
+  border-radius:11px;
+  background:linear-gradient(180deg,#0c2146,#091a39);
+  color:#dbeafe;
+  box-shadow:0 10px 24px rgba(0,0,0,.15) inset;
+}
+.paradise-catalog-v6.prc-products .prc-category-panel::before{
+  content:'CATÉGORIES';
+  display:block;
+  margin:2px 6px 9px;
+  color:#a8c8eb;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.7px;
+}
+.paradise-catalog-v6.prc-products .prc-category-panel button,
+.paradise-catalog-v6.prc-products .prc-category-panel [role="button"],
+.paradise-catalog-v6.prc-products .prc-category-panel .list-group-item{
+  width:100%;
+  min-height:38px;
+  margin:0 0 3px;
+  padding:8px 10px;
+  border:1px solid transparent;
+  border-radius:7px;
+  background:transparent;
+  color:#c8dbef;
+  text-align:left;
+  font-weight:650;
+  transition:background .12s ease,border-color .12s ease,color .12s ease,transform .12s ease;
+}
+.paradise-catalog-v6.prc-products .prc-category-panel button:hover,
+.paradise-catalog-v6.prc-products .prc-category-panel [role="button"]:hover,
+.paradise-catalog-v6.prc-products .prc-category-panel .list-group-item:hover{transform:translateX(2px);background:#0d3964;border-color:#185a8f;color:#fff}
+.paradise-catalog-v6.prc-products .prc-category-panel .active,
+.paradise-catalog-v6.prc-products .prc-category-panel [aria-selected="true"]{
+  background:linear-gradient(90deg,#1ba4ee,#187bd1);
+  border-color:#3bc6ff;
+  color:#fff;
+  box-shadow:0 0 14px rgba(32,163,241,.2) inset;
+}
+
+.paradise-catalog-v6.prc-products .prc-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(104px,1fr));
+  grid-auto-rows:minmax(116px,auto);
   gap:8px;
   height:100%;
   min-width:0;
   min-height:0;
-}
-.paradise-catalog-v5.prc-products .prc-col-categories,
-.paradise-catalog-v5.prc-products .prc-col-products,
-.paradise-catalog-v5.prc-products .prc-col-preview{min-width:0;min-height:0}
-
-.paradise-catalog-v5.prc-products .prc-category-panel{
-  height:100%;
-  overflow-y:auto;
-  padding:5px;
-  border:1px solid var(--prc-line);
-  border-radius:6px;
-  background:#edf3f6;
-  color:#263640;
-}
-.paradise-catalog-v5.prc-products .prc-category-panel button,
-.paradise-catalog-v5.prc-products .prc-category-panel [role="button"],
-.paradise-catalog-v5.prc-products .prc-category-panel .list-group-item{
-  width:100%;
-  margin-bottom:2px;
-  padding:5px 6px;
-  border:0;
-  border-radius:4px;
-  background:transparent;
-  color:#263640;
-  text-align:left;
-}
-.paradise-catalog-v5.prc-products .prc-category-panel .active,
-.paradise-catalog-v5.prc-products .prc-category-panel [aria-selected="true"]{background:#138fd0;color:#fff}
-
-.paradise-catalog-v5.prc-products .prc-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(82px,1fr));
-  grid-auto-rows:minmax(86px,auto);
-  gap:5px;
-  height:100%;
-  min-width:0;
-  min-height:0;
-  padding:6px;
-  overflow-y:auto;
-  border:1px solid var(--prc-line);
-  border-radius:6px;
-  background:#e8eff3;
-  align-content:start;
-}
-.paradise-catalog-v5.prc-products .prc-item{
-  min-width:0;
-  min-height:84px;
-  padding:5px;
-  overflow:hidden;
-  border:1px solid #9eb2bd;
-  border-radius:5px;
-  background:linear-gradient(#fff,#e3ebef);
-  color:#23323c;
-  transition:transform .13s ease,border-color .13s ease;
-}
-.paradise-catalog-v5.prc-products .prc-item:hover{transform:translateY(-1px);border-color:#238fc7}
-.paradise-catalog-v5.prc-products .prc-item img{max-width:64px;max-height:58px;object-fit:contain;image-rendering:pixelated}
-
-.paradise-catalog-v5.prc-products .prc-purchase{
-  height:100%;
-  overflow-y:auto;
   padding:8px;
-  border:1px solid #3d6985;
-  border-radius:6px;
-  background:linear-gradient(#0e3557,#0a2945);
-  color:#fff;
+  overflow-y:auto;
+  border:1px solid #174b77;
+  border-radius:11px;
+  background:linear-gradient(180deg,#071d37,#06182f);
+  align-content:start;
+  box-shadow:0 10px 24px rgba(0,0,0,.12) inset;
 }
-.paradise-catalog-v5.prc-products .prc-purchase img{display:block;max-width:120px;max-height:120px;margin:2px auto 8px;object-fit:contain;image-rendering:pixelated}
-.paradise-catalog-v5 .prc-buy-button,
-.paradise-catalog-v5 .prc-purchase .btn-success{
-  min-height:34px;
-  border:1px solid #0c6c36;
-  border-radius:5px;
-  background:linear-gradient(var(--prc-green),var(--prc-green2));
+.paradise-catalog-v6.prc-products .prc-item{
+  position:relative;
+  min-width:0;
+  min-height:112px;
+  padding:8px;
+  overflow:hidden;
+  border:1px solid #1c5b91;
+  border-radius:9px;
+  background:linear-gradient(180deg,#0d3761,#0a2a4c);
+  color:#f4f9ff;
+  box-shadow:0 1px 0 rgba(255,255,255,.03) inset;
+  transition:transform .13s ease,border-color .13s ease,box-shadow .13s ease,background .13s ease;
+}
+.paradise-catalog-v6.prc-products .prc-item:hover{
+  transform:translateY(-2px);
+  border-color:#35c6ff;
+  background:linear-gradient(180deg,#104873,#0c345b);
+  box-shadow:0 0 16px rgba(44,183,255,.18);
+}
+.paradise-catalog-v6.prc-products .prc-item.prc-item-selected,
+.paradise-catalog-v6.prc-products .prc-item.active,
+.paradise-catalog-v6.prc-products .prc-item.selected,
+.paradise-catalog-v6.prc-products .prc-item[aria-selected="true"]{
+  border-color:#45d9ff;
+  background:linear-gradient(180deg,#125487,#0d3b67);
+  box-shadow:0 0 0 1px rgba(69,217,255,.22) inset,0 0 20px rgba(45,179,255,.24);
+}
+.paradise-catalog-v6.prc-products .prc-item img{display:block;max-width:78px;max-height:68px;margin:0 auto 4px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 5px 5px rgba(0,0,0,.3))}
+.paradise-catalog-v6.prc-products .prc-item :where(span,div,p){color:inherit}
+
+.paradise-catalog-v6.prc-products .prc-purchase{
+  position:relative;
+  height:100%;
+  overflow-y:auto;
+  padding:16px;
+  border:1px solid #2487c7;
+  border-radius:12px;
+  background:
+    radial-gradient(circle at 50% 22%,rgba(36,118,255,.32),transparent 33%),
+    linear-gradient(180deg,#0b2b61,#081f47 55%,#061a37);
   color:#fff;
-  font-weight:800;
+  box-shadow:0 0 0 1px rgba(63,206,255,.08) inset,0 16px 30px rgba(0,0,0,.16) inset;
+}
+.paradise-catalog-v6.prc-products .prc-purchase::before{
+  content:'';
+  position:absolute;
+  left:12%;right:12%;top:102px;
+  height:54px;
+  border-radius:50%;
+  background:radial-gradient(ellipse,#2f91ff 0%,#1c68d7 52%,rgba(17,55,130,.2) 70%,transparent 72%);
+  box-shadow:0 0 30px rgba(46,154,255,.35);
+  pointer-events:none;
+}
+.paradise-catalog-v6.prc-products .prc-purchase img{position:relative;z-index:2;display:block;max-width:160px;max-height:140px;margin:18px auto 28px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 12px 8px rgba(0,0,0,.42))}
+.paradise-catalog-v6 .prc-buy-button,
+.paradise-catalog-v6 .prc-purchase .btn-success{
+  width:100%;
+  min-height:46px;
+  border:1px solid #39ef87;
+  border-radius:9px;
+  background:linear-gradient(180deg,var(--prc-green),var(--prc-green-2));
+  color:#fff;
+  font-size:16px;
+  font-weight:900;
+  box-shadow:0 5px 14px rgba(22,169,84,.23),0 1px 0 rgba(255,255,255,.18) inset;
+  transition:transform .12s ease,filter .12s ease,box-shadow .12s ease;
+}
+.paradise-catalog-v6 .prc-buy-button:hover,
+.paradise-catalog-v6 .prc-purchase .btn-success:hover{transform:translateY(-1px);filter:brightness(1.08);box-shadow:0 8px 20px rgba(22,169,84,.29)}
+.paradise-catalog-v6 .prc-buy-button:active,
+.paradise-catalog-v6 .prc-purchase .btn-success:active{transform:translateY(1px)}
+
+/* Front page and special catalogue pages keep every native child/functionality. */
+.paradise-catalog-v6.prc-front .nitro-card-content,
+.paradise-catalog-v6.prc-other .nitro-card-content{overflow:auto;background:linear-gradient(180deg,#071c35,#06162b)}
+.paradise-catalog-v6.prc-front img,
+.paradise-catalog-v6.prc-other img{max-width:100%;height:auto;object-fit:contain}
+.paradise-catalog-v6.prc-front .prc-promo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px}
+.paradise-catalog-v6.prc-front .prc-promo-card{overflow:hidden;border:1px solid #1d5e91;border-radius:11px;background:#0a294b;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.paradise-catalog-v6.prc-front .prc-promo-card img{max-height:190px}
+
+.paradise-catalog-v6 :where(.prc-topnav,.prc-category-panel,.prc-grid,.prc-purchase,.nitro-card-content)::-webkit-scrollbar{width:7px;height:7px}
+.paradise-catalog-v6 :where(.prc-topnav,.prc-category-panel,.prc-grid,.prc-purchase,.nitro-card-content)::-webkit-scrollbar-track{background:#06172c}
+.paradise-catalog-v6 :where(.prc-topnav,.prc-category-panel,.prc-grid,.prc-purchase,.nitro-card-content)::-webkit-scrollbar-thumb{background:linear-gradient(#2585c7,#1e5f9c);border-radius:8px}
+
+@media(max-width:1180px){
+  .nitro-catalog.paradise-catalog-v6{width:calc(100vw - 32px);height:min(680px,calc(100vh - 32px));min-width:700px}
+  .paradise-catalog-v6.prc-products .prc-product-layout{grid-template-columns:205px minmax(330px,1fr) 252px;gap:9px;padding:10px}
+  .paradise-catalog-v6 .prc-brand-copy strong{font-size:27px}
+  .paradise-catalog-v6 .prc-brand-copy em{font-size:19px}
+  .paradise-catalog-v6 .prc-brand-tagline{font-size:17px}
 }
 
-/* Accueil et pages spéciales : garder la structure Nitro, mais limiter l'encombrement. */
-.paradise-catalog-v5.prc-front .nitro-card-content,
-.paradise-catalog-v5.prc-other .nitro-card-content{padding:8px;overflow:auto}
-.paradise-catalog-v5.prc-front img,
-.paradise-catalog-v5.prc-other img{max-width:100%;height:auto;object-fit:contain}
-.paradise-catalog-v5.prc-front .prc-promo-card img{max-height:145px}
-
-.paradise-catalog-v5 :where(.prc-topnav,.prc-category-panel,.prc-grid,.prc-purchase,.nitro-card-content)::-webkit-scrollbar{width:6px;height:6px}
-.paradise-catalog-v5 :where(.prc-topnav,.prc-category-panel,.prc-grid,.prc-purchase,.nitro-card-content)::-webkit-scrollbar-thumb{background:#648da5;border-radius:6px}
-
-@media(max-width:980px){
-  .nitro-catalog.paradise-catalog-v5{width:calc(100vw - 34px);min-width:680px;height:min(540px,calc(100vh - 34px))}
-  .paradise-catalog-v5.prc-products .prc-product-layout{grid-template-columns:175px minmax(0,1fr) 200px;gap:6px}
+@media(max-width:860px){
+  .nitro-catalog.paradise-catalog-v6{min-width:0;width:calc(100vw - 14px);height:calc(100vh - 14px);border-radius:12px}
+  .paradise-catalog-v6>.prc-brand-banner{height:86px;min-height:86px;grid-template-columns:1fr;padding:0 62px 0 16px}
+  .paradise-catalog-v6 .prc-brand-tagline{display:none}
+  .paradise-catalog-v6>.nitro-card-content{height:calc(100% - 86px)}
+  .paradise-catalog-v6 .prc-topnav{min-height:54px;padding-left:8px;padding-right:8px}
+  .paradise-catalog-v6 .prc-topnav button,
+  .paradise-catalog-v6 .prc-topnav [role="button"],
+  .paradise-catalog-v6 .prc-topnav .nav-link,
+  .paradise-catalog-v6 .prc-topnav .list-group-item{min-width:112px;padding:8px 10px;font-size:13px}
+  .paradise-catalog-v6.prc-products .prc-product-layout{grid-template-columns:180px minmax(310px,1fr);height:calc(100% - 54px)}
+  .paradise-catalog-v6.prc-products .prc-col-preview{display:none}
 }
