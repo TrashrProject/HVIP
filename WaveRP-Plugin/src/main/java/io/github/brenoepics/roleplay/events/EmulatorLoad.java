@@ -47,8 +47,13 @@ public class EmulatorLoad implements EventListener {
   @EventHandler
   public static void onEmulatorLoaded(EmulatorLoadedEvent event) {
     try {
-      LoadPlayerCommands.loadCommands();
+      // Register the ParadiseRP item commands first so the permissions created by the registrar
+      // are included in the single permissions reload performed at the end of loadCommands().
+      // Registering them after loadCommands() left the new permission columns invisible to the
+      // in-memory PermissionsManager until a later reload, so :recharger/:pecher/:planter were
+      // treated as normal room chat on first startup.
       HabboBrItemCommandRegistrar.register();
+      LoadPlayerCommands.loadCommands();
       CommandViewRegistry.setProvider(new RoleplayCommandViewProvider());
       LoadConfig.ILoadConfig();
       PacketManager packetManager = Emulator.getGameServer().getPacketManager();
