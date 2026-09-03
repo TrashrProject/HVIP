@@ -19,8 +19,7 @@ if (-not (Test-Path -LiteralPath $MigrationPath -PathType Leaf)) {
 
 $content = Get-Content -LiteralPath $MigrationPath -Raw
 
-# Schema reel du VPS WavePlus : pas de min_vip ni page_strings_*.
-# On renseigne explicitement toutes les colonnes NOT NULL utiles.
+# Schema reel du VPS WavePlus pour catalog_pages.
 $pages = @(
     @(9967100,9967000,'Extension 2000 meubles',1),
     @(9967102,9967100,'Construction et architecture',1),
@@ -45,7 +44,6 @@ $pageBlock = "INSERT INTO catalog_pages (id,parent_id,caption_save,caption,page_
     ($pageRows -join ",`r`n") +
     "`r`nON DUPLICATE KEY UPDATE parent_id=VALUES(parent_id),caption_save=VALUES(caption_save),caption=VALUES(caption),page_layout=VALUES(page_layout),icon_color=VALUES(icon_color),icon_image=VALUES(icon_image),min_rank=VALUES(min_rank),order_num=VALUES(order_num),visible='1',enabled='1',club_only='0',vip_only='0';"
 
-# Remplace le bloc catalog_pages quelle que soit l'ancienne liste de colonnes.
 $content = [regex]::Replace(
     $content,
     "INSERT INTO catalog_pages \([^;]+?\) VALUES\r?\n.*?ON DUPLICATE KEY UPDATE .*?;",
@@ -69,7 +67,6 @@ function Get-CustomPage([string]$Name) {
     if ($n -match '^habbox_') { return 9967113 }
     if ($n -match '^habblet_') { return 9967115 }
     if ($n -match '^cstm_') { return 9967116 }
-
     $first = if ($n.Length -gt 0) { $n.Substring(0,1) } else { '' }
     if ($first -match '[a-h0-9]') { return 9967118 }
     if ($first -match '[i-p]') { return 9967119 }
@@ -78,18 +75,57 @@ function Get-CustomPage([string]$Name) {
 
 $lines = $content -split "`r?`n"
 $changed = 0
+$converted = 0
 for ($i = 0; $i -lt $lines.Count; $i++) {
     $line = $lines[$i]
-    if ($line -match "^\(9967113,'[^']*','([^']*)',") {
+
+    # Ancien format du generateur : page_id en premiere colonne.
+    if ($line -match "^\(9967113,'[^']*','((?:''|[^'])*)',") {
         $name = $Matches[1]
         $page = Get-CustomPage $name
         if ($page -ne 9967113) {
-            $lines[$i] = $line -replace '^\(9967113,', "($page,"
+            $line = $line -replace '^\(9967113,', "($page,"
             $changed++
         }
     }
+
+    # Format WavePlus deja converti : page_id en deuxieme colonne.
+    if ($line -match "^\('([^']*)',9967113,'((?:''|[^'])*)',") {
+        $name = $Matches[2]
+        $page = Get-CustomPage $name
+        if ($page -ne 9967113) {
+            $line = $line -replace "^\('$([regex]::Escape($Matches[1]))',9967113,", "('$($Matches[1])',$page,"
+            $changed++
+        }
+    }
+
+    # Convertit les lignes catalog_items de l'ancien schema vers le schema reel WavePlus.
+    if ($line -match "^\((?<page>\d+),'(?<item>\d+)','(?<name>(?:''|[^'])*)',(?<credits>-?\d+),(?<pixels>-?\d+),(?<diamonds>-?\d+),(?<amount>\d+),(?<limitedSells>\d+),(?<limitedStack>\d+),'(?<active>[01])','(?<extra>(?:''|[^'])*)','(?<badge>(?:''|[^'])*)',(?<offer>-?\d+),(?<pointsType>-?\d+)\)(?<comma>,?)$") {
+        $page = $Matches['page']
+        $item = $Matches['item']
+        $name = $Matches['name']
+        $credits = $Matches['credits']
+        $amount = $Matches['amount']
+        $limitedStack = $Matches['limitedStack']
+        $limitedSells = $Matches['limitedSells']
+        $extra = $Matches['extra']
+        $offer = $Matches['offer']
+        $comma = $Matches['comma']
+        $line = "('$item',$page,'$name',$credits,0,0,$amount,$limitedStack,$limitedSells,1,$offer,0,'$extra','1','0')$comma"
+        $converted++
+    }
+
+    $lines[$i] = $line
 }
 $content = $lines -join "`r`n"
+
+# Remplace l'entete catalog_items par les vraies colonnes WavePlus.
+$content = [regex]::Replace(
+    $content,
+    "INSERT INTO catalog_items \([^;]+?\) VALUES",
+    "INSERT INTO catalog_items (item_ids,page_id,catalog_name,cost_credits,cost_points,points_type,amount,limited_stack,limited_sells,order_number,offer_id,song_id,extradata,have_offer,club_only) VALUES",
+    [System.Text.RegularExpressions.RegexOptions]::Singleline
+)
 
 $catalogItemsMatch = [regex]::Match(
     $content,
@@ -105,11 +141,12 @@ $catalogRowsText = $catalogItemsMatch.Groups['rows'].Value
 
 Write-Host "Catalogue custom reequilibre : $MigrationPath" -ForegroundColor Green
 Write-Host "Offres custom deplacees : $changed" -ForegroundColor Green
+Write-Host "Lignes catalog_items converties WavePlus : $converted" -ForegroundColor Green
 Write-Host "Repartition SQL finale :" -ForegroundColor Cyan
 $total = 0
 foreach ($page in $pages | Where-Object { $_[0] -ne 9967100 }) {
     $id = [int]$page[0]
-    $count = ([regex]::Matches($catalogRowsText, "(?m)^\($id,")).Count
+    $count = ([regex]::Matches($catalogRowsText, "(?m)^\('[^']*',$id,")).Count
     $total += $count
     $color = if ($count -eq 0) { 'Yellow' } else { 'Green' }
     Write-Host (" - {0}: {1} offres" -f $page[2], $count) -ForegroundColor $color
