@@ -9,16 +9,22 @@ import gnu.trove.set.hash.THashSet;
 
 public class FloorPlanEditorBlockedTilesComposer extends MessageComposer {
     private final Room room;
+    private final boolean ignoreLockedTiles;
 
     public FloorPlanEditorBlockedTilesComposer(Room room) {
+        this(room, false);
+    }
+
+    public FloorPlanEditorBlockedTilesComposer(Room room, boolean ignoreLockedTiles) {
         this.room = room;
+        this.ignoreLockedTiles = ignoreLockedTiles;
     }
 
     @Override
     protected ServerMessage composeInternal() {
         this.response.init(Outgoing.FloorPlanEditorBlockedTilesComposer);
 
-        THashSet<RoomTile> tileList = this.room.getLockedTiles();
+        THashSet<RoomTile> tileList = this.ignoreLockedTiles ? new THashSet<>() : this.room.getLockedTiles();
 
         this.response.appendInt(tileList.size());
         for (RoomTile node : tileList) {
