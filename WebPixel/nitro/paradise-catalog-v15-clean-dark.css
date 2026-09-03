@@ -1,0 +1,126 @@
+/* ParadiseRP Catalogue V15 — hard override of legacy Nitro light skin. MUST be loaded last. */
+.nitro-catalog .nitro-card-content,
+.nitro-catalog .nitro-card-content > *,
+.nitro-catalog .nitro-card-content > * > *,
+.nitro-catalog .nitro-card-content > * > * > *,
+.nitro-catalog .nitro-card-content div:not(.prc-item),
+.nitro-catalog .nitro-card-content section,
+.nitro-catalog .nitro-card-content article,
+.nitro-catalog .nitro-card-content main,
+.nitro-catalog .nitro-card-content aside,
+.nitro-catalog .nitro-card-content form {
+    background-color: transparent !important;
+    color: #f5f9ff !important;
+}
+
+/* One continuous ParadiseRP blue/violet canvas. */
+.nitro-catalog .nitro-card-content {
+    background: linear-gradient(135deg,#0a2c5b 0%,#12265f 55%,#3b246f 100%) !important;
+}
+
+/* Any old Bootstrap/Nitro light utility is forbidden inside the catalogue. */
+.nitro-catalog .nitro-card-content :is(
+    .bg-white,.bg-light,.bg-secondary,.bg-body,.bg-body-secondary,
+    .card,.card-body,.list-group,.list-group-item,.container,.container-fluid,
+    .row,.col,.col-1,.col-2,.col-3,.col-4,.col-5,.col-6,.col-7,.col-8,.col-9,.col-10,.col-11,.col-12
+) {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #f5f9ff !important;
+    border-color: #1c5d94 !important;
+}
+
+/* Covers the large grey purchase/bundle sheets visible on native catalogue pages. */
+.nitro-catalog .nitro-card-content [style*="background"],
+.nitro-catalog .nitro-card-content [style*="background-color"] {
+    background-color: transparent !important;
+}
+
+/* Keep item tiles as real tiles instead of transparent blocks. */
+.nitro-catalog .prc-item,
+.nitro-catalog .nitro-catalog-grid-item,
+.nitro-catalog [class*="catalog-grid-item"] {
+    background: linear-gradient(180deg,#123f72,#0b2e58) !important;
+    border: 1px solid #317fba !important;
+    border-radius: 6px !important;
+    color: #fff !important;
+}
+.nitro-catalog .prc-item:hover,
+.nitro-catalog .nitro-catalog-grid-item:hover,
+.nitro-catalog [class*="catalog-grid-item"]:hover {
+    background: linear-gradient(180deg,#1a568f,#103d70) !important;
+    border-color:#50d7ff !important;
+}
+
+/* Main columns receive the same palette as the top header. */
+.nitro-catalog .prc-col-categories,
+.nitro-catalog .prc-col-products,
+.nitro-catalog .prc-col-preview,
+.nitro-catalog .prc-grid,
+.nitro-catalog .prc-purchase {
+    background: linear-gradient(145deg,#0b315f 0%,#13295e 58%,#352369 100%) !important;
+    color:#fff !important;
+}
+
+.nitro-catalog .prc-grid,
+.nitro-catalog .prc-purchase {
+    border:1px solid #178fd6 !important;
+    border-radius:8px !important;
+}
+
+/* Search and category header: same blue/violet visual language as the banner. */
+.nitro-catalog .prc-search,
+.nitro-catalog .prc-category-panel,
+.nitro-catalog [class*="navigation-grid"] {
+    background: linear-gradient(145deg,#0b376b 0%,#172b64 58%,#39236d 100%) !important;
+    color:#fff !important;
+    border-color:#168fd7 !important;
+}
+
+.nitro-catalog .prc-search-input,
+.nitro-catalog input[type="text"],
+.nitro-catalog input[type="search"],
+.nitro-catalog select,
+.nitro-catalog textarea {
+    background:#0a2a55 !important;
+    color:#fff !important;
+    border:1px solid #178fd6 !important;
+}
+.nitro-catalog input::placeholder{color:#a9caea !important;opacity:1 !important}
+
+/* No black copy on the dark catalogue. */
+.nitro-catalog .nitro-card-content :is(p,span,label,strong,b,em,i,h1,h2,h3,h4,h5,h6,small) {
+    color:#f5f9ff !important;
+    text-shadow:none !important;
+}
+
+/* Category rows remain readable and selected rows keep the Paradise accent. */
+.nitro-catalog .prc-category-panel :is(button,[role="button"],.list-group-item) {
+    background:#10365f !important;
+    color:#eff8ff !important;
+    border-color:#1c5d94 !important;
+}
+.nitro-catalog .prc-category-panel :is(.active,[aria-selected="true"]),
+.nitro-catalog .prc-category-panel :is(button,[role="button"],.list-group-item):hover {
+    background:linear-gradient(90deg,#168fd7,#5740c9) !important;
+    color:#fff !important;
+}
+
+/* Purchase buttons keep their semantic colors and are not flattened by the global override. */
+.nitro-catalog .prc-buy-button,
+.nitro-catalog .prc-purchase .btn-primary,
+.nitro-catalog .prc-purchase .btn-info {
+    background:linear-gradient(180deg,#1496de,#086ba9) !important;
+    color:#fff !important;
+    border-color:#29b6f4 !important;
+}
+.nitro-catalog .prc-purchase .btn-danger {
+    background:#a74652 !important;
+    color:#fff !important;
+    border-color:#d66a75 !important;
+}
+
+/* Do not repaint actual furni/room rendering primitives. */
+.nitro-catalog .nitro-card-content :is(img,canvas,svg,picture,video) {
+    background:transparent !important;
+}
