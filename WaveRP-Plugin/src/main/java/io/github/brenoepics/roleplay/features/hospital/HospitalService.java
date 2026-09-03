@@ -410,6 +410,11 @@ public class HospitalService {
 
       String configured = Emulator.getConfig()
           .getValue("features.hospital.bed.interactions", "");
+      String interactionName = normalize(
+          habboItem.getBaseItem().getInteractionType().getName());
+      if (interactionName.contains("bed") || interactionName.contains("lay")) {
+        return true;
+      }
       if (configured == null || configured.trim().isEmpty()
           || configured.trim().equalsIgnoreCase("rp_bed")) {
         // In the hospital room, the furnidata allow_lay flag is the canonical bed marker.
@@ -420,7 +425,6 @@ public class HospitalService {
           .map(String::trim)
           .filter(value -> !value.isEmpty())
           .collect(Collectors.toCollection(HashSet::new));
-      String interactionName = habboItem.getBaseItem().getInteractionType().getName();
       return interactionNames.contains(interactionName) || hasConfiguredBedName(habboItem);
     }
 
