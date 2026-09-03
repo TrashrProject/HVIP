@@ -23,18 +23,19 @@ $pages = @(
     @(9967100,9967000,'Extension 2000 meubles',1),
     @(9967102,9967100,'Construction et architecture',1),
     @(9967103,9967100,'Maison et decoration',2),
-    @(9967107,9967100,'Commerces et restauration',3),
-    @(9967106,9967100,'Nature et exterieurs',4),
-    @(9967111,9967100,'Loisirs jeux et musique',5),
-    @(9967112,9967100,'Saisons et evenements',6),
-    @(9967113,9967100,'Custom - Habbox',7),
-    @(9967114,9967100,'Custom - Yvess',8),
-    @(9967115,9967100,'Custom - Habblet',9),
-    @(9967116,9967100,'Custom - CSTM',10),
-    @(9967117,9967100,'Custom - Atlanta',11),
-    @(9967118,9967100,'Custom A-H',12),
-    @(9967119,9967100,'Custom I-P',13),
-    @(9967120,9967100,'Custom Q-Z',14)
+    @(9967104,9967100,'Ville services et transports',3),
+    @(9967107,9967100,'Commerces et restauration',4),
+    @(9967106,9967100,'Nature et exterieurs',5),
+    @(9967111,9967100,'Loisirs jeux et musique',6),
+    @(9967112,9967100,'Saisons et evenements',7),
+    @(9967113,9967100,'Custom - Habbox',8),
+    @(9967114,9967100,'Custom - Yvess',9),
+    @(9967115,9967100,'Custom - Habblet',10),
+    @(9967116,9967100,'Custom - CSTM',11),
+    @(9967117,9967100,'Custom - Atlanta',12),
+    @(9967118,9967100,'Custom A-H',13),
+    @(9967119,9967100,'Custom I-P',14),
+    @(9967120,9967100,'Custom Q-Z',15)
 )
 
 $pageRows = foreach ($p in $pages) {
@@ -87,9 +88,7 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
 }
 $content = $lines -join "`r`n"
 
-# Compter uniquement les lignes de l'INSERT catalog_items. Les anciennes
-# versions comptaient aussi les lignes catalog_pages, ajoutant exactement le
-# nombre de pages au total (ex. 2014 au lieu de 2000).
+# Compter uniquement les lignes de l'INSERT catalog_items.
 $catalogItemsMatch = [regex]::Match(
     $content,
     "INSERT INTO catalog_items \([^;]+?\) VALUES\r?\n(?<rows>.*?);\r?\nCOMMIT;",
