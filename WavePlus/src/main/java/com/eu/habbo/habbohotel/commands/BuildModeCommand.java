@@ -12,8 +12,14 @@ public class BuildModeCommand extends Command {
     @Override
     public boolean handle(GameClient gameClient, String[] params) throws Exception {
         Room room = gameClient.getHabbo().getHabboInfo().getCurrentRoom();
-        if (room == null || !room.hasRights(gameClient.getHabbo())) {
-            return false;
+        if (room == null) {
+            return true;
+        }
+
+        boolean canBuild = room.hasRights(gameClient.getHabbo()) || gameClient.getHabbo().hasPermission("acc_placefurni");
+        if (!canBuild) {
+            gameClient.getHabbo().whisper("Tu n'as pas la permission d'utiliser :buildmode ici.", RoomChatMessageBubbles.ALERT);
+            return true;
         }
 
         boolean enabled = ParadiseBuildState.toggleBuildMode(gameClient.getHabbo());
@@ -27,10 +33,6 @@ public class BuildModeCommand extends Command {
 
     @Override
     public boolean handlePermissionDenied(GameClient gameClient, String[] params) throws Exception {
-        Room room = gameClient.getHabbo().getHabboInfo().getCurrentRoom();
-        if (room != null && room.hasRights(gameClient.getHabbo())) {
-            return handle(gameClient, params);
-        }
-        return false;
+        return handle(gameClient, params);
     }
 }
