@@ -6,6 +6,7 @@ import com.eu.habbo.habbohotel.commands.CommandHandler;
 import io.github.brenoepics.roleplay.commands.combat.ReloadCommand;
 import io.github.brenoepics.roleplay.commands.generic.FishingCommand;
 import io.github.brenoepics.roleplay.commands.generic.PlantCommand;
+import io.github.brenoepics.roleplay.commands.staff.RpTestKitCommand;
 import io.github.brenoepics.roleplay.features.user.CheckDatabase;
 
 /** Registers the ParadiseRP adaptations of the useful HabboRPbr item actions. */
@@ -30,6 +31,11 @@ public final class HabboBrItemCommandRegistrar {
             new String[]{"planter", "recolter", "récolter", "harvest"}),
         new String[]{"planter", "recolter", "récolter", "harvest"},
         ":planter - Plante une Graine. :recolter - Récupère la culture arrivée à maturité.");
+
+    registerCommand(
+        new RpTestKitCommand("cmd_rp_test_kit", new String[]{"kitrp"}),
+        new String[]{"kitrp"},
+        ":kitrp - Ajoute le kit de test ParadiseRP (staff uniquement).");
   }
 
   private static void registerCommand(Command command, String[] keys, String description) {
