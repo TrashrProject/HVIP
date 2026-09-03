@@ -19,6 +19,8 @@ if (-not (Test-Path -LiteralPath $MigrationPath -PathType Leaf)) {
 
 $content = Get-Content -LiteralPath $MigrationPath -Raw
 
+# Pages finales : aucune sous-page vide. Yvess et Atlanta sont deja absorbees
+# par les categories semantiques du generateur lorsque leurs objets sont utiles.
 $pages = @(
     @(9967100,9967000,'Extension 2000 meubles',1),
     @(9967102,9967100,'Construction et architecture',1),
@@ -29,13 +31,11 @@ $pages = @(
     @(9967111,9967100,'Loisirs jeux et musique',6),
     @(9967112,9967100,'Saisons et evenements',7),
     @(9967113,9967100,'Custom - Habbox',8),
-    @(9967114,9967100,'Custom - Yvess',9),
-    @(9967115,9967100,'Custom - Habblet',10),
-    @(9967116,9967100,'Custom - CSTM',11),
-    @(9967117,9967100,'Custom - Atlanta',12),
-    @(9967118,9967100,'Custom A-H',13),
-    @(9967119,9967100,'Custom I-P',14),
-    @(9967120,9967100,'Custom Q-Z',15)
+    @(9967115,9967100,'Custom - Habblet',9),
+    @(9967116,9967100,'Custom - CSTM',10),
+    @(9967118,9967100,'Custom A-H',11),
+    @(9967119,9967100,'Custom I-P',12),
+    @(9967120,9967100,'Custom Q-Z',13)
 )
 
 $pageRows = foreach ($p in $pages) {
@@ -62,10 +62,8 @@ $content = [regex]::Replace(
 function Get-CustomPage([string]$Name) {
     $n = $Name.ToLowerInvariant()
     if ($n -match '^habbox_') { return 9967113 }
-    if ($n -match '^yvess5_|^yvesss_') { return 9967114 }
     if ($n -match '^habblet_') { return 9967115 }
     if ($n -match '^cstm_') { return 9967116 }
-    if ($n -match '^atlanta_') { return 9967117 }
 
     $first = if ($n.Length -gt 0) { $n.Substring(0,1) } else { '' }
     if ($first -match '[a-h0-9]') { return 9967118 }
