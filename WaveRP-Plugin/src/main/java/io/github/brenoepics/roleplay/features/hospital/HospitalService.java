@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.text.Normalizer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -101,8 +102,7 @@ public class HospitalService {
   }
 
   private static boolean isUsableBed(Room hospital, HabboItem bed) {
-    if (hospital == null || bed == null || bed.getBaseItem() == null
-        || !bed.getBaseItem().allowLay()) {
+    if (hospital == null || bed == null || bed.getBaseItem() == null) {
       return false;
     }
     return findPatientTile(hospital, bed).isPresent();
@@ -181,7 +181,7 @@ public class HospitalService {
     }
 
     HabboItem topItem = hospital.getTopItemAt(tile.x, tile.y);
-    if (topItem == null || topItem.getId() != bed.getId() || !topItem.getBaseItem().allowLay()) {
+    if (topItem == null || topItem.getId() != bed.getId()) {
       releaseBedReservation(userId);
       log.warn("Le lit d'hopital {} n'est plus utilisable pour le joueur {}.", bed.getId(),
           habbo.getHabboInfo().getUsername());
@@ -235,7 +235,7 @@ public class HospitalService {
   }
 
   private static boolean isValidBedTile(RoomTile tile, HabboItem bed, RoomLayout layout) {
-    return tile != null && tile.state != RoomTileState.INVALID && tile.state != RoomTileState.BLOCKED
+    return tile != null && tile.state != RoomTileState.INVALID
         && bed.getOccupyingTiles(layout).contains(tile);
   }
 
@@ -399,9 +399,13 @@ public class HospitalService {
 
     private static boolean isABed(HabboItem habboItem) {
       if (habboItem == null || habboItem.getBaseItem() == null
-          || habboItem.getBaseItem().getInteractionType() == null
-          || !habboItem.getBaseItem().allowLay()) {
+          || habboItem.getBaseItem().getInteractionType() == null) {
         return false;
+      }
+
+      if (habboItem.getBaseItem().allowLay()
+          || habboItem.getBaseItem().getInteractionType().getType() == InteractionRPBed.class) {
+        return true;
       }
 
       String configured = Emulator.getConfig()
@@ -410,15 +414,35 @@ public class HospitalService {
           || configured.trim().equalsIgnoreCase("rp_bed")) {
         // In the hospital room, the furnidata allow_lay flag is the canonical bed marker.
         // An interaction allow-list remains available for installations that need to narrow it.
-        return true;
+        return hasConfiguredBedName(habboItem);
       }
       Set<String> interactionNames = Arrays.stream(configured.split("[,;]"))
           .map(String::trim)
           .filter(value -> !value.isEmpty())
           .collect(Collectors.toCollection(HashSet::new));
       String interactionName = habboItem.getBaseItem().getInteractionType().getName();
-      return interactionNames.contains(interactionName)
-          || habboItem.getBaseItem().getInteractionType().getType() == InteractionRPBed.class;
+      return interactionNames.contains(interactionName) || hasConfiguredBedName(habboItem);
+    }
+
+    private static boolean hasConfiguredBedName(HabboItem item) {
+      String configured = Emulator.getConfig().getValue(
+          "features.hospital.bed.name.tokens", "bed,lit d'hopital");
+      String itemNames = normalize(item.getBaseItem().getName() + " "
+          + item.getBaseItem().getFullName());
+      return Arrays.stream(configured.split("[,;]"))
+          .map(HospitalBedCache::normalize)
+          .filter(value -> !value.isEmpty())
+          .anyMatch(itemNames::contains);
+    }
+
+    private static String normalize(String value) {
+      if (value == null) {
+        return "";
+      }
+      return Normalizer.normalize(value, Normalizer.Form.NFD)
+          .replaceAll("\\p{M}", "")
+          .toLowerCase()
+          .trim();
     }
 
     private boolean isCacheValid() {

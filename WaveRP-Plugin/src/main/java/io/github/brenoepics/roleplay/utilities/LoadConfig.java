@@ -10,6 +10,8 @@ public class LoadConfig {
             Emulator.getConfig().register("nahabbo.features.hospital.roomid", "0");
             Emulator.getConfig().register("features.hospital.autosend.seconds", "45");
             Emulator.getConfig().register("features.hospital.bed.interactions", "");
+            Emulator.getConfig().register("features.hospital.bed.name.tokens",
+                "bed,lit d'hopital");
             Emulator.getConfig().register("features.ems.call.cooldown.seconds", "30");
             Emulator.getConfig().register("features.ems.calls.list.limit", "15");
             Emulator.getConfig().register("features.ems.bandage.health", "20");
