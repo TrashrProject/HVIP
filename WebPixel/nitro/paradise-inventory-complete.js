@@ -62,31 +62,36 @@
         const quantity = item.quantity > 1 ? `<b class="p-inventory-quantity">${item.quantity}</b>` : '';
         const durability = ['weapon', 'shield'].includes(item.interaction_type)
             ? `<i class="p-inventory-durability"><span style="width:${Math.max(0, Math.min(100, item.durability))}%"></span></i>` : '';
-        const skin = item.skin ? `<span class="p-inventory-skin-dot" title="Skin: ${escapeHtml(item.skin.name)}"></span>` : '';
+        const skin = item.skin ? `<span class="p-inventory-skin-dot" title="Skin : ${escapeHtml(item.skin.name)}"></span>` : '';
         return `<img src="${escapeHtml(item.image_url)}" alt="" draggable="false">${quantity}${durability}${skin}`;
     }
 
-    function slotMarkup(index, item, special) {
-        const classes = ['p-inventory-slot', special ? 'is-special' : '', item?.is_broken ? 'is-broken' : '', item?.skin ? 'has-skin' : ''].filter(Boolean).join(' ');
-        const label = item ? `${item.display_name} x${item.quantity}` : (index === 0 ? 'Arme' : index === 1 ? 'Armure' : 'Case vide');
+    function slotMarkup(index, item) {
+        const classes = [
+            'p-inventory-slot',
+            index < 2 ? 'is-equipped-slot' : '',
+            item?.is_broken ? 'is-broken' : '',
+            item?.skin ? 'has-skin' : ''
+        ].filter(Boolean).join(' ');
+        const label = item ? `${item.display_name} x${item.quantity}` : (index === 0 ? 'Arme équipée' : index === 1 ? 'Protection équipée' : 'Case vide');
         return `<button type="button" class="${classes}" data-inventory-slot="${index}" title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}">${itemMarkup(item)}</button>`;
     }
 
     function render(data) {
         const root = document.querySelector(ROOT);
         if (!root) return;
+
+        const title = root.querySelector('.inventory-header-text');
+        if (title) title.textContent = 'Inventaire';
+
         const bySlot = new Map((data.slots || []).map(item => [Number(item.slot_index), item]));
-        root.dataset.paradiseInventory = 'complete-v2';
+        root.dataset.paradiseInventory = 'habbo-fr-v1';
         const content = root.querySelector('.inventory-content');
         if (!content) return;
+
         content.innerHTML = `
-            <div class="p-inventory-section-label">Équipement</div>
-            <div class="p-inventory-special" aria-label="Equipement">
-                ${[0, 1].map(index => slotMarkup(index, bySlot.get(index), true)).join('')}
-            </div>
-            <div class="p-inventory-section-label">Sac</div>
-            <div class="p-inventory-grid" aria-label="Objets">
-                ${Array.from({ length: 10 }, (_, offset) => slotMarkup(offset + 2, bySlot.get(offset + 2), false)).join('')}
+            <div class="p-inventory-grid" aria-label="Inventaire">
+                ${Array.from({ length: 12 }, (_, index) => slotMarkup(index, bySlot.get(index))).join('')}
             </div>
             <div class="p-inventory-actions" hidden>
                 <div class="p-inventory-card-head">
@@ -186,7 +191,7 @@
 
     const observer = new MutationObserver(() => {
         const root = document.querySelector(ROOT);
-        if (root && root.dataset.paradiseInventory !== 'complete-v2') refresh();
+        if (root && root.dataset.paradiseInventory !== 'habbo-fr-v1') refresh();
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
     setInterval(() => { if (document.querySelector(ROOT)) refresh(); }, 5000);
