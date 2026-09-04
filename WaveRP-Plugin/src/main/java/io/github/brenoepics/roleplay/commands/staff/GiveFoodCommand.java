@@ -4,18 +4,19 @@ import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
+import com.eu.habbo.messages.outgoing.generic.GenericAlertComposer;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.utilities.types.RPItem;
 import java.util.Comparator;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class GiveFoodCommand extends Command {
 
   private static final int MINIMUM_STAFF_RANK = 5;
   private static final int MAXIMUM_STAFF_RANK = 9;
   private static final int MAX_QUANTITY = 100;
+  private static final String MENU_MARKER = "PARADISE_FOOD_MENU";
 
   public GiveFoodCommand(String permission, String[] keys) {
     super(permission, keys);
@@ -32,15 +33,7 @@ public class GiveFoodCommand extends Command {
     }
 
     if (params.length < 2) {
-      String foods = RolePlay.getItemManager().getItems().values().stream()
-          .filter(GiveFoodCommand::isFood)
-          .sorted(Comparator.comparingInt(RPItem::getId))
-          .map(item -> item.getId() + "=" + item.getDisplayName())
-          .collect(Collectors.joining(", "));
-
-      staff.whisper(":givefood <id|nom> [quantite]", RoomChatMessageBubbles.ALERT);
-      staff.whisper("Nourriture disponible : " + (foods.isEmpty() ? "aucune" : foods),
-          RoomChatMessageBubbles.NORMAL);
+      openFoodMenu(gameClient);
       return true;
     }
 
@@ -57,7 +50,7 @@ public class GiveFoodCommand extends Command {
     }
 
     if (quantity < 1 || quantity > MAX_QUANTITY) {
-      staff.whisper("La quantite doit etre comprise entre 1 et " + MAX_QUANTITY + ".",
+      staff.whisper("La quantité doit être comprise entre 1 et " + MAX_QUANTITY + ".",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
@@ -73,7 +66,7 @@ public class GiveFoodCommand extends Command {
     String itemInput = itemInputBuilder.toString().trim();
     RPItem food = findFood(itemInput).orElse(null);
     if (food == null) {
-      staff.whisper("Cette nourriture n'existe pas. Utilise :givefood pour voir la liste.",
+      staff.whisper("Cette nourriture n'existe pas. Utilise :food pour voir la liste.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
@@ -85,9 +78,26 @@ public class GiveFoodCommand extends Command {
     }
 
     avatar.getInventory().addItem(staff, food, quantity);
-    staff.whisper("Tu as recu " + quantity + " x " + food.getDisplayName() + ".",
+    staff.whisper("Tu as reçu " + quantity + " x " + food.getDisplayName() + ".",
         RoomChatMessageBubbles.NORMAL);
     return true;
+  }
+
+  private static void openFoodMenu(GameClient gameClient) {
+    StringBuilder payload = new StringBuilder(MENU_MARKER).append('\n');
+    RolePlay.getItemManager().getItems().values().stream()
+        .filter(GiveFoodCommand::isFood)
+        .sorted(Comparator.comparingInt(RPItem::getId))
+        .forEach(item -> payload.append("FOOD|")
+            .append(item.getId()).append('|')
+            .append(sanitize(item.getDisplayName())).append('|')
+            .append(sanitize(item.getExtraData())).append('\n'));
+
+    gameClient.sendResponse(new GenericAlertComposer(payload.toString()));
+  }
+
+  private static String sanitize(String value) {
+    return value == null ? "" : value.replace("|", " ").replace("\r", " ").replace("\n", " ");
   }
 
   public boolean handlePermissionDenied(GameClient gameClient, String[] params) {
@@ -103,7 +113,8 @@ public class GiveFoodCommand extends Command {
     } catch (NumberFormatException ignored) {
       return RolePlay.getItemManager().getItems().values().stream()
           .filter(GiveFoodCommand::isFood)
-          .filter(item -> item.getDisplayName().equalsIgnoreCase(input))
+          .filter(item -> item.getDisplayName().equalsIgnoreCase(input)
+              || item.getRawDisplayName().equalsIgnoreCase(input))
           .findFirst();
     }
   }
