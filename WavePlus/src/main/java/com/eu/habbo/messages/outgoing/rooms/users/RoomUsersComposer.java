@@ -32,13 +32,28 @@ public class RoomUsersComposer extends MessageComposer {
         this.bots = bots;
     }
 
+    private static String getDisplayUsername(Habbo habbo) {
+        String username = habbo.getHabboInfo().getUsername();
+
+        if (habbo.getHabboInfo().getRank() == null || !habbo.getHabboInfo().getRank().hasPrefix()) {
+            return username;
+        }
+
+        String prefix = habbo.getHabboInfo().getRank().getPrefix();
+        if (prefix == null || prefix.trim().isEmpty()) {
+            return username;
+        }
+
+        return prefix.trim() + " " + username;
+    }
+
     @Override
     protected ServerMessage composeInternal() {
         this.response.init(Outgoing.RoomUsersComposer);
         if (this.habbo != null) {
             this.response.appendInt(1);
             this.response.appendInt(this.habbo.getHabboInfo().getId());
-            this.response.appendString(this.habbo.getHabboInfo().getUsername());
+            this.response.appendString(getDisplayUsername(this.habbo));
             this.response.appendString(this.habbo.getHabboInfo().getMotto());
             this.response.appendString(this.habbo.getHabboInfo().getLook());
             this.response.appendInt(this.habbo.getRoomUnit().getId()); //Room Unit ID
@@ -68,7 +83,7 @@ public class RoomUsersComposer extends MessageComposer {
             for (Habbo habbo : this.habbos) {
                 if (habbo != null) {
                     this.response.appendInt(habbo.getHabboInfo().getId());
-                    this.response.appendString(habbo.getHabboInfo().getUsername());
+                    this.response.appendString(getDisplayUsername(habbo));
                     this.response.appendString(habbo.getHabboInfo().getMotto());
                     this.response.appendString(habbo.getHabboInfo().getLook());
                     this.response.appendInt(habbo.getRoomUnit().getId()); //Room Unit ID
