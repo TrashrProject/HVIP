@@ -6,8 +6,8 @@
     let selectedSlot = null;
     let loading = false;
 
-    const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    const escapeHtml = value => String(value ?? '').replace(/[&<>'\"]/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '\"': '&quot;'
     })[char]);
 
     function sendCommand(command) {
@@ -85,7 +85,7 @@
         if (title) title.textContent = 'Inventaire';
 
         const bySlot = new Map((data.slots || []).map(item => [Number(item.slot_index), item]));
-        root.dataset.paradiseInventory = 'habbo-fr-v2';
+        root.dataset.paradiseInventory = 'habbo-fr-v3';
         const content = root.querySelector('.inventory-content');
         if (!content) return;
 
@@ -97,7 +97,6 @@
                 </div>
             </section>
             <section class="p-inventory-zone p-inventory-bag-zone">
-                <div class="p-inventory-zone-title"><span>Sac à dos</span></div>
                 <div class="p-inventory-grid p-inventory-bag-grid" aria-label="Sac à dos">
                     ${Array.from({ length: 10 }, (_, offset) => slotMarkup(offset + 2, bySlot.get(offset + 2))).join('')}
                 </div>
@@ -200,7 +199,7 @@
 
     const observer = new MutationObserver(() => {
         const root = document.querySelector(ROOT);
-        if (root && root.dataset.paradiseInventory !== 'habbo-fr-v2') refresh();
+        if (root && root.dataset.paradiseInventory !== 'habbo-fr-v3') refresh();
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
     setInterval(() => { if (document.querySelector(ROOT)) refresh(); }, 5000);
