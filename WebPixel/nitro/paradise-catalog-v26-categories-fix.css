@@ -1,0 +1,114 @@
+/* ParadiseRP Catalogue V26 — category rail readability hotfix.
+   CSS-only. Keeps Nitro native tree/navigation/click handlers untouched. */
+
+/* Keep the rail itself dark at every nesting level so Bootstrap/Nitro white cards cannot leak through. */
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-category-wrap,
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container{
+  background:#071d40!important;
+  color:#d9ecff!important;
+  -webkit-text-fill-color:#d9ecff!important;
+}
+
+/* Do NOT size generic wrappers. Only real clickable category controls get a compact row. */
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link),
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link){
+  width:100%!important;
+  min-height:30px!important;
+  height:30px!important;
+  max-height:30px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:6px!important;
+  margin:0 0 3px 0!important;
+  padding:0 8px!important;
+  border:1px solid #17446f!important;
+  border-radius:5px!important;
+  background:#0a294f!important;
+  background-image:linear-gradient(180deg,#0d315d 0%,#09264b 100%)!important;
+  color:#d9ecff!important;
+  -webkit-text-fill-color:#d9ecff!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  line-height:30px!important;
+  text-align:left!important;
+  text-decoration:none!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 1px 2px rgba(0,0,0,.18)!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* Some Nitro builds use layout-grid-item itself as the category click target. */
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation > .layout-grid-item,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container > .layout-grid-item{
+  min-height:30px!important;
+  height:30px!important;
+  max-height:30px!important;
+  margin:0 0 3px 0!important;
+  padding:0 8px!important;
+  border:1px solid #17446f!important;
+  border-radius:5px!important;
+  background:#0a294f!important;
+  background-image:linear-gradient(180deg,#0d315d 0%,#09264b 100%)!important;
+  color:#d9ecff!important;
+  -webkit-text-fill-color:#d9ecff!important;
+}
+
+/* Force every text node inside a category row to stay readable. */
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link) :is(span,div,p,strong,small),
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link) :is(span,div,p,strong,small),
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation > .layout-grid-item :is(span,div,p,strong,small),
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container > .layout-grid-item :is(span,div,p,strong,small){
+  background:transparent!important;
+  color:#d9ecff!important;
+  -webkit-text-fill-color:#d9ecff!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+/* Hover. */
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link):hover,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link):hover,
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation > .layout-grid-item:hover,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container > .layout-grid-item:hover{
+  border-color:#267fb8!important;
+  background:#0e3767!important;
+  background-image:linear-gradient(180deg,#124071,#0b2e58)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+
+/* Active category. Target only the clickable row, not arbitrary active descendants. */
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link).active,
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link)[aria-selected="true"],
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link).active,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link)[aria-selected="true"],
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation > .layout-grid-item.active,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container > .layout-grid-item.active{
+  border-color:#32c5ff!important;
+  background:#1177c5!important;
+  background-image:linear-gradient(90deg,#1491dc 0%,#0d6fbd 100%)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  box-shadow:inset 3px 0 0 #65dcff,0 2px 7px rgba(5,86,145,.28)!important;
+}
+
+/* The category list should use the available column height, with normal scrolling only when needed. */
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container{
+  min-height:0!important;
+  max-height:none!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:#217fba #071d40!important;
+}
+
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation::-webkit-scrollbar,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container::-webkit-scrollbar{width:4px!important}
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation::-webkit-scrollbar-track,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container::-webkit-scrollbar-track{background:#071d40!important}
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation::-webkit-scrollbar-thumb,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container::-webkit-scrollbar-thumb{background:#217fba!important;border-radius:8px!important}
