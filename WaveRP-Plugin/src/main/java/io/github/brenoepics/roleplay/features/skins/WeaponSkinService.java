@@ -10,17 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WeaponSkinService {
 
-  /**
-   * Temporary safety gate for ParadiseRP weapon skins.
-   *
-   * The non-default skin effect ids currently configured in SQL are not all backed by working
-   * Nitro effects on the live client. Returning one of those ids makes the equipped weapon appear
-   * to vanish even though it is still present in inventory slot 0. Until each custom effect is
-   * validated/imported, always keep the weapon's native RP enable id as the live visual effect.
-   *
-   * Skin ownership/selection stays persisted in the database, so the UI work is not lost. Once the
-   * missing Nitro effects are installed, this guard can be relaxed per validated effect.
-   */
   public int getEquippedEffect(int userId, String weaponName, int fallbackEffect) {
     String key = normalizeWeaponKey(weaponName);
     if (key == null) return fallbackEffect;
@@ -35,15 +24,11 @@ public class WeaponSkinService {
       try (ResultSet result = statement.executeQuery()) {
         if (result.next()) {
           int selectedEffect = result.getInt("effect_id");
-          if (selectedEffect != fallbackEffect) {
-            log.debug(
-                "Skin effect {} selected for user {} weapon {}, using stable fallback {} until the Nitro effect is validated",
-                selectedEffect, userId, key, fallbackEffect);
-          }
+          if (selectedEffect > 0) return selectedEffect;
         }
       }
     } catch (Exception exception) {
-      // A missing migration must not prevent weapons from being equipped.
+      // A missing migration or database issue must not prevent weapons from being equipped.
       log.warn("Unable to resolve weapon skin for user {} and weapon {}", userId, key,
           exception);
     }
