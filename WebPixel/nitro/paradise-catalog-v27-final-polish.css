@@ -1,0 +1,226 @@
+/* ParadiseRP Catalogue V27 — safe final visual polish.
+   CSS-only. Keeps Nitro native catalogue navigation, item selection and purchase logic intact. */
+
+/* ---------- overall shell ---------- */
+.nitro-catalog.paradise-catalog-v22[data-prc23-build]{
+  border:1px solid #198bd0!important;
+  box-shadow:0 18px 44px rgba(0,0,0,.42),0 0 0 1px rgba(59,189,255,.08) inset!important;
+}
+
+/* ---------- top tabs ---------- */
+.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs{
+  gap:4px!important;
+  padding:0 8px!important;
+  background:#071c3c!important;
+}
+.nitro-catalog.paradise-catalog-v22 .prc23-tab{
+  flex:1 1 0!important;
+  min-width:0!important;
+  height:38px!important;
+  min-height:38px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  padding:0 8px!important;
+  border:1px solid #164d79!important;
+  border-bottom-color:#0e3458!important;
+  border-radius:7px 7px 0 0!important;
+  background:linear-gradient(180deg,#0b2f58,#092446)!important;
+  color:#d5ebff!important;
+  -webkit-text-fill-color:#d5ebff!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.nitro-catalog.paradise-catalog-v22 .prc23-tab:hover{
+  border-color:#237cb3!important;
+  background:linear-gradient(180deg,#103f70,#0b2d55)!important;
+}
+.nitro-catalog.paradise-catalog-v22 .prc23-tab:is(.active,[aria-selected="true"]),
+.nitro-catalog.paradise-catalog-v22 .prc23-tab:has(.active,[aria-selected="true"]){
+  border-color:#29bbf4!important;
+  background:linear-gradient(180deg,#168ed0,#0f67aa)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  box-shadow:inset 0 0 0 1px rgba(126,225,255,.15),0 -2px 12px rgba(13,119,184,.12)!important;
+}
+
+/* ---------- left column / search ---------- */
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-left-column{
+  width:194px!important;
+  min-width:194px!important;
+  max-width:194px!important;
+  gap:6px!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-search{
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-search input,
+.nitro-catalog.paradise-catalog-v22.prc23-store input[type="search"]{
+  width:100%!important;
+  height:32px!important;
+  min-height:32px!important;
+  padding:0 10px!important;
+  border:1px solid #1f5d8f!important;
+  border-radius:7px!important;
+  background:#081f43!important;
+  color:#e5f4ff!important;
+  -webkit-text-fill-color:#e5f4ff!important;
+  font-size:11px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02)!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-search input::placeholder,
+.nitro-catalog.paradise-catalog-v22.prc23-store input[type="search"]::placeholder{
+  color:#79a6c8!important;
+  opacity:1!important;
+}
+
+/* ---------- category rail ---------- */
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-category-wrap{
+  min-height:0!important;
+  padding:6px!important;
+  border:1px solid #164c7a!important;
+  border-radius:8px!important;
+  background:linear-gradient(180deg,#081f44 0%,#071b3a 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 5px 14px rgba(0,0,0,.12)!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container{
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  display:block!important;
+  padding:0 2px 0 0!important;
+  background:transparent!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+}
+
+/* Only actual category buttons/rows. Never size generic wrapper nodes. */
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link),
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link),
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation > .layout-grid-item,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container > .layout-grid-item{
+  width:100%!important;
+  min-height:29px!important;
+  height:29px!important;
+  max-height:29px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:7px!important;
+  margin:0 0 3px 0!important;
+  padding:0 8px!important;
+  border:1px solid #123d68!important;
+  border-radius:6px!important;
+  background:linear-gradient(180deg,#0b2b54,#092347)!important;
+  color:#d7eaff!important;
+  -webkit-text-fill-color:#d7eaff!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  line-height:29px!important;
+  box-shadow:none!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link):hover,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link):hover,
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation > .layout-grid-item:hover,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container > .layout-grid-item:hover{
+  border-color:#2584bd!important;
+  background:linear-gradient(180deg,#113c6b,#0c2d56)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link).active,
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link)[aria-selected="true"],
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link).active,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link)[aria-selected="true"],
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation > .layout-grid-item.active,
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container > .layout-grid-item.active{
+  border-color:#3bc9ff!important;
+  background:linear-gradient(90deg,#168bd4,#1069b5)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  box-shadow:inset 3px 0 0 #79e1ff!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link) :is(span,div,p,strong,small),
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link) :is(span,div,p,strong,small),
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation > .layout-grid-item :is(span,div,p,strong,small),
+.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container > .layout-grid-item :is(span,div,p,strong,small){
+  background:transparent!important;
+  color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+/* ---------- product area ---------- */
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-grid{
+  gap:5px!important;
+  padding:6px!important;
+  border:1px solid #164875!important;
+  border-radius:8px!important;
+  background:linear-gradient(180deg,#071e41,#08234b)!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc23-product-card,
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-item{
+  min-height:57px!important;
+  height:57px!important;
+  border:1px solid #1d537f!important;
+  border-radius:7px!important;
+  box-shadow:0 2px 5px rgba(0,0,0,.18)!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc23-product-card:hover,
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-item:hover{
+  border-color:#34aee9!important;
+  box-shadow:0 0 0 1px rgba(69,189,239,.08),0 3px 7px rgba(0,0,0,.22)!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc23-product-card:is(.active,.selected,[aria-selected="true"]),
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-item:is(.active,.selected,[aria-selected="true"]){
+  border-color:#44ceff!important;
+  box-shadow:0 0 0 1px rgba(90,216,255,.2),inset 0 0 14px rgba(21,139,205,.12)!important;
+}
+
+/* ---------- right preview ---------- */
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-preview-column{
+  padding:8px!important;
+  border:1px solid #17649b!important;
+  border-radius:8px!important;
+  background:linear-gradient(180deg,#092955,#071f43)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 6px 16px rgba(0,0,0,.14)!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-purchase{
+  border:1px solid #164f7e!important;
+  border-radius:7px!important;
+  background:linear-gradient(180deg,#0b2c58,#082244)!important;
+}
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc23-buy,
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-buy-button{
+  min-height:32px!important;
+  height:32px!important;
+  border:1px solid #47e18b!important;
+  border-radius:7px!important;
+  background:linear-gradient(180deg,#24d979,#14b95f)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.11),0 4px 10px rgba(5,92,52,.2)!important;
+}
+
+/* scrollbars */
+.nitro-catalog.paradise-catalog-v22 *{
+  scrollbar-width:thin!important;
+  scrollbar-color:#207fb8 transparent!important;
+}
+.nitro-catalog.paradise-catalog-v22 *::-webkit-scrollbar{width:4px!important;height:4px!important}
+.nitro-catalog.paradise-catalog-v22 *::-webkit-scrollbar-thumb{background:#207fb8!important;border-radius:10px!important}
+.nitro-catalog.paradise-catalog-v22 *::-webkit-scrollbar-track{background:transparent!important}
