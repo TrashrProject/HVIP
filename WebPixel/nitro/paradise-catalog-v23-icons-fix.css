@@ -1,0 +1,30 @@
+/* V23 hotfix: the Nitro furni icon is an inline background-image on .layout-grid-item.
+   V23 card gradients were overriding it with !important background shorthands. */
+
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc23-product-card.prc23-has-native-image,
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-item.prc23-has-native-image{
+  background-color:#0b2b59!important;
+  background-image:var(--prc23-native-item-image)!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+  background-size:auto!important;
+}
+
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc23-product-card.prc23-has-native-image:hover,
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-item.prc23-has-native-image:hover{
+  background-color:#103866!important;
+  background-image:var(--prc23-native-item-image)!important;
+}
+
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc23-product-card.prc23-has-native-image:is(.active,.selected,[aria-selected="true"]),
+.nitro-catalog.paradise-catalog-v22.prc23-store .prc22-item.prc23-has-native-image:is(.active,.selected,[aria-selected="true"]){
+  background-color:#124575!important;
+  background-image:var(--prc23-native-item-image)!important;
+}
+
+.nitro-catalog.paradise-catalog-v22.prc23-store .unique-bg-override[style*="--prc23-native-item-image"]{
+  background-image:var(--prc23-native-item-image)!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+  background-size:auto!important;
+}
