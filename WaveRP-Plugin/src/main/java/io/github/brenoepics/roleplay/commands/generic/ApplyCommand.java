@@ -150,7 +150,7 @@ public class ApplyCommand extends Command {
 
     habbo.whisper(
         "Vous avez consomm\u00e9 " + item.getDisplayName() + " et r\u00e9cup\u00e9r\u00e9 "
-            + (newHunger - data.getHunger()) + " point(s) de sati\u00e9t\u00e9.", RoomChatMessageBubbles.ALERT);
+            + (newHunger - data.getHunger()) + " point(s) de faim.", RoomChatMessageBubbles.ALERT);
 
     data.setHunger(newHunger);
     return true;
