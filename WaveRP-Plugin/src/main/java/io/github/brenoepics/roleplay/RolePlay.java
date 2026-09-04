@@ -1,8 +1,9 @@
 package io.github.brenoepics.roleplay;
 
 import com.eu.habbo.Emulator;
-import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.commands.CommandViewRegistry;
+import com.eu.habbo.habbohotel.items.ItemInteraction;
+import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.PacketManager;
 import com.eu.habbo.messages.incoming.Incoming;
 import com.eu.habbo.messages.incoming.MessageHandler;
@@ -21,24 +22,25 @@ import io.github.brenoepics.roleplay.events.UserConnect;
 import io.github.brenoepics.roleplay.events.UserDisconnect;
 import io.github.brenoepics.roleplay.events.UserEnterRoomListener;
 import io.github.brenoepics.roleplay.events.UserTakeStepListener;
+import io.github.brenoepics.roleplay.features.banking.BankManager;
 import io.github.brenoepics.roleplay.features.crime.prison.PrisonHandler;
 import io.github.brenoepics.roleplay.features.crime.prison.PrisonService;
+import io.github.brenoepics.roleplay.features.crime.wantedlist.WantedSystemManager;
 import io.github.brenoepics.roleplay.features.escort.EscortManager;
 import io.github.brenoepics.roleplay.features.farm.data.FarmManager;
 import io.github.brenoepics.roleplay.features.farm.marketplace.MarketplaceManager;
+import io.github.brenoepics.roleplay.features.hospital.DeathHandler;
 import io.github.brenoepics.roleplay.features.hospital.HospitalService;
 import io.github.brenoepics.roleplay.features.hospital.ems.EmsService;
 import io.github.brenoepics.roleplay.features.items.ItemManager;
+import io.github.brenoepics.roleplay.features.items.interactions.InteractionCoffeeMachine;
 import io.github.brenoepics.roleplay.features.job.JobService;
 import io.github.brenoepics.roleplay.features.job.JobsManager;
+import io.github.brenoepics.roleplay.features.macro.MacroManager;
 import io.github.brenoepics.roleplay.features.offer.OfferManager;
 import io.github.brenoepics.roleplay.features.organizations.OrganizationManager;
-import io.github.brenoepics.roleplay.features.user.AvatarManager;
-import io.github.brenoepics.roleplay.features.hospital.DeathHandler;
-import io.github.brenoepics.roleplay.features.crime.wantedlist.WantedSystemManager;
-import io.github.brenoepics.roleplay.features.macro.MacroManager;
-import io.github.brenoepics.roleplay.features.banking.BankManager;
 import io.github.brenoepics.roleplay.features.skins.WeaponSkinService;
+import io.github.brenoepics.roleplay.features.user.AvatarManager;
 import java.lang.reflect.Field;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -86,6 +88,13 @@ public class RolePlay extends HabboPlugin implements EventListener {
 
   @Override
   public void onEnable() {
+    // Register the coffee interaction immediately when the plugin is enabled.
+    // ItemManager.load() resolves each items_base.interaction_type to a Java class while loading
+    // the base furniture. Registering here guarantees rp_coffee_machine exists before that pass.
+    Emulator.getGameEnvironment().getItemManager().addItemInteraction(
+        new ItemInteraction("rp_coffee_machine", InteractionCoffeeMachine.class));
+    LOGGER.info("[ParadiseRP] Registered item interaction: rp_coffee_machine");
+
     Emulator.getPluginManager().registerEvents(this, new EmulatorLoad());
     Emulator.getPluginManager().registerEvents(this, new EmulatorStartShutdownListener());
     Emulator.getPluginManager().registerEvents(this, new UserConnect());
