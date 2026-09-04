@@ -60,21 +60,18 @@ public class EquipCommand extends Command {
                 && currentWeaponSlot.getItem() != null
                 && currentWeaponSlot.getItem().equals(item);
 
-            // Re-applying the same weapon is used by the skin selector to refresh the visual effect.
-            // It must not unequip the weapon and move it back into a regular inventory slot.
             if (!alreadyEquipped && !data.getInventory().equipWeapon(item)) {
                 gameClient.getHabbo().whisper("Cette arme est inutilisable ou cassée.", RoomChatMessageBubbles.ALERT);
                 return true;
             }
 
-            // Apply the visual after the weapon is really equipped. Weapon effects use a long
-            // duration here, matching UserTakeStepListener; a duration of -1 did not stay visible
-            // in Nitro even though the same effect id works with :enable.
             int visualEffect = RolePlay.getWeaponSkinService().getEquippedEffect(
                 gameClient.getHabbo().getHabboInfo().getId(), item.getDisplayName(), item.getEnableId());
-            if (visualEffect > 0 && gameClient.getHabbo().getHabboInfo().getCurrentRoom() != null) {
+            if (visualEffect != -1 && gameClient.getHabbo().getHabboInfo().getCurrentRoom() != null) {
+                // Match the native :enable command exactly. In Arcturus, -1 is the correct
+                // persistent duration used by EnableCommand for avatar effects.
                 gameClient.getHabbo().getHabboInfo().getCurrentRoom()
-                    .giveEffect(gameClient.getHabbo(), visualEffect, Integer.MAX_VALUE);
+                    .giveEffect(gameClient.getHabbo(), visualEffect, -1);
             }
         } else {
             InventorySlot currentArmorSlot = data.getInventory().getSecondaryArmorSlot();
