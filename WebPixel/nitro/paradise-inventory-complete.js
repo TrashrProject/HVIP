@@ -85,14 +85,23 @@
         if (title) title.textContent = 'Inventaire';
 
         const bySlot = new Map((data.slots || []).map(item => [Number(item.slot_index), item]));
-        root.dataset.paradiseInventory = 'habbo-fr-v1';
+        root.dataset.paradiseInventory = 'habbo-fr-v2';
         const content = root.querySelector('.inventory-content');
         if (!content) return;
 
         content.innerHTML = `
-            <div class="p-inventory-grid" aria-label="Inventaire">
-                ${Array.from({ length: 12 }, (_, index) => slotMarkup(index, bySlot.get(index))).join('')}
-            </div>
+            <section class="p-inventory-zone p-inventory-equipped-zone">
+                <div class="p-inventory-zone-title"><span>Équipement</span></div>
+                <div class="p-inventory-grid p-inventory-equipped-grid" aria-label="Équipement">
+                    ${[0, 1].map(index => slotMarkup(index, bySlot.get(index))).join('')}
+                </div>
+            </section>
+            <section class="p-inventory-zone p-inventory-bag-zone">
+                <div class="p-inventory-zone-title"><span>Sac à dos</span></div>
+                <div class="p-inventory-grid p-inventory-bag-grid" aria-label="Sac à dos">
+                    ${Array.from({ length: 10 }, (_, offset) => slotMarkup(offset + 2, bySlot.get(offset + 2))).join('')}
+                </div>
+            </section>
             <div class="p-inventory-actions" hidden>
                 <div class="p-inventory-card-head">
                     <img class="p-inventory-preview" alt="">
@@ -191,7 +200,7 @@
 
     const observer = new MutationObserver(() => {
         const root = document.querySelector(ROOT);
-        if (root && root.dataset.paradiseInventory !== 'habbo-fr-v1') refresh();
+        if (root && root.dataset.paradiseInventory !== 'habbo-fr-v2') refresh();
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
     setInterval(() => { if (document.querySelector(ROOT)) refresh(); }, 5000);
