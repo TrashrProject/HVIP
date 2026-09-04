@@ -1,4 +1,4 @@
-/* ParadiseRP loading screen v3 — black screen + logo reveal only. */
+/* ParadiseRP loading screen v4 — black screen + progressive logo + subtle glow/particles. */
 html.paradise-booting,
 html.paradise-booting body{margin:0!important;background:#000!important;overflow:hidden!important}
 
@@ -13,17 +13,31 @@ html.paradise-booting body{margin:0!important;background:#000!important;overflow
   background:#000;
   opacity:1;
   pointer-events:none;
-  transition:opacity .45s ease;
+  transition:opacity .5s ease,filter .45s ease;
+  isolation:isolate;
 }
-
 #paradise-loading.is-ready{opacity:0}
+#paradise-loading.is-flashing{filter:brightness(1.16)}
+
+#paradise-loading .pr-ambient{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:min(760px,92vw);
+  height:min(440px,62vh);
+  transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse at center,rgba(39,161,255,.065),rgba(119,59,209,.025) 38%,transparent 70%);
+  filter:blur(22px);
+  opacity:calc(.18 + (var(--pr-progress-num,4) * .0062));
+  transition:opacity .5s ease;
+}
 
 #paradise-loading .pr-logo-wrap{
   position:relative;
   width:min(430px,72vw);
   aspect-ratio:430/190;
   transform:translateY(-2vh);
-  animation:pr-logo-enter .55s ease-out both;
+  animation:pr-logo-enter .72s cubic-bezier(.22,.61,.36,1) both;
 }
 
 #paradise-loading .pr-logo-base,
@@ -33,45 +47,71 @@ html.paradise-booting body{margin:0!important;background:#000!important;overflow
   background:url('/Dynamics/img/logos/hv_logo_p.png') center/contain no-repeat;
 }
 
-/* Very faint silhouette so the player knows what is loading. */
 #paradise-loading .pr-logo-base{
-  opacity:.10;
-  filter:grayscale(1) brightness(.48);
+  opacity:.08;
+  filter:grayscale(1) brightness(.43);
 }
 
-/* Real ParadiseRP logo is progressively revealed from left to right. */
 #paradise-loading .pr-logo-reveal{
   clip-path:inset(0 calc(100% - var(--pr-progress,4%)) 0 0);
-  filter:drop-shadow(0 0 8px rgba(55,190,255,.16));
-  transition:clip-path .38s cubic-bezier(.22,.61,.36,1),filter .38s ease;
+  filter:drop-shadow(0 0 5px rgba(55,190,255,.10));
+  transition:clip-path .38s cubic-bezier(.22,.61,.36,1),filter .42s ease;
 }
 
 #paradise-loading .pr-logo-reveal::after{
   content:"";
   position:absolute;
-  top:12%;
-  bottom:12%;
-  left:calc(var(--pr-progress,4%) - 2px);
-  width:3px;
-  background:rgba(126,220,255,.9);
-  box-shadow:0 0 9px rgba(76,188,255,.65),0 0 18px rgba(175,83,255,.28);
-  opacity:calc(.25 + (var(--pr-active,1) * .75));
+  top:14%;
+  bottom:14%;
+  left:calc(var(--pr-progress,4%) - 1px);
+  width:2px;
+  border-radius:999px;
+  background:rgba(145,225,255,.78);
+  box-shadow:0 0 8px rgba(76,188,255,.52),0 0 16px rgba(175,83,255,.18);
+  opacity:.72;
   transform:translateX(-1px);
 }
 
-#paradise-loading.is-complete .pr-logo-reveal{
-  filter:drop-shadow(0 0 12px rgba(72,190,255,.20)) drop-shadow(0 0 22px rgba(184,78,255,.10));
+#paradise-loading .pr-particles{position:absolute;inset:0;overflow:hidden}
+#paradise-loading .pr-particle{
+  position:absolute;
+  width:2px;
+  height:2px;
+  background:rgba(130,215,255,.72);
+  box-shadow:0 0 5px rgba(130,215,255,.35);
+  opacity:0;
+  animation:pr-pixel-float var(--pr-dur,3.8s) var(--pr-delay,0s) ease-in-out infinite;
 }
+#paradise-loading .pr-particle:nth-child(3n){background:rgba(192,102,255,.68);box-shadow:0 0 5px rgba(192,102,255,.28)}
+#paradise-loading .pr-particle:nth-child(4n){width:3px;height:3px}
 
+#paradise-loading.is-complete .pr-logo-reveal{
+  clip-path:inset(0 0 0 0)!important;
+  filter:drop-shadow(0 0 10px rgba(64,190,255,.24)) drop-shadow(0 0 23px rgba(187,72,255,.13));
+}
 #paradise-loading.is-complete .pr-logo-reveal::after{opacity:0}
+#paradise-loading.is-complete .pr-logo-wrap{animation:pr-finish-pulse .48s ease-out both}
+#paradise-loading.is-complete .pr-ambient{opacity:.92}
 
 @keyframes pr-logo-enter{
-  from{opacity:0;transform:translateY(-1vh) scale(.97)}
+  from{opacity:0;transform:translateY(-1vh) scale(.965)}
   to{opacity:1;transform:translateY(-2vh) scale(1)}
+}
+@keyframes pr-pixel-float{
+  0%,100%{opacity:0;transform:translate3d(0,5px,0) scale(.8)}
+  22%{opacity:.14}
+  50%{opacity:.58;transform:translate3d(3px,-5px,0) scale(1)}
+  78%{opacity:.16}
+}
+@keyframes pr-finish-pulse{
+  0%{transform:translateY(-2vh) scale(1)}
+  48%{transform:translateY(-2vh) scale(1.018)}
+  100%{transform:translateY(-2vh) scale(1)}
 }
 
 @media(max-width:700px){
   #paradise-loading .pr-logo-wrap{width:min(340px,78vw);transform:translateY(-1vh)}
+  #paradise-loading .pr-ambient{width:96vw;height:42vh}
 }
 
 @media(prefers-reduced-motion:reduce){
