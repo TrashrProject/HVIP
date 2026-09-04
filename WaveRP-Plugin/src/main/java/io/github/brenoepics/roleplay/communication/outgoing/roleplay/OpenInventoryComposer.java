@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import io.github.brenoepics.roleplay.communication.outgoing.OutgoingWebMessage;
 import io.github.brenoepics.roleplay.features.user.inventory.Inventory;
 import io.github.brenoepics.roleplay.features.user.inventory.InventorySlot;
+import io.github.brenoepics.roleplay.utilities.types.FoodPresentation;
 import io.github.brenoepics.roleplay.utilities.types.RPItem;
 
 public class OpenInventoryComposer extends OutgoingWebMessage {
@@ -17,7 +18,6 @@ public class OpenInventoryComposer extends OutgoingWebMessage {
 
     JsonArray inventoryData = new JsonArray();
 
-    // Process inventory slots only
     InventorySlot[] slots = inventory.getAllSlots();
     for (int i = 0; i < slots.length; i++) {
       InventorySlot slot = slots[i];
@@ -27,7 +27,6 @@ public class OpenInventoryComposer extends OutgoingWebMessage {
         itemObj.addProperty("is_special_slot", slot.isSpecialSlot());
         itemObj.addProperty("slot_type", slot.getSlotType());
 
-        // Mark if it's equipped in special slots
         switch (i) {
           case Inventory.PRIMARY_WEAPON_SLOT -> {
             itemObj.addProperty("equipped", true);
@@ -55,12 +54,10 @@ public class OpenInventoryComposer extends OutgoingWebMessage {
     RPItem item = slot.getItem();
     JsonObject itemObj = new JsonObject();
 
-    // Basic item information
     itemObj.addProperty("item_id", item.getId());
     itemObj.addProperty("display_name", item.getDisplayName());
     itemObj.addProperty("quantity", slot.getQuantity());
 
-    // Durability information (for weapons and armor)
     boolean hasDurability =
         "weapon".equals(item.getInteractionType()) || "shield".equals(item.getInteractionType());
     itemObj.addProperty("has_durability", hasDurability);
@@ -77,6 +74,11 @@ public class OpenInventoryComposer extends OutgoingWebMessage {
   }
 
   private String resolveImageUrl(RPItem item, String baseUrl) {
+    String foodImage = FoodPresentation.imageDataUri(item);
+    if (foodImage != null) {
+      return foodImage;
+    }
+
     String legacyFile = switch (item.getId()) {
       case 6101 -> "matraque.png";
       case 6102 -> "batte.png";
