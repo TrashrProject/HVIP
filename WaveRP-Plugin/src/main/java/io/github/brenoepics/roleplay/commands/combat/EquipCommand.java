@@ -54,12 +54,6 @@ public class EquipCommand extends Command {
             return true;
         }
         if (isWeapon) {
-            int visualEffect = RolePlay.getWeaponSkinService().getEquippedEffect(
-                gameClient.getHabbo().getHabboInfo().getId(), item.getDisplayName(), item.getEnableId());
-            if (visualEffect != -1) {
-                gameClient.getHabbo().getHabboInfo().getCurrentRoom().giveEffect(gameClient.getHabbo(), visualEffect, -1);
-            }
-
             InventorySlot currentWeaponSlot = data.getInventory().getPrimaryWeaponSlot();
             boolean alreadyEquipped = currentWeaponSlot != null
                 && !currentWeaponSlot.isEmpty()
@@ -71,6 +65,16 @@ public class EquipCommand extends Command {
             if (!alreadyEquipped && !data.getInventory().equipWeapon(item)) {
                 gameClient.getHabbo().whisper("Cette arme est inutilisable ou cassée.", RoomChatMessageBubbles.ALERT);
                 return true;
+            }
+
+            // Apply the visual after the weapon is really equipped. Weapon effects use a long
+            // duration here, matching UserTakeStepListener; a duration of -1 did not stay visible
+            // in Nitro even though the same effect id works with :enable.
+            int visualEffect = RolePlay.getWeaponSkinService().getEquippedEffect(
+                gameClient.getHabbo().getHabboInfo().getId(), item.getDisplayName(), item.getEnableId());
+            if (visualEffect > 0 && gameClient.getHabbo().getHabboInfo().getCurrentRoom() != null) {
+                gameClient.getHabbo().getHabboInfo().getCurrentRoom()
+                    .giveEffect(gameClient.getHabbo(), visualEffect, Integer.MAX_VALUE);
             }
         } else {
             InventorySlot currentArmorSlot = data.getInventory().getSecondaryArmorSlot();
