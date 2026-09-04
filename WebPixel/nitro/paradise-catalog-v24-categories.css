@@ -7,13 +7,19 @@
   border-radius:8px!important;
   background:linear-gradient(180deg,#071d42 0%,#081f47 100%)!important;
   box-shadow:0 8px 18px rgba(0,0,0,.16),0 0 0 1px rgba(54,160,224,.05) inset!important;
+  overflow:hidden!important;
 }
 
+/* IMPORTANT: the navigation container must keep its full available height.
+   Do not clamp its direct children: some Nitro builds wrap the whole tree in one child. */
 .nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation,
 .nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container{
   display:flex!important;
   flex-direction:column!important;
   gap:4px!important;
+  min-height:0!important;
+  height:100%!important;
+  max-height:none!important;
   padding:0 2px 0 0!important;
   overflow-x:hidden!important;
   overflow-y:auto!important;
@@ -32,46 +38,38 @@
   background:#1d83c6!important;
 }
 
-/* Every native category entry becomes a slim row instead of a giant block. */
+/* Wrapper nodes must never be forced to one-row height. */
 .nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation > *,
 .nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container > *{
-  min-height:34px!important;
-  height:34px!important;
-  max-height:34px!important;
-  margin:0!important;
-  padding:0!important;
-  border:0!important;
-  border-radius:6px!important;
-  background:transparent!important;
-  box-shadow:none!important;
-  overflow:hidden!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+  flex-shrink:0!important;
 }
 
-/* Catch nested clickable elements used by different Nitro builds. */
-.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation > * > *,
-.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container > * > *{
-  min-height:34px!important;
-}
-
+/* Only actual clickable category rows are compact. */
 .nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link,.layout-grid-item),
 .nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link,.layout-grid-item){
+  box-sizing:border-box!important;
   width:100%!important;
   min-width:0!important;
-  height:34px!important;
-  min-height:34px!important;
-  max-height:34px!important;
+  min-height:32px!important;
+  height:32px!important;
+  max-height:32px!important;
   display:flex!important;
+  flex:0 0 32px!important;
   align-items:center!important;
   justify-content:flex-start!important;
   gap:7px!important;
-  margin:0!important;
+  margin:0 0 4px 0!important;
   padding:0 9px!important;
   border:1px solid #123b68!important;
   border-radius:6px!important;
   background:linear-gradient(180deg,#0b2a56 0%,#092449 100%)!important;
   color:#d8eaff!important;
   -webkit-text-fill-color:#d8eaff!important;
-  font-size:12px!important;
+  font-size:11px!important;
   font-weight:700!important;
   line-height:1!important;
   text-align:left!important;
@@ -79,6 +77,8 @@
   box-shadow:0 1px 2px rgba(0,0,0,.16),0 0 0 1px rgba(255,255,255,.015) inset!important;
   transition:background .12s ease,border-color .12s ease,transform .12s ease,color .12s ease!important;
   overflow:hidden!important;
+  white-space:nowrap!important;
+  text-overflow:ellipsis!important;
 }
 
 .nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link,.layout-grid-item):hover,
@@ -90,7 +90,6 @@
   -webkit-text-fill-color:#fff!important;
 }
 
-/* Active category — bright but still compact. */
 .nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(.active,[aria-selected="true"]),
 .nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(.active,[aria-selected="true"]){
   border-color:#22b5f4!important;
@@ -100,35 +99,28 @@
   box-shadow:0 0 0 1px rgba(72,210,255,.2) inset,0 3px 8px rgba(7,80,133,.28)!important;
 }
 
-/* Keep native icon, but make it small and aligned. */
 .nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link,.layout-grid-item) :is(img,i,svg,[class*="icon"]),
 .nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link,.layout-grid-item) :is(img,i,svg,[class*="icon"]){
-  flex:0 0 16px!important;
-  width:16px!important;
-  max-width:16px!important;
-  height:16px!important;
-  max-height:16px!important;
+  flex:0 0 15px!important;
+  width:15px!important;
+  max-width:15px!important;
+  height:15px!important;
+  max-height:15px!important;
   margin:0!important;
   object-fit:contain!important;
 }
 
-/* Truncate absurdly long DB captions instead of making the row huge. */
 .nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(span,p,div),
 .nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(span,p,div){
   min-width:0!important;
 }
 
-.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link,.layout-grid-item),
-.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link,.layout-grid-item){
-  white-space:nowrap!important;
-  text-overflow:ellipsis!important;
-}
-
-/* Slightly narrower category rail so the product grid gains room. */
 .nitro-catalog.paradise-catalog-v22.prc23-store .prc22-left-column{
   width:205px!important;
   min-width:205px!important;
   max-width:205px!important;
+  min-height:0!important;
+  overflow:hidden!important;
 }
 
 @media (max-width:1050px){
