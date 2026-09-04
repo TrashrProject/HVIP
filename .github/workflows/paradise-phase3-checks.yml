@@ -15,13 +15,13 @@ jobs:
           node-version: '22'
       - name: JavaScript syntax
         run: |
-          node --check WebPixel/nitro-last/paradise-store.js
-          node --check WebPixel/nitro-last/paradise-inventory-v2.js
-          node --check WebPixel/nitro-last/paradise-inventory-commands-ui.js
+          node --check WebPixel/nitro/paradise-inventory-complete.js
+          node --check WebPixel/nitro/paradise-catalog-v2.js
+          node --check WebPixel/nitro/paradise-weapon-skins.js
       - name: PHP syntax
         run: |
-          php -l WebPixel/paradise-inventory-lib.php
-          php -l WebPixel/rp-inventory-data.php
+          php -l WebPixel/inventory.php
+          php -l WebPixel/weapon-skins.php
       - name: Production migration safety
         shell: bash
         run: |
