@@ -17,12 +17,18 @@ $BuiltJarRelativePath = "WavePlus\target\RPHabbo-3.5.4-jar-with-dependencies.jar
 $RuntimeJarRelativePath = "runtime\WavePlus\WaveRP-Arcturus.jar"
 $BuiltPluginRelativePath = "WaveRP-Plugin\target\Roleplay-1.0.45-jar-with-dependencies.jar"
 $RuntimePluginRelativePath = "runtime\WavePlus\plugins\WaveRP-Roleplay.jar"
-$MigrationRelativePaths = @(
+$CommonMigrationRelativePaths = @(
     "migrations\20260902_paradise_weapon_skins.sql",
-    "migrations\20260903_paradise_complete_inventory.sql",
+    "migrations\20260903_paradise_complete_inventory.sql"
+)
+$ModernCatalogMigrationRelativePaths = @(
     "migrations\20260903_paradise_catalogue_rp_v3.sql",
     "migrations\20260903_paradise_catalogue_extension_v4.sql",
     "migrations\20260903_paradise_catalogue_mass_habborpbr.sql"
+)
+$LegacyCatalogMigrationRelativePaths = @(
+    "migrations\20260904_paradise_catalogue_mass_habborpbr_legacy.sql",
+    "migrations\20260904_add_black_block_catalog.sql"
 )
 $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -71,7 +77,7 @@ try {
     $RuntimeJar = Join-Path $RepositoryRoot $RuntimeJarRelativePath
     $BuiltPlugin = Join-Path $RepositoryRoot $BuiltPluginRelativePath
     $RuntimePlugin = Join-Path $RepositoryRoot $RuntimePluginRelativePath
-    $Migrations = @($MigrationRelativePaths | ForEach-Object { Join-Path $RepositoryRoot $_ })
+    $Migrations = @($CommonMigrationRelativePaths | ForEach-Object { Join-Path $RepositoryRoot $_ })
     $RuntimeDirectory = Split-Path -Parent $RuntimeJar
     $JavaExecutable = Join-Path $JavaHome "bin\java.exe"
 
@@ -165,6 +171,16 @@ try {
         if (-not $Mysql) { throw 'mysql.exe introuvable pour appliquer les migrations SQL.' }
         try {
             $env:MYSQL_PWD = $DatabasePassword
+            $CatalogSchemaArgs = @(
+                "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
+                "--database=$DatabaseName", '--batch', '--skip-column-names',
+                "--execute=SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='catalog_items' AND column_name='item_ids'"
+            )
+            $LegacyCatalog = ((& $Mysql @CatalogSchemaArgs) -join '').Trim() -eq '1'
+            if ($LASTEXITCODE -ne 0) { throw 'Detection du schema catalogue impossible.' }
+            $CatalogMigrations = if ($LegacyCatalog) { $LegacyCatalogMigrationRelativePaths } else { $ModernCatalogMigrationRelativePaths }
+            $Migrations = @($CommonMigrationRelativePaths + $CatalogMigrations | ForEach-Object { Join-Path $RepositoryRoot $_ })
+            Write-Host ("Schema catalogue detecte : " + $(if ($LegacyCatalog) { 'legacy item_ids/vip_only' } else { 'moderne item_id/min_vip' })) -ForegroundColor Cyan
             foreach ($Migration in $Migrations) {
                 if (-not (Test-Path -LiteralPath $Migration -PathType Leaf)) { continue }
                 $MigrationProcess = Start-Process -FilePath $Mysql -ArgumentList @(

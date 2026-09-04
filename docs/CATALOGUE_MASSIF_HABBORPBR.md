@@ -15,7 +15,12 @@ Chaque meuble importé possède les quatre éléments obligatoires : une défini
 
 ## Déploiement
 
-La migration `20260903_paradise_catalogue_mass_habborpbr.sql` est appelée automatiquement par `mise-a-jour-wave-vps.ps1`, après les catalogues v3 et v4. Elle est idempotente et ses gros INSERT sont fractionnés pour fonctionner avec la valeur MySQL standard de `max_allowed_packet`.
+Le script `mise-a-jour-wave-vps.ps1` détecte automatiquement le schéma du catalogue :
+
+- schéma récent `item_id/min_vip` : catalogues v3, v4 puis import massif ;
+- schéma historique `item_ids/vip_only` : import massif legacy autonome puis page des blocs colorés.
+
+Les migrations sont idempotentes et leurs gros INSERT sont fractionnés pour fonctionner avec la valeur MySQL standard de `max_allowed_packet`.
 
 Depuis `C:\HVIP` :
 
