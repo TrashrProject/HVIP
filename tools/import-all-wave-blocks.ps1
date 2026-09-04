@@ -36,10 +36,12 @@ function Invoke-Rows([string]$Sql) {
 }
 
 function Get-IconName([string]$ClassName) {
-    $parts = $ClassName -split '\*',2
-    $base = $parts[0]
-    if ($parts.Count -gt 1 -and -not [string]::IsNullOrWhiteSpace($parts[1])) {
-        return $base + '_' + $parts[1] + '_icon.png'
+    # Windows PowerShell 5 peut reduire un tableau a un scalaire quand il n'y a
+    # pas de variante *N. Le @() garantit que .Count existe sous StrictMode.
+    $parts = @($ClassName -split '\*',2)
+    $base = [string]$parts[0]
+    if ($parts.Count -gt 1 -and -not [string]::IsNullOrWhiteSpace([string]$parts[1])) {
+        return $base + '_' + [string]$parts[1] + '_icon.png'
     }
     return $base + '_icon.png'
 }
@@ -92,14 +94,15 @@ WHERE type IN ('s','i')
 ORDER BY id;
 "@
 
-$raw = Invoke-Rows $sql
+# @() autour des appels garantit un vrai tableau meme si MySQL renvoie 0 ou 1 ligne.
+$raw = @(Invoke-Rows $sql)
 $catalogIds = [Collections.Generic.HashSet[long]]::new()
-foreach ($line in (Invoke-Rows "SELECT DISTINCT CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(item_ids, ',', 1), ':', 1) AS UNSIGNED) FROM catalog_items WHERE item_ids REGEXP '^[0-9]+';")) {
+foreach ($line in @(Invoke-Rows "SELECT DISTINCT CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(item_ids, ',', 1), ':', 1) AS UNSIGNED) FROM catalog_items WHERE item_ids REGEXP '^[0-9]+';")) {
     $value = 0L
     if ([long]::TryParse(($line -split "`t")[0],[ref]$value)) { [void]$catalogIds.Add($value) }
 }
 $itemsBaseIds = [Collections.Generic.HashSet[long]]::new()
-foreach ($line in (Invoke-Rows 'SELECT id FROM items_base;')) {
+foreach ($line in @(Invoke-Rows 'SELECT id FROM items_base;')) {
     $value = 0L
     if ([long]::TryParse(($line -split "`t")[0],[ref]$value)) { [void]$itemsBaseIds.Add($value) }
 }
@@ -109,21 +112,22 @@ $usable = [Collections.Generic.List[object]]::new()
 $seen = [Collections.Generic.HashSet[long]]::new()
 
 foreach ($line in $raw) {
-    $parts = $line -split "`t",-1
+    $parts = @($line -split "`t",-1)
     if ($parts.Count -lt 4) { continue }
     $furnitureId = 0L
-    if (-not [long]::TryParse($parts[0],[ref]$furnitureId)) { continue }
+    if (-not [long]::TryParse([string]$parts[0],[ref]$furnitureId)) { continue }
     if (-not $seen.Add($furnitureId)) { continue }
     if (-not $fdById.ContainsKey([string]$furnitureId)) { continue }
 
     $entry = $fdById[[string]$furnitureId]
     $className = [string]$entry.classname
     if ([string]::IsNullOrWhiteSpace($className)) { continue }
-    $display = if ($null -ne $entry.name) { [string]$entry.name } elseif (-not [string]::IsNullOrWhiteSpace($parts[2])) { $parts[2] } else { $parts[1] }
+    $display = if ($null -ne $entry.name) { [string]$entry.name } elseif (-not [string]::IsNullOrWhiteSpace([string]$parts[2])) { [string]$parts[2] } else { [string]$parts[1] }
     $check = ($className + ' ' + $display).ToLowerInvariant()
     if ($check -match $excludedPattern) { continue }
 
-    $assetBase = ($className -split '\*',2)[0]
+    $assetParts = @($className -split '\*',2)
+    $assetBase = [string]$assetParts[0]
     if ($assetBase -notmatch '^[A-Za-z0-9_.-]+$') { continue }
     $nitroPath = Join-Path $furnitureDir ($assetBase + '.nitro')
     $iconName = Get-IconName $className
@@ -168,11 +172,11 @@ $pages = [ordered]@{
     'Blocs custom'            = 9967607
 }
 
-$parentRows = Invoke-Rows 'SELECT parent_id FROM catalog_pages WHERE id=140 LIMIT 1;'
+$parentRows = @(Invoke-Rows 'SELECT parent_id FROM catalog_pages WHERE id=140 LIMIT 1;')
 $parentId = 222
 if ($parentRows.Count -gt 0) {
     $tmpParent = 0
-    if ([int]::TryParse(($parentRows[0] -split "`t")[0],[ref]$tmpParent)) { $parentId = $tmpParent }
+    if ([int]::TryParse([string](($parentRows[0] -split "`t")[0]),[ref]$tmpParent)) { $parentId = $tmpParent }
 }
 
 $sb = [Text.StringBuilder]::new()
@@ -214,7 +218,7 @@ for ($i=0; $i -lt $rows.Count; $i += $chunkSize) {
 $usable | Export-Csv -LiteralPath $report -NoTypeInformation -Encoding UTF8
 
 $missingItemsBase = @($usable | Where-Object { -not $_.InItemsBase }).Count
-$alreadyCatalog = @($usable | Where-Object AlreadyInCatalog).Count
+$alreadyCatalog = @($usable | Where-Object { $_.AlreadyInCatalog }).Count
 
 Write-Host '=== TOUS LES BLOCS WAVE ===' -ForegroundColor Cyan
 Write-Host "Blocs complets retenus : $($usable.Count)" -ForegroundColor Green
