@@ -1,123 +1,114 @@
 (() => {
     'use strict';
 
-    window.__PARADISE_BANK_POLICY__ = '4.0.0';
+    window.__PARADISE_BANK_POLICY__ = '5.0.0';
 
-    const BRAND = 'ParadiseBank';
-    const FORBIDDEN_TEXT = /^(?:retirer|retrait|withdraw|ouvrir\s*un\s*compte|open\s*account|open)$/i;
-    const FORBIDDEN_ANY = /(?:retirer|retrait|withdraw|ouvrir\s*un\s*compte|open\s*account)/i;
+    const FORBIDDEN = /(?:retirer|retrait|withdraw|ouvrir\s*un\s*compte|open\s*account)/i;
     const text = el => String(el?.textContent || '').replace(/\s+/g, ' ').trim();
 
-    function getBanks() {
-        return [...document.querySelectorAll('.phone-bank-app')];
-    }
-
     function ensureStyle() {
-        if (document.getElementById('paradise-bank-v4-style')) return;
+        if (document.getElementById('paradise-bank-v5-style')) return;
         const style = document.createElement('style');
-        style.id = 'paradise-bank-v4-style';
+        style.id = 'paradise-bank-v5-style';
         style.textContent = `
-            .phone-bank-app [data-paradise-bank-logo="1"]{display:flex!important;align-items:center!important;justify-content:center!important;width:78px!important;height:62px!important;margin:2px auto 3px!important;color:#eef6ff!important;font:900 46px/1 Arial,sans-serif!important;letter-spacing:-5px!important;text-shadow:0 2px 0 rgba(0,0,0,.55)!important;user-select:none!important;pointer-events:none!important}
-            .phone-bank-app [data-paradise-bank-deposit="1"]{width:100%!important;max-width:none!important;flex:1 1 100%!important}
-            .phone-bank-app [data-paradise-bank-deposit-row="1"]{display:flex!important;grid-template-columns:1fr!important;width:100%!important;gap:0!important}
-            .phone-bank-app [data-paradise-bank-forbidden="1"]{display:none!important;visibility:hidden!important;pointer-events:none!important}
+            .nitro-phone-frame [data-paradise-bank-hidden="1"]{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;width:0!important;height:0!important;min-width:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important}
+            .nitro-phone-frame [data-paradise-bank-deposit="1"]{width:100%!important;max-width:none!important;flex:1 1 100%!important}
+            .nitro-phone-frame [data-paradise-bank-deposit-row="1"]{display:flex!important;grid-template-columns:1fr!important;width:100%!important;gap:0!important}
         `;
         document.head.appendChild(style);
     }
 
-    function brand(bank) {
-        const walker = document.createTreeWalker(bank, NodeFilter.SHOW_TEXT);
-        const nodes = [];
-        while (walker.nextNode()) nodes.push(walker.currentNode);
-        for (const node of nodes) {
-            const before = node.nodeValue || '';
-            let after = before.replace(/Metro\s*Bank/gi, BRAND);
-            if (/^\s*M\${1,3}\s*$/i.test(before)) after = before.replace(/M\${1,3}/i, 'P$');
-            if (after !== before) node.nodeValue = after;
+    function isBankScreen(phone) {
+        if (!phone) return false;
+        const value = text(phone);
+        return /ParadiseBank|Metro\s*Bank/i.test(value) && /solde\s+du\s+compte/i.test(value) && /argent\s+liquide/i.test(value);
+    }
+
+    function hideForbiddenControl(control) {
+        if (!control || control.dataset?.paradiseBankHidden === '1') return;
+        control.dataset.paradiseBankHidden = '1';
+        control.setAttribute('aria-hidden', 'true');
+        if ('disabled' in control) control.disabled = true;
+        control.style.setProperty('display', 'none', 'important');
+        control.style.setProperty('visibility', 'hidden', 'important');
+        control.style.setProperty('pointer-events', 'none', 'important');
+        setTimeout(() => {
+            if (control.isConnected) control.remove();
+        }, 0);
+    }
+
+    function cleanPhone(phone) {
+        if (!phone || !isBankScreen(phone)) return;
+
+        const candidates = [...phone.querySelectorAll('button,a,[role="button"],input[type="button"],input[type="submit"]')];
+        for (const control of candidates) {
+            const descriptor = [
+                text(control),
+                control.getAttribute?.('aria-label') || '',
+                control.getAttribute?.('title') || '',
+                control.getAttribute?.('data-action') || '',
+                control.getAttribute?.('data-bank-action') || '',
+                control.getAttribute?.('name') || '',
+                control.getAttribute?.('value') || ''
+            ].join(' ');
+            if (FORBIDDEN.test(descriptor)) hideForbiddenControl(control);
         }
 
-        const title = [...bank.querySelectorAll('h1,h2,h3,h4,h5,h6,strong,b,span,p,div')]
-            .find(el => /^(?:Metro\s*Bank|ParadiseBank)$/i.test(text(el)));
-        if (!title) return;
-        title.textContent = BRAND;
-
-        let logo = bank.querySelector('[data-paradise-bank-logo="1"]');
-        if (!logo) {
-            const oldLogo = title.previousElementSibling || title.parentElement?.querySelector('svg,img,[class*="logo" i]');
-            if (oldLogo && !oldLogo.contains(title)) oldLogo.style.setProperty('display', 'none', 'important');
-            logo = document.createElement('div');
-            logo.dataset.paradiseBankLogo = '1';
-            logo.textContent = 'P$';
-            title.parentElement?.insertBefore(logo, title);
-        } else {
-            logo.textContent = 'P$';
+        const deposit = candidates.find(control => /(?:^|\s)(?:déposer|deposer|deposit)(?:\s|$)/i.test(text(control)));
+        if (deposit && deposit.isConnected) {
+            deposit.dataset.paradiseBankDeposit = '1';
+            if (deposit.parentElement) deposit.parentElement.dataset.paradiseBankDepositRow = '1';
         }
     }
 
-    function killForbidden(bank) {
-        const controls = [...bank.querySelectorAll('button,a,[role="button"],input[type="button"],input[type="submit"],[data-action],[data-bank-action],form')];
-        for (const control of controls) {
-            const descriptor = [text(control), control.id, control.className, control.getAttribute?.('name'), control.getAttribute?.('value'), control.getAttribute?.('data-action'), control.getAttribute?.('data-bank-action')].filter(Boolean).join(' ');
-            if (!FORBIDDEN_ANY.test(descriptor) && !FORBIDDEN_TEXT.test(text(control))) continue;
-            const target = control.closest('form,button,a,[role="button"]') || control;
-            target.dataset.paradiseBankForbidden = '1';
-            target.setAttribute('aria-hidden', 'true');
-            if ('disabled' in target) target.disabled = true;
-            target.style.setProperty('display', 'none', 'important');
-            queueMicrotask(() => { if (target.isConnected) target.remove(); });
-        }
-    }
-
-    function stretchDeposit(bank) {
-        const deposit = [...bank.querySelectorAll('button,a,[role="button"],input[type="button"],input[type="submit"]')]
-            .find(el => /^(?:déposer|deposer|deposit)$/i.test(text(el)));
-        if (!deposit) return;
-        deposit.dataset.paradiseBankDeposit = '1';
-        if (deposit.parentElement) deposit.parentElement.dataset.paradiseBankDepositRow = '1';
-    }
-
-    function enforceBank(bank) {
+    function scan() {
         ensureStyle();
-        brand(bank);
-        killForbidden(bank);
-        stretchDeposit(bank);
+        document.querySelectorAll('.nitro-phone-frame').forEach(cleanPhone);
     }
 
-    function enforceAll() {
-        getBanks().forEach(enforceBank);
-    }
-
-    function blockForbidden(event) {
+    function block(event) {
         const target = event.target instanceof Element ? event.target : null;
         if (!target) return;
-        const bank = target.closest('.phone-bank-app');
-        if (!bank) return;
+        const phone = target.closest('.nitro-phone-frame');
+        if (!phone || !isBankScreen(phone)) return;
         const control = target.closest('button,a,[role="button"],input[type="button"],input[type="submit"],form,[data-action],[data-bank-action]');
         if (!control) return;
-        const descriptor = [text(control), control.id, control.className, control.getAttribute?.('data-action'), control.getAttribute?.('data-bank-action')].filter(Boolean).join(' ');
-        if (!FORBIDDEN_ANY.test(descriptor) && !FORBIDDEN_TEXT.test(text(control))) return;
+        const descriptor = [
+            text(control),
+            control.getAttribute?.('aria-label') || '',
+            control.getAttribute?.('title') || '',
+            control.getAttribute?.('data-action') || '',
+            control.getAttribute?.('data-bank-action') || ''
+        ].join(' ');
+        if (!FORBIDDEN.test(descriptor)) return;
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation?.();
-        const remove = control.closest('form,button,a,[role="button"]') || control;
-        remove.dataset.paradiseBankForbidden = '1';
-        if ('disabled' in remove) remove.disabled = true;
-        remove.style.setProperty('display', 'none', 'important');
-        queueMicrotask(() => remove.remove());
+        hideForbiddenControl(control.closest('button,a,[role="button"]') || control);
     }
 
-    ['pointerdown','mousedown','touchstart','click','submit'].forEach(type => window.addEventListener(type, blockForbidden, true));
+    ['pointerdown','mousedown','touchstart','click','submit'].forEach(type => {
+        window.addEventListener(type, block, true);
+    });
 
-    let raf = 0;
+    let queued = false;
     const observer = new MutationObserver(() => {
-        if (raf) return;
-        raf = requestAnimationFrame(() => { raf = 0; enforceAll(); });
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+            queued = false;
+            scan();
+        });
     });
 
     function boot() {
-        enforceAll();
-        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-        setInterval(enforceAll, 150);
+        scan();
+        observer.observe(document.getElementById('root') || document.body, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+        setInterval(scan, 100);
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
