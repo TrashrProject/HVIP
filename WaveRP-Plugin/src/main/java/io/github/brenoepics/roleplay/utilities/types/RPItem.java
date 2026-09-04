@@ -103,6 +103,14 @@ public class RPItem {
     }
   }
 
+  public String getDisplayName() {
+    return FoodPresentation.localizedName(this.id, this.interactionType, this.displayName);
+  }
+
+  public String getRawDisplayName() {
+    return this.displayName;
+  }
+
   public boolean requiresJob() {
     return requirementJob != null;
   }
