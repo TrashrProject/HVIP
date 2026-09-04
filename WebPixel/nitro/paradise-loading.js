@@ -7,11 +7,12 @@
     el=document.createElement('div');
     el.id=ID;
     el.setAttribute('aria-hidden','true');
-    el.innerHTML='<div class="pr-bg"></div><div class="pr-ambient"></div><div class="pr-fog"></div><div class="pr-logo-wrap"><div class="pr-logo-base"></div><div class="pr-logo-reveal"></div><div class="pr-particles"></div></div><div class="pr-flash"></div>';
+    el.innerHTML='<div class="pr-bg"></div><div class="pr-ambient"></div><div class="pr-fog"></div><div class="pr-center"><div class="pr-logo-wrap"><div class="pr-logo-base"></div><div class="pr-logo-reveal"></div><div class="pr-particles"></div></div><div class="pr-wave-loader"><div class="pr-wave-track"><div class="pr-wave-fill"></div></div><div class="pr-wave-status">Préparation du client...</div></div></div><div class="pr-flash"></div>';
     document.body.insertBefore(el,document.body.firstChild);
   }
 
   const particles=el.querySelector('.pr-particles');
+  const status=el.querySelector('.pr-wave-status');
   if(particles&&!particles.childElementCount){
     const spots=[
       [18,24,3.8,.2],[26,70,4.3,1.1],[34,15,3.6,2],[42,78,4.7,.6],
@@ -34,10 +35,19 @@
   let done=false;
   const started=Date.now();
 
+  const getStatus=(v)=>{
+    if(v<24)return 'Préparation du client...';
+    if(v<48)return 'Chargement des ressources...';
+    if(v<72)return 'Connexion à ParadiseRP...';
+    if(v<93)return 'Initialisation du client...';
+    return 'Finalisation...';
+  };
+
   const setProgress=(next)=>{
     value=Math.max(value,Math.min(96,next));
     el.style.setProperty('--pr-progress',value+'%');
     el.style.setProperty('--pr-progress-num',String(Math.round(value)));
+    if(status)status.textContent=getStatus(value);
   };
 
   setProgress(value);
@@ -56,12 +66,10 @@
     clearInterval(timer);
     el.style.setProperty('--pr-progress','100%');
     el.style.setProperty('--pr-progress-num','100');
+    if(status)status.textContent='Finalisation...';
     el.classList.add('is-complete');
 
-    setTimeout(()=>{
-      el.classList.add('is-flashing');
-    },220);
-
+    setTimeout(()=>el.classList.add('is-flashing'),220);
     setTimeout(()=>{
       el.classList.add('is-ready');
       document.documentElement.classList.remove('paradise-booting');
@@ -82,6 +90,7 @@
     const elapsed=Date.now()-started;
     const wait=Math.max(0,1500-elapsed);
     setProgress(96);
+    if(status)status.textContent='Finalisation...';
     setTimeout(()=>{if(clientLooksReady())finish();},wait+350);
   };
 
