@@ -7,8 +7,26 @@
     el=document.createElement('div');
     el.id=ID;
     el.setAttribute('aria-hidden','true');
-    el.innerHTML='<div class="pr-logo-wrap"><div class="pr-logo-base"></div><div class="pr-logo-reveal"></div></div>';
+    el.innerHTML='<div class="pr-ambient"></div><div class="pr-logo-wrap"><div class="pr-logo-base"></div><div class="pr-logo-reveal"></div><div class="pr-particles"></div></div>';
     document.body.insertBefore(el,document.body.firstChild);
+  }
+
+  const particles=el.querySelector('.pr-particles');
+  if(particles&&!particles.childElementCount){
+    const spots=[
+      [18,24,3.8,.2],[26,70,4.3,1.1],[34,15,3.6,2],[42,78,4.7,.6],
+      [54,12,4.1,1.7],[62,74,3.9,.9],[71,22,4.5,2.4],[79,67,3.7,1.4],
+      [87,31,4.8,.4],[12,55,4.2,2.1],[91,54,3.5,1.2],[48,5,4.6,2.8]
+    ];
+    spots.forEach(([x,y,dur,delay])=>{
+      const p=document.createElement('span');
+      p.className='pr-particle';
+      p.style.left=x+'%';
+      p.style.top=y+'%';
+      p.style.setProperty('--pr-dur',dur+'s');
+      p.style.setProperty('--pr-delay',delay+'s');
+      particles.appendChild(p);
+    });
   }
 
   let value=4;
@@ -18,6 +36,7 @@
   const setProgress=(next)=>{
     value=Math.max(value,Math.min(96,next));
     el.style.setProperty('--pr-progress',value+'%');
+    el.style.setProperty('--pr-progress-num',String(Math.round(value)));
   };
 
   setProgress(value);
@@ -35,12 +54,14 @@
     done=true;
     clearInterval(timer);
     el.style.setProperty('--pr-progress','100%');
+    el.style.setProperty('--pr-progress-num','100');
     el.classList.add('is-complete');
+    setTimeout(()=>el.classList.add('is-flashing'),210);
     setTimeout(()=>{
       el.classList.add('is-ready');
       document.documentElement.classList.remove('paradise-booting');
-      setTimeout(()=>el.remove(),500);
-    },420);
+      setTimeout(()=>el.remove(),560);
+    },560);
   };
 
   const clientLooksReady=()=>{
