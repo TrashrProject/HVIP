@@ -7,12 +7,14 @@
     el=document.createElement('div');
     el.id=ID;
     el.setAttribute('aria-hidden','true');
-    el.innerHTML='<div class="pr-bg"></div><div class="pr-ambient"></div><div class="pr-fog"></div><div class="pr-center"><div class="pr-logo-wrap"><div class="pr-logo-base"></div><div class="pr-logo-reveal"></div><div class="pr-particles"></div></div><div class="pr-wave-loader"><div class="pr-wave-track"><div class="pr-wave-fill"></div></div><div class="pr-wave-status">Préparation du client...</div></div></div><div class="pr-flash"></div>';
+    el.innerHTML='<div class="pr-bg"></div><div class="pr-tropical-tint"></div><div class="pr-horizon"></div><div class="pr-sun"></div><div class="pr-sun-reflection"></div><div class="pr-clouds"></div><div class="pr-ambient"></div><div class="pr-fog"></div><div class="pr-birds pr-random"></div><div class="pr-shooting-star pr-random"></div><div class="pr-boat pr-random"><span class="pr-boat-wake"></span><i></i></div><div class="pr-island"><i class="pr-foam"></i><i class="pr-palm p1"></i><i class="pr-palm p2"></i><i class="pr-palm p3"></i><i class="pr-hut"></i><i class="pr-car"></i><i class="pr-leaf pr-random"></i><div class="pr-welcome-sign">Bienvenue à<span>ParadiseRP</span></div></div><div class="pr-logo-water-reflection"></div><div class="pr-center"><div class="pr-logo-wrap"><div class="pr-logo-base"></div><div class="pr-logo-underlight"></div><div class="pr-logo-reveal"></div><div class="pr-logo-warm"></div><div class="pr-logo-shine"></div><i class="pr-logo-spark s1"></i><i class="pr-logo-spark s2"></i><i class="pr-logo-spark s3"></i><div class="pr-particles"></div></div></div><div class="pr-flash"></div>';
     document.body.insertBefore(el,document.body.firstChild);
   }
 
+  const scenes=['pr-scene-boat','pr-scene-star','pr-scene-birds','pr-scene-leaf'];
+  el.classList.add(scenes[Math.floor(Math.random()*scenes.length)]);
+
   const particles=el.querySelector('.pr-particles');
-  const status=el.querySelector('.pr-wave-status');
   if(particles&&!particles.childElementCount){
     const spots=[
       [18,24,3.8,.2],[26,70,4.3,1.1],[34,15,3.6,2],[42,78,4.7,.6],
@@ -35,19 +37,10 @@
   let done=false;
   const started=Date.now();
 
-  const getStatus=(v)=>{
-    if(v<24)return 'Préparation du client...';
-    if(v<48)return 'Chargement des ressources...';
-    if(v<72)return 'Connexion à ParadiseRP...';
-    if(v<93)return 'Initialisation du client...';
-    return 'Finalisation...';
-  };
-
   const setProgress=(next)=>{
     value=Math.max(value,Math.min(96,next));
     el.style.setProperty('--pr-progress',value+'%');
     el.style.setProperty('--pr-progress-num',String(Math.round(value)));
-    if(status)status.textContent=getStatus(value);
   };
 
   setProgress(value);
@@ -66,7 +59,6 @@
     clearInterval(timer);
     el.style.setProperty('--pr-progress','100%');
     el.style.setProperty('--pr-progress-num','100');
-    if(status)status.textContent='Finalisation...';
     el.classList.add('is-complete');
 
     setTimeout(()=>el.classList.add('is-flashing'),220);
@@ -90,7 +82,6 @@
     const elapsed=Date.now()-started;
     const wait=Math.max(0,1500-elapsed);
     setProgress(96);
-    if(status)status.textContent='Finalisation...';
     setTimeout(()=>{if(clientLooksReady())finish();},wait+350);
   };
 
