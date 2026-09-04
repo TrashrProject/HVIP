@@ -27,14 +27,16 @@ $ModernCatalogMigrationRelativePaths = @(
     "migrations\20260903_paradise_catalogue_mass_habborpbr.sql",
     "migrations\20260904_paradise_catalogue_reorganize_v2.sql",
     "migrations\20260904_paradise_island_builder_kit.sql",
-    "migrations\20260904_paradise_island_visibility_fix.sql"
+    "migrations\20260904_paradise_island_visibility_fix.sql",
+    "migrations\20260904_paradise_black_cubes_force_visible.sql"
 )
 $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_catalogue_mass_habborpbr_legacy.sql",
     "migrations\20260904_paradise_catalogue_reorganize_v2_legacy.sql",
     "migrations\20260904_paradise_island_builder_kit_legacy.sql",
     "migrations\20260904_paradise_island_visibility_fix_legacy.sql",
-    "migrations\20260904_add_black_block_catalog.sql"
+    "migrations\20260904_add_black_block_catalog.sql",
+    "migrations\20260904_paradise_black_cubes_force_visible_legacy.sql"
 )
 $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -198,6 +200,19 @@ try {
                 }
                 Write-Host "Migration appliquee : $(Split-Path -Leaf $Migration)" -ForegroundColor Green
             }
+
+            $CatalogItemColumn = if ($LegacyCatalog) { 'item_ids' } else { 'item_id' }
+            $BlackCubeValidationSql = "SELECT COUNT(DISTINCT CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED)) FROM catalog_items WHERE page_id=9967201 AND CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED) IN (5480,5466,996661582)"
+            $BlackCubeValidationArgs = @(
+                "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
+                "--database=$DatabaseName", '--batch', '--skip-column-names',
+                "--execute=$BlackCubeValidationSql"
+            )
+            $VisibleBlackCubeCount = ((& $Mysql @BlackCubeValidationArgs) -join '').Trim()
+            if ($LASTEXITCODE -ne 0 -or $VisibleBlackCubeCount -ne '3') {
+                throw "Verification catalogue impossible : $VisibleBlackCubeCount/3 cubes noirs visibles dans la page 9967201."
+            }
+            Write-Host 'Verification catalogue : 3/3 cubes noirs visibles dans Construction - Blocs couleurs.' -ForegroundColor Green
         }
         finally {
             $env:MYSQL_PWD = $null
