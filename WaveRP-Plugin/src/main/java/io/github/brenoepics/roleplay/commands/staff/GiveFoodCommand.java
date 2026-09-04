@@ -19,7 +19,7 @@ public class GiveFoodCommand extends Command {
   private static final String MENU_MARKER = "PARADISE_FOOD_MENU";
 
   public GiveFoodCommand(String permission, String[] keys) {
-    super(permission, keys);
+    super(permission, new String[]{"givefood", "givenourriture", "food", "nourriture"});
   }
 
   @Override
