@@ -1,6 +1,6 @@
 SET NAMES utf8mb4;
 
--- Add the requested black block to the existing visible Construction et architecture page.
+-- Add the real black Builders Club cube to the dedicated island construction kit.
 -- Idempotent: does nothing if this furniture id is already offered somewhere in the catalog.
 INSERT INTO catalog_items (
     item_ids,
@@ -20,16 +20,16 @@ INSERT INTO catalog_items (
     club_only
 )
 SELECT
-    '2678830',
-    9967201,
-    'Bloc noir',
+    '5480',
+    9967301,
+    'Grand Cube noir',
     3,
     0,
     0,
     1,
     0,
     0,
-    COALESCE((SELECT MAX(ci2.order_number) + 1 FROM catalog_items ci2 WHERE ci2.page_id = 9967201), 1),
+    COALESCE((SELECT MAX(ci2.order_number) + 1 FROM catalog_items ci2 WHERE ci2.page_id = 9967301), 1),
     -1,
     0,
     '',
@@ -38,7 +38,7 @@ SELECT
 WHERE NOT EXISTS (
     SELECT 1
     FROM catalog_items ci
-    WHERE CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(ci.item_ids, ',', 1), ':', 1) AS UNSIGNED) = 2678830
+    WHERE CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(ci.item_ids, ',', 1), ':', 1) AS UNSIGNED) = 5480
 );
 
 -- Clean up the mojibake labels of the existing coloured-orb offers without moving them.
