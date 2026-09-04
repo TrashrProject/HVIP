@@ -64,6 +64,7 @@ import io.github.brenoepics.roleplay.commands.organizations.LeaveOrganizationCom
 import io.github.brenoepics.roleplay.commands.organizations.RankDownOrganizationCommand;
 import io.github.brenoepics.roleplay.commands.organizations.RankUpOrganizationCommand;
 import io.github.brenoepics.roleplay.commands.organizations.RenameOrganizationCommand;
+import io.github.brenoepics.roleplay.commands.staff.GiveFoodCommand;
 import io.github.brenoepics.roleplay.commands.staff.GlobalHealCommand;
 import io.github.brenoepics.roleplay.commands.staff.GotoRoomCommand;
 import io.github.brenoepics.roleplay.commands.staff.KillCommand;
@@ -401,6 +402,13 @@ public class LoadPlayerCommands {
           new SuperHireCommand("cmd_superhire", new String[]{"superhire", "superrecruter"}),
           new String[]{"superhire", "superrecruter"}, PermissionState.DENIED);
       CheckDatabase.allowPermissionForRankRange("cmd_superhire", 5, 9);
+
+      Emulator.getTexts().register("commands.description.cmd_givefood",
+          ":givefood <id|nom> [quantite] - Ajoute de la nourriture a votre inventaire (staff uniquement).");
+      LoadPlayerCommands.addCommand(
+          new GiveFoodCommand("cmd_givefood", new String[]{"givefood", "givenourriture"}),
+          new String[]{"givefood", "givenourriture"}, PermissionState.DENIED);
+      CheckDatabase.allowPermissionForRankRange("cmd_givefood", 5, 9);
 
       Emulator.getTexts().register("commands.description.cmd_staff_kill", ":kill <pseudo>");
       LoadPlayerCommands.addCommand(
