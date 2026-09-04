@@ -40,6 +40,12 @@ public class UserConnect implements EventListener {
     }
 
     RpAvatar avatar = RolePlay.getAvatarManager().getRpAvatar(habbo);
+    // Also repair weapons persisted by older server versions: equipped weapons are
+    // session-only and must be returned to the inventory as soon as the user logs in.
+    if (avatar.getEquippedWeapon().isPresent()) {
+      avatar.getInventory().unEquipWeapon();
+      avatar.updateDatabase();
+    }
     GameClient loginClient = habbo.getClient();
     AvatarManager.resetSpawnForward(habbo);
     scheduleSpawnRetry(habbo, avatar, loginClient, 1500);
