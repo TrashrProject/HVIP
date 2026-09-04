@@ -16,20 +16,21 @@
 
   const findTopNav = root => root.querySelector(':scope > .nitro-card-tabs, :scope > [class*="card-tabs"], .nitro-card-tabs');
 
+  const isKnownTab = node => !!node.dataset.prc23Key || TAB_DEFS.some(def => def.match.test(clean(node.textContent)));
+
   const getTabCandidates = root => {
     const nav = findTopNav(root);
     if(!nav) return [];
 
     const direct = [ ...nav.children ].filter(node => node instanceof HTMLElement);
-    const resolved = direct.filter(node => TAB_DEFS.some(def => def.match.test(clean(node.textContent))));
+    const resolved = direct.filter(isKnownTab);
     if(resolved.length) return resolved;
 
-    return [ ...nav.querySelectorAll('li,button,a,[role="tab"]') ]
-      .filter(node => TAB_DEFS.some(def => def.match.test(clean(node.textContent))));
+    return [ ...nav.querySelectorAll('li,button,a,[role="tab"]') ].filter(isKnownTab);
   };
 
-  const getTabDef = tab => TAB_DEFS.find(def => def.match.test(clean(tab.textContent))) ||
-    TAB_DEFS.find(def => tab.dataset.prc23Key === def.key) || null;
+  const getTabDef = tab => TAB_DEFS.find(def => tab.dataset.prc23Key === def.key) ||
+    TAB_DEFS.find(def => def.match.test(clean(tab.textContent))) || null;
 
   const findTextNode = (tab, def) => {
     const walker = document.createTreeWalker(tab, NodeFilter.SHOW_TEXT);
@@ -38,6 +39,12 @@
 
     while(current)
     {
+      if(current.parentElement?.classList?.contains('prc23-tab-icon'))
+      {
+        current = walker.nextNode();
+        continue;
+      }
+
       const value = clean(current.nodeValue);
       if(value)
       {
@@ -181,6 +188,7 @@
 
     root.querySelectorAll('button,a,label,span').forEach(node => {
       if(node.closest('.prc22-brand-banner')) return;
+      if(node.closest('.prc23-tab')) return;
       if(node.children.length) return;
       const value = clean(node.textContent);
       if(!value) return;
