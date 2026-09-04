@@ -59,12 +59,27 @@ public class EquipCommand extends Command {
             if (visualEffect != -1) {
                 gameClient.getHabbo().getHabboInfo().getCurrentRoom().giveEffect(gameClient.getHabbo(), visualEffect, -1);
             }
-            if (!data.getInventory().equipWeapon(item)) {
+
+            InventorySlot currentWeaponSlot = data.getInventory().getPrimaryWeaponSlot();
+            boolean alreadyEquipped = currentWeaponSlot != null
+                && !currentWeaponSlot.isEmpty()
+                && currentWeaponSlot.getItem() != null
+                && currentWeaponSlot.getItem().equals(item);
+
+            // Re-applying the same weapon is used by the skin selector to refresh the visual effect.
+            // It must not unequip the weapon and move it back into a regular inventory slot.
+            if (!alreadyEquipped && !data.getInventory().equipWeapon(item)) {
                 gameClient.getHabbo().whisper("Cette arme est inutilisable ou cassée.", RoomChatMessageBubbles.ALERT);
                 return true;
             }
         } else {
-            if (!data.getInventory().equipArmor(item)) {
+            InventorySlot currentArmorSlot = data.getInventory().getSecondaryArmorSlot();
+            boolean alreadyEquipped = currentArmorSlot != null
+                && !currentArmorSlot.isEmpty()
+                && currentArmorSlot.getItem() != null
+                && currentArmorSlot.getItem().equals(item);
+
+            if (!alreadyEquipped && !data.getInventory().equipArmor(item)) {
                 gameClient.getHabbo().whisper("Cette armure est inutilisable ou cassée.", RoomChatMessageBubbles.ALERT);
                 return true;
             }
