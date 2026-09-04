@@ -74,17 +74,12 @@ public class ApplyCommand extends Command {
     };
   }
 
-  /**
-   * Applies a health item to restore player health
-   */
   private boolean applyHealthItem(RPItem item, RpAvatar data, Habbo habbo) {
     if (data.getHealth() >= data.getMaxHealth()) {
       habbo.whisper("Votre sant\u00e9 est d\u00e9j\u00e0 au maximum.", RoomChatMessageBubbles.ALERT);
       return false;
     }
-
     habbo.whisper(getApplyMessage(item), RoomChatMessageBubbles.ALERT);
-
     useHealth(data, item.getExtraData());
     return true;
   }
@@ -98,47 +93,32 @@ public class ApplyCommand extends Command {
     return "features.apply." + item.getInteractionType();
   }
 
-  /**
-   * Applies an energy item to restore player energy
-   */
   private boolean applyEnergyItem(RPItem item, RpAvatar data, Habbo habbo) {
     if (data.getEnergy() >= data.getMaxEnergy()) {
       habbo.whisper("Votre \u00e9nergie est d\u00e9j\u00e0 au maximum.", RoomChatMessageBubbles.ALERT);
       return false;
     }
-
     int targetEnergy = getItemAmount(10, item.getExtraData());
     int newEnergy = Math.min(data.getEnergy() + targetEnergy, data.getMaxEnergy());
-
     habbo.whisper(
         "Vous avez utilis\u00e9 " + item.getDisplayName() + " et r\u00e9cup\u00e9r\u00e9 "
             + (newEnergy - data.getEnergy()) + " point(s) d'\u00e9nergie.", RoomChatMessageBubbles.ALERT);
-
     data.setEnergy(newEnergy);
     return true;
   }
 
-  /**
-   * Applies a shield item to restore the player shield
-   */
   private boolean applyShieldItem(RPItem item, RpAvatar data, Habbo habbo) {
     if (data.getShield() >= data.getMaxShield()) {
       habbo.whisper("Votre protection est d\u00e9j\u00e0 au maximum.", RoomChatMessageBubbles.ALERT);
       return false;
     }
-
     int targetShield = getItemAmount(25, item.getExtraData());
     int newShield = Math.min(data.getShield() + targetShield, data.getMaxShield());
-
     habbo.whisper(getApplyMessage(item), RoomChatMessageBubbles.ALERT);
-
     data.setShield(newShield);
     return true;
   }
 
-  /**
-   * Applies a food item to restore player hunger
-   */
   private boolean applyFoodItem(RPItem item, RpAvatar data, Habbo habbo) {
     if (data.getHunger() >= data.getMaxHunger()) {
       habbo.whisper("Vous n'avez plus faim.", RoomChatMessageBubbles.ALERT);
@@ -149,28 +129,29 @@ public class ApplyCommand extends Command {
     int newHunger = Math.min(data.getHunger() + restorationAmount, data.getMaxHunger());
 
     habbo.whisper(
-        "Vous avez consomm\u00e9 " + item.getDisplayName() + " et r\u00e9cup\u00e9r\u00e9 "
-            + (newHunger - data.getHunger()) + " point(s) de faim.", RoomChatMessageBubbles.ALERT);
+        "Vous avez consomm\u00e9 " + getFoodArticle(item) + " " + item.getDisplayName()
+            + " et r\u00e9cup\u00e9r\u00e9 " + (newHunger - data.getHunger()) + " point(s) de faim.",
+        RoomChatMessageBubbles.ALERT);
 
     data.setHunger(newHunger);
     return true;
   }
 
-  /**
-   * Applies a drug item with special effects
-   */
+  private static String getFoodArticle(RPItem item) {
+    return switch (item.getId()) {
+      case 9, 10, 13, 18 -> "une"; // Pomme, Banane, Part de pizza, Pâtes
+      default -> "un";
+    };
+  }
+
   private boolean applyDrugItem(RPItem item, RpAvatar data, Habbo habbo) {
     habbo.whisper(Emulator.getTexts().getValue(getApplyKey(item),
             "* Allume et consomme " + item.getDisplayName() + " *"),
         RoomChatMessageBubbles.ALERT);
-
     useDrug(item.getDisplayName().toLowerCase(), data, habbo, item.getExtraData().split("_"));
     return true;
   }
 
-  /**
-   * Helper method to get item effect amount with a default fallback
-   */
   private int getItemAmount(int defaultAmount, String extraData) {
     try {
       return Integer.parseInt(extraData);
@@ -185,7 +166,6 @@ public class ApplyCommand extends Command {
       return;
     }
     int duration = getItemAmount(100, params[1]);
-
     switch (params[0]) {
       case "fastwalk":
         habbo.getRoomUnit().setFastWalk(true);
@@ -205,22 +185,16 @@ public class ApplyCommand extends Command {
   private void useHealth(RpAvatar data, String extradata) {
     int currentHealth = data.getHealth();
     int maxHealth = data.getMaxHealth();
-
     int amountToHeal = getItemAmount(100, extradata);
-
     if (currentHealth >= maxHealth || amountToHeal <= 0) {
       return;
     }
-
     int targetHealth = Math.min(currentHealth + amountToHeal, maxHealth);
     int totalToRestore = targetHealth - currentHealth;
-
     int chunk = 5;
     int fullSteps = totalToRestore / chunk;
     int remainder = totalToRestore % chunk;
-
     final int startHealth = currentHealth;
-
     for (int i = 0; i < fullSteps; i++) {
       final int stepIndex = i + 1;
       Emulator.getThreading().run(() -> {
@@ -229,7 +203,6 @@ public class ApplyCommand extends Command {
         data.updateClientData();
       }, 1000L + (i * 1000L));
     }
-
     if (remainder > 0) {
       long finalDelay = 1000L + (fullSteps * 1000L);
       Emulator.getThreading().run(() -> {
@@ -239,6 +212,4 @@ public class ApplyCommand extends Command {
       }, finalDelay);
     }
   }
-
-
 }
