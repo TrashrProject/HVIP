@@ -26,12 +26,14 @@ $ModernCatalogMigrationRelativePaths = @(
     "migrations\20260903_paradise_catalogue_extension_v4.sql",
     "migrations\20260903_paradise_catalogue_mass_habborpbr.sql",
     "migrations\20260904_paradise_catalogue_reorganize_v2.sql",
-    "migrations\20260904_paradise_island_builder_kit.sql"
+    "migrations\20260904_paradise_island_builder_kit.sql",
+    "migrations\20260904_paradise_island_visibility_fix.sql"
 )
 $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_catalogue_mass_habborpbr_legacy.sql",
     "migrations\20260904_paradise_catalogue_reorganize_v2_legacy.sql",
     "migrations\20260904_paradise_island_builder_kit_legacy.sql",
+    "migrations\20260904_paradise_island_visibility_fix_legacy.sql",
     "migrations\20260904_add_black_block_catalog.sql"
 )
 $Ports = @(30000, 30001, 2096)
