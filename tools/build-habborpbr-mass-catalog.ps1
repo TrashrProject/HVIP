@@ -137,6 +137,9 @@ New-Item -ItemType Directory -Path $targetIconDir -Force | Out-Null
 foreach ($item in $selected) {
     Copy-Item -LiteralPath (Join-Path $sourceFurnitureDir ($item.AssetName+'.nitro')) -Destination (Join-Path $targetFurnitureDir ($item.AssetName+'.nitro')) -Force
     Copy-Item -LiteralPath (Join-Path $sourceIconDir ($item.AssetName+'_icon.png')) -Destination (Join-Path $targetIconDir ($item.AssetName+'_icon.png')) -Force
+    # Le client doit utiliser exactement le meme identifiant que furniture.id.
+    $item.Entry.id = [long]$item.Db[0]
+    $item.Entry.offerid = [long]$item.Db[0]
 }
 
 $roomNew = @($selected | Where-Object Kind -eq 'room' | ForEach-Object Entry)
@@ -151,37 +154,46 @@ $sb = [Text.StringBuilder]::new()
 [void]$sb.AppendLine('START TRANSACTION;')
 
 $pageRows = [Collections.Generic.List[string]]::new()
-$pageRows.Add("($rootPageId,9967000,'Catalogue massif HabboRPbr','Catalogue massif HabboRPbr','default_3x3',1,1,1,90,'1','1','0','0','','',NULL,NULL,NULL,NULL,NULL,0,'')")
+$pageRows.Add("($rootPageId,9967000,'Catalogue massif HabboRPbr',1,'1','1',1,0,90,'','default_3x3','','')")
 $order = 1
 foreach ($kv in $pages.GetEnumerator()) {
     $cap = Escape-Sql $kv.Key
-    $pageRows.Add("($($kv.Value),$rootPageId,'$cap','$cap','default_3x3',1,1,1,$order,'1','1','0','0','','',NULL,NULL,NULL,NULL,NULL,0,'')")
+    $pageRows.Add("($($kv.Value),$rootPageId,'$cap',1,'1','1',1,0,$order,'','default_3x3','','')")
     $order++
 }
-[void]$sb.AppendLine('INSERT INTO catalog_pages (id,parent_id,caption_save,caption,page_layout,icon_color,icon_image,min_rank,order_num,visible,enabled,club_only,vip_only,page_headline,page_teaser,page_special,page_text1,page_text2,page_text_details,page_text_teaser,room_id,includes) VALUES')
-[void]$sb.AppendLine(($pageRows -join ",`n") + "`nON DUPLICATE KEY UPDATE parent_id=VALUES(parent_id),caption_save=VALUES(caption_save),caption=VALUES(caption),order_num=VALUES(order_num),visible='1',enabled='1';")
+[void]$sb.AppendLine('INSERT INTO catalog_pages (id,parent_id,caption,icon_image,visible,enabled,min_rank,min_vip,order_num,page_link,page_layout,page_strings_1,page_strings_2) VALUES')
+[void]$sb.AppendLine(($pageRows -join ",`n") + "`nON DUPLICATE KEY UPDATE parent_id=VALUES(parent_id),caption=VALUES(caption),order_num=VALUES(order_num),visible='1',enabled='1';")
 [void]$sb.AppendLine("DELETE FROM catalog_items WHERE page_id BETWEEN 9967200 AND 9967299;")
 
-[void]$sb.AppendLine('INSERT INTO furniture (id,item_name,public_name,type,width,length,stack_height,can_stack,can_sit,is_walkable,sprite_id,allow_recycle,allow_trade,allow_marketplace_sell,allow_gift,allow_inventory_stack,interaction_type,behaviour_data,interaction_modes_count,vending_ids,height_adjustable,effect_id,wired_id,is_rare,clothing_id,extra_rot,allow_lay) VALUES')
 $furnitureRows = foreach ($item in $selected) {
     $d = $item.Db
     $values = @($d[0],"'$(Escape-Sql $d[1])'","'$(Escape-Sql $d[2])'","'$($d[3])'",$d[4],$d[5],$d[6],$d[7],$d[8],$d[9],$d[10],"'$($d[11])'","'$($d[12])'","'$($d[13])'","'$($d[14])'","'$($d[15])'","'$(Escape-Sql $d[16])'",$d[17],$d[18],"'$(Escape-Sql $d[19])'","'$(Escape-Sql $d[20])'",$d[21],$d[22],"'$($d[23])'",$d[24],"'$($d[25])'",$d[26])
     '(' + ($values -join ',') + ')'
 }
-[void]$sb.AppendLine(($furnitureRows -join ",`n") + "`nON DUPLICATE KEY UPDATE item_name=VALUES(item_name),public_name=VALUES(public_name),type=VALUES(type),width=VALUES(width),length=VALUES(length),stack_height=VALUES(stack_height),can_stack=VALUES(can_stack),can_sit=VALUES(can_sit),is_walkable=VALUES(is_walkable),sprite_id=VALUES(sprite_id),interaction_type=VALUES(interaction_type),behaviour_data=VALUES(behaviour_data),interaction_modes_count=VALUES(interaction_modes_count),vending_ids=VALUES(vending_ids),allow_lay=VALUES(allow_lay);")
+$furnitureHeader = 'INSERT INTO furniture (id,item_name,public_name,type,width,length,stack_height,can_stack,can_sit,is_walkable,sprite_id,allow_recycle,allow_trade,allow_marketplace_sell,allow_gift,allow_inventory_stack,interaction_type,behaviour_data,interaction_modes_count,vending_ids,height_adjustable,effect_id,wired_id,is_rare,clothing_id,extra_rot,allow_lay) VALUES'
+$furnitureUpdate = 'ON DUPLICATE KEY UPDATE item_name=VALUES(item_name),public_name=VALUES(public_name),type=VALUES(type),width=VALUES(width),length=VALUES(length),stack_height=VALUES(stack_height),can_stack=VALUES(can_stack),can_sit=VALUES(can_sit),is_walkable=VALUES(is_walkable),sprite_id=VALUES(sprite_id),interaction_type=VALUES(interaction_type),behaviour_data=VALUES(behaviour_data),interaction_modes_count=VALUES(interaction_modes_count),vending_ids=VALUES(vending_ids),allow_lay=VALUES(allow_lay);'
+for ($offset=0; $offset -lt $furnitureRows.Count; $offset+=250) {
+    $last = [Math]::Min($offset+249,$furnitureRows.Count-1)
+    [void]$sb.AppendLine($furnitureHeader)
+    [void]$sb.AppendLine((@($furnitureRows[$offset..$last]) -join ",`n") + "`n$furnitureUpdate")
+}
 
-[void]$sb.AppendLine('INSERT INTO catalog_items (item_ids,page_id,catalog_name,cost_credits,cost_points,points_type,amount,limited_stack,limited_sells,order_number,offer_id,song_id,extradata,have_offer,club_only) VALUES')
+$catalogHeader = 'INSERT INTO catalog_items (page_id,item_id,catalog_name,cost_credits,cost_pixels,cost_diamonds,amount,limited_sells,limited_stack,offer_active,extradata,badge,offer_id,points_type) VALUES'
 $offer = 1950200000
 $catalogRows = foreach ($item in $selected) {
     $d = $item.Db
     $pageId = [int]$pages[$item.Category]
     $name = if ([string]::IsNullOrWhiteSpace([string]$d[2])) { [string]$d[1] } else { [string]$d[2] }
     $price = [Math]::Min(30,[Math]::Max(3,2+([int]$d[4]*[int]$d[5])))
-    $row = "('$($d[0])',$pageId,'$(Escape-Sql $name)',$price,0,0,1,0,0,1,$offer,0,'','1','0')"
+    $row = "($pageId,'$($d[0])','$(Escape-Sql $name)',$price,0,0,1,0,0,'1','','',$offer,0)"
     $offer++
     $row
 }
-[void]$sb.AppendLine(($catalogRows -join ",`n") + ';')
+for ($offset=0; $offset -lt $catalogRows.Count; $offset+=500) {
+    $last = [Math]::Min($offset+499,$catalogRows.Count-1)
+    [void]$sb.AppendLine($catalogHeader)
+    [void]$sb.AppendLine((@($catalogRows[$offset..$last]) -join ",`n") + ';')
+}
 [void]$sb.AppendLine('COMMIT;')
 [IO.File]::WriteAllText($migrationPath,$sb.ToString(),[Text.UTF8Encoding]::new($false))
 

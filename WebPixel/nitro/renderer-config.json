@@ -8,7 +8,7 @@
     "sounds.url": "${asset.url}/sounds/%sample%.mp3",
     "external.texts.url": [ "${gamedata.url}/json/ExternalTexts.json", "${gamedata.url}/json/UITexts.json", "${gamedata.url}/json/ParadiseRoleplayTexts.json?v=1" ],
     "external.samples.url": "${hof.furni.url}/mp3/sound_machine_sample_%sample%.mp3",
-    "furnidata.url": "${gamedata.url}/json/FurnitureData.json?v=20260903-catalog-v4",
+    "furnidata.url": "${gamedata.url}/json/FurnitureData.json?v=20260904-catalog-mass-fix",
     "productdata.url": "${gamedata.url}/json/ProductData.json",
     "avatar.actions.url": "${gamedata.url}/json/HabboAvatarActions.json",
     "avatar.figuredata.url": "${gamedata.url}/json/FigureData.json",
