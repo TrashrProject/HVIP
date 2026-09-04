@@ -18,7 +18,7 @@ import java.util.List;
  *  string total_balance
  *  string fee_percentage (e.g. 0.05)
  *  bool can_deposit
- *  bool can_withdraw
+ *  bool can_withdraw (always false on the phone; withdrawals stay available through ATM/bank flows)
  *  string updated_at_ms
  *  int transaction_count
  *      For each transaction:
@@ -58,7 +58,9 @@ public class PhoneBankComposer extends MessageComposer {
         this.walletBalance = walletBalance == null ? BigDecimal.ZERO : walletBalance;
         this.feePercentage = feePercentage == null ? BigDecimal.ZERO : feePercentage;
         this.canDeposit = canDeposit;
-        this.canWithdraw = canWithdraw;
+        // ParadiseBank policy: a withdrawal must be done through an ATM or an in-world bank flow.
+        // Keep the constructor shape stable so existing BankManager callers do not need a parallel path.
+        this.canWithdraw = false;
         this.transactions = transactions;
         this.updatedAt = System.currentTimeMillis();
     }
@@ -94,4 +96,3 @@ public class PhoneBankComposer extends MessageComposer {
         return this.response;
     }
 }
-
