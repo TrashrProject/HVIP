@@ -1,184 +1,52 @@
-/* ParadiseRP loading screen v5 — exact loader.png background + progressive logo + fog/pixels + final flash. */
+/* ParadiseRP loading screen v6 — loader.png + progressive logo + WaveRP-style loading bar. */
 html.paradise-booting,
 html.paradise-booting body{margin:0!important;background:#4e43c4!important;overflow:hidden!important}
 
 #paradise-loading{
-  position:fixed;
-  inset:0;
-  z-index:2147483647;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  background:#4e43c4;
-  opacity:1;
-  pointer-events:none;
-  transition:opacity .5s ease,filter .38s ease;
-  isolation:isolate;
+  position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background:#4e43c4;opacity:1;pointer-events:none;transition:opacity .5s ease,filter .38s ease;isolation:isolate;
 }
 #paradise-loading.is-ready{opacity:0}
 #paradise-loading.is-flashing{filter:brightness(1.24) saturate(1.12)}
 
-/* User-provided loading artwork. Keep its proportions and fill the viewport cleanly. */
-#paradise-loading .pr-bg{
-  position:absolute;
-  inset:-1px;
-  z-index:-5;
-  background-image:url('./loader.png');
-  background-position:center center;
-  background-repeat:no-repeat;
-  background-size:cover;
-  transform:scale(1.002);
-}
+#paradise-loading .pr-bg{position:absolute;inset:-1px;z-index:-5;background-image:url('./loader.png');background-position:center center;background-repeat:no-repeat;background-size:cover;transform:scale(1.002)}
+#paradise-loading .pr-ambient{position:absolute;left:50%;top:50%;width:min(820px,94vw);height:min(470px,64vh);transform:translate(-50%,-50%);background:radial-gradient(ellipse at center,rgba(103,86,255,.12),rgba(90,115,255,.045) 42%,transparent 72%);filter:blur(28px);opacity:calc(.18 + (var(--pr-progress-num,4) * .0048));transition:opacity .5s ease;z-index:-1}
+#paradise-loading .pr-fog,#paradise-loading .pr-fog::before,#paradise-loading .pr-fog::after{position:absolute;content:"";pointer-events:none}
+#paradise-loading .pr-fog{inset:0;overflow:hidden;opacity:.16}
+#paradise-loading .pr-fog::before{left:-25%;top:36%;width:70%;height:30%;background:radial-gradient(ellipse at center,rgba(255,255,255,.18),transparent 68%);filter:blur(34px);animation:pr-fog-left 10s ease-in-out infinite alternate}
+#paradise-loading .pr-fog::after{right:-28%;bottom:22%;width:74%;height:28%;background:radial-gradient(ellipse at center,rgba(198,207,255,.18),transparent 70%);filter:blur(38px);animation:pr-fog-right 12s ease-in-out infinite alternate}
 
-/* Tiny depth layer: no dark overlay, just a soft center haze so the logo sits naturally on the art. */
-#paradise-loading .pr-ambient{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:min(820px,94vw);
-  height:min(470px,64vh);
-  transform:translate(-50%,-50%);
-  background:radial-gradient(ellipse at center,rgba(103,86,255,.12),rgba(90,115,255,.045) 42%,transparent 72%);
-  filter:blur(28px);
-  opacity:calc(.18 + (var(--pr-progress-num,4) * .0048));
-  transition:opacity .5s ease;
-  z-index:-1;
-}
-
-/* Light drifting mist. Deliberately subtle so loader.png remains fully visible. */
-#paradise-loading .pr-fog,
-#paradise-loading .pr-fog::before,
-#paradise-loading .pr-fog::after{
-  position:absolute;
-  content:"";
-  pointer-events:none;
-}
-#paradise-loading .pr-fog{
-  inset:0;
-  overflow:hidden;
-  opacity:.16;
-}
-#paradise-loading .pr-fog::before{
-  left:-25%;
-  top:36%;
-  width:70%;
-  height:30%;
-  background:radial-gradient(ellipse at center,rgba(255,255,255,.18),transparent 68%);
-  filter:blur(34px);
-  animation:pr-fog-left 10s ease-in-out infinite alternate;
-}
-#paradise-loading .pr-fog::after{
-  right:-28%;
-  bottom:22%;
-  width:74%;
-  height:28%;
-  background:radial-gradient(ellipse at center,rgba(198,207,255,.18),transparent 70%);
-  filter:blur(38px);
-  animation:pr-fog-right 12s ease-in-out infinite alternate;
-}
-
-#paradise-loading .pr-logo-wrap{
-  position:relative;
-  width:min(430px,72vw);
-  aspect-ratio:430/190;
-  transform:translateY(-1vh);
-  animation:pr-logo-enter .72s cubic-bezier(.22,.61,.36,1) both;
-}
-
-#paradise-loading .pr-logo-base,
-#paradise-loading .pr-logo-reveal{
-  position:absolute;
-  inset:0;
-  background:url('/Dynamics/img/logos/hv_logo_p.png') center/contain no-repeat;
-}
-
-#paradise-loading .pr-logo-base{
-  opacity:.10;
-  filter:grayscale(1) brightness(.52) contrast(1.08);
-}
-
-#paradise-loading .pr-logo-reveal{
-  clip-path:inset(0 calc(100% - var(--pr-progress,4%)) 0 0);
-  filter:drop-shadow(0 4px 7px rgba(33,24,102,.22)) drop-shadow(0 0 6px rgba(80,192,255,.14));
-  transition:clip-path .38s cubic-bezier(.22,.61,.36,1),filter .42s ease;
-}
-
-#paradise-loading .pr-logo-reveal::after{
-  content:"";
-  position:absolute;
-  top:15%;
-  bottom:15%;
-  left:calc(var(--pr-progress,4%) - 1px);
-  width:2px;
-  border-radius:999px;
-  background:rgba(173,231,255,.86);
-  box-shadow:0 0 9px rgba(74,194,255,.65),0 0 18px rgba(183,81,255,.25);
-  opacity:.76;
-  transform:translateX(-1px);
-}
+#paradise-loading .pr-center{position:relative;width:min(500px,86vw);display:flex;flex-direction:column;align-items:center;transform:translateY(-1vh);animation:pr-logo-enter .72s cubic-bezier(.22,.61,.36,1) both}
+#paradise-loading .pr-logo-wrap{position:relative;width:min(430px,72vw);aspect-ratio:430/190}
+#paradise-loading .pr-logo-base,#paradise-loading .pr-logo-reveal{position:absolute;inset:0;background:url('/Dynamics/img/logos/hv_logo_p.png') center/contain no-repeat}
+#paradise-loading .pr-logo-base{opacity:.10;filter:grayscale(1) brightness(.52) contrast(1.08)}
+#paradise-loading .pr-logo-reveal{clip-path:inset(0 calc(100% - var(--pr-progress,4%)) 0 0);filter:drop-shadow(0 4px 7px rgba(33,24,102,.22)) drop-shadow(0 0 6px rgba(80,192,255,.14));transition:clip-path .38s cubic-bezier(.22,.61,.36,1),filter .42s ease}
+#paradise-loading .pr-logo-reveal::after{content:"";position:absolute;top:15%;bottom:15%;left:calc(var(--pr-progress,4%) - 1px);width:2px;border-radius:999px;background:rgba(173,231,255,.86);box-shadow:0 0 9px rgba(74,194,255,.65),0 0 18px rgba(183,81,255,.25);opacity:.76;transform:translateX(-1px)}
 
 #paradise-loading .pr-particles{position:absolute;inset:-20%;overflow:visible;pointer-events:none}
-#paradise-loading .pr-particle{
-  position:absolute;
-  width:3px;
-  height:3px;
-  border-radius:1px;
-  background:rgba(220,240,255,.82);
-  box-shadow:0 0 6px rgba(104,201,255,.48);
-  opacity:0;
-  animation:pr-pixel-float var(--pr-dur,3.8s) var(--pr-delay,0s) ease-in-out infinite;
-}
+#paradise-loading .pr-particle{position:absolute;width:3px;height:3px;border-radius:1px;background:rgba(220,240,255,.82);box-shadow:0 0 6px rgba(104,201,255,.48);opacity:0;animation:pr-pixel-float var(--pr-dur,3.8s) var(--pr-delay,0s) ease-in-out infinite}
 #paradise-loading .pr-particle:nth-child(3n){background:rgba(226,170,255,.82);box-shadow:0 0 6px rgba(189,103,255,.34)}
 #paradise-loading .pr-particle:nth-child(4n){width:4px;height:4px}
 
-#paradise-loading .pr-flash{
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at center,rgba(129,212,255,.34),rgba(169,93,255,.16) 28%,transparent 64%);
-  opacity:0;
-  mix-blend-mode:screen;
-  pointer-events:none;
-}
+/* WaveRP/Nitro-like bar: thin, square and understated. */
+#paradise-loading .pr-wave-loader{width:min(390px,76vw);margin-top:-4px;text-align:center}
+#paradise-loading .pr-wave-track{position:relative;height:12px;background:#17364a;border:2px solid #020b11;box-shadow:inset 0 0 0 1px #52758a,0 2px 0 rgba(0,0,0,.26);overflow:hidden}
+#paradise-loading .pr-wave-fill{width:var(--pr-progress,4%);height:100%;background:linear-gradient(180deg,#52c8ef 0%,#24a5d7 48%,#1688b8 52%,#0f719d 100%);box-shadow:inset 0 1px rgba(255,255,255,.42);transition:width .35s ease}
+#paradise-loading .pr-wave-status{margin-top:7px;font:700 11px/1 Arial,Helvetica,sans-serif;color:#eef8ff;text-shadow:0 1px 2px rgba(31,19,85,.85),0 0 4px rgba(0,0,0,.45)}
 
-#paradise-loading.is-complete .pr-logo-reveal{
-  clip-path:inset(0 0 0 0)!important;
-  filter:drop-shadow(0 5px 9px rgba(28,20,92,.28)) drop-shadow(0 0 13px rgba(70,195,255,.34)) drop-shadow(0 0 24px rgba(183,77,255,.17));
-}
+#paradise-loading .pr-flash{position:absolute;inset:0;background:radial-gradient(circle at center,rgba(129,212,255,.34),rgba(169,93,255,.16) 28%,transparent 64%);opacity:0;mix-blend-mode:screen;pointer-events:none}
+#paradise-loading.is-complete .pr-logo-reveal{clip-path:inset(0 0 0 0)!important;filter:drop-shadow(0 5px 9px rgba(28,20,92,.28)) drop-shadow(0 0 13px rgba(70,195,255,.34)) drop-shadow(0 0 24px rgba(183,77,255,.17))}
 #paradise-loading.is-complete .pr-logo-reveal::after{opacity:0}
-#paradise-loading.is-complete .pr-logo-wrap{animation:pr-finish-pulse .48s ease-out both}
+#paradise-loading.is-complete .pr-center{animation:pr-finish-pulse .48s ease-out both}
 #paradise-loading.is-complete .pr-ambient{opacity:.72}
 #paradise-loading.is-flashing .pr-flash{animation:pr-final-flash .34s ease-out both}
 
-@keyframes pr-logo-enter{
-  from{opacity:0;transform:translateY(0) scale(.965)}
-  to{opacity:1;transform:translateY(-1vh) scale(1)}
-}
-@keyframes pr-pixel-float{
-  0%,100%{opacity:0;transform:translate3d(0,8px,0) scale(.8)}
-  20%{opacity:.18}
-  50%{opacity:.62;transform:translate3d(4px,-7px,0) scale(1)}
-  78%{opacity:.18}
-}
+@keyframes pr-logo-enter{from{opacity:0;transform:translateY(0) scale(.965)}to{opacity:1;transform:translateY(-1vh) scale(1)}}
+@keyframes pr-pixel-float{0%,100%{opacity:0;transform:translate3d(0,8px,0) scale(.8)}20%{opacity:.18}50%{opacity:.62;transform:translate3d(4px,-7px,0) scale(1)}78%{opacity:.18}}
 @keyframes pr-fog-left{from{transform:translate3d(-2%,0,0)}to{transform:translate3d(18%,-2%,0)}}
 @keyframes pr-fog-right{from{transform:translate3d(2%,0,0)}to{transform:translate3d(-16%,2%,0)}}
-@keyframes pr-finish-pulse{
-  0%{transform:translateY(-1vh) scale(1)}
-  48%{transform:translateY(-1vh) scale(1.022)}
-  100%{transform:translateY(-1vh) scale(1)}
-}
-@keyframes pr-final-flash{
-  0%{opacity:0}
-  42%{opacity:1}
-  100%{opacity:0}
-}
+@keyframes pr-finish-pulse{0%{transform:translateY(-1vh) scale(1)}48%{transform:translateY(-1vh) scale(1.022)}100%{transform:translateY(-1vh) scale(1)}}
+@keyframes pr-final-flash{0%{opacity:0}42%{opacity:1}100%{opacity:0}}
 
-@media(max-width:700px){
-  #paradise-loading .pr-bg{background-position:center center}
-  #paradise-loading .pr-logo-wrap{width:min(340px,78vw);transform:translateY(-1vh)}
-  #paradise-loading .pr-ambient{width:96vw;height:42vh}
-}
-
-@media(prefers-reduced-motion:reduce){
-  #paradise-loading *,#paradise-loading *::before,#paradise-loading *::after{animation:none!important;transition:none!important}
-}
+@media(max-width:700px){#paradise-loading .pr-bg{background-position:center center}#paradise-loading .pr-center{width:88vw}#paradise-loading .pr-logo-wrap{width:min(340px,78vw)}#paradise-loading .pr-ambient{width:96vw;height:42vh}#paradise-loading .pr-wave-loader{width:min(330px,74vw)}}
+@media(prefers-reduced-motion:reduce){#paradise-loading *,#paradise-loading *::before,#paradise-loading *::after{animation:none!important;transition:none!important}}
