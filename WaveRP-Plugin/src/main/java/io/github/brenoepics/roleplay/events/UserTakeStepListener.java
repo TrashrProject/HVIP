@@ -37,7 +37,8 @@ public class UserTakeStepListener implements EventListener {
           habbo.getHabboInfo().getId(),
           equippedWeapon.get().getItem().getDisplayName(),
           equippedWeapon.get().getItem().getEnableId());
-      habbo.getRoomUnit().getRoom().giveEffect(habbo, visualEffect, Integer.MAX_VALUE);
+      // Use the same duration semantics as the native :enable command.
+      habbo.getRoomUnit().getRoom().giveEffect(habbo, visualEffect, -1);
     }
   }
 
