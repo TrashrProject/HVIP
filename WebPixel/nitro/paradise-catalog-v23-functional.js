@@ -2,8 +2,9 @@
   'use strict';
 
   const ROOT = '.nitro-catalog';
-  const BUILD = 'paradise-catalog-v23-functional';
+  const BUILD = 'paradise-catalog-final-interactions';
   const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
+  const timers = new WeakMap();
 
   const TAB_DEFS = [
     { key: 'home', match: /^(Front Page|Accueil)(?:\s*\(\d+\))?$/i, label: 'Accueil', icon: '⌂' },
@@ -15,36 +16,27 @@
   ];
 
   const findTopNav = root => root.querySelector(':scope > .nitro-card-tabs, :scope > [class*="card-tabs"], .nitro-card-tabs');
-
   const isKnownTab = node => !!node.dataset.prc23Key || TAB_DEFS.some(def => def.match.test(clean(node.textContent)));
 
   const getTabCandidates = root => {
     const nav = findTopNav(root);
     if(!nav) return [];
-
     const direct = [ ...nav.children ].filter(node => node instanceof HTMLElement);
     const resolved = direct.filter(isKnownTab);
     if(resolved.length) return resolved;
-
     return [ ...nav.querySelectorAll('li,button,a,[role="tab"]') ].filter(isKnownTab);
   };
 
-  const getTabDef = tab => TAB_DEFS.find(def => tab.dataset.prc23Key === def.key) ||
-    TAB_DEFS.find(def => def.match.test(clean(tab.textContent))) || null;
+  const getTabDef = tab => TAB_DEFS.find(def => tab.dataset.prc23Key === def.key) || TAB_DEFS.find(def => def.match.test(clean(tab.textContent))) || null;
+  const getClickable = tab => tab.matches('button,a,[role="tab"],[role="button"]') ? tab : (tab.querySelector('button,a,[role="tab"],[role="button"]') || tab);
 
   const findTextNode = (tab, def) => {
     const walker = document.createTreeWalker(tab, NodeFilter.SHOW_TEXT);
     let fallback = null;
     let current = walker.nextNode();
-
     while(current)
     {
-      if(current.parentElement?.classList?.contains('prc23-tab-icon'))
-      {
-        current = walker.nextNode();
-        continue;
-      }
-
+      if(current.parentElement?.classList?.contains('prc23-tab-icon')) { current = walker.nextNode(); continue; }
       const value = clean(current.nodeValue);
       if(value)
       {
@@ -53,31 +45,28 @@
       }
       current = walker.nextNode();
     }
-
     return fallback;
   };
 
-  const getClickable = tab => {
-    if(tab.matches('button,a,[role="tab"],[role="button"]')) return tab;
-    return tab.querySelector('button,a,[role="tab"],[role="button"]') || tab;
-  };
+  function pulseClass(root, className, duration = 180)
+  {
+    root.classList.remove(className);
+    void root.offsetWidth;
+    root.classList.add(className);
+    window.setTimeout(() => root.classList.remove(className), duration);
+  }
 
   function decorateTabs(root)
   {
-    const tabs = getTabCandidates(root);
-
-    tabs.forEach(tab =>
-    {
+    getTabCandidates(root).forEach(tab => {
       const def = getTabDef(tab);
       if(!def) return;
-
       tab.dataset.prc23Key = def.key;
       tab.classList.add('prc23-tab');
 
       const raw = clean(tab.textContent);
       const suffix = raw.match(/\s*\(\d+\)\s*$/)?.[0] || '';
       const textNode = findTextNode(tab, def);
-
       if(textNode)
       {
         const existing = clean(textNode.nodeValue);
@@ -88,7 +77,6 @@
 
       const clickable = getClickable(tab);
       clickable.setAttribute('aria-label', def.label);
-
       if(!tab.querySelector(':scope > .prc23-tab-icon'))
       {
         const icon = document.createElement('span');
@@ -102,28 +90,19 @@
 
   function isTabActive(tab)
   {
-    return tab.matches('.active,[aria-selected="true"]') ||
-      !!tab.querySelector('.active,[aria-selected="true"]');
+    return tab.matches('.active,[aria-selected="true"]') || !!tab.querySelector('.active,[aria-selected="true"]');
   }
 
   function openDefaultStorefront(root)
   {
     if(root.dataset.prc23DefaultOpened === '1') return;
-
     const tabs = getTabCandidates(root);
     const home = tabs.find(tab => tab.dataset.prc23Key === 'home');
     const furni = tabs.find(tab => tab.dataset.prc23Key === 'furni');
     if(!home || !furni) return;
-
     const itemGridAlreadyVisible = !!root.querySelector('.layout-grid-item,[class*="catalog-grid-item"]');
-    if(itemGridAlreadyVisible || isTabActive(furni))
-    {
-      root.dataset.prc23DefaultOpened = '1';
-      return;
-    }
-
+    if(itemGridAlreadyVisible || isTabActive(furni)) { root.dataset.prc23DefaultOpened = '1'; return; }
     if(!isTabActive(home)) return;
-
     root.dataset.prc23DefaultOpened = '1';
     window.setTimeout(() => {
       if(!root.isConnected) return;
@@ -144,85 +123,125 @@
       '.nitro-purse-container [class*="currency"]',
       '.nitro-purse [class*="currency"]'
     ];
-
     selectors.forEach(selector => {
       document.querySelectorAll(selector).forEach(node => {
         const value = extractNumber(node.textContent);
         if(value && !values.includes(value)) values.push(value);
       });
     });
-
     if(values.length < 2)
     {
       const purse = document.querySelector('.nitro-purse-container,.nitro-purse');
       const matches = clean(purse?.textContent).match(/\d[\d\s.,]*/g) || [];
-      matches.map(extractNumber).filter(Boolean).forEach(value => {
-        if(!values.includes(value)) values.push(value);
-      });
+      matches.map(extractNumber).filter(Boolean).forEach(value => { if(!values.includes(value)) values.push(value); });
     }
-
     return { credits: values[0] || '', diamonds: values[1] || '' };
+  }
+
+  function updateWalletValue(root, node, value)
+  {
+    if(!node || !value) return false;
+    const oldValue = node.dataset.prcWalletValue || clean(node.textContent);
+    if(oldValue === value) { node.dataset.prcWalletValue = value; return false; }
+    node.textContent = value;
+    node.dataset.prcWalletValue = value;
+    node.classList.remove('prc-wallet-changing');
+    void node.offsetWidth;
+    node.classList.add('prc-wallet-changing');
+    window.setTimeout(() => node.classList.remove('prc-wallet-changing'), 220);
+    return !!oldValue;
   }
 
   function updateWallet(root)
   {
     const banner = root.querySelector(':scope > .prc22-brand-banner');
     if(!banner) return;
-
     const values = readWalletValues();
     const credits = banner.querySelector('.prc22-wallet-credits .prc22-wallet-value');
     const diamonds = banner.querySelector('.prc22-wallet-diamonds .prc22-wallet-value');
-
-    if(credits && values.credits) credits.textContent = values.credits;
-    if(diamonds && values.diamonds) diamonds.textContent = values.diamonds;
+    const changed = updateWalletValue(root, credits, values.credits) || updateWalletValue(root, diamonds, values.diamonds);
+    if(changed && root.dataset.prcPurchasePending === '1')
+    {
+      const buy = root.querySelector('.prc23-buy,.prc22-buy-button');
+      if(buy)
+      {
+        buy.classList.add('prc-purchase-success');
+        window.setTimeout(() => buy.classList.remove('prc-purchase-success'), 420);
+      }
+      root.dataset.prcPurchasePending = '0';
+    }
   }
 
   function translateActions(root)
   {
-    const rules = [
-      [/^(Buy|Purchase)$/i, 'Acheter'],
-      [/^Gift$/i, 'Offrir'],
-      [/^Search$/i, 'Rechercher'],
-      [/^Back$/i, 'Retour']
-    ];
-
+    const rules = [ [/^(Buy|Purchase)$/i, 'Acheter'], [/^Gift$/i, 'Offrir'], [/^Search$/i, 'Rechercher'], [/^Back$/i, 'Retour'] ];
     root.querySelectorAll('button,a,label,span').forEach(node => {
-      if(node.closest('.prc22-brand-banner')) return;
-      if(node.closest('.prc23-tab')) return;
-      if(node.children.length) return;
+      if(node.closest('.prc22-brand-banner') || node.closest('.prc23-tab') || node.children.length) return;
       const value = clean(node.textContent);
       if(!value) return;
-
       for(const [ matcher, replacement ] of rules)
       {
-        if(matcher.test(value))
-        {
-          node.textContent = replacement;
-          break;
-        }
+        if(matcher.test(value)) { node.textContent = replacement; break; }
       }
     });
-
     root.querySelectorAll('input[type="text"],input[type="search"]').forEach(input => {
       input.placeholder = 'Rechercher un furni...';
       input.setAttribute('aria-label', 'Rechercher dans le catalogue');
     });
   }
 
+  function ensureSearchClear(root)
+  {
+    const search = root.querySelector('.prc22-search');
+    if(!search || search.querySelector('.prc-search-clear')) return;
+    const input = search.querySelector('input[type="search"],input[type="text"]');
+    if(!input) return;
+    const clear = document.createElement('button');
+    clear.type = 'button';
+    clear.className = 'prc-search-clear';
+    clear.setAttribute('aria-label', 'Effacer la recherche');
+    clear.textContent = '×';
+    const sync = () => clear.classList.toggle('is-visible', !!input.value);
+    clear.addEventListener('click', () => {
+      input.value = '';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.focus();
+      sync();
+      pulseClass(root, 'prc-grid-transition', 170);
+    });
+    input.addEventListener('input', sync);
+    search.appendChild(clear);
+    sync();
+  }
+
   function applyPageMode(root)
   {
     const hasProducts = !!root.querySelector('.layout-grid-item,[class*="catalog-grid-item"]');
     const hasNavigation = !!root.querySelector('#nitro-catalog-main-navigation,.nitro-catalog-navigation-grid-container');
-
     root.classList.toggle('prc23-store', hasProducts || hasNavigation);
     root.classList.toggle('prc23-home', !hasProducts && !hasNavigation);
+    root.querySelectorAll('.layout-grid-item,[class*="catalog-grid-item"]').forEach(item => item.classList.add('prc23-product-card'));
+    [ ...root.querySelectorAll('button') ].filter(button => /^(Acheter|Buy|Purchase)$/i.test(clean(button.textContent))).forEach(button => button.classList.add('prc23-buy'));
+  }
 
-    root.querySelectorAll('.layout-grid-item,[class*="catalog-grid-item"]').forEach(item => {
-      item.classList.add('prc23-product-card');
-    });
+  function bindInteractions(root)
+  {
+    if(root.dataset.prcInteractionsBound === '1') return;
+    root.dataset.prcInteractionsBound = '1';
+    root.addEventListener('click', event => {
+      const tab = event.target.closest('.prc23-tab');
+      if(tab) pulseClass(root, 'prc-page-transition', 170);
 
-    const buyButtons = [ ...root.querySelectorAll('button') ].filter(button => /^(Acheter|Buy|Purchase)$/i.test(clean(button.textContent)));
-    buyButtons.forEach(button => button.classList.add('prc23-buy'));
+      const category = event.target.closest('#nitro-catalog-main-navigation button,#nitro-catalog-main-navigation a,#nitro-catalog-main-navigation [role="button"],#nitro-catalog-main-navigation .layout-grid-item,.nitro-catalog-navigation-grid-container button,.nitro-catalog-navigation-grid-container a,.nitro-catalog-navigation-grid-container [role="button"],.nitro-catalog-navigation-grid-container > .layout-grid-item');
+      if(category) pulseClass(root, 'prc-grid-transition', 170);
+
+      const product = event.target.closest('.prc23-product-card,.prc22-item');
+      if(product) pulseClass(root, 'prc-preview-transition', 160);
+
+      const buy = event.target.closest('.prc23-buy,.prc22-buy-button');
+      if(buy) root.dataset.prcPurchasePending = '1';
+    }, { passive: true });
   }
 
   function decorate(root)
@@ -232,6 +251,8 @@
     decorateTabs(root);
     translateActions(root);
     applyPageMode(root);
+    ensureSearchClear(root);
+    bindInteractions(root);
     updateWallet(root);
     openDefaultStorefront(root);
   }
@@ -251,7 +272,6 @@
   {
     scheduleDecorate();
     [120, 350, 800, 1600].forEach(delay => window.setTimeout(scheduleDecorate, delay));
-
     let walletAttempts = 0;
     const walletTimer = window.setInterval(() => {
       walletAttempts += 1;
@@ -262,18 +282,12 @@
     new MutationObserver(mutations => {
       for(const mutation of mutations)
       {
-        if(mutation.addedNodes.length)
-        {
-          scheduleDecorate();
-          return;
-        }
+        if(mutation.addedNodes.length) { scheduleDecorate(); return; }
       }
     }).observe(document.body, { childList: true, subtree: true });
 
-    console.info('[ParadiseRP] catalogue functional polish loaded', BUILD);
+    console.info('[ParadiseRP] catalogue interactions loaded', BUILD);
   }
 
-  document.readyState === 'loading'
-    ? document.addEventListener('DOMContentLoaded', boot, { once: true })
-    : boot();
+  document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', boot, { once: true }) : boot();
 })();
