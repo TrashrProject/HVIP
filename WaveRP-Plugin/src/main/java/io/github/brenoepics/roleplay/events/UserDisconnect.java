@@ -24,6 +24,9 @@ public class UserDisconnect implements EventListener {
     Habbo habbo = e.habbo;
     BankComputerSessionManager.disconnect(habbo);
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
+    // A weapon is a transient equipped state: put it back into the regular inventory
+    // (or the deposit box when full) before both the avatar and inventory are persisted.
+    data.getInventory().unEquipWeapon();
     data.updateDatabase();
     RolePlay.getEmsService().onDisconnect(habbo);
     RolePlay.getDeathHandler().onDisconnect(habbo);
