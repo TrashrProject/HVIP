@@ -11,6 +11,7 @@ import com.eu.habbo.plugin.events.furniture.FurnitureToggleEvent;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.utilities.types.RPItem;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,15 +35,12 @@ public final class FurnitureTrashSearchListener implements EventListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FurnitureTrashSearchListener.class);
 
-  private static final long DEFAULT_SEARCH_DELAY_MS = 4_000L;
-  private static final long DEFAULT_COOLDOWN_MS = 5 * 60_000L;
   private static final int DEFAULT_MAX_DISTANCE = 2;
 
-  // These IDs are existing non-weapon RP items from WaveRP-Plugin/sql.sql.
-  // The list remains configurable through config.ini without requiring code changes.
-  private static final List<Integer> DEFAULT_COMMON_LOOT = Arrays.asList(3, 9, 10); // Snack, Apple, Banana
-  private static final List<Integer> DEFAULT_UNCOMMON_LOOT = Arrays.asList(11, 12, 13); // Sandwich, Burger, Pizza Slice
-  private static final List<Integer> DEFAULT_RARE_LOOT = Arrays.asList(14, 15); // Taco, Sushi Roll
+  // Existing non-weapon RP items from WaveRP-Plugin/sql.sql.
+  private static final List<Integer> DEFAULT_COMMON_LOOT = Arrays.asList(3, 9, 10);
+  private static final List<Integer> DEFAULT_UNCOMMON_LOOT = Arrays.asList(11, 12, 13);
+  private static final List<Integer> DEFAULT_RARE_LOOT = Arrays.asList(14, 15);
 
   private static final ConcurrentHashMap<Integer, Long> COOLDOWNS = new ConcurrentHashMap<>();
   private static final Set<Integer> ACTIVE_FURNITURE = ConcurrentHashMap.newKeySet();
@@ -57,13 +55,15 @@ public final class FurnitureTrashSearchListener implements EventListener {
       return;
     }
 
-    String baseName = furniture.getBaseItem().getName();
-    if (!isTrashFurniture(baseName)) {
+    String itemName = furniture.getBaseItem().getName();
+    String publicName = furniture.getBaseItem().getFullName();
+    int baseItemId = furniture.getBaseItem().getId();
+
+    if (!isTrashFurniture(baseItemId, itemName, publicName)) {
       return;
     }
 
-    // Important: stop the native furniture interaction. This is what makes a trash item act as a
-    // searchable bin instead of just a normal toggleable furni.
+    // Stop the native furniture interaction: trash furniture becomes an RP searchable object.
     event.setCancelled(true);
 
     Room room = habbo.getHabboInfo().getCurrentRoom();
@@ -71,9 +71,9 @@ public final class FurnitureTrashSearchListener implements EventListener {
       return;
     }
 
-    LOGGER.info("[ParadiseRP Trash] interaction itemId={}, baseItemId={}, name={}, user={}",
-        furniture.getId(), furniture.getBaseItem().getId(), baseName,
-        habbo.getHabboInfo().getUsername());
+    LOGGER.info(
+        "[ParadiseRP Trash] interaction itemId={}, baseItemId={}, itemName={}, publicName={}, user={}",
+        furniture.getId(), baseItemId, itemName, publicName, habbo.getHabboInfo().getUsername());
 
     int maxDistance = Math.max(1,
         Emulator.getConfig().getInt("paradise.trash.max_distance", DEFAULT_MAX_DISTANCE));
@@ -173,30 +173,93 @@ public final class FurnitureTrashSearchListener implements EventListener {
     return Math.max(dx, dy) <= maxDistance;
   }
 
-  private static boolean isTrashFurniture(String baseName) {
-    if (baseName == null || baseName.isBlank()) {
-      return false;
-    }
-
-    String normalized = baseName.trim().toLowerCase(Locale.ROOT);
-    Set<String> exactConfigured = getConfiguredNames();
-    if (exactConfigured.contains(normalized)) {
+  /**
+   * Detect trash furniture from both the internal class name (item_name) and the visible catalog
+   * name (public_name). The visible Habbo furniture named "Poubelle" is therefore detected even
+   * when its internal classname does not contain "trash" or "bin".
+   */
+  private static boolean isTrashFurniture(int baseItemId, String itemName, String publicName) {
+    if (getConfiguredBaseItemIds().contains(baseItemId)) {
       return true;
     }
 
-    // Habbo furni classnames vary by release. Match only trash-related class-name fragments so
-    // ordinary furniture is unaffected. Exact names can be forced through paradise.trash.furniture_names.
-    return normalized.contains("trash")
-        || normalized.contains("garbage")
-        || normalized.contains("dumpster")
-        || normalized.contains("waste")
-        || normalized.contains("rubbish")
-        || normalized.contains("poubelle")
-        || normalized.contains("recycle")
-        || normalized.equals("bin")
-        || normalized.startsWith("bin_")
-        || normalized.endsWith("_bin")
-        || normalized.contains("_bin_");
+    Set<String> configuredNames = getConfiguredNames();
+    return matchesTrashName(itemName, configuredNames) || matchesTrashName(publicName, configuredNames);
+  }
+
+  private static boolean matchesTrashName(String value, Set<String> configuredNames) {
+    String normalized = normalize(value);
+    if (normalized.isEmpty()) {
+      return false;
+    }
+
+    if (configuredNames.contains(normalized)) {
+      return true;
+    }
+
+    // French names.
+    if (containsWord(normalized, "poubelle")
+        || containsWord(normalized, "poubelles")
+        || containsWord(normalized, "corbeille")
+        || containsWord(normalized, "corbeilles")
+        || containsWord(normalized, "ordure")
+        || containsWord(normalized, "ordures")
+        || containsWord(normalized, "dechet")
+        || containsWord(normalized, "dechets")) {
+      return true;
+    }
+
+    // Common Habbo/English class-name vocabulary for bins and waste furniture.
+    if (containsWord(normalized, "trash")
+        || containsWord(normalized, "trashcan")
+        || containsWord(normalized, "garbage")
+        || containsWord(normalized, "garbagecan")
+        || containsWord(normalized, "dumpster")
+        || containsWord(normalized, "dustbin")
+        || containsWord(normalized, "rubbish")
+        || containsWord(normalized, "waste")
+        || containsWord(normalized, "litter")
+        || containsWord(normalized, "recycle")
+        || containsWord(normalized, "recycling")) {
+      return true;
+    }
+
+    // Habbo classnames also commonly use compact forms such as bin1, bin_urban or city_bin.
+    return normalized.equals("bin")
+        || normalized.matches("^bin(?:[_ -]?\\d+|[_ -].+)$")
+        || normalized.matches("^.+[_ -]bin(?:[_ -]?\\d+)?$")
+        || normalized.matches("^.+[_ -]bin[_ -].+$")
+        || normalized.contains("trash_can")
+        || normalized.contains("garbage_can")
+        || normalized.contains("waste_bin")
+        || normalized.contains("recycle_bin")
+        || normalized.contains("recycling_bin");
+  }
+
+  private static boolean containsWord(String text, String word) {
+    if (text.equals(word)) {
+      return true;
+    }
+    return text.startsWith(word + "_")
+        || text.startsWith(word + "-")
+        || text.startsWith(word + " ")
+        || text.endsWith("_" + word)
+        || text.endsWith("-" + word)
+        || text.endsWith(" " + word)
+        || text.contains("_" + word + "_")
+        || text.contains("-" + word + "-")
+        || text.contains(" " + word + " ")
+        || text.contains("_" + word + "-")
+        || text.contains("-" + word + "_");
+  }
+
+  private static String normalize(String value) {
+    if (value == null || value.isBlank()) {
+      return "";
+    }
+    String lower = value.trim().toLowerCase(Locale.ROOT);
+    String decomposed = Normalizer.normalize(lower, Normalizer.Form.NFD);
+    return decomposed.replaceAll("\\p{M}+", "");
   }
 
   private static Set<String> getConfiguredNames() {
@@ -207,12 +270,29 @@ public final class FurnitureTrashSearchListener implements EventListener {
 
     Set<String> names = new HashSet<>();
     for (String value : raw.split(",")) {
-      String normalized = value.trim().toLowerCase(Locale.ROOT);
+      String normalized = normalize(value);
       if (!normalized.isEmpty()) {
         names.add(normalized);
       }
     }
     return names;
+  }
+
+  private static Set<Integer> getConfiguredBaseItemIds() {
+    String raw = Emulator.getConfig().getValue("paradise.trash.furniture_base_ids", "");
+    if (raw == null || raw.isBlank()) {
+      return Collections.emptySet();
+    }
+
+    Set<Integer> result = new HashSet<>();
+    for (String value : raw.split(",")) {
+      try {
+        result.add(Integer.parseInt(value.trim()));
+      } catch (NumberFormatException ignored) {
+        LOGGER.warn("[ParadiseRP Trash] Ignoring invalid furniture base id '{}'", value);
+      }
+    }
+    return result;
   }
 
   private static List<Integer> getConfiguredIds(String key, List<Integer> defaults) {
@@ -244,7 +324,6 @@ public final class FurnitureTrashSearchListener implements EventListener {
         continue;
       }
       String type = item.getInteractionType();
-      // Never let trash configuration accidentally hand out a weapon or drug.
       if ("weapon".equalsIgnoreCase(type) || "drug".equalsIgnoreCase(type)) {
         LOGGER.warn("[ParadiseRP Trash] Refusing unsafe loot item id={} type={}", id, type);
         continue;
