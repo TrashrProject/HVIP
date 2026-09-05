@@ -16,6 +16,84 @@
   const nativeContent = root => root.querySelector(':scope > .nitro-card-content');
   const nativeNav = root => nativeContent(root)?.querySelector('#nitro-catalog-main-navigation') || nativeContent(root)?.querySelector('.nitro-catalog-navigation-grid-container');
 
+  function installCompactLayout()
+  {
+    if(document.getElementById('paradise-catalog-cityref-v10-layout')) return;
+
+    const style = document.createElement('style');
+    style.id = 'paradise-catalog-cityref-v10-layout';
+    style.textContent = `
+      /* CityRef V10: categories must never eat the furni grid. */
+      .nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid {
+        grid-template-columns: 122px minmax(0,1fr) !important;
+        gap: 6px !important;
+      }
+
+      .nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-grid-container {
+        padding: 3px !important;
+        border-width: 1px !important;
+        border-radius: 7px !important;
+      }
+
+      .nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section > .layout-grid-item {
+        height: 24px !important;
+        min-height: 24px !important;
+        margin-bottom: 1px !important;
+        padding: 0 5px !important;
+        gap: 4px !important;
+        border-radius: 6px !important;
+        font-size: 9px !important;
+      }
+
+      .nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section > .layout-grid-item.inset {
+        padding-left: 11px !important;
+      }
+
+      .nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section span,
+      .nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section .text-truncate {
+        font-size: 9px !important;
+      }
+
+      /* Default Nitro page is 7/5. Give the furni grid much more room: about 78/22. */
+      .nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child > .grid {
+        display: grid !important;
+        grid-template-columns: minmax(0,3.55fr) minmax(112px,1fr) !important;
+        gap: 6px !important;
+        width: 100% !important;
+        height: 100% !important;
+        overflow: hidden !important;
+      }
+
+      .nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child > .grid > * {
+        grid-column: auto !important;
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+      }
+
+      /* Keep furni cells compact so the newly freed width is actually useful. */
+      .nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child .layout-grid {
+        gap: 4px !important;
+      }
+
+      .nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child .layout-grid-item {
+        min-width: 42px !important;
+        min-height: 42px !important;
+      }
+
+      @media (max-width: 760px) {
+        .nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid {
+          grid-template-columns: 108px minmax(0,1fr) !important;
+        }
+        .nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child > .grid {
+          grid-template-columns: minmax(0,4fr) minmax(96px,1fr) !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function clickTarget(node)
   {
     if(!node) return false;
@@ -169,7 +247,7 @@
     });
     shell.querySelector('.pc5-search-go')?.addEventListener('click', runSearch);
 
-    console.info('[ParadiseRP] CityRef V9 native-store bridge bound');
+    console.info('[ParadiseRP] CityRef V10 compact store bridge bound');
   }
 
   let queued = false;
@@ -185,10 +263,11 @@
 
   function boot()
   {
+    installCompactLayout();
     refresh();
     [80, 220, 500, 1000].forEach(delay => setTimeout(refresh, delay));
     new MutationObserver(refresh).observe(document.body, { childList:true, subtree:true });
-    console.info('[ParadiseRP] CityRef V9 real Nitro store engine loaded');
+    console.info('[ParadiseRP] CityRef V10 compact real Nitro store engine loaded');
   }
 
   document.readyState === 'loading'
