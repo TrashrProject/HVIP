@@ -10,7 +10,7 @@ ON DUPLICATE KEY UPDATE
   `description` = VALUES(`description`),
   `active` = VALUES(`active`);
 
--- Les restaurants peuvent être démarrés sans téléportation. -1 = toutes les salles.
+-- -1 = toutes les salles : aucun TP ajouté par le système Restaurant.
 INSERT INTO `jobs_rooms` (`job_id`, `rooms`)
 SELECT j.id, '-1'
 FROM `jobs` j
@@ -86,12 +86,13 @@ FROM jobs j WHERE j.name='tastycrousty'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name), level=VALUES(level), is_manager=VALUES(is_manager), salary=VALUES(salary), permissions=VALUES(permissions), active=1;
 
 -- Nouveaux aliments intégrés au vrai système rp_items/food.
+-- IDs réservés haut pour éviter les collisions avec les items RP existants.
 INSERT INTO `rp_items` (`id`,`name`,`interaction_type`,`permission`,`enable_id`,`extra_data`,`max`,`price`,`offer_job`,`required_job`,`crafter_organizations`)
 VALUES
-(1001,'Croque-monsieur','food',NULL,0,'8',10,5,NULL,NULL,''),
-(1002,'Frites','food',NULL,0,'6',10,4,NULL,NULL,''),
-(1003,'Boisson','food',NULL,0,'4',10,3,NULL,NULL,''),
-(1004,'Poulet croustillant','food',NULL,0,'10',8,7,NULL,NULL,'')
+(91001,'Croque-monsieur','food',NULL,0,'8',10,5,NULL,NULL,''),
+(91002,'Frites','food',NULL,0,'6',10,4,NULL,NULL,''),
+(91003,'Boisson','food',NULL,0,'4',10,3,NULL,NULL,''),
+(91004,'Poulet croustillant','food',NULL,0,'10',8,7,NULL,NULL,'')
 ON DUPLICATE KEY UPDATE name=VALUES(name), interaction_type='food', extra_data=VALUES(extra_data), max=VALUES(max), price=VALUES(price);
 
 CREATE TABLE IF NOT EXISTS `restaurant_menu` (
@@ -122,19 +123,19 @@ ON DUPLICATE KEY UPDATE job_id=VALUES(job_id);
 
 -- Zy'Croque
 INSERT INTO restaurant_menu(job_id,code,display_name,item_id,price,active)
-SELECT j.id,'croque','Croque-monsieur',1001,6,1 FROM jobs j WHERE j.name='zycroque'
+SELECT j.id,'croque','Croque-monsieur',91001,6,1 FROM jobs j WHERE j.name='zycroque'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name),item_id=VALUES(item_id),price=VALUES(price),active=1;
 INSERT INTO restaurant_menu(job_id,code,display_name,item_id,price,active)
 SELECT j.id,'sandwich','Sandwich',11,5,1 FROM jobs j WHERE j.name='zycroque'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name),item_id=VALUES(item_id),price=VALUES(price),active=1;
 INSERT INTO restaurant_menu(job_id,code,display_name,item_id,price,active)
-SELECT j.id,'frites','Frites',1002,4,1 FROM jobs j WHERE j.name='zycroque'
+SELECT j.id,'frites','Frites',91002,4,1 FROM jobs j WHERE j.name='zycroque'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name),item_id=VALUES(item_id),price=VALUES(price),active=1;
 INSERT INTO restaurant_menu(job_id,code,display_name,item_id,price,active)
 SELECT j.id,'burger','Burger',12,7,1 FROM jobs j WHERE j.name='zycroque'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name),item_id=VALUES(item_id),price=VALUES(price),active=1;
 INSERT INTO restaurant_menu(job_id,code,display_name,item_id,price,active)
-SELECT j.id,'boisson','Boisson',1003,3,1 FROM jobs j WHERE j.name='zycroque'
+SELECT j.id,'boisson','Boisson',91003,3,1 FROM jobs j WHERE j.name='zycroque'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name),item_id=VALUES(item_id),price=VALUES(price),active=1;
 
 -- Tasty Crousty
@@ -142,14 +143,14 @@ INSERT INTO restaurant_menu(job_id,code,display_name,item_id,price,active)
 SELECT j.id,'tacos','Tacos',14,7,1 FROM jobs j WHERE j.name='tastycrousty'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name),item_id=VALUES(item_id),price=VALUES(price),active=1;
 INSERT INTO restaurant_menu(job_id,code,display_name,item_id,price,active)
-SELECT j.id,'poulet','Poulet croustillant',1004,8,1 FROM jobs j WHERE j.name='tastycrousty'
+SELECT j.id,'poulet','Poulet croustillant',91004,8,1 FROM jobs j WHERE j.name='tastycrousty'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name),item_id=VALUES(item_id),price=VALUES(price),active=1;
 INSERT INTO restaurant_menu(job_id,code,display_name,item_id,price,active)
-SELECT j.id,'frites','Frites',1002,4,1 FROM jobs j WHERE j.name='tastycrousty'
+SELECT j.id,'frites','Frites',91002,4,1 FROM jobs j WHERE j.name='tastycrousty'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name),item_id=VALUES(item_id),price=VALUES(price),active=1;
 INSERT INTO restaurant_menu(job_id,code,display_name,item_id,price,active)
 SELECT j.id,'menu-poulet','Menu poulet',21,12,1 FROM jobs j WHERE j.name='tastycrousty'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name),item_id=VALUES(item_id),price=VALUES(price),active=1;
 INSERT INTO restaurant_menu(job_id,code,display_name,item_id,price,active)
-SELECT j.id,'boisson','Boisson',1003,3,1 FROM jobs j WHERE j.name='tastycrousty'
+SELECT j.id,'boisson','Boisson',91003,3,1 FROM jobs j WHERE j.name='tastycrousty'
 ON DUPLICATE KEY UPDATE display_name=VALUES(display_name),item_id=VALUES(item_id),price=VALUES(price),active=1;
