@@ -1,1 +1,326 @@
-.pws-backdrop{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.10);display:flex;align-items:flex-start;justify-content:center;padding-top:42px;font-family:Arial,sans-serif;color:#263842}.pws-window{width:286px;max-height:calc(100vh - 84px);overflow:hidden;border:1px solid #6f8f9f;border-radius:7px;background:#dce8ed;box-shadow:0 2px 0 rgba(0,0,0,.2),0 8px 18px rgba(0,0,0,.24)}.pws-title{position:relative;height:31px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#1687c6,#0d6fa9);border-bottom:1px solid #0b5f90;color:#fff;font:700 12px Arial,sans-serif;text-shadow:0 1px #064b73}.pws-close{position:absolute;right:5px;top:5px;width:20px;height:20px;padding:0;border:1px solid #70120e;border-radius:4px;background:linear-gradient(#ef514a,#bb201b);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);color:#fff;font:bold 15px/17px Arial;cursor:pointer}.pws-toolbar{height:29px;display:flex;align-items:center;justify-content:space-between;gap:5px;padding:0 7px;background:#cbdce4;border-bottom:1px solid #9eafb8}.pws-tab{color:#316278;font:700 10px Arial,sans-serif;text-transform:uppercase;letter-spacing:.35px}.pws-show-all{height:21px;padding:0 7px;border:1px solid #89a3af;border-radius:4px;background:linear-gradient(#fff,#dce7ec);color:#2d6179;font:700 9px Arial,sans-serif;cursor:pointer}.pws-show-all:hover{background:#fff}.pws-body{max-height:calc(100vh - 164px);overflow:auto;padding:7px;background:#edf3f6}.pws-group{position:relative;margin-bottom:7px;padding:24px 6px 7px;border:2px solid #2d96cd;border-radius:7px;background:#cceaf8;box-shadow:inset 0 0 0 1px #f0faff}.pws-group:last-child{margin-bottom:0}.pws-group-title{position:absolute;top:5px;left:0;right:0;text-align:center;color:#0c699d;font:700 9px Arial,sans-serif;text-transform:uppercase;letter-spacing:.4px}.pws-preview-row{display:grid;grid-template-columns:72px 1fr;gap:6px;margin-bottom:6px}.pws-preview{height:65px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid #9fb6c1;border-radius:5px;background:linear-gradient(#fff,#e6edf0);box-shadow:inset 1px 1px #fff}.pws-preview span{max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4b6978;font:700 8px Arial,sans-serif}.pws-weapon{display:block;max-width:55px;max-height:39px;object-fit:contain;image-rendering:pixelated}.pws-avatar-wrap{height:65px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 6px;border:1px solid #9fb6c1;border-radius:5px;background:#e5f0f5}.pws-avatar{display:block;max-width:54px;max-height:57px;object-fit:contain;image-rendering:pixelated}.pws-avatar-info{min-width:0}.pws-avatar-info b{display:block;color:#215f7e;font:700 9px Arial,sans-serif}.pws-avatar-info small{display:block;margin-top:2px;color:#64818f;font:8px Arial,sans-serif;line-height:1.2}.pws-options{display:grid;grid-template-columns:1fr 1fr;gap:4px}.pws-option{min-width:0;height:26px;display:flex;align-items:center;gap:5px;padding:0 6px;border:1px solid #829da9;border-radius:4px;background:linear-gradient(#fff,#dde8ed);color:#294653;font:700 9px Arial,sans-serif;text-align:left;cursor:pointer}.pws-option:hover{border-color:#1c86bd;background:#f4fbff}.pws-option.owned{border-color:#559abe;background:linear-gradient(#ebf8fe,#d2ebf6)}.pws-option.equipped{border-color:#348950;background:linear-gradient(#e5f6ea,#c7e9d1);color:#1f6a38;box-shadow:inset 0 0 0 1px #f2fcf5}.pws-option.locked{opacity:.45;cursor:not-allowed}.pws-check{flex:0 0 13px;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#94adb8;color:#fff;font:bold 9px Arial}.pws-option.equipped .pws-check{background:#2ca24e}.pws-option-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pws-status{min-height:27px;display:flex;align-items:center;justify-content:center;padding:0 8px;border-top:1px solid #9fafb7;background:#d6e3e9;color:#3d6b51;font:700 9px Arial,sans-serif;text-align:center}.pws-status.is-error{color:#a31d1d}.pws-empty{padding:24px 8px;text-align:center;color:#607680;font:10px Arial,sans-serif}@media(max-width:360px){.pws-window{width:calc(100vw - 18px)}.pws-backdrop{padding-top:14px}.pws-options{grid-template-columns:1fr}}
+/* ParadiseRP — Weapon Skins V6
+   Compact dark RP panel + draggable window. */
+.pws-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  background:rgba(4,10,18,.08);
+  font-family:Arial,sans-serif;
+  color:#eaf4fb;
+}
+
+.pws-window{
+  position:fixed;
+  left:50%;
+  top:58px;
+  width:342px;
+  max-width:calc(100vw - 20px);
+  max-height:calc(100vh - 76px);
+  overflow:hidden;
+  transform:translateX(-50%);
+  border:1px solid #234f6d;
+  border-radius:12px;
+  background:#0f1b27;
+  box-shadow:0 20px 48px rgba(0,0,0,.42),0 0 0 1px rgba(99,195,246,.08);
+  user-select:none;
+}
+
+.pws-window.is-dragging{
+  cursor:grabbing;
+  box-shadow:0 24px 58px rgba(0,0,0,.52),0 0 0 1px rgba(93,196,255,.22);
+}
+
+.pws-title{
+  position:relative;
+  height:38px;
+  display:flex;
+  align-items:center;
+  padding:0 44px 0 14px;
+  background:linear-gradient(180deg,#122b3d 0%,#0d2231 100%);
+  border-bottom:1px solid #21506e;
+  color:#fff;
+  font:800 13px Arial,sans-serif;
+  letter-spacing:.15px;
+  cursor:grab;
+}
+
+.pws-title::before{
+  content:'';
+  width:4px;
+  height:18px;
+  margin-right:9px;
+  border-radius:4px;
+  background:#45c2ff;
+  box-shadow:0 0 10px rgba(69,194,255,.55);
+}
+
+.pws-title span{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.pws-window.is-dragging .pws-title{cursor:grabbing}
+
+.pws-close{
+  position:absolute;
+  right:8px;
+  top:7px;
+  width:24px;
+  height:24px;
+  padding:0;
+  border:1px solid #46586b;
+  border-radius:6px;
+  background:#1b2a38;
+  color:#dce9f2;
+  font:bold 15px/21px Arial,sans-serif;
+  cursor:pointer;
+  transition:.14s ease;
+}
+
+.pws-close:hover{
+  border-color:#d85a5a;
+  background:#c83e3e;
+  color:#fff;
+}
+
+.pws-toolbar{
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:0 11px;
+  background:#101f2c;
+  border-bottom:1px solid #1d3b50;
+}
+
+.pws-tab{
+  color:#7fb8d8;
+  font:800 9px Arial,sans-serif;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+}
+
+.pws-show-all{
+  height:23px;
+  padding:0 9px;
+  border:1px solid #315c76;
+  border-radius:6px;
+  background:#162b3b;
+  color:#bfe9ff;
+  font:700 9px Arial,sans-serif;
+  cursor:pointer;
+}
+
+.pws-show-all:hover{
+  border-color:#4fbce9;
+  background:#1b3a4e;
+  color:#fff;
+}
+
+.pws-body{
+  max-height:calc(100vh - 175px);
+  overflow:auto;
+  padding:9px;
+  background:#0c1620;
+}
+
+.pws-group{
+  position:relative;
+  margin-bottom:8px;
+  padding:29px 8px 9px;
+  border:1px solid #22465f;
+  border-radius:10px;
+  background:linear-gradient(180deg,#132434 0%,#101e2b 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.pws-group:last-child{margin-bottom:0}
+
+.pws-group-title{
+  position:absolute;
+  left:10px;
+  top:9px;
+  color:#6ed0ff;
+  font:800 10px Arial,sans-serif;
+  text-transform:uppercase;
+  letter-spacing:.45px;
+}
+
+.pws-preview-row{
+  display:grid;
+  grid-template-columns:92px minmax(0,1fr);
+  gap:7px;
+  margin-bottom:8px;
+}
+
+.pws-preview,
+.pws-avatar-wrap{
+  height:78px;
+  border:1px solid #2b4c61;
+  border-radius:8px;
+  background:#0d1822;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.pws-preview{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+}
+
+.pws-preview span{
+  max-width:80px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#a6c2d3;
+  font:700 8px Arial,sans-serif;
+}
+
+.pws-weapon{
+  display:block;
+  max-width:70px;
+  max-height:48px;
+  object-fit:contain;
+  image-rendering:pixelated;
+}
+
+.pws-avatar-wrap{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:0 10px;
+}
+
+.pws-avatar{
+  display:block;
+  flex:0 0 auto;
+  max-width:58px;
+  max-height:67px;
+  object-fit:contain;
+  image-rendering:pixelated;
+}
+
+.pws-avatar-info{min-width:0}
+.pws-avatar-info b{
+  display:block;
+  margin-bottom:3px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#fff;
+  font:800 10px Arial,sans-serif;
+}
+
+.pws-avatar-info small{
+  display:block;
+  color:#6f8d9f;
+  font:8px/1.25 Arial,sans-serif;
+}
+
+.pws-options{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+}
+
+.pws-option{
+  min-width:0;
+  height:29px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:0 8px;
+  border:1px solid #2d526a;
+  border-radius:7px;
+  background:#152635;
+  color:#b9d0de;
+  font:700 9px Arial,sans-serif;
+  text-align:left;
+  cursor:pointer;
+  transition:.12s ease;
+}
+
+.pws-option:hover{
+  border-color:#4cb7e8;
+  background:#1a3346;
+  color:#fff;
+}
+
+.pws-option.owned{
+  border-color:#3c7190;
+  background:#173248;
+  color:#cceeff;
+}
+
+.pws-option.equipped{
+  border-color:#3ea86a;
+  background:linear-gradient(180deg,#173d2c,#123224);
+  color:#d9ffe8;
+  box-shadow:inset 0 0 0 1px rgba(83,211,133,.10);
+}
+
+.pws-option.locked{
+  opacity:.42;
+  cursor:not-allowed;
+}
+
+.pws-check{
+  flex:0 0 15px;
+  width:15px;
+  height:15px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:#405767;
+  color:#eaf6ff;
+  font:bold 9px Arial,sans-serif;
+}
+
+.pws-option.equipped .pws-check{
+  background:#32a85c;
+  color:#fff;
+}
+
+.pws-option-name{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.pws-status{
+  min-height:31px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 10px;
+  border-top:1px solid #1d3b50;
+  background:#10202d;
+  color:#7db895;
+  font:700 9px Arial,sans-serif;
+  text-align:center;
+}
+
+.pws-status.is-error{color:#ff7c7c}
+
+.pws-empty{
+  padding:28px 8px;
+  text-align:center;
+  color:#738c9d;
+  font:10px Arial,sans-serif;
+}
+
+.pws-body::-webkit-scrollbar{width:6px}
+.pws-body::-webkit-scrollbar-track{background:#0b151e}
+.pws-body::-webkit-scrollbar-thumb{background:#294a60;border-radius:6px}
+
+@media(max-width:380px){
+  .pws-window{width:calc(100vw - 14px);max-width:none}
+  .pws-preview-row{grid-template-columns:82px minmax(0,1fr)}
+  .pws-options{grid-template-columns:1fr}
+}
