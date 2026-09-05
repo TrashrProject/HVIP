@@ -62,7 +62,7 @@ public class HealingRunner implements Runnable {
     int progressMinute = (int) (elapsed / PROGRESS_MESSAGE_INTERVAL_MS);
     if (progressMinute > 0
         && RolePlay.getHospitalService().markProgressMinute(habbo, progressMinute)) {
-      habbo.whisper("Votre sante se regenere : " + newHealth + "/" + avatar.getMaxHealth() + ".");
+      habbo.whisper("Votre santé se régénère : " + newHealth + "/" + avatar.getMaxHealth() + ".");
     }
 
     if (newHealth < avatar.getMaxHealth()) {
@@ -78,7 +78,7 @@ public class HealingRunner implements Runnable {
     avatar.updateLife();
     avatar.updateDatabase();
     RolePlay.getHospitalService().finishHealing(habbo);
-    habbo.whisper("Votre sante est completement regeneree : " + avatar.getHealth() + "/"
+    habbo.whisper("Votre santé est complètement régénérée : " + avatar.getHealth() + "/"
         + avatar.getMaxHealth() + ".");
   }
 
