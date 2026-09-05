@@ -16,22 +16,38 @@ import java.util.Arrays;
 
 public class ChargeCommand extends Command {
 
+  private final StarCommand rechercherCommand;
+
   public ChargeCommand(String permission, String[] keys) {
-    super(permission, keys);
+    super(permission, withRechercheAliases(keys));
+    this.rechercherCommand = new StarCommand(permission, new String[]{"rechercher", "recherche"});
+  }
+
+  private static String[] withRechercheAliases(String[] keys) {
+    String[] source = keys == null ? new String[0] : keys;
+    String[] merged = Arrays.copyOf(source, source.length + 2);
+    merged[source.length] = "rechercher";
+    merged[source.length + 1] = "recherche";
+    return merged;
   }
 
   @Override
   public boolean handle(GameClient gameClient, String[] params) {
+    if (params.length > 0 && ("rechercher".equalsIgnoreCase(params[0])
+        || "recherche".equalsIgnoreCase(params[0]))) {
+      return rechercherCommand.handle(gameClient, params);
+    }
+
     Habbo officer = gameClient.getHabbo();
     RpAvatar officerData = RolePlay.getAvatarManager().getRpAvatar(officer);
 
     if (!officerData.getJobRankEntity().hasPermission(JobPermissions.POLICE_ARREST)) {
-      officer.whisper("Vous n'\u00eates pas policier.", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous n'êtes pas policier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!officerData.isDuty()) {
-      officer.whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous devez être en service.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -50,7 +66,7 @@ public class ChargeCommand extends Command {
     if (timeout != null) {
       officer.whisper(
           "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
+              .getEpochSecond() + " seconde(s) avant de réutiliser cette commande.");
       return true;
     }
 
@@ -60,12 +76,11 @@ public class ChargeCommand extends Command {
       return true;
     }
     if (criminal == officer) {
-      officer.whisper("Vous ne pouvez pas vous inculper vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous ne pouvez pas vous inculper vous-même.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     String crimeName = String.join(" ", Arrays.copyOfRange(params, 2, params.length));
-
     Crime crime = RolePlay.getWantedManager().getCrimeByName(crimeName);
 
     if (crime == null) {
