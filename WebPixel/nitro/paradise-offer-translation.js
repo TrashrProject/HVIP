@@ -22,14 +22,17 @@
     const style=document.createElement('style');
     style.id=STYLE_ID;
     style.textContent=`
-      .nitro-alert.nitro-alert-offer,.nitro-alert.nitro-alert-offer.paradise-order-offer{width:390px!important;min-width:390px!important;height:190px!important;min-height:190px!important;max-height:190px!important;overflow:hidden!important;border:2px solid #0877ae!important;border-radius:10px!important;background:linear-gradient(180deg,#eef8fd 0%,#dcecf5 100%)!important;box-shadow:0 14px 38px #0009,0 0 0 2px #ffffff80!important;resize:none!important}
-      .nitro-alert.nitro-alert-offer>.content-area{height:148px!important;min-height:148px!important;max-height:148px!important;overflow:hidden!important;padding:12px 14px 14px!important}
+      .nitro-alert.nitro-alert-offer,.nitro-alert.nitro-alert-offer.paradise-order-offer{width:380px!important;min-width:380px!important;height:170px!important;min-height:170px!important;max-height:170px!important;overflow:hidden!important;border:2px solid #0877ae!important;border-radius:10px!important;background:#e7f1f7!important;box-shadow:0 10px 26px #0008,0 0 0 1px #ffffffa6!important;resize:none!important}
+      .nitro-alert.nitro-alert-offer>.content-area{height:128px!important;min-height:128px!important;max-height:128px!important;overflow:hidden!important;padding:9px 14px 11px!important;background:linear-gradient(180deg,#f3f7f9 0%,#dce9f0 100%)!important}
+      .nitro-alert.nitro-alert-offer>.content-area>.d-flex{height:100%!important;align-items:center!important;gap:14px!important}
+      .nitro-alert.nitro-alert-offer>.content-area>.d-flex>.d-flex{justify-content:center!important;gap:9px!important}
+      .nitro-alert.nitro-alert-offer .avatar-image{margin-top:0!important;filter:drop-shadow(0 2px 1px #0004)}
       .paradise-order-offer,.paradise-order-offer *{box-sizing:border-box!important}
       .paradise-order-offer-title{font-weight:800!important;letter-spacing:.1px!important;text-shadow:0 1px #00466d!important}
-      .paradise-order-offer-prompt{display:block!important;margin:4px 6px 5px!important;color:#153d57!important;font-size:14px!important;font-weight:800!important;line-height:19px!important;text-align:left!important}
-      .paradise-order-offer-detail{margin:0 6px 12px!important;color:#527185!important;font-size:11px!important;line-height:15px!important;text-align:left!important}
-      .paradise-order-offer-actions{display:flex!important;gap:10px!important;width:100%!important;margin:2px 0 0!important;padding:0 6px 13px!important}
-      .paradise-order-offer-actions>button,.nitro-alert.nitro-alert-offer button.btn-success,.nitro-alert.nitro-alert-offer button.btn-danger{flex:1 1 0!important;min-width:120px!important;height:37px!important;margin:0!important;border-radius:6px!important;color:#fff!important;font-size:13px!important;font-weight:800!important;text-shadow:0 1px #0005!important;box-shadow:inset 0 1px #ffffff66,0 2px 3px #0003!important;transition:filter .12s ease,transform .12s ease!important}
+      .paradise-order-offer-prompt{display:block!important;margin:0!important;padding:8px 10px!important;color:#163b53!important;background:#ffffffb8!important;border:1px solid #b6d0df!important;border-radius:6px!important;font-size:13px!important;font-weight:700!important;line-height:17px!important;text-align:left!important}
+      .paradise-order-offer-detail{display:none!important}
+      .paradise-order-offer-actions{display:flex!important;gap:8px!important;width:100%!important;margin:0!important;padding:0!important;justify-content:flex-start!important}
+      .paradise-order-offer-actions>button,.nitro-alert.nitro-alert-offer button.btn-success,.nitro-alert.nitro-alert-offer button.btn-danger{flex:0 0 auto!important;min-width:108px!important;height:32px!important;margin:0!important;padding:0 14px!important;border-radius:5px!important;color:#fff!important;font-size:12px!important;font-weight:800!important;text-shadow:0 1px #0005!important;box-shadow:inset 0 1px #ffffff66,0 2px 2px #0003!important;transition:filter .12s ease,transform .12s ease!important}
       .paradise-order-offer-actions>button:hover{filter:brightness(1.08)!important;transform:translateY(-1px)!important}
       .paradise-order-offer-actions>button:active{transform:translateY(1px)!important}
       .paradise-order-offer-accept,.nitro-alert.nitro-alert-offer button.btn-success{background:linear-gradient(#39d66f,#169847)!important;border:1px solid #087735!important}
@@ -102,13 +105,58 @@
     if(actions&&actions.contains(refuseButton))actions.classList.add('paradise-order-offer-actions');
   };
 
+  const enhanceNativePopup=popup=>{
+    if(!(popup instanceof Element))return;
+    popup.classList.add('paradise-order-offer');
+
+    const titleLeaf=popup.querySelector('.nitro-card-header-text');
+    if(titleLeaf){
+      const titleText=cleanText(titleLeaf);
+      const restaurant=titleText.startsWith(TITLE_PREFIX)
+        ?titleText.slice(TITLE_PREFIX.length).trim()
+        :titleText.startsWith(ENHANCED_TITLE_PREFIX)
+          ?titleText.slice(ENHANCED_TITLE_PREFIX.length).trim()
+          :popup.dataset.paradiseRestaurant||'Restaurant';
+      popup.dataset.paradiseRestaurant=restaurant||'Restaurant';
+      titleLeaf.classList.add('paradise-order-offer-title');
+      setText(titleLeaf,`${ENHANCED_TITLE_PREFIX}${popup.dataset.paradiseRestaurant}`);
+    }
+
+    const popupLeaves=leafElements(popup);
+    const promptLeaf=popupLeaves.find(node=>[
+      'notifications.rpoffer',
+      'Accepter cette prise de commande ?',
+      'Souhaitez-vous accepter cette prise de commande ?'
+    ].includes(cleanText(node)));
+    if(promptLeaf){
+      promptLeaf.classList.add('paradise-order-offer-prompt');
+      setText(promptLeaf,'Souhaitez-vous accepter cette prise de commande ?');
+    }
+    popup.querySelectorAll('.paradise-order-offer-detail').forEach(node=>node.remove());
+
+    const acceptButton=popup.querySelector('button.btn-success');
+    const refuseButton=popup.querySelector('button.btn-danger');
+    if(acceptButton){
+      setText(acceptButton,'Accepter');
+      acceptButton.classList.add('paradise-order-offer-accept');
+    }
+    if(refuseButton){
+      setText(refuseButton,'Refuser');
+      refuseButton.classList.add('paradise-order-offer-refuse');
+    }
+    const actions=acceptButton?.parentElement;
+    if(actions&&refuseButton&&actions.contains(refuseButton))actions.classList.add('paradise-order-offer-actions');
+  };
+
   const enhanceAll=()=>{
     scheduled=false;
     if(!document.body)return;
     installStyle();
+    document.querySelectorAll('.nitro-alert.nitro-alert-offer').forEach(enhanceNativePopup);
     const candidates=leafElements(document.body).filter(node=>{
       const value=cleanText(node);
-      return value.startsWith(TITLE_PREFIX)||value.startsWith(ENHANCED_TITLE_PREFIX);
+      return !node.closest('.nitro-alert.nitro-alert-offer')
+        &&(value.startsWith(TITLE_PREFIX)||value.startsWith(ENHANCED_TITLE_PREFIX));
     });
     candidates.forEach(enhanceFromAnchor);
   };
