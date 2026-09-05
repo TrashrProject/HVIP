@@ -34,6 +34,6 @@ final class PoliceCommandSupport {
   }
 
   static void action(Habbo officer, String message) {
-    officer.shout("* " + message + " *", RoomChatMessageBubbles.YELLOW);
+    officer.shout("* " + message + " *", RoomChatMessageBubbles.AMBASSADOR);
   }
 }
