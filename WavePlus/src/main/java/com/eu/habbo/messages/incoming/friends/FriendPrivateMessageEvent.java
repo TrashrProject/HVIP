@@ -28,6 +28,7 @@ public class FriendPrivateMessageEvent extends MessageHandler {
             return;
 
         if (message.length() > 255) message = message.substring(0, 255);
+        message = capitalizeSentences(message);
 
         UserFriendChatEvent event = new UserFriendChatEvent(this.client.getHabbo(), buddy, message);
         if (Emulator.getPluginManager().fireEvent(event).isCancelled())
@@ -49,5 +50,36 @@ public class FriendPrivateMessageEvent extends MessageHandler {
                 recipient.shout("* Vient de recevoir un message de la part de " + sender.getHabboInfo().getUsername() + " *", RoomChatMessageBubbles.NORMAL);
             }
         }
+    }
+
+    private static String capitalizeSentences(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        StringBuilder output = new StringBuilder(input.length());
+        boolean capitalizeNext = true;
+
+        for (int i = 0; i < input.length(); i++) {
+            char current = input.charAt(i);
+
+            if (capitalizeNext && Character.isLetter(current)) {
+                current = Character.toUpperCase(current);
+                capitalizeNext = false;
+            } else if (!Character.isWhitespace(current)
+                    && current != '"'
+                    && current != '\''
+                    && current != '('
+                    && current != '['
+                    && current != '{') {
+                capitalizeNext = false;
+            }
+
+            output.append(current);
+
+            if (current == '.' || current == '!' || current == '?') {
+                capitalizeNext = true;
+            }
+        }
+
+        return output.toString();
     }
 }
