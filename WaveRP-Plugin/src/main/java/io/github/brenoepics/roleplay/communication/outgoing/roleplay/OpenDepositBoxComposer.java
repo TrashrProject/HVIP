@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import io.github.brenoepics.roleplay.communication.outgoing.OutgoingWebMessage;
 import io.github.brenoepics.roleplay.features.user.inventory.DepositBox;
 import io.github.brenoepics.roleplay.features.user.inventory.InventorySlot;
+import io.github.brenoepics.roleplay.utilities.types.FoodPresentation;
 import io.github.brenoepics.roleplay.utilities.types.RPItem;
 
 public class OpenDepositBoxComposer extends OutgoingWebMessage {
@@ -73,7 +74,9 @@ public class OpenDepositBoxComposer extends OutgoingWebMessage {
     itemObj.addProperty("is_stackable", isStackable(item.getInteractionType()));
 
     // Image URL
-    itemObj.addProperty("image_url", baseUrl.replace("%item%", item.getDisplayName()));
+    String foodImage = FoodPresentation.imageUrl(item);
+    itemObj.addProperty("image_url",
+        foodImage != null ? foodImage : baseUrl.replace("%item%", item.getDisplayName()));
 
     // Permission requirements
     itemObj.addProperty("permission_required", item.getPermission());

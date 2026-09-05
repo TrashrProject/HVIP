@@ -29,43 +29,6 @@
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
   }
 
-  function getPurseButtons()
-  {
-    return [ ...document.querySelectorAll('.nitro-purse-container .nitro-purse-button, .nitro-purse .nitro-purse-button') ];
-  }
-
-  function valueFrom(node)
-  {
-    return text(node).match(/[\d][\d\s.,]*/)?.[0]?.trim() || '';
-  }
-
-  function getWalletValues()
-  {
-    const buttons = getPurseButtons();
-    const values = buttons.map(valueFrom).filter(Boolean);
-    return { credits: values[0] || '—', diamonds: values[1] || '—' };
-  }
-
-  function copyNativeCurrencyIcon(target, source, fallback)
-  {
-    if(!target || !source || target.dataset.prcNativeIcon === '1') return;
-    const icon = source.querySelector('img,svg,[class*="icon"],[class*="currency"]');
-    target.replaceChildren();
-    if(icon)
-    {
-      const clone = icon.cloneNode(true);
-      clone.removeAttribute?.('id');
-      clone.setAttribute?.('aria-hidden', 'true');
-      target.appendChild(clone);
-      target.dataset.prcNativeIcon = '1';
-    }
-    else
-    {
-      target.textContent = fallback;
-      target.dataset.prcNativeIcon = '0';
-    }
-  }
-
   function clickTab(root, matcher)
   {
     const nav = findTopNav(root);
@@ -87,11 +50,8 @@
           <span class="prc22-brand-logo"><img src="/Dynamics/img/logos/hv_logo_p.png" alt="ParadiseRP" draggable="false"></span>
           <span class="prc22-brand-copy"><strong>CATALOGUE</strong><em>ParadiseRP</em></span>
         </div>
-        <div class="prc22-header-center" aria-hidden="true"></div>
-        <div class="prc22-wallets">
-          <div class="prc22-wallet prc22-wallet-credits"><span class="prc22-wallet-icon" aria-hidden="true">C</span><span class="prc22-wallet-value">—</span><span class="prc22-wallet-add" aria-hidden="true">+</span></div>
-          <div class="prc22-wallet prc22-wallet-diamonds"><span class="prc22-wallet-icon" aria-hidden="true">D</span><span class="prc22-wallet-value">—</span><span class="prc22-wallet-add" aria-hidden="true">+</span></div>
-        </div>
+        <div class="prc22-header-center" aria-hidden="true"><span>Des milliers de furnis<br>pour rendre votre ville unique !</span></div>
+        <div class="prc22-wallets" role="group" aria-label="Soldes du joueur"></div>
         <button type="button" class="prc22-close" aria-label="Fermer" title="Fermer">×</button>`;
       root.prepend(banner);
 
@@ -104,15 +64,6 @@
       });
     }
 
-    const purseButtons = getPurseButtons();
-    copyNativeCurrencyIcon(banner.querySelector('.prc22-wallet-credits .prc22-wallet-icon'), purseButtons[0], 'C');
-    copyNativeCurrencyIcon(banner.querySelector('.prc22-wallet-diamonds .prc22-wallet-icon'), purseButtons[1], 'D');
-
-    const values = getWalletValues();
-    const creditValue = banner.querySelector('.prc22-wallet-credits .prc22-wallet-value');
-    const diamondValue = banner.querySelector('.prc22-wallet-diamonds .prc22-wallet-value');
-    if(creditValue) creditValue.textContent = values.credits;
-    if(diamondValue) diamondValue.textContent = values.diamonds;
   }
 
   function translate(root)

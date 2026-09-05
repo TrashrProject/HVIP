@@ -2,7 +2,6 @@ package io.github.brenoepics.roleplay;
 
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.commands.CommandViewRegistry;
-import com.eu.habbo.habbohotel.items.ItemInteraction;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.PacketManager;
 import com.eu.habbo.messages.incoming.Incoming;
@@ -33,7 +32,6 @@ import io.github.brenoepics.roleplay.features.hospital.DeathHandler;
 import io.github.brenoepics.roleplay.features.hospital.HospitalService;
 import io.github.brenoepics.roleplay.features.hospital.ems.EmsService;
 import io.github.brenoepics.roleplay.features.items.ItemManager;
-import io.github.brenoepics.roleplay.features.items.interactions.InteractionCoffeeMachine;
 import io.github.brenoepics.roleplay.features.job.JobService;
 import io.github.brenoepics.roleplay.features.job.JobsManager;
 import io.github.brenoepics.roleplay.features.macro.MacroManager;
@@ -88,13 +86,6 @@ public class RolePlay extends HabboPlugin implements EventListener {
 
   @Override
   public void onEnable() {
-    // Register the coffee interaction immediately when the plugin is enabled.
-    // ItemManager.load() resolves each items_base.interaction_type to a Java class while loading
-    // the base furniture. Registering here guarantees rp_coffee_machine exists before that pass.
-    Emulator.getGameEnvironment().getItemManager().addItemInteraction(
-        new ItemInteraction("rp_coffee_machine", InteractionCoffeeMachine.class));
-    LOGGER.info("[ParadiseRP] Registered item interaction: rp_coffee_machine");
-
     Emulator.getPluginManager().registerEvents(this, new EmulatorLoad());
     Emulator.getPluginManager().registerEvents(this, new EmulatorStartShutdownListener());
     Emulator.getPluginManager().registerEvents(this, new UserConnect());

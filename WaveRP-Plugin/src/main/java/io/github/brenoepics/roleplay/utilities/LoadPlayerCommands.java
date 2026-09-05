@@ -15,6 +15,7 @@ import io.github.brenoepics.roleplay.commands.generic.PingCommand;
 import io.github.brenoepics.roleplay.commands.escort.EscortCommand;
 import io.github.brenoepics.roleplay.commands.escort.StopEscortCommand;
 import io.github.brenoepics.roleplay.commands.generic.ApplyCommand;
+import io.github.brenoepics.roleplay.commands.generic.DeleteInventoryItemCommand;
 import io.github.brenoepics.roleplay.commands.generic.BucksCommand;
 import io.github.brenoepics.roleplay.commands.generic.HelpCommand;
 import io.github.brenoepics.roleplay.commands.generic.EmsCallCommand;
@@ -289,6 +290,12 @@ public class LoadPlayerCommands {
       LoadPlayerCommands.addCommand(
           new ApplyCommand("cmd_apply", getSplit("commands.cmd_apply.keys")), new String[]{"apply"},
           CheckDatabase.PermissionState.ALLOWED);
+      setDescription("cmd_delete_inventory_item",
+          ":supprimerobjet <case> - Supprimer definitivement un objet de votre inventaire.");
+      LoadPlayerCommands.addCommand(
+          new DeleteInventoryItemCommand("cmd_delete_inventory_item",
+              new String[]{"supprimerobjet", "deleteitem"}),
+          new String[]{"supprimerobjet", "deleteitem"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(new HelpCommand("cmd_911", getSplit("commands.cmd_911.keys")),
           new String[]{"help", "911", "callpolice"}, CheckDatabase.PermissionState.ALLOWED);
       LoadPlayerCommands.addCommand(new FireCommand("cmd_fire", getSplit("commands.cmd_fire.keys")),

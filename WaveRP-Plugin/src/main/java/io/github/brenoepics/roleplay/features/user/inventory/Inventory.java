@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -246,8 +247,25 @@ public class Inventory {
   }
 
   private static boolean isSlot(String name, InventorySlot slot) {
-    return !slot.isEmpty() && slot.getItem() != null && slot.getItem().getDisplayName()
-        .equalsIgnoreCase(name) && slot.isUsable();
+    if (slot.isEmpty() || slot.getItem() == null || !slot.isUsable()) {
+      return false;
+    }
+    String input = normalizeItemName(name);
+    return normalizeItemName(slot.getItem().getDisplayName()).equals(input)
+        || normalizeItemName(slot.getItem().getRawDisplayName()).equals(input);
+  }
+
+  private static String normalizeItemName(String value) {
+    if (value == null) {
+      return "";
+    }
+    String repaired = value.replace("p?tes", "pates").replace("P?tes", "Pates")
+        .replace("b?uf", "boeuf").replace("B?uf", "Boeuf")
+        .replace("\u0153", "oe").replace("\u0152", "OE");
+    return Normalizer.normalize(repaired, Normalizer.Form.NFD)
+        .replaceAll("\\p{M}+", "")
+        .trim()
+        .toLowerCase(java.util.Locale.ROOT);
   }
 
   private static boolean isSlot(Integer itemId, InventorySlot slot) {

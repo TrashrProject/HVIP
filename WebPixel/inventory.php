@@ -41,6 +41,12 @@ $images = [
     6121 => 'carrot.png', 6122 => 'munitions.png'
 ];
 
+$foodImages = [
+    9 => 'pomme.png', 10 => 'banane.png', 11 => 'sandwich.png', 12 => 'burger.png',
+    13 => 'pizza.png', 14 => 'tacos.png', 15 => 'sushi.png', 16 => 'steak.png'
+];
+$foodNames = [18 => 'Pâtes', 20 => 'Bœuf'];
+
 // Only weapons that currently have ParadiseRP skin families are mapped here.
 $weaponKeys = [
     6110 => 'ak47',
@@ -96,14 +102,16 @@ while ($row = mysqli_fetch_assoc($result)) {
     $slots[] = [
         'slot_index' => $slotIndex,
         'item_id' => $itemId,
-        'display_name' => (string)$row['name'],
+        'display_name' => $foodNames[$itemId] ?? (string)$row['name'],
         'interaction_type' => (string)$row['interaction_type'],
         'extra_data' => (string)$row['extra_data'],
         'quantity' => (int)$row['quantity'],
         'durability' => (int)$row['durability'],
         'is_broken' => (int)$row['durability'] <= 0,
         'equipped' => $slotIndex < 2,
-        'image_url' => 'inventory-items/' . ($images[$itemId] ?? 'unknown.svg'),
+        'image_url' => isset($foodImages[$itemId])
+            ? '/Dynamics/img/food/' . $foodImages[$itemId]
+            : 'inventory-items/' . ($images[$itemId] ?? 'unknown.svg'),
         'weapon_key' => $weaponKey,
         'skin' => $skin
     ];

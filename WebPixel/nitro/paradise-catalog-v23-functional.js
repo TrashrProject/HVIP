@@ -64,14 +64,10 @@
       tab.dataset.prc23Key = def.key;
       tab.classList.add('prc23-tab');
 
-      const raw = clean(tab.textContent);
-      const suffix = raw.match(/\s*\(\d+\)\s*$/)?.[0] || '';
       const textNode = findTextNode(tab, def);
       if(textNode)
       {
-        const existing = clean(textNode.nodeValue);
-        const existingSuffix = existing.match(/\s*\(\d+\)\s*$/)?.[0] || suffix;
-        const desired = `${ def.label }${ existingSuffix }`;
+        const desired = def.label;
         if(clean(textNode.nodeValue) !== desired) textNode.nodeValue = desired;
       }
 
@@ -110,56 +106,56 @@
     }, 80);
   }
 
-  const extractNumber = value => {
-    const match = clean(value).match(/\d[\d\s.,]*/);
-    return match ? clean(match[0]) : '';
+  const getNativeCurrencies = () => {
+    const currencies = [];
+    document.querySelectorAll('.nitro-purse .nitro-currency-icon').forEach(icon => {
+      const row = icon.closest('.nitro-purse-seasonal-currency,.nitro-purse-button');
+      if(row && !row.closest('.prc22-brand-banner') && !currencies.includes(row)) currencies.push(row);
+    });
+    return currencies;
   };
 
-  function readWalletValues()
+  function makeWallet(source, index)
   {
-    const values = [];
-    const selectors = [
-      '.nitro-purse-container .nitro-purse-button',
-      '.nitro-purse-container [class*="currency"]',
-      '.nitro-purse [class*="currency"]'
-    ];
-    selectors.forEach(selector => {
-      document.querySelectorAll(selector).forEach(node => {
-        const value = extractNumber(node.textContent);
-        if(value && !values.includes(value)) values.push(value);
-      });
-    });
-    if(values.length < 2)
-    {
-      const purse = document.querySelector('.nitro-purse-container,.nitro-purse');
-      const matches = clean(purse?.textContent).match(/\d[\d\s.,]*/g) || [];
-      matches.map(extractNumber).filter(Boolean).forEach(value => { if(!values.includes(value)) values.push(value); });
-    }
-    return { credits: values[0] || '', diamonds: values[1] || '' };
-  }
+    const wallet = document.createElement('div');
+    wallet.className = 'prc22-wallet';
+    wallet.dataset.prcCurrencyIndex = String(index);
+    wallet.setAttribute('role', 'status');
 
-  function updateWalletValue(root, node, value)
-  {
-    if(!node || !value) return false;
-    const oldValue = node.dataset.prcWalletValue || clean(node.textContent);
-    if(oldValue === value) { node.dataset.prcWalletValue = value; return false; }
-    node.textContent = value;
-    node.dataset.prcWalletValue = value;
-    node.classList.remove('prc-wallet-changing');
-    void node.offsetWidth;
-    node.classList.add('prc-wallet-changing');
-    window.setTimeout(() => node.classList.remove('prc-wallet-changing'), 220);
-    return !!oldValue;
+    const icon = source.querySelector('.nitro-currency-icon,.currency-icon,[class*="currency-icon"],img,svg,i');
+    const value = [ ...source.querySelectorAll('span,div,p') ].reverse().find(node => /\d/.test(clean(node.textContent)) && !node.querySelector('*'));
+    const iconHost = document.createElement('span');
+    iconHost.className = 'prc22-wallet-icon';
+    iconHost.setAttribute('aria-hidden', 'true');
+    if(icon) iconHost.appendChild(icon.cloneNode(true));
+
+    const valueHost = document.createElement('span');
+    valueHost.className = 'prc22-wallet-value';
+    valueHost.textContent = clean(value?.textContent || source.textContent) || '—';
+
+    const add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'prc22-wallet-add';
+    add.textContent = '+';
+    add.setAttribute('aria-label', `Ouvrir les options de la monnaie ${ index + 1 }`);
+    add.title = 'Plus d’options';
+    wallet.append(iconHost, valueHost, add);
+    return wallet;
   }
 
   function updateWallet(root)
   {
     const banner = root.querySelector(':scope > .prc22-brand-banner');
     if(!banner) return;
-    const values = readWalletValues();
-    const credits = banner.querySelector('.prc22-wallet-credits .prc22-wallet-value');
-    const diamonds = banner.querySelector('.prc22-wallet-diamonds .prc22-wallet-value');
-    const changed = updateWalletValue(root, credits, values.credits) || updateWalletValue(root, diamonds, values.diamonds);
+    const host = banner.querySelector('.prc22-wallets');
+    const sources = getNativeCurrencies();
+    if(!host || !sources.length) return;
+    const signature = sources.map(source => `${ source.className }|${ clean(source.textContent) }|${ source.querySelector('[class*="currency-icon"]')?.className || '' }`).join('||');
+    if(host.dataset.prcWalletSignature === signature) return;
+    const hadWallet = !!host.children.length;
+    host.replaceChildren(...sources.map(makeWallet));
+    host.dataset.prcWalletSignature = signature;
+    const changed = hadWallet;
     if(changed && root.dataset.prcPurchasePending === '1')
     {
       const buy = root.querySelector('.prc23-buy,.prc22-buy-button');
@@ -170,6 +166,23 @@
       }
       root.dataset.prcPurchasePending = '0';
     }
+  }
+
+  function bindWalletProxy(root)
+  {
+    const host = root.querySelector('.prc22-wallets');
+    if(!host || host.dataset.prcWalletBound === '1') return;
+    host.dataset.prcWalletBound = '1';
+    host.addEventListener('click', event => {
+      const button = event.target.closest('.prc22-wallet-add');
+      if(!button) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const wallet = button.closest('.prc22-wallet');
+      const source = getNativeCurrencies()[Number(wallet?.dataset.prcCurrencyIndex)];
+      const clickable = source?.closest('.nitro-purse-button') || source;
+      clickable?.click();
+    });
   }
 
   function translateActions(root)
@@ -254,6 +267,7 @@
     ensureSearchClear(root);
     bindInteractions(root);
     updateWallet(root);
+    bindWalletProxy(root);
     openDefaultStorefront(root);
   }
 
@@ -282,9 +296,9 @@
     new MutationObserver(mutations => {
       for(const mutation of mutations)
       {
-        if(mutation.addedNodes.length) { scheduleDecorate(); return; }
+        if(mutation.addedNodes.length || mutation.type === 'characterData') { scheduleDecorate(); return; }
       }
-    }).observe(document.body, { childList: true, subtree: true });
+    }).observe(document.body, { childList: true, characterData: true, subtree: true });
 
     console.info('[ParadiseRP] catalogue interactions loaded', BUILD);
   }

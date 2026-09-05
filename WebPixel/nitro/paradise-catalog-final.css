@@ -275,3 +275,28 @@
 @media(prefers-reduced-motion:reduce){
   .nitro-catalog.paradise-catalog-v22,.nitro-catalog.paradise-catalog-v22 *{animation:none!important;transition:none!important;transform:none!important}
 }
+
+/* Requested native-size refinement: retain ParadiseRP composition, borrow only Habbo relief. */
+.nitro-catalog.paradise-catalog-v22 .prc22-brand-logo{width:76px!important;height:56px!important}
+.nitro-catalog.paradise-catalog-v22 .prc22-brand-logo img{width:73px!important;max-height:54px!important}
+.nitro-catalog.paradise-catalog-v22 .prc22-brand-left{gap:5px!important}
+.nitro-catalog.paradise-catalog-v22 .prc23-tab-icon{display:none!important}
+.nitro-catalog.paradise-catalog-v22 .prc23-tab,.nitro-catalog.paradise-catalog-v22 .prc22-topnav>:is(div,li),.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs>:is(div,li){border-radius:4px 4px 1px 1px!important;box-shadow:inset 0 2px rgba(255,255,255,.11),0 1px rgba(0,0,0,.32)!important}
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link),.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link){min-height:27px!important;margin-bottom:3px!important;padding-top:5px!important;padding-bottom:5px!important;border-color:#225675!important;background:linear-gradient(#123d60,#0b2d4d)!important;box-shadow:inset 0 1px rgba(255,255,255,.09),0 1px rgba(0,0,0,.25)!important}
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(button,a,[role="button"],.list-group-item,.nav-link):hover,.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(button,a,[role="button"],.list-group-item,.nav-link):hover{border-color:#4ba5cd!important;background:linear-gradient(#1a5278,#103c60)!important}
+.nitro-catalog.paradise-catalog-v22.prc23-store #nitro-catalog-main-navigation :is(.active,[aria-selected="true"]),.nitro-catalog.paradise-catalog-v22.prc23-store .nitro-catalog-navigation-grid-container :is(.active,[aria-selected="true"]){border-color:#83d5f1!important;background:linear-gradient(#28a5d5,#167fac)!important;box-shadow:inset 2px 0 #c9f2ff,inset 0 1px rgba(255,255,255,.2)!important}
+.nitro-catalog.paradise-catalog-v22 button:not(.prc22-close):not(.prc22-wallet-add):not(.prc23-tab):not(.prc22-buy-button):not(.prc23-buy){border-radius:3px!important;box-shadow:inset 0 1px rgba(255,255,255,.13),0 1px rgba(0,0,0,.28)!important}
+
+/* Keep currency icons; hide icons only in the main navigation. */
+.nitro-catalog.paradise-catalog-v22>.prc22-brand-banner{height:110px!important;min-height:110px!important;grid-template-columns:210px minmax(0,1fr) 310px!important;padding:0 42px 40px 8px!important}
+.nitro-catalog.paradise-catalog-v22 .prc22-wallets{position:relative!important;z-index:30!important;display:flex!important;visibility:visible!important;opacity:1!important;overflow:visible!important}
+.nitro-catalog.paradise-catalog-v22 .prc22-wallet-icon,.nitro-catalog.paradise-catalog-v22 .prc22-wallet-icon .nitro-currency-icon{display:flex!important;visibility:visible!important;opacity:1!important;background-repeat:no-repeat!important;background-position:center!important}
+.nitro-catalog.paradise-catalog-v22 .prc22-topnav,.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs{top:70px!important;left:0!important;right:0!important;height:40px!important;min-height:40px!important;padding:4px 8px 0!important;justify-content:flex-start!important;background:#071d36!important;border-top:1px solid #174c70!important}
+.nitro-catalog.paradise-catalog-v22 .prc23-tab,.nitro-catalog.paradise-catalog-v22 .prc22-topnav>:is(div,li),.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs>:is(div,li),.nitro-catalog.paradise-catalog-v22 .prc22-topnav :is(button,a,.nav-link),.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs :is(button,a,.nav-link){height:35px!important;min-height:35px!important}
+.nitro-catalog.paradise-catalog-v22>.nitro-card-content{height:calc(100% - 110px)!important}
+
+/* No motion, zoom or overlay when selecting a furni. */
+.nitro-catalog.paradise-catalog-v22 .prc23-product-card,.nitro-catalog.paradise-catalog-v22 .prc22-item{transition:border-color 100ms linear,background-color 100ms linear!important;transform:none!important}
+.nitro-catalog.paradise-catalog-v22 .prc23-product-card:hover,.nitro-catalog.paradise-catalog-v22 .prc22-item:hover{transform:none!important}
+.nitro-catalog.paradise-catalog-v22.prc-preview-transition .prc22-preview-column,.nitro-catalog.paradise-catalog-v22 .prc22-preview-column.prc-preview-arrive{animation:none!important;transform:none!important}
+.nitro-catalog.paradise-catalog-v22 .prc23-product-card:is(.active,.selected,[aria-selected="true"])::before,.nitro-catalog.paradise-catalog-v22 .prc23-product-card:is(.active,.selected,[aria-selected="true"])::after,.nitro-catalog.paradise-catalog-v22 .prc22-item:is(.active,.selected,[aria-selected="true"])::before,.nitro-catalog.paradise-catalog-v22 .prc22-item:is(.active,.selected,[aria-selected="true"])::after{content:none!important;display:none!important;animation:none!important}

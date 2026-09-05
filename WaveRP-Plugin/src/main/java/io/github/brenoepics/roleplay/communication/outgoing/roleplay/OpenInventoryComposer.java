@@ -74,7 +74,7 @@ public class OpenInventoryComposer extends OutgoingWebMessage {
   }
 
   private String resolveImageUrl(RPItem item, String baseUrl) {
-    String foodImage = FoodPresentation.imageDataUri(item);
+    String foodImage = FoodPresentation.imageUrl(item);
     if (foodImage != null) {
       return foodImage;
     }

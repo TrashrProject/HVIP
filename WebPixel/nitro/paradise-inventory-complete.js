@@ -45,7 +45,7 @@
         if (item.interaction_type === 'weapon' || item.interaction_type === 'shield') {
             return sendCommand(`:equiper ${item.display_name}`);
         }
-        return sendCommand(`:utiliser ${item.display_name}`);
+        return sendCommand(`:utiliser ${item.item_id}`);
     }
 
     function parseWeaponStats(extraData) {
@@ -111,6 +111,7 @@
                     <button type="button" data-inventory-action="default"></button>
                     <button type="button" data-inventory-action="use">Utiliser</button>
                     <button type="button" data-inventory-action="skin">Skins</button>
+                    <button type="button" data-inventory-action="delete">Supprimer</button>
                 </div>
             </div>
             <div class="p-inventory-status" hidden></div>`;
@@ -152,6 +153,7 @@
         const main = actions.querySelector('[data-inventory-action="default"]');
         const use = actions.querySelector('[data-inventory-action="use"]');
         const skin = actions.querySelector('[data-inventory-action="skin"]');
+        const remove = actions.querySelector('[data-inventory-action="delete"]');
         const stats = parseWeaponStats(item.extra_data);
 
         actions.querySelector('.p-inventory-name').textContent = item.display_name;
@@ -169,6 +171,7 @@
         main.textContent = index < 2 ? 'Ranger' : (['weapon', 'shield'].includes(item.interaction_type) ? 'Équiper' : 'Utiliser');
         use.hidden = !['shield'].includes(item.interaction_type) || index < 2;
         skin.hidden = !item.weapon_key;
+        remove.hidden = index < 2;
         actions.hidden = false;
     }
 
@@ -186,7 +189,11 @@
             else showStatus('Le gestionnaire de skins est indisponible.', true);
             return;
         }
-        if (action.dataset.inventoryAction === 'use') sendCommand(`:utiliser ${item.display_name}`);
+        if (action.dataset.inventoryAction === 'delete') {
+            const amount = item.quantity > 1 ? `les ${item.quantity} exemplaires de` : '';
+            if (!window.confirm(`Supprimer definitivement ${amount} ${item.display_name} ?`)) return;
+            sendCommand(`:supprimerobjet ${item.slot_index}`);
+        } else if (action.dataset.inventoryAction === 'use') sendCommand(`:utiliser ${item.item_id}`);
         else defaultAction(item);
         root.querySelector('.p-inventory-actions').hidden = true;
     });

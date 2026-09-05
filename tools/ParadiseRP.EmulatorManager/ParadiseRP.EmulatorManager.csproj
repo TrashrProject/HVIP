@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>ParadiseRP Emulator Manager</AssemblyName>
+    <RootNamespace>ParadiseRP.EmulatorManager</RootNamespace>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0</FileVersion>
+    <Product>ParadiseRP Emulator Manager</Product>
+    <Description>Gestionnaire de démarrage et redémarrage de l'émulateur ParadiseRP</Description>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+</Project>

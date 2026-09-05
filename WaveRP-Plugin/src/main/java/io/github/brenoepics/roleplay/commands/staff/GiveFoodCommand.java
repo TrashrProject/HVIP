@@ -8,6 +8,7 @@ import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.utilities.types.RPItem;
+import io.github.brenoepics.roleplay.utilities.types.FoodPresentation;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -91,7 +92,8 @@ public class GiveFoodCommand extends Command {
         .forEach(item -> payload.append("FOOD|")
             .append(item.getId()).append('|')
             .append(sanitize(item.getDisplayName())).append('|')
-            .append(sanitize(item.getExtraData())).append('\n'));
+            .append(sanitize(item.getExtraData())).append('|')
+            .append(sanitize(FoodPresentation.imageUrl(item))).append('\n'));
 
     gameClient.sendResponse(new GenericAlertComposer(payload.toString()));
   }

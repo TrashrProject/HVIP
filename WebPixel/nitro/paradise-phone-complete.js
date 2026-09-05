@@ -31,7 +31,6 @@
         ['Settings', 'Paramètres'],
         ['Wave Tunes', 'Paradise Tunes'],
         ['Waver Gram', 'Paradise Gram'],
-        ['Open', 'Ouvrir un compte'],
         ['Recipient', 'Destinataire'],
         ['Amount', 'Montant'],
         ['Wallet:', 'Espèces :'],
@@ -283,8 +282,6 @@
             };
             setValue(values[0], data.bankBalance);
             setValue(values[1], data.walletBalance);
-            const open = [...root.querySelectorAll('button')].find(button => button.textContent.trim() === 'Open' || button.textContent.trim() === 'Ouvrir un compte');
-            if (open) open.querySelector('span') ? open.querySelector('span').textContent = 'Ouvrir un compte' : open.textContent = 'Ouvrir un compte';
         } catch (error) {
             root.dataset.pprBankError = error.message;
         } finally {
@@ -448,11 +445,6 @@
         select('.phone-gallery:not([data-ppr-ready])').forEach(mountGallery);
         select('.phone-bank-app').forEach(syncBank);
         select('.phone-bank-app').forEach(bank => {
-            bank.querySelectorAll('button').forEach(button => {
-                if (/^Retirer$/i.test(button.textContent.trim())) button.remove();
-            });
-            const formTitle = bank.querySelector('.bank-action-form .title');
-            if (formTitle && /Retirer/i.test(formTitle.textContent)) bank.querySelector('.bank-action-form .back-btn')?.click();
             const summary = bank.querySelector('.bank-summary');
             if (summary && !summary.querySelector('[data-mobile-bank-policy]')) {
                 const policy = document.createElement('div');
@@ -491,21 +483,6 @@
                 input.dispatchEvent(new Event('input', { bubbles: true }));
             }
             borderChoice.parentElement.querySelectorAll('button').forEach(button => button.classList.toggle('is-selected', button === borderChoice));
-            return;
-        }
-        const openAccount = event.target.closest('.phone-bank-app button');
-        if (openAccount && /^(Open|Ouvrir un compte)$/i.test(openAccount.textContent.trim())) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            const bank = openAccount.closest('.phone-bank-app');
-            let notice = bank.querySelector('[data-phone-bank-notice]');
-            if (!notice) {
-                notice = document.createElement('div');
-                notice.dataset.phoneBankNotice = '1';
-                notice.className = 'phone-bank-notice';
-                bank.prepend(notice);
-            }
-            notice.textContent = 'Pour ouvrir un compte, rendez-vous à la banque et adressez-vous à un conseiller.';
             return;
         }
         const removeFriend = event.target.closest('.phone-friends-app .icon-btn.remove');

@@ -40,7 +40,12 @@ public class ApplyCommand extends Command {
     }
 
     String itemName = String.join(" ", java.util.Arrays.copyOfRange(params, 1, params.length));
-    RPItem item = data.getInventory().getSlotItem(itemName);
+    RPItem item;
+    try {
+      item = data.getInventory().getSlotItem(Integer.parseInt(itemName));
+    } catch (NumberFormatException ignored) {
+      item = data.getInventory().getSlotItem(itemName);
+    }
     if (item == null) {
       gameClient.getHabbo()
           .whisper("Vous ne poss\u00e9dez aucun objet nomm\u00e9 " + itemName + ".", RoomChatMessageBubbles.ALERT);
