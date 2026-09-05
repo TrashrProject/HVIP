@@ -1,0 +1,37 @@
+/* ParadiseRP Catalogue CityRef V6 — native engine layout fix.
+   Keep Nitro fully laid out behind the custom shell so AutoGrid continues rendering furni. */
+
+.nitro-catalog.pc5-catalog > .nitro-card-header,
+.nitro-catalog.pc5-catalog > [class*="card-header"],
+.nitro-catalog.pc5-catalog > .nitro-card-tabs,
+.nitro-catalog.pc5-catalog > [class*="card-tabs"],
+.nitro-catalog.pc5-catalog > .nitro-card-content {
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:auto!important;
+  width:auto!important;
+  height:auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  opacity:0!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+  transform:none!important;
+}
+
+.nitro-catalog.pc5-catalog > .nitro-card-content {
+  flex:1 1 auto!important;
+  width:100%!important;
+  min-height:0!important;
+}
+
+/* The shell is the only visible catalogue UI. Native Nitro stays underneath as engine. */
+.nitro-catalog.pc5-catalog > .pc5-shell {
+  z-index:1000!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
