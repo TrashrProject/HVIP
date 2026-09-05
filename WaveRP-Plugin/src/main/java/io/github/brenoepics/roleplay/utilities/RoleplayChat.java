@@ -4,7 +4,6 @@ import com.eu.habbo.habbohotel.rooms.RoomChatMessage;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.rooms.RoomUnit;
 import com.eu.habbo.habbohotel.users.Habbo;
-import com.eu.habbo.messages.ServerMessage;
 import com.eu.habbo.messages.outgoing.rooms.users.RoomUserShoutComposer;
 
 public final class RoleplayChat {
@@ -18,20 +17,11 @@ public final class RoleplayChat {
       return;
     }
 
+    // Keep the RP action markers inside the actual chat text so Nitro renders:
+    // Pseudo: * Mange ... *
+    // instead of action mode moving the first asterisk before the username.
     habbo.getHabboInfo().getCurrentRoom().sendComposer(
-        new RoomUserShoutComposer(new ActionChatMessage(message, habbo.getRoomUnit())).compose());
-  }
-
-  private static final class ActionChatMessage extends RoomChatMessage {
-
-    private ActionChatMessage(String message, RoomUnit roomUnit) {
-      super(message, roomUnit, RoomChatMessageBubbles.NORMAL);
-    }
-
-    @Override
-    public void serialize(ServerMessage message) {
-      super.serialize(message);
-      message.appendInt(1);
-    }
+        new RoomUserShoutComposer(
+            new RoomChatMessage(message, habbo.getRoomUnit(), RoomChatMessageBubbles.NORMAL)).compose());
   }
 }
