@@ -42,11 +42,11 @@ public class FriendPrivateMessageEvent extends MessageHandler {
         // consistent with the other ParadiseRP action messages.
         if (recipient != null) {
             if (sender.getHabboInfo().getCurrentRoom() != null && sender.getRoomUnit().isInRoom()) {
-                sender.shout("* envoie un message à " + buddy.getUsername() + " *", RoomChatMessageBubbles.NORMAL);
+                sender.shout("* Envoie un message à " + buddy.getUsername() + " *", RoomChatMessageBubbles.NORMAL);
             }
 
             if (recipient.getHabboInfo().getCurrentRoom() != null && recipient.getRoomUnit().isInRoom()) {
-                recipient.shout("* vient de recevoir un message de la part de " + sender.getHabboInfo().getUsername() + " *", RoomChatMessageBubbles.NORMAL);
+                recipient.shout("* Vient de recevoir un message de la part de " + sender.getHabboInfo().getUsername() + " *", RoomChatMessageBubbles.NORMAL);
             }
         }
     }
