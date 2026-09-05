@@ -1,37 +1,82 @@
-/* ParadiseRP Catalogue CityRef V6 — native engine layout fix.
-   Keep Nitro fully laid out behind the custom shell so AutoGrid continues rendering furni. */
+/* ParadiseRP Catalogue CityRef engine V7.
+   The custom shell stays visible; Nitro remains fully measurable behind it so AutoGrid can render furni. */
+
+.nitro-catalog.pc5-catalog {
+  display:flex!important;
+  flex-direction:column!important;
+}
 
 .nitro-catalog.pc5-catalog > .nitro-card-header,
 .nitro-catalog.pc5-catalog > [class*="card-header"],
 .nitro-catalog.pc5-catalog > .nitro-card-tabs,
-.nitro-catalog.pc5-catalog > [class*="card-tabs"],
+.nitro-catalog.pc5-catalog > [class*="card-tabs"] {
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  width:100%!important;
+  opacity:0!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+  overflow:visible!important;
+  transform:none!important;
+  z-index:1!important;
+}
+
+.nitro-catalog.pc5-catalog > .nitro-card-header,
+.nitro-catalog.pc5-catalog > [class*="card-header"] {
+  top:0!important;
+  height:46px!important;
+  min-height:46px!important;
+}
+
+.nitro-catalog.pc5-catalog > .nitro-card-tabs,
+.nitro-catalog.pc5-catalog > [class*="card-tabs"] {
+  top:46px!important;
+  height:46px!important;
+  min-height:46px!important;
+}
+
 .nitro-catalog.pc5-catalog > .nitro-card-content {
-  position:relative!important;
-  left:auto!important;
-  right:auto!important;
-  top:auto!important;
-  bottom:auto!important;
-  width:auto!important;
-  height:auto!important;
-  min-width:0!important;
-  min-height:0!important;
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  top:92px!important;
+  bottom:0!important;
+  width:100%!important;
+  height:calc(100% - 92px)!important;
+  min-width:620px!important;
+  min-height:390px!important;
   max-width:none!important;
   max-height:none!important;
+  display:block!important;
   opacity:0!important;
-  overflow:hidden!important;
+  visibility:visible!important;
   pointer-events:none!important;
+  overflow:hidden!important;
   transform:none!important;
+  z-index:1!important;
 }
 
-.nitro-catalog.pc5-catalog > .nitro-card-content {
-  flex:1 1 auto!important;
-  width:100%!important;
-  min-height:0!important;
+/* Give Nitro's responsive/virtualized grids a real viewport even while invisible. */
+.nitro-catalog.pc5-catalog > .nitro-card-content > .grid,
+.nitro-catalog.pc5-catalog > .nitro-card-content .nitro-catalog-navigation-grid-container,
+.nitro-catalog.pc5-catalog > .nitro-card-content #nitro-catalog-main-navigation,
+.nitro-catalog.pc5-catalog > .nitro-card-content [class*="catalog-grid"],
+.nitro-catalog.pc5-catalog > .nitro-card-content .layout-grid {
+  min-height:320px!important;
 }
 
-/* The shell is the only visible catalogue UI. Native Nitro stays underneath as engine. */
+.nitro-catalog.pc5-catalog > .nitro-card-content .nitro-catalog-navigation-grid-container {
+  height:100%!important;
+  max-height:100%!important;
+}
+
+/* The custom interface remains the only painted / interactive catalogue UI. */
 .nitro-catalog.pc5-catalog > .pc5-shell {
+  position:absolute!important;
+  inset:0!important;
   z-index:1000!important;
   opacity:1!important;
+  visibility:visible!important;
   pointer-events:auto!important;
 }
