@@ -3,21 +3,40 @@ package io.github.brenoepics.roleplay.commands.jobs.police;
 import static io.github.brenoepics.roleplay.features.job.JobsDelegate.getRoomUserShoutComposer;
 import static io.github.brenoepics.roleplay.features.user.HungerRunner.MISSING_ENERGY;
 
+import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.commands.Command;
+import com.eu.habbo.habbohotel.commands.CommandHandler;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.crime.wantedlist.Crime;
 import io.github.brenoepics.roleplay.features.job.JobPermissions;
+import io.github.brenoepics.roleplay.features.user.CheckDatabase;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.utilities.types.Timeout;
 import java.util.Arrays;
 
 public class ChargeCommand extends Command {
 
+  private static boolean searchCommandRegistered = false;
+
   public ChargeCommand(String permission, String[] keys) {
     super(permission, keys);
+
+    if (!searchCommandRegistered) {
+      searchCommandRegistered = true;
+
+      Emulator.getConfig().register("commands.cmd_give_stars.keys", "rechercher;recherche");
+      Emulator.getTexts().register("commands.description.cmd_give_stars",
+          ":rechercher <pseudo> <1-5> - Définit le niveau de recherche d'un suspect.");
+      Emulator.getTexts().update("commands.description.cmd_give_stars",
+          ":rechercher <pseudo> <1-5> - Définit le niveau de recherche d'un suspect.");
+
+      CommandHandler.addCommand(
+          new StarCommand("cmd_give_stars", new String[]{"rechercher", "recherche"}));
+      CheckDatabase.registerPermission("cmd_give_stars", CheckDatabase.PermissionState.ALLOWED);
+    }
   }
 
   @Override
