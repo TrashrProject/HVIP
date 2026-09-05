@@ -24,8 +24,11 @@ function Get-Setting([string]$Key, [string]$Default = '') {
     if ($null -eq $line) { return $Default }
     return ($line -split '=', 2)[1].Trim()
 }
-$database = Get-Setting 'db.name'
-if (-not $database) { throw 'db.name absent du config.ini du runtime.' }
+# WavePlus/config.ini.example and DatabasePool use db.database.
+# Keep db.name only as a fallback for configurations from older packs.
+$database = Get-Setting 'db.database'
+if ([string]::IsNullOrWhiteSpace($database)) { $database = Get-Setting 'db.name' }
+if ([string]::IsNullOrWhiteSpace($database)) { throw "db.database absent du fichier $ConfigPath (db.name accepte en compatibilite)." }
 # Build each argument separately: Windows PowerShell must not concatenate the array.
 $dbArgs = @("--host=$(Get-Setting 'db.hostname' '127.0.0.1')", "--port=$(Get-Setting 'db.port' '3306')", "--user=$(Get-Setting 'db.username' 'root')")
 $previousPassword = $env:MYSQL_PWD

@@ -164,10 +164,15 @@ try {
     }
 
     if ($Migrations | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf }) {
-        $RuntimeConfig = Join-Path $RuntimeDirectory "Config\config.ini"
+        $RuntimeConfig = Join-Path $RuntimeDirectory "config.ini"
+        if (-not (Test-Path -LiteralPath $RuntimeConfig -PathType Leaf)) {
+            throw "Configuration runtime introuvable : $RuntimeConfig"
+        }
         $DatabaseHost = Get-IniValue $RuntimeConfig 'db.hostname' '127.0.0.1'
         $DatabasePort = Get-IniValue $RuntimeConfig 'db.port' '3306'
-        $DatabaseName = Get-IniValue $RuntimeConfig 'db.name' 'waveplus'
+        $DatabaseName = Get-IniValue $RuntimeConfig 'db.database'
+        if ([string]::IsNullOrWhiteSpace($DatabaseName)) { $DatabaseName = Get-IniValue $RuntimeConfig 'db.name' }
+        if ([string]::IsNullOrWhiteSpace($DatabaseName)) { throw "db.database absent du fichier $RuntimeConfig" }
         $DatabaseUser = Get-IniValue $RuntimeConfig 'db.username' 'root'
         $DatabasePassword = Get-IniValue $RuntimeConfig 'db.password' ''
         $Mysql = @('C:\xampp\mysql\bin\mysql.exe','C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe') |
