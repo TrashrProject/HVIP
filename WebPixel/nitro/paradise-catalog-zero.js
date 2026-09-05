@@ -1,395 +1,396 @@
 (() => {
   'use strict';
 
-  const ROOT = '.nitro-catalog';
-  const BUILD = 'paradise-catalog-zero-v4-city';
+  const ROOT_SELECTOR = '.nitro-catalog';
+  const BUILD = 'paradise-catalog-city-v5';
   const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
+  const elementChildren = node => node ? [ ...node.children ].filter(child => child instanceof HTMLElement) : [];
 
-  const TAB_DEFS = [
-    { key:'home', pattern:/^(?:Front Page|Accueil)(?:\s*\(\d+\))?$/i, label:'Accueil' },
-    { key:'furni', pattern:/^(?:Furni|Furniture|Mobilier|Mobilier officiel)(?:\s*\(\d+\))?$/i, label:'Mobilier officiel' },
-    { key:'clothing', pattern:/^(?:Clothing|Vêtements)(?:\s*\(\d+\))?$/i, label:'Vêtements' },
-    { key:'pets', pattern:/^(?:Pets|Animaux)(?:\s*\(\d+\))?$/i, label:'Animaux' },
-    { key:'building', pattern:/^(?:Building|Construction)(?:\s*\(\d+\))?$/i, label:'Construction' },
-    { key:'staff', pattern:/^Staff(?:\s*\(\d+\))?$/i, label:'Staff' },
-    { key:'all', pattern:/^(?:Catalogue ParadiseRP complet.*|Tout|Tous)$/i, label:'Catalogue complet' }
+  const TAB_RULES = [
+    { key: 'home', match: /^(?:Front Page|Accueil|Informations?)(?:\s*\(\d+\))?$/i, label: 'MOBIS OFFICIEL' },
+    { key: 'official', match: /^(?:Furni|Furniture|Mobilier|Mobis? officiels?)(?:\s*\(\d+\))?$/i, label: 'MOBIS OFFICIEL' },
+    { key: 'custom', match: /^(?:Mobis? custom|Custom)(?:\s*\(\d+\))?$/i, label: 'MOBIS CUSTOM' },
+    { key: 'city', match: /^(?:Mobis? city|City)(?:\s*\(\d+\))?$/i, label: 'MOBIS CITY' },
+    { key: 'utilities', match: /^(?:Utilitaires?|Utilities)(?:\s*\(\d+\))?$/i, label: 'UTILITAIRES' },
+    { key: 'rares', match: /^(?:Rares?|Prestige)(?:\s*\(\d+\))?$/i, label: 'RARES' }
   ];
+
+  const MENU_ITEMS = [
+    [ 'info', 'i', 'INFORMATIONS' ],
+    [ 'history', '&#9677;', 'HISTORIQUE' ],
+    [ 'news', 'N', 'NOUVEAUTÉS', true ],
+    [ 'ranges', 'G', 'GAMMES', true ],
+    [ 'themes', 'T', 'THÈMES', true ],
+    [ 'types', 'D', 'TYPES', true ],
+    [ 'seasons', 'S', 'SAISONS', true ],
+    [ 'events', 'E', 'ÉVÉNEMENTS', true ],
+    [ 'building', 'B', 'CONSTRUCTION', true ],
+    [ 'public', 'P', 'LIEUX PUBLICS', true ],
+    [ 'games', 'J', 'JEUX', true ]
+  ];
+
+  const MENU_TARGETS = {
+    history: /historique/i,
+    news: /nouveaut|new|recent/i,
+    ranges: /gamme|collection/i,
+    themes: /th[èe]me/i,
+    types: /type/i,
+    seasons: /saison|no[eë]l|hiver|summer|[ée]t[ée]/i,
+    events: /[ée]v[ée]nement|f[êe]te|halloween/i,
+    building: /construction|architecture|build/i,
+    public: /lieux publics?|ville|services publics?/i,
+    games: /jeux|games|sport/i
+  };
 
   const getHeader = root => root.querySelector(':scope > .nitro-card-header, :scope > [class*="card-header"]');
   const getTabs = root => root.querySelector(':scope > .nitro-card-tabs, :scope > [class*="card-tabs"]');
+  const getContent = root => root.querySelector(':scope > .nitro-card-content, :scope > [class*="card-content"]');
   const getClickable = node => node?.matches?.('button,a,[role="tab"],[role="button"]') ? node : node?.querySelector?.('button,a,[role="tab"],[role="button"]');
+
+  function isActive(node)
+  {
+    return !!node && (node.matches('.active,.selected,[aria-selected="true"]') || !!node.querySelector('.active,.selected,[aria-selected="true"]'));
+  }
 
   function nativeClose(root)
   {
     const header = getHeader(root);
     if(!header) return null;
     return [ ...header.querySelectorAll('button,[role="button"],.close,[class*="close"],[class*="cross"]') ]
-      .find(node => !node.classList.contains('pz4-close')) || null;
+      .find(node => !node.classList.contains('pc5-close')) || null;
   }
 
   function closeCatalog(root)
   {
-    const button = nativeClose(root);
-    if(button) { button.click(); return; }
-    document.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', code:'Escape', bubbles:true }));
+    const close = nativeClose(root);
+    if(close) close.click();
+    else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
   }
 
-  function nativeCurrencies()
+  function ensureChrome(root)
   {
-    const rows = [];
-    document.querySelectorAll('.nitro-purse .nitro-currency-icon').forEach(icon => {
-      const row = icon.closest('.nitro-purse-seasonal-currency,.nitro-purse-button');
-      if(row && !row.closest('.pz4-header') && !rows.includes(row)) rows.push(row);
-    });
-    return rows.slice(0, 3);
-  }
-
-  function buildWallet(source)
-  {
-    const wallet = document.createElement('div');
-    wallet.className = 'pz4-wallet';
-
-    const icon = source.querySelector('.nitro-currency-icon,.currency-icon,[class*="currency-icon"],img,svg,i');
-    const iconHost = document.createElement('span');
-    iconHost.className = 'pz4-wallet-icon';
-    if(icon) iconHost.appendChild(icon.cloneNode(true));
-
-    const values = [ ...source.querySelectorAll('span,div,p') ].filter(node => !node.children.length && /\d/.test(clean(node.textContent)));
-    const value = document.createElement('span');
-    value.textContent = clean(values.at(-1)?.textContent || source.textContent) || '—';
-
-    wallet.append(iconHost, value);
-    return wallet;
-  }
-
-  function ensureHeader(root)
-  {
-    let header = root.querySelector(':scope > .pz4-header');
-    if(!header)
+    if(!root.querySelector(':scope > .pc5-header'))
     {
-      header = document.createElement('div');
-      header.className = 'pz4-header';
+      const header = document.createElement('div');
+      header.className = 'pc5-header';
       header.innerHTML = `
-        <span class="pz4-title-mark" aria-hidden="true">P</span>
-        <div class="pz4-title">Catalogue de Paradise <small>RP Market</small></div>
-        <div class="pz4-wallets" aria-label="Soldes"></div>
-        <button type="button" class="pz4-close" aria-label="Fermer" title="Fermer">×</button>`;
-      root.prepend(header);
-
-      const close = header.querySelector('.pz4-close');
-      close?.addEventListener('pointerdown', event => event.stopPropagation());
-      close?.addEventListener('click', event => {
+        <strong class="pc5-title">Catalogue de Paradise</strong>
+        <button class="pc5-close" type="button" aria-label="Fermer le catalogue" title="Fermer">&times;</button>`;
+      header.querySelector('.pc5-close')?.addEventListener('pointerdown', event => event.stopPropagation());
+      header.querySelector('.pc5-close')?.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
         closeCatalog(root);
       });
+      root.prepend(header);
     }
 
-    const host = header.querySelector('.pz4-wallets');
-    const sources = nativeCurrencies();
-    const signature = sources.map(source => clean(source.textContent) + '|' + (source.querySelector('[class*="currency-icon"]')?.className || '')).join('||');
-    if(host && host.dataset.signature !== signature)
+    if(!root.querySelector(':scope > .pc5-search'))
     {
-      host.replaceChildren(...sources.map(buildWallet));
-      host.dataset.signature = signature;
+      const search = document.createElement('form');
+      search.className = 'pc5-search';
+      search.setAttribute('role', 'search');
+      search.innerHTML = `
+        <span class="pc5-search-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20"><circle cx="8" cy="8" r="5"></circle><path d="m12 12 5 5"></path></svg>
+        </span>
+        <input class="pc5-search-input" type="search" autocomplete="off" placeholder="Rechercher un mobi, une catégorie..." aria-label="Rechercher dans le catalogue">
+        <button class="pc5-search-submit" type="submit" aria-label="Lancer la recherche" title="Rechercher">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h8.5a2 2 0 0 0 1.9-1.4L22 7H7"></path><circle cx="10" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle></svg>
+        </button>`;
+      const input = search.querySelector('.pc5-search-input');
+      input?.addEventListener('input', () => runNativeSearch(root, input.value, false));
+      search.addEventListener('submit', event => {
+        event.preventDefault();
+        runNativeSearch(root, input?.value || '', true);
+      });
+      root.appendChild(search);
     }
   }
 
-  function replaceFirstText(node, label)
+  function replaceLabel(node, label)
   {
     const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
-    let current = walker.nextNode();
-    while(current)
+    let text = walker.nextNode();
+    while(text)
     {
-      const value = clean(current.nodeValue);
+      const value = clean(text.nodeValue);
       if(value && /[A-Za-zÀ-ÿ]/.test(value))
       {
-        current.nodeValue = label;
+        if(value !== label) text.nodeValue = label;
         return;
       }
-      current = walker.nextNode();
+      text = walker.nextNode();
     }
   }
 
   function decorateTabs(root)
   {
-    const tabs = getTabs(root);
-    if(!tabs) return [];
-    tabs.classList.add('pz4-tabs');
+    const rail = getTabs(root);
+    if(!rail) return [];
+    rail.classList.add('pc5-tabs');
 
-    const result = [];
-    [ ...tabs.children ].filter(node => node instanceof HTMLElement).forEach(tab => {
+    const tabs = elementChildren(rail);
+    tabs.forEach((tab, index) => {
       const value = clean(tab.textContent);
-      const def = TAB_DEFS.find(item => item.pattern.test(value) || tab.dataset.pz4Tab === item.key);
-      if(!def) return;
-
-      tab.classList.add('pz4-tab');
-      tab.dataset.pz4Tab = def.key;
-      replaceFirstText(tab, def.label);
-
-      const clickable = getClickable(tab);
-      clickable?.setAttribute('aria-label', def.label);
-      clickable?.setAttribute('title', def.label);
-      result.push(tab);
+      const known = TAB_RULES.find(rule => rule.match.test(value) || tab.dataset.pc5Key === rule.key);
+      tab.classList.add('pc5-tab');
+      tab.dataset.pc5Key = known?.key || `section-${ index }`;
+      if(known)
+      {
+        replaceLabel(tab, known.label);
+        const clickable = getClickable(tab) || tab;
+        clickable.setAttribute('aria-label', known.label);
+        clickable.setAttribute('title', known.label);
+      }
     });
-
-    return result;
+    return tabs;
   }
 
-  function clickTab(root, key)
+  function nativeSearchInput(root)
   {
-    const tab = root.querySelector(`.pz4-tab[data-pz4-tab="${ key }"]`);
-    getClickable(tab)?.click();
-  }
-
-  function isTabActive(tab)
-  {
-    return !!tab && (tab.matches('.active,[aria-selected="true"]') || !!tab.querySelector('.active,[aria-selected="true"]'));
-  }
-
-  function getMode(root, tabs)
-  {
-    const active = tabs.find(isTabActive);
-    if(active) return active.dataset.pz4Tab || 'store';
-
-    const hasNav = !!root.querySelector('#nitro-catalog-main-navigation,.nitro-catalog-navigation-grid-container');
-    const hasProducts = !!root.querySelector('.layout-grid-item,[class*="catalog-grid-item"]');
-    return (!hasNav && !hasProducts) ? 'home' : 'store';
-  }
-
-  function findNativeSearch(root)
-  {
-    const content = root.querySelector(':scope > .nitro-card-content');
-    if(!content) return null;
-    const nav = content.querySelector('#nitro-catalog-main-navigation');
-    const navWrap = content.querySelector('.nitro-catalog-navigation-grid-container') || nav?.parentElement;
-    const side = nav?.closest('.g-col-3,.col-3') || navWrap?.parentElement;
+    const navigation = root.querySelector('#nitro-catalog-main-navigation');
+    const content = getContent(root);
+    const main = directChildContaining(content, navigation);
+    const side = directChildContaining(main, navigation);
     return side?.querySelector('input[type="search"],input[type="text"]') || null;
   }
 
-  function triggerNativeSearch(root, value, submit = false)
+  function runNativeSearch(root, value, submit, retry = true)
   {
-    const input = findNativeSearch(root);
-    if(!input) return;
-    if(input.value !== value) input.value = value;
-    input.dispatchEvent(new Event('input', { bubbles:true }));
-    input.dispatchEvent(new Event('change', { bubbles:true }));
-
-    if(submit)
+    const input = nativeSearchInput(root);
+    if(!input)
     {
-      input.dispatchEvent(new KeyboardEvent('keydown', { key:'Enter', code:'Enter', bubbles:true }));
-      input.dispatchEvent(new KeyboardEvent('keyup', { key:'Enter', code:'Enter', bubbles:true }));
-      const searchHost = input.closest('.d-flex,.flex-row') || input.parentElement?.parentElement;
-      const button = searchHost?.querySelector('button');
-      if(button) button.click();
-    }
-  }
-
-  function ensureSearchShell(root)
-  {
-    let shell = root.querySelector(':scope > .pz4-search-shell');
-    if(shell) return;
-
-    shell = document.createElement('div');
-    shell.className = 'pz4-search-shell';
-    shell.innerHTML = `
-      <div class="pz4-search-wrap">
-        <span class="pz4-search-icon" aria-hidden="true">⌕</span>
-        <input class="pz4-search-input" type="text" autocomplete="off" placeholder="Rechercher un mobi, une catégorie...">
-      </div>
-      <button type="button" class="pz4-search-go" aria-label="Rechercher">⌕</button>`;
-
-    const input = shell.querySelector('.pz4-search-input');
-    const go = shell.querySelector('.pz4-search-go');
-
-    input.addEventListener('input', () => triggerNativeSearch(root, input.value, false));
-    input.addEventListener('keydown', event => {
-      if(event.key !== 'Enter') return;
-      event.preventDefault();
-      triggerNativeSearch(root, input.value, true);
-    });
-    go.addEventListener('click', () => triggerNativeSearch(root, input.value, true));
-
-    root.appendChild(shell);
-  }
-
-  function ensureHome(root, content)
-  {
-    if(!content) return;
-    let home = content.querySelector(':scope > .pz4-home');
-    if(home) return;
-
-    home = document.createElement('div');
-    home.className = 'pz4-home';
-    home.innerHTML = `
-      <aside class="pz4-home-menu">
-        <button class="pz4-home-link is-active" type="button" data-pz4-home="home"><span class="pz4-menu-icon">●</span>INFORMATIONS</button>
-        <button class="pz4-home-link" type="button" data-pz4-home="furni"><span class="pz4-menu-icon">✦</span>NOUVEAUTÉS</button>
-        <button class="pz4-home-link" type="button" data-pz4-home="furni"><span class="pz4-menu-icon">▣</span>MOBILIER</button>
-        <button class="pz4-home-link" type="button" data-pz4-home="building"><span class="pz4-menu-icon">⌂</span>CONSTRUCTION</button>
-        <button class="pz4-home-link" type="button" data-pz4-home="clothing"><span class="pz4-menu-icon">◆</span>VÊTEMENTS</button>
-        <button class="pz4-home-link" type="button" data-pz4-home="pets"><span class="pz4-menu-icon">♣</span>ANIMAUX</button>
-        <button class="pz4-home-link" type="button" data-pz4-home="staff"><span class="pz4-menu-icon">♛</span>STAFF</button>
-        <button class="pz4-home-link" type="button" data-pz4-home="all"><span class="pz4-menu-icon">▤</span>CATALOGUE COMPLET</button>
-      </aside>
-      <section class="pz4-info-card">
-        <div class="pz4-info-head">
-          <div class="pz4-info-badge" aria-hidden="true">▦</div>
-          <div class="pz4-info-title">Deux, trois trucs à savoir</div>
-        </div>
-        <div class="pz4-info-text">
-          <p>- Pour décorer ton appartement ou tes lieux RP, choisis le mobilier souhaité puis achète-le. Il sera ensuite disponible dans ton inventaire.</p>
-          <p>- Utilise la barre de recherche en haut pour retrouver rapidement un mobi ou une famille de mobilier.</p>
-          <p>- Les catégories à gauche permettent de parcourir les collections, les blocs, les lieux publics, les éléments RP et les catalogues spéciaux.</p>
-          <p>- Les animaux, vêtements et contenus spéciaux disposent de leurs propres sections en haut de la fenêtre.</p>
-        </div>
-        <div class="pz4-info-support">En cas de question, n'hésite pas à contacter le support ParadiseRP.</div>
-      </section>`;
-
-    home.addEventListener('click', event => {
-      const button = event.target.closest('[data-pz4-home]');
-      if(!button) return;
-      const key = button.dataset.pz4Home;
-      if(key === 'home') return;
-      event.preventDefault();
-      clickTab(root, key);
-    });
-
-    content.appendChild(home);
-  }
-
-  function markCategoryRows(nav)
-  {
-    if(!nav) return;
-    nav.querySelectorAll('button,a,[role="button"],.list-group-item,.nav-link').forEach(node => node.classList.add('pz4-category-row'));
-    [ ...nav.children ].filter(node => node instanceof HTMLElement && node.classList.contains('layout-grid-item')).forEach(node => node.classList.add('pz4-category-row'));
-  }
-
-  function markProducts(root, nav)
-  {
-    const products = [ ...root.querySelectorAll('.layout-grid-item,[class*="catalog-grid-item"]') ].filter(item => !nav?.contains(item));
-    products.forEach(item => {
-      if(!(item instanceof HTMLElement)) return;
-      item.classList.add('pz4-product');
-      const inline = item.style.backgroundImage;
-      if(inline && inline !== 'none') item.style.setProperty('--pz4-item-image', inline);
-
-      const unique = item.querySelector('.unique-bg-override');
-      if(unique instanceof HTMLElement)
+      if(submit && retry)
       {
-        const image = unique.style.backgroundImage;
-        if(image && image !== 'none') unique.style.setProperty('--pz4-item-image', image);
+        const tabs = elementChildren(getTabs(root));
+        const official = tabs.find(tab => tab.dataset.pc5Key === 'official') || tabs.find(tab => tab.dataset.pc5Key !== 'home');
+        (getClickable(official) || official)?.click();
+        window.setTimeout(() => runNativeSearch(root, value, true, false), 180);
       }
+      return;
+    }
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    if(setter) setter.call(input, value);
+    else input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    if(!submit) return;
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', bubbles: true }));
+    const host = input.closest('form,.d-flex,.flex-row') || input.parentElement?.parentElement;
+    host?.querySelector('button')?.click();
+  }
+
+  function homeMarkup()
+  {
+    const rows = MENU_ITEMS.map(([ key, icon, label, branch ], index) => `
+      <button class="pc5-home-row${ index === 0 ? ' is-active' : '' }" type="button" data-pc5-menu="${ key }">
+        <span class="pc5-menu-icon" aria-hidden="true">${ icon }</span>
+        <span>${ label }</span>
+        ${ branch ? '<span class="pc5-menu-arrow" aria-hidden="true">&#9662;</span>' : '' }
+      </button>`).join('');
+
+    return `
+      <div class="pc5-home">
+        <aside class="pc5-home-menu" aria-label="Rubriques du catalogue">${ rows }</aside>
+        <section class="pc5-info">
+          <header class="pc5-info-header">
+            <span class="pc5-info-badge" aria-hidden="true"><span>RP</span></span>
+            <h2>Deux, trois trucs à savoir</h2>
+          </header>
+          <div class="pc5-info-copy">
+            <p>- Pour décorer ton appart ou construire tes lieux RP, achète le mobilier souhaité puis récupère-le dans ton inventaire.</p>
+            <p>- Recherche un mobilier par son nom grâce à la barre située en haut du catalogue, par exemple : bloc noir.</p>
+            <p>- Les mobiliers peuvent ensuite être posés avec les commandes de construction prévues sur ParadiseRP.</p>
+            <p>- Les animaux, vêtements et objets RP disposent de leurs propres catégories quand ils sont disponibles.</p>
+          </div>
+          <strong class="pc5-support">En cas de question, n'hésite pas à contacter le support.</strong>
+        </section>
+      </div>`;
+  }
+
+  function ensureHome(content)
+  {
+    if(content.querySelector(':scope > .pc5-home')) return;
+    content.insertAdjacentHTML('beforeend', homeMarkup());
+    const home = content.querySelector(':scope > .pc5-home');
+    home?.addEventListener('click', event => {
+      const button = event.target.closest('[data-pc5-menu]');
+      const root = button?.closest(ROOT_SELECTOR);
+      if(!button || !root || button.dataset.pc5Menu === 'info') return;
+      event.preventDefault();
+
+      const tabs = elementChildren(getTabs(root));
+      const official = tabs.find(tab => tab.dataset.pc5Key === 'official') || tabs.find(tab => tab.dataset.pc5Key !== 'home');
+      (getClickable(official) || official)?.click();
+
+      const target = MENU_TARGETS[button.dataset.pc5Menu];
+      if(!target) return;
+      [ 100, 250 ].forEach(delay => window.setTimeout(() => {
+        const navigation = root.querySelector('#nitro-catalog-main-navigation');
+        const category = [ ...(navigation?.querySelectorAll('.pc5-category,button,a,[role="button"],.layout-grid-item') || []) ]
+          .find(node => target.test(clean(node.textContent)));
+        (getClickable(category) || category)?.click();
+      }, delay));
+    });
+  }
+
+  function directChildContaining(boundary, descendant)
+  {
+    if(!descendant || !boundary) return null;
+    let node = descendant;
+    while(node?.parentElement && node.parentElement !== boundary) node = node.parentElement;
+    return node?.parentElement === boundary ? node : null;
+  }
+
+  function findRowAround(descendant, boundary)
+  {
+    if(!descendant || !boundary) return null;
+    let node = descendant;
+    let candidate = null;
+    while(node?.parentElement && node.parentElement !== boundary)
+    {
+      const parent = node.parentElement;
+      const children = elementChildren(parent);
+      if(children.length > 1 && children.some(child => child.contains(descendant)) && children.some(child => !child.contains(descendant))) candidate = parent;
+      node = parent;
+    }
+    return candidate;
+  }
+
+  function markCategoryRows(navigation)
+  {
+    if(!navigation) return;
+    const candidates = [ ...navigation.querySelectorAll('.nitro-catalog-navigation-section,button,a,[role="button"],.layout-grid-item') ];
+    candidates.forEach(node => {
+      if(!(node instanceof HTMLElement)) return;
+      const nestedClickable = node.querySelector('button,a,[role="button"]');
+      if(node.matches('.nitro-catalog-navigation-section'))
+      {
+        if(nestedClickable) nestedClickable.classList.add('pc5-category');
+        return;
+      }
+      if(!node.parentElement?.closest('button,a,[role="button"]')) node.classList.add('pc5-category');
+    });
+  }
+
+  function markProducts(root, navigation)
+  {
+    const candidates = [ ...root.querySelectorAll('.layout-grid-item,[class*="catalog-grid-item"]') ];
+    const products = candidates.filter(item => item instanceof HTMLElement && !navigation?.contains(item) && !item.closest('.pc5-tabs,.pc5-home'));
+    products.forEach(item => {
+      item.classList.add('pc5-product');
+      if(item.style.backgroundImage && item.style.backgroundImage !== 'none') item.style.setProperty('--pc5-product-image', item.style.backgroundImage);
+      item.querySelectorAll('.unique-bg-override,[style*="background-image"]').forEach(image => {
+        if(image instanceof HTMLElement && image.style.backgroundImage && image.style.backgroundImage !== 'none') image.style.setProperty('--pc5-product-image', image.style.backgroundImage);
+      });
     });
     return products;
   }
 
-  function decorateStructure(root)
+  function decorateContent(root)
   {
-    const content = root.querySelector(':scope > .nitro-card-content');
-    if(!content) return { content:null, hasNav:false, productCount:0 };
+    const content = getContent(root);
+    if(!content) return { hasStore: false, hasNavigation: false };
+    content.classList.add('pc5-content');
+    ensureHome(content);
 
-    content.classList.add('pz4-content');
-    ensureHome(root, content);
+    const navigation = content.querySelector('#nitro-catalog-main-navigation');
+    const navigationBox = content.querySelector('.nitro-catalog-navigation-grid-container') || navigation?.parentElement;
+    const nativeMain = directChildContaining(content, navigation);
+    const side = directChildContaining(nativeMain, navigation);
+    const contentColumn = nativeMain ? elementChildren(nativeMain).find(child => child !== side && !child.classList.contains('pc5-home')) : null;
 
-    const main = content.querySelector(':scope > .grid') || content.querySelector('.grid');
-    if(main) main.classList.add('pz4-main');
+    nativeMain?.classList.add('pc5-main');
+    side?.classList.add('pc5-side');
+    contentColumn?.classList.add('pc5-store-content');
+    navigationBox?.classList.add('pc5-navigation-box');
+    navigation?.classList.add('pc5-navigation');
+    markCategoryRows(navigation || navigationBox);
 
-    const nav = content.querySelector('#nitro-catalog-main-navigation');
-    const navWrap = content.querySelector('.nitro-catalog-navigation-grid-container') || nav?.parentElement;
-    const side = nav?.closest('.g-col-3,.col-3') || navWrap?.parentElement;
+    const search = side?.querySelector('input[type="search"],input[type="text"]');
+    const searchHost = search?.closest('form,.d-flex,.flex-row') || search?.parentElement?.parentElement;
+    searchHost?.classList.add('pc5-native-search');
 
-    if(nav) nav.classList.add('pz4-nav');
-    if(navWrap) navWrap.classList.add('pz4-nav-wrap');
-    if(side) side.classList.add('pz4-side');
-    markCategoryRows(nav || navWrap);
+    const products = markProducts(root, navigation || navigationBox);
+    const firstProduct = products[0] || null;
+    const productGrid = firstProduct?.parentElement || content.querySelector('.nitro-catalog-grid,[class*="catalog-grid"]');
+    productGrid?.classList.add('pc5-product-grid');
 
-    const nativeSearch = side?.querySelector('input[type="text"],input[type="search"]');
-    const nativeSearchHost = nativeSearch?.closest('.d-flex,.flex-row') || nativeSearch?.parentElement?.parentElement;
-    if(nativeSearchHost) nativeSearchHost.classList.add('pz4-native-search');
-
-    let contentCol = null;
-    if(main) contentCol = [ ...main.children ].find(node => node !== side && node instanceof HTMLElement) || null;
-    if(contentCol) contentCol.classList.add('pz4-content-col');
-
-    const products = markProducts(root, nav || navWrap);
-    const first = products[0] || null;
-    const itemGrid = first?.parentElement || root.querySelector('.nitro-catalog-grid,[class*="catalog-grid"]');
-    if(itemGrid) itemGrid.classList.add('pz4-grid');
-
-    let inner = null;
-    if(contentCol && first)
-    {
-      inner = [ ...contentCol.querySelectorAll('.grid') ].find(grid => grid.contains(first)) || null;
-      if(inner) inner.classList.add('pz4-inner');
-    }
-
+    const storeBoundary = contentColumn || nativeMain || content;
+    const inner = firstProduct ? findRowAround(firstProduct, storeBoundary) : null;
     if(inner)
     {
-      const gridCol = [ ...inner.children ].find(node => first && node.contains(first)) || null;
-      const preview = [ ...inner.children ].find(node => node !== gridCol && node instanceof HTMLElement) || null;
-      if(gridCol) gridCol.classList.add('pz4-grid-col');
-      if(preview) preview.classList.add('pz4-preview');
+      inner.classList.add('pc5-store-row');
+      const gridColumn = elementChildren(inner).find(child => child.contains(firstProduct));
+      const preview = elementChildren(inner).find(child => child !== gridColumn);
+      gridColumn?.classList.add('pc5-grid-column');
+      preview?.classList.add('pc5-preview');
     }
 
     const buyButtons = [ ...root.querySelectorAll('button') ].filter(button => /^(?:Acheter|Buy|Purchase)$/i.test(clean(button.textContent)));
-    buyButtons.forEach(button => button.classList.add('pz4-buy'));
-    const purchase = root.querySelector('.nitro-catalog-purchase-component,[class*="catalog-purchase"],[class*="purchase-component"]') || buyButtons[0]?.closest('[class*="purchase"],.d-flex.flex-column');
-    if(purchase) purchase.classList.add('pz4-purchase');
+    buyButtons.forEach(button => button.classList.add('pc5-buy'));
+    const purchase = root.querySelector('.nitro-catalog-purchase-component,[class*="catalog-purchase"],[class*="purchase-component"]') || buyButtons[0]?.parentElement;
+    purchase?.classList.add('pc5-purchase');
 
-    return { content, hasNav:!!nav, productCount:products.length };
+    return { hasStore: products.length > 0 || !!navigation, hasNavigation: !!navigation };
   }
 
-  function translateActions(root)
+  function translate(root)
   {
+    const translations = [ [ /^(?:Buy|Purchase)$/i, 'Acheter' ], [ /^Gift$/i, 'Offrir' ], [ /^Search$/i, 'Rechercher' ] ];
     root.querySelectorAll('button,a,label,span').forEach(node => {
-      if(node.closest('.pz4-header') || node.closest('.pz4-tabs') || node.closest('.pz4-home') || node.closest('.pz4-search-shell') || node.children.length) return;
+      if(node.children.length || node.closest('.pc5-header,.pc5-search,.pc5-home,.pc5-tabs')) return;
       const value = clean(node.textContent);
-      if(/^Buy$/i.test(value) || /^Purchase$/i.test(value)) node.textContent = 'Acheter';
-      else if(/^Gift$/i.test(value)) node.textContent = 'Offrir';
-      else if(/^Search$/i.test(value)) node.textContent = 'Rechercher';
+      const rule = translations.find(([ pattern ]) => pattern.test(value));
+      if(rule) node.textContent = rule[1];
     });
   }
 
   function applyMode(root, tabs, structure)
   {
-    const mode = getMode(root, tabs);
-    const home = mode === 'home';
-    root.classList.toggle('pz4-home-mode', home);
-    root.classList.toggle('pz4-store-mode', !home && (!!structure?.hasNav || !!structure?.productCount));
+    const activeTab = tabs.find(isActive);
+    const activeKey = activeTab?.dataset.pc5Key || '';
+    const home = activeKey === 'home' || !structure.hasStore;
+    root.classList.toggle('pc5-home-mode', home);
+    root.classList.toggle('pc5-store-mode', !home);
   }
 
   function decorate(root)
   {
     if(!(root instanceof HTMLElement)) return;
-    root.classList.add('pz-catalog');
-    root.dataset.pzBuild = BUILD;
-    ensureHeader(root);
-    ensureSearchShell(root);
+    root.classList.add('pc5-catalog');
+    root.dataset.paradiseCatalogBuild = BUILD;
+    ensureChrome(root);
     const tabs = decorateTabs(root);
-    const structure = decorateStructure(root);
-    translateActions(root);
+    const structure = decorateContent(root);
+    translate(root);
     applyMode(root, tabs, structure);
   }
 
-  let queued = false;
+  let frame = 0;
   function refresh()
   {
-    if(queued) return;
-    queued = true;
-    requestAnimationFrame(() => {
-      queued = false;
-      document.querySelectorAll(ROOT).forEach(decorate);
+    if(frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      document.querySelectorAll(ROOT_SELECTOR).forEach(decorate);
     });
   }
 
   function boot()
   {
     refresh();
-    [100, 260, 600, 1100].forEach(delay => setTimeout(refresh, delay));
-    new MutationObserver(refresh).observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class','style'] });
-    console.info('[ParadiseRP] catalogue ZERO V4 City-style loaded');
+    [ 100, 300, 700, 1400 ].forEach(delay => window.setTimeout(refresh, delay));
+    document.addEventListener('click', event => {
+      if(event.target.closest(ROOT_SELECTOR)) window.setTimeout(refresh, 0);
+    }, true);
+    new MutationObserver(refresh).observe(document.body, { childList: true, subtree: true });
+    console.info('[ParadiseRP] catalogue City V5 chargé');
   }
 
-  document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', boot, { once:true }) : boot();
+  document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', boot, { once: true })
+    : boot();
 })();
