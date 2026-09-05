@@ -101,6 +101,10 @@ public class TrashBin extends InteractionDefault {
             habbo,
             RoomChatMessageBubbles.NORMAL)).compose());
 
+        // Ouvre visuellement la poubelle dès le début de la fouille en réutilisant
+        // exactement le changement d'état normal du mobilier Habbo.
+        toggleDefaultState(room);
+
         final int habboId = habbo.getHabboInfo().getId();
         final int searchDelay = Math.max(1000,
             Emulator.getConfig().getInt("nahabbo.features.trashbin.search.time"));
@@ -118,6 +122,10 @@ public class TrashBin extends InteractionDefault {
                 if (habbo != null) {
                     habbo.whisper("La fouille a été annulée : vous vous êtes éloigné de la poubelle.");
                 }
+                // Si la fouille est annulée, refermer immédiatement la poubelle.
+                setExtradata("0");
+                needsUpdate(true);
+                room.updateItemState(this);
                 return;
             }
 
@@ -128,10 +136,10 @@ public class TrashBin extends InteractionDefault {
                 searched = true;
             }
 
-            // Etat visuel uniquement : la logique du cooldown ne depend pas de l'extradata.
+            // La poubelle reste ouverte pendant le cooldown après avoir été fouillée.
             setExtradata("1");
             needsUpdate(true);
-            room.updateItem(this);
+            room.updateItemState(this);
 
             final int cooldown = Math.max(1000,
                 Emulator.getConfig().getInt("nahabbo.features.trashbin.cooldown"));
@@ -141,7 +149,7 @@ public class TrashBin extends InteractionDefault {
                 }
                 setExtradata("0");
                 needsUpdate(true);
-                room.updateItem(TrashBin.this);
+                room.updateItemState(TrashBin.this);
             }, cooldown);
         } finally {
             occupied = false;
