@@ -74059,7 +74059,31 @@ Faz parte da coleção Customizada de Jogos do Pixeled Hotel.
 			<canlayon>0</canlayon>
 			<furniline>peak_furni</furniline>
 		</furnitype>
-	</roomitemtypes>
+			<furnitype id="996700070" classname="paradise_black_block*1">
+			<revision>1</revision>
+			<defaultdir>0</defaultdir>
+			<xdim>1</xdim>
+			<ydim>1</ydim>
+			<partcolors>
+				<color>#ffffff</color>
+				<color>#000000</color>
+			</partcolors>
+			<name>Bloc noir pur</name>
+			<description>Cube de construction noir pur</description>
+			<adurl/>
+			<offerid>996700070</offerid>
+			<buyout>0</buyout>
+			<rentofferid>-1</rentofferid>
+			<rentbuyout>0</rentbuyout>
+			<bc>0</bc>
+			<excludeddynamic>0</excludeddynamic>
+			<customparams>-0.25</customparams>
+			<specialtype>1</specialtype>
+			<canstandon>1</canstandon>
+			<cansiton>0</cansiton>
+			<canlayon>0</canlayon>
+		</furnitype>
+</roomitemtypes>
 	<!-- Below is custom wall item types for Habboon -->
 	<wallitemtypes>
 		<furnitype id="185817505" classname="super_c16_pstrsulk">

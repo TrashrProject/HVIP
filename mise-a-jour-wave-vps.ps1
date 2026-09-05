@@ -28,7 +28,8 @@ $ModernCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_catalogue_reorganize_v2.sql",
     "migrations\20260904_paradise_island_builder_kit.sql",
     "migrations\20260904_paradise_island_visibility_fix.sql",
-    "migrations\20260904_paradise_black_cubes_force_visible.sql"
+    "migrations\20260904_paradise_black_cubes_force_visible.sql",
+    "migrations\20260905_paradise_pure_black_block.sql"
 )
 $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_catalogue_mass_habborpbr_legacy.sql",
@@ -36,7 +37,8 @@ $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_island_builder_kit_legacy.sql",
     "migrations\20260904_paradise_island_visibility_fix_legacy.sql",
     "migrations\20260904_add_black_block_catalog.sql",
-    "migrations\20260904_paradise_black_cubes_force_visible_legacy.sql"
+    "migrations\20260904_paradise_black_cubes_force_visible_legacy.sql",
+    "migrations\20260905_paradise_pure_black_block_legacy.sql"
 )
 $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -207,17 +209,17 @@ try {
             }
 
             $CatalogItemColumn = if ($LegacyCatalog) { 'item_ids' } else { 'item_id' }
-            $BlackCubeValidationSql = "SELECT COUNT(DISTINCT CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED)) FROM catalog_items WHERE page_id=9967201 AND CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED) IN (5480,5466,996661582)"
+            $BlackCubeValidationSql = "SELECT COUNT(DISTINCT CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED)) FROM catalog_items WHERE page_id=9967201 AND CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED)=996700070"
             $BlackCubeValidationArgs = @(
                 "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
                 "--database=$DatabaseName", '--batch', '--skip-column-names',
                 "--execute=$BlackCubeValidationSql"
             )
             $VisibleBlackCubeCount = ((& $Mysql @BlackCubeValidationArgs) -join '').Trim()
-            if ($LASTEXITCODE -ne 0 -or $VisibleBlackCubeCount -ne '3') {
-                throw "Verification catalogue impossible : $VisibleBlackCubeCount/3 cubes noirs visibles dans la page 9967201."
+            if ($LASTEXITCODE -ne 0 -or $VisibleBlackCubeCount -ne '1') {
+                throw "Verification catalogue impossible : le Bloc noir pur 996700070 est absent de la page 9967201."
             }
-            Write-Host 'Verification catalogue : 3/3 cubes noirs visibles dans Construction - Blocs couleurs.' -ForegroundColor Green
+            Write-Host 'Verification catalogue : Bloc noir pur visible dans Construction - Blocs couleurs.' -ForegroundColor Green
         }
         finally {
             $env:MYSQL_PWD = $null
