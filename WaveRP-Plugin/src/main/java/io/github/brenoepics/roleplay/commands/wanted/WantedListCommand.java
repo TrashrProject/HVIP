@@ -24,13 +24,15 @@ public class WantedListCommand extends Command {
     Map<Habbo, List<CriminalRecord>> onlineCrimes = RolePlay.getWantedManager()
         .getOnlineUsersCrimes();
 
+    // Always publish the current snapshot, including an empty list, so the client can clear
+    // stale wanted entries deterministically instead of keeping the previous response visible.
+    gameClient.sendResponse(new WantedListComposer(onlineCrimes, DATE_TIME_FORMATTER));
+
     if (onlineCrimes.isEmpty()) {
       gameClient.getHabbo().whisper("Aucun joueur n'est actuellement recherch\u00e9.",
           com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles.ALERT);
-      return true;
     }
 
-    gameClient.sendResponse(new WantedListComposer(onlineCrimes, DATE_TIME_FORMATTER));
     return true;
   }
 }
