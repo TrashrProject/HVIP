@@ -33,6 +33,12 @@ public final class RoleplayCommandViewProvider implements CommandViewProvider {
       Map.entry("cmd_prison", JobPermissions.POLICE_ARREST),
       Map.entry("cmd_release", JobPermissions.POLICE_ARREST),
       Map.entry("cmd_wanted_list", JobPermissions.POLICE_WANTED_ACCESS),
+      Map.entry("cmd_restaurant_menu", JobPermissions.RESTAURANT_MENU),
+      Map.entry("cmd_restaurant_take_order", JobPermissions.RESTAURANT_ORDER),
+      Map.entry("cmd_restaurant_prepare", JobPermissions.RESTAURANT_PREPARE),
+      Map.entry("cmd_restaurant_serve", JobPermissions.RESTAURANT_SERVE),
+      Map.entry("cmd_restaurant_bill", JobPermissions.RESTAURANT_BILL),
+      Map.entry("cmd_restaurant_cash", JobPermissions.RESTAURANT_CASH),
       Map.entry("cmd_hire", JobPermissions.JOB_HIRE),
       Map.entry("cmd_fire", JobPermissions.JOB_FIRE),
       Map.entry("cmd_promote", JobPermissions.JOB_PROMOTE),
@@ -70,7 +76,6 @@ public final class RoleplayCommandViewProvider implements CommandViewProvider {
     if (requiredJob != null) {
       RpAvatar avatar = avatar(client);
       if (avatar == null || avatar.getJobEntity() == null) return null;
-      // Un métier autorisé devient son propre onglet dynamique : Banque, Police, EMS, etc.
       return displayJob(avatar.getJobEntity());
     }
     return generalCategory(command);
@@ -93,8 +98,7 @@ public final class RoleplayCommandViewProvider implements CommandViewProvider {
     if (permission.startsWith("cmd_org_")) return "Organisations";
     if (permission.contains("offer") || "cmd_sell_rpitem".equals(permission)) return "Échanges RP";
 
-    String category = generalCategory(command);
-    return category;
+    return generalCategory(command);
   }
 
   @Override
@@ -112,11 +116,6 @@ public final class RoleplayCommandViewProvider implements CommandViewProvider {
         : RolePlay.getAvatarManager().getRpAvatar(client.getHabbo());
   }
 
-  /**
-   * Retourne le métier auquel une commande professionnelle appartient.
-   * Les commandes publiques (ex. :ems pour appeler les secours, :taxi pour appeler un taxi,
-   * :solde pour son compte personnel) ne doivent surtout pas devenir des onglets métiers.
-   */
   private static String associatedJob(Command command) {
     if (command == null) return null;
 
@@ -128,9 +127,8 @@ public final class RoleplayCommandViewProvider implements CommandViewProvider {
       return "police";
     }
     if (className.contains(".commands.jobs.hospital.")) return "hospital";
+    if (className.contains(".commands.jobs.restaurant.")) return "current";
 
-    // Ces commandes agissent sur le métier actuellement occupé et restent donc dans
-    // l'onglet dynamique de ce métier, sans créer de nouveau système de permissions.
     if (isOneOf(permission, "cmd_hire", "cmd_fire", "cmd_promote", "cmd_demote", "cmd_send_home")) {
       return "current";
     }
@@ -147,12 +145,10 @@ public final class RoleplayCommandViewProvider implements CommandViewProvider {
   private static String generalCategory(Command command) {
     String permission = permission(command);
 
-    // Métier général : visible sans transformer la commande en commande d'un métier précis.
     if (isOneOf(permission, "cmd_start_work", "cmd_stop_work", "cmd_quit_job", "cmd_apply")) {
       return "Métiers";
     }
 
-    // Appels de services : ce sont des commandes joueur, pas des commandes EMS/Police métier.
     if (isOneOf(permission, "cmd_911", "cmd_ems", "cmd_cancel_ems")) {
       return "RP";
     }
