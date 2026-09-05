@@ -3,7 +3,10 @@ package io.github.brenoepics.roleplay.commands.jobs.restaurant;
 import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.users.Habbo;
+import io.github.brenoepics.roleplay.RolePlay;
+import io.github.brenoepics.roleplay.communication.packets.emulator.outgoing.RestaurantOrderComposer;
 import io.github.brenoepics.roleplay.features.restaurant.RestaurantService;
+import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import java.util.Arrays;
 
 public class RestaurantCommand extends Command {
@@ -40,7 +43,32 @@ public class RestaurantCommand extends Command {
           employee.whisper("Usage : :prendrecommande <pseudo>");
           return true;
         }
+
+        Habbo customer = null;
+        if (employee.getHabboInfo().getCurrentRoom() != null) {
+          customer = employee.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
+        }
+
+        if (customer == null || customer == employee) {
+          RestaurantService.takeOrder(employee, params[1]);
+          return true;
+        }
+
+        int x = Math.abs(employee.getRoomUnit().getX() - customer.getRoomUnit().getX());
+        int y = Math.abs(employee.getRoomUnit().getY() - customer.getRoomUnit().getY());
+        if (x > 3 || y > 3) {
+          RestaurantService.takeOrder(employee, params[1]);
+          return true;
+        }
+
         RestaurantService.takeOrder(employee, params[1]);
+
+        RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(employee);
+        String restaurantName = data != null && data.getJobEntity() != null
+            ? data.getJobEntity().getDisplayName()
+            : "Restaurant";
+        String orderId = "ORDER-" + customer.getHabboInfo().getId() + "-" + System.nanoTime();
+        customer.getClient().sendResponse(new RestaurantOrderComposer(employee, restaurantName, orderId));
       }
       case PREPARE -> {
         if (params.length < 2) {
