@@ -27,15 +27,15 @@ public class ChargeCommand extends Command {
     if (!searchCommandRegistered) {
       searchCommandRegistered = true;
 
-      Emulator.getConfig().register("commands.cmd_give_stars.keys", "rechercher;recherche");
-      Emulator.getTexts().register("commands.description.cmd_give_stars",
+      Emulator.getConfig().register("commands.cmd_police_rechercher.keys", "rechercher;recherche");
+      Emulator.getTexts().register("commands.description.cmd_police_rechercher",
           ":rechercher <pseudo> <1-5> - Définit le niveau de recherche d'un suspect.");
-      Emulator.getTexts().update("commands.description.cmd_give_stars",
+      Emulator.getTexts().update("commands.description.cmd_police_rechercher",
           ":rechercher <pseudo> <1-5> - Définit le niveau de recherche d'un suspect.");
 
       CommandHandler.addCommand(
-          new StarCommand("cmd_give_stars", new String[]{"rechercher", "recherche"}));
-      CheckDatabase.registerPermission("cmd_give_stars", CheckDatabase.PermissionState.ALLOWED);
+          new StarCommand("cmd_police_rechercher", new String[]{"rechercher", "recherche"}));
+      CheckDatabase.registerPermission("cmd_police_rechercher", CheckDatabase.PermissionState.ALLOWED);
     }
   }
 
