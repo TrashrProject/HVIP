@@ -27,10 +27,25 @@ public final class BankComputerSessionManager {
   private BankComputerSessionManager() {}
 
   public static boolean isConfigured(int itemId) {
-    String sql = "SELECT 1 FROM rp_bank_computer_items WHERE item_id=? AND active=1";
+    return isConfigured(itemId, 0);
+  }
+
+  /**
+   * Accepte les postes explicitement configures ainsi que tous les ordinateurs places dans une
+   * salle rattachee au metier Banque. Un ordinateur ajoute plus tard dans la banque fonctionne
+   * ainsi sans devoir enregistrer manuellement son identifiant d'instance.
+   */
+  public static boolean isConfigured(int itemId, int roomId) {
+    String sql = "SELECT 1 FROM rp_bank_computer_items WHERE item_id=? AND active=1 "
+        + "UNION ALL "
+        + "SELECT 1 FROM jobs j JOIN jobs_rooms jr ON jr.job_id=j.id "
+        + "WHERE ? > 0 AND j.active=1 AND LOWER(j.name)='bank' "
+        + "AND FIND_IN_SET(CAST(? AS CHAR),REPLACE(jr.rooms,' ',''))>0 LIMIT 1";
     try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
         PreparedStatement statement = connection.prepareStatement(sql)) {
       statement.setInt(1, itemId);
+      statement.setInt(2, roomId);
+      statement.setInt(3, roomId);
       try (ResultSet result = statement.executeQuery()) {
         return result.next();
       }

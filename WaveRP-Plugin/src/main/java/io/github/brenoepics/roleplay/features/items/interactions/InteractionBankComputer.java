@@ -17,7 +17,7 @@ public class InteractionBankComputer extends InteractionDefault {
   public boolean isUsable(){return true;}
   public void onClick(GameClient client,Room room,Object[] objects)throws Exception{
     if(client.getHabbo()==null||room==null)return;
-    if(!BankComputerSessionManager.isConfigured(getId())){super.onClick(client,room,objects);return;}
+    if(!BankComputerSessionManager.isConfigured(getId(),room.getId())){super.onClick(client,room,objects);return;}
     RpAvatar rp=RolePlay.getAvatarManager().getRpAvatar(client.getHabbo());
     if(rp==null||!rp.isDuty()||rp.getJobEntity()==null||!"bank".equalsIgnoreCase(rp.getJobEntity().getName())){client.getHabbo().whisper("Vous devez être employé de banque en service pour utiliser ce poste.",RoomChatMessageBubbles.ALERT);return;}
     if(!BankComputerSessionManager.hasActiveSession(client.getHabbo())

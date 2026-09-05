@@ -32,6 +32,16 @@ class FoodPresentationTest {
     assertNull(FoodPresentation.imageUrl(weapon));
   }
 
+  @Test
+  void formatsFoodActionWithCorrectArticleAndUppercaseText() {
+    assertEquals("* MANGE UNE POMME ET R\u00c9CUP\u00c8RE 2 POINTS DE FAIM *",
+        FoodPresentation.consumptionMessage(item(9, "Pomme", "food"), 2));
+    assertEquals("* MANGE UN BURGER ET R\u00c9CUP\u00c8RE 10 POINTS DE FAIM *",
+        FoodPresentation.consumptionMessage(item(12, "Burger", "food"), 10));
+    assertEquals("* MANGE DES P\u00c2TES ET R\u00c9CUP\u00c8RE 5 POINTS DE FAIM *",
+        FoodPresentation.consumptionMessage(item(18, "P\u00e2tes", "food"), 5));
+  }
+
   private static RPItem item(int id, String name, String interactionType) {
     return new RPItem(id, name, interactionType, "10", 10, 0, null, null, -1,
         List.of(), null);

@@ -9,6 +9,7 @@ import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import io.github.brenoepics.roleplay.utilities.types.FoodPresentation;
 import io.github.brenoepics.roleplay.utilities.types.RPItem;
 import io.github.brenoepics.roleplay.utilities.types.Timeout;
 import org.jetbrains.annotations.NotNull;
@@ -135,9 +136,8 @@ public class ApplyCommand extends Command {
     int restorationAmount = getItemAmount(10, item.getExtraData());
     int newHunger = Math.min(data.getHunger() + restorationAmount, data.getMaxHunger());
 
-    habbo.talk(
-        "* Mange " + item.getDisplayName() + " et r\u00e9cup\u00e8re "
-            + (newHunger - data.getHunger()) + " points de faim *",
+    habbo.shout(
+        FoodPresentation.consumptionMessage(item, newHunger - data.getHunger()),
         RoomChatMessageBubbles.DARK_YELLOW);
 
     data.setHunger(newHunger);
