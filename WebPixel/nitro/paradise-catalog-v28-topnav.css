@@ -1,0 +1,120 @@
+/* ParadiseRP Catalogue V28 — clean top navigation only.
+   Scope intentionally limited to the root catalogue tabs. No category, grid, preview or purchase styling. */
+
+/* Keep the navigation in the banner, but make it read like a modern compact segmented menu. */
+.nitro-catalog.paradise-catalog-v22 .prc22-topnav,
+.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs{
+  top:16px!important;
+  left:205px!important;
+  right:270px!important;
+  height:38px!important;
+  min-height:38px!important;
+  padding:3px!important;
+  gap:3px!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  border:1px solid rgba(77,151,197,.28)!important;
+  border-radius:9px!important;
+  background:rgba(3,22,43,.42)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+}
+
+/* Neutral flat chips instead of the old thick blue blocks. */
+.nitro-catalog.paradise-catalog-v22 .prc23-tab,
+.nitro-catalog.paradise-catalog-v22 .prc22-topnav>:is(div,li),
+.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs>:is(div,li),
+.nitro-catalog.paradise-catalog-v22 .prc22-topnav :is(button,a,.nav-link),
+.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs :is(button,a,.nav-link){
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:62px!important;
+  height:30px!important;
+  min-height:30px!important;
+  margin:0!important;
+  padding:0 10px!important;
+  gap:5px!important;
+  border:1px solid transparent!important;
+  border-radius:7px!important;
+  background:transparent!important;
+  background-image:none!important;
+  color:#a9c6dc!important;
+  -webkit-text-fill-color:#a9c6dc!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  line-height:1!important;
+  letter-spacing:.05px!important;
+  text-shadow:none!important;
+  box-shadow:none!important;
+  transition:background 120ms ease,color 120ms ease,border-color 120ms ease,box-shadow 120ms ease!important;
+}
+
+/* Small, restrained native icon. */
+.nitro-catalog.paradise-catalog-v22 .prc23-tab-icon{
+  display:inline-flex!important;
+  width:12px!important;
+  min-width:12px!important;
+  height:12px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin:0!important;
+  opacity:.82!important;
+  color:#89b8d5!important;
+  -webkit-text-fill-color:#89b8d5!important;
+  font-size:10px!important;
+  line-height:1!important;
+  filter:none!important;
+}
+
+.nitro-catalog.paradise-catalog-v22 .prc23-tab:hover,
+.nitro-catalog.paradise-catalog-v22 .prc22-topnav :is(button,a,.nav-link):hover,
+.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs :is(button,a,.nav-link):hover{
+  transform:none!important;
+  border-color:rgba(84,171,221,.28)!important;
+  background:rgba(32,92,130,.34)!important;
+  background-image:none!important;
+  color:#f4fbff!important;
+  -webkit-text-fill-color:#f4fbff!important;
+  box-shadow:none!important;
+}
+
+/* Active page: clean cyan pill, no browser-tab look. */
+.nitro-catalog.paradise-catalog-v22 .prc23-tab:is(.active,[aria-selected="true"]),
+.nitro-catalog.paradise-catalog-v22 .prc23-tab:has(.active,[aria-selected="true"]),
+.nitro-catalog.paradise-catalog-v22 .prc22-topnav :is(.active,[aria-selected="true"]),
+.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs :is(.active,[aria-selected="true"]){
+  border-color:#3bc1ef!important;
+  background:#157fbb!important;
+  background-image:linear-gradient(180deg,#1f9dd2 0%,#1274ad 100%)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 2px 5px rgba(0,0,0,.18)!important;
+}
+.nitro-catalog.paradise-catalog-v22 .prc23-tab:is(.active,[aria-selected="true"]) .prc23-tab-icon,
+.nitro-catalog.paradise-catalog-v22 .prc23-tab:has(.active,[aria-selected="true"]) .prc23-tab-icon{
+  opacity:1!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+
+/* The imported massive-catalog root can have a very long caption: keep it secondary and compact. */
+.nitro-catalog.paradise-catalog-v22 .prc22-topnav>:last-child,
+.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs>:last-child{
+  max-width:190px!important;
+}
+.nitro-catalog.paradise-catalog-v22 .prc22-topnav>:last-child :is(button,a,.nav-link),
+.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs>:last-child :is(button,a,.nav-link){
+  max-width:190px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+/* Horizontal scroll remains possible on smaller viewports but without an ugly bar. */
+.nitro-catalog.paradise-catalog-v22 .prc22-topnav,
+.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs{
+  scrollbar-width:none!important;
+}
+.nitro-catalog.paradise-catalog-v22 .prc22-topnav::-webkit-scrollbar,
+.nitro-catalog.paradise-catalog-v22 .nitro-card-tabs::-webkit-scrollbar{display:none!important}
