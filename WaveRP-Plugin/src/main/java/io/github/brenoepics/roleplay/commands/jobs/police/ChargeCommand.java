@@ -95,7 +95,7 @@ public class ChargeCommand extends Command {
     officer.getHabboInfo().getCurrentRoom().sendComposer(getRoomUserShoutComposer(
         "* Inculpe %username% pour %crime% *".replace("%username%",
             criminal.getHabboInfo().getUsername()).replace("%crime%", crime.getName()),
-        officer).compose());
+        officer, RoomChatMessageBubbles.AMBASSADOR).compose());
     officerData.executeAction();
     return true;
   }
