@@ -2,6 +2,7 @@
   'use strict';
 
   const ROOT = '.nitro-catalog';
+  const BUILD = 'paradise-catalog-zero-v3';
   const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
 
   const TAB_DEFS = [
@@ -16,6 +17,7 @@
 
   const getHeader = root => root.querySelector(':scope > .nitro-card-header, :scope > [class*="card-header"]');
   const getTabs = root => root.querySelector(':scope > .nitro-card-tabs, :scope > [class*="card-tabs"]');
+  const getClickable = tab => tab?.matches?.('button,a,[role="tab"],[role="button"]') ? tab : tab?.querySelector?.('button,a,[role="tab"],[role="button"]');
 
   function nativeClose(root)
   {
@@ -53,10 +55,10 @@
     iconHost.className = 'pz-wallet-icon';
     if(icon) iconHost.appendChild(icon.cloneNode(true));
 
-    const candidates = [ ...source.querySelectorAll('span,div,p') ].filter(node => !node.children.length && /\d/.test(clean(node.textContent)));
+    const values = [ ...source.querySelectorAll('span,div,p') ].filter(node => !node.children.length && /\d/.test(clean(node.textContent)));
     const valueHost = document.createElement('span');
     valueHost.className = 'pz-wallet-value';
-    valueHost.textContent = clean(candidates.at(-1)?.textContent || source.textContent) || '—';
+    valueHost.textContent = clean(values.at(-1)?.textContent || source.textContent) || '—';
 
     const add = document.createElement('button');
     add.type = 'button';
@@ -78,9 +80,9 @@
       header.innerHTML = `
         <div class="pz-brand">
           <span class="pz-logo"><img src="/Dynamics/img/logos/hv_logo_p.png" alt="ParadiseRP" draggable="false"></span>
-          <span class="pz-brand-copy"><strong>PARADISE MARKET</strong><small>Catalogue RP</small></span>
+          <span class="pz-brand-copy"><strong>PARADISE MARKET</strong><small>CITY STORE</small></span>
         </div>
-        <div class="pz-tagline">Construis. Décore.<br>Fais vivre ta ville.</div>
+        <div class="pz-tagline">Le marché de ta ville</div>
         <div class="pz-wallets" aria-label="Soldes"></div>
         <button type="button" class="pz-close" aria-label="Fermer" title="Fermer">×</button>`;
       root.prepend(header);
@@ -137,9 +139,10 @@
   function decorateTabs(root)
   {
     const tabs = getTabs(root);
-    if(!tabs) return;
+    if(!tabs) return [];
     tabs.classList.add('pz-tabs');
 
+    const result = [];
     [ ...tabs.children ].filter(node => node instanceof HTMLElement).forEach(tab => {
       const value = clean(tab.textContent);
       const def = TAB_DEFS.find(item => item.pattern.test(value) || tab.dataset.pzTab === item.key);
@@ -147,10 +150,64 @@
       tab.classList.add('pz-tab');
       tab.dataset.pzTab = def.key;
       replaceFirstText(tab, def.label);
-      const clickable = tab.matches('button,a,[role="tab"],[role="button"]') ? tab : tab.querySelector('button,a,[role="tab"],[role="button"]');
+      const clickable = getClickable(tab);
       clickable?.setAttribute('aria-label', def.label);
       clickable?.setAttribute('title', def.label);
+      result.push(tab);
     });
+    return result;
+  }
+
+  function isTabActive(tab)
+  {
+    return !!tab && (tab.matches('.active,[aria-selected="true"]') || !!tab.querySelector('.active,[aria-selected="true"]'));
+  }
+
+  function clickTab(root, key)
+  {
+    const tab = root.querySelector(`.pz-tab[data-pz-tab="${ key }"]`);
+    getClickable(tab)?.click();
+  }
+
+  function currentMode(root, tabs)
+  {
+    const active = tabs.find(isTabActive);
+    if(active) return active.dataset.pzTab || 'store';
+    const hasNav = !!root.querySelector('#nitro-catalog-main-navigation,.nitro-catalog-navigation-grid-container');
+    const hasProducts = !!root.querySelector('.layout-grid-item,[class*="catalog-grid-item"]');
+    return (!hasNav && !hasProducts) ? 'home' : 'store';
+  }
+
+  function ensureHomeDashboard(root, content)
+  {
+    if(!content) return;
+    let dashboard = content.querySelector(':scope > .pz-home-dashboard');
+    if(dashboard) return;
+
+    dashboard = document.createElement('div');
+    dashboard.className = 'pz-home-dashboard';
+    dashboard.innerHTML = `
+      <section class="pz-home-hero">
+        <div>
+          <div class="pz-home-kicker">PARADISE MARKET / SAISON 01</div>
+          <div class="pz-home-title">Construis ta ville.<br>À ta manière.</div>
+          <div class="pz-home-sub">Mobilier, construction, looks et compagnons dans une interface compacte pensée pour ParadiseRP.</div>
+        </div>
+        <button type="button" class="pz-home-cta" data-pz-go="furni">Explorer le marché <span>→</span></button>
+      </section>
+      <section class="pz-home-grid">
+        <button type="button" class="pz-home-card" data-pz-go="furni"><span class="pz-home-icon">▰</span><strong>Mobilier</strong><small>Équipe ton appartement et tes lieux RP.</small></button>
+        <button type="button" class="pz-home-card" data-pz-go="building"><span class="pz-home-icon">▦</span><strong>Construction</strong><small>Blocs, architecture et création de décors.</small></button>
+        <button type="button" class="pz-home-card" data-pz-go="clothing"><span class="pz-home-icon">◆</span><strong>Style</strong><small>Looks et vêtements pour ton personnage.</small></button>
+        <button type="button" class="pz-home-card" data-pz-go="pets"><span class="pz-home-icon">♣</span><strong>Compagnons</strong><small>Animaux et éléments de vie pour ta ville.</small></button>
+      </section>`;
+    dashboard.addEventListener('click', event => {
+      const button = event.target.closest('[data-pz-go]');
+      if(!button) return;
+      event.preventDefault();
+      clickTab(root, button.dataset.pzGo);
+    });
+    content.appendChild(dashboard);
   }
 
   function markCategoryRows(nav)
@@ -183,6 +240,7 @@
     const content = root.querySelector(':scope > .nitro-card-content');
     if(!content) return;
     content.classList.add('pz-content');
+    ensureHomeDashboard(root, content);
 
     const main = content.querySelector(':scope > .grid') || content.querySelector('.grid');
     if(main) main.classList.add('pz-main');
@@ -230,13 +288,13 @@
     const purchase = root.querySelector('.nitro-catalog-purchase-component,[class*="catalog-purchase"],[class*="purchase-component"]') || buyButtons[0]?.closest('[class*="purchase"],.d-flex.flex-column');
     if(purchase) purchase.classList.add('pz-purchase');
 
-    root.classList.toggle('pz-store', !!(nav || products.length));
+    return { content, hasNav:!!nav, productCount:products.length };
   }
 
   function translateActions(root)
   {
     root.querySelectorAll('button,a,label,span').forEach(node => {
-      if(node.closest('.pz-header') || node.closest('.pz-tab') || node.children.length) return;
+      if(node.closest('.pz-header') || node.closest('.pz-tab') || node.closest('.pz-home-dashboard') || node.children.length) return;
       const value = clean(node.textContent);
       if(/^Buy$/i.test(value) || /^Purchase$/i.test(value)) node.textContent = 'Acheter';
       else if(/^Gift$/i.test(value)) node.textContent = 'Offrir';
@@ -244,14 +302,28 @@
     });
   }
 
+  function applyMode(root, tabs, structure)
+  {
+    const mode = currentMode(root, tabs);
+    const home = mode === 'home';
+    root.classList.toggle('pz-home-mode', home);
+    root.classList.toggle('pz-store-mode', !home);
+    if(!home && !structure?.hasNav && !structure?.productCount)
+    {
+      root.classList.remove('pz-store-mode');
+    }
+  }
+
   function decorate(root)
   {
     if(!(root instanceof HTMLElement)) return;
     root.classList.add('pz-catalog');
+    root.dataset.pzBuild = BUILD;
     ensureHeader(root);
-    decorateTabs(root);
-    decorateStructure(root);
+    const tabs = decorateTabs(root);
+    const structure = decorateStructure(root);
     translateActions(root);
+    applyMode(root, tabs, structure);
   }
 
   let queued = false;
@@ -270,7 +342,7 @@
     refresh();
     [100, 280, 650, 1200].forEach(delay => setTimeout(refresh, delay));
     new MutationObserver(refresh).observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class','style'] });
-    console.info('[ParadiseRP] catalogue ZERO V2 loaded');
+    console.info('[ParadiseRP] catalogue ZERO V3 loaded');
   }
 
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', boot, { once:true }) : boot();
