@@ -7,6 +7,38 @@
     return text.includes('Prise de commande -');
   };
 
+  const improveRestaurantPopupSpacing = windowRoot => {
+    if (!(windowRoot instanceof Element)) return;
+
+    const leaves = [windowRoot, ...windowRoot.querySelectorAll('*')].filter(node => node.children.length === 0);
+    const yesLabel = leaves.find(node => String(node.textContent || '').trim() === 'Oui');
+    const noLabel = leaves.find(node => String(node.textContent || '').trim() === 'Non');
+    const yesButton = yesLabel?.closest('button');
+    const noButton = noLabel?.closest('button');
+
+    if (!yesButton || !noButton) return;
+
+    const buttonsRow = yesButton.parentElement;
+    if (buttonsRow) {
+      buttonsRow.style.setProperty('margin-bottom', '10px', 'important');
+      buttonsRow.style.setProperty('padding-bottom', '2px', 'important');
+    }
+
+    let current = buttonsRow;
+    while (current && current !== document.body) {
+      const text = String(current.textContent || '');
+      const rect = current.getBoundingClientRect();
+      if (text.includes('Prise de commande -') && rect.width >= 250 && rect.width <= 500 && rect.height <= 260) {
+        current.style.setProperty('height', 'auto', 'important');
+        current.style.setProperty('min-height', `${Math.ceil(rect.height + 14)}px`, 'important');
+        current.style.setProperty('padding-bottom', '12px', 'important');
+        current.style.setProperty('overflow', 'visible', 'important');
+        break;
+      }
+      current = current.parentElement;
+    }
+  };
+
   const translateWindow = root => {
     if (!(root instanceof Element)) return;
 
@@ -35,6 +67,8 @@
         node.textContent = 'Accepter cette prise de commande ?';
       }
     }
+
+    requestAnimationFrame(() => improveRestaurantPopupSpacing(windowRoot));
   };
 
   const inspect = node => {
