@@ -1,0 +1,115 @@
+/* ParadiseRP — ParadiseBank compact V2
+   Preserve the original stacked layout; only reduce vertical waste so the home view fits without scrolling. */
+
+/* Home dashboard only. Forms keep their normal scrolling behavior. */
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)){
+  padding:4px 10px 10px!important;
+  overflow-y:hidden!important;
+  overflow-x:hidden!important;
+}
+
+/* Keep the original centered logo/title, just smaller. */
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-logo-block{
+  margin:0 0 6px!important;
+  padding:0!important;
+  gap:2px!important;
+  min-height:0!important;
+}
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-logo-block .bank-logo{
+  width:52px!important;
+  height:52px!important;
+  min-width:52px!important;
+  min-height:52px!important;
+  margin:0 auto!important;
+}
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-logo-block .bank-title{
+  margin:0!important;
+  font-size:17px!important;
+  line-height:19px!important;
+}
+
+/* IMPORTANT: retain the original one-card-per-row structure. */
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-summary{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:6px!important;
+  margin:0 0 7px!important;
+  padding:0!important;
+}
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-summary .bank-card{
+  width:100%!important;
+  min-height:54px!important;
+  height:54px!important;
+  margin:0!important;
+  padding:7px 10px!important;
+  border-radius:9px!important;
+}
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-summary .bank-card .label,
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-summary .bank-card small{
+  margin-bottom:2px!important;
+  font-size:8px!important;
+  line-height:10px!important;
+}
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-summary .bank-card .value{
+  font-size:16px!important;
+  line-height:18px!important;
+}
+
+/* Keep transfer and deposit stacked and full width. */
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-main-actions{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:5px!important;
+  margin:0 0 7px!important;
+  padding:0!important;
+}
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-main-actions>div{
+  width:100%!important;
+  margin:0!important;
+}
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-main-actions .bank-action{
+  width:100%!important;
+  min-height:34px!important;
+  height:34px!important;
+  margin:0!important;
+  padding:0 8px!important;
+  font-size:10px!important;
+}
+
+/* Same notice, only more compact vertically. */
+.nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .phone-bank-mobile-policy{
+  margin:0 0 4px!important;
+  padding:5px 8px!important;
+  font-size:8px!important;
+  line-height:1.18!important;
+  border-radius:6px!important;
+}
+
+/* Do not allow the generic phone wrapper to introduce a second scrollbar on bank home. */
+.nitro-phone-frame .phone-app-body:has(>.phone-bank-app.redesigned:not(:has(.bank-action-form))){
+  overflow-y:hidden!important;
+}
+
+/* Slight extra compression on shorter phone viewports, still preserving the exact layout. */
+@media (max-height:720px){
+  .nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-logo-block .bank-logo{
+    width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;
+  }
+  .nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-logo-block .bank-title{
+    font-size:16px!important;line-height:18px!important;
+  }
+  .nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-summary .bank-card{
+    min-height:50px!important;height:50px!important;padding:5px 9px!important;
+  }
+  .nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .bank-main-actions .bank-action{
+    min-height:32px!important;height:32px!important;
+  }
+  .nitro-phone-frame .phone-bank-app.redesigned:not(:has(.bank-action-form)) .phone-bank-mobile-policy{
+    padding:4px 7px!important;font-size:7.7px!important;line-height:1.14!important;
+  }
+}
+
+/* Action forms remain unchanged and scrollable. */
+.nitro-phone-frame .phone-bank-app.redesigned:has(.bank-action-form){
+  overflow-y:auto!important;
+}
