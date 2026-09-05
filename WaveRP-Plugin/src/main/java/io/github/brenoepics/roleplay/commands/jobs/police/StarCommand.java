@@ -1,7 +1,9 @@
 package io.github.brenoepics.roleplay.commands.jobs.police;
 
+import static io.github.brenoepics.roleplay.features.job.JobsDelegate.getRoomUserShoutComposer;
 import static io.github.brenoepics.roleplay.features.user.HungerRunner.MISSING_ENERGY;
 
+import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
@@ -11,7 +13,6 @@ import io.github.brenoepics.roleplay.features.crime.wantedlist.Crime;
 import io.github.brenoepics.roleplay.features.job.JobPermissions;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.utilities.types.Timeout;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class StarCommand extends Command {
@@ -26,22 +27,22 @@ public class StarCommand extends Command {
     RpAvatar officerData = RolePlay.getAvatarManager().getRpAvatar(officer);
 
     if (!officerData.getJobRankEntity().hasPermission(JobPermissions.POLICE_ARREST)) {
-      officer.whisper("Vous n'\u00eates pas policier.", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous n'êtes pas policier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!officerData.isDuty()) {
-      officer.whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous devez être en service.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     if (!officerData.hasEnergy()) {
-      gameClient.getHabbo().whisper(MISSING_ENERGY, RoomChatMessageBubbles.ALERT);
+      officer.whisper(MISSING_ENERGY, RoomChatMessageBubbles.ALERT);
       return true;
     }
 
-    if (params.length < 2) {
-      officer.whisper(":recherche <pseudo> 1-5", RoomChatMessageBubbles.ALERT);
+    if (params.length < 3) {
+      officer.whisper(":rechercher <pseudo> <1-5>", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -50,17 +51,7 @@ public class StarCommand extends Command {
     if (timeout != null) {
       officer.whisper(
           "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
-      return true;
-    }
-
-    Habbo criminal = officer.getHabboInfo().getCurrentRoom().getHabbo(params[1]);
-    if (criminal == null) {
-      officer.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
-      return true;
-    }
-    if (criminal == officer) {
-      officer.whisper("Vous ne pouvez pas vous ajouter un niveau de recherche.", RoomChatMessageBubbles.ALERT);
+              .getEpochSecond() + " seconde(s) avant de réutiliser cette commande.");
       return true;
     }
 
@@ -69,14 +60,43 @@ public class StarCommand extends Command {
       return true;
     }
 
-    RolePlay.getWantedManager().chargeCrime(officer, criminal, getManualCharge(starCount, officer));
+    // Recherche le joueur dans tout l'hôtel, pas seulement dans la pièce du policier.
+    Habbo criminal = Emulator.getGameEnvironment().getHabboManager().getHabbo(params[1]);
+    if (criminal == null) {
+      officer.whisper("Le joueur " + params[1] + " n'est pas connecté.", RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+    if (criminal == officer) {
+      officer.whisper("Vous ne pouvez pas vous ajouter un niveau de recherche.", RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
+    Crime manualCrime = RolePlay.getWantedManager().getCrimeByName("Recherche manuelle " + starCount);
+    if (manualCrime == null) {
+      officer.whisper("Les niveaux de recherche manuelle ne sont pas initialisés dans la base de données.",
+          RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
+    // Ajoute réellement l'entrée au casier/recherche. On évite les grosses alertes UI du
+    // chargeCrime classique pour garder un rendu RP propre dans le chat.
+    RolePlay.getWantedManager().addCriminalRecord(
+        criminal.getHabboInfo().getId(), manualCrime, officer.getHabboInfo().getId());
+
+    String action = "* Place " + criminal.getHabboInfo().getUsername()
+        + " au niveau de recherche " + starCount + " *";
+    if (officer.getHabboInfo().getCurrentRoom() != null) {
+      officer.getHabboInfo().getCurrentRoom()
+          .sendComposer(getRoomUserShoutComposer(action, officer).compose());
+    }
+
+    criminal.whisper("Vous êtes désormais recherché niveau " + starCount + ".",
+        RoomChatMessageBubbles.ALERT);
+    officer.whisper(criminal.getHabboInfo().getUsername() + " est maintenant recherché niveau "
+        + starCount + ".", RoomChatMessageBubbles.ALERT);
+
     officerData.executeAction();
     return true;
-  }
-
-  private static @NotNull Crime getManualCharge(Integer starCount, Habbo officer) {
-    return new Crime(-1, "Inculpation manuelle", starCount, true, false, false,
-        "Inculpation manuelle par " + officer.getHabboInfo().getUsername());
   }
 
   private static @Nullable Integer getStarCount(String[] params, Habbo officer) {
@@ -84,11 +104,13 @@ public class StarCommand extends Command {
     try {
       starCount = Integer.parseInt(params[2]);
       if (starCount < 1 || starCount > 5) {
-        officer.whisper("Le niveau de recherche est invalide.", RoomChatMessageBubbles.ALERT);
+        officer.whisper("Le niveau de recherche est invalide (1 à 5).",
+            RoomChatMessageBubbles.ALERT);
         return null;
       }
     } catch (NumberFormatException exception) {
-      officer.whisper("Le niveau de recherche est invalide.", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Le niveau de recherche est invalide (1 à 5).",
+          RoomChatMessageBubbles.ALERT);
       return null;
     }
     return starCount;
