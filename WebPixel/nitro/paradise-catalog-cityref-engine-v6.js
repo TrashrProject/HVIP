@@ -3,220 +3,173 @@
 
   const ROOT = '.nitro-catalog.pc5-catalog';
   const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
-  const state = new WeakMap();
 
-  const contentOf = root => root.querySelector(':scope > .nitro-card-content');
-  const tabsOf = root => root.querySelector(':scope > .nitro-card-tabs, :scope > [class*="card-tabs"]');
+  const SEGMENT_MAP = {
+    official: /^(?:Furni|Furniture|Mobilier)(?:\s*\(\d+\))?$/i,
+    custom: /^Catalogue ParadiseRP complet.*$/i,
+    city: /^(?:Building|Construction)(?:\s*\(\d+\))?$/i,
+    utility: /^Staff(?:\s*\(\d+\))?$/i,
+    rares: /^(?:Furni|Furniture|Mobilier)(?:\s*\(\d+\))?$/i
+  };
 
-  function engineState(root)
-  {
-    if(!state.has(root)) state.set(root, { lastSegment:'', tried:new Set(), bound:false, timer:null });
-    return state.get(root);
-  }
+  const nativeTabs = root => root.querySelector(':scope > .nitro-card-tabs, :scope > [class*="card-tabs"]');
+  const nativeContent = root => root.querySelector(':scope > .nitro-card-content');
+  const nativeNav = root => nativeContent(root)?.querySelector('#nitro-catalog-main-navigation') || nativeContent(root)?.querySelector('.nitro-catalog-navigation-grid-container');
 
   function clickTarget(node)
   {
-    if(!node) return null;
-    if(node.matches?.('.layout-grid-item,.nav-item,button,a,[role="button"],[role="tab"]')) return node;
-    return node.querySelector?.(':scope > .layout-grid-item') ||
-      node.querySelector?.('.layout-grid-item') ||
-      node.querySelector?.('button,a,[role="button"],[role="tab"]') || node;
-  }
-
-  function nativeTabs(root)
-  {
-    const tabs = tabsOf(root);
-    return tabs ? [ ...tabs.children ].filter(node => node instanceof HTMLElement) : [];
-  }
-
-  function dataTab(root)
-  {
-    const tabs = nativeTabs(root);
-    return tabs.find(tab => /Catalogue ParadiseRP complet|9967200/i.test(clean(tab.textContent))) ||
-      tabs.find(tab => /^(?:Furni|Furniture|Mobilier)(?:\s*\(\d+\))?$/i.test(clean(tab.textContent))) || null;
-  }
-
-  function isActive(node)
-  {
-    return !!node && (node.matches?.('.active,[aria-selected="true"]') || !!node.querySelector?.('.active,[aria-selected="true"]'));
-  }
-
-  function navOf(root)
-  {
-    const content = contentOf(root);
-    if(!content) return null;
-    return content.querySelector('#nitro-catalog-main-navigation') || content.querySelector('.nitro-catalog-navigation-grid-container');
-  }
-
-  function categoryRows(root)
-  {
-    const nav = navOf(root);
-    if(!nav) return [];
-
-    const sections = [ ...nav.querySelectorAll('.nitro-catalog-navigation-section') ]
-      .filter(node => node instanceof HTMLElement && clean(node.textContent));
-    if(sections.length) return sections;
-
-    return [ ...nav.querySelectorAll('.layout-grid-item,button,a,[role="button"],.list-group-item') ]
-      .filter(node => node instanceof HTMLElement && clean(node.textContent));
-  }
-
-  function productNodes(root)
-  {
-    const content = contentOf(root);
-    const nav = navOf(root);
-    if(!content) return [];
-    return [ ...content.querySelectorAll('.layout-grid-item,[class*="catalog-grid-item"]') ]
-      .filter(node => !nav?.contains(node));
-  }
-
-  function activeSegment(root)
-  {
-    return root.querySelector(':scope > .pc5-shell .pc5-segment.is-active')?.dataset?.seg || 'official';
-  }
-
-  function segmentPattern(segment)
-  {
-    switch(segment)
-    {
-      case 'city': return /construction|ville|police|justice|h[oô]pital|transport|commerce|bureau|nature|jeu|sport/i;
-      case 'utility': return /wired|bots?|group|market|utilitaire|staff/i;
-      case 'rares': return /rare|limited|collector|crackable|balloon/i;
-      case 'custom': return /custom|paradise|habborp|massif|collection/i;
-      default: return /mobilier|maison|d[eé]cor|int[eé]rieur|ext[eé]rieur|room event|credit furni/i;
-    }
-  }
-
-  function forceLayout(root)
-  {
-    const content = contentOf(root);
-    if(content)
-    {
-      void content.offsetWidth;
-      void content.offsetHeight;
-    }
-    window.dispatchEvent(new Event('resize'));
-  }
-
-  function touchShell(root)
-  {
-    const shell = root.querySelector(':scope > .pc5-shell');
-    if(shell) shell.dataset.pcEngineTick = String(Date.now());
-  }
-
-  function showStore(shell)
-  {
-    if(!shell) return;
-    shell.querySelectorAll('.pc5-view').forEach(panel => panel.classList.toggle('is-visible', panel.dataset.viewPanel === 'store'));
-    shell.querySelectorAll('.pc5-menu-btn').forEach(button => button.classList.remove('is-active'));
-  }
-
-  function bindCustomCategoryClicks(root)
-  {
-    const st = engineState(root);
-    if(st.bound) return;
-    const shell = root.querySelector(':scope > .pc5-shell');
-    if(!shell) return;
-
-    st.bound = true;
-    shell.querySelector('.pc5-left')?.addEventListener('click', event => {
-      const button = event.target.closest('.pc5-category[data-index]');
-      if(!button) return;
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      const rows = categoryRows(root);
-      const row = rows[Number(button.dataset.index)];
-      const target = clickTarget(row);
-      if(!target) return;
-
-      shell.querySelectorAll('.pc5-category').forEach(item => item.classList.remove('is-active'));
-      button.classList.add('is-active');
-      showStore(shell);
-      target.click();
-      forceLayout(root);
-      setTimeout(() => { touchShell(root); forceLayout(root); }, 120);
-    }, true);
-  }
-
-  function chooseCategory(root, segment)
-  {
-    const st = engineState(root);
-    const rows = categoryRows(root);
-    if(!rows.length) return false;
-
-    const pattern = segmentPattern(segment);
-    const info = rows.map(row => {
-      const target = clickTarget(row);
-      const label = clean(target?.textContent || row.textContent);
-      const branch = !!target?.querySelector?.('.fa-icon');
-      return { row, target, label, branch };
-    }).filter(item => item.target && item.label);
-
-    let candidates = info.filter(item => pattern.test(item.label) && !st.tried.has(item.label));
-    if(!candidates.length) candidates = info.filter(item => !item.branch && !st.tried.has(item.label));
-    if(!candidates.length) candidates = info.filter(item => !st.tried.has(item.label));
-    if(!candidates.length) return false;
-
-    const chosen = candidates.find(item => !item.branch) || candidates[0];
-    st.tried.add(chosen.label);
-    chosen.target.click();
-    forceLayout(root);
+    if(!node) return false;
+    const target = node.matches?.('button,a,[role="button"],[role="tab"],.layout-grid-item,.nav-item')
+      ? node
+      : node.querySelector?.('button,a,[role="button"],[role="tab"],.layout-grid-item,.nav-item');
+    (target || node).dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true, view:window }));
     return true;
   }
 
-  function bootstrap(root)
+  function findNativeTab(root, pattern)
   {
-    if(!(root instanceof HTMLElement)) return;
-    bindCustomCategoryClicks(root);
+    const tabs = nativeTabs(root);
+    if(!tabs) return null;
+    const candidates = [ ...tabs.querySelectorAll('.nav-item,[role="tab"],button,a') ];
+    return candidates.find(node => pattern.test(clean(node.textContent)))
+      || [ ...tabs.children ].find(node => pattern.test(clean(node.textContent)))
+      || null;
+  }
 
-    const st = engineState(root);
-    const segment = activeSegment(root);
-    if(st.lastSegment !== segment)
+  function activateTab(root, key)
+  {
+    const pattern = SEGMENT_MAP[key] || SEGMENT_MAP.official;
+    const tab = findNativeTab(root, pattern);
+    if(!tab) return false;
+    clickTarget(tab);
+    return true;
+  }
+
+  function nativeOfferCount(root)
+  {
+    const content = nativeContent(root);
+    const nav = nativeNav(root);
+    if(!content) return 0;
+    return [ ...content.querySelectorAll('.layout-grid-item') ]
+      .filter(node => !nav?.contains(node)).length;
+  }
+
+  function navigationItems(root)
+  {
+    const nav = nativeNav(root);
+    if(!nav) return [];
+    return [ ...nav.querySelectorAll('.nitro-catalog-navigation-section > .layout-grid-item, .nitro-catalog-navigation-section .layout-grid-item') ]
+      .filter((node, index, all) => all.indexOf(node) === index && clean(node.textContent));
+  }
+
+  function openUsefulCategory(root, key, pass = 0)
+  {
+    if(pass > 8 || nativeOfferCount(root) > 0) return;
+    const items = navigationItems(root);
+    if(!items.length)
     {
-      st.lastSegment = segment;
-      st.tried.clear();
-      delete root.dataset.pcEngineReady;
-    }
-
-    const tab = dataTab(root);
-    if(!tab) return;
-
-    if(!isActive(tab))
-    {
-      clickTarget(tab)?.click?.();
-      forceLayout(root);
-      clearTimeout(st.timer);
-      st.timer = setTimeout(() => bootstrap(root), 180);
+      setTimeout(() => openUsefulCategory(root, key, pass + 1), 110);
       return;
     }
 
-    const nav = navOf(root);
-    if(!nav || !categoryRows(root).length)
+    let chosen = null;
+
+    if(key === 'rares') chosen = items.find(node => /rare|limited|collector/i.test(clean(node.textContent)));
+    if(!chosen) chosen = items.find(node => node.classList.contains('inset'));
+    if(!chosen) chosen = items.find(node => /mobilier|furni|maison|construction|d[eé]cor|int[eé]rieur|ville|nature|custom/i.test(clean(node.textContent)));
+    if(!chosen) chosen = items[0];
+
+    clickTarget(chosen);
+    window.dispatchEvent(new Event('resize'));
+
+    setTimeout(() => openUsefulCategory(root, key, pass + 1), 130);
+  }
+
+  function showNativeStore(root, key)
+  {
+    root.classList.add('pc9-native-store');
+    root.dataset.pc9Segment = key;
+
+    const shell = root.querySelector(':scope > .pc5-shell');
+    shell?.querySelectorAll('.pc5-menu-btn').forEach(button => button.classList.remove('is-active'));
+
+    if(!activateTab(root, key))
     {
-      clearTimeout(st.timer);
-      st.timer = setTimeout(() => bootstrap(root), 180);
+      setTimeout(() => showNativeStore(root, key), 120);
       return;
     }
 
-    touchShell(root);
+    [100, 240, 450, 750].forEach(delay => setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+      openUsefulCategory(root, key);
+    }, delay));
+  }
 
-    if(productNodes(root).length > 0)
-    {
-      root.dataset.pcEngineReady = '1';
-      forceLayout(root);
-      touchShell(root);
-      return;
-    }
+  function showCustomPanel(root)
+  {
+    root.classList.remove('pc9-native-store');
+  }
 
-    chooseCategory(root, segment);
-    clearTimeout(st.timer);
-    st.timer = setTimeout(() => {
-      forceLayout(root);
-      touchShell(root);
-      bootstrap(root);
-    }, 180);
+  function setReactInputValue(input, value)
+  {
+    if(!input) return;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    if(setter) setter.call(input, value);
+    else input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles:true }));
+    input.dispatchEvent(new Event('change', { bubbles:true }));
+  }
+
+  function nativeSearch(root, query)
+  {
+    const content = nativeContent(root);
+    if(!content) return false;
+    const input = content.querySelector('input[type="search"],input[type="text"]');
+    if(!input) return false;
+
+    setReactInputValue(input, query);
+    const wrapper = input.closest('.d-flex,.flex-row,.row') || input.parentElement?.parentElement || input.parentElement;
+    const button = wrapper?.querySelector('button');
+    button?.click();
+    return true;
+  }
+
+  function bind(root)
+  {
+    if(!(root instanceof HTMLElement) || root.dataset.pc9Bound === '1') return;
+    const shell = root.querySelector(':scope > .pc5-shell');
+    if(!shell) return;
+    root.dataset.pc9Bound = '1';
+
+    const segments = shell.querySelector('.pc5-segments');
+    segments?.addEventListener('click', event => {
+      const button = event.target.closest('.pc5-segment[data-seg]');
+      if(!button) return;
+      const key = button.dataset.seg || 'official';
+      setTimeout(() => showNativeStore(root, key), 0);
+    });
+
+    shell.querySelector('.pc5-left')?.addEventListener('click', event => {
+      if(event.target.closest('.pc5-menu-btn[data-view]')) showCustomPanel(root);
+    });
+
+    const customInput = shell.querySelector('.pc5-search-input');
+    const runSearch = () => {
+      const query = clean(customInput?.value);
+      showNativeStore(root, root.dataset.pc9Segment || 'official');
+      setTimeout(() => {
+        if(!nativeSearch(root, query)) setTimeout(() => nativeSearch(root, query), 180);
+      }, 150);
+    };
+
+    customInput?.addEventListener('keydown', event => {
+      if(event.key !== 'Enter') return;
+      event.preventDefault();
+      runSearch();
+    });
+    shell.querySelector('.pc5-search-go')?.addEventListener('click', runSearch);
+
+    console.info('[ParadiseRP] CityRef V9 native-store bridge bound');
   }
 
   let queued = false;
@@ -226,21 +179,16 @@
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
-      document.querySelectorAll(ROOT).forEach(bootstrap);
+      document.querySelectorAll(ROOT).forEach(bind);
     });
   }
 
   function boot()
   {
     refresh();
-    [100,250,500,900,1400,2200,3200].forEach(delay => setTimeout(refresh, delay));
-    new MutationObserver(refresh).observe(document.body, {
-      childList:true,
-      subtree:true,
-      attributes:true,
-      attributeFilter:['class','style','aria-selected']
-    });
-    console.info('[ParadiseRP] CityRef native engine V8 loaded');
+    [80, 220, 500, 1000].forEach(delay => setTimeout(refresh, delay));
+    new MutationObserver(refresh).observe(document.body, { childList:true, subtree:true });
+    console.info('[ParadiseRP] CityRef V9 real Nitro store engine loaded');
   }
 
   document.readyState === 'loading'
