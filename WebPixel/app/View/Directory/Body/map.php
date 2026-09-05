@@ -1,5 +1,5 @@
 <?php
-$rooms=$DB->Query("SELECT id,caption FROM rooms WHERE roomtype='public' ORDER BY id ASC");
+$rooms=$DB->Query("SELECT id,caption,name,roomtype FROM rooms WHERE roomtype='public' OR id IN (174,175) ORDER BY id ASC");
 $roomCount=mysqli_num_rows($rooms);
 ?>
 <div class="content"><div class="container">
@@ -13,7 +13,7 @@ $roomCount=mysqli_num_rows($rooms);
     </div>
     <div class="citymap-list" id="citymap-list">
     <?php while($room=mysqli_fetch_assoc($rooms)):
-        $name=trim($room['caption'])!==''?$room['caption']:'Salle sans nom';
+        $name=trim($room['caption'])!==''?$room['caption']:(trim($room['name'])!==''?$room['name']:'Salle sans nom');
         $searchText=strtolower($room['id'].' '.$name);
     ?>
         <article class="citymap-room citymap-room-simple" data-search="<?php echo htmlspecialchars($searchText,ENT_QUOTES,'UTF-8'); ?>">
