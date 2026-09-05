@@ -30,6 +30,7 @@ import io.github.brenoepics.roleplay.features.user.HungerRunner;
 import io.github.brenoepics.roleplay.utilities.HabboBrItemCommandRegistrar;
 import io.github.brenoepics.roleplay.utilities.LoadConfig;
 import io.github.brenoepics.roleplay.utilities.LoadPlayerCommands;
+import io.github.brenoepics.roleplay.utilities.RestaurantCommandRegistrar;
 import io.github.brenoepics.roleplay.utilities.RoleplayCommandViewProvider;
 import java.lang.reflect.Field;
 import org.slf4j.Logger;
@@ -48,12 +49,9 @@ public class EmulatorLoad implements EventListener {
   @EventHandler
   public static void onEmulatorLoaded(EmulatorLoadedEvent event) {
     try {
-      // Register the ParadiseRP item commands first so the permissions created by the registrar
-      // are included in the single permissions reload performed at the end of loadCommands().
-      // Registering them after loadCommands() left the new permission columns invisible to the
-      // in-memory PermissionsManager until a later reload, so :recharger/:pecher/:planter were
-      // treated as normal room chat on first startup.
+      // Register custom ParadiseRP commands before the permission reload done by loadCommands().
       HabboBrItemCommandRegistrar.register();
+      RestaurantCommandRegistrar.register();
       LoadPlayerCommands.loadCommands();
       CommandViewRegistry.setProvider(new RoleplayCommandViewProvider());
       LoadConfig.ILoadConfig();
@@ -80,8 +78,7 @@ public class EmulatorLoad implements EventListener {
       incoming.remove(Incoming.RoomUserWalkEvent);
       packetManager.registerHandler(Incoming.RoomUserWalkEvent, RoomUserWalkEventPlugin.class);
 
-      // Register custom bank data request packet (no existing constant available)
-      incoming.remove(REQUEST_BANK_DATA_PACKET_ID); // ensure clean override if previously registered
+      incoming.remove(REQUEST_BANK_DATA_PACKET_ID);
       packetManager.registerHandler(REQUEST_BANK_DATA_PACKET_ID, RequestBankDataEvent.class);
 
       incoming.remove(REQUEST_GANG_DATA_PACKET_ID);
