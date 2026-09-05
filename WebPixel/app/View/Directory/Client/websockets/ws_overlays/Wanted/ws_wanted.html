@@ -1,0 +1,146 @@
+<link href="<?php echo WS_DY;?>/ws_overlays/Wanted/resources/css/styles.css?p=<?php echo time(); ?>" rel="stylesheet">
+
+<div id="WantedListV2" class="paradise-wanted-window" style="display:none;" aria-hidden="true">
+  <div class="paradise-wanted-header" data-wanted-drag-handle>
+    <div class="paradise-wanted-brand" aria-label="ParadiseRP Lake Placid">
+      <div class="paradise-wanted-brand-mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="paradise-wanted-brand-copy">
+        <strong>ParadiseRP</strong>
+        <small>LAKE PLACID</small>
+      </div>
+    </div>
+
+    <div class="paradise-wanted-title-block">
+      <strong>Personnes recherchées</strong>
+      <span>Pour une ville plus sûre</span>
+    </div>
+
+    <div class="paradise-wanted-motto" aria-hidden="true">
+      <span>SIGNALER</span><b>•</b><span>ENQUÊTER</span><b>•</b><span>PROTÉGER</span>
+    </div>
+
+    <button id="CloseWantedListV2" class="paradise-wanted-close" type="button" aria-label="Fermer">×</button>
+  </div>
+
+  <div class="paradise-wanted-body">
+    <aside class="paradise-wanted-sidebar">
+      <div class="paradise-wanted-tabs" role="tablist" aria-label="Navigation personnes recherchées">
+        <button class="paradise-wanted-tab is-active" type="button" role="tab" aria-selected="true" data-wanted-tab="list">
+          <span class="paradise-wanted-tab-icon" aria-hidden="true">♟</span>
+          <span>LISTE</span>
+        </button>
+        <button class="paradise-wanted-tab" type="button" role="tab" aria-selected="false" data-wanted-tab="info">
+          <span class="paradise-wanted-tab-icon" aria-hidden="true">▤</span>
+          <span>INFOS</span>
+        </button>
+      </div>
+
+      <div class="paradise-wanted-tab-panel is-active" data-wanted-panel="list">
+        <label class="paradise-wanted-search" for="WantedSearchV2">
+          <span class="paradise-wanted-search-icon" aria-hidden="true"></span>
+          <input id="WantedSearchV2" type="search" autocomplete="off" placeholder="Rechercher un suspect..." maxlength="32">
+        </label>
+
+        <div id="WantedCardsV2" class="paradise-wanted-cards" aria-live="polite"></div>
+
+        <div class="paradise-wanted-list-footer">
+          <span id="WantedCountV2">0 personne dans la liste</span>
+        </div>
+      </div>
+
+      <div class="paradise-wanted-tab-panel paradise-wanted-info-panel" data-wanted-panel="info">
+        <div class="paradise-wanted-info-card">
+          <strong>À propos de la liste</strong>
+          <p>Cette liste recense les personnes actuellement signalées comme recherchées par les autorités de Lake Placid.</p>
+          <p>Le niveau de danger est représenté de une à cinq étoiles selon les infractions actives enregistrées par le système RP.</p>
+        </div>
+        <div class="paradise-wanted-info-card paradise-wanted-info-card--warning">
+          <strong>Consigne de sécurité</strong>
+          <p>Ne tentez pas d’interpeller vous-même une personne recherchée. Prévenez les forces de l’ordre.</p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="paradise-wanted-details">
+      <div id="WantedEmptyV2" class="paradise-wanted-empty">
+        <div class="paradise-wanted-empty-badge" aria-hidden="true">★</div>
+        <strong>Aucune personne sélectionnée</strong>
+        <span>Sélectionnez un suspect dans la liste pour afficher sa fiche.</span>
+      </div>
+
+      <article id="WantedProfileV2" class="paradise-wanted-profile" hidden>
+        <div class="paradise-wanted-profile-top">
+          <div id="WantedProfileAvatarV2" class="paradise-wanted-profile-avatar" aria-hidden="true"></div>
+
+          <div class="paradise-wanted-profile-identity">
+            <div class="paradise-wanted-profile-name-row">
+              <h2 id="WantedProfileNameV2">—</h2>
+              <span class="paradise-wanted-status">RECHERCHÉ</span>
+            </div>
+
+            <div class="paradise-wanted-identity-grid">
+              <div class="paradise-wanted-field">
+                <span class="paradise-wanted-label">ALIAS</span>
+                <strong id="WantedProfileAliasV2">Aucun alias connu</strong>
+              </div>
+              <div class="paradise-wanted-field">
+                <span class="paradise-wanted-label">NIVEAU DE DANGER</span>
+                <div id="WantedProfileStarsV2" class="paradise-wanted-stars" aria-label="Niveau de danger"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="paradise-wanted-divider"></div>
+
+        <div class="paradise-wanted-facts">
+          <div class="paradise-wanted-fact">
+            <span class="paradise-wanted-fact-icon" aria-hidden="true">$</span>
+            <div>
+              <span class="paradise-wanted-label">RÉCOMPENSE</span>
+              <strong id="WantedProfileRewardV2">—</strong>
+            </div>
+          </div>
+
+          <div class="paradise-wanted-fact">
+            <span class="paradise-wanted-fact-icon paradise-wanted-fact-icon--pin" aria-hidden="true"></span>
+            <div>
+              <span class="paradise-wanted-label">DERNIER SECTEUR CONNU</span>
+              <strong id="WantedProfileRoomV2">Inconnu</strong>
+            </div>
+          </div>
+
+          <div class="paradise-wanted-fact paradise-wanted-fact--wide">
+            <span class="paradise-wanted-fact-icon paradise-wanted-fact-icon--document" aria-hidden="true">≡</span>
+            <div>
+              <span class="paradise-wanted-label">MOTIF</span>
+              <strong id="WantedProfileReasonV2">Aucun motif communiqué.</strong>
+            </div>
+          </div>
+
+          <div class="paradise-wanted-fact paradise-wanted-fact--wide">
+            <span class="paradise-wanted-fact-icon paradise-wanted-fact-icon--info" aria-hidden="true">!</span>
+            <div>
+              <span class="paradise-wanted-label">INFORMATIONS</span>
+              <p id="WantedProfileInfoV2">Individu actuellement recherché par les autorités de Lake Placid.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="paradise-wanted-divider paradise-wanted-divider--bottom"></div>
+
+        <div class="paradise-wanted-alert">
+          <span class="paradise-wanted-alert-icon" aria-hidden="true">!</span>
+          <div>
+            <strong>NE TENTEZ PAS D’INTERPELLER CET INDIVIDU VOUS-MÊME.</strong>
+            <span>Contactez les forces de l’ordre de ParadiseRP.</span>
+          </div>
+        </div>
+      </article>
+    </main>
+  </div>
+</div>
+
+<script src="<?php echo WS_DY;?>/ws_overlays/Wanted/resources/js/wanted.js?p=<?php echo time(); ?>"></script>
