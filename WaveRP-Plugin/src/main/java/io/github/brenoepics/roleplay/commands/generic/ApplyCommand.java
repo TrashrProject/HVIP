@@ -58,10 +58,6 @@ public class ApplyCommand extends Command {
       data.updateLife();
       data.getInventory().removeItem(item, 1);
       data.getInventory().updateInventory(gameClient.getHabbo());
-      if (!"food".equalsIgnoreCase(item.getInteractionType())) {
-        gameClient.getHabbo().whisper("Vous avez utilisé " + item.getDisplayName() + ".",
-            RoomChatMessageBubbles.ALERT);
-      }
       RolePlay.getCommandsCounter().getCoolDown("apply")
           .addTimeOut(gameClient.getHabbo().getHabboInfo().getId(), APPLY_TIMEOUT);
     }
@@ -88,7 +84,7 @@ public class ApplyCommand extends Command {
       habbo.whisper("Votre santé est déjà au maximum.", RoomChatMessageBubbles.ALERT);
       return false;
     }
-    habbo.whisper(getApplyMessage(item), RoomChatMessageBubbles.ALERT);
+    RoleplayChat.shoutAction(habbo, "* " + getApplyMessage(item) + " *");
     useHealth(data, item.getExtraData());
     return true;
   }
@@ -118,9 +114,9 @@ public class ApplyCommand extends Command {
     data.updateClientData();
     data.updateDatabase();
 
-    habbo.whisper(
-        "Vous avez utilisé " + item.getDisplayName() + " et récupéré "
-            + (newEnergy - previousEnergy) + " point(s) d'énergie.", RoomChatMessageBubbles.ALERT);
+    RoleplayChat.shoutAction(habbo,
+        "* Consomme " + item.getDisplayName() + " et récupère "
+            + (newEnergy - previousEnergy) + " point(s) d'énergie. *");
     return true;
   }
 
@@ -131,7 +127,7 @@ public class ApplyCommand extends Command {
     }
     int targetShield = getItemAmount(25, item.getExtraData());
     int newShield = Math.min(data.getShield() + targetShield, data.getMaxShield());
-    habbo.whisper(getApplyMessage(item), RoomChatMessageBubbles.ALERT);
+    RoleplayChat.shoutAction(habbo, "* " + getApplyMessage(item) + " *");
     data.setShield(newShield);
     return true;
   }
@@ -153,9 +149,9 @@ public class ApplyCommand extends Command {
   }
 
   private boolean applyDrugItem(RPItem item, RpAvatar data, Habbo habbo) {
-    habbo.whisper(Emulator.getTexts().getValue(getApplyKey(item),
-            "* Allume et consomme " + item.getDisplayName() + " *"),
-        RoomChatMessageBubbles.ALERT);
+    RoleplayChat.shoutAction(habbo,
+        Emulator.getTexts().getValue(getApplyKey(item),
+            "* Allume et consomme " + item.getDisplayName() + " *"));
     useDrug(item.getDisplayName().toLowerCase(), data, habbo, item.getExtraData().split("_"));
     return true;
   }
