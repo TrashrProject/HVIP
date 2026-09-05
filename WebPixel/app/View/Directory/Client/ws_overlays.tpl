@@ -11,6 +11,9 @@ require 'websockets/ws_overlays/Map/ws_map.html';
 // Stats Bars
 require 'websockets/ws_overlays/Stats/ws_stats.html';
 
+// ParadiseRP Wanted UI (keeps the legacy WantedList as the live data source)
+require 'websockets/ws_overlays/Wanted/ws_wanted.html';
+
 // Commands Window
 require 'websockets/ws_overlays/Commands/ws_commands.html';
 
