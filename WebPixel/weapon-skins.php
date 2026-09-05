@@ -32,12 +32,25 @@ if ($method === 'POST') {
     $skinId = (int)($payload['skin_id'] ?? 0);
     if ($skinId < 1) skin_reply(422, ['ok' => false, 'error' => 'Skin invalide.']);
 
-    $stmt = mysqli_prepare($db, 'SELECT s.id, s.weapon_key, s.effect_id FROM paradise_weapon_skins s INNER JOIN paradise_user_weapon_skins us ON us.skin_id=s.id AND us.user_id=? WHERE s.id=? LIMIT 1');
-    mysqli_stmt_bind_param($stmt, 'ii', $userId, $skinId);
+    $stmt = mysqli_prepare($db, 'SELECT s.id, s.weapon_key, s.effect_id
+        FROM paradise_weapon_skins s
+        INNER JOIN paradise_user_weapon_skins us ON us.skin_id=s.id AND us.user_id=?
+        WHERE s.id=?
+          AND EXISTS (
+              SELECT 1
+              FROM user_inventory ui
+              INNER JOIN rp_items i ON i.id=ui.item_id
+              WHERE ui.user_id=?
+                AND ui.quantity>0
+                AND i.interaction_type=\'weapon\'
+                AND LOWER(i.name)=LOWER(s.weapon_key)
+          )
+        LIMIT 1');
+    mysqli_stmt_bind_param($stmt, 'iii', $userId, $skinId, $userId);
     mysqli_stmt_execute($stmt);
     $owned = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
     mysqli_stmt_close($stmt);
-    if (!$owned) skin_reply(403, ['ok' => false, 'error' => 'Vous ne possédez pas ce skin.']);
+    if (!$owned) skin_reply(403, ['ok' => false, 'error' => 'Vous ne possédez pas cette arme ou ce skin.']);
 
     mysqli_begin_transaction($db);
     try {
@@ -55,9 +68,6 @@ if ($method === 'POST') {
         skin_reply(500, ['ok' => false, 'error' => 'Sauvegarde impossible.']);
     }
 
-    // Le skin est une vraie variante de rendu d'arme. On renvoie l'effect_id sélectionné
-    // pour que le client / l'émulateur applique exactement cette variante, au lieu d'un
-    // effet décoratif générique (ex: coeur d'un :enable incorrect).
     skin_reply(200, [
         'ok' => true,
         'skin_id' => $skinId,
@@ -68,20 +78,47 @@ if ($method === 'POST') {
 
 if ($method !== 'GET') skin_reply(405, ['ok' => false, 'error' => 'Méthode refusée.']);
 
-$grant = mysqli_prepare($db, 'INSERT IGNORE INTO paradise_user_weapon_skins(user_id,skin_id,equipped) SELECT ?,id,is_default FROM paradise_weapon_skins');
-mysqli_stmt_bind_param($grant, 'i', $userId);
+// Le skin Standard est disponible automatiquement, mais uniquement pour les armes
+// réellement présentes dans l'inventaire/coffre du joueur. Les autres skins doivent
+// déjà exister dans paradise_user_weapon_skins pour être considérés comme possédés.
+$grant = mysqli_prepare($db, 'INSERT IGNORE INTO paradise_user_weapon_skins(user_id,skin_id,equipped)
+    SELECT ?,s.id,1
+    FROM paradise_weapon_skins s
+    WHERE s.is_default=1
+      AND EXISTS (
+          SELECT 1
+          FROM user_inventory ui
+          INNER JOIN rp_items i ON i.id=ui.item_id
+          WHERE ui.user_id=?
+            AND ui.quantity>0
+            AND i.interaction_type=\'weapon\'
+            AND LOWER(i.name)=LOWER(s.weapon_key)
+      )');
+mysqli_stmt_bind_param($grant, 'ii', $userId, $userId);
 mysqli_stmt_execute($grant);
 mysqli_stmt_close($grant);
 
-$stmt = mysqli_prepare($db, 'SELECT s.id,s.weapon_key,s.name,s.effect_id,s.image,s.avatar_image,s.is_default,IF(us.user_id IS NULL,0,1) owned,COALESCE(us.equipped,0) equipped FROM paradise_weapon_skins s LEFT JOIN paradise_user_weapon_skins us ON us.skin_id=s.id AND us.user_id=? ORDER BY FIELD(s.weapon_key,\'tazor\',\'ak47\',\'akm\',\'g36\'),s.sort_order,s.id');
-mysqli_stmt_bind_param($stmt, 'i', $userId);
+$stmt = mysqli_prepare($db, 'SELECT s.id,s.weapon_key,s.name,s.effect_id,s.image,s.avatar_image,s.is_default,1 owned,COALESCE(us.equipped,0) equipped
+    FROM paradise_weapon_skins s
+    INNER JOIN paradise_user_weapon_skins us ON us.skin_id=s.id AND us.user_id=?
+    WHERE EXISTS (
+        SELECT 1
+        FROM user_inventory ui
+        INNER JOIN rp_items i ON i.id=ui.item_id
+        WHERE ui.user_id=?
+          AND ui.quantity>0
+          AND i.interaction_type=\'weapon\'
+          AND LOWER(i.name)=LOWER(s.weapon_key)
+    )
+    ORDER BY FIELD(s.weapon_key,\'tazor\',\'ak47\',\'akm\',\'g36\'),s.sort_order,s.id');
+mysqli_stmt_bind_param($stmt, 'ii', $userId, $userId);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $skins = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $row['id'] = (int)$row['id'];
     $row['effect_id'] = (int)$row['effect_id'];
-    $row['owned'] = (bool)$row['owned'];
+    $row['owned'] = true;
     $row['equipped'] = (bool)$row['equipped'];
     $row['is_default'] = (bool)$row['is_default'];
     $skins[] = $row;
