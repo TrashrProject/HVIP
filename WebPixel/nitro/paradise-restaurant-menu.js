@@ -26,35 +26,50 @@
   const promoteWindow=el=>{let best=el,node=el;for(let i=0;i<7&&node;i++,node=node.parentElement){if(node===document.body)break;const text=normalize(node.innerText||node.textContent||'');if(!text.includes('Message de ParadiseRP'))continue;const r=node.getBoundingClientRect();if(r.width>=250&&r.width<=800&&r.height>=120&&r.height<=750&&hasCloseControl(node))best=node}return best};
   const findAlert=()=>{for(const raw of document.querySelectorAll('body div, body section')){if(raw.closest('#'+OVERLAY_ID))continue;const text=normalize(raw.innerText||raw.textContent||'');if(!text.includes(MARKER)||!text.includes('Message de ParadiseRP'))continue;const el=promoteWindow(raw);const rect=el.getBoundingClientRect();if(rect.width>=250&&rect.height>=120)return {el,text}}return null};
 
-  const removeAlertBackdrop=alert=>{
+  const findAlertBackdrop=alert=>{
     let node=alert?.parentElement;
+    let fallback=null;
     while(node&&node!==document.body){
       if(node.id==='root'||node.id==='app')break;
       const style=getComputedStyle(node);
       const rect=node.getBoundingClientRect();
       const coversScreen=rect.width>=window.innerWidth*.9&&rect.height>=window.innerHeight*.9;
-      const modalLayer=style.position==='fixed'&&coversScreen&&Number.parseInt(style.zIndex||'0',10)>=100;
-      if(modalLayer){
-        node.style.setProperty('display','none','important');
-        node.style.setProperty('visibility','hidden','important');
-        node.style.setProperty('pointer-events','none','important');
-        return;
-      }
+      if(coversScreen) fallback=node;
+      const z=Number.parseInt(style.zIndex||'0',10)||0;
+      if(style.position==='fixed'&&coversScreen&&z>=100)return node;
       node=node.parentElement;
     }
+    return fallback;
+  };
+
+  const hideBackdrop=backdrop=>{
+    if(!backdrop||backdrop.id==='root'||backdrop.id==='app')return;
+    backdrop.style.setProperty('background','transparent','important');
+    backdrop.style.setProperty('background-color','transparent','important');
+    backdrop.style.setProperty('backdrop-filter','none','important');
+    backdrop.style.setProperty('-webkit-backdrop-filter','none','important');
+    backdrop.style.setProperty('pointer-events','none','important');
+    backdrop.style.setProperty('display','none','important');
+    backdrop.style.setProperty('visibility','hidden','important');
   };
 
   const dismissOriginal=alert=>{
     if(!alert)return;
+    // Capture the full-screen GenericAlert layer BEFORE clicking close. React can unmount the
+    // alert synchronously, which used to lose the parent reference and leave the black backdrop.
+    const backdrop=findAlertBackdrop(alert);
     const controls=[...alert.querySelectorAll('button,[role="button"]')];
     const close=controls.find(b=>/^(fermer|close)$/i.test((b.textContent||'').trim()))||controls.find(b=>/^(×|✕|x)$/i.test(((b.getAttribute('aria-label')||'')+' '+(b.textContent||'')).trim()));
     if(close)try{close.click()}catch{}
-    removeAlertBackdrop(alert);
+    hideBackdrop(backdrop);
     if(alert.isConnected){
       alert.style.setProperty('display','none','important');
       alert.style.setProperty('visibility','hidden','important');
       alert.style.setProperty('pointer-events','none','important');
     }
+    // A second pass handles frameworks that recreate/remove the modal layer on the next tick.
+    requestAnimationFrame(()=>hideBackdrop(backdrop));
+    setTimeout(()=>hideBackdrop(backdrop),50);
   };
   const removeOverlay=()=>document.getElementById(OVERLAY_ID)?.remove();
 
