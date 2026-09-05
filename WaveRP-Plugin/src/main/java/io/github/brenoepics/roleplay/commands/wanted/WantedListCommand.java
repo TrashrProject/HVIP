@@ -4,8 +4,14 @@ import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
+import com.eu.habbo.habbohotel.users.Habbo;
+import com.eu.habbo.habbohotel.users.HabboInfo;
+import com.eu.habbo.habbohotel.users.HabboManager;
+import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.communication.packets.emulator.outgoing.WantedListComposer;
 import io.github.brenoepics.roleplay.communication.packets.emulator.outgoing.WantedListComposer.WantedEntry;
+import io.github.brenoepics.roleplay.features.job.JobPermissions;
+import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,15 +28,15 @@ public class WantedListCommand extends Command {
       "dd/MM/yyyy HH:mm:ss");
 
   public WantedListCommand(String permission, String[] keys) {
-    super(permission, new String[]{"wanted"});
-    Emulator.getTexts().register("commands.description." + permission,
-        ":wanted - Afficher les personnes recherchées.");
-    Emulator.getTexts().update("commands.description." + permission,
-        ":wanted - Afficher les personnes recherchées.");
+    super(permission, keys);
   }
 
   @Override
   public boolean handle(GameClient gameClient, String[] strings) {
+    if (strings.length > 0 && "unwanted".equalsIgnoreCase(strings[0])) {
+      return handleUnwanted(gameClient, strings);
+    }
+
     List<WantedEntry> wanted = loadWantedEntries();
 
     if (wanted.isEmpty()) {
@@ -41,6 +47,78 @@ public class WantedListCommand extends Command {
 
     gameClient.sendResponse(new WantedListComposer(wanted, DATE_TIME_FORMATTER));
     return true;
+  }
+
+  private boolean handleUnwanted(GameClient gameClient, String[] strings) {
+    Habbo officer = gameClient.getHabbo();
+    RpAvatar officerData = RolePlay.getAvatarManager().getRpAvatar(officer);
+
+    if (officerData == null || officerData.getJobRankEntity() == null
+        || !officerData.getJobRankEntity().hasPermission(JobPermissions.POLICE_ARREST)) {
+      officer.whisper("Vous n'êtes pas policier.", RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
+    if (!officerData.isDuty()) {
+      officer.whisper("Vous devez être en service.", RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
+    if (strings.length < 2) {
+      officer.whisper("Usage : :unwanted <pseudo>", RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
+    Habbo onlineTarget = Emulator.getGameEnvironment().getHabboManager().getHabbo(strings[1]);
+    HabboInfo targetInfo = onlineTarget != null
+        ? onlineTarget.getHabboInfo()
+        : HabboManager.getOfflineHabboInfo(strings[1]);
+
+    if (targetInfo == null) {
+      officer.whisper("Le joueur " + strings[1] + " est introuvable.",
+          RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
+    if (targetInfo.getId() == officer.getHabboInfo().getId()) {
+      officer.whisper("Vous ne pouvez pas vous retirer vous-même de la liste des recherchés.",
+          RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
+    int updated = clearWantedRecords(targetInfo.getId());
+    if (updated <= 0) {
+      officer.whisper(targetInfo.getUsername() + " n'est pas actuellement recherché.",
+          RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
+    RolePlay.getWantedManager().getCachedWantedList().remove(targetInfo.getId());
+
+    officer.whisper(targetInfo.getUsername() + " a été retiré de la liste des recherchés.",
+        RoomChatMessageBubbles.ALERT);
+    if (onlineTarget != null) {
+      onlineTarget.whisper("Vous n'êtes plus recherché par la Police Nationale.",
+          RoomChatMessageBubbles.ALERT);
+    }
+
+    return true;
+  }
+
+  private static int clearWantedRecords(int userId) {
+    String sql = "UPDATE user_criminal_records "
+        + "SET served_time = 1 "
+        + "WHERE user_id = ? AND served_time = 0 AND paid_fine = 0 "
+        + "AND ends_at IS NOT NULL AND ends_at > CURRENT_TIMESTAMP";
+
+    try (Connection connection = Emulator.getDatabase().getDataSource().getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql)) {
+      statement.setInt(1, userId);
+      return statement.executeUpdate();
+    } catch (SQLException exception) {
+      Emulator.getLogging().logSQLException(exception);
+      return 0;
+    }
   }
 
   private static List<WantedEntry> loadWantedEntries() {
