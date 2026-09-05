@@ -16,28 +16,12 @@ import java.util.Arrays;
 
 public class ChargeCommand extends Command {
 
-  private final StarCommand rechercherCommand;
-
   public ChargeCommand(String permission, String[] keys) {
-    super(permission, withRechercheAliases(keys));
-    this.rechercherCommand = new StarCommand(permission, new String[]{"rechercher", "recherche"});
-  }
-
-  private static String[] withRechercheAliases(String[] keys) {
-    String[] source = keys == null ? new String[0] : keys;
-    String[] merged = Arrays.copyOf(source, source.length + 2);
-    merged[source.length] = "rechercher";
-    merged[source.length + 1] = "recherche";
-    return merged;
+    super(permission, keys);
   }
 
   @Override
   public boolean handle(GameClient gameClient, String[] params) {
-    if (params.length > 0 && ("rechercher".equalsIgnoreCase(params[0])
-        || "recherche".equalsIgnoreCase(params[0]))) {
-      return rechercherCommand.handle(gameClient, params);
-    }
-
     Habbo officer = gameClient.getHabbo();
     RpAvatar officerData = RolePlay.getAvatarManager().getRpAvatar(officer);
 
