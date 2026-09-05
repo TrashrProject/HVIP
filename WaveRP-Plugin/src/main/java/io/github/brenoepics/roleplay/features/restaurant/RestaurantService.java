@@ -75,9 +75,6 @@ public final class RestaurantService {
     WORKING_ORDERS.remove(employee.getHabboInfo().getId());
 
     employee.shout("* Propose de prendre la commande de " + customer.getHabboInfo().getUsername() + " *");
-    customer.whisper(employee.getHabboInfo().getUsername() + " vous propose de prendre votre commande chez "
-        + data.getJobEntity().getDisplayName() + ". Tapez :acceptercommande ou :refusercommande.",
-        RoomChatMessageBubbles.ALERT);
   }
 
   public static void acceptOrder(Habbo customer) {
