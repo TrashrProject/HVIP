@@ -97,6 +97,18 @@ public class SuperHireCommand extends Command {
   }
 
   private static Optional<JobEntity> findJob(JobService service, String input) {
+    Optional<JobEntity> result = findJobInCache(service, input);
+    if (result.isPresent()) {
+      return result;
+    }
+
+    // Les métiers peuvent être ajoutés depuis le CMS/phpMyAdmin pendant que l'émulateur tourne.
+    // Recharge le vrai référentiel SQL avant de conclure que le métier n'existe pas.
+    service.loadAllJobs();
+    return findJobInCache(service, input);
+  }
+
+  private static Optional<JobEntity> findJobInCache(JobService service, String input) {
     try {
       int jobId = Integer.parseInt(input);
       return service.getJobById(jobId);
