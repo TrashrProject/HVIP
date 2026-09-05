@@ -46,7 +46,15 @@ $foodImages = [
     13 => 'pizza.png', 14 => 'tacos.png', 15 => 'sushi.png', 16 => 'steak.png',
     20 => 'boeuf.png', 6123 => 'tastycrousty.png'
 ];
-$foodNames = [18 => 'Pâtes', 20 => 'Bœuf', 6123 => 'Tasty Crousty'];
+
+// Noms d'affichage corrigés pour les anciens imports SQL ayant perdu les accents.
+$itemNames = [
+    18 => 'Pâtes',
+    20 => 'Bœuf',
+    6114 => 'Kit de réparation',
+    6115 => 'Canne à pêche',
+    6123 => 'Tasty Crousty'
+];
 
 // Only weapons that currently have ParadiseRP skin families are mapped here.
 $weaponKeys = [
@@ -103,7 +111,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     $slots[] = [
         'slot_index' => $slotIndex,
         'item_id' => $itemId,
-        'display_name' => $foodNames[$itemId] ?? (string)$row['name'],
+        'display_name' => $itemNames[$itemId] ?? (string)$row['name'],
         'interaction_type' => (string)$row['interaction_type'],
         'extra_data' => (string)$row['extra_data'],
         'quantity' => (int)$row['quantity'],
