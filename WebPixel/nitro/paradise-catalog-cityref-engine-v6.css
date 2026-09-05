@@ -1,100 +1,238 @@
-/* ParadiseRP Catalogue CityRef engine V8.
-   Keep Nitro fully laid out and measurable behind the custom shell so navigation and AutoGrid keep rendering. */
+/* ParadiseRP Catalogue CityRef V9 — REAL NITRO STORE MODE.
+   We keep the custom title/search/tabs, but the store body is now the real Nitro React
+   navigation/grid/purchase layout. No offer cloning, no proxy grid, no missing furni. */
 
 .nitro-catalog.pc5-catalog{
   display:block!important;
-}
-
-/* Native Nitro remains invisible but keeps a real 700x555 viewport. */
-.nitro-catalog.pc5-catalog > .nitro-card-header,
-.nitro-catalog.pc5-catalog > [class*="card-header"],
-.nitro-catalog.pc5-catalog > .nitro-card-tabs,
-.nitro-catalog.pc5-catalog > [class*="card-tabs"],
-.nitro-catalog.pc5-catalog > .nitro-card-content{
-  visibility:visible!important;
-  opacity:.001!important;
-  pointer-events:none!important;
-  transform:none!important;
-  z-index:0!important;
-}
-
-.nitro-catalog.pc5-catalog > .nitro-card-header,
-.nitro-catalog.pc5-catalog > [class*="card-header"]{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-  width:700px!important;
-  height:47px!important;
-  min-height:47px!important;
+  position:relative!important;
   overflow:hidden!important;
 }
 
+/* Native header/tabs stay mounted for React but remain invisible. */
+.nitro-catalog.pc5-catalog > .nitro-card-header,
+.nitro-catalog.pc5-catalog > [class*="card-header"],
 .nitro-catalog.pc5-catalog > .nitro-card-tabs,
 .nitro-catalog.pc5-catalog > [class*="card-tabs"]{
   position:absolute!important;
   left:0!important;
-  top:47px!important;
+  top:0!important;
   width:700px!important;
-  height:50px!important;
-  min-height:50px!important;
+  height:44px!important;
+  min-width:700px!important;
+  min-height:44px!important;
+  opacity:0!important;
+  visibility:visible!important;
+  pointer-events:none!important;
   overflow:visible!important;
+  transform:none!important;
+  z-index:1!important;
 }
 
+/* Real native body viewport. Hidden while Info/Historique is shown. */
 .nitro-catalog.pc5-catalog > .nitro-card-content{
   position:absolute!important;
-  left:0!important;
-  top:97px!important;
-  width:700px!important;
-  height:458px!important;
-  min-width:700px!important;
-  min-height:458px!important;
-  max-width:700px!important;
-  max-height:458px!important;
+  left:9px!important;
+  right:9px!important;
+  top:143px!important;
+  bottom:9px!important;
+  width:auto!important;
+  height:auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
   display:block!important;
+  opacity:0!important;
+  visibility:visible!important;
+  pointer-events:none!important;
   overflow:hidden!important;
+  transform:none!important;
+  z-index:300!important;
+  background:#202634!important;
 }
 
-/* Force every native layout layer to keep measurable dimensions. */
-.nitro-catalog.pc5-catalog > .nitro-card-content > .grid{
-  width:100%!important;
-  height:100%!important;
-  min-height:458px!important;
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content{
+  opacity:1!important;
+  pointer-events:auto!important;
 }
 
-.nitro-catalog.pc5-catalog > .nitro-card-content .g-col-3,
-.nitro-catalog.pc5-catalog > .nitro-card-content .col-3,
-.nitro-catalog.pc5-catalog > .nitro-card-content .g-col-9,
-.nitro-catalog.pc5-catalog > .nitro-card-content .col-9,
-.nitro-catalog.pc5-catalog > .nitro-card-content .column{
-  min-height:420px!important;
-}
-
-.nitro-catalog.pc5-catalog > .nitro-card-content .nitro-catalog-navigation-grid-container{
-  height:390px!important;
-  min-height:390px!important;
-  max-height:390px!important;
-  overflow:hidden!important;
-}
-
-.nitro-catalog.pc5-catalog > .nitro-card-content #nitro-catalog-main-navigation{
-  height:380px!important;
-  min-height:380px!important;
-  max-height:380px!important;
-  overflow-y:auto!important;
-}
-
-.nitro-catalog.pc5-catalog > .nitro-card-content .layout-grid,
-.nitro-catalog.pc5-catalog > .nitro-card-content [class*="catalog-grid"]{
-  min-height:360px!important;
-  max-height:390px!important;
-}
-
-/* The custom CityRef shell remains the only visible and interactive catalogue. */
+/* Custom shell is only chrome in store mode. */
 .nitro-catalog.pc5-catalog > .pc5-shell{
   position:absolute!important;
   inset:0!important;
   z-index:1000!important;
-  opacity:1!important;
   visibility:visible!important;
+  opacity:1!important;
+  pointer-events:none!important;
+  background:transparent!important;
+}
+.nitro-catalog.pc5-catalog > .pc5-shell .pc5-titlebar,
+.nitro-catalog.pc5-catalog > .pc5-shell .pc5-searchbar,
+.nitro-catalog.pc5-catalog > .pc5-shell .pc5-segments,
+.nitro-catalog.pc5-catalog > .pc5-shell .pc5-body{
   pointer-events:auto!important;
 }
+.nitro-catalog.pc5-catalog.pc9-native-store > .pc5-shell .pc5-body{
+  display:none!important;
+  pointer-events:none!important;
+}
+
+/* ===== REAL NITRO BODY -> CITYREF LAYOUT ===== */
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content,
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content *{
+  box-sizing:border-box!important;
+}
+
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid{
+  width:100%!important;
+  height:100%!important;
+  min-height:100%!important;
+  display:grid!important;
+  grid-template-columns:166px minmax(0,1fr)!important;
+  gap:9px!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:#202634!important;
+}
+
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > *{
+  width:auto!important;
+  max-width:none!important;
+  min-width:0!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  flex:initial!important;
+}
+
+/* Hide Nitro search row; the yellow search bar is the visible one. */
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :first-child > *:has(input[type="text"]),
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :first-child > *:has(input[type="search"]){
+  display:none!important;
+}
+
+/* Navigation */
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-grid-container{
+  height:100%!important;
+  min-height:0!important;
+  max-height:100%!important;
+  margin:0!important;
+  padding:5px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  border:2px solid #30394c!important;
+  border-radius:9px!important;
+  background:#171d27!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store #nitro-catalog-main-navigation{
+  min-height:100%!important;
+  height:auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:2px!important;
+  padding:0!important;
+  background:transparent!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section{
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section > .layout-grid-item{
+  width:100%!important;
+  height:27px!important;
+  min-height:27px!important;
+  margin:0 0 2px!important;
+  padding:0 8px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  border:0!important;
+  border-radius:14px!important;
+  background:transparent!important;
+  color:#edf0f3!important;
+  box-shadow:none!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  cursor:pointer!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section > .layout-grid-item:hover{
+  background:#252d3b!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section > .layout-grid-item.active,
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section > .layout-grid-item.selected,
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section > .layout-grid-item[aria-selected="true"]{
+  background:#f5c400!important;
+  color:#1b2028!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section > .layout-grid-item.inset{
+  padding-left:18px!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section span,
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section .text-truncate{
+  color:inherit!important;
+  font-size:10px!important;
+}
+
+/* Product/purchase side */
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child{
+  min-width:0!important;
+  min-height:0!important;
+  border:2px solid #30394c!important;
+  border-radius:9px!important;
+  background:#151b25!important;
+  color:#f4f5f7!important;
+  overflow:hidden!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child > *{
+  min-width:0!important;
+  min-height:0!important;
+  color:#f4f5f7!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child .layout-grid,
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child .auto-grid,
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child [class*="catalog-grid"]{
+  min-height:0!important;
+  background:#151b25!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child .layout-grid-item{
+  border:1px solid #445069!important;
+  border-radius:6px!important;
+  background-color:#252d3b!important;
+  box-shadow:none!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child .layout-grid-item:hover{
+  border-color:#7e8ca6!important;
+  background-color:#2d3748!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child .layout-grid-item.active,
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child .layout-grid-item.selected,
+.nitro-catalog.pc5-catalog.pc9-native-store > .nitro-card-content > .grid > :last-child .layout-grid-item[aria-selected="true"]{
+  border:2px solid #f5c400!important;
+  background-color:#343d4a!important;
+}
+
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-purchase-component,
+.nitro-catalog.pc5-catalog.pc9-native-store [class*="catalog-purchase"],
+.nitro-catalog.pc5-catalog.pc9-native-store [class*="purchase-component"]{
+  color:#f4f5f7!important;
+  background:#171d27!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store button.btn-success,
+.nitro-catalog.pc5-catalog.pc9-native-store button[class*="success"]{
+  border-color:#f5c400!important;
+  background:#f5c400!important;
+  color:#1b2028!important;
+  font-weight:900!important;
+}
+
+.nitro-catalog.pc5-catalog.pc9-native-store *{
+  scrollbar-width:thin!important;
+  scrollbar-color:#56637b #151b25!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store *::-webkit-scrollbar{width:6px!important;height:6px!important}
+.nitro-catalog.pc5-catalog.pc9-native-store *::-webkit-scrollbar-thumb{background:#56637b!important;border-radius:6px!important}
+.nitro-catalog.pc5-catalog.pc9-native-store *::-webkit-scrollbar-track{background:#151b25!important}
