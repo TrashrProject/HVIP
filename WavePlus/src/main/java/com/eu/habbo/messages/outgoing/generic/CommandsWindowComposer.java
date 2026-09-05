@@ -101,6 +101,8 @@ public class CommandsWindowComposer extends MessageComposer {
             usedCategories.add(details.category);
         }
 
+        // Ordre stable : seules les catégories réellement présentes sont envoyées.
+        // Les onglets métiers dynamiques fournis par le plugin sont ajoutés ensuite.
         JsonArray categories = new JsonArray();
         categories.add("Toutes");
         addCategory(categories, usedCategories, "Général");
@@ -111,7 +113,6 @@ public class CommandsWindowComposer extends MessageComposer {
         addCategory(categories, usedCategories, "Utilitaires");
         addCategory(categories, usedCategories, "Métiers");
         addCategory(categories, usedCategories, "Staff");
-        addCategory(categories, usedCategories, "Administration");
         for (String category : usedCategories) addCategory(categories, usedCategories, category);
 
         data.add("commands", commandItems);
@@ -145,7 +146,7 @@ public class CommandsWindowComposer extends MessageComposer {
         String localized = Emulator.getTexts().getValue(translationKey, "").trim();
 
         String usage = name;
-        String description = "Utilisez cette commande dans le chat de l'appartement.";
+        String description = "Commande disponible selon vos permissions.";
 
         if (!localized.isEmpty() && !localized.equalsIgnoreCase(translationKey)) {
             String firstLine = firstLine(localized);
@@ -168,9 +169,12 @@ public class CommandsWindowComposer extends MessageComposer {
         String customCategory = CommandViewRegistry.category(client, command);
         String customSubcategory = CommandViewRegistry.subcategory(client, command);
         String customAccess = CommandViewRegistry.access(client, command);
-        if (customCategory != null) category = new Category(customCategory,
-                customSubcategory == null ? customCategory : customSubcategory,
-                customAccess == null ? category.access : customAccess);
+        if (customCategory != null) {
+            category = new Category(customCategory,
+                    customSubcategory == null ? customCategory : customSubcategory,
+                    customAccess == null ? category.access : customAccess);
+        }
+
         return new CommandDetails(name, aliases, description, normalizeUsage(usage),
                 category.category, category.subcategory, category.access);
     }
@@ -178,41 +182,51 @@ public class CommandsWindowComposer extends MessageComposer {
     private static Category categoryFor(String permission, String key) {
         String value = (permission + " " + key).toLowerCase(Locale.ROOT);
 
-        if (containsAny(value, "bank", "solde", "virement", "deposer", "depot", "deposit", "retirer", "withdraw", "historique", "transactions", "openaccount", "ouvrircompte", "versement", "retraitclient", "fermercompte")) {
-            boolean employee = permission.startsWith("cmd_bank_") || permission.equals("cmd_openaccount");
-            return new Category(employee ? "Métiers" : "Économie", "Banque",
-                    employee ? "Banque en service · grade autorisé · ordinateur connecté" : "Compte bancaire actif");
+        if (containsAny(value, "bank", "solde", "virement", "deposer", "depot", "deposit", "retirer", "withdraw", "historique", "transactions")) {
+            return new Category("Économie", "Banque personnelle", "Accessible selon vos permissions");
         }
 
-        if (containsAny(value, "911", "police", "tazor", "taser", "handcuff", "escort", "prison", "release", "arrest", "wanted", "charge", "pardon", "detaser")) {
-            return new Category("Métiers", "Police", "Policier en service au lieu de travail · grade autorisé");
+        if (containsAny(value, "911", "callpolice")) {
+            return new Category("RP", "Services d'urgence", "Accessible selon vos permissions");
         }
 
-        if (containsAny(value, "ems", "medical", "medecin", "ambulance", "heal", "bandage", "stabil", "revive", "patient", "diagnostic")) {
-            return new Category("Métiers", "Hôpital", "Personnel médical en service au lieu de travail · grade autorisé");
+        if (containsAny(value, "police", "tazor", "taser", "handcuff", "escort", "prison", "release", "arrest", "wanted", "charge", "pardon", "detaser")) {
+            return new Category("Métiers", "Police", "Métier et grade autorisés");
         }
 
-        if (containsAny(value, "taxi")) {
-            return new Category("Métiers", "Taxi", "Chauffeur en service · grade autorisé");
+        if (containsAny(value, "ems", "medical", "medecin", "ambulance", "heal", "bandage", "stabil", "reanimer", "revive", "patient", "diagnostic")) {
+            return new Category("Métiers", "EMS", "Métier et grade autorisés");
         }
 
-        if (containsAny(value, "job", "work", "hire", "fire", "promote", "demote", "apply", "sell_rpitem", "offer_rpitem", "accept_offer", "decline_offer", "send_home")) {
-            return new Category("Métiers", "Gestion et service", "Métier en service au lieu de travail · grade autorisé");
+        if (containsAny(value, "taxi", "goto", "teleport", "stalk", "hotrooms")) {
+            return new Category("Déplacements", "Déplacements", "Accessible selon vos permissions");
         }
 
-        if (containsAny(value, "business", "cashregister", "inventory", "security")) {
-            return new Category("Métiers", "Entreprise", "Employé en service au lieu de travail · grade autorisé");
+        if (containsAny(value, "job", "work", "hire", "fire", "promote", "demote", "apply", "send_home", "sendhome")) {
+            return new Category("Métiers", "Gestion du travail", "Accessible selon vos permissions");
         }
 
-        if (containsAny(value, "bucks", "rob", "shoot", "hit", "spit", "equip", "unequip", "passive", "combat", "org_", "rpitem")) {
+        if (containsAny(value, "business", "cashregister", "security")) {
+            return new Category("Métiers", "Entreprise", "Métier et grade autorisés");
+        }
+
+        if (containsAny(value, "friend", "kiss", "hug", "whisper", "follow")) {
+            return new Category("Social", "Social", "Accessible selon vos permissions");
+        }
+
+        if (containsAny(value, "inventory", "equip", "unequip", "macro", "commands", "ping", "help", "deleteitem")) {
+            return new Category("Utilitaires", "Utilitaires", "Accessible selon vos permissions");
+        }
+
+        if (containsAny(value, "bucks", "rob", "shoot", "hit", "spit", "passive", "combat", "org_", "rpitem", "offer")) {
             return new Category("RP", "Roleplay", "Accessible selon votre situation RP");
         }
 
-        if (containsAny(value, "ban", "mute", "alert", "staff", "shutdown", "update_", "super", "give_rank", "mass", "userinfo", "invisible", "summon", "stalk")) {
-            return new Category("Staff", "Staff", "R\u00e9serv\u00e9 au staff");
+        if (containsAny(value, "ban", "mute", "alert", "staff", "shutdown", "update_", "super", "give_rank", "mass", "userinfo", "invisible", "summon", "global_heal", "room_heal", "set_stats")) {
+            return new Category("Staff", "Staff", "Réservé au staff");
         }
 
-        return new Category("Général", "Général", "Accessible à votre rang");
+        return new Category("Général", "Général", "Accessible selon vos permissions");
     }
 
     private static boolean containsAny(String value, String... needles) {
