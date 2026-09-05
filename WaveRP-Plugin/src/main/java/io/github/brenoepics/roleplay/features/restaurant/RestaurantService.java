@@ -3,11 +3,9 @@ package io.github.brenoepics.roleplay.features.restaurant;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
-import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.job.JobEntity;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
-import io.github.brenoepics.roleplay.utilities.types.FoodPresentation;
 import io.github.brenoepics.roleplay.utilities.types.RPItem;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class RestaurantService {
 
   private static final int TARGET_RANGE = 3;
-  private static final String MENU_MARKER = "PARADISE_RESTAURANT_MENU";
+  private static final String MENU_SIGNAL = "PARADISE_RESTAURANT_OPEN:";
   private static final Map<Integer, WorkingOrder> WORKING_ORDERS = new ConcurrentHashMap<>();
   private static final Map<String, Invoice> INVOICES = new ConcurrentHashMap<>();
 
@@ -60,26 +58,9 @@ public final class RestaurantService {
       return;
     }
 
-    StringBuilder payload = new StringBuilder(MENU_MARKER).append('\n');
-    payload.append("RESTAURANT_NAME|")
-        .append(sanitize(data.getJobEntity().getDisplayName())).append('\n');
-
-    for (MenuItem item : items) {
-      RPItem rpItem = RolePlay.getItemManager().getItems().get(item.itemId());
-      String hunger = rpItem == null ? "0" : sanitize(rpItem.getExtraData());
-      String image = rpItem == null ? "" : sanitize(FoodPresentation.imageUrl(rpItem));
-      payload.append("RESTAURANT|")
-          .append(sanitize(item.code())).append('|')
-          .append(sanitize(item.displayName())).append('|')
-          .append(item.itemId()).append('|')
-          .append(item.price()).append('|')
-          .append(hunger).append('|')
-          .append(image).append('\n');
-    }
-
-    if (employee.getClient() != null) {
-      employee.getClient().sendResponse(new GenericAlertComposer(payload.toString()));
-    }
+    // GenericAlert darkens the complete Nitro renderer. The browser consumes this private
+    // whisper and loads the menu through the authenticated CMS endpoint instead.
+    employee.whisper(MENU_SIGNAL + System.nanoTime(), RoomChatMessageBubbles.NORMAL);
   }
 
   public static void takeOrder(Habbo employee, String username) {
@@ -356,10 +337,6 @@ public final class RestaurantService {
 
   private static String invoiceKey(int jobId, int customerId) {
     return jobId + ":" + customerId;
-  }
-
-  private static String sanitize(String value) {
-    return value == null ? "" : value.replace("|", " ").replace("\r", " ").replace("\n", " ");
   }
 
   public record MenuItem(String code, String displayName, int itemId, int price) {

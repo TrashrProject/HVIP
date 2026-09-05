@@ -1,116 +1,146 @@
 (()=>{
-  const MARKER='PARADISE_RESTAURANT_MENU';
+  'use strict';
+
+  const SIGNAL='PARADISE_RESTAURANT_OPEN:';
   const OVERLAY_ID='waverp-commands-overlay';
-  const normalize=s=>String(s||'').replace(/\u00a0/g,' ').replace(/\r/g,'');
-  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const API='/restaurant-menu.php';
+  const seenSignals=new Set();
+  let loading=false;
 
-  const parseMenu=text=>{
-    const lines=normalize(text).split('\n').map(v=>v.trim()).filter(Boolean);
-    const nameLine=lines.find(v=>v.startsWith('RESTAURANT_NAME|'));
-    const restaurant=nameLine?nameLine.slice('RESTAURANT_NAME|'.length):'Restaurant';
-    const items=lines.filter(v=>v.startsWith('RESTAURANT|')).map(line=>{
-      const parts=line.split('|');
-      return {
-        code:parts[1]||'',
-        name:parts[2]||'Plat',
-        id:Number(parts[3])||0,
-        price:Number(parts[4])||0,
-        hunger:Number(parts[5])||0,
-        image:parts[6]||''
-      };
-    }).filter(item=>item.code&&item.id>0);
-    return {restaurant,items};
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[char]);
+  const removeOverlay=()=>{
+    const overlay=document.getElementById(OVERLAY_ID);
+    overlay?._restaurantCleanup?.();
+    overlay?.remove();
   };
 
-  const hasCloseControl=el=>[...el.querySelectorAll('button,[role="button"]')].some(b=>/^(fermer|close|×|✕|x)$/i.test(((b.getAttribute('aria-label')||'')+' '+(b.textContent||'')).trim()));
-  const promoteWindow=el=>{let best=el,node=el;for(let i=0;i<7&&node;i++,node=node.parentElement){if(node===document.body)break;const text=normalize(node.innerText||node.textContent||'');if(!text.includes('Message de ParadiseRP'))continue;const r=node.getBoundingClientRect();if(r.width>=250&&r.width<=800&&r.height>=120&&r.height<=750&&hasCloseControl(node))best=node}return best};
-  const findAlert=()=>{for(const raw of document.querySelectorAll('body div, body section')){if(raw.closest('#'+OVERLAY_ID))continue;const text=normalize(raw.innerText||raw.textContent||'');if(!text.includes(MARKER)||!text.includes('Message de ParadiseRP'))continue;const el=promoteWindow(raw);const rect=el.getBoundingClientRect();if(rect.width>=250&&rect.height>=120)return {el,text}}return null};
+  const makeDraggable=(panel,handle)=>{
+    let drag=null;
+    handle.style.cursor='move';
+    handle.style.touchAction='none';
+    handle.style.userSelect='none';
 
-  const findAlertBackdrop=alert=>{
-    let node=alert?.parentElement;
-    let fallback=null;
-    while(node&&node!==document.body){
-      if(node.id==='root'||node.id==='app')break;
-      const style=getComputedStyle(node);
-      const rect=node.getBoundingClientRect();
-      const coversScreen=rect.width>=window.innerWidth*.9&&rect.height>=window.innerHeight*.9;
-      if(coversScreen) fallback=node;
-      const z=Number.parseInt(style.zIndex||'0',10)||0;
-      if(style.position==='fixed'&&coversScreen&&z>=100)return node;
-      node=node.parentElement;
-    }
-    return fallback;
-  };
+    const clamp=(value,min,max)=>Math.min(Math.max(value,min),Math.max(min,max));
+    const keepOnScreen=(left,top)=>({
+      left:clamp(left,4,window.innerWidth-panel.offsetWidth-4),
+      top:clamp(top,4,window.innerHeight-panel.offsetHeight-4)
+    });
+    const place=(left,top)=>{
+      const position=keepOnScreen(left,top);
+      panel.style.left=`${position.left}px`;
+      panel.style.top=`${position.top}px`;
+    };
 
-  const hideBackdrop=backdrop=>{
-    if(!backdrop||backdrop.id==='root'||backdrop.id==='app')return;
-    backdrop.style.setProperty('background','transparent','important');
-    backdrop.style.setProperty('background-color','transparent','important');
-    backdrop.style.setProperty('backdrop-filter','none','important');
-    backdrop.style.setProperty('-webkit-backdrop-filter','none','important');
-    backdrop.style.setProperty('pointer-events','none','important');
-    backdrop.style.setProperty('display','none','important');
-    backdrop.style.setProperty('visibility','hidden','important');
+    handle.addEventListener('pointerdown',event=>{
+      if(event.button!==0||event.target.closest('button,input,a'))return;
+      const rect=panel.getBoundingClientRect();
+      panel.style.position='fixed';
+      panel.style.width=`${rect.width}px`;
+      panel.style.height=`${rect.height}px`;
+      panel.style.margin='0';
+      panel.style.right='auto';
+      panel.style.bottom='auto';
+      place(rect.left,rect.top);
+      drag={pointerId:event.pointerId,x:event.clientX,y:event.clientY,left:rect.left,top:rect.top};
+      handle.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+    handle.addEventListener('pointermove',event=>{
+      if(!drag||event.pointerId!==drag.pointerId)return;
+      place(drag.left+event.clientX-drag.x,drag.top+event.clientY-drag.y);
+      event.preventDefault();
+    });
+    const stop=event=>{
+      if(!drag||event.pointerId!==drag.pointerId)return;
+      drag=null;
+      if(handle.hasPointerCapture(event.pointerId))handle.releasePointerCapture(event.pointerId);
+    };
+    handle.addEventListener('pointerup',stop);
+    handle.addEventListener('pointercancel',stop);
+    const handleResize=()=>{
+      if(panel.style.position==='fixed')place(panel.offsetLeft,panel.offsetTop);
+    };
+    window.addEventListener('resize',handleResize);
+    return ()=>window.removeEventListener('resize',handleResize);
   };
-
-  const dismissOriginal=alert=>{
-    if(!alert)return;
-    // Capture the full-screen GenericAlert layer BEFORE clicking close. React can unmount the
-    // alert synchronously, which used to lose the parent reference and leave the black backdrop.
-    const backdrop=findAlertBackdrop(alert);
-    const controls=[...alert.querySelectorAll('button,[role="button"]')];
-    const close=controls.find(b=>/^(fermer|close)$/i.test((b.textContent||'').trim()))||controls.find(b=>/^(×|✕|x)$/i.test(((b.getAttribute('aria-label')||'')+' '+(b.textContent||'')).trim()));
-    if(close)try{close.click()}catch{}
-    hideBackdrop(backdrop);
-    if(alert.isConnected){
-      alert.style.setProperty('display','none','important');
-      alert.style.setProperty('visibility','hidden','important');
-      alert.style.setProperty('pointer-events','none','important');
-    }
-    // A second pass handles frameworks that recreate/remove the modal layer on the next tick.
-    requestAnimationFrame(()=>hideBackdrop(backdrop));
-    setTimeout(()=>hideBackdrop(backdrop),50);
-  };
-  const removeOverlay=()=>document.getElementById(OVERLAY_ID)?.remove();
 
   const render=menu=>{
     removeOverlay();
     let query='';
     const overlay=document.createElement('div');
     overlay.id=OVERLAY_ID;
-    overlay.classList.add('wrc-food-mode');
-    overlay.style.setProperty('background','transparent','important');
-    overlay.style.setProperty('background-color','transparent','important');
-    overlay.style.setProperty('backdrop-filter','none','important');
-    overlay.style.setProperty('-webkit-backdrop-filter','none','important');
-    overlay.innerHTML=`<div class="wrc-window"><div class="wrc-titlebar">ParadiseRP — ${esc(menu.restaurant)}<button class="wrc-close" type="button">×</button></div><div class="wrc-content"><div class="wrc-head"><div><h2>Menu du restaurant</h2><div class="wrc-count"></div></div><div class="wrc-hint">Plats disponibles</div></div><div class="wrc-search-wrap"><span class="wrc-search-icon"></span><input class="wrc-search" type="text" placeholder="Rechercher un plat..."></div><div class="wrc-food-grid"></div><div class="wrc-footer"><span>:preparer [nom du plat]</span><button class="wrc-footer-close" type="button">Fermer</button></div></div></div>`;
+    overlay.className='wrc-food-mode';
+    overlay.innerHTML=`<div class="wrc-window"><div class="wrc-titlebar">ParadiseRP — ${esc(menu.restaurant)}<button class="wrc-close" type="button" aria-label="Fermer">×</button></div><div class="wrc-content"><div class="wrc-head"><div><h2>Menu du restaurant</h2><div class="wrc-count"></div></div><div class="wrc-hint">Plats disponibles</div></div><div class="wrc-search-wrap"><span class="wrc-search-icon"></span><input class="wrc-search" type="text" placeholder="Rechercher un plat..."></div><div class="wrc-food-grid"></div><div class="wrc-footer"><span>:preparer [nom du plat]</span><button class="wrc-footer-close" type="button">Fermer</button></div></div></div>`;
     document.body.appendChild(overlay);
+
+    const panel=overlay.querySelector('.wrc-window');
+    overlay._restaurantCleanup=makeDraggable(panel,overlay.querySelector('.wrc-titlebar'));
     const grid=overlay.querySelector('.wrc-food-grid');
     const count=overlay.querySelector('.wrc-count');
     const draw=()=>{
-      const q=query.toLowerCase();
-      const items=menu.items.filter(item=>!q||`${item.name} ${item.code} ${item.price}`.toLowerCase().includes(q));
+      const term=query.trim().toLowerCase();
+      const items=menu.items.filter(item=>!term||`${item.name} ${item.code} ${item.price}`.toLowerCase().includes(term));
       count.textContent=`${menu.items.length} plat(s) disponible(s)`;
-      grid.innerHTML=items.length?items.map(item=>`<div class="wrc-food-card"><div class="wrc-food-image"><img src="${esc(item.image)}" alt="${esc(item.name)}"></div><div class="wrc-food-info"><div class="wrc-food-name">${esc(item.name)}</div><div class="wrc-food-id">${esc(item.code)}</div><div class="wrc-food-hunger">${item.price} crédits · +${item.hunger} point(s) de faim</div></div><button class="wrc-food-copy" data-copy=":preparer ${esc(item.code)}" type="button">Copier</button></div>`).join(''):'<div class="wrc-empty">Aucun plat trouvé.</div>';
-      grid.querySelectorAll('.wrc-food-copy').forEach(button=>button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(button.dataset.copy||'');const old=button.textContent;button.textContent='Copié';setTimeout(()=>button.textContent=old,900)}catch{}}));
+      grid.innerHTML=items.length?items.map(item=>`<div class="wrc-food-card"><div class="wrc-food-image"><img src="${esc(item.image)}" alt="${esc(item.name)}"></div><div class="wrc-food-info"><div class="wrc-food-name">${esc(item.name)}</div><div class="wrc-food-id">${esc(item.code)}</div><div class="wrc-food-hunger">${Number(item.price)||0} crédits · +${Number(item.hunger)||0} point(s) de faim</div></div><button class="wrc-food-copy" data-copy=":preparer ${esc(item.code)}" type="button">Copier</button></div>`).join(''):'<div class="wrc-empty">Aucun plat trouvé.</div>';
+      grid.querySelectorAll('.wrc-food-copy').forEach(button=>button.addEventListener('click',async()=>{
+        try{
+          await navigator.clipboard.writeText(button.dataset.copy||'');
+          const label=button.textContent;
+          button.textContent='Copié';
+          setTimeout(()=>button.textContent=label,900);
+        }catch{}
+      }));
     };
+
     overlay.querySelector('.wrc-search').addEventListener('input',event=>{query=event.target.value;draw()});
     overlay.querySelector('.wrc-close').addEventListener('click',removeOverlay);
     overlay.querySelector('.wrc-footer-close').addEventListener('click',removeOverlay);
     draw();
   };
 
-  const inspect=()=>{
-    const found=findAlert();
-    if(!found||found.el.dataset.paradiseRestaurantHandled==='1')return;
-    const menu=parseMenu(found.text);
-    if(!menu.items.length)return;
-    found.el.dataset.paradiseRestaurantHandled='1';
-    dismissOriginal(found.el);
-    render(menu);
+  const loadMenu=async()=>{
+    if(loading)return;
+    loading=true;
+    try{
+      const response=await fetch(`${API}?t=${Date.now()}`,{
+        credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}
+      });
+      const payload=await response.json();
+      if(!response.ok||!payload.ok)throw new Error(payload.error||'Menu indisponible.');
+      render(payload);
+    }catch(error){
+      console.error('[ParadiseRP Restaurant]',error);
+    }finally{
+      loading=false;
+    }
   };
 
-  new MutationObserver(inspect).observe(document.body,{childList:true,subtree:true,characterData:true});
-  setInterval(inspect,500);
-  setTimeout(inspect,0);
+  const consumeCandidate=element=>{
+    if(!(element instanceof Element))return;
+    const text=String(element.textContent||'');
+    const start=text.indexOf(SIGNAL);
+    if(start<0)return;
+    const token=(text.slice(start).match(/^PARADISE_RESTAURANT_OPEN:\d+/)||[])[0];
+    if(!token||seenSignals.has(token))return;
+    seenSignals.add(token);
+    element.style.setProperty('display','none','important');
+    loadMenu();
+  };
+
+  const inspectNode=node=>{
+    const element=node instanceof Element?node:node?.parentElement;
+    if(!element)return;
+    const bubble=element.closest('.bubble-container,.chat-bubble');
+    if(bubble)consumeCandidate(bubble);
+    if(element.matches?.('.bubble-container,.chat-bubble'))consumeCandidate(element);
+    element.querySelectorAll?.('.bubble-container,.chat-bubble').forEach(consumeCandidate);
+  };
+
+  new MutationObserver(mutations=>mutations.forEach(mutation=>{
+    inspectNode(mutation.target);
+    mutation.addedNodes.forEach(inspectNode);
+  })).observe(document.body,{childList:true,subtree:true,characterData:true});
+  document.querySelectorAll('.bubble-container,.chat-bubble').forEach(consumeCandidate);
 })();
