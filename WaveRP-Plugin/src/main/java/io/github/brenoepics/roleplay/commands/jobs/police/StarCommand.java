@@ -58,9 +58,7 @@ public class StarCommand extends Command {
     }
 
     Integer starCount = getStarCount(params, officer);
-    if (starCount == null) {
-      return true;
-    }
+    if (starCount == null) return true;
 
     Crime manualCrime = RolePlay.getWantedManager().getCrimeByName("Recherche manuelle " + starCount);
     if (manualCrime == null) {
@@ -90,8 +88,8 @@ public class StarCommand extends Command {
     String action = "* Place " + criminalInfo.getUsername()
         + " au niveau de recherche " + starCount + " *";
     if (officer.getHabboInfo().getCurrentRoom() != null) {
-      officer.getHabboInfo().getCurrentRoom()
-          .sendComposer(getRoomUserShoutComposer(action, officer).compose());
+      officer.getHabboInfo().getCurrentRoom().sendComposer(
+          getRoomUserShoutComposer(action, officer, RoomChatMessageBubbles.AMBASSADOR).compose());
     }
 
     if (criminal != null) {
