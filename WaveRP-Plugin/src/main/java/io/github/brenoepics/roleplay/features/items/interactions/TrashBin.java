@@ -54,9 +54,9 @@ public class TrashBin extends InteractionDefault {
             return;
         }
 
-        // Hors des salles RP, conserver le comportement visuel normal 0/1 du mobilier.
+        // Hors des salles RP, conserver exactement le toggle natif Arcturus du mobilier.
         if (room.getCategory() != Emulator.getConfig().getInt("nahabbo.features.room.category")) {
-            setVisualState(room, "1".equals(getExtradata()) ? "0" : "1");
+            toggleLikeNormalFurniture(room);
             return;
         }
 
@@ -94,10 +94,9 @@ public class TrashBin extends InteractionDefault {
             habbo,
             RoomChatMessageBubbles.NORMAL)).compose());
 
-        // L'etat 1 est l'etat utilise/ouvert des mobiliers Habbo a deux etats.
-        // Ne pas calculer modulo getStateCount(): certaines anciennes poubelles ont encore
-        // interaction_modes_count=1 en DB, ce qui ferait toujours retomber l'etat a 0.
-        setVisualState(room, "1");
+        // Ouvrir avec le MEME chemin que l'utilisation normale d'un mobi Arcturus.
+        // On repart volontairement de 0 afin que le toggle natif arrive sur l'etat 1.
+        openLikeNormalFurniture(room);
 
         final int habboId = habbo.getHabboInfo().getId();
         final int searchDelay = Math.max(1000,
@@ -116,7 +115,7 @@ public class TrashBin extends InteractionDefault {
                 if (habbo != null) {
                     habbo.whisper("La fouille a été annulée : vous vous êtes éloigné de la poubelle.");
                 }
-                setVisualState(room, "0");
+                closeFurniture(room);
                 return;
             }
 
@@ -127,27 +126,44 @@ public class TrashBin extends InteractionDefault {
                 searched = true;
             }
 
-            // La poubelle reste ouverte pendant le cooldown.
-            setVisualState(room, "1");
-
             final int cooldown = Math.max(1000,
                 Emulator.getConfig().getInt("nahabbo.features.trashbin.cooldown"));
             Emulator.getThreading().run(() -> {
                 synchronized (TrashBin.this) {
                     searched = false;
                 }
-                setVisualState(room, "0");
+                closeFurniture(room);
             }, cooldown);
         } finally {
             occupied = false;
         }
     }
 
-    private void setVisualState(Room room, String state) {
+    /** Reproduit le toggle natif d'InteractionDefault sans exiger les droits de la salle. */
+    private void toggleLikeNormalFurniture(Room room) {
         if (room == null) {
             return;
         }
-        setExtradata(state);
+        try {
+            super.onClick(null, room, new Object[]{0});
+        } catch (Exception ignored) {
+            // Le systeme RP ne doit jamais casser la fouille si un mobi atypique refuse le toggle.
+        }
+    }
+
+    private void openLikeNormalFurniture(Room room) {
+        if (room == null) {
+            return;
+        }
+        closeFurniture(room);
+        toggleLikeNormalFurniture(room);
+    }
+
+    private void closeFurniture(Room room) {
+        if (room == null) {
+            return;
+        }
+        setExtradata("0");
         needsUpdate(true);
         room.updateItemState(this);
     }
@@ -237,7 +253,7 @@ public class TrashBin extends InteractionDefault {
             occupied = false;
             searched = false;
         }
-        setVisualState(room, "0");
+        closeFurniture(room);
     }
 
     private record LootTable(String[] items, int[] chances, int total) {
