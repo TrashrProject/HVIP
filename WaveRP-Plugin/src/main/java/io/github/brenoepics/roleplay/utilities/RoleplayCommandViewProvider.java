@@ -8,9 +8,13 @@ import io.github.brenoepics.roleplay.features.job.JobEntity;
 import io.github.brenoepics.roleplay.features.job.JobPermissions;
 import io.github.brenoepics.roleplay.features.job.JobRankEntity;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import java.util.Locale;
 import java.util.Map;
 
-/** Adapte l'affichage des commandes aux métiers et permissions RP existants. */
+/**
+ * Adapte uniquement la présentation de :commands aux métiers et permissions RP existants.
+ * Ce provider ne donne jamais de permission et ne change jamais le comportement d'une commande.
+ */
 public final class RoleplayCommandViewProvider implements CommandViewProvider {
   private static final Map<String, String> REQUIRED_PERMISSIONS = Map.ofEntries(
       Map.entry("cmd_ems_heal", JobPermissions.MEDICAL_HEAL),
@@ -39,38 +43,67 @@ public final class RoleplayCommandViewProvider implements CommandViewProvider {
   public boolean isVisible(GameClient client, Command command) {
     String requiredJob = associatedJob(command);
     if (requiredJob == null) return true;
+
     RpAvatar avatar = avatar(client);
     if (avatar == null || avatar.getJobEntity() == null || avatar.getJobEntity().isUnemployed()) {
       return false;
     }
+
     if (!"current".equals(requiredJob)
-        && !requiredJob.equalsIgnoreCase(avatar.getJobEntity().getName())) return false;
+        && !requiredJob.equalsIgnoreCase(avatar.getJobEntity().getName())) {
+      return false;
+    }
+
     JobRankEntity rank = avatar.getJobRankEntity();
     if ("cmd_ems_calls".equals(command.permission)) {
       return rank != null && (rank.hasPermission(JobPermissions.MEDICAL_AMBULANCE)
           || rank.hasPermission(JobPermissions.MEDICAL_DISPATCH));
     }
+
     String requiredPermission = REQUIRED_PERMISSIONS.get(command.permission);
     return requiredPermission == null || (rank != null && rank.hasPermission(requiredPermission));
   }
 
   @Override
   public String category(GameClient client, Command command) {
-    if (associatedJob(command) == null) return generalCategory(command);
-    RpAvatar avatar = avatar(client);
-    if (avatar == null || avatar.getJobEntity() == null) return null;
-    return displayJob(avatar.getJobEntity());
+    String requiredJob = associatedJob(command);
+    if (requiredJob != null) {
+      RpAvatar avatar = avatar(client);
+      if (avatar == null || avatar.getJobEntity() == null) return null;
+      // Un métier autorisé devient son propre onglet dynamique : Banque, Police, EMS, etc.
+      return displayJob(avatar.getJobEntity());
+    }
+    return generalCategory(command);
   }
 
   @Override
   public String subcategory(GameClient client, Command command) {
-    return category(client, command);
+    if (associatedJob(command) != null) return category(client, command);
+
+    String permission = permission(command);
+    if (isOneOf(permission, "cmd_start_work", "cmd_stop_work", "cmd_quit_job", "cmd_apply")) {
+      return "Gestion du travail";
+    }
+    if (isOneOf(permission, "cmd_911", "cmd_ems", "cmd_cancel_ems")) {
+      return "Services d'urgence";
+    }
+    if (isOneOf(permission, "cmd_balance", "cmd_give", "cmd_transactions", "cmd_deposit", "cmd_withdraw")) {
+      return "Banque personnelle";
+    }
+    if (permission.startsWith("cmd_org_")) return "Organisations";
+    if (permission.contains("offer") || "cmd_sell_rpitem".equals(permission)) return "Échanges RP";
+
+    String category = generalCategory(command);
+    return category;
   }
 
   @Override
   public String access(GameClient client, Command command) {
-    String permission = REQUIRED_PERMISSIONS.get(command.permission);
-    if (permission != null) return "Métier et grade autorisés";
+    String requiredJob = associatedJob(command);
+    if (requiredJob != null) {
+      String permission = REQUIRED_PERMISSIONS.get(command.permission);
+      return permission == null ? "Métier requis" : "Métier et grade autorisés";
+    }
     return null;
   }
 
@@ -79,16 +112,29 @@ public final class RoleplayCommandViewProvider implements CommandViewProvider {
         : RolePlay.getAvatarManager().getRpAvatar(client.getHabbo());
   }
 
+  /**
+   * Retourne le métier auquel une commande professionnelle appartient.
+   * Les commandes publiques (ex. :ems pour appeler les secours, :taxi pour appeler un taxi,
+   * :solde pour son compte personnel) ne doivent surtout pas devenir des onglets métiers.
+   */
   private static String associatedJob(Command command) {
     if (command == null) return null;
+
     String className = command.getClass().getName();
-    String permission = command.permission == null ? "" : command.permission;
+    String permission = permission(command);
+
     if (className.contains(".commands.banking.BankEmployeeCommand")) return "bank";
-    if (className.contains(".commands.jobs.police.") || className.contains(".commands.escort.")) return "police";
+    if (className.contains(".commands.jobs.police.") || className.contains(".commands.escort.")) {
+      return "police";
+    }
     if (className.contains(".commands.jobs.hospital.")) return "hospital";
-    if (REQUIRED_PERMISSIONS.containsKey(permission) && permission.matches("cmd_(hire|fire|promote|demote)")) {
+
+    // Ces commandes agissent sur le métier actuellement occupé et restent donc dans
+    // l'onglet dynamique de ce métier, sans créer de nouveau système de permissions.
+    if (isOneOf(permission, "cmd_hire", "cmd_fire", "cmd_promote", "cmd_demote", "cmd_send_home")) {
       return "current";
     }
+
     return null;
   }
 
@@ -99,17 +145,59 @@ public final class RoleplayCommandViewProvider implements CommandViewProvider {
   }
 
   private static String generalCategory(Command command) {
-    StringBuilder valueBuilder = new StringBuilder(command.permission == null ? "" : command.permission);
-    if (command.keys != null) {
-      for (String key : command.keys) if (key != null) valueBuilder.append(' ').append(key);
+    String permission = permission(command);
+
+    // Métier général : visible sans transformer la commande en commande d'un métier précis.
+    if (isOneOf(permission, "cmd_start_work", "cmd_stop_work", "cmd_quit_job", "cmd_apply")) {
+      return "Métiers";
     }
-    String value = valueBuilder.toString().toLowerCase();
-    if (value.matches(".*(balance|solde|deposit|depot|withdraw|retirer|transaction|virement|bucks).*")) return "Économie";
-    if (value.matches(".*(taxi|goto|stalk|teleport|room|sendhome).*")) return "Déplacements";
-    if (value.matches(".*(friend|kiss|hug|spit|whisper|follow).*")) return "Social";
-    if (value.matches(".*(inventory|equip|unequip|macro|commands|help|ping).*")) return "Utilitaires";
-    if (value.matches(".*(staff|ban|mute|alert|super|shutdown|mass|give_rank|update_).*")) return "Staff";
-    if (value.matches(".*(rob|shoot|hit|passive|combat|org_|rpitem).*")) return "RP";
+
+    // Appels de services : ce sont des commandes joueur, pas des commandes EMS/Police métier.
+    if (isOneOf(permission, "cmd_911", "cmd_ems", "cmd_cancel_ems")) {
+      return "RP";
+    }
+
+    if (isOneOf(permission, "cmd_balance", "cmd_give", "cmd_transactions", "cmd_deposit", "cmd_withdraw", "cmd_bucks")) {
+      return "Économie";
+    }
+
+    if (permission.startsWith("cmd_org_") || permission.contains("offer")
+        || "cmd_sell_rpitem".equals(permission)) {
+      return "RP";
+    }
+
+    StringBuilder valueBuilder = new StringBuilder(permission);
+    if (command != null && command.keys != null) {
+      for (String key : command.keys) {
+        if (key != null) valueBuilder.append(' ').append(key);
+      }
+    }
+    String value = valueBuilder.toString().toLowerCase(Locale.ROOT);
+
+    if (value.matches(".*(balance|solde|deposit|depot|withdraw|retirer|transaction|virement|bucks).*")) {
+      return "Économie";
+    }
+    if (value.matches(".*(taxi|goto|stalk|teleport|hotrooms).*")) return "Déplacements";
+    if (value.matches(".*(friend|kiss|hug|whisper|follow).*")) return "Social";
+    if (value.matches(".*(inventory|equip|unequip|macro|commands|ping|deleteitem|supprimerobjet).*")) {
+      return "Utilitaires";
+    }
+    if (value.matches(".*(staff|ban|mute|alert|super|shutdown|mass|give_rank|update_|global_heal|room_heal|set_stats).*")) {
+      return "Staff";
+    }
+    if (value.matches(".*(rob|shoot|hit|spit|passive|combat|target_lock|rpitem).*")) return "RP";
+
     return null;
+  }
+
+  private static String permission(Command command) {
+    return command == null || command.permission == null
+        ? ""
+        : command.permission.toLowerCase(Locale.ROOT);
+  }
+
+  private static boolean isOneOf(String value, String... expected) {
+    for (String item : expected) if (item.equals(value)) return true;
+    return false;
   }
 }
