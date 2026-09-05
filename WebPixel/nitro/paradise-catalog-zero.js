@@ -4,14 +4,14 @@
   const ROOT = '.nitro-catalog';
   const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
 
-  const TAB_LABELS = [
-    [/^Front Page(?:\s*\(\d+\))?$/i, 'Accueil'],
-    [/^(?:Furni|Furniture|Mobilier)(?:\s*\(\d+\))?$/i, 'Mobilier'],
-    [/^(?:Clothing|Vêtements)(?:\s*\(\d+\))?$/i, 'Vêtements'],
-    [/^(?:Pets|Animaux)(?:\s*\(\d+\))?$/i, 'Animaux'],
-    [/^(?:Building|Construction)(?:\s*\(\d+\))?$/i, 'Construction'],
-    [/^Staff(?:\s*\(\d+\))?$/i, 'Staff'],
-    [/^Catalogue ParadiseRP complet.*$/i, 'Tous']
+  const TAB_DEFS = [
+    { key:'home', pattern:/^Front Page(?:\s*\(\d+\))?$/i, label:'Accueil' },
+    { key:'furni', pattern:/^(?:Furni|Furniture|Mobilier)(?:\s*\(\d+\))?$/i, label:'Mobilier' },
+    { key:'clothing', pattern:/^(?:Clothing|Vêtements)(?:\s*\(\d+\))?$/i, label:'Vêtements' },
+    { key:'pets', pattern:/^(?:Pets|Animaux)(?:\s*\(\d+\))?$/i, label:'Animaux' },
+    { key:'building', pattern:/^(?:Building|Construction)(?:\s*\(\d+\))?$/i, label:'Construction' },
+    { key:'staff', pattern:/^Staff(?:\s*\(\d+\))?$/i, label:'Staff' },
+    { key:'all', pattern:/^Catalogue ParadiseRP complet.*$/i, label:'Tout' }
   ];
 
   const getHeader = root => root.querySelector(':scope > .nitro-card-header, :scope > [class*="card-header"]');
@@ -78,14 +78,16 @@
       header.innerHTML = `
         <div class="pz-brand">
           <span class="pz-logo"><img src="/Dynamics/img/logos/hv_logo_p.png" alt="ParadiseRP" draggable="false"></span>
-          <span class="pz-brand-copy"><strong>CATALOGUE</strong><small>ParadiseRP</small></span>
+          <span class="pz-brand-copy"><strong>PARADISE MARKET</strong><small>Catalogue RP</small></span>
         </div>
-        <div class="pz-tagline">Des milliers de furnis<br>pour construire ta ville</div>
+        <div class="pz-tagline">Construis. Décore.<br>Fais vivre ta ville.</div>
         <div class="pz-wallets" aria-label="Soldes"></div>
-        <button type="button" class="pz-close" aria-label="Fermer">×</button>`;
+        <button type="button" class="pz-close" aria-label="Fermer" title="Fermer">×</button>`;
       root.prepend(header);
-      header.querySelector('.pz-close')?.addEventListener('pointerdown', event => event.stopPropagation());
-      header.querySelector('.pz-close')?.addEventListener('click', event => {
+
+      const close = header.querySelector('.pz-close');
+      close?.addEventListener('pointerdown', event => event.stopPropagation());
+      close?.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
         closeCatalog(root);
@@ -116,7 +118,7 @@
     }
   }
 
-  function translateLeaf(node, label)
+  function replaceFirstText(node, label)
   {
     const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
     let current = walker.nextNode();
@@ -138,13 +140,16 @@
     if(!tabs) return;
     tabs.classList.add('pz-tabs');
 
-    const direct = [ ...tabs.children ].filter(node => node instanceof HTMLElement);
-    direct.forEach(tab => {
+    [ ...tabs.children ].filter(node => node instanceof HTMLElement).forEach(tab => {
       const value = clean(tab.textContent);
-      const match = TAB_LABELS.find(([pattern]) => pattern.test(value));
-      if(!match) return;
+      const def = TAB_DEFS.find(item => item.pattern.test(value) || tab.dataset.pzTab === item.key);
+      if(!def) return;
       tab.classList.add('pz-tab');
-      translateLeaf(tab, match[1]);
+      tab.dataset.pzTab = def.key;
+      replaceFirstText(tab, def.label);
+      const clickable = tab.matches('button,a,[role="tab"],[role="button"]') ? tab : tab.querySelector('button,a,[role="tab"],[role="button"]');
+      clickable?.setAttribute('aria-label', def.label);
+      clickable?.setAttribute('title', def.label);
     });
   }
 
@@ -157,9 +162,7 @@
 
   function markProducts(root, nav)
   {
-    const products = [ ...root.querySelectorAll('.layout-grid-item,[class*="catalog-grid-item"]') ]
-      .filter(item => !nav?.contains(item));
-
+    const products = [ ...root.querySelectorAll('.layout-grid-item,[class*="catalog-grid-item"]') ].filter(item => !nav?.contains(item));
     products.forEach(item => {
       if(!(item instanceof HTMLElement)) return;
       item.classList.add('pz-product');
@@ -168,11 +171,10 @@
       const unique = item.querySelector('.unique-bg-override');
       if(unique instanceof HTMLElement)
       {
-        const img = unique.style.backgroundImage;
-        if(img && img !== 'none') unique.style.setProperty('--pz-item-image', img);
+        const image = unique.style.backgroundImage;
+        if(image && image !== 'none') unique.style.setProperty('--pz-item-image', image);
       }
     });
-
     return products;
   }
 
@@ -196,7 +198,8 @@
     const searchInput = side?.querySelector('input[type="text"],input[type="search"]');
     const search = searchInput?.closest('.d-flex,.flex-row') || searchInput?.parentElement?.parentElement;
     if(search) search.classList.add('pz-search');
-    if(searchInput) searchInput.placeholder = 'Rechercher un furni...';
+    if(searchInput) searchInput.placeholder = 'Rechercher...';
+    search?.querySelectorAll('button').forEach(button => button.classList.add('pz-search-button'));
 
     let contentCol = null;
     if(main) contentCol = [ ...main.children ].find(node => node !== side && node instanceof HTMLElement) || null;
@@ -237,29 +240,8 @@
       const value = clean(node.textContent);
       if(/^Buy$/i.test(value) || /^Purchase$/i.test(value)) node.textContent = 'Acheter';
       else if(/^Gift$/i.test(value)) node.textContent = 'Offrir';
+      else if(/^Search$/i.test(value)) node.textContent = 'Rechercher';
     });
-  }
-
-  function openStorefront(root)
-  {
-    if(root.dataset.pzOpened === '1') return;
-    const tabs = getTabs(root);
-    if(!tabs) return;
-    const candidates = [ ...tabs.querySelectorAll('.pz-tab') ];
-    const home = candidates.find(tab => clean(tab.textContent) === 'Accueil');
-    const furni = candidates.find(tab => clean(tab.textContent) === 'Mobilier');
-    if(!home || !furni) return;
-    const activeHome = home.matches('.active,[aria-selected="true"]') || home.querySelector('.active,[aria-selected="true"]');
-    const hasProducts = !!root.querySelector('.pz-product');
-    if(hasProducts) { root.dataset.pzOpened = '1'; return; }
-    if(activeHome)
-    {
-      root.dataset.pzOpened = '1';
-      setTimeout(() => {
-        const clickTarget = furni.matches('button,a,[role="tab"],[role="button"]') ? furni : furni.querySelector('button,a,[role="tab"],[role="button"]');
-        clickTarget?.click();
-      }, 80);
-    }
   }
 
   function decorate(root)
@@ -270,7 +252,6 @@
     decorateTabs(root);
     decorateStructure(root);
     translateActions(root);
-    openStorefront(root);
   }
 
   let queued = false;
@@ -287,9 +268,9 @@
   function boot()
   {
     refresh();
-    [120, 350, 800, 1500].forEach(delay => setTimeout(refresh, delay));
+    [100, 280, 650, 1200].forEach(delay => setTimeout(refresh, delay));
     new MutationObserver(refresh).observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class','style'] });
-    console.info('[ParadiseRP] catalogue ZERO loaded');
+    console.info('[ParadiseRP] catalogue ZERO V2 loaded');
   }
 
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', boot, { once:true }) : boot();
