@@ -3,11 +3,13 @@ package io.github.brenoepics.roleplay.events;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
+import com.eu.habbo.habbohotel.rooms.RoomTile;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.habbohotel.users.HabboItem;
 import com.eu.habbo.plugin.EventHandler;
 import com.eu.habbo.plugin.EventListener;
 import com.eu.habbo.plugin.events.furniture.FurnitureToggleEvent;
+import com.eu.habbo.plugin.events.users.UserTakeStepEvent;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.utilities.types.RPItem;
@@ -45,6 +47,8 @@ public final class FurnitureTrashSearchListener implements EventListener {
   private static final ConcurrentHashMap<Integer, Long> COOLDOWNS = new ConcurrentHashMap<>();
   private static final Set<Integer> ACTIVE_FURNITURE = ConcurrentHashMap.newKeySet();
   private static final Set<Integer> ACTIVE_USERS = ConcurrentHashMap.newKeySet();
+  private static final ConcurrentHashMap<Integer, ActiveSearch> ACTIVE_SEARCHES =
+      new ConcurrentHashMap<>();
 
   @EventHandler
   public static void onFurnitureToggle(FurnitureToggleEvent event) {
@@ -103,32 +107,72 @@ public final class FurnitureTrashSearchListener implements EventListener {
       return;
     }
 
-    long cooldownMs = Math.max(1_000L,
-        Emulator.getConfig().getInt("paradise.trash.cooldown_seconds", 300) * 1000L);
-    COOLDOWNS.put(furniture.getId(), now + cooldownMs);
-
+    ActiveSearch search = new ActiveSearch(habbo, furniture, room, userId, maxDistance);
+    ACTIVE_SEARCHES.put(userId, search);
+    setFurnitureOpen(search, true);
     habbo.shout("* Fouille la poubelle... *", RoomChatMessageBubbles.NORMAL);
 
     long delayMs = Math.max(1_000L,
         Emulator.getConfig().getInt("paradise.trash.search_seconds", 4) * 1000L);
     Emulator.getThreading().run(
-        () -> finishSearch(habbo, furniture, room, userId, maxDistance), delayMs);
+        () -> finishSearch(search), delayMs);
   }
 
-  private static void finishSearch(Habbo habbo, HabboItem furniture, Room originalRoom, int userId,
-      int maxDistance) {
+  /** Annule immédiatement une fouille si le joueur tente de sortir de la portée autorisée. */
+  @EventHandler
+  public static void onUserTakeStep(UserTakeStepEvent event) {
+    if (event == null || event.habbo == null || event.habbo.getHabboInfo() == null) {
+      return;
+    }
+
+    int userId = event.habbo.getHabboInfo().getId();
+    ActiveSearch search = ACTIVE_SEARCHES.get(userId);
+    if (search == null || event.toLocation == null
+        || event.habbo.getHabboInfo().getCurrentRoom() != search.room()) {
+      return;
+    }
+
+    if (isNear(event.toLocation, search.furniture(), search.maxDistance())) {
+      return;
+    }
+
+    if (ACTIVE_SEARCHES.remove(userId, search)) {
+      COOLDOWNS.remove(search.furniture().getId());
+      releaseSearch(search);
+      setFurnitureOpen(search, false);
+      event.habbo.shout(
+          "* Annule la fouille de la poubelle car il est trop loin. *",
+          RoomChatMessageBubbles.NORMAL);
+    }
+  }
+
+  private static void finishSearch(ActiveSearch search) {
+    if (!ACTIVE_SEARCHES.remove(search.userId(), search)) {
+      return;
+    }
+
+    Habbo habbo = search.habbo();
+    HabboItem furniture = search.furniture();
+    Room originalRoom = search.room();
+    boolean completed = false;
     try {
       if (habbo.getHabboInfo() == null || habbo.getRoomUnit() == null
           || habbo.getHabboInfo().getCurrentRoom() != originalRoom
           || originalRoom.getHabboItem(furniture.getId()) == null) {
+        COOLDOWNS.remove(furniture.getId());
         return;
       }
 
-      if (!isNear(habbo, furniture, maxDistance)) {
-        habbo.whisper("Vous vous etes trop eloigne de la poubelle.", RoomChatMessageBubbles.ALERT);
+      if (!isNear(habbo, furniture, search.maxDistance())) {
+        COOLDOWNS.remove(furniture.getId());
+        habbo.shout(
+            "* Annule la fouille de la poubelle car il est trop loin. *",
+            RoomChatMessageBubbles.NORMAL);
         return;
       }
 
+      // From this point the search itself completed, with or without loot.
+      completed = true;
       int roll = ThreadLocalRandom.current().nextInt(100);
       if (roll < 50) {
         habbo.shout("* Fouille la poubelle mais ne trouve rien *", RoomChatMessageBubbles.NORMAL);
@@ -160,16 +204,58 @@ public final class FurnitureTrashSearchListener implements EventListener {
       habbo.shout("* Fouille la poubelle et trouve " + reward.getDisplayName() + " *",
           RoomChatMessageBubbles.NORMAL);
     } catch (Exception e) {
+      COOLDOWNS.remove(furniture.getId());
       LOGGER.error("[ParadiseRP Trash] Failed to finish trash search", e);
     } finally {
-      ACTIVE_USERS.remove(userId);
-      ACTIVE_FURNITURE.remove(furniture.getId());
+      releaseSearch(search);
+      if (completed) {
+        keepOpenUntilReady(search);
+      } else {
+        setFurnitureOpen(search, false);
+      }
+    }
+  }
+
+  private static void keepOpenUntilReady(ActiveSearch search) {
+    long cooldownMs = Math.max(1_000L,
+        Emulator.getConfig().getInt("paradise.trash.cooldown_seconds", 300) * 1000L);
+    long cooldownUntil = System.currentTimeMillis() + cooldownMs;
+    COOLDOWNS.put(search.furniture().getId(), cooldownUntil);
+
+    Emulator.getThreading().run(() -> {
+      if (COOLDOWNS.remove(search.furniture().getId(), cooldownUntil)) {
+        setFurnitureOpen(search, false);
+      }
+    }, cooldownMs);
+  }
+
+  private static void releaseSearch(ActiveSearch search) {
+    ACTIVE_USERS.remove(search.userId());
+    ACTIVE_FURNITURE.remove(search.furniture().getId());
+  }
+
+  private static void setFurnitureOpen(ActiveSearch search, boolean open) {
+    try {
+      if (search.room().getHabboItem(search.furniture().getId()) == null) {
+        return;
+      }
+      search.furniture().setExtradata(open ? "1" : "0");
+      search.furniture().needsUpdate(true);
+      search.room().updateItemState(search.furniture());
+    } catch (Exception e) {
+      LOGGER.warn("[ParadiseRP Trash] Failed to update trash visual state", e);
     }
   }
 
   private static boolean isNear(Habbo habbo, HabboItem furniture, int maxDistance) {
     int dx = Math.abs(habbo.getRoomUnit().getX() - furniture.getX());
     int dy = Math.abs(habbo.getRoomUnit().getY() - furniture.getY());
+    return Math.max(dx, dy) <= maxDistance;
+  }
+
+  private static boolean isNear(RoomTile tile, HabboItem furniture, int maxDistance) {
+    int dx = Math.abs(tile.x - furniture.getX());
+    int dy = Math.abs(tile.y - furniture.getY());
     return Math.max(dx, dy) <= maxDistance;
   }
 
@@ -335,5 +421,9 @@ public final class FurnitureTrashSearchListener implements EventListener {
       return null;
     }
     return candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()));
+  }
+
+  private record ActiveSearch(Habbo habbo, HabboItem furniture, Room room, int userId,
+                              int maxDistance) {
   }
 }

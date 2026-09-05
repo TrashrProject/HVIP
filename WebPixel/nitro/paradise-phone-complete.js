@@ -2,7 +2,7 @@
     'use strict';
 
     if (window.__PARADISE_PHONE_COMPLETE__) return;
-    window.__PARADISE_PHONE_COMPLETE__ = '1.1.0';
+    window.__PARADISE_PHONE_COMPLETE__ = '1.2.0';
 
     const API = '/nitro/phone-api.php';
     const runtime = window.__PARADISE_PHONE_RUNTIME__ = window.__PARADISE_PHONE_RUNTIME__ || { photos: [] };
@@ -81,7 +81,7 @@
         });
     }
 
-    function errorView(message, retry) {
+    function errorView(message) {
         return `<div class="ppr-state ppr-error"><strong>Impossible de charger cette application.</strong><span>${escapeHtml(message)}</span><button type="button" data-ppr-retry>Réessayer</button></div>`;
     }
 
@@ -90,8 +90,8 @@
         return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
     }
 
-    function avatar(look, name) {
-        return `<img src="/avatar.php?figure=${encodeURIComponent(look || '')}&size=m&direction=2&head_direction=2" alt="${escapeHtml(name)}" loading="lazy">`;
+    function avatar(look, name, size = 'm') {
+        return `<img src="/avatar.php?figure=${encodeURIComponent(look || '')}&size=${encodeURIComponent(size)}&direction=2&head_direction=2" alt="${escapeHtml(name)}" loading="lazy">`;
     }
 
     function youtubeId(value) {
@@ -184,10 +184,10 @@
     };
 
     const gram = {
-        root: null, csrf: '', data: null, loading: false,
+        root: null, csrf: '', data: null, loading: false, view: 'home', selectedPhotoId: 0, profileUserId: 0,
         async mount(root) {
             this.root = root;
-            root.className = 'phone-coming-soon ppr-app ppr-gram';
+            root.className = 'phone-coming-soon ppr-app ppr-gram pg-v2';
             root.dataset.pprReady = '1';
             root.addEventListener('submit', event => this.submit(event));
             root.addEventListener('click', event => this.click(event));
@@ -196,17 +196,21 @@
         async load() {
             if (!this.root || this.loading) return;
             this.loading = true;
-            this.root.innerHTML = '<div class="ppr-state"><span class="ppr-loader"></span><strong>Chargement du fil...</strong></div>';
-            try { this.data = await request('feed'); this.csrf = this.data.csrf; this.render(); }
-            catch (error) { this.root.innerHTML = errorView(error.message); }
+            if (!this.data) this.root.innerHTML = '<div class="ppr-state"><span class="ppr-loader"></span><strong>Chargement de Paradise Gram...</strong></div>';
+            try {
+                this.data = await request('feed');
+                this.csrf = this.data.csrf;
+                if (!this.profileUserId) this.profileUserId = Number(this.data.me?.id || 0);
+                this.render();
+            } catch (error) { this.root.innerHTML = errorView(error.message); }
             finally { this.loading = false; }
         },
         async action(payload) {
             return request('feed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, csrf: this.csrf }) });
         },
         async submit(event) {
-            const publish = event.target.closest('[data-gram-publish]');
-            const comment = event.target.closest('[data-gram-comment]');
+            const publish = event.target.closest('[data-pg-publish]');
+            const comment = event.target.closest('[data-pg-comment]');
             if (!publish && !comment) return;
             event.preventDefault();
             const button = event.target.querySelector('button[type="submit"]');
@@ -214,33 +218,86 @@
             if (button) button.disabled = true;
             try {
                 const data = new FormData(event.target);
-                if (publish) await this.action({ action: 'create', body: String(data.get('body') || ''), imageUrl: String(data.get('imageUrl') || '') });
-                else await this.action({ action: 'comment', postId: Number(comment.dataset.gramComment), body: String(data.get('body') || '') });
+                if (publish) {
+                    if (!this.selectedPhotoId) throw new Error('Choisissez une photo de votre galerie.');
+                    await this.action({ action: 'create', photoId: this.selectedPhotoId, body: String(data.get('body') || '') });
+                    this.selectedPhotoId = 0;
+                    this.view = 'home';
+                } else {
+                    await this.action({ action: 'comment', postId: Number(comment.dataset.pgComment), body: String(data.get('body') || '') });
+                }
                 await this.load();
             } catch (error) { this.notice(error.message); if (button) button.disabled = false; }
         },
         async click(event) {
             if (event.target.closest('[data-ppr-retry]')) return this.load();
-            const like = event.target.closest('[data-gram-like]');
-            const remove = event.target.closest('[data-gram-delete]');
-            if (!like && !remove) return;
+            const nav = event.target.closest('[data-pg-nav]');
+            if (nav) { this.view = nav.dataset.pgNav; if (this.view === 'profile') this.profileUserId = Number(this.data?.me?.id || 0); return this.render(); }
+            const photo = event.target.closest('[data-pg-photo]');
+            if (photo) { this.selectedPhotoId = Number(photo.dataset.pgPhoto); return this.render(); }
+            const profile = event.target.closest('[data-pg-profile]');
+            if (profile) { this.profileUserId = Number(profile.dataset.pgProfile); this.view = 'profile'; return this.render(); }
+            const like = event.target.closest('[data-pg-like]');
+            const remove = event.target.closest('[data-pg-delete]');
+            const follow = event.target.closest('[data-pg-follow]');
+            const removeComment = event.target.closest('[data-pg-delete-comment]');
+            if (!like && !remove && !follow && !removeComment) return;
             if (remove && !confirm('Supprimer cette publication ?')) return;
-            const button = like || remove;
+            const button = like || remove || follow || removeComment;
             if (button.disabled) return;
             button.disabled = true;
-            try { await this.action({ action: like ? 'like' : 'delete', postId: Number((like || remove).dataset[like ? 'gramLike' : 'gramDelete']) }); await this.load(); }
-            catch (error) { this.notice(error.message); button.disabled = false; }
+            try {
+                if (like) await this.action({ action: 'like', postId: Number(like.dataset.pgLike) });
+                if (remove) await this.action({ action: 'delete', postId: Number(remove.dataset.pgDelete) });
+                if (follow) await this.action({ action: 'follow', targetUserId: Number(follow.dataset.pgFollow) });
+                if (removeComment) await this.action({ action: 'delete_comment', commentId: Number(removeComment.dataset.pgDeleteComment) });
+                await this.load();
+            } catch (error) { this.notice(error.message); button.disabled = false; }
         },
-        notice(message) { const node = this.root?.querySelector('[data-gram-status]'); if (node) node.textContent = message; },
+        notice(message) { const node = this.root?.querySelector('[data-pg-status]'); if (node) node.textContent = message; },
+        navButton(view, icon, label) {
+            return `<button type="button" class="${this.view === view ? 'active' : ''}" data-pg-nav="${view}" title="${label}">${icon}</button>`;
+        },
         render() {
             if (!this.root || !this.data) return;
+            let content;
+            if (this.view === 'explore') content = this.explore();
+            else if (this.view === 'publish') content = this.publish();
+            else if (this.view === 'activity') content = this.activity();
+            else if (this.view === 'profile') content = this.profile();
+            else content = this.home();
+            const title = this.view === 'home' ? 'Accueil' : this.view === 'explore' ? 'Explorer' : this.view === 'publish' ? 'Publier' : this.view === 'activity' ? 'Activité' : 'Profil';
+            this.root.innerHTML = `<div class="pg-shell"><header class="pg-top"><strong>ParadiseGram</strong><span data-pg-status>${title}</span></header><main class="pg-body">${content}</main><nav class="pg-nav">${this.navButton('home','⌂','Accueil')}${this.navButton('explore','⌕','Explorer')}${this.navButton('publish','＋','Publier')}${this.navButton('activity','♡','Activité')}${this.navButton('profile','♙','Profil')}</nav></div>`;
+        },
+        home() {
             const posts = this.data.posts || [];
-            this.root.innerHTML = `<header class="ppr-header"><strong>Paradise Gram</strong><span data-gram-status>Fil d'actualité</span></header>
-                <form class="ppr-compose-card" data-gram-publish><textarea name="body" maxlength="500" placeholder="Quoi de neuf ?"></textarea><input name="imageUrl" type="url" placeholder="Photo HTTPS (facultatif)"><button type="submit">Publier</button></form>
-                <div class="ppr-scroll ppr-feed">${posts.length ? posts.map(post => this.post(post)).join('') : '<div class="ppr-state"><strong>Aucune publication</strong><span>Le fil est encore vide.</span></div>'}</div>`;
+            return posts.length ? `<div class="pg-feed">${posts.map(post => this.post(post)).join('')}</div>` : '<div class="pg-empty"><strong>Le fil est vide</strong><span>Publiez une photo depuis votre galerie.</span></div>';
         },
         post(post) {
-            return `<article class="ppr-post"><header><span class="ppr-avatar">${avatar(post.look, post.username)}</span><div><strong>${escapeHtml(post.username)}</strong><small>${formatDate(post.createdAt)}</small></div>${post.canDelete ? `<button type="button" data-gram-delete="${post.id}" title="Supprimer">×</button>` : ''}</header>${post.body ? `<p>${escapeHtml(post.body)}</p>` : ''}${post.imageUrl ? `<img class="ppr-post-image" src="${escapeHtml(post.imageUrl)}" alt="Publication de ${escapeHtml(post.username)}" loading="lazy">` : ''}<div class="ppr-post-actions"><button type="button" class="${post.liked ? 'active' : ''}" data-gram-like="${post.id}">J'aime <b>${post.likes}</b></button></div><div class="ppr-comments">${(post.comments || []).map(comment => `<div><b>${escapeHtml(comment.username)}</b> ${escapeHtml(comment.body)}</div>`).join('')}</div><form data-gram-comment="${post.id}"><input name="body" maxlength="240" required placeholder="Ajouter un commentaire"><button type="submit">Envoyer</button></form></article>`;
+            const comments = post.comments || [];
+            return `<article class="pg-post"><header class="pg-post-head"><button type="button" class="pg-user" data-pg-profile="${post.userId}"><span class="pg-avatar">${avatar(post.look, post.username)}</span><span><strong>${escapeHtml(post.username)}</strong><small>${formatDate(post.createdAt)}</small></span></button>${post.canDelete ? `<button type="button" class="pg-delete" data-pg-delete="${post.id}" title="Supprimer">×</button>` : `<button type="button" class="pg-follow ${post.following ? 'active' : ''}" data-pg-follow="${post.userId}">${post.following ? 'Suivi' : 'Suivre'}</button>`}</header><img class="pg-photo" src="${escapeHtml(post.imageUrl || '')}" alt="Publication de ${escapeHtml(post.username)}" loading="lazy"><div class="pg-actions"><button type="button" class="pg-heart ${post.liked ? 'active' : ''}" data-pg-like="${post.id}">${post.liked ? '♥' : '♡'}</button><span>◯</span></div><div class="pg-likes">${Number(post.likes || 0)} J’aime</div>${post.body ? `<div class="pg-caption"><strong>${escapeHtml(post.username)}</strong> ${escapeHtml(post.body)}</div>` : ''}<div class="pg-comments">${comments.slice(-4).map(comment => `<div><span><strong>${escapeHtml(comment.username)}</strong> ${escapeHtml(comment.body)}</span>${comment.canDelete ? `<button type="button" data-pg-delete-comment="${comment.id}" title="Supprimer">×</button>` : ''}</div>`).join('')}</div><form class="pg-comment-form" data-pg-comment="${post.id}"><input name="body" maxlength="240" required placeholder="Ajouter un commentaire…"><button type="submit">Publier</button></form></article>`;
+        },
+        explore() {
+            const posts = [...(this.data.posts || [])].filter(post => post.imageUrl).sort((a, b) => Number(b.likes || 0) - Number(a.likes || 0));
+            return posts.length ? `<div class="pg-grid">${posts.map(post => `<button type="button" data-pg-profile="${post.userId}"><img src="${escapeHtml(post.imageUrl)}" alt="Photo de ${escapeHtml(post.username)}" loading="lazy"><span>♥ ${Number(post.likes || 0)}</span></button>`).join('')}</div>` : '<div class="pg-empty">Aucune photo à explorer.</div>';
+        },
+        publish() {
+            const gallery = this.data.gallery || [];
+            const selected = gallery.find(photo => Number(photo.id) === this.selectedPhotoId);
+            return `<section class="pg-publish">${selected ? `<img class="pg-selected" src="${escapeHtml(selected.url)}" alt="Photo sélectionnée">` : '<div class="pg-publish-intro"><strong>Choisissez une photo</strong><span>Uniquement depuis votre galerie ParadiseRP.</span></div>'}<div class="pg-picker">${gallery.length ? gallery.map(photo => `<button type="button" class="${Number(photo.id) === this.selectedPhotoId ? 'active' : ''}" data-pg-photo="${photo.id}"><img src="${escapeHtml(photo.url)}" alt="Photo de galerie" loading="lazy"></button>`).join('') : '<div class="pg-empty">Aucune photo dans votre galerie.</div>'}</div><form class="pg-publish-form" data-pg-publish><textarea name="body" maxlength="500" placeholder="Écrire une légende…"></textarea><button type="submit" ${selected ? '' : 'disabled'}>Publier</button></form></section>`;
+        },
+        activity() {
+            const items = this.data.activity || [];
+            const text = item => item.type === 'like' ? 'a aimé votre publication.' : item.type === 'comment' ? 'a commenté votre publication.' : 'a commencé à vous suivre.';
+            return items.length ? `<div class="pg-activity">${items.map(item => `<div class="pg-activity-row"><span class="pg-avatar">${avatar(item.look, item.username)}</span><div><span><strong>${escapeHtml(item.username)}</strong> ${text(item)}</span><small>${formatDate(item.createdAt)}</small></div></div>`).join('')}</div>` : '<div class="pg-empty"><strong>Aucune activité</strong><span>Les likes, commentaires et abonnements apparaîtront ici.</span></div>';
+        },
+        profile() {
+            const userId = Number(this.profileUserId || this.data.me?.id || 0);
+            const posts = (this.data.posts || []).filter(post => Number(post.userId) === userId);
+            const first = posts[0];
+            const isMe = userId === Number(this.data.me?.id || 0);
+            const profile = isMe ? this.data.me : { id:userId, username:first?.username || 'Utilisateur', look:first?.look || '', posts:posts.length, followers:Number(first?.followers || 0), followingCount:Number(first?.followingCount || 0), following:Boolean(first?.following) };
+            return `<section class="pg-profile"><header class="pg-profile-head"><span class="pg-profile-avatar">${avatar(profile.look, profile.username, 'l')}</span><div><strong>${escapeHtml(profile.username)}</strong><small>@${escapeHtml(profile.username)}</small>${isMe ? '' : `<button type="button" class="pg-profile-follow ${profile.following ? 'active' : ''}" data-pg-follow="${userId}">${profile.following ? 'Abonné' : 'Suivre'}</button>`}</div></header><div class="pg-stats"><span><strong>${Number(profile.posts ?? posts.length)}</strong>publications</span><span><strong>${Number(profile.followers || 0)}</strong>abonnés</span><span><strong>${Number(profile.followingCount || 0)}</strong>abonnements</span></div><div class="pg-grid">${posts.length ? posts.map(post => `<div><img src="${escapeHtml(post.imageUrl || '')}" alt="Publication" loading="lazy"></div>`).join('') : '<div class="pg-empty">Aucune publication.</div>'}</div></section>`;
         }
     };
 
@@ -333,7 +390,7 @@
                         const sourceX = Math.max(0, Math.floor((source.width - side) / 2));
                         const sourceY = Math.max(0, Math.floor((source.height - side) / 2));
                         preview.getContext('2d', { alpha: false }).drawImage(source, sourceX, sourceY, side, side, 0, 0, preview.width, preview.height);
-                    } catch { /* Le rendu natif de la caméra reste disponible. */ }
+                    } catch {}
                 }
             }
 

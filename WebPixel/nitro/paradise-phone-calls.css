@@ -1,0 +1,48 @@
+/* ParadiseRP — ParadisePhone voice/video calls */
+
+.phone-friends-app .friend-row.paradise-callable-friend{position:relative!important;padding-right:62px!important}
+.paradise-call-actions{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;gap:4px;z-index:5}
+.paradise-call-actions button{width:25px;height:25px;padding:0;border:1px solid #3b6b8f;border-radius:7px;background:#123453;color:#fff;font-size:12px;font-weight:900;line-height:23px;text-align:center;cursor:pointer;box-shadow:0 1px 2px #0005;transition:transform .12s,background .12s,border-color .12s}
+.paradise-call-actions button:hover{transform:translateY(-1px);background:#1673b7;border-color:#54b9ed}
+.paradise-call-actions button:last-child{background:#174d62}.paradise-call-actions button:last-child:hover{background:#167c91}
+
+.paradise-call-layer{position:absolute;z-index:10000;inset:44px 9px 16px;border-radius:17px;overflow:hidden;pointer-events:auto;font-family:Arial,sans-serif;color:#fff}
+body>.paradise-call-layer.is-floating{position:fixed;inset:auto 22px 22px auto;width:278px;height:470px;z-index:2147482000;filter:drop-shadow(0 12px 24px #0009)}
+.pcall-card{position:relative;width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 14px;background:radial-gradient(circle at 50% 18%,#173a5b 0,#081a2d 42%,#06111f 100%);border:1px solid #176fa8;border-radius:17px;overflow:hidden;text-align:center;box-shadow:inset 0 0 0 1px #04101d}
+.pcall-card:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(145deg,#1eb6e313 0,transparent 35%,#621da312 100%)}
+.pcall-card>*{position:relative;z-index:2}
+.pcall-topline{position:absolute;top:10px;left:12px;right:12px;display:flex;align-items:center;justify-content:space-between;color:#9dc1dc;font-size:8px;text-transform:uppercase;letter-spacing:.55px}
+.pcall-topline b{color:#62d5ff;font-size:7px;letter-spacing:.7px}
+.pcall-avatar{width:76px;height:76px;margin:4px 0 8px;border-radius:50%;overflow:hidden;background:linear-gradient(145deg,#163c59,#0a2134);border:2px solid #35b9ef;box-shadow:0 0 0 4px #0a2439,0 6px 18px #0008}
+.pcall-avatar.is-large{width:88px;height:88px}.pcall-avatar img{width:100%;height:100%;object-fit:cover;image-rendering:auto}
+.pcall-card h3{margin:6px 0 2px;font-size:18px;line-height:1.15;color:#fff;text-shadow:0 2px 2px #000}
+.pcall-card p{margin:3px 0;color:#9eb6ca;font-size:10px;line-height:1.35}.pcall-status{font-size:11px!important;color:#bcd8eb!important}
+.pcall-card small{margin-top:6px;color:#91aabe;font-size:8px}
+.pcall-duration{display:block;margin:7px 0 14px;font-size:15px;letter-spacing:1px;color:#fff;font-variant-numeric:tabular-nums}
+
+.pcall-incoming-actions{display:grid;grid-template-columns:1fr 1fr;gap:18px;width:100%;margin-top:28px;padding:0 12px;box-sizing:border-box}
+.pcall-incoming-actions button{border:0;background:transparent;color:#dbeafa;font-size:9px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px}
+.pcall-incoming-actions button span{display:grid;place-items:center;width:47px;height:47px;border-radius:50%;color:#fff;font-size:19px;box-shadow:0 5px 12px #0006;transition:transform .12s,filter .12s}
+.pcall-incoming-actions button:hover span{transform:scale(1.06);filter:brightness(1.08)}
+.pcall-incoming-actions .is-decline span{background:#cf3442}.pcall-incoming-actions .is-accept span{background:#16a35d}
+
+.pcall-pulse{height:28px;display:flex;align-items:center;justify-content:center;gap:5px;margin:8px 0 16px}
+.pcall-pulse i{width:5px;height:5px;border-radius:50%;background:#57cfff;animation:pcall-pulse 1.1s infinite ease-in-out}.pcall-pulse i:nth-child(2){animation-delay:.15s}.pcall-pulse i:nth-child(3){animation-delay:.3s}
+@keyframes pcall-pulse{0%,70%,100%{transform:scale(.65);opacity:.4}35%{transform:scale(1.15);opacity:1}}
+.pcall-big-hangup{width:50px;height:50px;border:0;border-radius:50%;background:#d73742;color:#fff;font-size:23px;font-weight:900;cursor:pointer;transform:rotate(135deg);box-shadow:0 5px 14px #0008;transition:transform .12s,filter .12s}.pcall-big-hangup:hover{transform:rotate(135deg) scale(1.06);filter:brightness(1.08)}
+
+.pcall-controls{position:absolute;left:10px;right:10px;bottom:13px;display:flex;justify-content:center;gap:8px;z-index:5}
+.pcall-control{min-width:52px;border:0;background:transparent;color:#d9e9f7;font-size:8px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
+.pcall-control:first-line{font-size:15px}.pcall-control:before{content:"";position:absolute}
+.pcall-control{padding:0}.pcall-control>span{white-space:nowrap}.pcall-control:not(.is-hangup){font-size:18px}.pcall-control:not(.is-hangup)>span{font-size:7px}.pcall-control.is-hangup{width:53px;height:53px;min-width:53px;border-radius:50%;background:#d63340;color:#fff;font-size:20px;line-height:53px;display:block;transform:rotate(135deg);box-shadow:0 4px 12px #0008}.pcall-control.is-hangup>span{display:none}
+
+.pcall-active.is-audio{padding-bottom:82px}.pcall-active.is-audio .pcall-avatar{margin-top:22px}
+.pcall-active.is-video{padding:0;background:#02080e;border-color:#163b57}.pcall-active.is-video>video[data-pcall-remote]{position:absolute;z-index:1;inset:0;width:100%;height:100%;object-fit:cover;background:#071525}
+.pcall-video-shade{position:absolute!important;z-index:2!important;inset:0;background:linear-gradient(180deg,#0009 0,transparent 27%,transparent 58%,#000c 100%);pointer-events:none}
+.pcall-video-head{position:absolute!important;z-index:4!important;top:12px;left:12px;right:12px;display:flex;flex-direction:column;align-items:flex-start;text-shadow:0 1px 3px #000}.pcall-video-head b{font-size:14px}.pcall-video-head span{margin-top:2px;font-size:8px;color:#d9e8f4}.pcall-video-head i{font-style:normal;font-variant-numeric:tabular-nums}
+.pcall-local-video{position:absolute!important;z-index:4!important;right:10px;top:49px;width:68px!important;height:92px!important;object-fit:cover;border:2px solid #fff;border-radius:9px;background:#0b1b28;box-shadow:0 4px 12px #0008}
+.pcall-active.is-video .pcall-controls{z-index:6;bottom:14px}
+
+.paradise-call-toast{position:fixed;z-index:2147483000;left:50%;top:22px;transform:translateX(-50%);max-width:min(420px,calc(100vw - 24px));padding:9px 13px;border:1px solid #267aae;border-radius:8px;background:#09243a;color:#fff;font:700 11px/1.25 Arial,sans-serif;box-shadow:0 5px 18px #0007;text-align:center}.paradise-call-toast.is-error{border-color:#cf4d59;background:#48141b}.paradise-call-toast.is-info{border-color:#2b96c7;background:#0b2b42}
+
+@media(max-height:650px){.paradise-call-layer{inset:38px 7px 10px}.pcall-avatar{width:66px;height:66px}.pcall-avatar.is-large{width:76px;height:76px}.pcall-incoming-actions{margin-top:18px}.pcall-card h3{font-size:16px}.pcall-controls{bottom:9px}}

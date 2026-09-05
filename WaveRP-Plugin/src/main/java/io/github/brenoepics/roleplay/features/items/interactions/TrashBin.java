@@ -37,13 +37,6 @@ public class TrashBin extends InteractionDefault {
         super(id, userId, item, extradata, limitedStack, limitedSells);
     }
 
-    /**
-     * WavePlus transmet isUsable() a Nitro dans RoomFloorItemsComposer/AddFloorItemComposer.
-     * Une poubelle Habbo statique a souvent un seul etat et etait donc annoncee comme non
-     * utilisable : Nitro la selectionnait mais n'envoyait jamais ToggleFloorItemEvent.
-     * Une interaction RP de poubelle doit toujours etre utilisable, independamment du nombre
-     * d'etats visuels du mobilier d'origine.
-     */
     @Override
     public boolean isUsable() {
         return true;
@@ -61,9 +54,9 @@ public class TrashBin extends InteractionDefault {
             return;
         }
 
-        // Hors des salles RP, conserver le comportement normal du mobilier.
+        // Hors des salles RP, conserver exactement le toggle natif Arcturus du mobilier.
         if (room.getCategory() != Emulator.getConfig().getInt("nahabbo.features.room.category")) {
-            toggleDefaultState(room);
+            toggleLikeNormalFurniture(room);
             return;
         }
 
@@ -101,9 +94,9 @@ public class TrashBin extends InteractionDefault {
             habbo,
             RoomChatMessageBubbles.NORMAL)).compose());
 
-        // Ouvre visuellement la poubelle dès le début de la fouille en réutilisant
-        // exactement le changement d'état normal du mobilier Habbo.
-        toggleDefaultState(room);
+        // Ouvrir avec le MEME chemin que l'utilisation normale d'un mobi Arcturus.
+        // On repart volontairement de 0 afin que le toggle natif arrive sur l'etat 1.
+        openLikeNormalFurniture(room);
 
         final int habboId = habbo.getHabboInfo().getId();
         final int searchDelay = Math.max(1000,
@@ -116,30 +109,27 @@ public class TrashBin extends InteractionDefault {
 
     private void finishSearch(Habbo habbo, int habboId, RpAvatar data, Room room,
                               LootTable lootTable) {
+        boolean completed = false;
         try {
             if (habbo == null || habbo.getHabboInfo().getId() != habboId
                 || !isHabboStillInRoom(habbo, room) || !isAdjacent(habbo, room)) {
                 if (habbo != null) {
-                    habbo.whisper("La fouille a été annulée : vous vous êtes éloigné de la poubelle.");
+                    room.sendComposer(new RoomUserShoutComposer(new RoomChatMessage(
+                        "* Annule la fouille de la poubelle car il est trop loin. *",
+                        habbo,
+                        habbo,
+                        RoomChatMessageBubbles.NORMAL)).compose());
                 }
-                // Si la fouille est annulée, refermer immédiatement la poubelle.
-                setExtradata("0");
-                needsUpdate(true);
-                room.updateItemState(this);
                 return;
             }
 
             String rewardName = roll(lootTable);
             giveReward(rewardName, habbo, data);
+            completed = true;
 
             synchronized (this) {
                 searched = true;
             }
-
-            // La poubelle reste ouverte pendant le cooldown après avoir été fouillée.
-            setExtradata("1");
-            needsUpdate(true);
-            room.updateItemState(this);
 
             final int cooldown = Math.max(1000,
                 Emulator.getConfig().getInt("nahabbo.features.trashbin.cooldown"));
@@ -147,13 +137,43 @@ public class TrashBin extends InteractionDefault {
                 synchronized (TrashBin.this) {
                     searched = false;
                 }
-                setExtradata("0");
-                needsUpdate(true);
-                room.updateItemState(TrashBin.this);
+                closeFurniture(room);
             }, cooldown);
         } finally {
+            if (!completed) {
+                closeFurniture(room);
+            }
             occupied = false;
         }
+    }
+
+    /** Reproduit le toggle natif d'InteractionDefault sans exiger les droits de la salle. */
+    private void toggleLikeNormalFurniture(Room room) {
+        if (room == null) {
+            return;
+        }
+        try {
+            super.onClick(null, room, new Object[]{0});
+        } catch (Exception ignored) {
+            // Le systeme RP ne doit jamais casser la fouille si un mobi atypique refuse le toggle.
+        }
+    }
+
+    private void openLikeNormalFurniture(Room room) {
+        if (room == null) {
+            return;
+        }
+        closeFurniture(room);
+        toggleLikeNormalFurniture(room);
+    }
+
+    private void closeFurniture(Room room) {
+        if (room == null) {
+            return;
+        }
+        setExtradata("0");
+        needsUpdate(true);
+        room.updateItemState(this);
     }
 
     private LootTable readLootTable() {
@@ -211,7 +231,6 @@ public class TrashBin extends InteractionDefault {
             return;
         }
 
-        // Ne jamais fabriquer un item a partir d'un ID arbitraire : il doit exister dans rp_items.
         RPItem reward = RolePlay.getItemManager().getItemByName(rewardName);
         if (reward == null) {
             habbo.whisper("* Fouille la poubelle mais ne trouve rien. *");
@@ -236,25 +255,13 @@ public class TrashBin extends InteractionDefault {
             .contains(habbo.getRoomUnit().getCurrentLocation());
     }
 
-    private void toggleDefaultState(Room room) {
-        int states = Math.max(1, getBaseItem().getStateCount());
-        int currentState = 0;
-        try {
-            currentState = Integer.parseInt(getExtradata());
-        } catch (NumberFormatException ignored) {
-            // Le mobilier repart de l'etat 0 si son extradata n'est pas numerique.
-        }
-        setExtradata(String.valueOf((currentState + 1) % states));
-        needsUpdate(true);
-        room.updateItemState(this);
-    }
-
     @Override
     public void onPickUp(Room room) {
         synchronized (this) {
             occupied = false;
             searched = false;
         }
+        closeFurniture(room);
     }
 
     private record LootTable(String[] items, int[] chances, int total) {
