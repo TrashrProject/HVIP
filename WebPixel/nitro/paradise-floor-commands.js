@@ -70,4 +70,44 @@
         // built-in local :floor command to open the native editor automatically.
         window.setTimeout(openNativeFloorEditor, 250);
     }, true);
+
+    // ParadiseRP: le client affiche parfois la clé brute "wantedTitle" au lieu
+    // d'un vrai titre. Corrige-la directement dans l'UI active, y compris pour
+    // les fenêtres créées après le chargement initial.
+    function fixWantedTitle(root) {
+        if (!root) return;
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        let node;
+        while ((node = walker.nextNode())) {
+            const value = (node.nodeValue || '').trim();
+            if (value === 'wantedTitle' || value === 'Wanted Title' || value === 'Wanted') {
+                node.nodeValue = node.nodeValue.replace(value, 'Personnes recherchées');
+            }
+        }
+    }
+
+    const startWantedTitleFix = () => {
+        fixWantedTitle(document.body);
+        const observer = new MutationObserver(records => {
+            for (const record of records) {
+                for (const node of record.addedNodes) {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        const value = (node.nodeValue || '').trim();
+                        if (value === 'wantedTitle' || value === 'Wanted Title' || value === 'Wanted') {
+                            node.nodeValue = node.nodeValue.replace(value, 'Personnes recherchées');
+                        }
+                    } else if (node.nodeType === Node.ELEMENT_NODE) {
+                        fixWantedTitle(node);
+                    }
+                }
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startWantedTitleFix, { once: true });
+    } else {
+        startWantedTitleFix();
+    }
 })();
