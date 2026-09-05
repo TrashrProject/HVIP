@@ -1,124 +1,106 @@
 (()=>{
   'use strict';
 
-  const isRestaurantOfferWindow = element => {
-    if (!(element instanceof Element)) return false;
-    const text = String(element.textContent || '');
-    return text.includes('Prise de commande -');
+  const TITLE_PREFIX='Prise de commande -';
+
+  const leafText = element => String(element?.textContent || '').trim();
+
+  const findLeaf = (root, predicate) => {
+    if (!(root instanceof Element)) return null;
+    const nodes=[root,...root.querySelectorAll('*')];
+    return nodes.find(node=>node.children.length===0 && predicate(leafText(node))) || null;
   };
 
-  const improveRestaurantPopupSpacing = windowRoot => {
-    if (!(windowRoot instanceof Element)) return;
+  const findPopup = root => {
+    const titleLeaf=findLeaf(root,text=>text.startsWith(TITLE_PREFIX));
+    if(!titleLeaf) return null;
 
-    const all = [windowRoot, ...windowRoot.querySelectorAll('*')];
-    const leaves = all.filter(node => node.children.length === 0);
-    const yesLabel = leaves.find(node => String(node.textContent || '').trim() === 'Oui');
-    const noLabel = leaves.find(node => String(node.textContent || '').trim() === 'Non');
-    const yesButton = yesLabel?.closest('button');
-    const noButton = noLabel?.closest('button');
+    const yesLeaf=findLeaf(root,text=>text==='Oui' || text==='offer.accept');
+    const noLeaf=findLeaf(root,text=>text==='Non' || text==='Fermer');
+    if(!yesLeaf || !noLeaf) return null;
 
-    if (!yesButton || !noButton) return;
+    const yesButton=yesLeaf.closest('button');
+    const noButton=noLeaf.closest('button');
+    if(!yesButton || !noButton) return null;
 
-    // Espace réel sous les boutons.
-    const buttonsRow = yesButton.parentElement;
-    if (buttonsRow) {
-      buttonsRow.style.setProperty('margin-bottom', '22px', 'important');
-      buttonsRow.style.setProperty('padding-bottom', '8px', 'important');
-    }
-
-    // Retrouve le vrai panneau Nitro (et pas seulement le contenu interne)
-    // puis agrandit réellement sa hauteur vers le bas.
-    let current = buttonsRow;
-    let popup = null;
-
-    while (current && current !== document.body) {
-      const rect = current.getBoundingClientRect();
-      const text = String(current.textContent || '');
-
-      if (
-        text.includes('Prise de commande -') &&
-        rect.width >= 260 && rect.width <= 430 &&
-        rect.height >= 90 && rect.height <= 230
-      ) {
-        popup = current;
+    // Cherche le plus petit ancêtre commun qui contient le titre ET les deux boutons.
+    let current=titleLeaf.parentElement;
+    while(current && current!==document.body){
+      if(current.contains(yesButton) && current.contains(noButton)){
+        const rect=current.getBoundingClientRect();
+        if(rect.width>=260 && rect.width<=460 && rect.height>=80 && rect.height<=260){
+          return { popup: current, titleLeaf, yesLeaf, noLeaf, yesButton, noButton };
+        }
       }
-
-      current = current.parentElement;
+      current=current.parentElement;
     }
-
-    if (popup) {
-      const rect = popup.getBoundingClientRect();
-      popup.style.setProperty('height', `${Math.ceil(rect.height + 34)}px`, 'important');
-      popup.style.setProperty('min-height', `${Math.ceil(rect.height + 34)}px`, 'important');
-      popup.style.setProperty('max-height', 'none', 'important');
-      popup.style.setProperty('padding-bottom', '18px', 'important');
-      popup.style.setProperty('overflow', 'visible', 'important');
-      popup.style.setProperty('box-sizing', 'border-box', 'important');
-    }
-
-    // Sécurité : si le parent direct du contenu fixe lui aussi la hauteur,
-    // on lui laisse de la place pour ne plus couper le bas arrondi.
-    let parent = popup?.parentElement;
-    if (parent && parent !== document.body) {
-      const rect = parent.getBoundingClientRect();
-      if (rect.width >= 260 && rect.width <= 450 && rect.height <= 260) {
-        parent.style.setProperty('height', 'auto', 'important');
-        parent.style.setProperty('min-height', `${Math.ceil(rect.height + 30)}px`, 'important');
-        parent.style.setProperty('overflow', 'visible', 'important');
-      }
-    }
+    return null;
   };
 
-  const translateWindow = root => {
-    if (!(root instanceof Element)) return;
+  const applyPopupFix = root => {
+    const found=findPopup(root);
+    if(!found) return;
 
-    const candidates = [root, ...root.querySelectorAll('*')];
-    let windowRoot = null;
+    const { popup, yesLeaf, noLeaf, yesButton, noButton }=found;
 
-    for (const element of candidates) {
-      if (isRestaurantOfferWindow(element)) {
-        windowRoot = element;
-        break;
-      }
+    if(leafText(yesLeaf)==='offer.accept') yesLeaf.textContent='Oui';
+    if(leafText(noLeaf)==='Fermer') noLeaf.textContent='Non';
+
+    const promptLeaf=findLeaf(popup,text=>text==='notifications.rpoffer' || text==='Accepter cette prise de commande ?');
+    if(promptLeaf && leafText(promptLeaf)==='notifications.rpoffer') {
+      promptLeaf.textContent='Accepter cette prise de commande ?';
     }
 
-    if (!windowRoot) return;
+    // On agrandit LE VRAI conteneur de fenêtre, pas juste la ligne des boutons.
+    // Hauteur fixe volontairement plus grande pour garder un vrai espace sous Oui / Non.
+    popup.style.setProperty('height','150px','important');
+    popup.style.setProperty('min-height','150px','important');
+    popup.style.setProperty('max-height','none','important');
+    popup.style.setProperty('overflow','visible','important');
+    popup.style.setProperty('box-sizing','border-box','important');
 
-    const nodes = [windowRoot, ...windowRoot.querySelectorAll('*')];
-    for (const node of nodes) {
-      if (node.children.length > 0) continue;
-      const value = String(node.textContent || '').trim();
-
-      if (value === 'offer.accept') {
-        node.textContent = 'Oui';
-      } else if (value === 'Fermer') {
-        node.textContent = 'Non';
-      } else if (value === 'notifications.rpoffer') {
-        node.textContent = 'Accepter cette prise de commande ?';
-      }
+    const buttonRow=yesButton.parentElement;
+    if(buttonRow){
+      buttonRow.style.setProperty('margin-bottom','22px','important');
+      buttonRow.style.setProperty('padding-bottom','10px','important');
     }
 
-    requestAnimationFrame(() => {
-      improveRestaurantPopupSpacing(windowRoot);
-      setTimeout(() => improveRestaurantPopupSpacing(windowRoot), 60);
-    });
+    // Certains wrappers Nitro ont aussi une hauteur fixe : on les libère.
+    let parent=popup.parentElement;
+    for(let i=0;i<3 && parent && parent!==document.body;i++,parent=parent.parentElement){
+      const rect=parent.getBoundingClientRect();
+      if(rect.width>=260 && rect.width<=480 && rect.height<=260){
+        parent.style.setProperty('min-height','150px','important');
+        parent.style.setProperty('height','auto','important');
+        parent.style.setProperty('max-height','none','important');
+        parent.style.setProperty('overflow','visible','important');
+      }
+    }
   };
 
   const inspect = node => {
-    const element = node instanceof Element ? node : node?.parentElement;
-    if (!element) return;
-    translateWindow(element);
-    element.querySelectorAll?.('*').forEach(child => {
-      if (String(child.textContent || '').includes('Prise de commande -')) translateWindow(child);
+    const element=node instanceof Element ? node : node?.parentElement;
+    if(!element) return;
+
+    const text=String(element.textContent || '');
+    if(text.includes(TITLE_PREFIX)){
+      applyPopupFix(element);
+      requestAnimationFrame(()=>applyPopupFix(element));
+      setTimeout(()=>applyPopupFix(element),50);
+      setTimeout(()=>applyPopupFix(element),200);
+    }
+
+    element.querySelectorAll?.('*').forEach(child=>{
+      if(String(child.textContent || '').includes(TITLE_PREFIX)) applyPopupFix(child);
     });
   };
 
-  new MutationObserver(mutations => {
-    for (const mutation of mutations) {
+  new MutationObserver(mutations=>{
+    for(const mutation of mutations){
       inspect(mutation.target);
       mutation.addedNodes.forEach(inspect);
     }
-  }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  }).observe(document.body,{childList:true,subtree:true,characterData:true});
 
   inspect(document.body);
 })();
