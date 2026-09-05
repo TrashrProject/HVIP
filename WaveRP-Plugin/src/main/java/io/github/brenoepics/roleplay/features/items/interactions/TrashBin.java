@@ -37,6 +37,18 @@ public class TrashBin extends InteractionDefault {
         super(id, userId, item, extradata, limitedStack, limitedSells);
     }
 
+    /**
+     * WavePlus transmet isUsable() a Nitro dans RoomFloorItemsComposer/AddFloorItemComposer.
+     * Une poubelle Habbo statique a souvent un seul etat et etait donc annoncee comme non
+     * utilisable : Nitro la selectionnait mais n'envoyait jamais ToggleFloorItemEvent.
+     * Une interaction RP de poubelle doit toujours etre utilisable, independamment du nombre
+     * d'etats visuels du mobilier d'origine.
+     */
+    @Override
+    public boolean isUsable() {
+        return true;
+    }
+
     @Override
     public void onClick(final GameClient client, final Room room, Object[] objects) {
         if (client == null || client.getHabbo() == null || room == null) {
