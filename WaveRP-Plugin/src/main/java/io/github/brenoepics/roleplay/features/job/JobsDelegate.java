@@ -85,12 +85,8 @@ public class JobsDelegate {
   public static RoomUserShoutComposer getRoomUserShoutComposer(String message, Habbo habbo) {
     RoomChatMessageBubbles bubble = RoomChatMessageBubbles.NORMAL;
 
-    if (habbo != null) {
-      RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
-      if (data != null && data.isDuty() && data.getJobEntity() != null
-          && "police".equalsIgnoreCase(data.getJobEntity().getName())) {
-        bubble = RoomChatMessageBubbles.AMBASSADOR;
-      }
+    if (isPoliceOnDuty(habbo)) {
+      bubble = RoomChatMessageBubbles.AMBASSADOR;
     }
 
     return getRoomUserShoutComposer(message, habbo, bubble);
@@ -98,8 +94,29 @@ public class JobsDelegate {
 
   public static RoomUserShoutComposer getRoomUserShoutComposer(String message, Habbo habbo,
       RoomChatMessageBubbles bubble) {
+    RoomChatMessageBubbles resolvedBubble = bubble;
+
+    // JobsManager historically sends BLUE explicitly when :travailler is used by Police.
+    // Replace only that Police work bubble with the native Ambassador bubble. Other jobs
+    // and any unrelated BLUE messages keep their original bubble.
+    if (bubble == RoomChatMessageBubbles.BLUE && isPoliceOnDuty(habbo)) {
+      resolvedBubble = RoomChatMessageBubbles.AMBASSADOR;
+    }
+
     return new RoomUserShoutComposer(
-        new RoomChatMessage(message, habbo, habbo, bubble));
+        new RoomChatMessage(message, habbo, habbo, resolvedBubble));
+  }
+
+  private static boolean isPoliceOnDuty(Habbo habbo) {
+    if (habbo == null) {
+      return false;
+    }
+
+    RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
+    return data != null
+        && data.isDuty()
+        && data.getJobEntity() != null
+        && "police".equalsIgnoreCase(data.getJobEntity().getName());
   }
 
   public static Look findLook(Habbo habbo, List<Look> figure) {
