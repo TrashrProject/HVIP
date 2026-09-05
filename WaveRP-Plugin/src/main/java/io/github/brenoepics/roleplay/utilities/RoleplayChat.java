@@ -2,7 +2,6 @@ package io.github.brenoepics.roleplay.utilities;
 
 import com.eu.habbo.habbohotel.rooms.RoomChatMessage;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
-import com.eu.habbo.habbohotel.rooms.RoomUnit;
 import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.outgoing.rooms.users.RoomUserShoutComposer;
 
@@ -12,16 +11,20 @@ public final class RoleplayChat {
   }
 
   public static void shoutAction(Habbo habbo, String message) {
-    if (habbo == null || !habbo.getRoomUnit().isInRoom()
+    if (habbo == null || habbo.getRoomUnit() == null
         || habbo.getHabboInfo().getCurrentRoom() == null) {
       return;
     }
 
-    // Keep the RP action markers inside the actual chat text so Nitro renders:
-    // Pseudo: * Mange ... *
-    // instead of action mode moving the first asterisk before the username.
+    // Utiliser la meme construction de RoomChatMessage que les interactions RP
+    // deja fonctionnelles (ex. poubelles). Cela garantit l'affichage de la bulle
+    // au-dessus du Habbo et dans le chat de la salle sur Nitro.
     habbo.getHabboInfo().getCurrentRoom().sendComposer(
         new RoomUserShoutComposer(
-            new RoomChatMessage(message, habbo.getRoomUnit(), RoomChatMessageBubbles.NORMAL)).compose());
+            new RoomChatMessage(
+                message,
+                habbo,
+                habbo,
+                RoomChatMessageBubbles.NORMAL)).compose());
   }
 }
