@@ -4,6 +4,7 @@ import static io.github.brenoepics.roleplay.features.crime.prison.PrisonService.
 import static io.github.brenoepics.roleplay.features.hospital.HospitalService.HOSPITAL_ROOM_ID;
 
 import com.eu.habbo.Emulator;
+import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.rooms.RoomTile;
 import com.eu.habbo.habbohotel.rooms.RoomTileState;
 import com.eu.habbo.habbohotel.rooms.RoomUserRotation;
@@ -13,10 +14,12 @@ import com.eu.habbo.plugin.EventListener;
 import com.eu.habbo.plugin.events.users.HabboAddedToRoomEvent;
 import com.eu.habbo.plugin.events.users.UserEnterRoomEvent;
 import com.eu.habbo.plugin.events.users.UserIdleEvent;
+import com.eu.habbo.plugin.events.users.UserTalkEvent;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.crime.PoliceHandcuffService;
 import io.github.brenoepics.roleplay.features.banking.BankComputerSessionManager;
 import io.github.brenoepics.roleplay.features.job.JobsDelegate;
+import io.github.brenoepics.roleplay.features.job.JobsManager;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.features.user.inventory.InventorySlot;
 import java.util.Optional;
@@ -111,10 +114,10 @@ public class UserEnterRoomListener implements EventListener {
     data.resetLastPosition();
   }
 
-  //TODO: @EventHandler
+  @EventHandler
   public static void onUserIdle(UserIdleEvent event) {
-    if (event.habbo.getHabboInfo().getCurrentRoom() == null) {
-      //TODO: This is a bug, need to add an Event in Arcturus to fix this.
+    if (!event.idle || event.reason != UserIdleEvent.IdleReason.TIMEOUT
+        || event.habbo.getHabboInfo().getCurrentRoom() == null) {
       return;
     }
 
@@ -122,7 +125,23 @@ public class UserEnterRoomListener implements EventListener {
       JobsDelegate.resetLook(event.habbo);
     }
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(event.habbo);
-    RolePlay.getJobsManager().stopWork(event.habbo, data);
+    if (data != null && data.isDuty()) {
+      RolePlay.getJobsManager().stopWork(event.habbo, data,
+          JobsManager.StopReason.AFK);
+      event.habbo.whisper("Vous avez arrêté de travailler car vous êtes AFK.",
+          RoomChatMessageBubbles.ALERT);
+    }
+  }
 
+  @EventHandler
+  public static void onUserTalk(UserTalkEvent event) {
+    RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(event.habbo);
+    if (data == null || !data.isDead()) {
+      return;
+    }
+
+    event.setCancelled(true);
+    event.habbo.whisper("Vous ne pouvez pas parler lorsque vous êtes mort.",
+        RoomChatMessageBubbles.ALERT);
   }
 }

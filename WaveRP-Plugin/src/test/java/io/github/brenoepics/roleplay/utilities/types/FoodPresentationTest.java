@@ -17,11 +17,17 @@ class FoodPresentationTest {
   @Test
   void mapsCustomCmsPngAndKeepsUnknownFoodsOnFallback() {
     RPItem apple = item(9, "Pomme", "food");
+    RPItem beef = item(20, "B?uf", "food");
+    RPItem tastyCrousty = item(6123, "Tasty Crousty", "food");
     RPItem lobster = item(19, "Homard", "food");
     RPItem weapon = item(6110, "AK47", "weapon");
 
     assertEquals("https://paradiserp.fr/Dynamics/img/food/pomme.png",
         FoodPresentation.imageUrl(apple));
+    assertEquals("https://paradiserp.fr/Dynamics/img/food/boeuf.png",
+        FoodPresentation.imageUrl(beef));
+    assertEquals("https://paradiserp.fr/Dynamics/img/food/tastycrousty.png",
+        FoodPresentation.imageUrl(tastyCrousty));
     assertNull(FoodPresentation.imageUrl(lobster));
     assertNull(FoodPresentation.imageUrl(weapon));
   }

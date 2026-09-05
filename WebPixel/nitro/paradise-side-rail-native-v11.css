@@ -104,6 +104,16 @@
     margin-top: 7px !important;
 }
 
+.roleplay-left-menu .paradise-side-rail-item[data-paradise-index="6"] .left-menu-icon img.paradise-weapon-skins-rail-icon {
+    width: 42px !important;
+    height: 42px !important;
+    max-width: 42px !important;
+    max-height: 42px !important;
+    padding: 6px 2px !important;
+    box-sizing: border-box !important;
+    object-fit: contain !important;
+}
+
 .roleplay-left-menu .paradise-side-rail-item[data-paradise-index="6"]::before {
     content: "";
     position: absolute;

@@ -42,7 +42,9 @@ public class JobsManager {
   }
 
   private static final String ORIGINAL_MOTTO_CACHE_KEY = "roleplay.original_motto";
+  private static final String DEATH_MOTTO_CACHE_KEY = "roleplay.death_original_motto";
   private static final String DEFAULT_MOTTO = "Citoyen";
+  private static final String DEATH_MOTTO = "Mort";
 
   @Getter
   private final JobService jobService;
@@ -305,9 +307,38 @@ public class JobsManager {
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
     if (data != null && data.isDuty()) {
       stopWork(habbo, data, StopReason.LOGOUT);
+    } else {
+      restoreMotto(habbo);
+    }
+    restoreDeathMotto(habbo);
+  }
+
+  public void applyDeathMotto(Habbo habbo) {
+    if (habbo == null) {
       return;
     }
-    restoreMotto(habbo);
+
+    if (!habbo.getHabboStats().cache.containsKey(DEATH_MOTTO_CACHE_KEY)) {
+      String currentMotto = habbo.getHabboInfo().getMotto();
+      habbo.getHabboStats().cache.put(DEATH_MOTTO_CACHE_KEY,
+          currentMotto == null || currentMotto.trim().isEmpty() ? DEFAULT_MOTTO : currentMotto);
+    }
+    habbo.getHabboInfo().setMotto(DEATH_MOTTO);
+    sendMottoUpdate(habbo);
+  }
+
+  public void restoreDeathMotto(Habbo habbo) {
+    if (habbo == null) {
+      return;
+    }
+
+    Object originalMotto = habbo.getHabboStats().cache.remove(DEATH_MOTTO_CACHE_KEY);
+    if (originalMotto == null) {
+      return;
+    }
+    String restoredMotto = originalMotto.toString().trim();
+    habbo.getHabboInfo().setMotto(restoredMotto.isEmpty() ? DEFAULT_MOTTO : restoredMotto);
+    sendMottoUpdate(habbo);
   }
 
   private void applyWorkMotto(Habbo habbo, RpAvatar data) {
@@ -319,14 +350,24 @@ public class JobsManager {
 
     String displayedJob = "hospital".equalsIgnoreCase(data.getJobEntity().getName())
         ? "EMS" : data.getJobEntity().getDisplayName();
-    String workMotto = displayedJob + " " + data.getJobRankEntity().getDisplayName();
+    String displayedRank = data.getJobRankEntity().getDisplayName().trim();
+    String workMotto;
+    if (displayedRank.toLowerCase().endsWith(" senior")) {
+      int seniorIndex = displayedRank.length() - " senior".length();
+      workMotto = displayedJob + " " + displayedRank.substring(0, seniorIndex) + " - Senior";
+    } else {
+      workMotto = displayedJob + " - " + displayedRank;
+    }
     habbo.getHabboInfo().setMotto(workMotto.trim());
     sendMottoUpdate(habbo);
   }
 
   private void restoreMotto(Habbo habbo) {
     Object originalMotto = habbo.getHabboStats().cache.remove(ORIGINAL_MOTTO_CACHE_KEY);
-    String restoredMotto = originalMotto == null ? DEFAULT_MOTTO : originalMotto.toString().trim();
+    if (originalMotto == null) {
+      return;
+    }
+    String restoredMotto = originalMotto.toString().trim();
     if (restoredMotto.isEmpty()) {
       restoredMotto = DEFAULT_MOTTO;
     }

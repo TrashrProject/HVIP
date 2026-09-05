@@ -20,6 +20,7 @@ import io.github.brenoepics.roleplay.features.items.interactions.InteractionRPBe
 import io.github.brenoepics.roleplay.features.job.JobEntity;
 import io.github.brenoepics.roleplay.features.job.JobRankEntity;
 import io.github.brenoepics.roleplay.features.job.JobService;
+import io.github.brenoepics.roleplay.features.job.JobsManager;
 import io.github.brenoepics.roleplay.features.targetlock.TargetLockService;
 import io.github.brenoepics.roleplay.features.user.inventory.Inventory;
 import io.github.brenoepics.roleplay.features.user.inventory.InventorySlot;
@@ -105,13 +106,10 @@ public class RpAvatar {
       throws SQLException {
     RpAvatar data = new RpAvatar(habbo);
     data.setHealth(set.getInt("health"));
-    if (data.getHealth() < 1) {
-      data.setDead(true);
-    }
     data.setShield(set.getInt("shield"));
     data.setEnergy(set.getInt("energy"));
     data.setPassive(false);
-    data.setDead(set.getInt("dead") == 1);
+    data.dead = set.getInt("dead") == 1 || data.getHealth() < 1;
 
     // Load job and rank using new database system
     JobService jobService = RolePlay.getJobService();
@@ -461,7 +459,7 @@ public class RpAvatar {
 
   public void makeDead() {
     health = 0;
-    dead = true;
+    setDead(true);
     Room currentRoom = habbo.getHabboInfo().getCurrentRoom();
     if (RolePlay.getHospitalService().isAtBed(habbo) || RolePlay.getPrisonService()
         .isAtBed(habbo)) {
@@ -774,7 +772,21 @@ public class RpAvatar {
   }
 
   public void setDead(boolean dead) {
+    if (this.dead == dead) {
+      return;
+    }
     this.dead = dead;
+    if (habbo == null) {
+      return;
+    }
+
+    if (dead) {
+      RolePlay.getJobsManager().stopWork(habbo, this,
+          JobsManager.StopReason.DEATH);
+      RolePlay.getJobsManager().applyDeathMotto(habbo);
+    } else {
+      RolePlay.getJobsManager().restoreDeathMotto(habbo);
+    }
   }
 
   public void setPassive(boolean passive) {

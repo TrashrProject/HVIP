@@ -1,22 +1,32 @@
 (() => {
-    const BUILD = 'paradise-side-rail-native-v11';
+    const BUILD = 'paradise-side-rail-native-v12';
     const LABELS = [
         'Inventaire',
-        'Catalogue',
-        'Appartements',
+        'Centre des métiers',
+        'Gang',
         'Profil',
-        'Amis',
+        'Téléphone',
         'Mes appartements',
-        'Réglages'
+        'Skin d’armes'
     ];
+
+    const WEAPON_SKINS_ICON = '/nitro/weapon-skins/g36_584.png?v=20260905-1';
 
     const decorateItem = (item, index, items) => {
         item.classList.add('paradise-side-rail-item');
         item.dataset.paradiseIndex = String(index);
         item.dataset.paradiseLabel = LABELS[index] || `Menu ${index + 1}`;
 
-        if (!item.getAttribute('aria-label')) {
-            item.setAttribute('aria-label', item.dataset.paradiseLabel);
+        item.setAttribute('aria-label', item.dataset.paradiseLabel);
+        item.setAttribute('title', item.dataset.paradiseLabel);
+
+        if (index === 6) {
+            const image = item.querySelector('img');
+            if (image) {
+                image.src = WEAPON_SKINS_ICON;
+                image.alt = '';
+                image.classList.add('paradise-weapon-skins-rail-icon');
+            }
         }
 
         if (item.dataset.paradiseActiveBound === '1') return;

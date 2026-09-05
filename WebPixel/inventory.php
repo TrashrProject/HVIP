@@ -43,9 +43,10 @@ $images = [
 
 $foodImages = [
     9 => 'pomme.png', 10 => 'banane.png', 11 => 'sandwich.png', 12 => 'burger.png',
-    13 => 'pizza.png', 14 => 'tacos.png', 15 => 'sushi.png', 16 => 'steak.png'
+    13 => 'pizza.png', 14 => 'tacos.png', 15 => 'sushi.png', 16 => 'steak.png',
+    20 => 'boeuf.png', 6123 => 'tastycrousty.png'
 ];
-$foodNames = [18 => 'Pâtes', 20 => 'Bœuf'];
+$foodNames = [18 => 'Pâtes', 20 => 'Bœuf', 6123 => 'Tasty Crousty'];
 
 // Only weapons that currently have ParadiseRP skin families are mapped here.
 $weaponKeys = [

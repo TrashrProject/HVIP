@@ -25,6 +25,7 @@ public final class FoodPresentation {
       case 19 -> "Homard";
       case 20 -> "B\u0153uf";
       case 21 -> "Repas complet";
+      case 6123 -> "Tasty Crousty";
       default -> fallback;
     };
   }
@@ -44,6 +45,8 @@ public final class FoodPresentation {
       case 14 -> "tacos.png";
       case 15 -> "sushi.png";
       case 16 -> "steak.png";
+      case 20 -> "boeuf.png";
+      case 6123 -> "tastycrousty.png";
       default -> null;
     };
     return filename == null ? null : FOOD_IMAGE_BASE + filename;

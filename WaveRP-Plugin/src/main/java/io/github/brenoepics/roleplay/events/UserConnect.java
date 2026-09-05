@@ -40,6 +40,9 @@ public class UserConnect implements EventListener {
     }
 
     RpAvatar avatar = RolePlay.getAvatarManager().getRpAvatar(habbo);
+    if (avatar.isDead()) {
+      RolePlay.getJobsManager().applyDeathMotto(habbo);
+    }
     // Also repair weapons persisted by older server versions: equipped weapons are
     // session-only and must be returned to the inventory as soon as the user logs in.
     if (avatar.getEquippedWeapon().isPresent()) {

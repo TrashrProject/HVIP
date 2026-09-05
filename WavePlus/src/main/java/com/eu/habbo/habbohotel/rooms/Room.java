@@ -1390,14 +1390,22 @@ public class Room implements Comparable<Room>, ISerialize, Runnable {
               habbo.getRoomUnit().increaseIdleTimer();
 
               if (habbo.getRoomUnit().isIdle()) {
-                boolean danceIsNone = (habbo.getRoomUnit().getDanceType() == DanceType.NONE);
-                if (danceIsNone) {
-                  this.sendComposer(new RoomUnitIdleComposer(habbo.getRoomUnit()).compose());
-                }
-                if (danceIsNone && !Emulator.getConfig()
-                    .getBoolean("hotel.roomuser.idle.not_dancing.ignore.wired_idle")) {
-                  WiredHandler.handle(WiredTriggerType.IDLES, habbo.getRoomUnit(), this,
-                      new Object[]{habbo});
+                UserIdleEvent idleEvent = new UserIdleEvent(habbo,
+                    UserIdleEvent.IdleReason.TIMEOUT, true);
+                Emulator.getPluginManager().fireEvent(idleEvent);
+
+                if (idleEvent.isCancelled() || !idleEvent.idle) {
+                  habbo.getRoomUnit().resetIdleTimer();
+                } else {
+                  boolean danceIsNone = (habbo.getRoomUnit().getDanceType() == DanceType.NONE);
+                  if (danceIsNone) {
+                    this.sendComposer(new RoomUnitIdleComposer(habbo.getRoomUnit()).compose());
+                  }
+                  if (danceIsNone && !Emulator.getConfig()
+                      .getBoolean("hotel.roomuser.idle.not_dancing.ignore.wired_idle")) {
+                    WiredHandler.handle(WiredTriggerType.IDLES, habbo.getRoomUnit(), this,
+                        new Object[]{habbo});
+                  }
                 }
               }
             } else {

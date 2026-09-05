@@ -56,8 +56,10 @@ public class ApplyCommand extends Command {
       data.updateLife();
       data.getInventory().removeItem(item, 1);
       data.getInventory().updateInventory(gameClient.getHabbo());
-      gameClient.getHabbo().whisper("Vous avez utilis\u00e9 " + item.getDisplayName() + ".",
-          RoomChatMessageBubbles.ALERT);
+      if (!"food".equalsIgnoreCase(item.getInteractionType())) {
+        gameClient.getHabbo().whisper("Vous avez utilis\u00e9 " + item.getDisplayName() + ".",
+            RoomChatMessageBubbles.ALERT);
+      }
       RolePlay.getCommandsCounter().getCoolDown("apply")
           .addTimeOut(gameClient.getHabbo().getHabboInfo().getId(), APPLY_TIMEOUT);
     }
@@ -133,20 +135,13 @@ public class ApplyCommand extends Command {
     int restorationAmount = getItemAmount(10, item.getExtraData());
     int newHunger = Math.min(data.getHunger() + restorationAmount, data.getMaxHunger());
 
-    habbo.whisper(
-        "Vous avez consomm\u00e9 " + getFoodArticle(item) + " " + item.getDisplayName()
-            + " et r\u00e9cup\u00e9r\u00e9 " + (newHunger - data.getHunger()) + " point(s) de faim.",
-        RoomChatMessageBubbles.ALERT);
+    habbo.talk(
+        "* Mange " + item.getDisplayName() + " et r\u00e9cup\u00e8re "
+            + (newHunger - data.getHunger()) + " points de faim *",
+        RoomChatMessageBubbles.DARK_YELLOW);
 
     data.setHunger(newHunger);
     return true;
-  }
-
-  private static String getFoodArticle(RPItem item) {
-    return switch (item.getId()) {
-      case 9, 10, 13, 18 -> "une"; // Pomme, Banane, Part de pizza, Pâtes
-      default -> "un";
-    };
   }
 
   private boolean applyDrugItem(RPItem item, RpAvatar data, Habbo habbo) {

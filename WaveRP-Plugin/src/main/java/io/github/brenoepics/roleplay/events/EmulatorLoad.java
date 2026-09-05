@@ -25,6 +25,7 @@ import io.github.brenoepics.roleplay.communication.packets.js.JavascriptCallback
 import io.github.brenoepics.roleplay.features.crime.prison.JailTimeRunner;
 import io.github.brenoepics.roleplay.features.crime.wantedlist.WantedRunner;
 import io.github.brenoepics.roleplay.features.hospital.HealingRunner;
+import io.github.brenoepics.roleplay.features.job.AfkWorkRunner;
 import io.github.brenoepics.roleplay.features.user.HungerRunner;
 import io.github.brenoepics.roleplay.utilities.HabboBrItemCommandRegistrar;
 import io.github.brenoepics.roleplay.utilities.LoadConfig;
@@ -110,6 +111,7 @@ public class EmulatorLoad implements EventListener {
       new HungerRunner().run();
       new HealingRunner().run();
       new JailTimeRunner().run();
+      new AfkWorkRunner().run();
     }, 1000);
   }
 }
