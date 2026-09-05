@@ -1,477 +1,187 @@
-/* ParadiseRP catalogue City V5.
-   One visual layer only: Nitro keeps navigation, offers and purchases. */
+/* ParadiseRP catalogue V2 — City-inspired skin over Nitro's real catalogue DOM. */
 
-.nitro-catalog.pc5-catalog {
-  --pc5-bg: #171d29;
-  --pc5-deep: #111721;
-  --pc5-panel: #1d2432;
-  --pc5-panel-light: #222b3d;
-  --pc5-line: #34415b;
-  --pc5-line-soft: #283349;
-  --pc5-text: #f5f6f8;
-  --pc5-muted: #7e899f;
-  --pc5-yellow: #ffc900;
-  --pc5-tab: #53688f;
+.nitro-catalog.pc6-catalog {
+  --pc6-window: #171e2b;
+  --pc6-header: #202838;
+  --pc6-search: #ffc900;
+  --pc6-input: #172236;
+  --pc6-sidebar: #151c28;
+  --pc6-content: #171e29;
+  --pc6-panel: #111823;
+  --pc6-active: #66799e;
+  --pc6-tab: #1b2537;
+  --pc6-border: #35445f;
+  --pc6-text: #fff;
+  --pc6-muted: #9da9bc;
   position: relative !important;
-  width: min(630px, calc(100vw - 24px)) !important;
-  min-width: 590px !important;
-  max-width: 630px !important;
-  height: min(522px, calc(100vh - 30px)) !important;
-  min-height: 470px !important;
-  max-height: 522px !important;
+  width: min(700px, calc(100vw - 20px)) !important;
+  min-width: 0 !important;
+  max-width: 700px !important;
+  height: min(540px, calc(100vh - 20px)) !important;
+  min-height: min(430px, calc(100vh - 20px)) !important;
+  max-height: 540px !important;
   padding: 0 !important;
   overflow: hidden !important;
-  border: 3px solid #2e3850 !important;
+  border: 3px solid #2d3851 !important;
   border-radius: 12px !important;
-  background: var(--pc5-bg) !important;
-  color: var(--pc5-text) !important;
+  background: var(--pc6-window) !important;
+  color: var(--pc6-text) !important;
   font-family: Ubuntu, Arial, sans-serif !important;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, .54), inset 0 0 0 1px rgba(255, 255, 255, .035) !important;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, .52), inset 0 0 0 1px rgba(255, 255, 255, .035) !important;
 }
 
-.nitro-catalog.pc5-catalog,
-.nitro-catalog.pc5-catalog * {
-  box-sizing: border-box !important;
-}
+.nitro-catalog.pc6-catalog,
+.nitro-catalog.pc6-catalog * { box-sizing: border-box !important; }
 
-/* Keep Nitro's invisible header as the native drag surface. */
-.nitro-catalog.pc5-catalog > .nitro-card-header,
-.nitro-catalog.pc5-catalog > [class*="card-header"] {
+/* Native draggable header and native close callback are preserved. */
+.nitro-catalog.pc6-catalog > .pc6-header {
   position: absolute !important;
   z-index: 40 !important;
   inset: 0 0 auto !important;
   width: 100% !important;
-  height: 52px !important;
-  min-height: 52px !important;
-  border: 0 !important;
-  opacity: 0 !important;
-  pointer-events: auto !important;
-}
-
-.nitro-catalog.pc5-catalog > .nitro-card-header > *,
-.nitro-catalog.pc5-catalog > [class*="card-header"] > * {
-  pointer-events: none !important;
-}
-
-.nitro-catalog.pc5-catalog > .pc5-header {
-  position: absolute !important;
-  z-index: 41 !important;
-  inset: 0 0 auto !important;
-  height: 52px !important;
-  display: flex !important;
-  align-items: center !important;
-  padding: 0 48px 0 15px !important;
-  border-bottom: 1px solid #354058 !important;
-  background: linear-gradient(#202838, #1a202d) !important;
-  pointer-events: none !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-title {
-  color: #fff !important;
-  -webkit-text-fill-color: #fff !important;
-  font-size: 18px !important;
-  font-weight: 900 !important;
-  letter-spacing: -.45px !important;
-  line-height: 1 !important;
-  text-shadow: 0 2px 1px #06080d, 0 0 2px #000 !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-close {
-  position: absolute !important;
-  top: 11px !important;
-  right: 11px !important;
-  width: 25px !important;
-  min-width: 25px !important;
-  height: 25px !important;
-  padding: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  border: 0 !important;
-  border-radius: 5px !important;
-  background: #f1f2f4 !important;
-  color: #161b25 !important;
-  -webkit-text-fill-color: #161b25 !important;
-  font-size: 18px !important;
-  font-weight: 900 !important;
-  line-height: 22px !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-close:hover {
-  background: var(--pc5-yellow) !important;
-}
-
-/* Search strip copied from the target proportions. */
-.nitro-catalog.pc5-catalog > .pc5-search {
-  position: absolute !important;
-  z-index: 34 !important;
-  top: 58px !important;
-  left: 16px !important;
-  right: 16px !important;
-  height: 34px !important;
+  height: 44px !important;
+  min-height: 44px !important;
   display: flex !important;
   align-items: center !important;
   margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  border: 2px solid #dbaa00 !important;
-  border-radius: 15px !important;
-  background: var(--pc5-yellow) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35) !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-search-icon {
-  width: 37px !important;
-  height: 32px !important;
-  flex: 0 0 37px !important;
-  display: grid !important;
-  place-items: center !important;
-  color: #fff !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-search-icon svg {
-  width: 19px !important;
-  height: 19px !important;
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 3 !important;
-  stroke-linecap: round !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-search-input {
-  height: 30px !important;
-  min-width: 0 !important;
-  flex: 1 1 auto !important;
   padding: 0 14px !important;
   border: 0 !important;
-  border-radius: 14px !important;
-  outline: 0 !important;
-  background: #202838 !important;
-  color: #fff !important;
-  -webkit-text-fill-color: #fff !important;
-  font-size: 10px !important;
-  font-weight: 600 !important;
-  line-height: 30px !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .28) !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-search-input::placeholder {
-  color: #b1b8c5 !important;
-  -webkit-text-fill-color: #b1b8c5 !important;
-  opacity: 1 !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-search-input::-webkit-search-cancel-button {
-  display: none !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-search-submit {
-  width: 55px !important;
-  min-width: 55px !important;
-  height: 32px !important;
-  display: grid !important;
-  place-items: center !important;
-  padding: 0 !important;
-  border: 0 !important;
-  background: transparent !important;
-  color: #253047 !important;
-  cursor: pointer !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-search-submit svg {
-  width: 29px !important;
-  height: 29px !important;
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 2.25 !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
-}
-
-/* Native tabs retain all native clicks/state, only their skin changes. */
-.nitro-catalog.pc5-catalog > .pc5-tabs,
-.nitro-catalog.pc5-catalog > .nitro-card-tabs {
-  position: absolute !important;
-  z-index: 32 !important;
-  top: 99px !important;
-  left: 15px !important;
-  right: 15px !important;
-  height: 42px !important;
-  display: flex !important;
-  align-items: stretch !important;
-  gap: 5px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  border: 0 !important;
-  background: transparent !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-tab,
-.nitro-catalog.pc5-catalog .pc5-tab :is(button, a, [role="tab"], [role="button"]) {
-  min-width: 0 !important;
-  height: 39px !important;
-  min-height: 39px !important;
-  flex: 1 1 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  margin: 0 !important;
-  padding: 0 7px !important;
-  overflow: hidden !important;
-  border: 1px solid #475773 !important;
-  border-radius: 12px !important;
-  background: #1b2331 !important;
-  color: #758299 !important;
-  -webkit-text-fill-color: #758299 !important;
-  font-size: 9px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
-  box-shadow: none !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-tab[data-pc5-key="home"] {
-  display: none !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-tab:hover,
-.nitro-catalog.pc5-catalog .pc5-tab:hover :is(button, a, [role="tab"], [role="button"]) {
-  border-color: #65789a !important;
-  background: #283348 !important;
-  color: #e7eaf0 !important;
-  -webkit-text-fill-color: #e7eaf0 !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-tab:is(.active, .selected, [aria-selected="true"]),
-.nitro-catalog.pc5-catalog .pc5-tab:has(.active, .selected, [aria-selected="true"]),
-.nitro-catalog.pc5-catalog .pc5-tab:is(.active, .selected, [aria-selected="true"]) :is(button, a, [role="tab"], [role="button"]),
-.nitro-catalog.pc5-catalog .pc5-tab:has(.active, .selected, [aria-selected="true"]) :is(button, a, [role="tab"], [role="button"]) {
-  border-color: #60749a !important;
-  background: var(--pc5-tab) !important;
-  color: #fff !important;
-  -webkit-text-fill-color: #fff !important;
-}
-
-.nitro-catalog.pc5-catalog.pc5-home-mode .pc5-tab[data-pc5-key="official"],
-.nitro-catalog.pc5-catalog.pc5-home-mode .pc5-tab[data-pc5-key="official"] :is(button, a, [role="tab"], [role="button"]) {
-  border-color: #60749a !important;
-  background: var(--pc5-tab) !important;
-  color: #fff !important;
-  -webkit-text-fill-color: #fff !important;
-}
-
-/* Content starts below the fixed title/search/tabs block. */
-.nitro-catalog.pc5-catalog > .pc5-content,
-.nitro-catalog.pc5-catalog > .nitro-card-content {
-  position: absolute !important;
-  z-index: 10 !important;
-  top: 151px !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  width: auto !important;
-  height: auto !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  padding: 8px !important;
-  overflow: hidden !important;
-  border: 0 !important;
-  background: var(--pc5-bg) !important;
-  color: var(--pc5-text) !important;
-}
-
-.nitro-catalog.pc5-catalog > .pc5-content :is(.bg-white, .bg-light, .bg-secondary, .bg-body, .bg-body-secondary, .card, .card-body, .list-group, .list-group-item) {
-  border-color: transparent !important;
-  background-color: transparent !important;
-  color: inherit !important;
-}
-
-/* Landing page */
-.nitro-catalog.pc5-catalog .pc5-home {
-  display: none !important;
-  width: 100% !important;
-  height: 100% !important;
-  grid-template-columns: 164px minmax(0, 1fr) !important;
-  gap: 14px !important;
-}
-
-.nitro-catalog.pc5-catalog.pc5-home-mode > .pc5-content > :not(.pc5-home) {
-  display: none !important;
-}
-
-.nitro-catalog.pc5-catalog.pc5-home-mode .pc5-home {
-  display: grid !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-home-menu {
-  min-height: 0 !important;
-  padding: 10px 7px !important;
-  overflow: auto !important;
-  border: 3px solid #2d3851 !important;
-  border-radius: 12px !important;
-  background: #151b26 !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .025) !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-home-row {
-  width: 100% !important;
-  height: 29px !important;
-  min-height: 29px !important;
-  display: grid !important;
-  grid-template-columns: 20px minmax(0, 1fr) 10px !important;
-  align-items: center !important;
-  gap: 5px !important;
-  margin: 0 0 1px !important;
-  padding: 0 8px !important;
-  border: 0 !important;
-  border-radius: 12px !important;
-  background: transparent !important;
-  color: #f3f4f6 !important;
-  -webkit-text-fill-color: #f3f4f6 !important;
-  font-size: 8px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-  text-align: left !important;
-  cursor: pointer !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-home-row:hover {
-  background: #252f42 !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-home-row.is-active {
-  background: linear-gradient(90deg, #ffcf00, #f2b900) !important;
-  color: #171b22 !important;
-  -webkit-text-fill-color: #171b22 !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-menu-icon {
-  width: 16px !important;
-  height: 16px !important;
-  display: grid !important;
-  place-items: center !important;
-  border: 1px solid currentColor !important;
-  border-radius: 4px !important;
-  color: var(--pc5-yellow) !important;
-  -webkit-text-fill-color: var(--pc5-yellow) !important;
-  font-size: 8px !important;
-  font-weight: 900 !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-home-row.is-active .pc5-menu-icon {
-  color: #171b22 !important;
-  -webkit-text-fill-color: #171b22 !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-menu-arrow {
-  justify-self: end !important;
-  color: #f6f7f8 !important;
-  -webkit-text-fill-color: #f6f7f8 !important;
-  font-size: 10px !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-info {
-  min-width: 0 !important;
-  min-height: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  padding: 14px 16px 12px !important;
-  overflow: auto !important;
-  border: 1px solid #222c3e !important;
-  border-radius: 14px !important;
-  background: #111720 !important;
-  color: #f5f6f8 !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-info-header {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  margin: 0 0 22px !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-info-badge {
-  width: 50px !important;
-  height: 50px !important;
-  flex: 0 0 50px !important;
-  display: grid !important;
-  place-items: center !important;
-  border: 3px solid #d8dde4 !important;
-  border-radius: 50% !important;
-  background: #edf0f3 !important;
-  box-shadow: 0 0 0 3px #30394a !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-info-badge span {
-  display: grid !important;
-  place-items: center !important;
-  width: 33px !important;
-  height: 27px !important;
-  border: 2px solid #a92232 !important;
-  border-radius: 5px !important;
-  background: #d33d4e !important;
-  color: #fff !important;
-  -webkit-text-fill-color: #fff !important;
-  font-size: 10px !important;
-  font-weight: 900 !important;
-  text-shadow: 0 1px #64101b !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-info h2 {
-  margin: 0 !important;
+  border-bottom: 1px solid #101722 !important;
+  border-radius: 8px 8px 0 0 !important;
+  background: var(--pc6-header) !important;
   color: #fff !important;
   -webkit-text-fill-color: #fff !important;
   font-size: 16px !important;
   font-weight: 900 !important;
-  line-height: 1.1 !important;
+  line-height: 1 !important;
+  text-shadow: 0 2px 1px #070a10 !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-info-copy {
-  color: #f2f3f5 !important;
-  -webkit-text-fill-color: #f2f3f5 !important;
+.nitro-catalog.pc6-catalog .pc6-close {
+  position: absolute !important;
+  top: 9px !important;
+  right: 10px !important;
+  width: 25px !important;
+  min-width: 25px !important;
+  height: 25px !important;
+  min-height: 25px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid #fff !important;
+  border-radius: 5px !important;
+  background: #f0f2f4 !important;
+  color: #151c28 !important;
+  -webkit-text-fill-color: #151c28 !important;
+  box-shadow: 0 1px 0 #080c12 !important;
+  cursor: pointer !important;
+  transition: background-color 120ms ease, transform 120ms ease !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-close:hover {
+  background: var(--pc6-search) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Native root pages: real labels, visibility, active state and click handlers. */
+.nitro-catalog.pc6-catalog > .pc6-tabs {
+  position: absolute !important;
+  z-index: 32 !important;
+  top: 96px !important;
+  left: 14px !important;
+  right: 14px !important;
+  height: 39px !important;
+  display: flex !important;
+  align-items: stretch !important;
+  gap: 5px !important;
+  margin: 0 !important;
+  padding: 0 0 3px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  border: 0 !important;
+  background: transparent !important;
+  scrollbar-width: none !important;
+}
+
+.nitro-catalog.pc6-catalog > .pc6-tabs::-webkit-scrollbar { display: none !important; }
+
+.nitro-catalog.pc6-catalog .pc6-tab,
+.nitro-catalog.pc6-catalog .pc6-tab :is(button, a, [role="tab"], [role="button"]) {
+  width: auto !important;
+  min-width: 112px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  overflow: visible !important;
+  border: 1px solid #4b5c7b !important;
+  border-radius: 11px !important;
+  background: var(--pc6-tab) !important;
+  color: var(--pc6-muted) !important;
+  -webkit-text-fill-color: var(--pc6-muted) !important;
   font-size: 10px !important;
-  font-weight: 600 !important;
-  line-height: 1.36 !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-info-copy p {
-  margin: 0 0 12px !important;
-  color: inherit !important;
-  -webkit-text-fill-color: inherit !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-support {
-  margin-top: auto !important;
-  padding-top: 10px !important;
+.nitro-catalog.pc6-catalog .pc6-tab:hover,
+.nitro-catalog.pc6-catalog .pc6-tab:hover :is(button, a, [role="tab"], [role="button"]) {
+  border-color: #7284a5 !important;
+  background: #28344a !important;
   color: #fff !important;
   -webkit-text-fill-color: #fff !important;
-  font-size: 10px !important;
-  font-weight: 900 !important;
 }
 
-/* Native store structure */
-.nitro-catalog.pc5-catalog.pc5-store-mode .pc5-home {
-  display: none !important;
+.nitro-catalog.pc6-catalog .pc6-tab:is(.active, .selected, [aria-selected="true"]),
+.nitro-catalog.pc6-catalog .pc6-tab:has(.active, .selected, [aria-selected="true"]),
+.nitro-catalog.pc6-catalog .pc6-tab:is(.active, .selected, [aria-selected="true"]) :is(button, a, [role="tab"], [role="button"]),
+.nitro-catalog.pc6-catalog .pc6-tab:has(.active, .selected, [aria-selected="true"]) :is(button, a, [role="tab"], [role="button"]) {
+  border-color: #7588ad !important;
+  background: var(--pc6-active) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
 }
 
-.nitro-catalog.pc5-catalog.pc5-store-mode .pc5-main {
+/* Content begins below the fixed chrome. */
+.nitro-catalog.pc6-catalog > .pc6-content {
+  position: absolute !important;
+  z-index: 10 !important;
+  inset: 143px 0 0 !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 8px 10px 10px !important;
+  overflow: visible !important;
+  border: 0 !important;
+  background: var(--pc6-window) !important;
+  color: var(--pc6-text) !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-main {
+  position: static !important;
   width: 100% !important;
   height: 100% !important;
   min-height: 0 !important;
   display: grid !important;
-  grid-template-columns: 175px minmax(0, 1fr) !important;
+  grid-template-columns: 174px minmax(0, 1fr) !important;
   gap: 10px !important;
   margin: 0 !important;
   padding: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   background: transparent !important;
 }
 
-.nitro-catalog.pc5-catalog :is(.pc5-side, .pc5-store-content, .pc5-grid-column, .pc5-preview) {
+.nitro-catalog.pc6-catalog :is(.pc6-side, .pc6-content-column, .pc6-products-column, .pc6-preview) {
   width: auto !important;
   min-width: 0 !important;
   max-width: none !important;
@@ -479,39 +189,138 @@
   margin: 0 !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-side {
+.nitro-catalog.pc6-catalog .pc6-side {
+  position: static !important;
   height: 100% !important;
   display: flex !important;
   flex-direction: column !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-native-search {
+/* The visible search is Nitro's controlled search (300 ms debounce), not a proxy. */
+.nitro-catalog.pc6-catalog .pc6-search {
   position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
+  z-index: 35 !important;
+  top: -91px !important;
+  left: 14px !important;
+  right: 14px !important;
+  width: auto !important;
+  height: 38px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 42px !important;
+  align-items: center !important;
+  gap: 0 !important;
+  margin: 0 !important;
+  padding: 3px !important;
   overflow: hidden !important;
-  opacity: 0 !important;
+  border: 2px solid #d5a900 !important;
+  border-radius: 15px !important;
+  background: var(--pc6-search) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .42) !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-search::before {
+  content: '' !important;
+  position: absolute !important;
+  z-index: 2 !important;
+  left: 13px !important;
+  top: 10px !important;
+  width: 12px !important;
+  height: 12px !important;
+  border: 3px solid #fff !important;
+  border-radius: 50% !important;
   pointer-events: none !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-navigation-box {
+.nitro-catalog.pc6-catalog .pc6-search::after {
+  content: '' !important;
+  position: absolute !important;
+  z-index: 2 !important;
+  left: 25px !important;
+  top: 23px !important;
+  width: 8px !important;
+  height: 3px !important;
+  border-radius: 2px !important;
+  background: #fff !important;
+  transform: rotate(45deg) !important;
+  transform-origin: left center !important;
+  pointer-events: none !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-search-field {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 13px !important;
+  background: var(--pc6-input) !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-search-input {
+  width: 100% !important;
+  height: 30px !important;
+  margin: 0 !important;
+  padding: 0 12px 0 39px !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-search-input::placeholder {
+  color: #aeb8c8 !important;
+  -webkit-text-fill-color: #aeb8c8 !important;
+  opacity: 1 !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-search-action,
+.nitro-catalog.pc6-catalog .pc6-search > button {
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #1a2940 !important;
+  -webkit-text-fill-color: #1a2940 !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-search-action:hover,
+.nitro-catalog.pc6-catalog .pc6-search > button:hover { filter: brightness(.72) !important; }
+
+/* Dynamic native navigation and recursive subcategories. */
+.nitro-catalog.pc6-catalog .pc6-navigation-box {
   width: 100% !important;
   height: 100% !important;
   min-height: 0 !important;
   flex: 1 1 auto !important;
   margin: 0 !important;
-  padding: 7px 6px !important;
+  padding: 8px 6px !important;
   overflow: hidden !important;
   border: 3px solid #2d3851 !important;
   border-radius: 11px !important;
-  background: #151b26 !important;
+  background: var(--pc6-sidebar) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .025) !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-navigation {
+.nitro-catalog.pc6-catalog .pc6-navigation {
   width: 100% !important;
   height: 100% !important;
   min-height: 0 !important;
+  display: block !important;
   margin: 0 !important;
   padding: 0 2px 0 0 !important;
   overflow-x: hidden !important;
@@ -519,215 +328,259 @@
   background: transparent !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-category {
+.nitro-catalog.pc6-catalog .pc6-navigation-section {
   width: 100% !important;
   min-width: 0 !important;
-  min-height: 27px !important;
-  height: 27px !important;
-  max-height: 27px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-category {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 28px !important;
   display: flex !important;
   align-items: center !important;
   gap: 6px !important;
   margin: 0 0 1px !important;
-  padding: 0 8px !important;
+  padding: 0 7px !important;
   overflow: hidden !important;
   border: 0 !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   background: transparent !important;
-  color: #f3f4f7 !important;
-  -webkit-text-fill-color: #f3f4f7 !important;
-  font-size: 8px !important;
-  font-weight: 900 !important;
+  color: #f4f6f8 !important;
+  -webkit-text-fill-color: #f4f6f8 !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
   line-height: 1 !important;
-  text-align: left !important;
   white-space: nowrap !important;
-  text-overflow: ellipsis !important;
   box-shadow: none !important;
+  cursor: pointer !important;
+  transition: background-color 120ms ease, color 120ms ease !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-category:hover {
-  background: #283247 !important;
+.nitro-catalog.pc6-catalog .pc6-category.inset { padding-left: 20px !important; }
+.nitro-catalog.pc6-catalog .pc6-category:hover { background: #263147 !important; }
+
+.nitro-catalog.pc6-catalog .pc6-category:is(.active, .selected, [aria-selected="true"]),
+.nitro-catalog.pc6-catalog .pc6-category:has(.active, .selected, [aria-selected="true"]) {
+  background: var(--pc6-search) !important;
+  color: #151c28 !important;
+  -webkit-text-fill-color: #151c28 !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-category:is(.active, .selected, [aria-selected="true"]),
-.nitro-catalog.pc5-catalog .pc5-category:has(.active, .selected, [aria-selected="true"]) {
-  background: var(--pc5-yellow) !important;
-  color: #171b22 !important;
-  -webkit-text-fill-color: #171b22 !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-category :is(span, div, p, strong, small) {
+.nitro-catalog.pc6-catalog .pc6-category :is(span, div, p, strong, small) {
   min-width: 0 !important;
   overflow: hidden !important;
-  background: transparent !important;
   color: inherit !important;
   -webkit-text-fill-color: currentColor !important;
   text-overflow: ellipsis !important;
-  box-shadow: none !important;
+  background: transparent !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-store-content {
+/* Real page renderer, offer grid, preview, currencies and purchase controls. */
+.nitro-catalog.pc6-catalog .pc6-content-column {
   height: 100% !important;
+  min-height: 0 !important;
+  padding: 9px !important;
   overflow: hidden !important;
+  border: 1px solid #263248 !important;
+  border-radius: 12px !important;
+  background: var(--pc6-content) !important;
+  color: #fff !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-store-row {
+.nitro-catalog.pc6-catalog .pc6-content-column :is(.text-black, .text-dark) {
+  color: #eef2f7 !important;
+  -webkit-text-fill-color: #eef2f7 !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-content-column > :is(.bg-muted, .bg-light, .bg-white) {
+  border: 1px solid var(--pc6-border) !important;
+  background: var(--pc6-panel) !important;
+  color: #fff !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-page-header {
+  flex: 0 0 auto !important;
+  max-height: 48px !important;
+  margin: 0 0 6px !important;
+  overflow: hidden !important;
+  border-radius: 7px !important;
+  background: #253047 !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-store-row {
   width: 100% !important;
   height: 100% !important;
   min-height: 0 !important;
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 178px !important;
+  grid-template-columns: minmax(0, 1fr) 190px !important;
   gap: 9px !important;
   margin: 0 !important;
   padding: 0 !important;
   overflow: hidden !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-grid-column {
+.nitro-catalog.pc6-catalog .pc6-products-column {
   height: 100% !important;
   overflow: hidden !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-product-grid {
+.nitro-catalog.pc6-catalog .pc6-product-grid {
   width: 100% !important;
   height: 100% !important;
   min-height: 0 !important;
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)) !important;
-  grid-auto-rows: 49px !important;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)) !important;
+  grid-auto-rows: 52px !important;
   align-content: start !important;
   gap: 5px !important;
   margin: 0 !important;
   padding: 6px !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
-  border: 1px solid #2b374d !important;
-  border-radius: 10px !important;
-  background: #111720 !important;
+  border: 1px solid var(--pc6-border) !important;
+  border-radius: 9px !important;
+  background: var(--pc6-panel) !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-product {
+.nitro-catalog.pc6-catalog .pc6-product {
   position: relative !important;
   width: auto !important;
   min-width: 0 !important;
-  height: 49px !important;
-  min-height: 49px !important;
-  max-height: 49px !important;
+  height: 52px !important;
+  min-height: 52px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   margin: 0 !important;
   padding: 3px !important;
   overflow: hidden !important;
-  border: 1px solid #3d4b63 !important;
-  border-radius: 7px !important;
-  background-color: #d2d9e0 !important;
-  background-image: var(--pc5-product-image) !important;
+  border: 2px solid #aab5c2 !important;
+  border-radius: 6px !important;
+  background-color: #d5dce3 !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  color: #fff !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3) !important;
+  color: #17202d !important;
+  -webkit-text-fill-color: #17202d !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7) !important;
+  cursor: pointer !important;
+  transition: border-color 120ms ease, background-color 120ms ease, transform 120ms ease !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-product:hover {
-  border-color: #7387a8 !important;
-  background-color: #e0e5e9 !important;
+.nitro-catalog.pc6-catalog .pc6-product:hover {
+  border-color: #7e94b7 !important;
+  background-color: #edf1f4 !important;
+  transform: translateY(-1px) !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-product:is(.active, .selected, [aria-selected="true"]) {
-  border-color: var(--pc5-yellow) !important;
-  box-shadow: 0 0 0 1px #ad8600, inset 0 1px rgba(255, 255, 255, .35) !important;
+.nitro-catalog.pc6-catalog .pc6-product:is(.active, .selected, [aria-selected="true"]) {
+  border-color: var(--pc6-search) !important;
+  box-shadow: 0 0 0 1px #9f7d00, inset 0 1px rgba(255, 255, 255, .7) !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-product [style*="--pc5-product-image"] {
-  background-image: var(--pc5-product-image) !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-}
-
-.nitro-catalog.pc5-catalog .pc5-preview {
+.nitro-catalog.pc6-catalog .pc6-preview {
   height: 100% !important;
-  padding: 9px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 8px !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
-  border: 1px solid #2b374d !important;
-  border-radius: 10px !important;
-  background: #111720 !important;
+  border: 1px solid var(--pc6-border) !important;
+  border-radius: 9px !important;
+  background: var(--pc6-panel) !important;
   color: #fff !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-preview :is(h1, h2, h3, h4, strong, b) {
+.nitro-catalog.pc6-catalog .pc6-preview :is(h1, h2, h3, h4, strong, b) {
   color: #fff !important;
   -webkit-text-fill-color: #fff !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-preview :is(p, small, label, span) {
-  color: #c7ccd5 !important;
-  -webkit-text-fill-color: #c7ccd5 !important;
+.nitro-catalog.pc6-catalog .pc6-preview :is(p, small, label, span) {
+  color: #c8d0dc !important;
+  -webkit-text-fill-color: #c8d0dc !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-purchase {
-  min-height: 0 !important;
-  background: transparent !important;
-  color: #fff !important;
+.nitro-catalog.pc6-catalog .pc6-preview :is(.bg-muted, .bg-light) {
+  border-color: #3a4963 !important;
+  background-color: #263146 !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-buy {
+.nitro-catalog.pc6-catalog .pc6-buy,
+.nitro-catalog.pc6-catalog .pc6-gift {
   width: 100% !important;
-  min-height: 32px !important;
-  border: 1px solid #a98200 !important;
-  border-radius: 8px !important;
-  background: linear-gradient(#ffdb39, #f5bd00) !important;
-  color: #171b22 !important;
-  -webkit-text-fill-color: #171b22 !important;
+  min-height: 31px !important;
+  border-radius: 7px !important;
   font-size: 10px !important;
   font-weight: 900 !important;
   text-shadow: none !important;
+  transition: filter 120ms ease, transform 120ms ease !important;
 }
 
-.nitro-catalog.pc5-catalog .pc5-buy:hover {
-  background: linear-gradient(#ffe96a, #ffcc10) !important;
+.nitro-catalog.pc6-catalog .pc6-buy {
+  border: 1px solid #a57f00 !important;
+  background: linear-gradient(#ffdc3e, #f4bd00) !important;
+  color: #171d29 !important;
+  -webkit-text-fill-color: #171d29 !important;
 }
 
-.nitro-catalog.pc5-catalog * {
+.nitro-catalog.pc6-catalog .pc6-gift {
+  border: 1px solid #4b5c7b !important;
+  background: #263248 !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+.nitro-catalog.pc6-catalog :is(.pc6-buy, .pc6-gift):hover:not(:disabled) {
+  filter: brightness(1.12) !important;
+  transform: translateY(-1px) !important;
+}
+
+.nitro-catalog.pc6-catalog :is(.pc6-buy, .pc6-gift):disabled {
+  opacity: .55 !important;
+  cursor: not-allowed !important;
+}
+
+.nitro-catalog.pc6-catalog .pc6-loading {
+  width: 20px !important;
+  height: 20px !important;
+  color: var(--pc6-search) !important;
+}
+
+.nitro-catalog.pc6-catalog * {
   scrollbar-width: thin !important;
-  scrollbar-color: #687286 #151b25 !important;
+  scrollbar-color: #66748c #111823 !important;
 }
 
-.nitro-catalog.pc5-catalog *::-webkit-scrollbar {
-  width: 5px !important;
-  height: 5px !important;
-}
+.nitro-catalog.pc6-catalog *::-webkit-scrollbar { width: 5px !important; height: 5px !important; }
+.nitro-catalog.pc6-catalog *::-webkit-scrollbar-track { border-radius: 8px !important; background: #111823 !important; }
+.nitro-catalog.pc6-catalog *::-webkit-scrollbar-thumb { border-radius: 8px !important; background: #66748c !important; }
 
-.nitro-catalog.pc5-catalog *::-webkit-scrollbar-track {
-  border-radius: 8px !important;
-  background: #151b25 !important;
-}
-
-.nitro-catalog.pc5-catalog *::-webkit-scrollbar-thumb {
-  border-radius: 8px !important;
-  background: #687286 !important;
-}
-
-@media (max-width: 650px), (max-height: 500px) {
-  .nitro-catalog.pc5-catalog {
+@media (max-width: 720px), (max-height: 560px) {
+  .nitro-catalog.pc6-catalog {
     width: calc(100vw - 12px) !important;
-    min-width: 520px !important;
     height: calc(100vh - 12px) !important;
-    min-height: 430px !important;
+    min-height: 390px !important;
   }
 
-  .nitro-catalog.pc5-catalog .pc5-tab,
-  .nitro-catalog.pc5-catalog .pc5-tab :is(button, a, [role="tab"], [role="button"]) {
-    padding-inline: 4px !important;
-    font-size: 8px !important;
+  .nitro-catalog.pc6-catalog .pc6-main { grid-template-columns: 154px minmax(0, 1fr) !important; }
+  .nitro-catalog.pc6-catalog .pc6-store-row { grid-template-columns: minmax(0, 1fr) 166px !important; }
+  .nitro-catalog.pc6-catalog .pc6-tab,
+  .nitro-catalog.pc6-catalog .pc6-tab :is(button, a, [role="tab"], [role="button"]) {
+    min-width: 104px !important;
+    padding-inline: 8px !important;
   }
+}
 
-  .nitro-catalog.pc5-catalog.pc5-store-mode .pc5-main {
-    grid-template-columns: 155px minmax(0, 1fr) !important;
-  }
-
-  .nitro-catalog.pc5-catalog .pc5-store-row {
-    grid-template-columns: minmax(0, 1fr) 160px !important;
+@media (max-width: 560px) {
+  .nitro-catalog.pc6-catalog .pc6-main { grid-template-columns: 140px minmax(0, 1fr) !important; gap: 6px !important; }
+  .nitro-catalog.pc6-catalog .pc6-content-column { padding: 6px !important; }
+  .nitro-catalog.pc6-catalog .pc6-store-row {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(180px, 1fr) minmax(180px, 1fr) !important;
+    overflow-y: auto !important;
   }
 }
