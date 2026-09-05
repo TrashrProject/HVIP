@@ -12,123 +12,231 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import com.eu.habbo.messages.outgoing.rooms.users.RoomUserShoutComposer;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import io.github.brenoepics.roleplay.utilities.types.RPItem;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Interaction RP des poubelles.
+ *
+ * Le loot est genere exclusivement cote serveur. Le verrou et le cooldown sont portes par
+ * l'instance du mobilier, ce qui empeche plusieurs joueurs de farmer la meme poubelle.
+ */
 public class TrashBin extends InteractionDefault {
 
-    private boolean occupied = false;
-    private boolean searched = false;
+    private volatile boolean occupied = false;
+    private volatile boolean searched = false;
 
     public TrashBin(ResultSet set, Item baseItem) throws SQLException {
         super(set, baseItem);
     }
 
-    public TrashBin(int id, int userId, Item item, String extradata, int limitedStack, int limitedSells) {
+    public TrashBin(int id, int userId, Item item, String extradata, int limitedStack,
+                    int limitedSells) {
         super(id, userId, item, extradata, limitedStack, limitedSells);
     }
 
     @Override
     public void onClick(final GameClient client, final Room room, Object[] objects) {
-        RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(client.getHabbo());
+        if (client == null || client.getHabbo() == null || room == null) {
+            return;
+        }
+
+        Habbo habbo = client.getHabbo();
+        RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
+        if (data == null || habbo.getRoomUnit() == null) {
+            return;
+        }
+
+        // Hors des salles RP, conserver le comportement normal du mobilier.
         if (room.getCategory() != Emulator.getConfig().getInt("nahabbo.features.room.category")) {
-            this.setExtradata(this.getExtradata().isEmpty() ? "0" : String.valueOf((Integer.parseInt(this.getExtradata()) + 1) % this.getBaseItem().getStateCount()));
-            this.needsUpdate(true);
-            room.updateItemState(this);
+            toggleDefaultState(room);
             return;
         }
 
-        if (this.occupied || data.isDead() || room.getCategory() != Emulator.getConfig().getInt("nahabbo.features.room.category")) {
+        if (data.isDead()) {
             return;
         }
 
-        if (this.searched) {
-            client.getHabbo().whisper("Cette poubelle a déjà été fouillée. Réessayez plus tard.");
+        if (!isHabboStillInRoom(habbo, room) || !isAdjacent(habbo, room)) {
+            habbo.whisper("Vous devez être à côté de la poubelle pour la fouiller.");
             return;
         }
 
-        String[] items = Emulator.getConfig().getValue("nahabbo.features.trashbin.items").split(","); // Items that can be found in the trash can (separate by commas
-        int[] chances = Arrays.stream(Emulator.getConfig().getValue("nahabbo.features.trashbin.chances").split(",")).mapToInt(Integer::parseInt).toArray(); // Chances of finding each item (separated by commas)
-        int sum = Arrays.stream(chances).sum();
-        TrashBin bin = this;
-        RoomTile location = room.getLayout().getTile(getX(), getY());
-        if (client.getHabbo().getHabboInfo().getCurrentRoom().getLayout().getTilesAround(location, 0, false).contains(client.getHabbo().getRoomUnit().getCurrentLocation())) {
-            this.occupied = true;
+        synchronized (this) {
+            if (searched) {
+                habbo.whisper("Cette poubelle a déjà été fouillée récemment.");
+                return;
+            }
+            if (occupied) {
+                habbo.whisper("Quelqu'un est déjà en train de fouiller cette poubelle.");
+                return;
+            }
+            occupied = true;
+        }
+
+        LootTable lootTable = readLootTable();
+        if (lootTable == null) {
+            occupied = false;
+            habbo.whisper("Cette poubelle ne peut pas être fouillée pour le moment.");
+            return;
+        }
+
+        room.sendComposer(new RoomUserShoutComposer(new RoomChatMessage(
+            "* Fouille la poubelle... *",
+            habbo,
+            habbo,
+            RoomChatMessageBubbles.NORMAL)).compose());
+
+        final int habboId = habbo.getHabboInfo().getId();
+        final int searchDelay = Math.max(1000,
+            Emulator.getConfig().getInt("nahabbo.features.trashbin.search.time"));
+
+        Emulator.getThreading().run(
+            () -> finishSearch(habbo, habboId, data, room, lootTable),
+            searchDelay);
+    }
+
+    private void finishSearch(Habbo habbo, int habboId, RpAvatar data, Room room,
+                              LootTable lootTable) {
+        try {
+            if (habbo == null || habbo.getHabboInfo().getId() != habboId
+                || !isHabboStillInRoom(habbo, room) || !isAdjacent(habbo, room)) {
+                if (habbo != null) {
+                    habbo.whisper("La fouille a été annulée : vous vous êtes éloigné de la poubelle.");
+                }
+                return;
+            }
+
+            String rewardName = roll(lootTable);
+            giveReward(rewardName, habbo, data);
+
+            synchronized (this) {
+                searched = true;
+            }
+
+            // Etat visuel uniquement : la logique du cooldown ne depend pas de l'extradata.
+            setExtradata("1");
+            needsUpdate(true);
             room.updateItem(this);
-            client.getHabbo().getHabboInfo().getCurrentRoom().sendComposer(new RoomUserShoutComposer(new RoomChatMessage("*Fouille la poubelle à la recherche d'objets utiles*", client.getHabbo(), client.getHabbo(), RoomChatMessageBubbles.NORMAL)).compose());
-            Emulator.getThreading().run(() -> updateOccupied(client.getHabbo(), sum, chances, items, data, room, bin, location), Emulator.getConfig().getInt("nahabbo.features.trashbin.search.time"));
-        }
-    }
 
-    private void updateOccupied(Habbo habbo, int sum, int[] chances, String[] items, RpAvatar data, Room room, TrashBin bin, RoomTile location) {
-        if (habbo == null) return;
-
-        int random = Emulator.getRandom().nextInt(sum) + 1;
-        int i = 0;
-        while (random > chances[i]) {
-            random -= chances[i];
-            i++;
-        }
-        if (habbo.getHabboInfo().getCurrentRoom().getLayout().getTilesAround(location, 0, false).contains(habbo.getRoomUnit().getCurrentLocation())) {
-            handleSearch(items[i], habbo, data);
-            this.searched = true;
-            bin.setExtradata("1");
-            room.updateItem(bin);
+            final int cooldown = Math.max(1000,
+                Emulator.getConfig().getInt("nahabbo.features.trashbin.cooldown"));
             Emulator.getThreading().run(() -> {
-                bin.setExtradata("2");
-                room.updateItem(bin);
-                bin.searched = false;
-            }, Emulator.getConfig().getInt("nahabbo.features.trashbin.cooldown"));
+                synchronized (TrashBin.this) {
+                    searched = false;
+                }
+                setExtradata("0");
+                needsUpdate(true);
+                room.updateItem(TrashBin.this);
+            }, cooldown);
+        } finally {
+            occupied = false;
         }
-        this.occupied = false;
     }
 
-    private void handleSearch(String item, Habbo habbo, RpAvatar data) {
-        switch (item) {
-            case "Bucks":
-                int bucks = ThreadLocalRandom.current().nextInt(1, 5);
-                habbo.getHabboInfo().addCurrencyAmount(200, bucks);
-                habbo.whisper("Vous avez trouvé " + bucks + " Bucks.");
-                break;
-            case "Pizza":
-                data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Snack"), 1);
-                habbo.whisper("Vous avez trouvé un encas.");
-                break;
-            case "Medkit":
-                data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Medkit"), 1);
-                habbo.whisper("Vous avez trouvé une trousse de secours.");
-                break;
-            case "Shield":
-                data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Shield"), 1);
-                habbo.whisper("Vous avez trouvé une protection.");
-                break;
-            case "Weapon":
-                int weapon = ThreadLocalRandom.current().nextInt(1, 3);
-                if (weapon == 1) {
-                    data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Bat"), 1);
-                    habbo.whisper("Vous avez trouvé une batte.");
-                    return;
-                }
-                if (weapon == 2) {
-                    data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Sword"), 1);
-                    habbo.whisper("Vous avez trouvé une épée.");
-                    return;
-                }
-                if (weapon == 3) {
-                    data.getInventory().addItem(habbo, RolePlay.getItemManager().getItemByName("Pistol"), 1);
-                    habbo.whisper("Vous avez trouvé un pistolet.");
-                }
-                break;
-            default:
-                habbo.whisper("Vous n'avez rien trouvé.");
-                break;
+    private LootTable readLootTable() {
+        String rawItems = Emulator.getConfig().getValue("nahabbo.features.trashbin.items");
+        String rawChances = Emulator.getConfig().getValue("nahabbo.features.trashbin.chances");
+        if (rawItems == null || rawItems.isBlank() || rawChances == null || rawChances.isBlank()) {
+            return null;
         }
+
+        String[] items = Arrays.stream(rawItems.split(","))
+            .map(String::trim)
+            .toArray(String[]::new);
+
+        int[] chances;
+        try {
+            chances = Arrays.stream(rawChances.split(","))
+                .map(String::trim)
+                .mapToInt(Integer::parseInt)
+                .toArray();
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+
+        if (items.length == 0 || items.length != chances.length) {
+            return null;
+        }
+
+        int total = 0;
+        for (int chance : chances) {
+            if (chance < 0) {
+                return null;
+            }
+            total += chance;
+        }
+
+        return total > 0 ? new LootTable(items, chances, total) : null;
+    }
+
+    private String roll(LootTable lootTable) {
+        int random = Emulator.getRandom().nextInt(lootTable.total()) + 1;
+        for (int i = 0; i < lootTable.chances().length; i++) {
+            random -= lootTable.chances()[i];
+            if (random <= 0) {
+                return lootTable.items()[i];
+            }
+        }
+        return "Nothing";
+    }
+
+    private void giveReward(String rewardName, Habbo habbo, RpAvatar data) {
+        if (rewardName == null || rewardName.isBlank()
+            || rewardName.equalsIgnoreCase("Nothing")
+            || rewardName.equalsIgnoreCase("Rien")) {
+            habbo.whisper("* Fouille la poubelle mais ne trouve rien. *");
+            return;
+        }
+
+        // Ne jamais fabriquer un item a partir d'un ID arbitraire : il doit exister dans rp_items.
+        RPItem reward = RolePlay.getItemManager().getItemByName(rewardName);
+        if (reward == null) {
+            habbo.whisper("* Fouille la poubelle mais ne trouve rien. *");
+            return;
+        }
+
+        data.getInventory().addItem(habbo, reward, 1);
+        habbo.whisper("* Fouille la poubelle et trouve : " + reward.getDisplayName() + " *");
+    }
+
+    private boolean isHabboStillInRoom(Habbo habbo, Room room) {
+        return habbo.getHabboInfo().getCurrentRoom() == room && habbo.getRoomUnit() != null;
+    }
+
+    private boolean isAdjacent(Habbo habbo, Room room) {
+        RoomTile location = room.getLayout().getTile(getX(), getY());
+        if (location == null || habbo.getRoomUnit() == null
+            || habbo.getRoomUnit().getCurrentLocation() == null) {
+            return false;
+        }
+        return room.getLayout().getTilesAround(location, 0, false)
+            .contains(habbo.getRoomUnit().getCurrentLocation());
+    }
+
+    private void toggleDefaultState(Room room) {
+        int states = Math.max(1, getBaseItem().getStateCount());
+        int currentState = 0;
+        try {
+            currentState = Integer.parseInt(getExtradata());
+        } catch (NumberFormatException ignored) {
+            // Le mobilier repart de l'etat 0 si son extradata n'est pas numerique.
+        }
+        setExtradata(String.valueOf((currentState + 1) % states));
+        needsUpdate(true);
+        room.updateItemState(this);
     }
 
     @Override
     public void onPickUp(Room room) {
-        this.occupied = false;
+        synchronized (this) {
+            occupied = false;
+            searched = false;
+        }
+    }
+
+    private record LootTable(String[] items, int[] chances, int total) {
     }
 }
