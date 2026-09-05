@@ -5,6 +5,7 @@ import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.commands.CommandHandler;
 import io.github.brenoepics.roleplay.commands.jobs.restaurant.RestaurantCommand;
 import io.github.brenoepics.roleplay.commands.jobs.restaurant.RestaurantCommand.Action;
+import io.github.brenoepics.roleplay.commands.jobs.restaurant.RestaurantOrderResponseCommand;
 import io.github.brenoepics.roleplay.features.job.JobPermissions;
 import io.github.brenoepics.roleplay.features.user.CheckDatabase;
 
@@ -21,7 +22,15 @@ public final class RestaurantCommandRegistrar {
     registerCommand(new RestaurantCommand("cmd_restaurant_take_order",
         new String[]{"prendrecommande"}, Action.TAKE_ORDER, JobPermissions.RESTAURANT_ORDER),
         new String[]{"prendrecommande"},
-        ":prendrecommande <pseudo> - Prend la commande d'un client proche.");
+        ":prendrecommande <pseudo> - Propose de prendre la commande d'un client proche.");
+
+    registerCommand(new RestaurantOrderResponseCommand("cmd_restaurant_accept_order",
+        new String[]{"acceptercommande"}, true), new String[]{"acceptercommande"},
+        ":acceptercommande - Accepte la proposition de prise de commande d'un restaurant.");
+
+    registerCommand(new RestaurantOrderResponseCommand("cmd_restaurant_refuse_order",
+        new String[]{"refusercommande"}, false), new String[]{"refusercommande"},
+        ":refusercommande - Refuse la proposition de prise de commande d'un restaurant.");
 
     registerCommand(new RestaurantCommand("cmd_restaurant_prepare", new String[]{"preparer"},
         Action.PREPARE, JobPermissions.RESTAURANT_PREPARE), new String[]{"preparer"},
