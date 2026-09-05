@@ -27,17 +27,14 @@ public class ReleaseCommand extends Command {
       officer.whisper("Vous n'etes pas policier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
-
     if (!officerData.isDuty()) {
       officer.whisper("Vous devez etre en service.", RoomChatMessageBubbles.ALERT);
       return true;
     }
-
     if (!officerData.hasEnergy()) {
       gameClient.getHabbo().whisper(MISSING_ENERGY, RoomChatMessageBubbles.ALERT);
       return true;
     }
-
     if (params.length < 2) {
       officer.whisper("Usage : :liberer <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
@@ -46,9 +43,8 @@ public class ReleaseCommand extends Command {
     Timeout timeout = RolePlay.getCommandsCounter().getCoolDown("release")
         .getTimeOut(officer.getHabboInfo().getId());
     if (timeout != null) {
-      officer.whisper(
-          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconde(s) avant de reutiliser cette commande.");
+      officer.whisper("Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+          .getEpochSecond() + " seconde(s) avant de reutiliser cette commande.");
       return true;
     }
 
@@ -70,8 +66,8 @@ public class ReleaseCommand extends Command {
 
     RolePlay.getPrisonService().releaseFromJail(criminal, criminalData);
     officer.getHabboInfo().getCurrentRoom().sendComposer(getRoomUserShoutComposer(
-        "Libere %username% de prison *".replace("%username%",
-            criminal.getHabboInfo().getUsername()), officer).compose());
+        "* Libere %username% de prison *".replace("%username%", criminal.getHabboInfo().getUsername()),
+        officer, RoomChatMessageBubbles.AMBASSADOR).compose());
     officerData.executeAction();
     return true;
   }
