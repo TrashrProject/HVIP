@@ -109,6 +109,7 @@ public class TrashBin extends InteractionDefault {
 
     private void finishSearch(Habbo habbo, int habboId, RpAvatar data, Room room,
                               LootTable lootTable) {
+        boolean completed = false;
         try {
             if (habbo == null || habbo.getHabboInfo().getId() != habboId
                 || !isHabboStillInRoom(habbo, room) || !isAdjacent(habbo, room)) {
@@ -124,6 +125,7 @@ public class TrashBin extends InteractionDefault {
 
             String rewardName = roll(lootTable);
             giveReward(rewardName, habbo, data);
+            completed = true;
 
             synchronized (this) {
                 searched = true;
@@ -135,9 +137,12 @@ public class TrashBin extends InteractionDefault {
                 synchronized (TrashBin.this) {
                     searched = false;
                 }
+                closeFurniture(room);
             }, cooldown);
         } finally {
-            closeFurniture(room);
+            if (!completed) {
+                closeFurniture(room);
+            }
             occupied = false;
         }
     }

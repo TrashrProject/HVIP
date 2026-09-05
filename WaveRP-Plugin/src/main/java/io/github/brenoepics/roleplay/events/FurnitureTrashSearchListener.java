@@ -107,10 +107,6 @@ public final class FurnitureTrashSearchListener implements EventListener {
       return;
     }
 
-    long cooldownMs = Math.max(1_000L,
-        Emulator.getConfig().getInt("paradise.trash.cooldown_seconds", 300) * 1000L);
-    COOLDOWNS.put(furniture.getId(), now + cooldownMs);
-
     ActiveSearch search = new ActiveSearch(habbo, furniture, room, userId, maxDistance);
     ACTIVE_SEARCHES.put(userId, search);
     setFurnitureOpen(search, true);
@@ -158,6 +154,7 @@ public final class FurnitureTrashSearchListener implements EventListener {
     Habbo habbo = search.habbo();
     HabboItem furniture = search.furniture();
     Room originalRoom = search.room();
+    boolean completed = false;
     try {
       if (habbo.getHabboInfo() == null || habbo.getRoomUnit() == null
           || habbo.getHabboInfo().getCurrentRoom() != originalRoom
@@ -174,6 +171,8 @@ public final class FurnitureTrashSearchListener implements EventListener {
         return;
       }
 
+      // From this point the search itself completed, with or without loot.
+      completed = true;
       int roll = ThreadLocalRandom.current().nextInt(100);
       if (roll < 50) {
         habbo.shout("* Fouille la poubelle mais ne trouve rien *", RoomChatMessageBubbles.NORMAL);
@@ -205,11 +204,29 @@ public final class FurnitureTrashSearchListener implements EventListener {
       habbo.shout("* Fouille la poubelle et trouve " + reward.getDisplayName() + " *",
           RoomChatMessageBubbles.NORMAL);
     } catch (Exception e) {
+      COOLDOWNS.remove(furniture.getId());
       LOGGER.error("[ParadiseRP Trash] Failed to finish trash search", e);
     } finally {
       releaseSearch(search);
-      setFurnitureOpen(search, false);
+      if (completed) {
+        keepOpenUntilReady(search);
+      } else {
+        setFurnitureOpen(search, false);
+      }
     }
+  }
+
+  private static void keepOpenUntilReady(ActiveSearch search) {
+    long cooldownMs = Math.max(1_000L,
+        Emulator.getConfig().getInt("paradise.trash.cooldown_seconds", 300) * 1000L);
+    long cooldownUntil = System.currentTimeMillis() + cooldownMs;
+    COOLDOWNS.put(search.furniture().getId(), cooldownUntil);
+
+    Emulator.getThreading().run(() -> {
+      if (COOLDOWNS.remove(search.furniture().getId(), cooldownUntil)) {
+        setFurnitureOpen(search, false);
+      }
+    }, cooldownMs);
   }
 
   private static void releaseSearch(ActiveSearch search) {
