@@ -3,9 +3,11 @@ package io.github.brenoepics.roleplay.features.restaurant;
 import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
+import com.eu.habbo.messages.outgoing.generic.alerts.GenericAlertComposer;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.job.JobEntity;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import io.github.brenoepics.roleplay.utilities.types.FoodPresentation;
 import io.github.brenoepics.roleplay.utilities.types.RPItem;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class RestaurantService {
 
   private static final int TARGET_RANGE = 3;
+  private static final String MENU_MARKER = "PARADISE_RESTAURANT_MENU";
   private static final Map<Integer, WorkingOrder> WORKING_ORDERS = new ConcurrentHashMap<>();
   private static final Map<String, Invoice> INVOICES = new ConcurrentHashMap<>();
 
@@ -56,14 +59,27 @@ public final class RestaurantService {
       employee.whisper("La carte de ce restaurant est vide.", RoomChatMessageBubbles.ALERT);
       return;
     }
-    StringBuilder message = new StringBuilder(data.getJobEntity().getDisplayName()).append(" — Carte : ");
-    for (int i = 0; i < items.size(); i++) {
-      MenuItem item = items.get(i);
-      if (i > 0) message.append(" | ");
-      message.append(item.displayName()).append(" (").append(item.code()).append(") : ")
-          .append(item.price()).append(" crédits");
+
+    StringBuilder payload = new StringBuilder(MENU_MARKER).append('\n');
+    payload.append("RESTAURANT_NAME|")
+        .append(sanitize(data.getJobEntity().getDisplayName())).append('\n');
+
+    for (MenuItem item : items) {
+      RPItem rpItem = RolePlay.getItemManager().getItems().get(item.itemId());
+      String hunger = rpItem == null ? "0" : sanitize(rpItem.getExtraData());
+      String image = rpItem == null ? "" : sanitize(FoodPresentation.imageUrl(rpItem));
+      payload.append("RESTAURANT|")
+          .append(sanitize(item.code())).append('|')
+          .append(sanitize(item.displayName())).append('|')
+          .append(item.itemId()).append('|')
+          .append(item.price()).append('|')
+          .append(hunger).append('|')
+          .append(image).append('\n');
     }
-    employee.whisper(message.toString(), RoomChatMessageBubbles.ALERT);
+
+    if (employee.getClient() != null) {
+      employee.getClient().sendResponse(new GenericAlertComposer(payload.toString()));
+    }
   }
 
   public static void takeOrder(Habbo employee, String username) {
@@ -129,21 +145,34 @@ public final class RestaurantService {
       return;
     }
 
-    customerData.getInventory().addItem(customer, rpItem, 1);
-    String key = invoiceKey(order.jobId(), customer.getHabboInfo().getId());
-    INVOICES.compute(key, (ignored, existing) -> {
-      Invoice invoice = existing == null
-          ? new Invoice(order.jobId(), order.restaurantName(), customer.getHabboInfo().getId(),
-              customer.getHabboInfo().getUsername())
-          : existing;
-      invoice.add(order.prepared().displayName(), order.prepared().price());
-      return invoice;
-    });
+    int price = order.prepared().price();
+    PaymentResult result = debitAndCreditCompany(order.jobId(), customer.getHabboInfo().getId(), price);
+    if (result == PaymentResult.NOT_ENOUGH) {
+      employee.whisper("Le client n'a pas assez de crédits pour payer " + price + " crédits.",
+          RoomChatMessageBubbles.ALERT);
+      customer.whisper("Vous n'avez pas assez de crédits pour payer " + order.prepared().displayName()
+          + " (" + price + " crédits).", RoomChatMessageBubbles.ALERT);
+      return;
+    }
+    if (result == PaymentResult.ERROR) {
+      employee.whisper("Le paiement a échoué. Le plat n'a pas été servi.",
+          RoomChatMessageBubbles.ALERT);
+      customer.whisper("Le paiement a échoué. Aucun crédit n'a été débité.",
+          RoomChatMessageBubbles.ALERT);
+      return;
+    }
 
+    // Synchronise le solde du client connecté avec le débit SQL et rafraîchit le compteur crédits.
+    customer.giveCredits(-price);
+    customerData.getInventory().addItem(customer, rpItem, 1);
     WORKING_ORDERS.remove(employee.getHabboInfo().getId());
+    INVOICES.remove(invoiceKey(order.jobId(), customer.getHabboInfo().getId()));
+
     employee.shout("* Sert " + order.prepared().displayName() + " à " + order.customerName() + " *");
-    customer.whisper("Commande servie : " + order.prepared().displayName() + ".",
-        RoomChatMessageBubbles.ALERT);
+    customer.shout("* Paie " + price + " crédits chez " + order.restaurantName() + " *");
+    employee.shout("* Encaisse " + price + " crédits de " + order.customerName() + " *");
+    customer.whisper("Vous avez payé " + price + " crédits pour " + order.prepared().displayName() + ".",
+        RoomChatMessageBubbles.NORMAL);
   }
 
   public static void sendBill(Habbo employee, String username) {
@@ -153,7 +182,8 @@ public final class RestaurantService {
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(employee);
     Invoice invoice = INVOICES.get(invoiceKey(data.getJobEntity().getId(), customer.getHabboInfo().getId()));
     if (invoice == null || invoice.total() <= 0) {
-      employee.whisper("Aucune addition en attente pour ce client.", RoomChatMessageBubbles.ALERT);
+      employee.whisper("Aucune addition en attente pour ce client. Le paiement est automatique au service.",
+          RoomChatMessageBubbles.ALERT);
       return;
     }
 
@@ -172,7 +202,8 @@ public final class RestaurantService {
     String key = invoiceKey(data.getJobEntity().getId(), customer.getHabboInfo().getId());
     Invoice invoice = INVOICES.get(key);
     if (invoice == null || invoice.total() <= 0) {
-      employee.whisper("Aucune addition en attente pour ce client.", RoomChatMessageBubbles.ALERT);
+      employee.whisper("Aucune addition en attente. Le paiement est automatique avec :servir.",
+          RoomChatMessageBubbles.ALERT);
       return;
     }
 
@@ -197,6 +228,7 @@ public final class RestaurantService {
       invoice.paid = true;
       INVOICES.remove(key, invoice);
       customer.giveCredits(-invoice.total());
+      customer.shout("* Paie " + invoice.total() + " crédits chez " + invoice.restaurantName() + " *");
       employee.shout("* Encaisse " + customer.getHabboInfo().getUsername() + " pour "
           + invoice.total() + " crédits *");
       employee.whisper("Paiement effectué avec succès.", RoomChatMessageBubbles.ALERT);
@@ -324,6 +356,10 @@ public final class RestaurantService {
 
   private static String invoiceKey(int jobId, int customerId) {
     return jobId + ":" + customerId;
+  }
+
+  private static String sanitize(String value) {
+    return value == null ? "" : value.replace("|", " ").replace("\r", " ").replace("\n", " ");
   }
 
   public record MenuItem(String code, String displayName, int itemId, int price) {
