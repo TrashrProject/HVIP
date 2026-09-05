@@ -4,6 +4,7 @@ import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import io.github.brenoepics.roleplay.RolePlay;
+import io.github.brenoepics.roleplay.features.restaurant.RestaurantService;
 
 public class AcceptOfferCommand extends Command {
     public AcceptOfferCommand(String permission, String[] keys) {
@@ -14,6 +15,11 @@ public class AcceptOfferCommand extends Command {
     public boolean handle(GameClient gameClient, String[] params) {
         if (params.length != 2) {
             gameClient.getHabbo().whisper(":accepteroffre <code>", RoomChatMessageBubbles.ALERT);
+            return true;
+        }
+
+        if (params[1].startsWith("ORDER-")) {
+            RestaurantService.acceptOrder(gameClient.getHabbo());
             return true;
         }
 
