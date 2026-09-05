@@ -81,7 +81,6 @@ public class JobsDelegate {
     }
   }
 
-  // Keep the static utility methods as they are still needed
   public static RoomUserShoutComposer getRoomUserShoutComposer(String message, Habbo habbo) {
     RoomChatMessageBubbles bubble = RoomChatMessageBubbles.NORMAL;
 
@@ -96,15 +95,32 @@ public class JobsDelegate {
       RoomChatMessageBubbles bubble) {
     RoomChatMessageBubbles resolvedBubble = bubble;
 
-    // JobsManager historically sends BLUE explicitly when :travailler is used by Police.
-    // Replace only that Police work bubble with the native Ambassador bubble. Other jobs
-    // and any unrelated BLUE messages keep their original bubble.
     if (bubble == RoomChatMessageBubbles.BLUE && isPoliceOnDuty(habbo)) {
       resolvedBubble = RoomChatMessageBubbles.AMBASSADOR;
     }
 
+    String resolvedMessage = resolveRestaurantWorkMessage(message, habbo);
     return new RoomUserShoutComposer(
-        new RoomChatMessage(message, habbo, habbo, resolvedBubble));
+        new RoomChatMessage(resolvedMessage, habbo, habbo, resolvedBubble));
+  }
+
+  private static String resolveRestaurantWorkMessage(String message, Habbo habbo) {
+    if (message == null || habbo == null || !message.startsWith("* Commence à travailler en tant que ")) {
+      return message;
+    }
+
+    RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
+    if (data == null || data.getJobEntity() == null || data.getJobRankEntity() == null) {
+      return message;
+    }
+
+    String jobName = data.getJobEntity().getName();
+    if (!"zycroque".equalsIgnoreCase(jobName) && !"tastycrousty".equalsIgnoreCase(jobName)) {
+      return message;
+    }
+
+    return "* Commence à travailler chez " + data.getJobEntity().getDisplayName()
+        + " en tant que " + data.getJobRankEntity().getDisplayName() + " *";
   }
 
   private static boolean isPoliceOnDuty(Habbo habbo) {
