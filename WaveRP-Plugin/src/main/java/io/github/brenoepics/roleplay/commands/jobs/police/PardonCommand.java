@@ -24,20 +24,17 @@ public class PardonCommand extends Command {
     RpAvatar officerData = RolePlay.getAvatarManager().getRpAvatar(officer);
 
     if (!officerData.getJobRankEntity().hasPermission(JobPermissions.POLICE_ARREST)) {
-      officer.whisper("Vous n'\u00eates pas policier.", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous n'êtes pas policier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
-
     if (!officerData.isDuty()) {
-      officer.whisper("Vous devez \u00eatre en service.", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous devez être en service.", RoomChatMessageBubbles.ALERT);
       return true;
     }
-
     if (!officerData.hasEnergy()) {
       gameClient.getHabbo().whisper(MISSING_ENERGY, RoomChatMessageBubbles.ALERT);
       return true;
     }
-
     if (params.length < 2) {
       officer.whisper(":gracier <pseudo>", RoomChatMessageBubbles.ALERT);
       return true;
@@ -46,9 +43,8 @@ public class PardonCommand extends Command {
     Timeout timeout = RolePlay.getCommandsCounter().getCoolDown("pardon")
         .getTimeOut(officer.getHabboInfo().getId());
     if (timeout != null) {
-      officer.whisper(
-          "Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
-              .getEpochSecond() + " seconde(s) avant de r\u00e9utiliser cette commande.");
+      officer.whisper("Vous devez attendre " + timeout.getFinish().minusMillis(System.currentTimeMillis())
+          .getEpochSecond() + " seconde(s) avant de réutiliser cette commande.");
       return true;
     }
 
@@ -58,15 +54,14 @@ public class PardonCommand extends Command {
       return true;
     }
     if (criminal == officer) {
-      officer.whisper("Vous ne pouvez pas vous gracier vous-m\u00eame.", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Vous ne pouvez pas vous gracier vous-même.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
     RpAvatar criminalData = RolePlay.getAvatarManager().getRpAvatar(criminal);
-    int userWantedStars = RolePlay.getWantedManager()
-        .getUserWantedStars(criminal.getHabboInfo().getId());
+    int userWantedStars = RolePlay.getWantedManager().getUserWantedStars(criminal.getHabboInfo().getId());
     if (!criminalData.isJailed() && userWantedStars <= 0) {
-      officer.whisper("Ce joueur n'est ni emprisonn\u00e9 ni recherch\u00e9.", RoomChatMessageBubbles.ALERT);
+      officer.whisper("Ce joueur n'est ni emprisonné ni recherché.", RoomChatMessageBubbles.ALERT);
       return true;
     }
 
@@ -76,8 +71,8 @@ public class PardonCommand extends Command {
     }
 
     officer.getHabboInfo().getCurrentRoom().sendComposer(getRoomUserShoutComposer(
-        "Wipes %username%'s criminal record*".replace("%username%",
-            criminal.getHabboInfo().getUsername()), officer).compose());
+        "* Efface le casier de %username% *".replace("%username%", criminal.getHabboInfo().getUsername()),
+        officer, RoomChatMessageBubbles.AMBASSADOR).compose());
     officerData.executeAction();
     return true;
   }
