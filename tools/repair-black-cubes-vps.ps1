@@ -10,7 +10,13 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $RepositoryPath = (Resolve-Path -LiteralPath $RepositoryPath).Path
-if (-not $ConfigPath) { $ConfigPath = Join-Path $RepositoryPath 'runtime\WavePlus\Config\config.ini' }
+if (-not $ConfigPath) {
+    # Emulator.main loads config.ini relative to the launcher's runtime directory.
+    $ConfigPath = Join-Path $RepositoryPath 'runtime\WavePlus\config.ini'
+}
+if (-not (Test-Path -LiteralPath $ConfigPath -PathType Leaf)) {
+    throw "Configuration runtime absente : $ConfigPath. Preciser le fichier utilise par l'emulateur avec -ConfigPath."
+}
 if (-not (Test-Path -LiteralPath $Mysql -PathType Leaf)) { throw "mysql.exe absent : $Mysql" }
 $configLines = Get-Content -LiteralPath $ConfigPath
 function Get-Setting([string]$Key, [string]$Default = '') {
