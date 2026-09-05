@@ -95,6 +95,11 @@ public class WantedListCommand extends Command {
 
     RolePlay.getWantedManager().getCachedWantedList().remove(targetInfo.getId());
 
+    if (officer.getHabboInfo().getCurrentRoom() != null) {
+      officer.shout("* Retire " + targetInfo.getUsername() + " de la liste des recherchés *",
+          RoomChatMessageBubbles.AMBASSADOR);
+    }
+
     officer.whisper(targetInfo.getUsername() + " a été retiré de la liste des recherchés.",
         RoomChatMessageBubbles.ALERT);
     if (onlineTarget != null) {
