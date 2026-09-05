@@ -9,6 +9,8 @@ import com.eu.habbo.habbohotel.users.HabboGender;
 import com.eu.habbo.messages.outgoing.rooms.users.RoomUserDataComposer;
 import com.eu.habbo.messages.outgoing.rooms.users.RoomUserShoutComposer;
 import com.eu.habbo.messages.outgoing.users.UserDataComposer;
+import io.github.brenoepics.roleplay.RolePlay;
+import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.utilities.types.Look;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -81,7 +83,17 @@ public class JobsDelegate {
 
   // Keep the static utility methods as they are still needed
   public static RoomUserShoutComposer getRoomUserShoutComposer(String message, Habbo habbo) {
-    return getRoomUserShoutComposer(message, habbo, RoomChatMessageBubbles.NORMAL);
+    RoomChatMessageBubbles bubble = RoomChatMessageBubbles.NORMAL;
+
+    if (habbo != null) {
+      RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
+      if (data != null && data.isDuty() && data.getJobEntity() != null
+          && "police".equalsIgnoreCase(data.getJobEntity().getName())) {
+        bubble = RoomChatMessageBubbles.AMBASSADOR;
+      }
+    }
+
+    return getRoomUserShoutComposer(message, habbo, bubble);
   }
 
   public static RoomUserShoutComposer getRoomUserShoutComposer(String message, Habbo habbo,
