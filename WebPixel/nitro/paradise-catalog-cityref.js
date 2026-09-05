@@ -2,6 +2,7 @@
   'use strict';
 
   const ROOT = '.nitro-catalog';
+  const BUILD = 'pcity-v5-proxy-shell';
   const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
   const getHeader = root => root.querySelector(':scope > .nitro-card-header, :scope > [class*="card-header"]');
   const getTabs = root => root.querySelector(':scope > .nitro-card-tabs, :scope > [class*="card-tabs"]');
@@ -9,25 +10,32 @@
   const getClickable = node => node?.matches?.('button,a,[role="button"],[role="tab"]') ? node : node?.querySelector?.('button,a,[role="button"],[role="tab"]');
 
   const SEGMENTS = [
-    { label:'MOBIS OFFICIEL', match:/^(?:Furni|Furniture|Mobilier)(?:\s*\(\d+\))?$/i },
-    { label:'MOBIS CUSTOM', match:/^Catalogue ParadiseRP complet.*$/i },
-    { label:'MOBIS CITY', match:/^(?:Building|Construction)(?:\s*\(\d+\))?$/i },
-    { label:'UTILITAIRES', match:/^Staff(?:\s*\(\d+\))?$/i },
-    { label:'RARES', match:/^Front Page(?:\s*\(\d+\))?$/i }
+    { key:'official', label:'MOBIS OFFICIEL', tab:/^(?:Furni|Furniture|Mobilier)(?:\s*\(\d+\))?$/i },
+    { key:'custom', label:'MOBIS CUSTOM', tab:/^Catalogue ParadiseRP complet.*$/i },
+    { key:'city', label:'MOBIS CITY', tab:/^(?:Building|Construction)(?:\s*\(\d+\))?$/i },
+    { key:'utility', label:'UTILITAIRES', tab:/^Staff(?:\s*\(\d+\))?$/i },
+    { key:'rares', label:'RARES', tab:/^(?:Furni|Furniture|Mobilier)(?:\s*\(\d+\))?$/i, category:/rare|limited|collector/i }
   ];
+
+  const state = new WeakMap();
+
+  function rootState(root)
+  {
+    if(!state.has(root)) state.set(root, { view:'info', segment:'official', categoryIndex:-1, productIndex:-1, categorySig:'', productSig:'' });
+    return state.get(root);
+  }
 
   function nativeClose(root)
   {
     const header = getHeader(root);
     if(!header) return null;
-    return [ ...header.querySelectorAll('button,[role="button"],.close,[class*="close"],[class*="cross"]') ]
-      .find(node => !node.classList.contains('pcity-close')) || null;
+    return [ ...header.querySelectorAll('button,[role="button"],.close,[class*="close"],[class*="cross"]') ][0] || null;
   }
 
   function closeCatalog(root)
   {
-    const close = nativeClose(root);
-    if(close) { close.click(); return; }
+    const button = nativeClose(root);
+    if(button) { button.click(); return; }
     document.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', code:'Escape', bubbles:true }));
   }
 
@@ -44,38 +52,13 @@
     getClickable(tab)?.click();
   }
 
-  function isNativeTabActive(tab)
-  {
-    return !!tab && (tab.matches('.active,[aria-selected="true"]') || !!tab.querySelector('.active,[aria-selected="true"]'));
-  }
-
-  function ensureHeader(root)
-  {
-    let header = root.querySelector(':scope > .pcity-header');
-    if(!header)
-    {
-      header = document.createElement('div');
-      header.className = 'pcity-header';
-      header.innerHTML = '<div class="pcity-title">Catalogue de Paradise</div><button type="button" class="pcity-close" aria-label="Fermer">×</button>';
-      root.prepend(header);
-      header.querySelector('.pcity-close')?.addEventListener('pointerdown', event => event.stopPropagation());
-      header.querySelector('.pcity-close')?.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        closeCatalog(root);
-      });
-    }
-  }
-
   function findNativeSearch(root)
   {
     const content = getContent(root);
-    if(!content) return null;
-    const input = content.querySelector('input[type="search"],input[type="text"]');
+    const input = content?.querySelector('input[type="search"],input[type="text"]');
     if(!input) return null;
     const row = input.closest('.d-flex,.flex-row') || input.parentElement?.parentElement || input.parentElement;
-    const button = row?.querySelector('button');
-    return { input, button, row };
+    return { input, button:row?.querySelector('button'), row };
   }
 
   function setNativeInputValue(input, value)
@@ -87,204 +70,346 @@
     input.dispatchEvent(new Event('change', { bubbles:true }));
   }
 
-  function ensureSearch(root)
+  function nativeNav(root)
   {
-    let bar = root.querySelector(':scope > .pcity-searchbar');
-    if(!bar)
-    {
-      bar = document.createElement('div');
-      bar.className = 'pcity-searchbar';
-      bar.innerHTML = '<div class="pcity-search-icon">⌕</div><input class="pcity-search-input" type="search" placeholder="Rechercher un mobi, une catégorie..."><button class="pcity-search-go" type="button" aria-label="Rechercher">⌕</button>';
-      root.appendChild(bar);
-
-      const proxy = bar.querySelector('.pcity-search-input');
-      const runSearch = () => {
-        const native = findNativeSearch(root);
-        if(!native) return;
-        setNativeInputValue(native.input, proxy.value);
-        if(native.button) native.button.click();
-      };
-      proxy?.addEventListener('input', () => {
-        const native = findNativeSearch(root);
-        if(native) setNativeInputValue(native.input, proxy.value);
-      });
-      proxy?.addEventListener('keydown', event => { if(event.key === 'Enter') { event.preventDefault(); runSearch(); } });
-      bar.querySelector('.pcity-search-go')?.addEventListener('click', runSearch);
-    }
-
-    const native = findNativeSearch(root);
-    if(native?.row) native.row.classList.add('pcity-native-search');
+    const content = getContent(root);
+    if(!content) return null;
+    return content.querySelector('#nitro-catalog-main-navigation') || content.querySelector('.nitro-catalog-navigation-grid-container');
   }
 
-  function ensureSegments(root)
+  function nativeCategories(root)
   {
-    let host = root.querySelector(':scope > .pcity-segments');
-    if(!host)
+    const nav = nativeNav(root);
+    if(!nav) return [];
+    let rows = [ ...nav.children ].filter(node => node instanceof HTMLElement && clean(node.textContent));
+    if(!rows.length)
     {
-      host = document.createElement('div');
-      host.className = 'pcity-segments';
-      SEGMENTS.forEach(def => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'pcity-segment';
-        button.textContent = def.label;
-        button.dataset.pcityLabel = def.label;
-        button.addEventListener('click', () => {
-          root.classList.remove('pcity-info-mode');
-          clickNativeTab(root, def.match);
-        });
-        host.appendChild(button);
-      });
-      root.appendChild(host);
+      rows = [ ...nav.querySelectorAll('button,a,[role="button"],.list-group-item,.layout-grid-item') ]
+        .filter(node => clean(node.textContent));
     }
-
-    SEGMENTS.forEach(def => {
-      const button = [ ...host.children ].find(node => node.dataset.pcityLabel === def.label);
-      const tab = nativeTab(root, def.match);
-      button?.classList.toggle('is-active', isNativeTabActive(tab));
-    });
+    return rows.map(node => ({ node, click:getClickable(node) || node, label:clean(node.textContent) }));
   }
 
-  function ensureInfoPanel(root, content)
+  function elementBackground(node)
   {
-    if(!content || content.querySelector(':scope > .pcity-info-panel')) return;
-    const panel = document.createElement('div');
-    panel.className = 'pcity-info-panel';
-    panel.innerHTML = `
-      <div class="pcity-info-left">
-        <button type="button" class="pcity-info-button is-active">◉ Informations</button>
-        <button type="button" class="pcity-info-button">◌ Historique</button>
-        <button type="button" class="pcity-info-button">Nouveautés</button>
-        <button type="button" class="pcity-info-button">Gammes</button>
-        <button type="button" class="pcity-info-button">Thèmes</button>
-        <button type="button" class="pcity-info-button">Types</button>
-        <button type="button" class="pcity-info-button">Saisons</button>
-        <button type="button" class="pcity-info-button">Événements</button>
-        <button type="button" class="pcity-info-button">Construction</button>
-        <button type="button" class="pcity-info-button">Lieux publics</button>
-        <button type="button" class="pcity-info-button">Jeux</button>
+    if(!(node instanceof HTMLElement)) return '';
+    const all = [ node, ...node.querySelectorAll('*') ];
+    for(const el of all)
+    {
+      if(!(el instanceof HTMLElement)) continue;
+      const inline = el.style.backgroundImage;
+      if(inline && inline !== 'none') return inline;
+      const computed = getComputedStyle(el).backgroundImage;
+      if(computed && computed !== 'none') return computed;
+      const img = el.matches('img[src]') ? el : el.querySelector?.('img[src]');
+      if(img?.src) return `url("${ img.src }")`;
+    }
+    return '';
+  }
+
+  function nativeProducts(root)
+  {
+    const content = getContent(root);
+    const nav = nativeNav(root);
+    if(!content) return [];
+    const items = [ ...content.querySelectorAll('.layout-grid-item,[class*="catalog-grid-item"]') ]
+      .filter(node => !nav?.contains(node));
+    return items
+      .map(node => ({ node, click:getClickable(node) || node, image:elementBackground(node) }))
+      .filter(item => item.image);
+  }
+
+  function isNativeSelected(node)
+  {
+    return !!node && (node.matches('.active,.selected,[aria-selected="true"]') || !!node.querySelector('.active,.selected,[aria-selected="true"]'));
+  }
+
+  function nativePurchase(root)
+  {
+    return getContent(root)?.querySelector('.nitro-catalog-purchase-component,[class*="catalog-purchase"],[class*="purchase-component"]') || null;
+  }
+
+  function nativeAction(root, regex)
+  {
+    return [ ...getContent(root)?.querySelectorAll('button') || [] ].find(button => regex.test(clean(button.textContent))) || null;
+  }
+
+  function ensureShell(root)
+  {
+    root.classList.add('pc5-catalog');
+    root.dataset.pc5Build = BUILD;
+
+    let shell = root.querySelector(':scope > .pc5-shell');
+    if(shell) return shell;
+
+    shell = document.createElement('div');
+    shell.className = 'pc5-shell';
+    shell.innerHTML = `
+      <div class="pc5-titlebar">
+        <div class="pc5-title">Catalogue de Paradise</div>
+        <button type="button" class="pc5-close" aria-label="Fermer">×</button>
       </div>
-      <div class="pcity-info-card">
-        <div class="pcity-info-heading"><div class="pcity-info-badge">▦</div><div class="pcity-info-title">Deux, trois trucs à savoir</div></div>
-        <div class="pcity-info-copy">
-          <p>- Pour décorer ton appart, il suffit d'acheter le mobilier que tu souhaites et de le récupérer dans ton inventaire pour ensuite pouvoir le poser dans ton appartement.</p>
-          <p>- Recherche un mobilier en fonction de son nom depuis la barre de recherche, exemple : chaise.</p>
-          <p>- Les mobiliers peuvent ensuite être posés avec les commandes de construction disponibles sur ParadiseRP.</p>
-          <p>- Les animaux ainsi que les bots apparaissent eux aussi dans l'inventaire, dans leurs catégories dédiées.</p>
-        </div>
-        <div class="pcity-info-footer">En cas de question, contacte le support ParadiseRP.</div>
+      <div class="pc5-searchbar">
+        <div class="pc5-search-icon">⌕</div>
+        <input class="pc5-search-input" type="search" placeholder="Rechercher un mobi, une catégorie...">
+        <button type="button" class="pc5-search-go" aria-label="Rechercher">⌕</button>
+      </div>
+      <div class="pc5-segments">
+        ${ SEGMENTS.map(seg => `<button type="button" class="pc5-segment" data-seg="${ seg.key }">${ seg.label }</button>`).join('') }
+      </div>
+      <div class="pc5-body">
+        <aside class="pc5-left">
+          <div class="pc5-left-scroll">
+            <button type="button" class="pc5-menu-btn is-active" data-view="info">Informations</button>
+            <button type="button" class="pc5-menu-btn" data-view="history">Historique</button>
+            <div class="pc5-category-list"></div>
+          </div>
+        </aside>
+        <section class="pc5-right">
+          <div class="pc5-view pc5-info is-visible" data-view-panel="info">
+            <div class="pc5-info-heading">
+              <div class="pc5-info-badge">▦</div>
+              <div class="pc5-info-title">Deux, trois trucs à savoir</div>
+            </div>
+            <div class="pc5-info-copy">
+              <p>- Pour décorer ton appart, il suffit d'acheter le mobilier que tu souhaites et de le récupérer dans ton inventaire pour ensuite pouvoir le poser dans ton appartement.</p>
+              <p>- Recherche un mobilier en fonction de son nom depuis la barre de recherche, exemple : chaise.</p>
+              <p>- Les mobiliers peuvent ensuite être posés avec les commandes de construction de ParadiseRP.</p>
+              <p>- Les animaux ainsi que les bots apparaissent eux aussi dans l'inventaire, dans leurs catégories dédiées.</p>
+            </div>
+            <div class="pc5-info-footer">En cas de question n'hésite pas à contacter notre support.</div>
+          </div>
+          <div class="pc5-view pc5-history" data-view-panel="history">
+            <h3>Historique du catalogue</h3>
+            <p>Le catalogue ParadiseRP regroupe le mobilier officiel, les créations custom, les blocs de construction et les contenus dédiés au roleplay.</p>
+            <p>Les catégories affichées à gauche restent celles du catalogue Nitro afin de conserver toutes les interactions et tous les achats fonctionnels.</p>
+          </div>
+          <div class="pc5-view pc5-store" data-view-panel="store">
+            <div class="pc5-products"></div>
+            <div class="pc5-preview">
+              <div class="pc5-preview-art"></div>
+              <div class="pc5-preview-name">Sélectionne un mobi</div>
+              <div class="pc5-preview-desc">Choisis un objet dans la grille pour afficher ses informations.</div>
+              <div class="pc5-preview-price"></div>
+              <div class="pc5-preview-actions">
+                <button type="button" class="pc5-buy">Acheter</button>
+                <button type="button" class="pc5-gift">Offrir</button>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>`;
-    content.appendChild(panel);
-  }
+    root.appendChild(shell);
 
-  function decorateCategories(nav)
-  {
-    if(!nav) return;
-    nav.querySelectorAll('button,a,[role="button"],.list-group-item,.nav-link').forEach(node => node.classList.add('pcity-category'));
-    [ ...nav.children ].filter(node => node instanceof HTMLElement && node.classList.contains('layout-grid-item')).forEach(node => node.classList.add('pcity-category'));
-  }
+    shell.querySelector('.pc5-close')?.addEventListener('pointerdown', event => event.stopPropagation());
+    shell.querySelector('.pc5-close')?.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCatalog(root);
+    });
 
-  function decorateProducts(root, nav)
-  {
-    const products = [ ...root.querySelectorAll('.layout-grid-item,[class*="catalog-grid-item"]') ].filter(item => !nav?.contains(item));
-    products.forEach(item => {
-      if(!(item instanceof HTMLElement)) return;
-      item.classList.add('pcity-product');
-      const inline = item.style.backgroundImage;
-      if(inline && inline !== 'none') item.style.setProperty('--pcity-item-image', inline);
-      const unique = item.querySelector('.unique-bg-override');
-      if(unique instanceof HTMLElement)
+    const searchInput = shell.querySelector('.pc5-search-input');
+    const runSearch = () => {
+      const native = findNativeSearch(root);
+      if(!native)
       {
-        const image = unique.style.backgroundImage;
-        if(image && image !== 'none') unique.style.setProperty('--pcity-item-image', image);
+        clickNativeTab(root, SEGMENTS[0].tab);
+        setTimeout(runSearch, 100);
+        return;
+      }
+      setNativeInputValue(native.input, searchInput.value);
+      native.button?.click();
+      showView(root, 'store');
+      setTimeout(() => syncAll(root), 120);
+    };
+    searchInput?.addEventListener('input', () => {
+      const native = findNativeSearch(root);
+      if(native) setNativeInputValue(native.input, searchInput.value);
+    });
+    searchInput?.addEventListener('keydown', event => {
+      if(event.key === 'Enter') { event.preventDefault(); runSearch(); }
+    });
+    shell.querySelector('.pc5-search-go')?.addEventListener('click', runSearch);
+
+    shell.querySelector('.pc5-segments')?.addEventListener('click', event => {
+      const button = event.target.closest('.pc5-segment');
+      if(!button) return;
+      const seg = SEGMENTS.find(item => item.key === button.dataset.seg);
+      if(!seg) return;
+      const st = rootState(root);
+      st.segment = seg.key;
+      st.categoryIndex = -1;
+      st.productIndex = -1;
+      clickNativeTab(root, seg.tab);
+      showView(root, 'store');
+      syncSegmentState(root);
+      if(seg.category)
+      {
+        setTimeout(() => {
+          const categories = nativeCategories(root);
+          const hit = categories.find(item => seg.category.test(item.label));
+          hit?.click?.click();
+          setTimeout(() => syncAll(root), 100);
+        }, 120);
+      }
+      else setTimeout(() => syncAll(root), 120);
+    });
+
+    shell.querySelector('.pc5-left')?.addEventListener('click', event => {
+      const view = event.target.closest('.pc5-menu-btn[data-view]');
+      if(view) { showView(root, view.dataset.view); return; }
+      const category = event.target.closest('.pc5-category[data-index]');
+      if(category)
+      {
+        const index = Number(category.dataset.index);
+        const native = nativeCategories(root)[index];
+        if(native)
+        {
+          rootState(root).categoryIndex = index;
+          native.click.click();
+          showView(root, 'store');
+          setTimeout(() => syncAll(root), 90);
+        }
       }
     });
-    return products;
+
+    shell.querySelector('.pc5-products')?.addEventListener('click', event => {
+      const button = event.target.closest('.pc5-product[data-index]');
+      if(!button) return;
+      const index = Number(button.dataset.index);
+      const products = nativeProducts(root);
+      const item = products[index];
+      if(!item) return;
+      rootState(root).productIndex = index;
+      item.click.click();
+      setTimeout(() => syncAll(root), 70);
+    });
+
+    shell.querySelector('.pc5-buy')?.addEventListener('click', () => nativeAction(root, /^(?:Acheter|Buy|Purchase)$/i)?.click());
+    shell.querySelector('.pc5-gift')?.addEventListener('click', () => nativeAction(root, /^(?:Offrir|Gift)$/i)?.click());
+
+    return shell;
   }
 
-  function decorateStructure(root)
+  function showView(root, view)
   {
-    const content = getContent(root);
-    if(!content) return;
-    content.classList.add('pcity-content');
-    ensureInfoPanel(root, content);
-
-    const main = content.querySelector(':scope > .grid') || content.querySelector('.grid');
-    if(main) main.classList.add('pcity-main');
-
-    const nav = content.querySelector('#nitro-catalog-main-navigation');
-    const navWrap = content.querySelector('.nitro-catalog-navigation-grid-container') || nav?.parentElement;
-    const side = nav?.closest('.g-col-3,.col-3') || navWrap?.parentElement;
-    if(side) side.classList.add('pcity-side');
-    if(navWrap) navWrap.classList.add('pcity-nav-wrap');
-    if(nav) nav.classList.add('pcity-nav');
-    decorateCategories(nav || navWrap);
-
-    let right = null;
-    if(main) right = [ ...main.children ].find(node => node !== side && node instanceof HTMLElement) || null;
-    if(right) right.classList.add('pcity-right');
-
-    const products = decorateProducts(root, nav || navWrap);
-    const first = products[0] || null;
-    const grid = first?.parentElement || root.querySelector('.nitro-catalog-grid,[class*="catalog-grid"]');
-    if(grid) grid.classList.add('pcity-grid');
-
-    let inner = null;
-    if(right && first)
-    {
-      inner = [ ...right.querySelectorAll('.grid') ].find(node => node.contains(first)) || null;
-      if(inner) inner.classList.add('pcity-inner');
-    }
-    if(inner)
-    {
-      const gridCol = [ ...inner.children ].find(node => first && node.contains(first)) || null;
-      const preview = [ ...inner.children ].find(node => node !== gridCol && node instanceof HTMLElement) || null;
-      if(gridCol) gridCol.classList.add('pcity-grid-col');
-      if(preview) preview.classList.add('pcity-preview');
-    }
-
-    [ ...root.querySelectorAll('button') ].filter(button => /^(?:Acheter|Buy|Purchase)$/i.test(clean(button.textContent))).forEach(button => button.classList.add('pcity-buy'));
-
-    const native = findNativeSearch(root);
-    if(native?.row) native.row.classList.add('pcity-native-search');
-
-    if(side && !side.querySelector('.pcity-info-entry'))
-    {
-      const entry = document.createElement('button');
-      entry.type = 'button';
-      entry.className = 'pcity-info-button pcity-info-entry';
-      entry.textContent = 'Informations';
-      entry.addEventListener('click', () => root.classList.add('pcity-info-mode'));
-      side.prepend(entry);
-    }
+    const st = rootState(root);
+    st.view = view;
+    const shell = root.querySelector(':scope > .pc5-shell');
+    if(!shell) return;
+    shell.querySelectorAll('.pc5-view').forEach(panel => panel.classList.toggle('is-visible', panel.dataset.viewPanel === (view === 'info' ? 'info' : view === 'history' ? 'history' : 'store')));
+    shell.querySelectorAll('.pc5-menu-btn').forEach(button => button.classList.toggle('is-active', button.dataset.view === view));
+    if(view !== 'store') shell.querySelectorAll('.pc5-category').forEach(button => button.classList.remove('is-active'));
   }
 
-  function ensureStoreLoaded(root)
+  function syncSegmentState(root)
   {
-    const content = getContent(root);
-    if(!content || root.dataset.pcityStoreBooted === '1') return;
-    const nav = content.querySelector('#nitro-catalog-main-navigation,.nitro-catalog-navigation-grid-container');
-    const product = content.querySelector('.layout-grid-item,[class*="catalog-grid-item"]');
-    if(nav || product) { root.dataset.pcityStoreBooted = '1'; return; }
-
-    const furni = nativeTab(root, /^(?:Furni|Furniture|Mobilier)(?:\s*\(\d+\))?$/i);
-    if(furni)
-    {
-      root.dataset.pcityStoreBooted = '1';
-      setTimeout(() => getClickable(furni)?.click(), 80);
-      setTimeout(() => root.classList.add('pcity-info-mode'), 220);
-    }
+    const shell = root.querySelector(':scope > .pc5-shell');
+    if(!shell) return;
+    const active = rootState(root).segment;
+    shell.querySelectorAll('.pc5-segment').forEach(button => button.classList.toggle('is-active', button.dataset.seg === active));
   }
 
-  function decorate(root)
+  function syncCategories(root)
   {
-    if(!(root instanceof HTMLElement)) return;
-    root.classList.add('pcity-catalog');
-    ensureHeader(root);
-    ensureSearch(root);
-    ensureSegments(root);
-    decorateStructure(root);
-    ensureStoreLoaded(root);
+    const shell = root.querySelector(':scope > .pc5-shell');
+    const host = shell?.querySelector('.pc5-category-list');
+    if(!host) return;
+    const categories = nativeCategories(root);
+    const sig = categories.map(item => item.label).join('|');
+    const st = rootState(root);
+    if(sig !== st.categorySig)
+    {
+      host.replaceChildren(...categories.map((item, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'pc5-category';
+        button.dataset.index = String(index);
+        button.title = item.label;
+        button.textContent = item.label;
+        return button;
+      }));
+      st.categorySig = sig;
+    }
+    const current = categories.findIndex(item => isNativeSelected(item.node));
+    if(current >= 0) st.categoryIndex = current;
+    host.querySelectorAll('.pc5-category').forEach(button => button.classList.toggle('is-active', Number(button.dataset.index) === st.categoryIndex && st.view === 'store'));
+  }
+
+  function syncProducts(root)
+  {
+    const shell = root.querySelector(':scope > .pc5-shell');
+    const host = shell?.querySelector('.pc5-products');
+    if(!host) return;
+    const products = nativeProducts(root);
+    const sig = products.map(item => item.image).join('|');
+    const st = rootState(root);
+    if(sig !== st.productSig)
+    {
+      host.replaceChildren(...products.map((item, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'pc5-product';
+        button.dataset.index = String(index);
+        button.style.backgroundImage = item.image;
+        button.title = item.node.getAttribute('aria-label') || item.node.getAttribute('title') || `Mobi ${ index + 1 }`;
+        return button;
+      }));
+      st.productSig = sig;
+    }
+    const selected = products.findIndex(item => isNativeSelected(item.node));
+    if(selected >= 0) st.productIndex = selected;
+    host.querySelectorAll('.pc5-product').forEach(button => button.classList.toggle('is-selected', Number(button.dataset.index) === st.productIndex));
+  }
+
+  function leafTexts(node)
+  {
+    if(!node) return [];
+    return [ ...node.querySelectorAll('*') ]
+      .filter(el => !el.children.length)
+      .map(el => clean(el.textContent))
+      .filter(Boolean);
+  }
+
+  function syncPreview(root)
+  {
+    const shell = root.querySelector(':scope > .pc5-shell');
+    if(!shell) return;
+    const products = nativeProducts(root);
+    const st = rootState(root);
+    const item = products[st.productIndex] || products.find(product => isNativeSelected(product.node));
+    const art = shell.querySelector('.pc5-preview-art');
+    const name = shell.querySelector('.pc5-preview-name');
+    const desc = shell.querySelector('.pc5-preview-desc');
+    const price = shell.querySelector('.pc5-preview-price');
+    if(!item)
+    {
+      art.style.backgroundImage = '';
+      name.textContent = 'Sélectionne un mobi';
+      desc.textContent = 'Choisis un objet dans la grille pour afficher ses informations.';
+      price.textContent = '';
+      return;
+    }
+
+    art.style.backgroundImage = item.image || '';
+    const purchase = nativePurchase(root);
+    const texts = leafTexts(purchase);
+    const ignored = /^(Acheter|Buy|Purchase|Offrir|Gift|Choisir une quantité|Quantity|\+|-|\d+)$/i;
+    const candidates = texts.filter(text => !ignored.test(text));
+    const title = candidates.find(text => /[A-Za-zÀ-ÿ]/.test(text) && text.length < 80) || item.node.getAttribute('aria-label') || 'Mobi sélectionné';
+    const numbers = texts.filter(text => /\d/.test(text));
+    name.textContent = title;
+    desc.textContent = candidates.filter(text => text !== title).slice(0, 3).join(' ') || 'Objet du catalogue ParadiseRP.';
+    price.textContent = numbers.length ? `Prix : ${ numbers.at(-1) }` : '';
+  }
+
+  function syncAll(root)
+  {
+    ensureShell(root);
+    syncSegmentState(root);
+    syncCategories(root);
+    syncProducts(root);
+    syncPreview(root);
   }
 
   let queued = false;
@@ -294,16 +419,16 @@
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
-      document.querySelectorAll(ROOT).forEach(decorate);
+      document.querySelectorAll(ROOT).forEach(syncAll);
     });
   }
 
   function boot()
   {
     refresh();
-    [120, 350, 700, 1400].forEach(delay => setTimeout(refresh, delay));
+    [100, 260, 600, 1100].forEach(delay => setTimeout(refresh, delay));
     new MutationObserver(refresh).observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class','style'] });
-    console.info('[ParadiseRP] City reference catalogue loaded');
+    console.info('[ParadiseRP] catalogue City reference V5 proxy shell loaded');
   }
 
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', boot, { once:true }) : boot();
