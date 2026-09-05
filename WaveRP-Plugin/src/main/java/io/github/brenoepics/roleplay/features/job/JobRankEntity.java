@@ -61,13 +61,33 @@ public class JobRankEntity {
   }
 
   public boolean hasPermission(String permission) {
-    return getPermissions().contains(permission);
+    Set<String> rankPermissions = getPermissions();
+    if (rankPermissions.contains(permission)) {
+      return true;
+    }
+
+    // Compatibilité avec les permissions restaurant déjà créées dans ParadiseRP.
+    // Les premiers grades Zy'Croque / Tasty Crousty ont été enregistrés avec les noms
+    // de commandes (menu, prendrecommande, preparer...) alors que le moteur utilise
+    // maintenant des permissions namespacées restaurant.*. On accepte les deux formats
+    // afin que les anciens grades fonctionnent sans casser les autres métiers.
+    String legacyRestaurantPermission = switch (permission) {
+      case JobPermissions.RESTAURANT_MENU -> "menu";
+      case JobPermissions.RESTAURANT_ORDER -> "prendrecommande";
+      case JobPermissions.RESTAURANT_PREPARE -> "preparer";
+      case JobPermissions.RESTAURANT_SERVE -> "servir";
+      case JobPermissions.RESTAURANT_BILL -> "addition";
+      case JobPermissions.RESTAURANT_CASH -> "encaisser";
+      case JobPermissions.RESTAURANT_KITCHEN -> "kitchen";
+      default -> null;
+    };
+
+    return legacyRestaurantPermission != null && rankPermissions.contains(legacyRestaurantPermission);
   }
 
   public boolean hasAnyPermission(String... permissions) {
-    Set<String> rankPermissions = getPermissions();
     for (String permission : permissions) {
-      if (rankPermissions.contains(permission)) {
+      if (hasPermission(permission)) {
         return true;
       }
     }
