@@ -19,29 +19,49 @@
                     <div class="staff-grid">
                         <?php
                         $R_ = $UserMG->GetStaffs();
-                        $CurrentStaffRank = null;
-                        while($Row = mysqli_fetch_assoc($R_)): 
-                            $RankName = (string)($Row['rank_name'] ?? ('Rang '.$Row['rank']));
-                            $RankKey = strtolower($RankName);
-                            if(strpos($RankKey, 'owner') !== false || strpos($RankKey, 'founder') !== false): $BadgeFile = 'FOND.png';
-                            elseif(strpos($RankKey, 'developer') !== false): $BadgeFile = 'DEV.png';
-                            elseif(strpos($RankKey, 'administrator') !== false || strpos($RankKey, 'manager') !== false): $BadgeFile = 'ADM.png';
-                            elseif(strpos($RankKey, 'moderator') !== false): $BadgeFile = 'MOD.png';
-                            else: $BadgeFile = 'STAFF.png'; endif;
+                        $CurrentStaffRole = null;
+                        while($Row = mysqli_fetch_assoc($R_)):
+                            $RawRankName = trim((string)($Row['rank_name'] ?? ('Rang '.$Row['rank'])));
+                            $RankKey = strtolower($RawRankName);
+
+                            // Affichage canonique ParadiseRP : on ne sépare jamais Owner et Fondateur.
+                            // Les variantes historiques/anglaises restent reconnues pour les anciennes DB.
+                            if(strpos($RankKey, 'owner') !== false || strpos($RankKey, 'founder') !== false || strpos($RankKey, 'fondateur') !== false):
+                                $RankName = 'Fondateur';
+                                $RankRoleKey = 'fondateur';
+                                $BadgeFile = 'FOND.png';
+                            elseif(strpos($RankKey, 'developer') !== false || strpos($RankKey, 'développeur') !== false || strpos($RankKey, 'developpeur') !== false):
+                                $RankName = 'Développeur';
+                                $RankRoleKey = 'developpeur';
+                                $BadgeFile = 'DEV.png';
+                            elseif(strpos($RankKey, 'administrator') !== false || strpos($RankKey, 'administrateur') !== false || strpos($RankKey, 'manager') !== false):
+                                $RankName = 'Administrateur';
+                                $RankRoleKey = 'administrateur';
+                                $BadgeFile = 'ADM.png';
+                            elseif(strpos($RankKey, 'moderator') !== false || strpos($RankKey, 'modérateur') !== false || strpos($RankKey, 'moderateur') !== false):
+                                $RankName = 'Modérateur';
+                                $RankRoleKey = 'moderateur';
+                                $BadgeFile = 'MOD.png';
+                            else:
+                                $RankName = 'Staff';
+                                $RankRoleKey = 'staff';
+                                $BadgeFile = 'STAFF.png';
+                            endif;
+
                             $BadgePath = dirname(__DIR__, 4) . '/Dynamics/img/staff/normalized/' . $BadgeFile;
-                            if($CurrentStaffRank !== (int)$Row['rank']):
-                                $CurrentStaffRank = (int)$Row['rank'];
+                            if($CurrentStaffRole !== $RankRoleKey):
+                                $CurrentStaffRole = $RankRoleKey;
                         ?>
                         <div class="staff-rank-heading"><span><?php echo htmlspecialchars($RankName, ENT_QUOTES, 'UTF-8'); ?></span></div>
                         <?php endif; ?>
                         <a href="<?php echo Config::$URL; ?>/profile/<?php echo $Row['id']; ?>" class="content-box mb-0 no-link-styling" style="<?php echo ($Row['online'] == '1')? "border-bottom: 3px solid #1dc40e;" : "" ; ?>">
                             <div class="title d-flex align-items-center" style="">
-                                <div class="mr-auto" style="padding-left: 115px;"><?php echo $Row['username']; ?></div>
+                                <div class="mr-auto" style="padding-left: 115px;"><?php echo htmlspecialchars($Row['username'], ENT_QUOTES, 'UTF-8'); ?></div>
                                 <div><span class="float-right pr-3"></span></div>
                             </div>
                             <div class="d-flex align-items-center">
                                 <div class="staff-member-avatar">
-                                    <img src="https://nitro-imager.kubbo.ch/?figure=<?php echo $Row['look']; ?>&amp;direction=3&amp;size=l&amp;gesture=sml">
+                                    <img src="https://nitro-imager.kubbo.ch/?figure=<?php echo urlencode($Row['look']); ?>&amp;direction=3&amp;size=l&amp;gesture=sml">
                                 </div>
                                 <div class="mr-auto">
                                     <div class="staff-role text-white">
