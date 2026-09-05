@@ -20,6 +20,15 @@ public final class JobPermissions {
   public static final String MEDICAL_DISPATCH = "medical.dispatch";
   public static final String MEDICAL_SURGERY = "medical.surgery";
 
+  // Restaurant permissions
+  public static final String RESTAURANT_MENU = "restaurant.menu";
+  public static final String RESTAURANT_ORDER = "restaurant.order";
+  public static final String RESTAURANT_PREPARE = "restaurant.prepare";
+  public static final String RESTAURANT_SERVE = "restaurant.serve";
+  public static final String RESTAURANT_BILL = "restaurant.bill";
+  public static final String RESTAURANT_CASH = "restaurant.cash";
+  public static final String RESTAURANT_KITCHEN = "restaurant.kitchen";
+
   // Job management permissions
   public static final String JOB_HIRE = "job.hire";
   public static final String JOB_FIRE = "job.fire";
