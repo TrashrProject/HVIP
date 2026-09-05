@@ -1,7 +1,5 @@
 package io.github.brenoepics.roleplay.utilities.types;
 
-import java.util.Locale;
-
 public final class FoodPresentation {
 
   private static final String FOOD_IMAGE_BASE = "https://paradiserp.fr/Dynamics/img/food/";
@@ -68,8 +66,7 @@ public final class FoodPresentation {
 
   public static String consumptionMessage(RPItem item, int restoredHunger) {
     String name = item == null ? "nourriture" : item.getDisplayName();
-    String message = "* Mange " + indefiniteArticle(item) + " " + name + " et r\u00e9cup\u00e8re "
-        + restoredHunger + " points de faim *";
-    return message.toUpperCase(Locale.FRENCH);
+    return "* Mange " + indefiniteArticle(item) + " " + name + " et r\u00e9cup\u00e8re "
+        + restoredHunger + " points de faim. *";
   }
 }

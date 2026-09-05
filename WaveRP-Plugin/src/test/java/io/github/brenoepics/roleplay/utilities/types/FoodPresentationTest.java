@@ -33,12 +33,12 @@ class FoodPresentationTest {
   }
 
   @Test
-  void formatsFoodActionWithCorrectArticleAndUppercaseText() {
-    assertEquals("* MANGE UNE POMME ET R\u00c9CUP\u00c8RE 2 POINTS DE FAIM *",
+  void formatsFoodActionWithCorrectArticleAndSentenceCaseText() {
+    assertEquals("* Mange une Pomme et r\u00e9cup\u00e8re 2 points de faim. *",
         FoodPresentation.consumptionMessage(item(9, "Pomme", "food"), 2));
-    assertEquals("* MANGE UN BURGER ET R\u00c9CUP\u00c8RE 10 POINTS DE FAIM *",
+    assertEquals("* Mange un Burger et r\u00e9cup\u00e8re 10 points de faim. *",
         FoodPresentation.consumptionMessage(item(12, "Burger", "food"), 10));
-    assertEquals("* MANGE DES P\u00c2TES ET R\u00c9CUP\u00c8RE 5 POINTS DE FAIM *",
+    assertEquals("* Mange des P\u00e2tes et r\u00e9cup\u00e8re 5 points de faim. *",
         FoodPresentation.consumptionMessage(item(18, "P\u00e2tes", "food"), 5));
   }
 
