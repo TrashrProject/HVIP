@@ -14,15 +14,15 @@
                         $R_ = $UserMG->GetStaffs();
                         $CurrentStaffRole = null;
 
-                        // Les niveaux correspondent aux groupes de permissions de la DB.
-                        // Le nom affiche reste donc coherent meme si une ancienne DB contient
-                        // encore un libelle historique (Owner, Moderator, etc.).
+                        // Rangs reels de permissions_groups sur ParadiseRP.
                         $StaffRanks = array(
-                            7 => array('name' => 'Fondateur',      'key' => 'fondateur',      'badge' => 'FOND.png'),
-                            6 => array('name' => 'Développeur',    'key' => 'developpeur',    'badge' => 'DEV.png'),
-                            5 => array('name' => 'Administrateur', 'key' => 'administrateur', 'badge' => 'ADM.png'),
-                            4 => array('name' => 'Modérateur',     'key' => 'moderateur',     'badge' => 'MOD.png'),
-                            3 => array('name' => 'Staff',          'key' => 'staff',          'badge' => 'STAFF.png')
+                            9 => array('name' => 'Fondateur',       'key' => 'fondateur',       'badge' => 'FOND.png'),
+                            8 => array('name' => 'Développeurs',    'key' => 'developpeurs',    'badge' => 'DEV.png'),
+                            7 => array('name' => 'Gérant',          'key' => 'gerant',          'badge' => 'STAFF.png'),
+                            6 => array('name' => 'Administrateurs', 'key' => 'administrateurs', 'badge' => 'ADM.png'),
+                            5 => array('name' => 'Modérateurs',     'key' => 'moderateurs',     'badge' => 'MOD.png'),
+                            4 => array('name' => 'Builders',        'key' => 'builders',        'badge' => 'STAFF.png'),
+                            3 => array('name' => 'Ambassadors',     'key' => 'ambassadors',     'badge' => 'STAFF.png')
                         );
 
                         while($Row = mysqli_fetch_assoc($R_)):
