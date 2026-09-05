@@ -34,6 +34,12 @@
     const overlay=document.createElement('div');
     overlay.id=OVERLAY_ID;
     overlay.classList.add('wrc-food-mode');
+    // The shared commands overlay normally paints a full-screen black backdrop.
+    // Restaurant :menu must behave like :food and leave the hotel visible behind the window.
+    overlay.style.setProperty('background','transparent','important');
+    overlay.style.setProperty('background-color','transparent','important');
+    overlay.style.setProperty('backdrop-filter','none','important');
+    overlay.style.setProperty('-webkit-backdrop-filter','none','important');
     overlay.innerHTML=`<div class="wrc-window"><div class="wrc-titlebar">ParadiseRP — ${esc(menu.restaurant)}<button class="wrc-close" type="button">×</button></div><div class="wrc-content"><div class="wrc-head"><div><h2>Menu du restaurant</h2><div class="wrc-count"></div></div><div class="wrc-hint">Plats disponibles</div></div><div class="wrc-search-wrap"><span class="wrc-search-icon"></span><input class="wrc-search" type="text" placeholder="Rechercher un plat..."></div><div class="wrc-food-grid"></div><div class="wrc-footer"><span>:preparer [nom du plat]</span><button class="wrc-footer-close" type="button">Fermer</button></div></div></div>`;
     document.body.appendChild(overlay);
     const grid=overlay.querySelector('.wrc-food-grid');
