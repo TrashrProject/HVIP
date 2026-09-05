@@ -8,6 +8,8 @@ import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
+import com.eu.habbo.habbohotel.users.HabboInfo;
+import com.eu.habbo.habbohotel.users.HabboManager;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.crime.wantedlist.Crime;
 import io.github.brenoepics.roleplay.features.job.JobPermissions;
@@ -60,17 +62,6 @@ public class StarCommand extends Command {
       return true;
     }
 
-    // Recherche le joueur dans tout l'hôtel, pas seulement dans la pièce du policier.
-    Habbo criminal = Emulator.getGameEnvironment().getHabboManager().getHabbo(params[1]);
-    if (criminal == null) {
-      officer.whisper("Le joueur " + params[1] + " n'est pas connecté.", RoomChatMessageBubbles.ALERT);
-      return true;
-    }
-    if (criminal == officer) {
-      officer.whisper("Vous ne pouvez pas vous ajouter un niveau de recherche.", RoomChatMessageBubbles.ALERT);
-      return true;
-    }
-
     Crime manualCrime = RolePlay.getWantedManager().getCrimeByName("Recherche manuelle " + starCount);
     if (manualCrime == null) {
       officer.whisper("Les niveaux de recherche manuelle ne sont pas initialisés dans la base de données.",
@@ -78,22 +69,38 @@ public class StarCommand extends Command {
       return true;
     }
 
-    // Ajoute réellement l'entrée au casier/recherche. On évite les grosses alertes UI du
-    // chargeCrime classique pour garder un rendu RP propre dans le chat.
-    RolePlay.getWantedManager().addCriminalRecord(
-        criminal.getHabboInfo().getId(), manualCrime, officer.getHabboInfo().getId());
+    Habbo criminal = Emulator.getGameEnvironment().getHabboManager().getHabbo(params[1]);
+    HabboInfo criminalInfo = criminal != null
+        ? criminal.getHabboInfo()
+        : HabboManager.getOfflineHabboInfo(params[1]);
 
-    String action = "* Place " + criminal.getHabboInfo().getUsername()
+    if (criminalInfo == null) {
+      officer.whisper("Le joueur " + params[1] + " est introuvable.", RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
+    if (criminalInfo.getId() == officer.getHabboInfo().getId()) {
+      officer.whisper("Vous ne pouvez pas vous ajouter un niveau de recherche.", RoomChatMessageBubbles.ALERT);
+      return true;
+    }
+
+    RolePlay.getWantedManager().addCriminalRecord(
+        criminalInfo.getId(), manualCrime, officer.getHabboInfo().getId());
+
+    String action = "* Place " + criminalInfo.getUsername()
         + " au niveau de recherche " + starCount + " *";
     if (officer.getHabboInfo().getCurrentRoom() != null) {
       officer.getHabboInfo().getCurrentRoom()
           .sendComposer(getRoomUserShoutComposer(action, officer).compose());
     }
 
-    criminal.whisper("Vous êtes désormais recherché niveau " + starCount + ".",
-        RoomChatMessageBubbles.ALERT);
-    officer.whisper(criminal.getHabboInfo().getUsername() + " est maintenant recherché niveau "
-        + starCount + ".", RoomChatMessageBubbles.ALERT);
+    if (criminal != null) {
+      criminal.whisper("Vous êtes désormais recherché niveau " + starCount + ".",
+          RoomChatMessageBubbles.ALERT);
+    }
+
+    officer.whisper(criminalInfo.getUsername() + " est maintenant recherché niveau "
+        + starCount + (criminal == null ? " (hors ligne)." : "."), RoomChatMessageBubbles.ALERT);
 
     officerData.executeAction();
     return true;
