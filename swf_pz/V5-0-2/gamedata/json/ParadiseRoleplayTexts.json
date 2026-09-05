@@ -55,5 +55,7 @@
   "skill.8.0": "Fouilleur - Non débloqué",
   "skill.8.1": "Fouilleur - Niveau 1",
   "skill.8.2": "Fouilleur - Niveau 2",
-  "skill.8.3": "Fouilleur - Niveau 3"
+  "skill.8.3": "Fouilleur - Niveau 3",
+  "notifications.rpoffer": "Souhaitez-vous accepter cette prise de commande ?",
+  "offer.accept": "Accepter"
 }
