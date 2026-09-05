@@ -22,7 +22,11 @@ public class WantedListCommand extends Command {
       "dd/MM/yyyy HH:mm:ss");
 
   public WantedListCommand(String permission, String[] keys) {
-    super(permission, keys);
+    super(permission, new String[]{"wanted"});
+    Emulator.getTexts().register("commands.description." + permission,
+        ":wanted - Afficher les personnes recherchées.");
+    Emulator.getTexts().update("commands.description." + permission,
+        ":wanted - Afficher les personnes recherchées.");
   }
 
   @Override
