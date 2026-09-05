@@ -21,6 +21,7 @@ public final class RestaurantService {
 
   private static final int TARGET_RANGE = 3;
   private static final String MENU_SIGNAL = "PARADISE_RESTAURANT_OPEN:";
+  private static final Map<Integer, PendingOrder> PENDING_ORDERS = new ConcurrentHashMap<>();
   private static final Map<Integer, WorkingOrder> WORKING_ORDERS = new ConcurrentHashMap<>();
   private static final Map<String, Invoice> INVOICES = new ConcurrentHashMap<>();
 
@@ -57,9 +58,6 @@ public final class RestaurantService {
       employee.whisper("La carte de ce restaurant est vide.", RoomChatMessageBubbles.ALERT);
       return;
     }
-
-    // GenericAlert darkens the complete Nitro renderer. The browser consumes this private
-    // whisper and loads the menu through the authenticated CMS endpoint instead.
     employee.whisper(MENU_SIGNAL + System.nanoTime(), RoomChatMessageBubbles.NORMAL);
   }
 
@@ -68,19 +66,62 @@ public final class RestaurantService {
     if (customer == null) return;
 
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(employee);
-    WORKING_ORDERS.put(employee.getHabboInfo().getId(), new WorkingOrder(
+    PendingOrder pending = new PendingOrder(
+        employee.getHabboInfo().getId(), employee.getHabboInfo().getUsername(),
         data.getJobEntity().getId(), data.getJobEntity().getDisplayName(),
-        customer.getHabboInfo().getId(), customer.getHabboInfo().getUsername(), null));
+        customer.getHabboInfo().getId(), customer.getHabboInfo().getUsername());
 
-    employee.shout("* Prend la commande de " + customer.getHabboInfo().getUsername() + " *");
-    customer.whisper(employee.getHabboInfo().getUsername() + " prend votre commande chez "
-        + data.getJobEntity().getDisplayName() + ".", RoomChatMessageBubbles.ALERT);
+    PENDING_ORDERS.put(customer.getHabboInfo().getId(), pending);
+    WORKING_ORDERS.remove(employee.getHabboInfo().getId());
+
+    employee.shout("* Propose de prendre la commande de " + customer.getHabboInfo().getUsername() + " *");
+    customer.whisper(employee.getHabboInfo().getUsername() + " vous propose de prendre votre commande chez "
+        + data.getJobEntity().getDisplayName() + ". Tapez :acceptercommande ou :refusercommande.",
+        RoomChatMessageBubbles.ALERT);
+  }
+
+  public static void acceptOrder(Habbo customer) {
+    PendingOrder pending = PENDING_ORDERS.remove(customer.getHabboInfo().getId());
+    if (pending == null) {
+      customer.whisper("Vous n'avez aucune proposition de commande en attente.", RoomChatMessageBubbles.ALERT);
+      return;
+    }
+
+    Habbo employee = findHabboInSameRoom(customer, pending.employeeName());
+    if (employee == null) {
+      customer.whisper("L'employé n'est plus dans l'appartement.", RoomChatMessageBubbles.ALERT);
+      return;
+    }
+
+    WORKING_ORDERS.put(pending.employeeId(), new WorkingOrder(
+        pending.jobId(), pending.restaurantName(), pending.customerId(), pending.customerName(), null));
+
+    customer.shout("* Accepte que " + pending.employeeName() + " prenne sa commande *");
+    employee.whisper(pending.customerName() + " a accepté votre proposition. Vous pouvez préparer sa commande.",
+        RoomChatMessageBubbles.NORMAL);
+  }
+
+  public static void refuseOrder(Habbo customer) {
+    PendingOrder pending = PENDING_ORDERS.remove(customer.getHabboInfo().getId());
+    if (pending == null) {
+      customer.whisper("Vous n'avez aucune proposition de commande en attente.", RoomChatMessageBubbles.ALERT);
+      return;
+    }
+
+    WORKING_ORDERS.remove(pending.employeeId());
+    customer.shout("* Refuse que " + pending.employeeName() + " prenne sa commande *");
+
+    Habbo employee = findHabboInSameRoom(customer, pending.employeeName());
+    if (employee != null) {
+      employee.whisper(pending.customerName() + " a refusé votre proposition de commande.",
+          RoomChatMessageBubbles.ALERT);
+    }
   }
 
   public static void prepare(Habbo employee, String product) {
     WorkingOrder order = WORKING_ORDERS.get(employee.getHabboInfo().getId());
     if (order == null) {
-      employee.whisper("Prenez d'abord la commande d'un client avec :prendrecommande <pseudo>.",
+      employee.whisper("Prenez d'abord la commande d'un client avec :prendrecommande <pseudo> puis attendez son acceptation.",
           RoomChatMessageBubbles.ALERT);
       return;
     }
@@ -143,7 +184,6 @@ public final class RestaurantService {
       return;
     }
 
-    // Synchronise le solde du client connecté avec le débit SQL et rafraîchit le compteur crédits.
     customer.giveCredits(-price);
     customerData.getInventory().addItem(customer, rpItem, 1);
     WORKING_ORDERS.remove(employee.getHabboInfo().getId());
@@ -216,6 +256,11 @@ public final class RestaurantService {
       customer.whisper("Paiement de " + invoice.total() + " crédits effectué chez "
           + invoice.restaurantName() + ".", RoomChatMessageBubbles.ALERT);
     }
+  }
+
+  private static Habbo findHabboInSameRoom(Habbo source, String username) {
+    if (source.getHabboInfo().getCurrentRoom() == null) return null;
+    return source.getHabboInfo().getCurrentRoom().getHabbo(username);
   }
 
   private static Habbo nearby(Habbo employee, String username) {
@@ -340,6 +385,10 @@ public final class RestaurantService {
   }
 
   public record MenuItem(String code, String displayName, int itemId, int price) {
+  }
+
+  private record PendingOrder(int employeeId, String employeeName, int jobId,
+                              String restaurantName, int customerId, String customerName) {
   }
 
   private record WorkingOrder(int jobId, String restaurantName, int customerId,
