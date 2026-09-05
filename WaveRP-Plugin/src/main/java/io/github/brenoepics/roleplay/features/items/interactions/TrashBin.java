@@ -37,13 +37,6 @@ public class TrashBin extends InteractionDefault {
         super(id, userId, item, extradata, limitedStack, limitedSells);
     }
 
-    /**
-     * WavePlus transmet isUsable() a Nitro dans RoomFloorItemsComposer/AddFloorItemComposer.
-     * Une poubelle Habbo statique a souvent un seul etat et etait donc annoncee comme non
-     * utilisable : Nitro la selectionnait mais n'envoyait jamais ToggleFloorItemEvent.
-     * Une interaction RP de poubelle doit toujours etre utilisable, independamment du nombre
-     * d'etats visuels du mobilier d'origine.
-     */
     @Override
     public boolean isUsable() {
         return true;
@@ -61,9 +54,9 @@ public class TrashBin extends InteractionDefault {
             return;
         }
 
-        // Hors des salles RP, conserver le comportement normal du mobilier.
+        // Hors des salles RP, conserver le comportement visuel normal 0/1 du mobilier.
         if (room.getCategory() != Emulator.getConfig().getInt("nahabbo.features.room.category")) {
-            toggleDefaultState(room);
+            setVisualState(room, "1".equals(getExtradata()) ? "0" : "1");
             return;
         }
 
@@ -101,9 +94,10 @@ public class TrashBin extends InteractionDefault {
             habbo,
             RoomChatMessageBubbles.NORMAL)).compose());
 
-        // Ouvre visuellement la poubelle dès le début de la fouille en réutilisant
-        // exactement le changement d'état normal du mobilier Habbo.
-        toggleDefaultState(room);
+        // L'etat 1 est l'etat utilise/ouvert des mobiliers Habbo a deux etats.
+        // Ne pas calculer modulo getStateCount(): certaines anciennes poubelles ont encore
+        // interaction_modes_count=1 en DB, ce qui ferait toujours retomber l'etat a 0.
+        setVisualState(room, "1");
 
         final int habboId = habbo.getHabboInfo().getId();
         final int searchDelay = Math.max(1000,
@@ -122,10 +116,7 @@ public class TrashBin extends InteractionDefault {
                 if (habbo != null) {
                     habbo.whisper("La fouille a été annulée : vous vous êtes éloigné de la poubelle.");
                 }
-                // Si la fouille est annulée, refermer immédiatement la poubelle.
-                setExtradata("0");
-                needsUpdate(true);
-                room.updateItemState(this);
+                setVisualState(room, "0");
                 return;
             }
 
@@ -136,10 +127,8 @@ public class TrashBin extends InteractionDefault {
                 searched = true;
             }
 
-            // La poubelle reste ouverte pendant le cooldown après avoir été fouillée.
-            setExtradata("1");
-            needsUpdate(true);
-            room.updateItemState(this);
+            // La poubelle reste ouverte pendant le cooldown.
+            setVisualState(room, "1");
 
             final int cooldown = Math.max(1000,
                 Emulator.getConfig().getInt("nahabbo.features.trashbin.cooldown"));
@@ -147,13 +136,20 @@ public class TrashBin extends InteractionDefault {
                 synchronized (TrashBin.this) {
                     searched = false;
                 }
-                setExtradata("0");
-                needsUpdate(true);
-                room.updateItemState(TrashBin.this);
+                setVisualState(room, "0");
             }, cooldown);
         } finally {
             occupied = false;
         }
+    }
+
+    private void setVisualState(Room room, String state) {
+        if (room == null) {
+            return;
+        }
+        setExtradata(state);
+        needsUpdate(true);
+        room.updateItemState(this);
     }
 
     private LootTable readLootTable() {
@@ -211,7 +207,6 @@ public class TrashBin extends InteractionDefault {
             return;
         }
 
-        // Ne jamais fabriquer un item a partir d'un ID arbitraire : il doit exister dans rp_items.
         RPItem reward = RolePlay.getItemManager().getItemByName(rewardName);
         if (reward == null) {
             habbo.whisper("* Fouille la poubelle mais ne trouve rien. *");
@@ -236,25 +231,13 @@ public class TrashBin extends InteractionDefault {
             .contains(habbo.getRoomUnit().getCurrentLocation());
     }
 
-    private void toggleDefaultState(Room room) {
-        int states = Math.max(1, getBaseItem().getStateCount());
-        int currentState = 0;
-        try {
-            currentState = Integer.parseInt(getExtradata());
-        } catch (NumberFormatException ignored) {
-            // Le mobilier repart de l'etat 0 si son extradata n'est pas numerique.
-        }
-        setExtradata(String.valueOf((currentState + 1) % states));
-        needsUpdate(true);
-        room.updateItemState(this);
-    }
-
     @Override
     public void onPickUp(Room room) {
         synchronized (this) {
             occupied = false;
             searched = false;
         }
+        setVisualState(room, "0");
     }
 
     private record LootTable(String[] items, int[] chances, int total) {
