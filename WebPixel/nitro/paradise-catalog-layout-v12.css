@@ -1,0 +1,195 @@
+/* ParadiseRP Catalogue V12 — hard layout fix for the real Nitro DOM.
+   The previous rules assumed .grid at exact levels; Nitro pages also use Bootstrap
+   .row/.d-flex wrappers, so the category rail and purchase pane could still keep
+   their native 3/9 and 7/5 widths. This file targets the columns by what they contain. */
+
+/* Give the catalogue enough room on desktop instead of hard-capping it at 700px. */
+.nitro-catalog.pc5-catalog {
+  width:min(960px,calc(100vw - 28px))!important;
+  max-width:960px!important;
+  min-width:760px!important;
+  height:min(610px,calc(100vh - 28px))!important;
+  max-height:610px!important;
+  min-height:520px!important;
+}
+
+@media (max-width:800px){
+  .nitro-catalog.pc5-catalog{
+    width:calc(100vw - 18px)!important;
+    min-width:0!important;
+    max-width:calc(100vw - 18px)!important;
+  }
+}
+
+/* ===== OUTER NITRO SPLIT =====
+   Detect the navigation column by its actual navigation descendants instead of
+   relying on Bootstrap's class names. The rail is fixed and the store gets the rest. */
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content > :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]) {
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:stretch!important;
+  grid-template-columns:none!important;
+  gap:6px!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content > :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]) > *:has(#nitro-catalog-main-navigation),
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content > :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]) > *:has(.nitro-catalog-navigation-grid-container) {
+  flex:0 0 132px!important;
+  width:132px!important;
+  min-width:132px!important;
+  max-width:132px!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content > :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]) > *:not(:has(#nitro-catalog-main-navigation)):not(:has(.nitro-catalog-navigation-grid-container)) {
+  flex:1 1 0!important;
+  width:0!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+/* Bootstrap fallback when the outer wrapper changes class. */
+.nitro-catalog.pc5-catalog.pc9-native-store .col-3:has(#nitro-catalog-main-navigation),
+.nitro-catalog.pc5-catalog.pc9-native-store .col-3:has(.nitro-catalog-navigation-grid-container){
+  flex:0 0 132px!important;
+  width:132px!important;
+  min-width:132px!important;
+  max-width:132px!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .col-3:has(#nitro-catalog-main-navigation) + .col-9,
+.nitro-catalog.pc5-catalog.pc9-native-store .col-3:has(.nitro-catalog-navigation-grid-container) + .col-9{
+  flex:1 1 0!important;
+  width:0!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+
+/* Keep category rows compact but readable. */
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-grid-container{
+  width:100%!important;
+  max-width:100%!important;
+  padding:3px!important;
+  overflow-x:hidden!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section > .layout-grid-item{
+  width:100%!important;
+  max-width:100%!important;
+  height:24px!important;
+  min-height:24px!important;
+  padding:0 5px!important;
+  gap:4px!important;
+  font-size:8.7px!important;
+  overflow:hidden!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section .text-truncate,
+.nitro-catalog.pc5-catalog.pc9-native-store .nitro-catalog-navigation-section span{
+  min-width:0!important;
+  overflow:hidden!important;
+  white-space:nowrap!important;
+  text-overflow:ellipsis!important;
+}
+
+/* ===== PRODUCT / PURCHASE SPLIT =====
+   Match the row whose direct children contain the purchase component. This defeats
+   Nitro's native col-7/col-5 ratio and leaves only a compact details panel. */
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]):not(:has(#nitro-catalog-main-navigation)):has(> * .nitro-catalog-purchase-component),
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]):not(:has(#nitro-catalog-main-navigation)):has(> * [class*="catalog-purchase"]),
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]):not(:has(#nitro-catalog-main-navigation)):has(> * [class*="purchase-component"]) {
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:stretch!important;
+  grid-template-columns:none!important;
+  gap:6px!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]):not(:has(#nitro-catalog-main-navigation)):has(> * .nitro-catalog-purchase-component) > *:has(.nitro-catalog-purchase-component),
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]):not(:has(#nitro-catalog-main-navigation)):has(> * [class*="catalog-purchase"]) > *:has([class*="catalog-purchase"]),
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]):not(:has(#nitro-catalog-main-navigation)):has(> * [class*="purchase-component"]) > *:has([class*="purchase-component"]) {
+  flex:0 0 154px!important;
+  width:154px!important;
+  min-width:154px!important;
+  max-width:154px!important;
+  margin:0!important;
+  padding:5px!important;
+  overflow:hidden!important;
+}
+
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]):not(:has(#nitro-catalog-main-navigation)):has(> * .nitro-catalog-purchase-component) > *:not(:has(.nitro-catalog-purchase-component)),
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]):not(:has(#nitro-catalog-main-navigation)):has(> * [class*="catalog-purchase"]) > *:not(:has([class*="catalog-purchase"])),
+.nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]):not(:has(#nitro-catalog-main-navigation)):has(> * [class*="purchase-component"]) > *:not(:has([class*="purchase-component"])) {
+  flex:1 1 0!important;
+  width:0!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+/* Direct Bootstrap 7/5 fallback. */
+.nitro-catalog.pc5-catalog.pc9-native-store .col-5:has(.nitro-catalog-purchase-component),
+.nitro-catalog.pc5-catalog.pc9-native-store .col-5:has([class*="catalog-purchase"]),
+.nitro-catalog.pc5-catalog.pc9-native-store .col-5:has([class*="purchase-component"]){
+  flex:0 0 154px!important;
+  width:154px!important;
+  min-width:154px!important;
+  max-width:154px!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .col-7:has(+ .col-5 .nitro-catalog-purchase-component),
+.nitro-catalog.pc5-catalog.pc9-native-store .col-7:has(+ .col-5 [class*="catalog-purchase"]),
+.nitro-catalog.pc5-catalog.pc9-native-store .col-7:has(+ .col-5 [class*="purchase-component"]){
+  flex:1 1 0!important;
+  width:0!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+
+/* Let the furni grid actually consume the reclaimed width. */
+.nitro-catalog.pc5-catalog.pc9-native-store .layout-grid:not(#nitro-catalog-main-navigation),
+.nitro-catalog.pc5-catalog.pc9-native-store .auto-grid{
+  max-width:none!important;
+  min-width:0!important;
+}
+.nitro-catalog.pc5-catalog.pc9-native-store .auto-grid,
+.nitro-catalog.pc5-catalog.pc9-native-store [class*="catalog-grid"]{
+  width:100%!important;
+}
+
+/* On small widths, preserve products first. */
+@media (max-width:820px){
+  .nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content > :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]) > *:has(#nitro-catalog-main-navigation),
+  .nitro-catalog.pc5-catalog.pc9-native-store.pc5-catalog > .nitro-card-content > :is(.grid,.row,.d-flex,.flex-row,[class*="flex-row"]) > *:has(.nitro-catalog-navigation-grid-container){
+    flex-basis:118px!important;
+    width:118px!important;
+    min-width:118px!important;
+    max-width:118px!important;
+  }
+
+  .nitro-catalog.pc5-catalog.pc9-native-store .col-5:has(.nitro-catalog-purchase-component),
+  .nitro-catalog.pc5-catalog.pc9-native-store .col-5:has([class*="catalog-purchase"]),
+  .nitro-catalog.pc5-catalog.pc9-native-store .col-5:has([class*="purchase-component"]){
+    flex-basis:132px!important;
+    width:132px!important;
+    min-width:132px!important;
+    max-width:132px!important;
+  }
+}

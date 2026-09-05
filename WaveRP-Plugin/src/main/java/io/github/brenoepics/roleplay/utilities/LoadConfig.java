@@ -27,7 +27,7 @@ public class LoadConfig {
             Emulator.getConfig().register("features.healing.enableid", "23");
             Emulator.getConfig().register("nahabbo.features.jail.roomid", "0");
             Emulator.getConfig().register("nahabbo.features.death.mute", "29");
-            Emulator.getConfig().register("nahabbo.features.trashbin.search.time", "1500");
+            Emulator.getConfig().register("nahabbo.features.trashbin.search.time", "3500");
             Emulator.getConfig().register("nahabbo.features.trashbin.cooldown", "300000");
             Emulator.getConfig().register("nahabbo.features.room.category", "10");
             Emulator.getConfig().register("features.safezone.category", "11");
@@ -48,8 +48,10 @@ public class LoadConfig {
             Emulator.getConfig().register("features.send_home.max", "15");
             Emulator.getConfig().register("features.police.tazor.effectid", "182");
             Emulator.getConfig().register("walking.rate.limit", "100");
-            Emulator.getConfig().register("nahabbo.features.trashbin.items", "Bucks,Pizza,Medkit,Shield,Weapon,Nothing");
-            Emulator.getConfig().register("nahabbo.features.trashbin.chances", "20,15,15,10,5,35");
+            // 50 % rien, 30 % commun (Snack/Pomme/Banane), 15 % peu commun (Sandwich), 5 % rare (Medkit).
+            // Les noms ci-dessous correspondent a de vrais rp_items existants et sont resolus cote serveur.
+            Emulator.getConfig().register("nahabbo.features.trashbin.items", "Nothing,Snack,Apple,Banana,Sandwich,Medkit");
+            Emulator.getConfig().register("nahabbo.features.trashbin.chances", "50,15,8,7,15,5");
             Emulator.getConfig().register("nahabbo.features.drugs.strength", "1.5");
             Emulator.getConfig().register("nahabbo.features.drugs.craft.time", "5");
             Emulator.getConfig().register("nahabbo.features.drugmachine.cooldown", "30");

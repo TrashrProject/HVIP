@@ -15,6 +15,7 @@ import io.github.brenoepics.roleplay.commands.generic.CommandsCounter;
 import io.github.brenoepics.roleplay.events.EmulatorLoad;
 import io.github.brenoepics.roleplay.events.EmulatorLoadItemsManagerListener;
 import io.github.brenoepics.roleplay.events.EmulatorStartShutdownListener;
+import io.github.brenoepics.roleplay.events.FurnitureTrashSearchListener;
 import io.github.brenoepics.roleplay.events.RoomLoadedListener;
 import io.github.brenoepics.roleplay.events.UserChangeClothing;
 import io.github.brenoepics.roleplay.events.UserConnect;
@@ -95,6 +96,7 @@ public class RolePlay extends HabboPlugin implements EventListener {
     Emulator.getPluginManager().registerEvents(this, new RoomLoadedListener());
     Emulator.getPluginManager().registerEvents(this, new UserTakeStepListener());
     Emulator.getPluginManager().registerEvents(this, new UserChangeClothing());
+    Emulator.getPluginManager().registerEvents(this, new FurnitureTrashSearchListener());
   }
 
   @Override
