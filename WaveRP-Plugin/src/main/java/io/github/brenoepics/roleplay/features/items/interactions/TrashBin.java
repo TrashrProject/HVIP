@@ -113,9 +113,12 @@ public class TrashBin extends InteractionDefault {
             if (habbo == null || habbo.getHabboInfo().getId() != habboId
                 || !isHabboStillInRoom(habbo, room) || !isAdjacent(habbo, room)) {
                 if (habbo != null) {
-                    habbo.whisper("La fouille a été annulée : vous vous êtes éloigné de la poubelle.");
+                    room.sendComposer(new RoomUserShoutComposer(new RoomChatMessage(
+                        "* Annule la fouille de la poubelle car il est trop loin. *",
+                        habbo,
+                        habbo,
+                        RoomChatMessageBubbles.NORMAL)).compose());
                 }
-                closeFurniture(room);
                 return;
             }
 
@@ -132,9 +135,9 @@ public class TrashBin extends InteractionDefault {
                 synchronized (TrashBin.this) {
                     searched = false;
                 }
-                closeFurniture(room);
             }, cooldown);
         } finally {
+            closeFurniture(room);
             occupied = false;
         }
     }
