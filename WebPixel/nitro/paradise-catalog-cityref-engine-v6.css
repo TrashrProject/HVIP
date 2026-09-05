@@ -1,78 +1,96 @@
-/* ParadiseRP Catalogue CityRef engine V7.
-   The custom shell stays visible; Nitro remains fully measurable behind it so AutoGrid can render furni. */
+/* ParadiseRP Catalogue CityRef engine V8.
+   Keep Nitro fully laid out and measurable behind the custom shell so navigation and AutoGrid keep rendering. */
 
-.nitro-catalog.pc5-catalog {
-  display:flex!important;
-  flex-direction:column!important;
+.nitro-catalog.pc5-catalog{
+  display:block!important;
 }
 
+/* Native Nitro remains invisible but keeps a real 700x555 viewport. */
 .nitro-catalog.pc5-catalog > .nitro-card-header,
 .nitro-catalog.pc5-catalog > [class*="card-header"],
 .nitro-catalog.pc5-catalog > .nitro-card-tabs,
-.nitro-catalog.pc5-catalog > [class*="card-tabs"] {
-  position:absolute!important;
-  left:0!important;
-  right:0!important;
-  width:100%!important;
-  opacity:0!important;
+.nitro-catalog.pc5-catalog > [class*="card-tabs"],
+.nitro-catalog.pc5-catalog > .nitro-card-content{
   visibility:visible!important;
+  opacity:.001!important;
   pointer-events:none!important;
-  overflow:visible!important;
   transform:none!important;
-  z-index:1!important;
+  z-index:0!important;
 }
 
 .nitro-catalog.pc5-catalog > .nitro-card-header,
-.nitro-catalog.pc5-catalog > [class*="card-header"] {
+.nitro-catalog.pc5-catalog > [class*="card-header"]{
+  position:absolute!important;
+  left:0!important;
   top:0!important;
-  height:46px!important;
-  min-height:46px!important;
+  width:700px!important;
+  height:47px!important;
+  min-height:47px!important;
+  overflow:hidden!important;
 }
 
 .nitro-catalog.pc5-catalog > .nitro-card-tabs,
-.nitro-catalog.pc5-catalog > [class*="card-tabs"] {
-  top:46px!important;
-  height:46px!important;
-  min-height:46px!important;
-}
-
-.nitro-catalog.pc5-catalog > .nitro-card-content {
+.nitro-catalog.pc5-catalog > [class*="card-tabs"]{
   position:absolute!important;
   left:0!important;
-  right:0!important;
-  top:92px!important;
-  bottom:0!important;
-  width:100%!important;
-  height:calc(100% - 92px)!important;
-  min-width:620px!important;
-  min-height:390px!important;
-  max-width:none!important;
-  max-height:none!important;
+  top:47px!important;
+  width:700px!important;
+  height:50px!important;
+  min-height:50px!important;
+  overflow:visible!important;
+}
+
+.nitro-catalog.pc5-catalog > .nitro-card-content{
+  position:absolute!important;
+  left:0!important;
+  top:97px!important;
+  width:700px!important;
+  height:458px!important;
+  min-width:700px!important;
+  min-height:458px!important;
+  max-width:700px!important;
+  max-height:458px!important;
   display:block!important;
-  opacity:0!important;
-  visibility:visible!important;
-  pointer-events:none!important;
   overflow:hidden!important;
-  transform:none!important;
-  z-index:1!important;
 }
 
-/* Give Nitro's responsive/virtualized grids a real viewport even while invisible. */
-.nitro-catalog.pc5-catalog > .nitro-card-content > .grid,
-.nitro-catalog.pc5-catalog > .nitro-card-content .nitro-catalog-navigation-grid-container,
-.nitro-catalog.pc5-catalog > .nitro-card-content #nitro-catalog-main-navigation,
-.nitro-catalog.pc5-catalog > .nitro-card-content [class*="catalog-grid"],
-.nitro-catalog.pc5-catalog > .nitro-card-content .layout-grid {
-  min-height:320px!important;
-}
-
-.nitro-catalog.pc5-catalog > .nitro-card-content .nitro-catalog-navigation-grid-container {
+/* Force every native layout layer to keep measurable dimensions. */
+.nitro-catalog.pc5-catalog > .nitro-card-content > .grid{
+  width:100%!important;
   height:100%!important;
-  max-height:100%!important;
+  min-height:458px!important;
 }
 
-/* The custom interface remains the only painted / interactive catalogue UI. */
-.nitro-catalog.pc5-catalog > .pc5-shell {
+.nitro-catalog.pc5-catalog > .nitro-card-content .g-col-3,
+.nitro-catalog.pc5-catalog > .nitro-card-content .col-3,
+.nitro-catalog.pc5-catalog > .nitro-card-content .g-col-9,
+.nitro-catalog.pc5-catalog > .nitro-card-content .col-9,
+.nitro-catalog.pc5-catalog > .nitro-card-content .column{
+  min-height:420px!important;
+}
+
+.nitro-catalog.pc5-catalog > .nitro-card-content .nitro-catalog-navigation-grid-container{
+  height:390px!important;
+  min-height:390px!important;
+  max-height:390px!important;
+  overflow:hidden!important;
+}
+
+.nitro-catalog.pc5-catalog > .nitro-card-content #nitro-catalog-main-navigation{
+  height:380px!important;
+  min-height:380px!important;
+  max-height:380px!important;
+  overflow-y:auto!important;
+}
+
+.nitro-catalog.pc5-catalog > .nitro-card-content .layout-grid,
+.nitro-catalog.pc5-catalog > .nitro-card-content [class*="catalog-grid"]{
+  min-height:360px!important;
+  max-height:390px!important;
+}
+
+/* The custom CityRef shell remains the only visible and interactive catalogue. */
+.nitro-catalog.pc5-catalog > .pc5-shell{
   position:absolute!important;
   inset:0!important;
   z-index:1000!important;
