@@ -73,20 +73,26 @@ try {
     } else {
         'migrations\20260906_paradise_catalogue_taxonomy_v4_all_items.sql'
     }
+    $BlockFamiliesMigrationRelativePath = if ($LegacyCatalog) {
+        'migrations\20260906_paradise_catalogue_blocks_families_v5_legacy.sql'
+    } else {
+        'migrations\20260906_paradise_catalogue_blocks_families_v5.sql'
+    }
 
     $Migration = Join-Path $RepositoryRoot $MigrationRelativePath
     $AllItemsMigration = Join-Path $RepositoryRoot $AllItemsMigrationRelativePath
-    if (-not (Test-Path -LiteralPath $Migration -PathType Leaf)) {
-        throw "Migration V4 introuvable : $Migration"
-    }
-    if (-not (Test-Path -LiteralPath $AllItemsMigration -PathType Leaf)) {
-        throw "Migration V4 totale introuvable : $AllItemsMigration"
+    $BlockFamiliesMigration = Join-Path $RepositoryRoot $BlockFamiliesMigrationRelativePath
+
+    foreach ($RequiredMigration in @($Migration, $AllItemsMigration, $BlockFamiliesMigration)) {
+        if (-not (Test-Path -LiteralPath $RequiredMigration -PathType Leaf)) {
+            throw "Migration catalogue introuvable : $RequiredMigration"
+        }
     }
 
     Write-Host ("Schema detecte : " + $(if ($LegacyCatalog) { 'legacy' } else { 'moderne' })) -ForegroundColor Cyan
-    Write-Host "Application du catalogue V4 global..." -ForegroundColor Cyan
+    Write-Host "Application du catalogue global + separation fine des familles..." -ForegroundColor Cyan
 
-    foreach ($MigrationToApply in @($Migration, $AllItemsMigration)) {
+    foreach ($MigrationToApply in @($Migration, $AllItemsMigration, $BlockFamiliesMigration)) {
         $MigrationProcess = Start-Process -FilePath $Mysql -ArgumentList @(
             "--host=$DatabaseHost",
             "--port=$DatabasePort",
@@ -117,6 +123,21 @@ SELECT CONCAT(
     }
     Write-Host "Verification totale : $($CountParts[0]) offres sur $($CountParts[0]) sont dans Catalogue ParadiseRP complet, 0 hors catalogue." -ForegroundColor Green
 
+    $BlockFamilyValidationSql = @"
+SELECT CONCAT(
+ (SELECT COUNT(*) FROM catalog_items WHERE page_id=9967201), '|',
+ (SELECT COUNT(*) FROM catalog_items WHERE page_id BETWEEN 9968140 AND 9968152), '|',
+ (SELECT COUNT(*) FROM catalog_pages WHERE parent_id=9967201 AND id BETWEEN 9968140 AND 9968152 AND visible='1' AND enabled='1')
+)
+"@
+    $BlockFamilyCounts = ((& $Mysql @CommonArgs "--execute=$BlockFamilyValidationSql") -join '').Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'Validation des familles de blocs impossible.' }
+    $BlockFamilyParts = @($BlockFamilyCounts -split '\|')
+    if ($BlockFamilyParts.Count -ne 3 -or $BlockFamilyParts[0] -ne '0' -or $BlockFamilyParts[2] -ne '13') {
+        throw "Separation des blocs incomplete : restants_dans_parent|classes|pages = $BlockFamilyCounts (attendu 0|N|13)."
+    }
+    Write-Host "Verification blocs : 0 offre melangee dans le parent, $($BlockFamilyParts[1]) offres reparties dans 13 familles." -ForegroundColor Green
+
     $ValidationMigration = Join-Path $RepositoryRoot 'migrations\20260906_paradise_catalogue_taxonomy_v4_validation.sql'
     if (Test-Path -LiteralPath $ValidationMigration -PathType Leaf) {
         $ValidationProcess = Start-Process -FilePath $Mysql -ArgumentList @(
@@ -136,7 +157,7 @@ SELECT CONCAT(
     if ($LASTEXITCODE -ne 0) { throw 'Lecture des metriques V4 impossible.' }
 
     Write-Host ''
-    Write-Host '=== Catalogue ParadiseRP V4 TOTAL ===' -ForegroundColor Green
+    Write-Host '=== Catalogue ParadiseRP V5 FIN ===' -ForegroundColor Green
     foreach ($Metric in $Metrics) {
         Write-Host $Metric
     }
@@ -149,7 +170,7 @@ WHERE (cp.id BETWEEN 9967201 AND 9967224 OR cp.id BETWEEN 9968100 AND 9968199)
   AND cp.visible='1' AND cp.enabled='1'
 GROUP BY cp.id, cp.caption
 ORDER BY offers DESC
-LIMIT 20
+LIMIT 25
 "@
     Write-Host ''
     Write-Host 'Pages les plus chargees :' -ForegroundColor Cyan
@@ -157,7 +178,7 @@ LIMIT 20
     if ($LASTEXITCODE -ne 0) { throw 'Lecture des pages catalogue impossible.' }
 
     Write-Host ''
-    Write-Host 'Catalogue V4 TOTAL applique : pages normales, staff, cachees et desactivees ont ete fusionnees.' -ForegroundColor Green
+    Write-Host 'Catalogue applique : tout est fusionne, puis les blocs sont separes par famille exacte.' -ForegroundColor Green
 }
 finally {
     $env:MYSQL_PWD = $null
