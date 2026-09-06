@@ -570,3 +570,87 @@
   .paradise-wanted-fact{min-height:34px;padding:4px 5px}
   .paradise-wanted-information,.paradise-wanted-warning{margin-top:4px;padding:4px 6px}
 }
+
+/* V13 readability pass: keep the compact layout, stop using micro-text. */
+.paradise-wanted-brand-copy span{font-size:7.5px;letter-spacing:.8px}
+.paradise-wanted-heading span{font-size:9px;color:#d5e7ef}
+.paradise-wanted-motto{font-size:7px;color:#d0e1e9;letter-spacing:.25px}
+
+.paradise-wanted-tab{
+  font-size:10.5px;
+  font-weight:800;
+}
+
+.paradise-wanted-search{
+  height:30px;
+  font-size:10.5px;
+}
+.paradise-wanted-search::placeholder{color:#9babb4}
+
+.pr-wanted-name{font-size:12.5px;line-height:1.05}
+.pr-wanted-stars{font-size:10.5px;margin-top:4px}
+.paradise-wanted-count{font-size:8.5px;color:#a7b6bf}
+.paradise-wanted-info-panel{font-size:10.5px;color:#bdc9cf}
+.paradise-wanted-info-panel strong{font-size:12px}
+
+.paradise-wanted-label{
+  color:#c0cbd2;
+  font-size:9.5px;
+  line-height:1.05;
+  font-weight:800;
+  letter-spacing:.3px;
+}
+
+.paradise-wanted-value{
+  margin-top:3px;
+  color:#fff;
+  font-size:11.5px;
+  line-height:1.24;
+  font-weight:500;
+}
+
+.paradise-wanted-status{
+  height:22px;
+  padding:0 8px;
+  font-size:9px;
+}
+
+.paradise-wanted-danger-stars{font-size:13px}
+.paradise-wanted-danger-level{
+  padding:3px 7px;
+  color:#d5dfe4;
+  font-size:9px;
+}
+
+.paradise-wanted-fact{min-height:44px}
+.paradise-wanted-fact .paradise-wanted-value{font-size:11px}
+.paradise-wanted-fact-value-strong{font-size:13.5px!important}
+
+.paradise-wanted-information{
+  padding:7px 10px;
+  background:#122a36;
+}
+.paradise-wanted-information .paradise-wanted-value{
+  font-size:10.5px;
+  line-height:1.25;
+}
+
+.paradise-wanted-warning{padding:7px 9px}
+.paradise-wanted-warning strong{
+  color:#fff0f1;
+  font-size:9.25px;
+  line-height:1.18;
+}
+.paradise-wanted-warning span{
+  margin-top:2px;
+  color:#f0c8ca;
+  font-size:9px;
+  line-height:1.18;
+}
+
+@media(max-height:370px) and (min-width:641px){
+  .paradise-wanted-label{font-size:9px}
+  .paradise-wanted-value{font-size:10.75px}
+  .paradise-wanted-warning strong{font-size:8.75px}
+  .paradise-wanted-warning span{font-size:8.5px}
+}
