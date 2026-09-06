@@ -58,8 +58,9 @@
   function createShell(alert) {
     const shell = document.createElement('div');
     shell.className = 'paradise-wanted-shell';
+    shell.title = 'Maintenir et déplacer la fenêtre depuis n’importe quelle zone libre';
     shell.innerHTML = `
-      <div class="paradise-wanted-topbar" title="Maintenir pour déplacer">
+      <div class="paradise-wanted-topbar">
         <div class="paradise-wanted-brand">
           <div class="paradise-wanted-logo">P</div>
           <div class="paradise-wanted-brand-copy"><strong>ParadiseRP</strong><span>LAKE PLACID</span></div>
@@ -71,8 +72,8 @@
       <div class="paradise-wanted-body">
         <aside class="paradise-wanted-sidebar">
           <div class="paradise-wanted-tabs">
-            <button class="paradise-wanted-tab is-active" type="button" data-pr-tab="list"><span aria-hidden="true">≡</span> LISTE</button>
-            <button class="paradise-wanted-tab" type="button" data-pr-tab="info"><span aria-hidden="true">i</span> INFOS</button>
+            <button class="paradise-wanted-tab is-active" type="button" data-pr-tab="list">LISTE</button>
+            <button class="paradise-wanted-tab" type="button" data-pr-tab="info">INFOS</button>
           </div>
           <section class="paradise-wanted-panel" data-pr-panel="list">
             <div class="paradise-wanted-search-wrap"><span class="paradise-wanted-search-icon" aria-hidden="true">⌕</span><input class="paradise-wanted-search" type="search" placeholder="Rechercher un suspect..." autocomplete="off"></div>
@@ -115,10 +116,22 @@
     const main = document.createElement('div');
     main.className = 'paradise-wanted-profile-main';
     main.innerHTML = `
-      <div class="paradise-wanted-name-row"><div class="paradise-wanted-profile-name"></div><div class="paradise-wanted-status">RECHERCHÉ</div></div>
+      <div class="paradise-wanted-name-row">
+        <div class="paradise-wanted-profile-name"></div>
+        <div class="paradise-wanted-status">RECHERCHÉ</div>
+      </div>
       <div class="paradise-wanted-two-col">
-        <div><div class="paradise-wanted-label">Alias</div><div class="paradise-wanted-value">Aucun alias connu</div></div>
-        <div><div class="paradise-wanted-label">Niveau de danger</div><div class="paradise-wanted-danger-row"><div class="paradise-wanted-danger-stars">${starsMarkup(user.stars, true)}</div><div class="paradise-wanted-danger-level">${dangerLabel(user.stars)}</div></div></div>
+        <div>
+          <div class="paradise-wanted-label">Alias</div>
+          <div class="paradise-wanted-value">Aucun alias connu</div>
+        </div>
+        <div>
+          <div class="paradise-wanted-label">Niveau de danger</div>
+          <div class="paradise-wanted-danger-row">
+            <div class="paradise-wanted-danger-stars">${starsMarkup(user.stars, true)}</div>
+            <div class="paradise-wanted-danger-level">${dangerLabel(user.stars)}</div>
+          </div>
+        </div>
       </div>`;
     main.querySelector('.paradise-wanted-profile-name').textContent = user.name;
     head.appendChild(main);
@@ -127,9 +140,18 @@
     const facts = document.createElement('div');
     facts.className = 'paradise-wanted-facts';
     facts.innerHTML = `
-      <div class="paradise-wanted-fact"><div class="paradise-wanted-fact-icon">$</div><div><div class="paradise-wanted-label">Récompense</div><div class="paradise-wanted-value paradise-wanted-fact-value-strong">—</div></div></div>
-      <div class="paradise-wanted-fact"><div class="paradise-wanted-fact-icon">⌖</div><div><div class="paradise-wanted-label">Dernier secteur connu</div><div class="paradise-wanted-value">Inconnu</div></div></div>
-      <div class="paradise-wanted-fact is-wide"><div class="paradise-wanted-fact-icon">≡</div><div><div class="paradise-wanted-label">Motif</div><div class="paradise-wanted-value">Aucun motif communiqué.</div></div></div>`;
+      <div class="paradise-wanted-fact">
+        <div class="paradise-wanted-fact-icon">$</div>
+        <div><div class="paradise-wanted-label">Récompense</div><div class="paradise-wanted-value paradise-wanted-fact-value-strong">—</div></div>
+      </div>
+      <div class="paradise-wanted-fact">
+        <div class="paradise-wanted-fact-icon">⌖</div>
+        <div><div class="paradise-wanted-label">Dernier secteur connu</div><div class="paradise-wanted-value">Inconnu</div></div>
+      </div>
+      <div class="paradise-wanted-fact is-wide">
+        <div class="paradise-wanted-fact-icon">≡</div>
+        <div><div class="paradise-wanted-label">Motif</div><div class="paradise-wanted-value">Aucun motif communiqué.</div></div>
+      </div>`;
     detail.appendChild(facts);
 
     const information = document.createElement('div');
@@ -156,27 +178,13 @@
   }
 
   function bindDrag(alert, shell) {
-    const handle = shell.querySelector('.paradise-wanted-topbar');
-    if (!handle || handle.dataset.dragBound === '1') return;
-    handle.dataset.dragBound = '1';
+    if (!shell || shell.dataset.dragBound === '1') return;
+    shell.dataset.dragBound = '1';
 
-    let drag = null;
+    let gesture = null;
+    let suppressClick = false;
 
-    const endDrag = pointerId => {
-      if (!drag) return;
-      try { handle.releasePointerCapture(pointerId); } catch (_) {}
-      handle.classList.remove('is-dragging');
-      document.body.style.userSelect = drag.previousUserSelect;
-      drag = null;
-    };
-
-    handle.addEventListener('pointerdown', event => {
-      if (event.button !== 0) return;
-      if (event.target.closest('button, input, a, select, textarea')) return;
-
-      const rect = alert.getBoundingClientRect();
-      const previousUserSelect = document.body.style.userSelect;
-
+    const applyFixedPosition = rect => {
       alert.style.setProperty('position', 'fixed', 'important');
       alert.style.setProperty('left', `${rect.left}px`, 'important');
       alert.style.setProperty('top', `${rect.top}px`, 'important');
@@ -184,8 +192,30 @@
       alert.style.setProperty('bottom', 'auto', 'important');
       alert.style.setProperty('margin', '0', 'important');
       alert.style.setProperty('transform', 'none', 'important');
+    };
 
-      drag = {
+    const finishGesture = pointerId => {
+      if (!gesture) return;
+      try { shell.releasePointerCapture(pointerId); } catch (_) {}
+      shell.classList.remove('is-dragging');
+      document.body.style.userSelect = gesture.previousUserSelect;
+      const wasDragging = gesture.dragging;
+      gesture = null;
+
+      if (wasDragging) {
+        suppressClick = true;
+        window.setTimeout(() => { suppressClick = false; }, 80);
+      }
+    };
+
+    shell.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+
+      /* Text fields keep normal selection/focus behaviour. Everything else can be used as a drag surface. */
+      if (event.target.closest('input, textarea, select')) return;
+
+      const rect = alert.getBoundingClientRect();
+      gesture = {
         pointerId: event.pointerId,
         startX: event.clientX,
         startY: event.clientY,
@@ -193,28 +223,47 @@
         startTop: rect.top,
         width: rect.width,
         height: rect.height,
-        previousUserSelect
+        previousUserSelect: document.body.style.userSelect,
+        dragging: false
       };
 
-      document.body.style.userSelect = 'none';
-      handle.classList.add('is-dragging');
-      handle.setPointerCapture(event.pointerId);
+      try { shell.setPointerCapture(event.pointerId); } catch (_) {}
+    });
+
+    shell.addEventListener('pointermove', event => {
+      if (!gesture || event.pointerId !== gesture.pointerId) return;
+
+      const dx = event.clientX - gesture.startX;
+      const dy = event.clientY - gesture.startY;
+
+      if (!gesture.dragging) {
+        if (Math.hypot(dx, dy) < 4) return;
+        gesture.dragging = true;
+        applyFixedPosition(alert.getBoundingClientRect());
+        document.body.style.userSelect = 'none';
+        shell.classList.add('is-dragging');
+      }
+
+      const margin = 4;
+      const maxLeft = Math.max(margin, window.innerWidth - gesture.width - margin);
+      const maxTop = Math.max(margin, window.innerHeight - gesture.height - margin);
+      const left = Math.min(maxLeft, Math.max(margin, gesture.startLeft + dx));
+      const top = Math.min(maxTop, Math.max(margin, gesture.startTop + dy));
+
+      alert.style.setProperty('left', `${left}px`, 'important');
+      alert.style.setProperty('top', `${top}px`, 'important');
       event.preventDefault();
     });
 
-    handle.addEventListener('pointermove', event => {
-      if (!drag || event.pointerId !== drag.pointerId) return;
-      const margin = 4;
-      const maxLeft = Math.max(margin, window.innerWidth - drag.width - margin);
-      const maxTop = Math.max(margin, window.innerHeight - drag.height - margin);
-      const left = Math.min(maxLeft, Math.max(margin, drag.startLeft + event.clientX - drag.startX));
-      const top = Math.min(maxTop, Math.max(margin, drag.startTop + event.clientY - drag.startY));
-      alert.style.setProperty('left', `${left}px`, 'important');
-      alert.style.setProperty('top', `${top}px`, 'important');
-    });
+    shell.addEventListener('pointerup', event => finishGesture(event.pointerId));
+    shell.addEventListener('pointercancel', event => finishGesture(event.pointerId));
 
-    handle.addEventListener('pointerup', event => endDrag(event.pointerId));
-    handle.addEventListener('pointercancel', event => endDrag(event.pointerId));
+    /* Prevent an accidental close/tab/card click when the same pointer gesture was actually a drag. */
+    shell.addEventListener('click', event => {
+      if (!suppressClick) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }, true);
   }
 
   function renderList(alert, shell) {
