@@ -1,0 +1,73 @@
+/* ParadiseRP — ParadisePhone video header minimal V8
+   Keep the video-call overlay focused on the room: peer name + call timer only.
+   Call/whisper mechanics stay untouched. */
+
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-video .pcall-video-head{
+  width:max-content!important;
+  min-width:92px!important;
+  max-width:calc(100% - 118px)!important;
+  padding:6px 9px 7px!important;
+  background:linear-gradient(90deg,rgba(5,19,30,.82),rgba(5,19,30,.58))!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  border-radius:10px!important;
+  box-shadow:0 3px 12px rgba(0,0,0,.34)!important;
+  backdrop-filter:blur(4px)!important;
+}
+
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-video .pcall-video-head>b{
+  display:block!important;
+  margin:0!important;
+  color:#fff!important;
+  font-size:13px!important;
+  line-height:15px!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* The span contains "En communication · <timer>". Zeroing its own font hides the
+   status text while the timer child remains visible. */
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-video .pcall-video-head>span{
+  display:block!important;
+  margin-top:2px!important;
+  font-size:0!important;
+  line-height:0!important;
+  color:transparent!important;
+}
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-video .pcall-video-head>span>i[data-pcall-duration]{
+  display:block!important;
+  color:#cfe9f7!important;
+  font-size:9px!important;
+  line-height:11px!important;
+  font-style:normal!important;
+  font-weight:700!important;
+  letter-spacing:.2px!important;
+}
+
+/* "Vue de sa salle" and the whisper badge are redundant during a video call. */
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-video .pcall-video-head>small,
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-video .pcall-room-whisper-badge{
+  display:none!important;
+}
+
+/* Landscape: keep the compact name/timer block clear of the local preview. */
+.nitro-phone-frame.pcall-video-landscape>.paradise-call-layer .pcall-video-head{
+  right:auto!important;
+  max-width:calc(100% - 118px)!important;
+}
+
+@media(max-width:760px), (max-height:430px){
+  .paradise-call-stable-v2 .pcall-card.pcall-active.is-video .pcall-video-head{
+    min-width:84px!important;
+    padding:5px 8px 6px!important;
+  }
+  .paradise-call-stable-v2 .pcall-card.pcall-active.is-video .pcall-video-head>b{
+    font-size:12px!important;
+    line-height:14px!important;
+  }
+  .paradise-call-stable-v2 .pcall-card.pcall-active.is-video .pcall-video-head>span>i[data-pcall-duration]{
+    font-size:8px!important;
+    line-height:10px!important;
+  }
+}
