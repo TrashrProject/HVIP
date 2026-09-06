@@ -1,0 +1,126 @@
+{
+  "categories": [
+    {
+      "id": 9967201,
+      "caption": "Construction - Blocs et formes",
+      "pattern": "bc_|bloc de construction|building block|construction block|colour block|color block|cube|cubo|wedge|pyramid|sphere|quarter ring|triangular prism|standing cylinder|glass panel|flower hedge"
+    },
+    {
+      "id": 9967209,
+      "caption": "RP - Police justice et armee",
+      "pattern": "police|prison|jail|prison cell|jail cell|cell door|cell bars|army|military|soldier|weapon|gun|rifle|pistol|sword|shield|security|detective|court|justice|swat|crime|criminal|handcuff|cctv|evidence|interrogation"
+    },
+    {
+      "id": 9967210,
+      "caption": "RP - Hopital secours et incendie",
+      "pattern": "hospital|medical|medic|doctor|nurse|ambulance|health|clinic|surgery|patient|firefighter|fire station|firetruck|rescue|pharmacy|first aid|emergency|medicine|defibrillator|stretcher|wheelchair|xray|x-ray|blood bag|syringe"
+    },
+    {
+      "id": 9967211,
+      "caption": "RP - Transports et garages",
+      "pattern": "vehicle|garage|parking|traffic|road|street|car_| car |taxi|bus_| bus |train|subway|metro|tram|truck|motor|bike|bicycle|scooter|airport|plane|aircraft|boat|ship|yacht"
+    },
+    {
+      "id": 9967208,
+      "caption": "RP - Commerces restaurants et entreprises",
+      "pattern": "shop|store|market|restaurant|cafe|diner|bar_|pub_|office|business|commerce|bank|hotel|reception|cashier|counter|salon|boutique|bakery|supermarket|factory|warehouse"
+    },
+    {
+      "id": 9967207,
+      "caption": "RP - Ville et services publics",
+      "pattern": "city|urban|public|school|university|library|museum|station|post office|town|building|skyscraper|streetlight|bus stop|construction site"
+    },
+    {
+      "id": 9967204,
+      "caption": "Maison - Cuisine nourriture et boissons",
+      "pattern": "kitchen|food|drink|meal|cake|coffee|tea_|teapot|bottle|pizza|burger|fruit|vegetable|snack|dinner|breakfast|icecream|ice cream|candy|restaurant|oven|fridge|refrigerator|sink|plate|cup|glass|barbecue|bbq"
+    },
+    {
+      "id": 9967205,
+      "caption": "Maison - Chambre salle de bain",
+      "pattern": "bedroom|bed_| bed |pillow|blanket|wardrobe|dresser|nightstand|bath|toilet|shower|bathtub|washbasin|towel|sleep|mattress"
+    },
+    {
+      "id": 9967215,
+      "caption": "Nature - Animaux et compagnons",
+      "pattern": "animal|pet_|dog|cat_| cat |horse|pony|bird|parrot|penguin|duck|frog|fish|shark|whale|dolphin|turtle|rabbit|bunny|bear|monkey|gorilla|lion|tiger|elephant|deer|unicorn|dragon|dinosaur"
+    },
+    {
+      "id": 9967212,
+      "caption": "Nature eau jardins et exterieurs",
+      "pattern": "nature|garden|plant|tree|flower|grass|soil|crop|farm|forest|bush|rock|stone|water|waterfall|fountain|pond|river|ocean|sea_|beach|sand|coral|pool|outdoor|camp|mountain|cloud"
+    },
+    {
+      "id": 9967213,
+      "caption": "Bureau technologie et machines",
+      "pattern": "computer|laptop|phone|television|monitor|screen|console|machine|robot|camera|speaker|radio|science|laboratory|office|printer|keyboard|tech|spaceship|rocket|satellite"
+    },
+    {
+      "id": 9967214,
+      "caption": "Loisirs jeux sport et musique",
+      "pattern": "game_|arcade|gaming|football|fball|soccer|basketball|tennis|sport|trophy|dance|disco|music|guitar|piano|drum|turntable|microphone|cinema|theatre|hobby|craft|dice|chess|skate"
+    },
+    {
+      "id": 9967216,
+      "caption": "Saisons - Noel hiver et neige",
+      "pattern": "xmas|christmas|santa|advent|winter|snow|ice_|frost|festive|reindeer|nutcracker|mistletoe"
+    },
+    {
+      "id": 9967217,
+      "caption": "Halloween fantastique et aventure",
+      "pattern": "hween|halloween|horror|ghost|spooky|haunted|witch|vampire|zombie|skull|fantasy|magic|wizard|myth|olympus|wonderland|dream|quest|temple|ancient|dungeon"
+    },
+    {
+      "id": 9967218,
+      "caption": "Fetes Paques amour et evenements",
+      "pattern": "easter|valentine|love|wedding|party|birthday|celebration|festival|gift|present|balloon|heart|egg_|carnival"
+    },
+    {
+      "id": 9967222,
+      "caption": "Mode beaute et accessoires",
+      "pattern": "fashion|clothing|clothes|hair|beauty|makeup|jewelry|jewellery|dress|shirt|jacket|shoe|hat_| hat |accessory|perfume|mannequin"
+    },
+    {
+      "id": 9967224,
+      "caption": "Panneaux lettres et signaletique",
+      "pattern": "sign|poster|letter|number|alphabet|billboard|banner|road sign|traffic sign|placard|notice|logo|flag"
+    },
+    {
+      "id": 9967223,
+      "caption": "Art cultures et histoire",
+      "pattern": "painting|picture|art_| art |statue|sculpture|museum|historic|history|culture|easel|portrait|canvas|gallery|antique"
+    },
+    {
+      "id": 9967206,
+      "caption": "Decoration lampes et accessoires",
+      "pattern": "lamp|light|lantern|candle|torch|chandelier|neon|fireplace|rug|carpet|curtain|vase|ornament|decoration|mirror|clock|plush|doll|toy|plant pot"
+    },
+    {
+      "id": 9967203,
+      "caption": "Maison - Salon sieges et mobilier",
+      "pattern": "chair|sofa|couch|seat|stool|bench|armchair|table|desk|cabinet|shelf|bookcase|drawer|furniture|hammock|throne"
+    },
+    {
+      "id": 9967202,
+      "caption": "Construction - Murs sols portes et toits",
+      "pattern": "wall|floor|tile|roof|door|window|pillar|column|stair|ramp|bridge|divider|gate|fence|rail|platform|architecture|construction|brick|panel|background"
+    },
+    {
+      "id": 9967219,
+      "caption": "Rares LTD et collections",
+      "pattern": "rare|diamond|ltd|limited|collectible|collection|golden|silver|bronze|trophy|prize|relic|nft_"
+    },
+    {
+      "id": 9967221,
+      "caption": "Creations custom exclusives",
+      "pattern": "custom|paradise|waveplus|waverp|habborpbr|exclusive"
+    },
+    {
+      "id": 9967220,
+      "caption": "Classiques et objets divers",
+      "pattern": ".*"
+    }
+  ],
+  "scope": "catalog pages 9967000-9967839",
+  "fallbackPage": 9967220
+}

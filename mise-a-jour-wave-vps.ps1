@@ -34,7 +34,8 @@ $ModernCatalogMigrationRelativePaths = @(
     "migrations\20260906_paradise_official_novelties_2023_2026.sql",
     "migrations\20260906_paradise_official_archive_expansion.sql",
     "migrations\20260906_sync_catalog_furniture_to_items_base_modern.sql",
-    "migrations\20260906_paradise_catalogue_sprite_id_fix.sql"
+    "migrations\20260906_paradise_catalogue_sprite_id_fix.sql",
+    "migrations\20260906_paradise_catalogue_taxonomy_v3.sql"
 )
 $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_catalogue_mass_habborpbr_legacy.sql",
@@ -48,7 +49,8 @@ $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260906_paradise_official_novelties_2023_2026_legacy.sql",
     "migrations\20260906_paradise_official_archive_expansion_legacy.sql",
     "migrations\20260904_sync_catalog_furniture_to_items_base.sql",
-    "migrations\20260906_paradise_catalogue_sprite_id_fix.sql"
+    "migrations\20260906_paradise_catalogue_sprite_id_fix.sql",
+    "migrations\20260906_paradise_catalogue_taxonomy_v3_legacy.sql"
 )
 $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -218,6 +220,13 @@ try {
                 Write-Host "Migration appliquee : $(Split-Path -Leaf $Migration)" -ForegroundColor Green
             }
 
+            $CatalogItemColumn = if ($LegacyCatalog) { 'item_ids' } else { 'item_id' }
+            $CatalogFurnitureIdSql = if ($LegacyCatalog) {
+                "CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(item_ids, ',', 1), ':', 1) AS UNSIGNED)"
+            } else {
+                'CAST(item_id AS UNSIGNED)'
+            }
+
             # Le lot 2023-2026 doit exister dans les trois tables réellement
             # utilisées par le catalogue et l'émulateur. Cette vérification évite
             # un faux déploiement "réussi" lorsque le mauvais commit ou la mauvaise
@@ -225,7 +234,7 @@ try {
             $OfficialNoveltiesValidationSql = @"
 SELECT CONCAT(
     (SELECT COUNT(*) FROM furniture WHERE id BETWEEN 997100000 AND 997101056), '|',
-    (SELECT COUNT(*) FROM catalog_items WHERE page_id BETWEEN 9967800 AND 9967819), '|',
+    (SELECT COUNT(*) FROM catalog_items WHERE $CatalogFurnitureIdSql BETWEEN 997100000 AND 997101056), '|',
     (SELECT COUNT(*) FROM items_base WHERE id BETWEEN 997100000 AND 997101056)
 )
 "@
@@ -250,7 +259,7 @@ SELECT CONCAT(
             $OfficialArchiveValidationSql = @"
 SELECT CONCAT(
     (SELECT COUNT(*) FROM furniture WHERE id BETWEEN 997200000 AND 997202944), '|',
-    (SELECT COUNT(*) FROM catalog_items WHERE page_id BETWEEN 9967820 AND 9967839), '|',
+    (SELECT COUNT(*) FROM catalog_items WHERE $CatalogFurnitureIdSql BETWEEN 997200000 AND 997202944), '|',
     (SELECT COUNT(*) FROM items_base WHERE id BETWEEN 997200000 AND 997202944)
 )
 "@
@@ -265,7 +274,18 @@ SELECT CONCAT(
             }
             Write-Host 'Verification extension officielle : 2945/2945/2945 dans furniture, catalog_items et items_base.' -ForegroundColor Green
 
-            $CatalogItemColumn = if ($LegacyCatalog) { 'item_ids' } else { 'item_id' }
+            $TaxonomyValidationSql = "SELECT CONCAT((SELECT COUNT(*) FROM catalog_pages WHERE parent_id=9967200 AND visible='1' AND enabled='1'),'|',(SELECT COUNT(*) FROM catalog_items WHERE page_id BETWEEN 9967000 AND 9967839 AND page_id NOT BETWEEN 9967200 AND 9967224))"
+            $TaxonomyValidationArgs = @(
+                "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
+                "--database=$DatabaseName", '--batch', '--skip-column-names',
+                "--execute=$TaxonomyValidationSql"
+            )
+            $TaxonomyCounts = ((& $Mysql @TaxonomyValidationArgs) -join '').Trim()
+            if ($LASTEXITCODE -ne 0 -or $TaxonomyCounts -ne '24|0') {
+                throw "Taxonomie catalogue incomplete : categories visibles|offres non classees = $TaxonomyCounts (attendu 24|0)."
+            }
+            Write-Host 'Verification rangement catalogue : 24 categories visibles, 0 offre hors classement.' -ForegroundColor Green
+
             $BlackCubeValidationSql = "SELECT COUNT(DISTINCT CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED)) FROM catalog_items WHERE page_id=9967201 AND CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED)=996700070"
             $BlackCubeValidationArgs = @(
                 "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
