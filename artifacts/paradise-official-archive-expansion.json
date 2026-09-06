@@ -1,0 +1,31 @@
+{
+  "source": "higoka/habbo-downloader",
+  "imported": 2945,
+  "baseAssets": 1768,
+  "skippedAssets": [
+    "h25_monkeybzn_pole",
+    "nft_china_light",
+    "tile_cursor"
+  ],
+  "itemIdStart": 997200000,
+  "itemIdEnd": 997202944,
+  "counts": {
+    "Construction et architecture": 526,
+    "Maison et decoration": 682,
+    "Ville commerces et RP": 27,
+    "Nature jardins et ferme": 214,
+    "Plage mer et piscines": 34,
+    "Loisirs jeux et musique": 86,
+    "Fantastique et aventure": 92,
+    "Halloween et horreur": 38,
+    "Noel Paques et saisons": 155,
+    "Rares et collections": 30,
+    "Sieges lits et confort": 205,
+    "Lampes et eclairage": 71,
+    "Cuisine nourriture et boissons": 66,
+    "Technologie et machines": 67,
+    "Decoration art et accessoires": 199,
+    "Collections NFT": 407,
+    "Classiques et objets divers": 46
+  }
+}

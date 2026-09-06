@@ -32,6 +32,7 @@ $ModernCatalogMigrationRelativePaths = @(
     "migrations\20260905_paradise_pure_black_block.sql",
     "migrations\20260906_paradise_catalogue_image_cleanup.sql",
     "migrations\20260906_paradise_official_novelties_2023_2026.sql",
+    "migrations\20260906_paradise_official_archive_expansion.sql",
     "migrations\20260906_sync_catalog_furniture_to_items_base_modern.sql",
     "migrations\20260906_paradise_catalogue_sprite_id_fix.sql"
 )
@@ -45,6 +46,7 @@ $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260905_paradise_pure_black_block_legacy.sql",
     "migrations\20260906_paradise_catalogue_image_cleanup_legacy.sql",
     "migrations\20260906_paradise_official_novelties_2023_2026_legacy.sql",
+    "migrations\20260906_paradise_official_archive_expansion_legacy.sql",
     "migrations\20260904_sync_catalog_furniture_to_items_base.sql",
     "migrations\20260906_paradise_catalogue_sprite_id_fix.sql"
 )
@@ -244,6 +246,24 @@ SELECT CONCAT(
                 throw "Lot officiel 2023-2026 incomplet : furniture/catalog_items/items_base = $OfficialNoveltiesCounts (attendu 1057|1057|1057)."
             }
             Write-Host 'Verification nouveautes 2023-2026 : 1057/1057/1057 dans furniture, catalog_items et items_base.' -ForegroundColor Green
+
+            $OfficialArchiveValidationSql = @"
+SELECT CONCAT(
+    (SELECT COUNT(*) FROM furniture WHERE id BETWEEN 997200000 AND 997202944), '|',
+    (SELECT COUNT(*) FROM catalog_items WHERE page_id BETWEEN 9967820 AND 9967839), '|',
+    (SELECT COUNT(*) FROM items_base WHERE id BETWEEN 997200000 AND 997202944)
+)
+"@
+            $OfficialArchiveValidationArgs = @(
+                "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
+                "--database=$DatabaseName", '--batch', '--skip-column-names',
+                "--execute=$OfficialArchiveValidationSql"
+            )
+            $OfficialArchiveCounts = ((& $Mysql @OfficialArchiveValidationArgs) -join '').Trim()
+            if ($LASTEXITCODE -ne 0 -or $OfficialArchiveCounts -ne '2945|2945|2945') {
+                throw "Extension officielle massive incomplete : furniture/catalog_items/items_base = $OfficialArchiveCounts (attendu 2945|2945|2945)."
+            }
+            Write-Host 'Verification extension officielle : 2945/2945/2945 dans furniture, catalog_items et items_base.' -ForegroundColor Green
 
             $CatalogItemColumn = if ($LegacyCatalog) { 'item_ids' } else { 'item_id' }
             $BlackCubeValidationSql = "SELECT COUNT(DISTINCT CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED)) FROM catalog_items WHERE page_id=9967201 AND CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED)=996700070"
