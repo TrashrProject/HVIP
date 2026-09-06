@@ -246,3 +246,52 @@
   .paradise-call-stable-v2 .pcall-card.pcall-outgoing>small{bottom:27px!important}
   .paradise-call-stable-v2 .pcall-incoming-actions{bottom:35px!important}
 }
+
+/* V3.1 — make the call screen visually continuous through the native status bar.
+   The call surface now starts behind the status bar; native time/network/battery stay above it. */
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-screen,
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-screen.app-open{
+  background:#123b56!important;
+}
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-status-bar{
+  position:relative!important;
+  z-index:10020!important;
+  background:transparent!important;
+  color:#fff!important;
+}
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-status-bar .time{
+  color:#fff!important;
+}
+.nitro-phone-frame>.paradise-call-layer.paradise-call-stable-v2:not(.pcall-video-landscape-layer),
+.nitro-phone-frame>.paradise-call-layer.paradise-call-stable-v2.pcall-video-expanded{
+  inset:0 2px 2px!important;
+  border-radius:27px!important;
+}
+.paradise-call-stable-v2 .pcall-card.pcall-outgoing,
+.paradise-call-stable-v2 .pcall-card.pcall-incoming,
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-audio,
+.paradise-call-stable-v2.pcall-video-expanded .pcall-card.pcall-active.is-video{
+  border-radius:27px!important;
+}
+.paradise-call-stable-v2 .pcall-card.pcall-outgoing,
+.paradise-call-stable-v2 .pcall-card.pcall-incoming,
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-audio{
+  padding-top:78px!important;
+}
+.paradise-call-stable-v2 .pcall-topline{
+  top:45px!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-video-head{
+  top:43px!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-local-video{
+  top:45px!important;
+}
+
+@media(max-height:650px){
+  .paradise-call-stable-v2 .pcall-card.pcall-outgoing,
+  .paradise-call-stable-v2 .pcall-card.pcall-incoming,
+  .paradise-call-stable-v2 .pcall-card.pcall-active.is-audio{
+    padding-top:68px!important;
+  }
+}
