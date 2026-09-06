@@ -1,7 +1,7 @@
 (function(){
     'use strict';
-    if(window.__rdpWhatsHeaderV8) return;
-    window.__rdpWhatsHeaderV8 = true;
+    if(window.__rdpWhatsHeaderV9) return;
+    window.__rdpWhatsHeaderV9 = true;
 
     function extractFigure(value){
         value = String(value || '');
@@ -25,14 +25,39 @@
         return 'https://www.habbo.com/habbo-imaging/avatarimage?figure=' + encodeURIComponent(figure) + '&gesture=sml&direction=2&head_direction=2&headonly=1&size=m';
     }
 
+    function forceAvatarBox(avatar){
+        if(!avatar) return;
+        avatar.style.setProperty('position', 'relative', 'important');
+        avatar.style.setProperty('display', 'block', 'important');
+        avatar.style.setProperty('flex', '0 0 44px', 'important');
+        avatar.style.setProperty('width', '44px', 'important');
+        avatar.style.setProperty('height', '44px', 'important');
+        avatar.style.setProperty('min-width', '44px', 'important');
+        avatar.style.setProperty('min-height', '44px', 'important');
+        avatar.style.setProperty('max-width', '44px', 'important');
+        avatar.style.setProperty('max-height', '44px', 'important');
+        avatar.style.setProperty('margin', '0 9px 0 0', 'important');
+        avatar.style.setProperty('padding', '0', 'important');
+        avatar.style.setProperty('overflow', 'hidden', 'important');
+        avatar.style.setProperty('border-radius', '50%', 'important');
+        avatar.style.setProperty('background-color', '#20343a', 'important');
+        avatar.style.setProperty('box-sizing', 'border-box', 'important');
+        avatar.style.setProperty('transform', 'none', 'important');
+    }
+
     function installAvatar(avatar, figure){
         if(!avatar || !figure) return;
+        forceAvatarBox(avatar);
         avatar.setAttribute('data-figure', figure);
         avatar.classList.add('rdp-real-habbo-avatar');
 
-        if(avatar.dataset.rdpRenderedFigure === figure && avatar.querySelector('.rdp-habbo-avatar-img')) return;
-        avatar.dataset.rdpRenderedFigure = figure;
+        var existing = avatar.querySelector('.rdp-habbo-avatar-img');
+        if(avatar.dataset.rdpRenderedFigure === figure && existing){
+            forceAvatarImage(existing);
+            return;
+        }
 
+        avatar.dataset.rdpRenderedFigure = figure;
         avatar.style.setProperty('background-image', 'none', 'important');
         avatar.innerHTML = '';
 
@@ -40,6 +65,7 @@
         img.className = 'rdp-habbo-avatar-img';
         img.alt = '';
         img.draggable = false;
+        forceAvatarImage(img);
         img.src = avatarUrl(figure);
         img.onerror = function(){
             img.removeAttribute('src');
@@ -48,20 +74,38 @@
         };
         img.onload = function(){
             avatar.classList.remove('rdp-avatar-failed');
-            img.style.display = 'block';
+            forceAvatarImage(img);
         };
         avatar.appendChild(img);
     }
 
+    function forceAvatarImage(img){
+        if(!img) return;
+        img.style.setProperty('display', 'block', 'important');
+        img.style.setProperty('position', 'absolute', 'important');
+        img.style.setProperty('left', '50%', 'important');
+        img.style.setProperty('top', '50%', 'important');
+        img.style.setProperty('width', '64px', 'important');
+        img.style.setProperty('height', '64px', 'important');
+        img.style.setProperty('min-width', '64px', 'important');
+        img.style.setProperty('min-height', '64px', 'important');
+        img.style.setProperty('max-width', 'none', 'important');
+        img.style.setProperty('max-height', 'none', 'important');
+        img.style.setProperty('object-fit', 'contain', 'important');
+        img.style.setProperty('transform', 'translate(-50%, -48%)', 'important');
+        img.style.setProperty('margin', '0', 'important');
+        img.style.setProperty('padding', '0', 'important');
+    }
+
     function enhanceAvatar(avatar){
         if(!avatar) return;
+        forceAvatarBox(avatar);
         var figure = getFigure(avatar);
         if(figure) installAvatar(avatar, figure);
     }
 
     function enhanceAllAvatars(){
-        enhanceAvatar(document.querySelector('#app_WhatsApp .Whats_Title_Chatting .app_whats_photo .app_contacts_avatar'));
-        document.querySelectorAll('#WS_WhatsApp .app_contacts_avatar, #WS_WhatsApp_Contacts .app_contacts_avatar').forEach(enhanceAvatar);
+        document.querySelectorAll('#phone .app_contacts_avatar').forEach(enhanceAvatar);
     }
 
     function enhanceStatus(){
@@ -75,23 +119,23 @@
         if(online) status.textContent = 'En ligne';
     }
 
-    function enhanceWhatsApp(){
+    function enhancePhone(){
         enhanceAllAvatars();
         enhanceStatus();
     }
 
     function boot(){
-        enhanceWhatsApp();
-        var root = document.getElementById('app_WhatsApp');
+        enhancePhone();
+        var root = document.getElementById('phone');
         if(root){
             var scheduled = false;
             new MutationObserver(function(){
                 if(scheduled) return;
                 scheduled = true;
-                setTimeout(function(){ scheduled = false; enhanceWhatsApp(); }, 0);
+                setTimeout(function(){ scheduled = false; enhancePhone(); }, 0);
             }).observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','data-figure']});
         }
-        setInterval(enhanceWhatsApp,1000);
+        setInterval(enhancePhone,750);
     }
 
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded',boot);
