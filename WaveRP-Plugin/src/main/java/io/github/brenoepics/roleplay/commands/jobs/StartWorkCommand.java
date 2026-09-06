@@ -69,9 +69,13 @@ public class StartWorkCommand extends Command {
       int paydayMinutes = Math.max(1,
           Emulator.getConfig().getInt("features.payday.timer_minutes", 10));
       data.setLastPayday(new Date());
-      habbo.whisper(
+
+      // Affichage volontairement en bulle de chat : les whispers ALERT ne sont pas visibles
+      // sur tous les clients Nitro utilisés par ParadiseRP.
+      habbo.shout(
           "Prochaine paie dans " + paydayMinutes + " minutes.",
-          RoomChatMessageBubbles.ALERT);
+          RoomChatMessageBubbles.NORMAL);
+
       data.executeAction();
     }
     return true;
