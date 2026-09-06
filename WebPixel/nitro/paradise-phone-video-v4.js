@@ -2,9 +2,10 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_VIDEO_V4__) return;
-  window.__PARADISE_PHONE_VIDEO_V4__ = '4.0.1';
+  window.__PARADISE_PHONE_VIDEO_V4__ = '4.0.2';
 
-  const state = { landscape: false };
+  const state = { landscape: false, queued: false };
+  const RELEVANT_SELECTOR = '.nitro-phone-frame,.paradise-call-layer,.pcall-active,.pcall-whisper-panel,.pcall-controls';
 
   function getFrame() {
     return document.querySelector('.nitro-phone-frame');
@@ -14,8 +15,8 @@
     return document.querySelector('.paradise-call-layer');
   }
 
-  function getActiveCard() {
-    return getLayer()?.querySelector('.pcall-active') || null;
+  function getActiveCard(layer = getLayer()) {
+    return layer?.querySelector('.pcall-active') || null;
   }
 
   function ensureWhisperDock() {
@@ -38,12 +39,7 @@
     const frame = getFrame();
     if (!dock) return;
 
-    dock.style.removeProperty('left');
-    dock.style.removeProperty('right');
-    dock.style.removeProperty('top');
-    dock.style.removeProperty('bottom');
-    dock.style.removeProperty('transform');
-    dock.style.removeProperty('width');
+    dock.style.cssText = '';
 
     if (state.landscape || !frame) {
       dock.style.left = '50%';
@@ -61,7 +57,6 @@
       dock.style.left = `${Math.round(rect.right + 18)}px`;
       dock.style.bottom = '64px';
       dock.style.width = `${Math.min(390, Math.max(280, rightSpace - 34))}px`;
-      dock.style.transform = 'none';
       return;
     }
 
@@ -69,7 +64,6 @@
       dock.style.right = `${Math.round(window.innerWidth - rect.left + 18)}px`;
       dock.style.bottom = '64px';
       dock.style.width = `${Math.min(390, Math.max(280, leftSpace - 34))}px`;
-      dock.style.transform = 'none';
       return;
     }
 
@@ -124,8 +118,8 @@
 
   function enhance() {
     const layer = getLayer();
-    const card = getActiveCard();
     const frame = getFrame();
+    const card = getActiveCard(layer);
 
     if (!layer || !card) {
       frame?.classList.remove('pcall-v4-video-active', 'pcall-v4-phone-landscape');
@@ -148,11 +142,29 @@
       layer.classList.toggle('pcall-v4-landscape', state.landscape);
       frame?.classList.toggle('pcall-v4-phone-landscape', state.landscape);
     } else {
-      applyLandscape(false);
-      layer.classList.remove('pcall-v4-video-fullscreen');
+      if (state.landscape) applyLandscape(false);
+      layer.classList.remove('pcall-v4-video-fullscreen', 'pcall-v4-landscape');
     }
 
     positionWhisperDock();
+  }
+
+  function scheduleEnhance() {
+    if (state.queued) return;
+    state.queued = true;
+    requestAnimationFrame(() => {
+      state.queued = false;
+      enhance();
+    });
+  }
+
+  function mutationIsRelevant(record) {
+    if (record.type !== 'childList') return false;
+    const nodes = [...record.addedNodes, ...record.removedNodes];
+    return nodes.some(node => {
+      if (!(node instanceof Element)) return false;
+      return node.matches(RELEVANT_SELECTOR) || Boolean(node.querySelector?.(RELEVANT_SELECTOR));
+    });
   }
 
   document.addEventListener('click', event => {
@@ -161,22 +173,26 @@
     event.preventDefault();
     event.stopPropagation();
     applyLandscape(!state.landscape);
-    enhance();
+    scheduleEnhance();
   }, true);
 
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || !state.landscape) return;
     applyLandscape(false);
-    enhance();
+    scheduleEnhance();
   }, true);
 
-  window.addEventListener('resize', () => positionWhisperDock(), { passive: true });
+  window.addEventListener('resize', () => {
+    if (document.querySelector('.pcall-room-whisper-dock')) positionWhisperDock();
+  }, { passive: true });
 
-  const observer = new MutationObserver(() => enhance());
+  const observer = new MutationObserver(records => {
+    if (records.some(mutationIsRelevant)) scheduleEnhance();
+  });
 
   function boot() {
-    observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-    enhance();
+    observer.observe(document.body, { childList: true, subtree: true });
+    scheduleEnhance();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
