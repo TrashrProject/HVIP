@@ -1,6 +1,9 @@
 /* ParadiseRP — ParadisePhone voice/video calls */
 
 .phone-friends-app .friend-row.paradise-callable-friend{position:relative!important;padding-right:94px!important}
+/* Keep the native friend avatar from being squeezed by the extra call action. */
+.phone-friends-app .friend-row.paradise-callable-friend>:first-child:has(img){flex:0 0 46px!important;width:46px!important;min-width:46px!important;max-width:46px!important;height:46px!important;overflow:visible!important}
+.phone-friends-app .friend-row.paradise-callable-friend>:first-child:has(img) img{display:block!important;width:46px!important;min-width:46px!important;max-width:46px!important;height:46px!important;object-fit:contain!important;flex:none!important}
 .paradise-call-actions{position:absolute;right:68px;top:50%;transform:translateY(-50%);display:flex;gap:4px;z-index:8}
 .paradise-call-actions button{width:25px;height:25px;padding:0;border:1px solid #3b6b8f;border-radius:7px;background:#123453;color:#fff;font-size:12px;font-weight:900;line-height:23px;text-align:center;cursor:pointer;box-shadow:0 1px 2px #0005;transition:transform .12s,background .12s,border-color .12s}
 .paradise-call-actions button:hover{transform:translateY(-1px);background:#1673b7;border-color:#54b9ed}
