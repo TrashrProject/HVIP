@@ -1,106 +1,108 @@
 (function(){
   'use strict';
 
-  function normalizeText(s){
-    return String(s || '').replace(/\s+/g,' ').trim().toUpperCase();
+  function norm(value){
+    return String(value || '').replace(/\s+/g, ' ').trim().toUpperCase();
   }
 
-  function findMetaBlock(){
+  function paint(el, color, weight){
+    if(!el || !el.style) return;
+    el.style.setProperty('color', color || '#ffffff', 'important');
+    el.style.setProperty('-webkit-text-fill-color', color || '#ffffff', 'important');
+    el.style.setProperty('opacity', '1', 'important');
+    el.style.setProperty('visibility', 'visible', 'important');
+    el.style.setProperty('filter', 'none', 'important');
+    el.style.setProperty('text-shadow', '0 1px 2px rgba(0,0,0,.85)', 'important');
+    if(weight) el.style.setProperty('font-weight', weight, 'important');
+  }
+
+  function forceNodeAndFamily(el, color){
+    if(!el) return;
+    paint(el, color, '800');
+
+    var descendants = el.querySelectorAll ? el.querySelectorAll('*') : [];
+    for(var i = 0; i < descendants.length; i++) paint(descendants[i], color, '800');
+
+    if(el.parentElement){
+      paint(el.parentElement, color, '800');
+      var siblings = el.parentElement.children;
+      for(var j = 0; j < siblings.length; j++){
+        paint(siblings[j], color, '800');
+        var nested = siblings[j].querySelectorAll ? siblings[j].querySelectorAll('*') : [];
+        for(var k = 0; k < nested.length; k++) paint(nested[k], color, '800');
+      }
+    }
+  }
+
+  function forceMetadata(){
     var phone = document.getElementById('phone');
-    if(!phone) return null;
+    if(!phone) return;
 
-    var all = phone.querySelectorAll('*');
-    var label = null;
+    var walker = document.createTreeWalker(phone, NodeFilter.SHOW_TEXT, null, false);
+    var node;
+    var found = false;
 
-    for(var i=0;i<all.length;i++){
-      var text = normalizeText(all[i].textContent);
-      if(text === 'PRISE LE' || text.indexOf('PRISE LE ') === 0){
-        label = all[i];
-        break;
+    while((node = walker.nextNode())){
+      var text = norm(node.nodeValue);
+      if(!text) continue;
+
+      if(text.indexOf('PRISE LE') !== -1){
+        found = true;
+        forceNodeAndFamily(node.parentElement, '#e8f1fb');
+      }
+
+      if(/\b\d{2}\/\d{2}\/\d{4}\b/.test(text) || /\b\d{1,2}:\d{2}\b/.test(text)){
+        var parentText = node.parentElement ? norm(node.parentElement.textContent) : '';
+        var familyText = node.parentElement && node.parentElement.parentElement ? norm(node.parentElement.parentElement.textContent) : '';
+        if(parentText.indexOf('PRISE LE') !== -1 || familyText.indexOf('PRISE LE') !== -1 || found){
+          forceNodeAndFamily(node.parentElement, '#ffffff');
+        }
       }
     }
 
-    if(!label) return null;
+    /* Filet de sécurité : le footer PhotoSwipe est toujours sombre dans ParadiseRP. */
+    var captions = phone.querySelectorAll('#gallery .pswp__caption, #gallery .pswp__caption__center, #gallery .pswp__caption *, #app_Gallery .pswp__caption, #app_Gallery .pswp__caption__center, #app_Gallery .pswp__caption *');
+    for(var c = 0; c < captions.length; c++) paint(captions[c], '#ffffff', '800');
 
-    var p = label;
-    while(p && p !== phone){
-      var t = normalizeText(p.textContent);
-      if(t.indexOf('PRISE LE') !== -1 && /\d{2}\/\d{2}\/\d{4}/.test(t)){
-        return p;
-      }
-      p = p.parentElement;
-    }
-
-    return label.parentElement || label;
-  }
-
-  function forceReadable(block){
-    if(!block) return;
-
-    /* On garde volontairement ce bandeau sombre dans les deux thèmes.
-       Comme ça le label + date/heure restent toujours lisibles. */
-    block.style.setProperty('background', '#0b1724', 'important');
-    block.style.setProperty('background-color', '#0b1724', 'important');
-    block.style.setProperty('color', '#ffffff', 'important');
-    block.style.setProperty('opacity', '1', 'important');
-    block.style.setProperty('border-top', '1px solid rgba(255,255,255,.08)', 'important');
-
-    var nodes = block.querySelectorAll('*');
-    for(var i=0;i<nodes.length;i++){
-      nodes[i].style.setProperty('color', '#ffffff', 'important');
-      nodes[i].style.setProperty('opacity', '1', 'important');
-      nodes[i].style.setProperty('text-shadow', '0 1px 2px rgba(0,0,0,.75)', 'important');
-      nodes[i].style.removeProperty('filter');
-    }
-
-    /* Renforce spécialement PRISE LE + la date/heure. */
-    for(var j=0;j<nodes.length;j++){
-      var text = normalizeText(nodes[j].textContent);
-      if(text === 'PRISE LE' || text.indexOf('PRISE LE ') === 0){
-        nodes[j].style.setProperty('color', '#dce6f2', 'important');
-        nodes[j].style.setProperty('font-weight', '800', 'important');
-        nodes[j].style.setProperty('letter-spacing', '.5px', 'important');
-      }
-      if(/\d{2}\/\d{2}\/\d{4}/.test(text)){
-        nodes[j].style.setProperty('color', '#ffffff', 'important');
-        nodes[j].style.setProperty('font-weight', '800', 'important');
-      }
+    var captionBars = phone.querySelectorAll('#gallery .pswp__caption, #app_Gallery .pswp__caption');
+    for(var b = 0; b < captionBars.length; b++){
+      captionBars[b].style.setProperty('background', '#0b1724', 'important');
+      captionBars[b].style.setProperty('background-color', '#0b1724', 'important');
+      captionBars[b].style.setProperty('opacity', '1', 'important');
     }
   }
 
-  function apply(){
-    forceReadable(findMetaBlock());
-  }
-
-  var queued = false;
-  function queueApply(){
-    if(queued) return;
-    queued = true;
+  var running = false;
+  function run(){
+    if(running) return;
+    running = true;
     requestAnimationFrame(function(){
-      queued = false;
-      apply();
+      running = false;
+      forceMetadata();
     });
   }
 
   document.addEventListener('click', function(){
-    setTimeout(queueApply, 0);
-    setTimeout(queueApply, 80);
-    setTimeout(queueApply, 250);
+    run();
+    setTimeout(run, 30);
+    setTimeout(run, 120);
+    setTimeout(run, 350);
+    setTimeout(run, 800);
   }, true);
 
-  window.addEventListener('load', queueApply);
+  window.addEventListener('load', run);
 
-  var observer = new MutationObserver(queueApply);
+  var observer = new MutationObserver(run);
   if(document.documentElement){
     observer.observe(document.documentElement, {
-      subtree:true,
-      childList:true,
-      characterData:true,
-      attributes:true,
-      attributeFilter:['class','style']
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['class', 'style']
     });
   }
 
-  setInterval(queueApply, 300);
-  queueApply();
+  setInterval(run, 250);
+  run();
 })();
