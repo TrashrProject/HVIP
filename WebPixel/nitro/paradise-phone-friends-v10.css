@@ -1,0 +1,211 @@
+/* ParadiseRP — ParadisePhone friends V10
+   Visual polish only. Keeps the native friend list and all existing call/message/delete behavior. */
+
+.nitro-phone-frame .phone-friends-app{
+  box-sizing:border-box!important;
+  padding:8px 9px 18px!important;
+  background:
+    radial-gradient(circle at 50% -12%,rgba(35,126,176,.16),transparent 34%),
+    linear-gradient(180deg,#0a1725 0%,#08131f 100%)!important;
+}
+
+/* Search */
+.nitro-phone-frame .phone-friends-app .phone-input,
+.nitro-phone-frame .phone-friends-app input[type="text"]{
+  min-height:36px!important;
+  height:36px!important;
+  padding:0 13px!important;
+  border:1px solid rgba(92,159,205,.52)!important;
+  border-radius:12px!important;
+  background:rgba(15,33,50,.92)!important;
+  color:#eef8ff!important;
+  font-size:12px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 5px 14px rgba(0,0,0,.16)!important;
+  outline:none!important;
+  transition:border-color .14s ease,box-shadow .14s ease,background .14s ease!important;
+}
+.nitro-phone-frame .phone-friends-app .phone-input::placeholder,
+.nitro-phone-frame .phone-friends-app input[type="text"]::placeholder{
+  color:#6f879c!important;
+  opacity:1!important;
+}
+.nitro-phone-frame .phone-friends-app .phone-input:focus,
+.nitro-phone-frame .phone-friends-app input[type="text"]:focus{
+  border-color:#38bff3!important;
+  background:#10263a!important;
+  box-shadow:0 0 0 2px rgba(56,191,243,.12),0 6px 18px rgba(0,0,0,.2)!important;
+}
+
+/* Sections */
+.nitro-phone-frame .phone-friends-app .friends-section{
+  margin:9px 0 0!important;
+  padding:0 7px 7px!important;
+  border:1px solid rgba(77,122,158,.34)!important;
+  border-radius:14px!important;
+  background:linear-gradient(180deg,rgba(24,44,63,.94),rgba(16,33,49,.95))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 6px 18px rgba(0,0,0,.14)!important;
+  overflow:hidden!important;
+}
+.nitro-phone-frame .phone-friends-app .section-header{
+  min-height:37px!important;
+  margin:0 -7px 6px!important;
+  padding:0 11px!important;
+  border-bottom:1px solid rgba(255,255,255,.055)!important;
+  background:linear-gradient(180deg,rgba(36,60,82,.62),rgba(23,43,61,.28))!important;
+  color:#e9f5ff!important;
+  letter-spacing:.55px!important;
+}
+.nitro-phone-frame .phone-friends-app .section-header span{
+  font-size:10px!important;
+  font-weight:800!important;
+  text-transform:uppercase!important;
+}
+.nitro-phone-frame .phone-friends-app .section-header svg,
+.nitro-phone-frame .phone-friends-app .section-header i{
+  opacity:.75!important;
+}
+
+/* Friend card */
+.nitro-phone-frame .phone-friends-app .friend-row{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+  min-height:64px!important;
+  margin:0 0 6px!important;
+  padding:7px 8px!important;
+  border:1px solid rgba(97,145,183,.30)!important;
+  border-radius:12px!important;
+  background:linear-gradient(135deg,rgba(34,59,82,.96),rgba(27,48,68,.97))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 4px 10px rgba(0,0,0,.12)!important;
+  transition:transform .12s ease,border-color .12s ease,background .12s ease!important;
+}
+.nitro-phone-frame .phone-friends-app .friend-row:last-child{
+  margin-bottom:0!important;
+}
+.nitro-phone-frame .phone-friends-app .friend-row:hover{
+  transform:translateY(-1px)!important;
+  border-color:rgba(78,190,238,.48)!important;
+  background:linear-gradient(135deg,rgba(38,67,92,.98),rgba(28,52,74,.98))!important;
+}
+
+/* Avatar */
+.nitro-phone-frame .phone-friends-app .friend-row img,
+.nitro-phone-frame .phone-friends-app .friend-avatar{
+  flex:0 0 auto!important;
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  min-height:44px!important;
+  border-radius:50%!important;
+  border:2px solid rgba(141,177,202,.5)!important;
+  background:#1c3448!important;
+  box-shadow:0 0 0 3px rgba(4,16,26,.34),0 4px 10px rgba(0,0,0,.22)!important;
+  image-rendering:auto!important;
+}
+.nitro-phone-frame .phone-friends-app .friends-section:first-of-type .friend-row img,
+.nitro-phone-frame .phone-friends-app .friends-section:first-of-type .friend-row .friend-avatar{
+  border-color:#46cfff!important;
+  box-shadow:0 0 0 3px rgba(4,31,45,.62),0 0 14px rgba(54,196,242,.18)!important;
+}
+
+/* Names */
+.nitro-phone-frame .phone-friends-app .friend-name{
+  min-width:0!important;
+  margin-right:auto!important;
+  color:#d8e8f4!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  letter-spacing:.05px!important;
+  text-shadow:0 1px 1px rgba(0,0,0,.35)!important;
+}
+.nitro-phone-frame .phone-friends-app .friends-section:first-of-type .friend-name{
+  color:#42c8ff!important;
+}
+
+/* All actions use one compact visual language. */
+.nitro-phone-frame .phone-friends-app .friend-row .icon-btn,
+.nitro-phone-frame .phone-friends-app .paradise-call-actions button{
+  box-sizing:border-box!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:27px!important;
+  min-width:27px!important;
+  height:27px!important;
+  min-height:27px!important;
+  margin:0!important;
+  padding:0!important;
+  border:1px solid rgba(114,161,196,.42)!important;
+  border-radius:8px!important;
+  background:linear-gradient(180deg,#24465f,#19384f)!important;
+  color:#eef9ff!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 3px 7px rgba(0,0,0,.2)!important;
+  transition:transform .12s ease,border-color .12s ease,background .12s ease!important;
+}
+.nitro-phone-frame .phone-friends-app .friend-row .icon-btn:hover,
+.nitro-phone-frame .phone-friends-app .paradise-call-actions button:hover{
+  transform:translateY(-1px)!important;
+  border-color:#50c8f5!important;
+  background:linear-gradient(180deg,#2c5878,#1d4663)!important;
+}
+.nitro-phone-frame .phone-friends-app .paradise-call-actions{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  margin-left:auto!important;
+}
+.nitro-phone-frame .phone-friends-app .paradise-call-actions button svg{
+  width:13px!important;
+  height:13px!important;
+  fill:#fff!important;
+  stroke:#fff!important;
+  stroke-width:1.8!important;
+}
+.nitro-phone-frame .phone-friends-app .paradise-call-actions button:first-child{
+  border-color:rgba(64,198,226,.48)!important;
+  background:linear-gradient(180deg,#18536d,#123f55)!important;
+}
+.nitro-phone-frame .phone-friends-app .paradise-call-actions button:nth-child(2){
+  border-color:rgba(70,207,223,.50)!important;
+  background:linear-gradient(180deg,#1a5d6d,#124653)!important;
+}
+.nitro-phone-frame .phone-friends-app .friend-row .icon-btn.remove{
+  border-color:rgba(235,76,112,.38)!important;
+  background:linear-gradient(180deg,#563247,#442637)!important;
+  color:#ff6688!important;
+}
+.nitro-phone-frame .phone-friends-app .friend-row .icon-btn.remove:hover{
+  border-color:#ff6788!important;
+  background:linear-gradient(180deg,#6b344c,#53283d)!important;
+}
+
+/* Keep native action clusters aligned without forcing a different DOM structure. */
+.nitro-phone-frame .phone-friends-app .friend-row>*:last-child{
+  flex-shrink:0!important;
+}
+
+/* Light theme stays readable if the user changes phone appearance. */
+.nitro-phone-frame[data-paradise-theme=light] .phone-friends-app{
+  background:linear-gradient(180deg,#eef4f8,#e5edf3)!important;
+}
+.nitro-phone-frame[data-paradise-theme=light] .phone-friends-app .friends-section{
+  border-color:#c8d6e1!important;
+  background:#f7fafc!important;
+}
+.nitro-phone-frame[data-paradise-theme=light] .phone-friends-app .section-header{
+  background:#eaf1f6!important;
+  color:#18324a!important;
+  border-bottom-color:#d7e2ea!important;
+}
+.nitro-phone-frame[data-paradise-theme=light] .phone-friends-app .friend-row{
+  border-color:#d2dfe8!important;
+  background:#fff!important;
+  color:#172d41!important;
+}
+.nitro-phone-frame[data-paradise-theme=light] .phone-friends-app .friend-name{
+  color:#24384b!important;
+}
+.nitro-phone-frame[data-paradise-theme=light] .phone-friends-app .friends-section:first-of-type .friend-name{
+  color:#087fb8!important;
+}
