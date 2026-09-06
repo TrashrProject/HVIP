@@ -28,42 +28,35 @@
 </div>
 
 <style id="paradise-contacts-actions-fix">
-/*
- * Le CSS historique reserve 165px aux infos + 67px aux boutons.
- * Depuis l'ajout appel/video, cette disposition depasse la carte et compresse l'avatar.
- * On garde maintenant une zone infos flexible et une zone actions fixe a droite.
- */
+/* Les boutons message/appel/video sont sortis du flux : ils ne peuvent plus écraser l'avatar. */
 #app_Contacts #WS_Contacts .app_contacts_content{
   box-sizing:border-box!important;
+  position:relative!important;
   width:100%!important;
-  min-height:62px!important;
-  padding:8px 9px!important;
+  min-height:64px!important;
   margin:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  gap:8px!important;
+  padding:10px 98px 10px 10px!important;
   overflow:hidden!important;
 }
 
 #app_Contacts #WS_Contacts .app_contatcs_info{
   box-sizing:border-box!important;
-  width:auto!important;
+  position:relative!important;
+  width:100%!important;
   min-width:0!important;
-  flex:1 1 auto!important;
-  display:flex!important;
-  align-items:center!important;
-  gap:9px!important;
+  min-height:44px!important;
   margin:0!important;
-  padding:0!important;
+  padding:0 0 0 54px!important;
   overflow:hidden!important;
 }
 
 #app_Contacts #WS_Contacts .app_contacts_avatar{
-  position:relative!important;
+  position:absolute!important;
+  left:0!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
   float:none!important;
   display:block!important;
-  flex:0 0 44px!important;
   width:44px!important;
   min-width:44px!important;
   max-width:44px!important;
@@ -74,7 +67,6 @@
   padding:0!important;
   border-radius:50%!important;
   overflow:hidden!important;
-  transform:none!important;
   background-repeat:no-repeat!important;
   background-position:center -8px!important;
   background-size:auto 64px!important;
@@ -98,14 +90,17 @@
 }
 
 #app_Contacts #WS_Contacts .app_contacts_name{
-  position:static!important;
+  position:absolute!important;
+  left:54px!important;
+  right:0!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
   float:none!important;
-  flex:1 1 auto!important;
+  display:block!important;
   width:auto!important;
   min-width:0!important;
   margin:0!important;
   padding:0!important;
-  display:block!important;
   white-space:nowrap!important;
   overflow:hidden!important;
   text-overflow:ellipsis!important;
@@ -117,21 +112,24 @@
 
 #app_Contacts #WS_Contacts .app_contacts_buttons{
   box-sizing:border-box!important;
-  width:auto!important;
-  min-width:max-content!important;
-  flex:0 0 auto!important;
+  position:absolute!important;
+  right:8px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:82px!important;
+  min-width:82px!important;
+  max-width:82px!important;
+  height:28px!important;
+  margin:0!important;
+  padding:0!important;
   display:flex!important;
   align-items:center!important;
   justify-content:flex-end!important;
-  gap:4px!important;
-  margin:0!important;
-  padding:0!important;
-  position:static!important;
+  gap:3px!important;
   float:none!important;
-  white-space:nowrap!important;
+  overflow:visible!important;
 }
 
-/* Message / appel / video restent groupes a droite et ne participent plus a la largeur de l'avatar. */
 #app_Contacts #WS_Contacts .app_contacts_buttons > *,
 #app_Contacts #WS_Contacts .app_contacts_msg,
 #app_Contacts #WS_Contacts .app_contacts_call,
@@ -148,5 +146,6 @@
   min-height:26px!important;
   max-height:26px!important;
   margin:0!important;
+  padding:0!important;
 }
 </style>
