@@ -59,7 +59,7 @@
     const shell = document.createElement('div');
     shell.className = 'paradise-wanted-shell';
     shell.innerHTML = `
-      <div class="paradise-wanted-topbar">
+      <div class="paradise-wanted-topbar" title="Maintenir et déplacer la fenêtre">
         <div class="paradise-wanted-brand">
           <div class="paradise-wanted-logo">P</div>
           <div class="paradise-wanted-brand-copy"><strong>ParadiseRP</strong><span>LAKE PLACID</span></div>
@@ -114,17 +114,8 @@
     main.innerHTML = `
       <div class="paradise-wanted-name-row"><div class="paradise-wanted-profile-name"></div><div class="paradise-wanted-status">RECHERCHÉ</div></div>
       <div class="paradise-wanted-two-col">
-        <div>
-          <div class="paradise-wanted-label">Alias</div>
-          <div class="paradise-wanted-value">Aucun alias connu</div>
-        </div>
-        <div>
-          <div class="paradise-wanted-label">Niveau de danger</div>
-          <div class="paradise-wanted-danger-row">
-            <div class="paradise-wanted-danger-stars">${starsMarkup(user.stars, true)}</div>
-            <div class="paradise-wanted-danger-level">${dangerLabel(user.stars)}</div>
-          </div>
-        </div>
+        <div><div class="paradise-wanted-label">Alias</div><div class="paradise-wanted-value">Aucun alias connu</div></div>
+        <div><div class="paradise-wanted-label">Niveau de danger</div><div class="paradise-wanted-danger-row"><div class="paradise-wanted-danger-stars">${starsMarkup(user.stars, true)}</div><div class="paradise-wanted-danger-level">${dangerLabel(user.stars)}</div></div></div>
       </div>`;
     main.querySelector('.paradise-wanted-profile-name').textContent = user.name;
     head.appendChild(main);
@@ -133,18 +124,9 @@
     const facts = document.createElement('div');
     facts.className = 'paradise-wanted-facts';
     facts.innerHTML = `
-      <div class="paradise-wanted-fact">
-        <div class="paradise-wanted-fact-icon">$</div>
-        <div><div class="paradise-wanted-label">Récompense</div><div class="paradise-wanted-value paradise-wanted-fact-value-strong">—</div></div>
-      </div>
-      <div class="paradise-wanted-fact">
-        <div class="paradise-wanted-fact-icon">⌖</div>
-        <div><div class="paradise-wanted-label">Dernier secteur connu</div><div class="paradise-wanted-value">Inconnu</div></div>
-      </div>
-      <div class="paradise-wanted-fact is-wide">
-        <div class="paradise-wanted-fact-icon">▤</div>
-        <div><div class="paradise-wanted-label">Motif</div><div class="paradise-wanted-value">Aucun motif communiqué.</div></div>
-      </div>`;
+      <div class="paradise-wanted-fact"><div class="paradise-wanted-fact-icon">$</div><div><div class="paradise-wanted-label">Récompense</div><div class="paradise-wanted-value paradise-wanted-fact-value-strong">—</div></div></div>
+      <div class="paradise-wanted-fact"><div class="paradise-wanted-fact-icon">⌖</div><div><div class="paradise-wanted-label">Dernier secteur connu</div><div class="paradise-wanted-value">Inconnu</div></div></div>
+      <div class="paradise-wanted-fact is-wide"><div class="paradise-wanted-fact-icon">▤</div><div><div class="paradise-wanted-label">Motif</div><div class="paradise-wanted-value">Aucun motif communiqué.</div></div></div>`;
     detail.appendChild(facts);
 
     const information = document.createElement('div');
@@ -170,6 +152,68 @@
     });
   }
 
+  function bindDrag(alert, shell) {
+    const handle = shell.querySelector('.paradise-wanted-topbar');
+    if (!handle || handle.dataset.dragBound === '1') return;
+    handle.dataset.dragBound = '1';
+
+    let drag = null;
+
+    const endDrag = pointerId => {
+      if (!drag) return;
+      try { handle.releasePointerCapture(pointerId); } catch (_) {}
+      handle.classList.remove('is-dragging');
+      document.body.style.userSelect = drag.previousUserSelect;
+      drag = null;
+    };
+
+    handle.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+      if (event.target.closest('button, input, a, select, textarea')) return;
+
+      const rect = alert.getBoundingClientRect();
+      const previousUserSelect = document.body.style.userSelect;
+
+      alert.style.setProperty('position', 'fixed', 'important');
+      alert.style.setProperty('left', `${rect.left}px`, 'important');
+      alert.style.setProperty('top', `${rect.top}px`, 'important');
+      alert.style.setProperty('right', 'auto', 'important');
+      alert.style.setProperty('bottom', 'auto', 'important');
+      alert.style.setProperty('margin', '0', 'important');
+      alert.style.setProperty('transform', 'none', 'important');
+
+      drag = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        startLeft: rect.left,
+        startTop: rect.top,
+        width: rect.width,
+        height: rect.height,
+        previousUserSelect
+      };
+
+      document.body.style.userSelect = 'none';
+      handle.classList.add('is-dragging');
+      handle.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    handle.addEventListener('pointermove', event => {
+      if (!drag || event.pointerId !== drag.pointerId) return;
+      const margin = 4;
+      const maxLeft = Math.max(margin, window.innerWidth - drag.width - margin);
+      const maxTop = Math.max(margin, window.innerHeight - drag.height - margin);
+      const left = Math.min(maxLeft, Math.max(margin, drag.startLeft + event.clientX - drag.startX));
+      const top = Math.min(maxTop, Math.max(margin, drag.startTop + event.clientY - drag.startY));
+      alert.style.setProperty('left', `${left}px`, 'important');
+      alert.style.setProperty('top', `${top}px`, 'important');
+    });
+
+    handle.addEventListener('pointerup', event => endDrag(event.pointerId));
+    handle.addEventListener('pointercancel', event => endDrag(event.pointerId));
+  }
+
   function renderList(alert, shell) {
     const users = readSuspects(alert);
     const list = shell.querySelector('.paradise-wanted-list');
@@ -193,15 +237,12 @@
 
       const meta = document.createElement('div');
       meta.className = 'pr-wanted-meta';
-
       const name = document.createElement('div');
       name.className = 'pr-wanted-name';
       name.textContent = user.name;
-
       const stars = document.createElement('div');
       stars.className = 'pr-wanted-stars';
       stars.innerHTML = starsMarkup(user.stars, true);
-
       meta.append(name, stars);
       card.appendChild(meta);
 
@@ -215,7 +256,6 @@
         renderList(alert, shell);
         renderDetail(shell, user);
       });
-
       list.appendChild(card);
     });
 
@@ -234,6 +274,7 @@
       shell = createShell(alert);
       alert.classList.add('paradise-wanted-enhanced');
       bindTabs(shell);
+      bindDrag(alert, shell);
 
       shell.querySelector('.paradise-wanted-close').addEventListener('click', () => {
         if (nativeClose && typeof nativeClose.click === 'function') nativeClose.click();
@@ -258,11 +299,8 @@
     requestAnimationFrame(scan);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', scheduleScan, { once: true });
-  } else {
-    scheduleScan();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleScan, { once: true });
+  else scheduleScan();
 
   new MutationObserver(scheduleScan).observe(document.documentElement, { childList: true, subtree: true });
 })();
