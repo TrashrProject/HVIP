@@ -1,0 +1,113 @@
+/* ParadiseRP — ParadisePhone Notifications V4
+   Status-bar bell replaces the old home-screen Notifications application. */
+
+/* Never show the previous injected Notifications application. */
+.nitro-phone-frame .paradise-phone-notification-app{
+  display:none!important;
+}
+
+.nitro-phone-frame .pnc-status-bell{
+  position:absolute!important;
+  z-index:190!important;
+  top:10px!important;
+  left:62px!important;
+  width:24px!important;
+  height:24px!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:8px!important;
+  background:transparent!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  cursor:pointer!important;
+  overflow:visible!important;
+  color:#fff!important;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))!important;
+}
+
+.nitro-phone-frame .pnc-status-bell:hover{
+  background:rgba(255,255,255,.07)!important;
+}
+
+.nitro-phone-frame .pnc-status-bell:active{
+  transform:scale(.94)!important;
+}
+
+.nitro-phone-frame .pnc-status-bell-glyph{
+  position:relative!important;
+  width:14px!important;
+  height:15px!important;
+  display:block!important;
+  box-sizing:border-box!important;
+  border:2px solid #fff!important;
+  border-bottom:0!important;
+  border-radius:8px 8px 4px 4px!important;
+}
+
+.nitro-phone-frame .pnc-status-bell-glyph:before{
+  content:""!important;
+  position:absolute!important;
+  left:50%!important;
+  bottom:-3px!important;
+  width:17px!important;
+  height:2px!important;
+  transform:translateX(-50%)!important;
+  border-radius:2px!important;
+  background:#fff!important;
+}
+
+.nitro-phone-frame .pnc-status-bell-glyph:after{
+  content:""!important;
+  position:absolute!important;
+  left:50%!important;
+  bottom:-6px!important;
+  width:4px!important;
+  height:3px!important;
+  transform:translateX(-50%)!important;
+  border-radius:0 0 4px 4px!important;
+  background:#fff!important;
+}
+
+.nitro-phone-frame .pnc-status-bell .pnc-launch-badge{
+  position:absolute!important;
+  z-index:3!important;
+  top:-5px!important;
+  right:-6px!important;
+  min-width:15px!important;
+  height:15px!important;
+  padding:0 3px!important;
+  border:2px solid #07131f!important;
+  border-radius:9px!important;
+  background:#ef3e4f!important;
+  color:#fff!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  font-size:7px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  box-shadow:0 1px 4px rgba(0,0,0,.45)!important;
+}
+
+.nitro-phone-frame .pnc-status-bell .pnc-launch-badge[hidden]{
+  display:none!important;
+}
+
+/* Keep the bell readable in the light phone theme. */
+.nitro-phone-frame[data-paradise-theme=light] .pnc-status-bell-glyph{
+  border-color:#14293b!important;
+}
+.nitro-phone-frame[data-paradise-theme=light] .pnc-status-bell-glyph:before,
+.nitro-phone-frame[data-paradise-theme=light] .pnc-status-bell-glyph:after{
+  background:#14293b!important;
+}
+
+/* Landscape calls already have a dense status area: keep the bell compact. */
+.nitro-phone-frame.paradise-phone-landscape .pnc-status-bell,
+.nitro-phone-frame.is-landscape .pnc-status-bell{
+  left:68px!important;
+  top:9px!important;
+}
