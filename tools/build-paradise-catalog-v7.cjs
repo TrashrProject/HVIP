@@ -22,7 +22,7 @@ const inputPath = path.join(repositoryRoot, 'WebPixel', 'nitro', 'assets', 'inde
 const outputPath = path.join(repositoryRoot, 'WebPixel', 'nitro', 'assets', 'index-paradise-catalog-v7.js');
 const indexPath = path.join(repositoryRoot, 'WebPixel', 'nitro', 'index.html');
 const expectedSha256 = '34f7941abee35bb1fd4d64e9b3fa6ab49c50f61441330ded97168c6f27abf0a8';
-const buildMarker = '20260906-react-v8-direct-icons';
+const buildMarker = '20260906-react-v9-variant-icons';
 
 function sha256(value) {
     return crypto.createHash('sha256').update(value).digest('hex');
@@ -125,9 +125,9 @@ const components = {
 
         if(!p)return null;
 
-        let y=String(p.furnitureData&&p.furnitureData.className||\`\`).split(\`*\`),
+        let y=String(p.furnitureData&&(p.furnitureData.fullName||p.furnitureData.className)||\`\`).split(\`*\`),
             b=y[0]?(y[0]+(y.length>1?\`_\`+y.slice(1).join(\`*\`):\`\`)):\`\`,
-            d=t.pricingModel===mJ.PRICING_MODEL_BUNDLE?null:(b?String(Nq(\`hof.furni.url\`)).replace(/\\\/$/,\`\`)+\`/icon/\`+encodeURIComponent(b)+\`_icon.png?v=20260906-card-icons-v3\`:p.getIconUrl(t)),
+            d=t.pricingModel===mJ.PRICING_MODEL_BUNDLE?null:(b?String(Nq(\`hof.furni.url\`)).replace(/\\\/$/,\`\`)+\`/icon/\`+encodeURIComponent(b)+\`_icon.png?v=20260906-card-icons-v4\`:p.getIconUrl(t)),
             m=t.localizationName||t.offerName||\`Mobilier\`,
             h=!!p.uniqueLimitedItemSeriesSize,
             g=h&&!p.uniqueLimitedItemsLeft,
