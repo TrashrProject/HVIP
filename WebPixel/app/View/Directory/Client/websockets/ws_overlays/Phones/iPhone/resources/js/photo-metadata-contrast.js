@@ -5,11 +5,10 @@
     return String(value || '').replace(/\s+/g, ' ').trim().toUpperCase();
   }
 
-  function paint(el, color, weight){
+  function hardPaint(el, color, weight){
     if(!el || !el.style) return;
-    var c = color || '#ffffff';
-    el.style.setProperty('color', c, 'important');
-    el.style.setProperty('-webkit-text-fill-color', c, 'important');
+    el.style.setProperty('color', color, 'important');
+    el.style.setProperty('-webkit-text-fill-color', color, 'important');
     el.style.setProperty('opacity', '1', 'important');
     el.style.setProperty('visibility', 'visible', 'important');
     el.style.setProperty('filter', 'none', 'important');
@@ -18,78 +17,108 @@
     if(weight) el.style.setProperty('font-weight', weight, 'important');
   }
 
-  function paintTree(root, color){
-    if(!root) return;
-    paint(root, color, '800');
-    var nodes = root.querySelectorAll ? root.querySelectorAll('*') : [];
-    for(var i = 0; i < nodes.length; i++) paint(nodes[i], color, '800');
+  function paintAncestors(el){
+    var p = el;
+    for(var i = 0; i < 5 && p; i++, p = p.parentElement){
+      p.style && p.style.setProperty('opacity', '1', 'important');
+      p.style && p.style.setProperty('visibility', 'visible', 'important');
+      p.style && p.style.setProperty('filter', 'none', 'important');
+      p.style && p.style.setProperty('mix-blend-mode', 'normal', 'important');
+    }
   }
 
-  function forcePhotoSwipeCaption(){
-    /* PhotoSwipe peut déplacer/dupliquer son UI hors de #phone selon l'état de la galerie.
-       On cible donc directement les classes réelles, partout dans le document. */
-    var bars = document.querySelectorAll('.pswp__caption');
-    for(var i = 0; i < bars.length; i++){
-      bars[i].style.setProperty('background', '#0b1724', 'important');
-      bars[i].style.setProperty('background-color', '#0b1724', 'important');
-      bars[i].style.setProperty('opacity', '1', 'important');
-      paintTree(bars[i], '#ffffff');
-    }
+  function forceDateNode(el){
+    if(!el) return;
+    hardPaint(el, '#ffffff', '900');
+    el.style.setProperty('font-size', '12px', 'important');
+    el.style.setProperty('line-height', '15px', 'important');
+    paintAncestors(el);
 
-    var centers = document.querySelectorAll('.pswp__caption__center');
-    for(var j = 0; j < centers.length; j++) paintTree(centers[j], '#ffffff');
-
-    /* Filet de sécurité : on cherche les vrais nœuds texte affichés "PRISE LE" et date/heure,
-       même si le HTML reçu du serveur n'utilise pas les classes PhotoSwipe attendues. */
-    var root = document.body || document.documentElement;
-    if(!root) return;
-    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-    var node;
-    while((node = walker.nextNode())){
-      var text = norm(node.nodeValue);
-      if(!text) continue;
-
-      if(text.indexOf('PRISE LE') !== -1){
-        var el = node.parentElement;
-        paint(el, '#e8f1fb', '800');
-        if(el && el.parentElement) paintTree(el.parentElement, '#ffffff');
+    if(el.querySelectorAll){
+      var descendants = el.querySelectorAll('*');
+      for(var i = 0; i < descendants.length; i++){
+        hardPaint(descendants[i], '#ffffff', '900');
+        descendants[i].style.setProperty('font-size', '12px', 'important');
       }
+    }
+  }
 
-      if(/\b\d{2}\/\d{2}\/\d{4}\b/.test(text) || /\b\d{1,2}:\d{2}\b/.test(text)){
-        var p = node.parentElement;
-        var pText = p ? norm(p.textContent) : '';
-        var ppText = p && p.parentElement ? norm(p.parentElement.textContent) : '';
-        if(pText.indexOf('PRISE LE') !== -1 || ppText.indexOf('PRISE LE') !== -1){
-          paint(p, '#ffffff', '800');
-          if(p && p.parentElement) paintTree(p.parentElement, '#ffffff');
+  function forceMetadata(){
+    var roots = document.querySelectorAll('#phone, #gallery, .pswp, .pswp__caption, .pswp__caption__center');
+    if(!roots.length) roots = [document.body];
+
+    var seen = [];
+    for(var r = 0; r < roots.length; r++){
+      var root = roots[r];
+      if(!root || seen.indexOf(root) !== -1) continue;
+      seen.push(root);
+
+      var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+      var node;
+      while((node = walker.nextNode())){
+        var text = norm(node.nodeValue);
+        if(!text) continue;
+
+        if(text.indexOf('PRISE LE') !== -1){
+          hardPaint(node.parentElement, '#dce6f2', '800');
+          paintAncestors(node.parentElement);
+        }
+
+        if(/\b\d{2}\/\d{2}\/\d{4}\b/.test(text)){
+          forceDateNode(node.parentElement);
+          if(node.parentElement && node.parentElement.parentElement){
+            var parent = node.parentElement.parentElement;
+            var kids = parent.querySelectorAll('*');
+            for(var k = 0; k < kids.length; k++){
+              if(/\b\d{2}\/\d{2}\/\d{4}\b/.test(norm(kids[k].textContent)) || /\b\d{1,2}:\d{2}\b/.test(norm(kids[k].textContent))){
+                forceDateNode(kids[k]);
+              }
+            }
+          }
         }
       }
     }
+
+    var captions = document.querySelectorAll('.pswp__caption, .pswp__caption__center');
+    for(var c = 0; c < captions.length; c++){
+      captions[c].style.setProperty('opacity', '1', 'important');
+      captions[c].style.setProperty('visibility', 'visible', 'important');
+      captions[c].style.setProperty('background-color', '#0b1724', 'important');
+    }
   }
 
-  function runBurst(){
-    forcePhotoSwipeCaption();
-    setTimeout(forcePhotoSwipeCaption, 0);
-    setTimeout(forcePhotoSwipeCaption, 25);
-    setTimeout(forcePhotoSwipeCaption, 75);
-    setTimeout(forcePhotoSwipeCaption, 150);
-    setTimeout(forcePhotoSwipeCaption, 350);
-    setTimeout(forcePhotoSwipeCaption, 800);
+  var running = false;
+  function run(){
+    if(running) return;
+    running = true;
+    requestAnimationFrame(function(){
+      running = false;
+      forceMetadata();
+    });
   }
 
-  document.addEventListener('click', runBurst, true);
-  document.addEventListener('transitionend', runBurst, true);
-  window.addEventListener('load', runBurst);
+  document.addEventListener('click', function(){
+    run();
+    setTimeout(run, 20);
+    setTimeout(run, 80);
+    setTimeout(run, 180);
+    setTimeout(run, 400);
+    setTimeout(run, 900);
+  }, true);
 
-  var observer = new MutationObserver(forcePhotoSwipeCaption);
-  observer.observe(document.documentElement, {
-    subtree: true,
-    childList: true,
-    characterData: true,
-    attributes: true,
-    attributeFilter: ['class','style']
-  });
+  window.addEventListener('load', run);
 
-  setInterval(forcePhotoSwipeCaption, 150);
-  runBurst();
+  var observer = new MutationObserver(run);
+  if(document.documentElement){
+    observer.observe(document.documentElement, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['class', 'style']
+    });
+  }
+
+  setInterval(run, 200);
+  run();
 })();
