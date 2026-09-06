@@ -3,6 +3,7 @@
 
   const SHELL_SELECTOR = '.nitro-alert.nitro-alert-wanted .paradise-wanted-shell';
   const ALERT_SELECTOR = '.nitro-alert.nitro-alert-wanted';
+  const INTERACTIVE_SELECTOR = 'button, input, textarea, select, a, [role="button"], [contenteditable="true"]';
   const DRAG_THRESHOLD = 4;
   const VIEWPORT_MARGIN = 6;
 
@@ -30,8 +31,8 @@
     const shell = getShellFromEvent(event);
     if (!shell) return;
 
-    // Keep text fields fully interactive. The rest of the Wanted window is draggable.
-    if (event.target.closest('input, textarea, select')) return;
+    // Controls must stay fully clickable. Dragging is available from every non-interactive surface.
+    if (event.target.closest(INTERACTIVE_SELECTOR)) return;
 
     const alert = shell.closest(ALERT_SELECTOR);
     if (!alert) return;
@@ -54,7 +55,6 @@
     };
 
     // Stop the legacy drag handler from converting the Nitro window to position:fixed.
-    // That conversion is what caused the window to jump to the bottom of the screen.
     event.stopPropagation();
 
     try { shell.setPointerCapture(event.pointerId); } catch (_) {}
@@ -74,9 +74,6 @@
     }
 
     const { startRect } = gesture;
-
-    // Clamp the movement using the CURRENT visual rectangle. We never rewrite
-    // left/top/position, so Nitro keeps its own positioning context intact.
     const minDx = VIEWPORT_MARGIN - startRect.left;
     const maxDx = window.innerWidth - VIEWPORT_MARGIN - startRect.right;
     const minDy = VIEWPORT_MARGIN - startRect.top;
@@ -101,7 +98,11 @@
 
   document.addEventListener('click', event => {
     if (performance.now() > suppressClickUntil) return;
-    if (!getShellFromEvent(event)) return;
+    const shell = getShellFromEvent(event);
+    if (!shell) return;
+
+    // Never suppress a real control click. This keeps close, tabs and suspect cards reliable.
+    if (event.target.closest(INTERACTIVE_SELECTOR)) return;
 
     event.preventDefault();
     event.stopImmediatePropagation();
