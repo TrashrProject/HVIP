@@ -1,0 +1,264 @@
+/* ParadiseRP — ParadisePhone notifications V1
+   Compact in-phone banners + unread badges for missed calls and ParadiseGram activity. */
+
+.nitro-phone-frame{
+  --pnotif-bg:rgba(8,20,31,.96);
+  --pnotif-border:rgba(88,169,214,.34);
+  --pnotif-text:#f2f8fc;
+  --pnotif-muted:#8fa7b8;
+}
+
+.nitro-phone-frame .paradise-phone-notification-host{
+  position:absolute!important;
+  z-index:100000!important;
+  top:50px!important;
+  left:10px!important;
+  right:10px!important;
+  pointer-events:none!important;
+}
+
+.nitro-phone-frame .paradise-phone-notification{
+  position:relative!important;
+  display:flex!important;
+  align-items:stretch!important;
+  width:100%!important;
+  min-height:68px!important;
+  overflow:hidden!important;
+  border:1px solid var(--pnotif-border)!important;
+  border-radius:15px!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.035),transparent 36%),
+    var(--pnotif-bg)!important;
+  box-shadow:0 13px 34px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.035)!important;
+  backdrop-filter:blur(16px)!important;
+  -webkit-backdrop-filter:blur(16px)!important;
+  opacity:0!important;
+  transform:translateY(-14px) scale(.985)!important;
+  transition:opacity .16s ease,transform .16s ease!important;
+  pointer-events:auto!important;
+}
+
+.nitro-phone-frame .paradise-phone-notification.is-visible{
+  opacity:1!important;
+  transform:translateY(0) scale(1)!important;
+}
+
+.nitro-phone-frame .paradise-phone-notification.is-gram{
+  border-color:rgba(229,78,135,.38)!important;
+  box-shadow:0 13px 34px rgba(0,0,0,.42),0 0 18px rgba(218,73,133,.065),inset 0 1px 0 rgba(255,255,255,.04)!important;
+}
+
+.nitro-phone-frame .paradise-phone-notification.is-call{
+  border-color:rgba(48,191,228,.40)!important;
+  box-shadow:0 13px 34px rgba(0,0,0,.42),0 0 18px rgba(48,191,228,.07),inset 0 1px 0 rgba(255,255,255,.04)!important;
+}
+
+.nitro-phone-frame .pnotif-main{
+  display:flex!important;
+  flex:1 1 auto!important;
+  align-items:center!important;
+  gap:9px!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:8px 31px 8px 8px!important;
+  border:0!important;
+  background:transparent!important;
+  color:var(--pnotif-text)!important;
+  text-align:left!important;
+  cursor:pointer!important;
+}
+
+.nitro-phone-frame .pnotif-visual{
+  position:relative!important;
+  display:grid!important;
+  place-items:center!important;
+  flex:0 0 42px!important;
+  width:42px!important;
+  height:42px!important;
+  overflow:visible!important;
+  border:1px solid rgba(126,178,210,.26)!important;
+  border-radius:12px!important;
+  background:linear-gradient(180deg,#19384f,#10293d)!important;
+  color:#eafaff!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 4px 10px rgba(0,0,0,.18)!important;
+}
+
+.nitro-phone-frame .paradise-phone-notification.is-gram .pnotif-visual{
+  border-color:rgba(235,100,151,.34)!important;
+  background:linear-gradient(145deg,#702f64,#b23f6e 58%,#e2864b)!important;
+}
+
+.nitro-phone-frame .paradise-phone-notification.is-call .pnotif-visual{
+  border-color:rgba(73,199,233,.34)!important;
+  background:linear-gradient(145deg,#10435a,#13677d)!important;
+}
+
+.nitro-phone-frame .pnotif-visual>img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center top!important;
+  border-radius:11px!important;
+  image-rendering:auto!important;
+}
+
+.nitro-phone-frame .pnotif-visual>b{
+  font-size:20px!important;
+  line-height:1!important;
+}
+
+.nitro-phone-frame .pnotif-visual>i{
+  position:absolute!important;
+  right:-4px!important;
+  bottom:-4px!important;
+  display:grid!important;
+  place-items:center!important;
+  width:17px!important;
+  height:17px!important;
+  border:2px solid #0b1a27!important;
+  border-radius:50%!important;
+  background:#19a4cf!important;
+  color:#fff!important;
+  font-size:8px!important;
+  font-style:normal!important;
+  font-weight:900!important;
+  box-shadow:0 2px 6px rgba(0,0,0,.28)!important;
+}
+
+.nitro-phone-frame .paradise-phone-notification.is-gram .pnotif-visual>i{
+  background:#db477c!important;
+}
+
+.nitro-phone-frame .pnotif-copy{
+  display:flex!important;
+  flex:1 1 auto!important;
+  min-width:0!important;
+  flex-direction:column!important;
+  gap:1px!important;
+}
+
+.nitro-phone-frame .pnotif-app{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  min-width:0!important;
+  margin-bottom:1px!important;
+}
+
+.nitro-phone-frame .pnotif-app strong{
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  color:#d7e7f1!important;
+  font-size:8px!important;
+  font-weight:900!important;
+  letter-spacing:.45px!important;
+  text-transform:uppercase!important;
+}
+
+.nitro-phone-frame .pnotif-app time{
+  flex:0 0 auto!important;
+  color:#718a9e!important;
+  font-size:7.5px!important;
+  font-weight:700!important;
+}
+
+.nitro-phone-frame .pnotif-copy>b{
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  color:#f5fbff!important;
+  font-size:10.5px!important;
+  line-height:13px!important;
+  font-weight:900!important;
+}
+
+.nitro-phone-frame .pnotif-copy>small{
+  display:-webkit-box!important;
+  overflow:hidden!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:2!important;
+  color:var(--pnotif-muted)!important;
+  font-size:8.5px!important;
+  line-height:11px!important;
+  font-weight:650!important;
+}
+
+.nitro-phone-frame .pnotif-close{
+  position:absolute!important;
+  z-index:2!important;
+  top:6px!important;
+  right:7px!important;
+  display:grid!important;
+  place-items:center!important;
+  width:21px!important;
+  height:21px!important;
+  margin:0!important;
+  padding:0 0 1px!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:rgba(255,255,255,.045)!important;
+  color:#8398a8!important;
+  font-size:15px!important;
+  line-height:1!important;
+  cursor:pointer!important;
+}
+
+.nitro-phone-frame .pnotif-close:hover{
+  background:rgba(255,255,255,.09)!important;
+  color:#fff!important;
+}
+
+.nitro-phone-frame .paradise-phone-badge-anchor{
+  position:relative!important;
+  overflow:visible!important;
+}
+
+.nitro-phone-frame .paradise-phone-notification-badge{
+  position:absolute!important;
+  z-index:80!important;
+  top:-5px!important;
+  right:-5px!important;
+  display:grid!important;
+  place-items:center!important;
+  min-width:17px!important;
+  height:17px!important;
+  padding:0 4px!important;
+  border:2px solid #07131f!important;
+  border-radius:999px!important;
+  background:#ef3f62!important;
+  color:#fff!important;
+  box-shadow:0 3px 8px rgba(0,0,0,.32)!important;
+  font-size:8px!important;
+  line-height:1!important;
+  font-weight:950!important;
+  pointer-events:none!important;
+}
+
+.nitro-phone-frame[data-paradise-theme=light] .paradise-phone-notification{
+  --pnotif-bg:rgba(247,251,253,.97);
+  --pnotif-border:rgba(89,133,164,.28);
+  --pnotif-text:#14283a;
+  --pnotif-muted:#637c8e;
+  box-shadow:0 12px 30px rgba(40,63,78,.22),inset 0 1px 0 rgba(255,255,255,.72)!important;
+}
+
+.nitro-phone-frame[data-paradise-theme=light] .pnotif-app strong,
+.nitro-phone-frame[data-paradise-theme=light] .pnotif-copy>b{
+  color:#17324a!important;
+}
+
+.nitro-phone-frame[data-paradise-theme=light] .pnotif-visual>i,
+.nitro-phone-frame[data-paradise-theme=light] .paradise-phone-notification-badge{
+  border-color:#edf4f8!important;
+}
+
+@media(max-width:430px), (max-height:650px){
+  .nitro-phone-frame .paradise-phone-notification-host{top:47px!important;left:8px!important;right:8px!important}
+  .nitro-phone-frame .paradise-phone-notification{min-height:64px!important;border-radius:13px!important}
+  .nitro-phone-frame .pnotif-main{gap:8px!important;padding:7px 29px 7px 7px!important}
+  .nitro-phone-frame .pnotif-visual{flex-basis:39px!important;width:39px!important;height:39px!important}
+  .nitro-phone-frame .pnotif-copy>b{font-size:10px!important}
+  .nitro-phone-frame .pnotif-copy>small{font-size:8px!important;line-height:10px!important}
+}
