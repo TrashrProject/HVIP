@@ -62,10 +62,9 @@ finally {
     Pop-Location
 }
 
-# L'ancien updater V3 contient un controle historique qui exige que le bloc noir
-# 996700070 soit obligatoirement dans la page 9967201. Ce controle n'est plus
-# pertinent avec la taxonomie V4 globale. On ne modifie pas le fichier original :
-# on execute une copie temporaire ou ce seul echec devient un avertissement.
+# L'ancien updater V3 contient plusieurs controles historiques qui ne correspondent
+# plus au fonctionnement de la taxonomie V4 globale. On execute une copie temporaire
+# corrigee, sans modifier le script principal historique sur le VPS.
 $BaseUpdaterContent = Get-Content -LiteralPath $BaseUpdater -Raw
 $OldBlackCubeThrow = 'throw "Verification catalogue impossible : le Bloc noir pur 996700070 est absent de la page 9967201."'
 $NewBlackCubeWarning = 'Write-Warning "Controle V3 ignore pour le Bloc noir pur 996700070 : la taxonomie V4 globale sera appliquee juste apres."'
@@ -76,6 +75,18 @@ if ($BaseUpdaterContent.Contains($OldBlackCubeThrow)) {
 else {
     Write-Warning 'Le controle historique du bloc noir n a pas ete trouve dans mise-a-jour-wave-vps.ps1. Execution sans patch specifique.'
 }
+
+# Les migrations catalogue peuvent creer plusieurs offres qui pointent vers un meme
+# mobi. Les controles des lots officiels doivent donc verifier la presence des IDs
+# de furniture distincts, pas exiger exactement une ligne catalog_items par mobi.
+$BaseUpdaterContent = $BaseUpdaterContent.Replace(
+    '(SELECT COUNT(*) FROM catalog_items WHERE $CatalogFurnitureIdSql BETWEEN 997100000 AND 997101056)',
+    '(SELECT COUNT(DISTINCT $CatalogFurnitureIdSql) FROM catalog_items WHERE $CatalogFurnitureIdSql BETWEEN 997100000 AND 997101056)'
+)
+$BaseUpdaterContent = $BaseUpdaterContent.Replace(
+    '(SELECT COUNT(*) FROM catalog_items WHERE $CatalogFurnitureIdSql BETWEEN 997200000 AND 997202944)',
+    '(SELECT COUNT(DISTINCT $CatalogFurnitureIdSql) FROM catalog_items WHERE $CatalogFurnitureIdSql BETWEEN 997200000 AND 997202944)'
+)
 
 Set-Content -LiteralPath $PatchedBaseUpdater -Value $BaseUpdaterContent -Encoding UTF8
 
