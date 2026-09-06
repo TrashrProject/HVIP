@@ -1,25 +1,6 @@
 (function(){
   'use strict';
 
-  function rgbFromColor(value){
-    var m = String(value || '').match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
-    return m ? [parseInt(m[1],10), parseInt(m[2],10), parseInt(m[3],10)] : null;
-  }
-
-  function isDark(el){
-    var node = el;
-    while(node && node !== document.documentElement){
-      var bg = window.getComputedStyle(node).backgroundColor;
-      var rgb = rgbFromColor(bg);
-      if(rgb && !(rgb[0] === 0 && rgb[1] === 0 && rgb[2] === 0 && /rgba\([^)]*,\s*0\)/.test(bg))){
-        var lum = (0.2126 * rgb[0]) + (0.7152 * rgb[1]) + (0.0722 * rgb[2]);
-        return lum < 145;
-      }
-      node = node.parentElement;
-    }
-    return true;
-  }
-
   function normalizeText(s){
     return String(s || '').replace(/\s+/g,' ').trim().toUpperCase();
   }
@@ -27,52 +8,68 @@
   function findMetaBlock(){
     var phone = document.getElementById('phone');
     if(!phone) return null;
+
     var all = phone.querySelectorAll('*');
+    var label = null;
+
     for(var i=0;i<all.length;i++){
       var text = normalizeText(all[i].textContent);
       if(text === 'PRISE LE' || text.indexOf('PRISE LE ') === 0){
-        var el = all[i];
-        var p = el;
-        for(var j=0;j<4 && p && p !== phone;j++, p=p.parentElement){
-          var t = normalizeText(p.textContent);
-          if(t.indexOf('PRISE LE') !== -1 && /\d{2}\/\d{2}\/\d{4}/.test(t)) return p;
-        }
-        return el.parentElement || el;
+        label = all[i];
+        break;
       }
     }
-    return null;
+
+    if(!label) return null;
+
+    var p = label;
+    while(p && p !== phone){
+      var t = normalizeText(p.textContent);
+      if(t.indexOf('PRISE LE') !== -1 && /\d{2}\/\d{2}\/\d{4}/.test(t)){
+        return p;
+      }
+      p = p.parentElement;
+    }
+
+    return label.parentElement || label;
   }
 
-  function applyContrast(){
-    var block = findMetaBlock();
+  function forceReadable(block){
     if(!block) return;
 
-    var dark = isDark(block);
-    var fg = dark ? '#f7f9fc' : '#111827';
-    var sub = dark ? '#d7deea' : '#283548';
-    var bg = dark ? 'rgba(12,18,29,.96)' : 'rgba(247,249,252,.96)';
-    var border = dark ? 'rgba(255,255,255,.10)' : 'rgba(17,24,39,.10)';
-
-    block.style.setProperty('color', fg, 'important');
-    block.style.setProperty('background', bg, 'important');
-    block.style.setProperty('border-top', '1px solid ' + border, 'important');
+    /* On garde volontairement ce bandeau sombre dans les deux thèmes.
+       Comme ça le label + date/heure restent toujours lisibles. */
+    block.style.setProperty('background', '#0b1724', 'important');
+    block.style.setProperty('background-color', '#0b1724', 'important');
+    block.style.setProperty('color', '#ffffff', 'important');
     block.style.setProperty('opacity', '1', 'important');
+    block.style.setProperty('border-top', '1px solid rgba(255,255,255,.08)', 'important');
 
-    var descendants = block.querySelectorAll('*');
-    for(var i=0;i<descendants.length;i++){
-      descendants[i].style.setProperty('color', fg, 'important');
-      descendants[i].style.setProperty('opacity', '1', 'important');
-      descendants[i].style.setProperty('text-shadow', dark ? '0 1px 2px rgba(0,0,0,.7)' : 'none', 'important');
+    var nodes = block.querySelectorAll('*');
+    for(var i=0;i<nodes.length;i++){
+      nodes[i].style.setProperty('color', '#ffffff', 'important');
+      nodes[i].style.setProperty('opacity', '1', 'important');
+      nodes[i].style.setProperty('text-shadow', '0 1px 2px rgba(0,0,0,.75)', 'important');
+      nodes[i].style.removeProperty('filter');
     }
 
-    var textNodes = block.children;
-    for(var k=0;k<textNodes.length;k++){
-      if(/PRISE LE/i.test(textNodes[k].textContent || '')){
-        textNodes[k].style.setProperty('color', sub, 'important');
-        textNodes[k].style.setProperty('font-weight','800','important');
-        textNodes[k].style.setProperty('letter-spacing','.5px','important');
+    /* Renforce spécialement PRISE LE + la date/heure. */
+    for(var j=0;j<nodes.length;j++){
+      var text = normalizeText(nodes[j].textContent);
+      if(text === 'PRISE LE' || text.indexOf('PRISE LE ') === 0){
+        nodes[j].style.setProperty('color', '#dce6f2', 'important');
+        nodes[j].style.setProperty('font-weight', '800', 'important');
+        nodes[j].style.setProperty('letter-spacing', '.5px', 'important');
+      }
+      if(/\d{2}\/\d{2}\/\d{4}/.test(text)){
+        nodes[j].style.setProperty('color', '#ffffff', 'important');
+        nodes[j].style.setProperty('font-weight', '800', 'important');
       }
     }
+  }
+
+  function apply(){
+    forceReadable(findMetaBlock());
   }
 
   var queued = false;
@@ -81,18 +78,29 @@
     queued = true;
     requestAnimationFrame(function(){
       queued = false;
-      applyContrast();
+      apply();
     });
   }
 
-  document.addEventListener('click', function(){ setTimeout(queueApply, 20); }, true);
+  document.addEventListener('click', function(){
+    setTimeout(queueApply, 0);
+    setTimeout(queueApply, 80);
+    setTimeout(queueApply, 250);
+  }, true);
+
   window.addEventListener('load', queueApply);
 
   var observer = new MutationObserver(queueApply);
   if(document.documentElement){
-    observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style']});
+    observer.observe(document.documentElement, {
+      subtree:true,
+      childList:true,
+      characterData:true,
+      attributes:true,
+      attributeFilter:['class','style']
+    });
   }
 
-  setInterval(queueApply, 700);
+  setInterval(queueApply, 300);
   queueApply();
 })();
