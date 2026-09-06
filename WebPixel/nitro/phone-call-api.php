@@ -67,16 +67,18 @@ function pcall_require_participant(array $call, int $userId): void {
 
 /**
  * Best-effort bridge to the local WaveRP RCON server.
- * A failed RP announcement must never prevent the actual phone call.
+ * It is intentionally fire-and-forget so an RP bubble never slows the phone call.
  */
-function pcall_room_action(int $userId, string $message): void {
+function pcall_room_message(int $userId, string $message, string $type = 'shout'): void {
+    if (!in_array($type, ['talk', 'whisper', 'shout'], true)) $type = 'shout';
+
     $port = (int) (getenv('RCON_PORT') ?: 30001);
     if ($port < 1 || $port > 65535) $port = 30001;
 
     $payload = json_encode([
         'key' => 'talkuser',
         'data' => [
-            'type' => 'shout',
+            'type' => $type,
             'user_id' => $userId,
             'bubble_id' => -1,
             'message' => $message
@@ -91,19 +93,20 @@ function pcall_room_action(int $userId, string $message): void {
         'tcp://127.0.0.1:' . $port,
         $errno,
         $errstr,
-        0.35,
+        0.20,
         STREAM_CLIENT_CONNECT
     );
 
     if (!is_resource($socket)) {
-        error_log('[Paradise Phone Call API] RCON room action unavailable: ' . $errstr . ' (' . $errno . ')');
+        error_log('[Paradise Phone Call API] RCON room message unavailable: ' . $errstr . ' (' . $errno . ')');
         return;
     }
 
     try {
-        stream_set_timeout($socket, 0, 400000);
+        stream_set_blocking($socket, false);
         @fwrite($socket, $payload);
-        @stream_get_contents($socket);
+        @fflush($socket);
+        @stream_socket_shutdown($socket, STREAM_SHUT_WR);
     } finally {
         @fclose($socket);
     }
@@ -231,9 +234,10 @@ try {
         $callId = (int) $db->insert_id;
 
         // RP room action: visible around the caller, while the phone content stays private.
-        pcall_room_action(
+        pcall_room_message(
             $userId,
-            '* ' . $user['username'] . ' essaie d\'appeler ' . $target['username'] . ' *'
+            '* ' . $user['username'] . ' essaie d\'appeler ' . $target['username'] . ' *',
+            'shout'
         );
 
         pcall_json(['ok' => true, 'call' => [
@@ -256,6 +260,24 @@ try {
         if ($answer['type'] !== 'answer') throw new InvalidArgumentException('Réponse WebRTC invalide.');
         $answerJson = json_encode($answer, JSON_UNESCAPED_SLASHES);
         pcall_stmt($db, "UPDATE phone_calls SET status='accepted',answer_sdp=?,answered_at=?,updated_at=? WHERE id=? AND status='ringing'", 'siii', [$answerJson, $now, $now, $callId]);
+
+        // As soon as the recipient answers, both players are explicitly switched to the
+        // room-whisper conversation. RoomUserTalkEvent routes their normal room chat
+        // privately while this call remains accepted.
+        $caller = pcall_stmt($db, 'SELECT id,username FROM users WHERE id=? LIMIT 1', 'i', [(int) $call['caller_id']])->get_result()->fetch_assoc();
+        if ($caller) {
+            pcall_room_message(
+                (int) $caller['id'],
+                $user['username'] . ' a décroché. Conversation en murmure privé active.',
+                'whisper'
+            );
+            pcall_room_message(
+                $userId,
+                'Appel avec ' . $caller['username'] . ' connecté. Conversation en murmure privé active.',
+                'whisper'
+            );
+        }
+
         pcall_json(['ok' => true, 'status' => 'accepted']);
     }
 
