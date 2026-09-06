@@ -9,6 +9,7 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.utilities.types.Timeout;
+import java.util.Date;
 
 public class StartWorkCommand extends Command {
 
@@ -44,7 +45,7 @@ public class StartWorkCommand extends Command {
 
     if (habbo.getHabboInfo().getCurrentRoom() == null || !RolePlay.getJobsManager()
         .canWorkAtRoom(data.getJobEntity(), habbo.getHabboInfo().getCurrentRoom().getId())) {
-      habbo.whisper("Vous devez \u00eatre dans votre lieu de travail pour commencer votre service.",
+      habbo.whisper("Vous devez être dans votre lieu de travail pour commencer votre service.",
           RoomChatMessageBubbles.ALERT);
       return true;
     }
@@ -63,8 +64,12 @@ public class StartWorkCommand extends Command {
       return true;
     }
 
-    RolePlay.getJobsManager().startWork(gameClient, data, habbo);
-    data.executeAction();
+    if (RolePlay.getJobsManager().startWork(gameClient, data, habbo)) {
+      // Chaque prise de service démarre un nouveau cycle de paie : pas de salaire instantané
+      // ni de rattrapage d'une ancienne session.
+      data.setLastPayday(new Date());
+      data.executeAction();
+    }
     return true;
   }
 
