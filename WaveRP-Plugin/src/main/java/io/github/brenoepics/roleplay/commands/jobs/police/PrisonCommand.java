@@ -11,6 +11,7 @@ import io.github.brenoepics.roleplay.features.crime.PoliceHandcuffService;
 import io.github.brenoepics.roleplay.features.crime.PoliceTaserService;
 import io.github.brenoepics.roleplay.features.job.JobPermissions;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import io.github.brenoepics.roleplay.utilities.LiveFeed;
 import java.time.Duration;
 import java.util.Arrays;
 
@@ -43,6 +44,8 @@ public class PrisonCommand extends Command {
     }
     targetData.makeJailed(Duration.ofMinutes(minutes));
     PoliceCommandSupport.action(officer, "Envoie " + target.getHabboInfo().getUsername() + " en prison pour " + minutes + " minutes : " + reason);
+    LiveFeed.sendGlobalAlert(LiveFeed.alert("[PRISON] " + target.getHabboInfo().getUsername()
+        + " a ete emprisonne pour " + minutes + " minute(s)."));
     return true;
   }
 }
