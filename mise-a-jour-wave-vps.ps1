@@ -216,6 +216,35 @@ try {
                 Write-Host "Migration appliquee : $(Split-Path -Leaf $Migration)" -ForegroundColor Green
             }
 
+            # Le lot 2023-2026 doit exister dans les trois tables réellement
+            # utilisées par le catalogue et l'émulateur. Cette vérification évite
+            # un faux déploiement "réussi" lorsque le mauvais commit ou la mauvaise
+            # base de données a été utilisé.
+            $OfficialNoveltiesValidationSql = @"
+SELECT CONCAT(
+    (SELECT COUNT(*) FROM furniture WHERE id BETWEEN 997100000 AND 997101056), '|',
+    (SELECT COUNT(*) FROM catalog_items WHERE page_id BETWEEN 9967800 AND 9967819), '|',
+    (SELECT COUNT(*) FROM items_base WHERE id BETWEEN 997100000 AND 997101056)
+)
+"@
+            $OfficialNoveltiesValidationArgs = @(
+                "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
+                "--database=$DatabaseName", '--batch', '--skip-column-names',
+                "--execute=$OfficialNoveltiesValidationSql"
+            )
+            $OfficialNoveltiesCounts = ((& $Mysql @OfficialNoveltiesValidationArgs) -join '').Trim()
+            if ($LASTEXITCODE -ne 0) {
+                throw 'Verification des nouveautes officielles 2023-2026 impossible.'
+            }
+            $OfficialNoveltiesParts = @($OfficialNoveltiesCounts -split '\|')
+            if ($OfficialNoveltiesParts.Count -ne 3 -or
+                $OfficialNoveltiesParts[0] -ne '1057' -or
+                $OfficialNoveltiesParts[1] -ne '1057' -or
+                $OfficialNoveltiesParts[2] -ne '1057') {
+                throw "Lot officiel 2023-2026 incomplet : furniture/catalog_items/items_base = $OfficialNoveltiesCounts (attendu 1057|1057|1057)."
+            }
+            Write-Host 'Verification nouveautes 2023-2026 : 1057/1057/1057 dans furniture, catalog_items et items_base.' -ForegroundColor Green
+
             $CatalogItemColumn = if ($LegacyCatalog) { 'item_ids' } else { 'item_id' }
             $BlackCubeValidationSql = "SELECT COUNT(DISTINCT CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED)) FROM catalog_items WHERE page_id=9967201 AND CAST(SUBSTRING_INDEX(SUBSTRING_INDEX($CatalogItemColumn, ',', 1), ':', 1) AS UNSIGNED)=996700070"
             $BlackCubeValidationArgs = @(
