@@ -1,9 +1,6 @@
 package io.github.brenoepics.roleplay.features.job;
 
-import static io.github.brenoepics.roleplay.features.job.JobsDelegate.getRoomUserShoutComposer;
-
 import com.eu.habbo.Emulator;
-import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
@@ -18,15 +15,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Systeme de paie ParadiseRP.
- *
- * - un cycle individuel demarre au moment exact de :travailler ;
- * - compte a rebours affiche au demarrage puis toutes les minutes ;
- * - paiement toutes les 10 minutes par defaut ;
- * - montant lu depuis job_ranks.salary ;
- * - paiement en vrais credits Habbo via giveCredits().
- */
+/** Systeme de paie ParadiseRP. Les messages de paie sont prives au joueur concerne. */
 public class PaydayTimer {
 
   private static final int DEFAULT_PAYDAY_MINUTES = 10;
@@ -44,7 +33,6 @@ public class PaydayTimer {
     }, TICK_MS, TICK_MS);
   }
 
-  /** Demarre/reinitialise le cycle de paie d'un joueur qui vient de prendre son service. */
   public void onWorkStarted(Habbo habbo, RpAvatar data) {
     if (habbo == null || data == null || !data.isDuty()) {
       return;
@@ -53,11 +41,9 @@ public class PaydayTimer {
     int minutes = getPaydayMinutes();
     long next = System.currentTimeMillis() + minutes * 60_000L;
     nextPayAt.put(habbo.getHabboInfo().getId(), next);
-
-    sendRoomMessage(habbo, "Prochaine paie dans " + minutes + " minutes.");
+    sendPrivateMessage(habbo, "Prochaine paie dans " + minutes + " minutes.");
   }
 
-  /** Peut etre appele lors d'un arret de service ; le tick nettoie aussi automatiquement. */
   public void onWorkStopped(Habbo habbo) {
     if (habbo != null && habbo.getHabboInfo() != null) {
       nextPayAt.remove(habbo.getHabboInfo().getId());
@@ -93,7 +79,7 @@ public class PaydayTimer {
 
       long remainingMs = dueAt - now;
       int remainingMinutes = (int) Math.ceil(remainingMs / 60_000.0);
-      sendRoomMessage(habbo,
+      sendPrivateMessage(habbo,
           "Prochaine paie dans " + remainingMinutes + " "
               + (remainingMinutes > 1 ? "minutes" : "minute") + ".");
     }
@@ -118,7 +104,7 @@ public class PaydayTimer {
       jobName = "EMS";
     }
 
-    sendRoomMessage(habbo,
+    sendPrivateMessage(habbo,
         "Salaire reçu : +" + earned + " crédits — " + jobName + " | "
             + rank.getDisplayName());
   }
@@ -141,17 +127,10 @@ public class PaydayTimer {
         && !habbo.getRoomUnit().isIdle();
   }
 
-  private static void sendRoomMessage(Habbo habbo, String message) {
-    if (habbo == null || habbo.getHabboInfo() == null) {
+  private static void sendPrivateMessage(Habbo habbo, String message) {
+    if (habbo == null) {
       return;
     }
-
-    Room room = habbo.getHabboInfo().getCurrentRoom();
-    if (room == null) {
-      return;
-    }
-
-    room.sendComposer(
-        getRoomUserShoutComposer(message, habbo, RoomChatMessageBubbles.NORMAL).compose());
+    habbo.whisper(message, RoomChatMessageBubbles.NORMAL);
   }
 }
