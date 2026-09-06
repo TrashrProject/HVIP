@@ -2,7 +2,7 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_NOTIFICATIONS_V1__) return;
-  window.__PARADISE_PHONE_NOTIFICATIONS_V1__ = '1.1.0';
+  window.__PARADISE_PHONE_NOTIFICATIONS_V1__ = '1.2.0';
 
   const API = '/nitro/phone-notifications-api.php';
   const POLL_MS = 5000;
@@ -14,7 +14,6 @@
     serverTime: 0,
     items: [],
     busy: false,
-    firstLoad: true,
     timer: 0,
     observer: null,
     observerFrame: 0,
@@ -134,6 +133,12 @@
     return document.querySelector('.nitro-phone-frame');
   }
 
+  function visible(node) {
+    if (!node) return false;
+    const style = getComputedStyle(node);
+    return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > 0 && node.getClientRects().length > 0;
+  }
+
   function ensureToastHost() {
     const frame = getFrame();
     if (!frame) return null;
@@ -147,9 +152,11 @@
   }
 
   function showToast(item) {
-    if (!item) return;
+    if (!item) return false;
+    const frame = getFrame();
+    if (!visible(frame)) return false;
     const host = ensureToastHost();
-    if (!host) return;
+    if (!host) return false;
 
     const copy = notificationText(item);
     const hasAvatar = Boolean(item.look);
@@ -172,6 +179,7 @@
     requestAnimationFrame(() => card?.classList.add('is-visible'));
     clearTimeout(state.toastTimer);
     state.toastTimer = window.setTimeout(() => hideToast(false), 6200);
+    return true;
   }
 
   function hideToast(markCurrent = false) {
@@ -257,12 +265,6 @@
     }, 180);
   }
 
-  function visible(node) {
-    if (!node) return false;
-    const style = getComputedStyle(node);
-    return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > 0 && node.getClientRects().length > 0;
-  }
-
   function syncOpenedApps() {
     const gram = document.querySelector('.phone-active-app .ppr-gram[data-ppr-ready]');
     if (visible(gram) && unreadCount('gram')) markRead('gram');
@@ -275,19 +277,11 @@
     const unread = [...unreadItems('call'), ...unreadItems('gram')]
       .sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
     const fresh = unread.filter(item => !state.announced.has(`${item.source}:${item.id}`));
-    if (!fresh.length) return;
-
-    if (state.firstLoad) {
-      fresh.slice(0, -1).forEach(item => state.announced.add(`${item.source}:${item.id}`));
-      const newest = fresh[fresh.length - 1];
-      state.announced.add(`${newest.source}:${newest.id}`);
-      showToast(newest);
-      return;
-    }
+    if (!fresh.length || !visible(getFrame())) return;
 
     const newest = fresh[fresh.length - 1];
+    if (!showToast(newest)) return;
     fresh.forEach(item => state.announced.add(`${item.source}:${item.id}`));
-    showToast(newest);
   }
 
   function scheduleDomSync() {
@@ -295,6 +289,7 @@
     state.observerFrame = requestAnimationFrame(() => {
       state.observerFrame = 0;
       syncOpenedApps();
+      announceNewItems();
     });
   }
 
@@ -313,7 +308,6 @@
       renderBadges();
       announceNewItems();
       syncOpenedApps();
-      state.firstLoad = false;
     } catch (error) {
       console.warn('[ParadisePhone notifications]', error);
     } finally {
@@ -345,7 +339,7 @@
     poll();
     clearInterval(state.timer);
     state.timer = window.setInterval(poll, POLL_MS);
-    console.info('[ParadisePhone] notifications V1.1 actives');
+    console.info('[ParadisePhone] notifications V1.2 actives');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap, { once: true });
