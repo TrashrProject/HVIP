@@ -1,4 +1,4 @@
-/* ParadiseRP — ParadisePhone framed call screen V5.1
+/* ParadiseRP — ParadisePhone framed call screen V5.2
    Visual-only override. Keeps Stable V2 call logic unchanged.
    The outer call layer still covers the whole usable phone area so the previous app can never bleed through.
    The visible "rebords" are created INSIDE that layer. */
@@ -117,6 +117,66 @@
 .nitro-phone-frame.pcall-video-landscape>.paradise-call-layer .pcall-active.is-video{
   border:1px solid rgba(86,195,235,.26)!important;
   border-radius:17px!important;
+}
+
+/* Ringing feedback: premium cyan halo around the avatar. */
+.paradise-call-stable-v2 .pcall-card.pcall-outgoing .pcall-avatar,
+.paradise-call-stable-v2 .pcall-card.pcall-incoming .pcall-avatar{
+  animation:paradise-call-avatar-ring 1.55s ease-out infinite!important;
+}
+@keyframes paradise-call-avatar-ring{
+  0%{
+    box-shadow:0 0 0 6px rgba(7,35,53,.95),0 0 0 7px rgba(75,210,255,.08),0 0 24px rgba(46,186,238,.20),0 12px 28px rgba(0,0,0,.58);
+  }
+  55%{
+    box-shadow:0 0 0 6px rgba(7,35,53,.95),0 0 0 14px rgba(75,210,255,.14),0 0 42px rgba(46,186,238,.42),0 12px 28px rgba(0,0,0,.58);
+  }
+  100%{
+    box-shadow:0 0 0 6px rgba(7,35,53,.95),0 0 0 22px rgba(75,210,255,0),0 0 48px rgba(46,186,238,0),0 12px 28px rgba(0,0,0,.58);
+  }
+}
+
+/* Physical phone vibration while the call is ringing.
+   Double-buzz + pause: the complete frame moves, including shell/status bar/close button.
+   Uses transform so the draggable position stored with the CSS translate property is preserved. */
+.nitro-phone-frame:has(>.paradise-call-layer .pcall-card.pcall-incoming),
+.nitro-phone-frame:has(>.paradise-call-layer .pcall-card.pcall-outgoing){
+  animation:paradise-phone-vibrate 1.9s linear infinite!important;
+  will-change:transform;
+}
+@keyframes paradise-phone-vibrate{
+  0%,2%,18%,20%,36%,100%{transform:translate3d(0,0,0)}
+  4%{transform:translate3d(-2px,0,0) rotate(-.18deg)}
+  6%{transform:translate3d(2px,0,0) rotate(.18deg)}
+  8%{transform:translate3d(-2px,0,0) rotate(-.14deg)}
+  10%{transform:translate3d(2px,0,0) rotate(.14deg)}
+  12%{transform:translate3d(-1px,0,0)}
+  14%{transform:translate3d(1px,0,0)}
+  22%{transform:translate3d(-1.5px,0,0) rotate(-.12deg)}
+  24%{transform:translate3d(1.5px,0,0) rotate(.12deg)}
+  26%{transform:translate3d(-1.5px,0,0)}
+  28%{transform:translate3d(1.5px,0,0)}
+  30%{transform:translate3d(-1px,0,0)}
+  32%{transform:translate3d(1px,0,0)}
+  34%{transform:translate3d(0,0,0)}
+}
+
+/* Once connected, stop every ringing animation immediately. */
+.nitro-phone-frame:has(>.paradise-call-layer .pcall-card.pcall-active){
+  animation:none!important;
+  transform:none;
+}
+.paradise-call-stable-v2 .pcall-card.pcall-active .pcall-avatar{
+  animation:none!important;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .nitro-phone-frame:has(>.paradise-call-layer .pcall-card.pcall-incoming),
+  .nitro-phone-frame:has(>.paradise-call-layer .pcall-card.pcall-outgoing),
+  .paradise-call-stable-v2 .pcall-card.pcall-outgoing .pcall-avatar,
+  .paradise-call-stable-v2 .pcall-card.pcall-incoming .pcall-avatar{
+    animation:none!important;
+  }
 }
 
 @media(max-height:650px){
