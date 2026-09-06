@@ -11,12 +11,12 @@ const html = read('WebPixel/nitro/index.html');
 const bundle = read('WebPixel/nitro/assets/index-paradise-catalog-v7.js');
 const css = read('WebPixel/nitro/paradise-catalog-react-v7.css');
 
-assert.match(html, /assets\/index-paradise-catalog-v7\.js\?v=20260906-react-v7/);
-assert.match(html, /paradise-catalog-react-v7\.css\?v=20260906-react-v7/);
+assert.match(html, /assets\/index-paradise-catalog-v7\.js\?v=20260906-react-v9-variant-icons/);
+assert.match(html, /paradise-catalog-react-v7\.css\?v=20260906-react-v9-variant-icons/);
 assert.doesNotMatch(html, /paradise-catalog-zero\.(?:js|css)/);
 
 for(const marker of [
-    '20260906-react-v7',
+    '20260906-react-v9-variant-icons',
     'paradise-catalog-v7',
     'pc7-workspace',
     'pc7-standard-layout',
@@ -26,6 +26,9 @@ for(const marker of [
     'pc7-details-pane',
     'Aucun mobilier trouvé'
 ]) assert.ok(bundle.includes(marker), `Missing generated catalogue marker: ${ marker }`);
+
+assert.ok(bundle.includes('p.furnitureData.fullName||p.furnitureData.className'), 'Variant furniture fullName support is missing.');
+assert.ok(bundle.includes('20260906-card-icons-v4'), 'Variant icon cache marker is missing.');
 
 // Regression guards for native catalogue and ParadiseRP behavior that must
 // survive the component replacement.

@@ -1,0 +1,19 @@
+{
+  "source": "higoka/habbo-downloader",
+  "imported": 1057,
+  "baseAssets": 1050,
+  "itemIdStart": 997100000,
+  "itemIdEnd": 997101056,
+  "counts": {
+    "Construction 2023-2026": 34,
+    "Maison et design 2023-2026": 174,
+    "Ville et RP 2023-2026": 42,
+    "Nature et ferme 2023-2026": 118,
+    "Plage et mer 2023-2026": 66,
+    "Loisirs et fete 2023-2026": 114,
+    "Fantastique et aventure": 172,
+    "Halloween 2023-2026": 69,
+    "Noel et Paques 2023-2026": 193,
+    "Rares et collections 2023-2026": 75
+  }
+}

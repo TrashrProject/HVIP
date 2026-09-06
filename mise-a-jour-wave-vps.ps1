@@ -31,6 +31,7 @@ $ModernCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_black_cubes_force_visible.sql",
     "migrations\20260905_paradise_pure_black_block.sql",
     "migrations\20260906_paradise_catalogue_image_cleanup.sql",
+    "migrations\20260906_paradise_official_novelties_2023_2026.sql",
     "migrations\20260906_sync_catalog_furniture_to_items_base_modern.sql",
     "migrations\20260906_paradise_catalogue_sprite_id_fix.sql"
 )
@@ -43,6 +44,7 @@ $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_black_cubes_force_visible_legacy.sql",
     "migrations\20260905_paradise_pure_black_block_legacy.sql",
     "migrations\20260906_paradise_catalogue_image_cleanup_legacy.sql",
+    "migrations\20260906_paradise_official_novelties_2023_2026_legacy.sql",
     "migrations\20260904_sync_catalog_furniture_to_items_base.sql",
     "migrations\20260906_paradise_catalogue_sprite_id_fix.sql"
 )
