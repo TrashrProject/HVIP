@@ -2,7 +2,7 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_VIDEO_V4__) return;
-  window.__PARADISE_PHONE_VIDEO_V4__ = '4.0.0';
+  window.__PARADISE_PHONE_VIDEO_V4__ = '4.0.1';
 
   const state = { landscape: false };
 
@@ -33,6 +33,52 @@
     document.querySelector('.pcall-room-whisper-dock')?.remove();
   }
 
+  function positionWhisperDock() {
+    const dock = document.querySelector('.pcall-room-whisper-dock');
+    const frame = getFrame();
+    if (!dock) return;
+
+    dock.style.removeProperty('left');
+    dock.style.removeProperty('right');
+    dock.style.removeProperty('top');
+    dock.style.removeProperty('bottom');
+    dock.style.removeProperty('transform');
+    dock.style.removeProperty('width');
+
+    if (state.landscape || !frame) {
+      dock.style.left = '50%';
+      dock.style.bottom = '22px';
+      dock.style.transform = 'translateX(-50%)';
+      dock.style.width = 'min(500px, calc(100vw - 28px))';
+      return;
+    }
+
+    const rect = frame.getBoundingClientRect();
+    const rightSpace = window.innerWidth - rect.right;
+    const leftSpace = rect.left;
+
+    if (rightSpace >= 330) {
+      dock.style.left = `${Math.round(rect.right + 18)}px`;
+      dock.style.bottom = '64px';
+      dock.style.width = `${Math.min(390, Math.max(280, rightSpace - 34))}px`;
+      dock.style.transform = 'none';
+      return;
+    }
+
+    if (leftSpace >= 330) {
+      dock.style.right = `${Math.round(window.innerWidth - rect.left + 18)}px`;
+      dock.style.bottom = '64px';
+      dock.style.width = `${Math.min(390, Math.max(280, leftSpace - 34))}px`;
+      dock.style.transform = 'none';
+      return;
+    }
+
+    dock.style.left = '50%';
+    dock.style.bottom = '58px';
+    dock.style.transform = 'translateX(-50%)';
+    dock.style.width = 'min(410px, calc(100vw - 34px))';
+  }
+
   function moveWhispersToRoom(card) {
     const panel = card?.querySelector('.pcall-whisper-panel');
     if (!panel) return;
@@ -41,6 +87,7 @@
     if (previous && previous !== panel) previous.remove();
     panel.classList.add('pcall-whisper-on-room');
     dock.appendChild(panel);
+    positionWhisperDock();
   }
 
   function addVideoControls(card) {
@@ -52,7 +99,7 @@
     rotate.className = 'pcall-control pcall-v4-rotate';
     rotate.dataset.pcallV4Rotate = '1';
     rotate.innerHTML = '↻<span>Tourner</span>';
-    rotate.title = 'Passer l’appel vidéo en mode paysage';
+    rotate.title = 'Tourner le téléphone en mode paysage';
     controls.prepend(rotate);
   }
 
@@ -60,9 +107,19 @@
     state.landscape = Boolean(enabled);
     const layer = getLayer();
     const frame = getFrame();
-    layer?.classList.toggle('pcall-v4-landscape', state.landscape);
+
+    if (layer) {
+      if (state.landscape) {
+        if (layer.parentElement !== document.body) document.body.appendChild(layer);
+      } else if (frame && layer.parentElement !== frame) {
+        frame.appendChild(layer);
+      }
+      layer.classList.toggle('pcall-v4-landscape', state.landscape);
+    }
+
     frame?.classList.toggle('pcall-v4-phone-landscape', state.landscape);
     document.body.classList.toggle('pcall-v4-landscape-open', state.landscape);
+    positionWhisperDock();
   }
 
   function enhance() {
@@ -87,12 +144,15 @@
 
     if (video) {
       addVideoControls(card);
+      if (state.landscape && layer.parentElement !== document.body) document.body.appendChild(layer);
       layer.classList.toggle('pcall-v4-landscape', state.landscape);
       frame?.classList.toggle('pcall-v4-phone-landscape', state.landscape);
     } else {
       applyLandscape(false);
       layer.classList.remove('pcall-v4-video-fullscreen');
     }
+
+    positionWhisperDock();
   }
 
   document.addEventListener('click', event => {
@@ -109,6 +169,8 @@
     applyLandscape(false);
     enhance();
   }, true);
+
+  window.addEventListener('resize', () => positionWhisperDock(), { passive: true });
 
   const observer = new MutationObserver(() => enhance());
 
