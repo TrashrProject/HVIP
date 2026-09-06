@@ -20,8 +20,9 @@ const path = require('node:path');
 const repositoryRoot = path.resolve(__dirname, '..');
 const inputPath = path.join(repositoryRoot, 'WebPixel', 'nitro', 'assets', 'index-988G3uA2.js');
 const outputPath = path.join(repositoryRoot, 'WebPixel', 'nitro', 'assets', 'index-paradise-catalog-v7.js');
+const indexPath = path.join(repositoryRoot, 'WebPixel', 'nitro', 'index.html');
 const expectedSha256 = '34f7941abee35bb1fd4d64e9b3fa6ab49c50f61441330ded97168c6f27abf0a8';
-const buildMarker = '20260906-react-v7';
+const buildMarker = '20260906-react-v8-direct-icons';
 
 function sha256(value) {
     return crypto.createHash('sha256').update(value).digest('hex');
@@ -113,7 +114,6 @@ const components = {
             [s,c]=(0,V.useState)(!1),
             { requestOfferToMover:l=null }=g2(),
             { isVisible:u=!1 }=G2(),
-            d=(0,V.useMemo)(()=>t.pricingModel===mJ.PRICING_MODEL_BUNDLE?null:t.product.getIconUrl(t),[t]),
             f=e=>{
                 switch(e.type){
                     case Qp.MOUSE_DOWN:n(t),o(!0);return;
@@ -125,7 +125,10 @@ const components = {
 
         if(!p)return null;
 
-        let m=t.localizationName||t.offerName||\`Mobilier\`,
+        let y=String(p.furnitureData&&p.furnitureData.className||\`\`).split(\`*\`),
+            b=y[0]?(y[0]+(y.length>1?\`_\`+y.slice(1).join(\`*\`):\`\`)):\`\`,
+            d=t.pricingModel===mJ.PRICING_MODEL_BUNDLE?null:(b?String(Nq(\`hof.furni.url\`)).replace(/\\\/$/,\`\`)+\`/icon/\`+encodeURIComponent(b)+\`_icon.png?v=20260906-card-icons-v3\`:p.getIconUrl(t)),
+            m=t.localizationName||t.offerName||\`Mobilier\`,
             h=!!p.uniqueLimitedItemSeriesSize,
             g=h&&!p.uniqueLimitedItemsLeft,
             _=[];
@@ -392,6 +395,12 @@ for(const [marker, body] of Object.entries(components)) {
 source = source.replace(/[ \t]+$/gm, '');
 source += `\n;globalThis.__PARADISE_CATALOG_BUILD__=${ JSON.stringify(buildMarker) };\n`;
 fs.writeFileSync(outputPath, source, 'utf8');
+
+let indexHtml = fs.readFileSync(indexPath, 'utf8');
+indexHtml = indexHtml
+    .replace(/(index-paradise-catalog-v7\.js\?v=)[^"']+/, `$1${ buildMarker }`)
+    .replace(/(paradise-catalog-react-v7\.css\?v=)[^"']+/, `$1${ buildMarker }`);
+fs.writeFileSync(indexPath, indexHtml, 'utf8');
 
 console.log(`ParadiseRP catalogue bundle generated: ${ path.relative(repositoryRoot, outputPath) }`);
 console.log(`Build marker: ${ buildMarker }`);
