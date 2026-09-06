@@ -98,8 +98,9 @@ SELECT CONCAT(
 "@
     $KnownCounts = ((& $Mysql @CommonArgs "--execute=$ValidationSql") -join '').Trim()
     if ($LASTEXITCODE -ne 0) { throw 'Validation des blocs critiques impossible.' }
-    $Parts = @($KnownCounts -split '\|')
-    if ($Parts.Count -ne 4 -or ($Parts | Where-Object { [int]$_ -lt 1 }).Count -gt 0) {
+    [string[]]$Parts = $KnownCounts -split '\|'
+    $InvalidParts = @($Parts | Where-Object { [int]$_ -lt 1 })
+    if ($Parts.Count -ne 4 -or $InvalidParts.Count -gt 0) {
         throw "Blocs critiques mal classes : Large5480|Small5466|Small996661582|Noir996700070 = $KnownCounts"
     }
 
