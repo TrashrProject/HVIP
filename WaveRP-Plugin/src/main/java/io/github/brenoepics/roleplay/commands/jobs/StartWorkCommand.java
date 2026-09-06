@@ -1,9 +1,7 @@
 package io.github.brenoepics.roleplay.commands.jobs;
 
-import static io.github.brenoepics.roleplay.features.job.JobsDelegate.getRoomUserShoutComposer;
 import static io.github.brenoepics.roleplay.features.user.HungerRunner.MISSING_ENERGY;
 
-import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
@@ -11,7 +9,6 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import io.github.brenoepics.roleplay.utilities.types.Timeout;
-import java.util.Date;
 
 public class StartWorkCommand extends Command {
 
@@ -24,7 +21,8 @@ public class StartWorkCommand extends Command {
     Habbo habbo = gameClient.getHabbo();
     RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
 
-    if (data.getJobEntity() == null || data.getJobEntity().equals(RolePlay.getJobService().getUnemployedJob())) {
+    if (data.getJobEntity() == null
+        || data.getJobEntity().equals(RolePlay.getJobService().getUnemployedJob())) {
       habbo.whisper("Vous n'avez aucun metier.", RoomChatMessageBubbles.ALERT);
       return true;
     }
@@ -41,12 +39,13 @@ public class StartWorkCommand extends Command {
     }
 
     if (!data.hasEnergy()) {
-      gameClient.getHabbo().whisper(MISSING_ENERGY, RoomChatMessageBubbles.ALERT);
+      habbo.whisper(MISSING_ENERGY, RoomChatMessageBubbles.ALERT);
       return true;
     }
 
-    if (habbo.getHabboInfo().getCurrentRoom() == null || !RolePlay.getJobsManager()
-        .canWorkAtRoom(data.getJobEntity(), habbo.getHabboInfo().getCurrentRoom().getId())) {
+    if (habbo.getHabboInfo().getCurrentRoom() == null
+        || !RolePlay.getJobsManager().canWorkAtRoom(
+            data.getJobEntity(), habbo.getHabboInfo().getCurrentRoom().getId())) {
       habbo.whisper("Vous devez être dans votre lieu de travail pour commencer votre service.",
           RoomChatMessageBubbles.ALERT);
       return true;
@@ -67,23 +66,10 @@ public class StartWorkCommand extends Command {
     }
 
     if (RolePlay.getJobsManager().startWork(gameClient, data, habbo)) {
-      int paydayMinutes = Math.max(1,
-          Emulator.getConfig().getInt("features.payday.timer_minutes", 10));
-      data.setLastPayday(new Date());
-
-      // Utilise exactement le même mécanisme de bulle que le message
-      // "Commence à travailler", déjà confirmé visible sur Nitro.
-      if (habbo.getHabboInfo().getCurrentRoom() != null) {
-        habbo.getHabboInfo().getCurrentRoom().sendComposer(
-            getRoomUserShoutComposer(
-                "Prochaine paie dans " + paydayMinutes + " minutes.",
-                habbo,
-                RoomChatMessageBubbles.NORMAL).compose());
-      }
-
+      RolePlay.getJobsManager().getPaydayTimer().onWorkStarted(habbo, data);
       data.executeAction();
     }
+
     return true;
   }
-
 }
