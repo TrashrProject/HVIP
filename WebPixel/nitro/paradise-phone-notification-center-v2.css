@@ -1,14 +1,13 @@
-/* ParadiseRP — ParadisePhone Notification Center V2.2 */
+/* ParadiseRP — ParadisePhone Notification Center V2.3 */
 
 .nitro-phone-frame .paradise-phone-notification-app{display:none!important}
 
-/* status bar bell */
 .nitro-phone-frame .pnc-status-bell{
   position:absolute!important;z-index:188!important;top:10px!important;left:62px!important;
   width:24px!important;height:24px!important;padding:0!important;margin:0!important;border:0!important;
   border-radius:8px!important;background:transparent!important;display:flex!important;align-items:center!important;
   justify-content:center!important;cursor:pointer!important;overflow:visible!important;box-shadow:none!important;
-  filter:drop-shadow(0 1px 1px rgba(0,0,0,.65))!important;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.65))!important;pointer-events:auto!important;
 }
 .nitro-phone-frame.pnc-center-open .pnc-status-bell,
 .nitro-phone-frame:has(> .paradise-phone-notification-center) .pnc-status-bell{visibility:hidden!important;pointer-events:none!important}
@@ -32,55 +31,62 @@
 }
 .nitro-phone-frame .pnc-status-bell .pnc-launch-badge[hidden]{display:none!important}
 
-/* panel */
 .nitro-phone-frame .paradise-phone-notification-center{
   position:absolute!important;z-index:176!important;left:7px!important;right:7px!important;top:45px!important;bottom:10px!important;
   display:flex!important;flex-direction:column!important;min-height:0!important;overflow:hidden!important;box-sizing:border-box!important;
   border:1px solid #28516c!important;border-radius:15px!important;background:#071522!important;color:#eef8ff!important;
   box-shadow:0 14px 32px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.035)!important;
-  font-family:Arial,Helvetica,sans-serif!important;
+  font-family:Arial,Helvetica,sans-serif!important;pointer-events:auto!important;touch-action:manipulation!important;
 }
+
 .nitro-phone-frame .pnc-header{
   flex:0 0 auto!important;display:grid!important;grid-template-columns:38px minmax(0,1fr) auto!important;align-items:center!important;
   gap:9px!important;min-height:56px!important;padding:8px 10px!important;box-sizing:border-box!important;
-  border-bottom:1px solid rgba(120,185,224,.16)!important;background:#0d2638!important;
+  border-bottom:1px solid rgba(120,185,224,.16)!important;background:#0d2638!important;pointer-events:auto!important;
 }
 .nitro-phone-frame .pnc-back{
   width:36px!important;height:36px!important;padding:0!important;border:1px solid #2e6d91!important;border-radius:10px!important;
   background:#10344c!important;color:#67d8ff!important;display:flex!important;align-items:center!important;justify-content:center!important;
-  font:700 24px/1 Arial,sans-serif!important;cursor:pointer!important;
+  font:700 24px/1 Arial,sans-serif!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;
 }
+.nitro-phone-frame .pnc-back:hover{background:#16445f!important;border-color:#3e8ab2!important}
 .nitro-phone-frame .pnc-title{min-width:0!important;display:flex!important;flex-direction:column!important;gap:2px!important}
 .nitro-phone-frame .pnc-title strong{color:#fff!important;font-size:16px!important;line-height:18px!important;font-weight:800!important}
 .nitro-phone-frame .pnc-title small{color:#8eb4c9!important;font-size:10px!important;line-height:12px!important;font-weight:600!important}
 .nitro-phone-frame .pnc-read-all{
   min-height:32px!important;padding:0 10px!important;border:1px solid #2f6d90!important;border-radius:9px!important;
-  background:#11354d!important;color:#eaf8ff!important;font-size:10px!important;font-weight:700!important;white-space:nowrap!important;cursor:pointer!important;
+  background:#11354d!important;color:#eaf8ff!important;font-size:10px!important;font-weight:700!important;white-space:nowrap!important;
+  cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;
 }
 .nitro-phone-frame .pnc-read-all:disabled{opacity:.45!important;cursor:default!important}
 
 .nitro-phone-frame .pnc-tabs{
   flex:0 0 auto!important;display:grid!important;grid-template-columns:1fr 1fr 1.25fr!important;gap:6px!important;padding:8px!important;
-  box-sizing:border-box!important;border-bottom:1px solid rgba(255,255,255,.05)!important;background:#091a28!important;
+  box-sizing:border-box!important;border-bottom:1px solid rgba(255,255,255,.05)!important;background:#091a28!important;pointer-events:auto!important;
 }
 .nitro-phone-frame .pnc-tab{
   min-height:34px!important;padding:0 6px!important;border:1px solid #29475d!important;border-radius:9px!important;background:#102536!important;
-  color:#9fb6c5!important;font-size:10px!important;font-weight:700!important;cursor:pointer!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+  color:#9fb6c5!important;font-size:10px!important;font-weight:700!important;cursor:pointer!important;overflow:hidden!important;
+  text-overflow:ellipsis!important;white-space:nowrap!important;pointer-events:auto!important;touch-action:manipulation!important;
 }
+.nitro-phone-frame .pnc-tab:hover{background:#153247!important;color:#d7e7f1!important}
 .nitro-phone-frame .pnc-tab.is-active{color:#fff!important;border-color:#2487b4!important;background:#0f5373!important}
 
 .nitro-phone-frame .pnc-list{
-  flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding:8px!important;
-  box-sizing:border-box!important;scrollbar-width:thin!important;scrollbar-color:#31566d transparent!important;background:#071522!important;
+  flex:1 1 auto!important;min-height:0!important;height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain!important;padding:8px!important;box-sizing:border-box!important;scrollbar-width:thin!important;
+  scrollbar-color:#31566d transparent!important;background:#071522!important;pointer-events:auto!important;touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch!important;user-select:none!important;
 }
-.nitro-phone-frame .pnc-list::-webkit-scrollbar{width:4px!important}
+.nitro-phone-frame .pnc-list::-webkit-scrollbar{width:5px!important}
+.nitro-phone-frame .pnc-list::-webkit-scrollbar-track{background:transparent!important}
 .nitro-phone-frame .pnc-list::-webkit-scrollbar-thumb{background:#31566d!important;border-radius:6px!important}
 
 .nitro-phone-frame .pnc-row{
   position:relative!important;width:100%!important;min-height:62px!important;display:grid!important;grid-template-columns:44px minmax(0,1fr) 9px!important;
   align-items:center!important;gap:9px!important;margin:0 0 7px!important;padding:8px 9px!important;box-sizing:border-box!important;
-  border:1px solid #244258!important;border-radius:12px!important;background:#102536!important;color:#eef8ff!important;text-align:left!important;cursor:pointer!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+  border:1px solid #244258!important;border-radius:12px!important;background:#102536!important;color:#eef8ff!important;text-align:left!important;
+  cursor:pointer!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;pointer-events:auto!important;touch-action:manipulation!important;
 }
 .nitro-phone-frame .pnc-row:last-child{margin-bottom:0!important}
 .nitro-phone-frame .pnc-row.is-unread{border-color:#2e91b9!important;background:#123149!important;box-shadow:inset 3px 0 0 #37c9f5!important}
