@@ -27,7 +27,6 @@ public class PaydayTimer {
     int paydayMinutes = Math.max(1,
         Emulator.getConfig().getInt("features.payday.timer_minutes", DEFAULT_PAYDAY_MINUTES));
 
-    // Vérification chaque minute pour afficher un vrai compte à rebours individuel.
     timer.scheduleAtFixedRate(new TimerTask() {
       @Override
       public void run() {
@@ -98,16 +97,16 @@ public class PaydayTimer {
       jobName = "EMS";
     }
 
-    habbo.whisper(
+    habbo.shout(
         "Salaire reçu : +" + earned + " crédits — " + jobName + " | " + rank.getDisplayName(),
-        RoomChatMessageBubbles.ALERT);
+        RoomChatMessageBubbles.NORMAL);
   }
 
   private static void sendCountdown(Habbo habbo, int minutes) {
     String unit = minutes > 1 ? "minutes" : "minute";
-    habbo.whisper(
+    habbo.shout(
         "Prochaine paie dans " + minutes + " " + unit + ".",
-        RoomChatMessageBubbles.ALERT);
+        RoomChatMessageBubbles.NORMAL);
   }
 
   private static boolean isUnavailable(Habbo habbo, RpAvatar data) {
