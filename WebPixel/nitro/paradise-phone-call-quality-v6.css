@@ -1,0 +1,29 @@
+/* ParadiseRP — ParadisePhone call quality V6
+   Small visual/shell fixes only. Call logic stays in Stable V2. */
+
+/* When the phone is closed, Stable V2 briefly creates a floating incoming card.
+   Keep that temporary card invisible until the real ParadisePhone shell is mounted. */
+body>.paradise-call-layer.is-floating:has(.pcall-card.pcall-incoming),
+.paradise-call-layer.is-floating[data-pcall-awaiting-shell="1"]{
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+/* Preserve Habbo/Nitro pixel detail instead of letting browser video scaling soften it. */
+.paradise-call-stable-v2 .pcall-active.is-video>video[data-pcall-remote],
+.paradise-call-stable-v2 .pcall-active.is-video>video[data-pcall-local],
+.paradise-call-stable-v2 .pcall-local-video{
+  image-rendering:crisp-edges!important;
+  image-rendering:pixelated!important;
+  filter:contrast(1.045) saturate(1.025)!important;
+  backface-visibility:hidden!important;
+}
+
+/* Keep the main room view sharp at every phone orientation. */
+.paradise-call-stable-v2.pcall-video-expanded .pcall-active.is-video>video[data-pcall-remote],
+.nitro-phone-frame.pcall-video-landscape .pcall-active.is-video>video[data-pcall-remote]{
+  object-fit:cover!important;
+  object-position:center center!important;
+  transform:translateZ(0)!important;
+}
