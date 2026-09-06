@@ -1,4 +1,4 @@
-/* ParadiseRP — ParadisePhone call quality V6
+/* ParadiseRP — ParadisePhone call quality V6.1
    Small visual/shell fixes only. Call logic stays in Stable V2. */
 
 /* When the phone is closed, Stable V2 briefly creates a floating incoming card.
@@ -14,16 +14,28 @@ body>.paradise-call-layer.is-floating:has(.pcall-card.pcall-incoming),
 .paradise-call-stable-v2 .pcall-active.is-video>video[data-pcall-remote],
 .paradise-call-stable-v2 .pcall-active.is-video>video[data-pcall-local],
 .paradise-call-stable-v2 .pcall-local-video{
-  image-rendering:crisp-edges!important;
   image-rendering:pixelated!important;
-  filter:contrast(1.045) saturate(1.025)!important;
+  filter:contrast(1.075) saturate(1.035)!important;
   backface-visibility:hidden!important;
+  transform:none!important;
 }
 
-/* Keep the main room view sharp at every phone orientation. */
+/* Keep the main room view sharp at every phone orientation.
+   Avoid GPU translateZ here: fractional compositing can soften pixel edges on Chromium. */
 .paradise-call-stable-v2.pcall-video-expanded .pcall-active.is-video>video[data-pcall-remote],
 .nitro-phone-frame.pcall-video-landscape .pcall-active.is-video>video[data-pcall-remote]{
   object-fit:cover!important;
   object-position:center center!important;
-  transform:translateZ(0)!important;
+  image-rendering:pixelated!important;
+  transform:none!important;
+}
+
+/* Chromium sometimes smooths a video again when it is resized to fractional CSS pixels.
+   Force an integer-pixel raster box inside the call card. */
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-video{
+  contain:paint!important;
+}
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-video>video[data-pcall-remote]{
+  min-width:100%!important;
+  min-height:100%!important;
 }
