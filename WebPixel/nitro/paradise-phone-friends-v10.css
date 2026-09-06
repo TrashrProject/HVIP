@@ -1,4 +1,4 @@
-/* ParadiseRP — ParadisePhone friends V10.2
+/* ParadiseRP — ParadisePhone friends V10.3
    Premium visual pass only. Keeps native friend list behavior and existing call/message/delete actions. */
 
 .nitro-phone-frame .phone-friends-app{
@@ -9,7 +9,7 @@
     linear-gradient(180deg,#091724 0%,#07131f 58%,#06111b 100%)!important;
 }
 
-/* Back control: keep it compact but make it feel like part of the phone UI. */
+/* Back control: compact native control. Final row alignment is defined at the end of the file. */
 .nitro-phone-frame .phone-active-app:has(.phone-friends-app) .phone-app-home{
   width:26px!important;
   height:26px!important;
@@ -287,4 +287,32 @@
   .nitro-phone-frame .phone-friends-app .friend-row .icon-btn,
   .nitro-phone-frame .phone-friends-app .paradise-call-actions button{width:24px!important;min-width:24px!important;height:24px!important;min-height:24px!important}
   .nitro-phone-frame .phone-friends-app .friend-name{font-size:12px!important}
+}
+
+/* V10.3 — put the native back button on the SAME ROW, directly left of search. */
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app){
+  position:relative!important;
+}
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) .phone-app-home{
+  position:absolute!important;
+  z-index:70!important;
+  top:7px!important;
+  left:9px!important;
+  width:30px!important;
+  min-width:30px!important;
+  height:35px!important;
+  min-height:35px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.nitro-phone-frame .phone-friends-app .phone-input,
+.nitro-phone-frame .phone-friends-app input[type="text"]{
+  box-sizing:border-box!important;
+  width:calc(100% - 39px)!important;
+  max-width:calc(100% - 39px)!important;
+  margin-left:39px!important;
 }
