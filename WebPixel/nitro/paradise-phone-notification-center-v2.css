@@ -1,0 +1,167 @@
+/* ParadiseRP — ParadisePhone Notification Center V2 */
+
+.nitro-phone-frame .paradise-phone-notification-center{
+  position:absolute!important;
+  z-index:176!important;
+  left:10px!important;
+  right:10px!important;
+  top:45px!important;
+  bottom:12px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  border:1px solid rgba(70,145,194,.34)!important;
+  border-radius:17px!important;
+  background:
+    radial-gradient(circle at 50% -12%,rgba(44,165,222,.16),transparent 30%),
+    linear-gradient(180deg,#091826 0%,#07131f 56%,#05101a 100%)!important;
+  color:#edf8ff!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.04)!important;
+}
+
+.nitro-phone-frame .pnc-header{
+  flex:0 0 auto!important;
+  display:grid!important;
+  grid-template-columns:34px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:8px!important;
+  min-height:52px!important;
+  padding:7px 9px!important;
+  border-bottom:1px solid rgba(106,167,205,.14)!important;
+  background:linear-gradient(180deg,rgba(19,48,70,.94),rgba(9,28,44,.82))!important;
+}
+
+.nitro-phone-frame .pnc-back,
+.nitro-phone-frame .pnc-read-all{
+  border:1px solid rgba(81,171,220,.28)!important;
+  color:#dff7ff!important;
+  background:rgba(15,48,69,.72)!important;
+  cursor:pointer!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;
+}
+.nitro-phone-frame .pnc-back{
+  width:34px!important;height:34px!important;padding:0!important;border-radius:10px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  font-size:21px!important;line-height:1!important;color:#58d0ff!important;
+}
+.nitro-phone-frame .pnc-read-all{
+  min-height:29px!important;padding:0 9px!important;border-radius:9px!important;
+  font-size:8.5px!important;font-weight:800!important;white-space:nowrap!important;
+}
+.nitro-phone-frame .pnc-back:hover,.nitro-phone-frame .pnc-read-all:hover{
+  border-color:rgba(83,207,255,.58)!important;background:rgba(19,68,94,.9)!important;
+}
+.nitro-phone-frame .pnc-title{min-width:0!important;display:flex!important;flex-direction:column!important;gap:2px!important}
+.nitro-phone-frame .pnc-title strong{font-size:14px!important;font-weight:900!important;color:#fff!important;line-height:1.05!important}
+.nitro-phone-frame .pnc-title small{font-size:8.5px!important;font-weight:700!important;color:#79a9c3!important}
+
+.nitro-phone-frame .pnc-tabs{
+  flex:0 0 auto!important;display:grid!important;grid-template-columns:1fr 1fr 1.25fr!important;
+  gap:5px!important;padding:7px 8px!important;border-bottom:1px solid rgba(255,255,255,.04)!important;
+}
+.nitro-phone-frame .pnc-tab{
+  min-height:29px!important;border:1px solid rgba(78,126,160,.25)!important;border-radius:9px!important;
+  background:#102335!important;color:#8faabd!important;font-size:8.7px!important;font-weight:850!important;cursor:pointer!important;
+}
+.nitro-phone-frame .pnc-tab.is-active{
+  color:#e9faff!important;border-color:rgba(58,190,239,.48)!important;
+  background:linear-gradient(180deg,#164662,#10364f)!important;
+  box-shadow:0 0 12px rgba(38,185,236,.08)!important;
+}
+
+.nitro-phone-frame .pnc-list{
+  flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+  padding:7px!important;scrollbar-width:thin!important;scrollbar-color:#315b78 transparent!important;
+}
+.nitro-phone-frame .pnc-list::-webkit-scrollbar{width:4px!important}
+.nitro-phone-frame .pnc-list::-webkit-scrollbar-thumb{background:#315b78!important;border-radius:5px!important}
+
+.nitro-phone-frame .pnc-row{
+  position:relative!important;width:100%!important;display:grid!important;grid-template-columns:42px minmax(0,1fr) 14px!important;
+  align-items:center!important;gap:8px!important;margin:0 0 6px!important;padding:8px!important;
+  border:1px solid rgba(91,137,170,.20)!important;border-radius:12px!important;
+  background:linear-gradient(135deg,rgba(27,50,70,.94),rgba(17,34,51,.96))!important;
+  color:#eaf6ff!important;text-align:left!important;cursor:pointer!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 3px 10px rgba(0,0,0,.12)!important;
+}
+.nitro-phone-frame .pnc-row:last-child{margin-bottom:0!important}
+.nitro-phone-frame .pnc-row.is-unread{
+  border-color:rgba(59,195,242,.46)!important;
+  background:linear-gradient(135deg,rgba(24,67,91,.98),rgba(17,43,63,.98))!important;
+  box-shadow:inset 2px 0 0 #39c8f6,0 4px 13px rgba(0,0,0,.16)!important;
+}
+.nitro-phone-frame .pnc-row:hover{border-color:rgba(80,202,247,.52)!important;filter:brightness(1.035)!important}
+
+.nitro-phone-frame .pnc-avatar{
+  position:relative!important;width:40px!important;height:40px!important;border-radius:50%!important;overflow:visible!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;background:#18354a!important;
+  border:2px solid rgba(97,175,217,.42)!important;box-shadow:0 3px 8px rgba(0,0,0,.24)!important;
+}
+.nitro-phone-frame .pnc-avatar img{width:100%!important;height:100%!important;border-radius:50%!important;object-fit:cover!important}
+.nitro-phone-frame .pnc-avatar i{
+  position:absolute!important;right:-4px!important;bottom:-3px!important;width:18px!important;height:18px!important;border-radius:6px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;border:2px solid #112638!important;
+  background:#0b7196!important;color:#fff!important;font-size:9px!important;font-style:normal!important;font-weight:900!important;
+}
+.nitro-phone-frame .pnc-row.is-gram .pnc-avatar i{background:linear-gradient(145deg,#c82c77,#f05b51)!important}
+
+.nitro-phone-frame .pnc-copy{min-width:0!important;display:flex!important;flex-direction:column!important;gap:2px!important}
+.nitro-phone-frame .pnc-meta{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:5px!important;min-width:0!important}
+.nitro-phone-frame .pnc-meta strong{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;font-size:8px!important;letter-spacing:.35px!important;text-transform:uppercase!important;color:#6fcff1!important}
+.nitro-phone-frame .pnc-row.is-gram .pnc-meta strong{color:#ff8eb2!important}
+.nitro-phone-frame .pnc-meta time{flex:0 0 auto!important;font-size:7.5px!important;color:#748ea2!important}
+.nitro-phone-frame .pnc-copy>b{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;font-size:10.5px!important;color:#f7fbff!important}
+.nitro-phone-frame .pnc-copy>small{display:block!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;font-size:8.5px!important;color:#a9becd!important}
+.nitro-phone-frame .pnc-dot{width:7px!important;height:7px!important;border-radius:50%!important;background:transparent!important}
+.nitro-phone-frame .pnc-row.is-unread .pnc-dot{background:#4ed5ff!important;box-shadow:0 0 8px rgba(78,213,255,.65)!important}
+
+.nitro-phone-frame .pnc-empty,
+.nitro-phone-frame .pnc-loading{
+  min-height:100%!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  gap:7px!important;padding:18px!important;text-align:center!important;color:#718da2!important;
+}
+.nitro-phone-frame .pnc-empty .pnc-empty-icon{width:52px!important;height:52px!important;border-radius:16px!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#10283b!important;border:1px solid rgba(78,170,215,.22)!important;font-size:25px!important;color:#52ccfb!important}
+.nitro-phone-frame .pnc-empty strong,.nitro-phone-frame .pnc-loading strong{font-size:11px!important;color:#dcedf8!important}
+.nitro-phone-frame .pnc-empty small,.nitro-phone-frame .pnc-loading small{font-size:8.5px!important;line-height:1.35!important;color:#6f8b9f!important}
+
+/* Launcher injected into the native app grid. */
+.nitro-phone-frame .paradise-phone-notification-app{
+  position:relative!important;cursor:pointer!important;
+}
+.nitro-phone-frame .paradise-phone-notification-app .pnc-launch-icon{
+  position:relative!important;margin:0 auto!important;width:48px!important;height:48px!important;border-radius:14px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  background:linear-gradient(150deg,#22b9ee,#176da4)!important;border:1px solid rgba(199,244,255,.44)!important;
+  color:#fff!important;font-size:24px!important;line-height:1!important;box-shadow:0 5px 12px rgba(0,39,65,.30),inset 0 1px 0 rgba(255,255,255,.24)!important;
+}
+.nitro-phone-frame .paradise-phone-notification-app .pnc-launch-icon:before{
+  content:"";position:absolute!important;width:16px!important;height:17px!important;border:2px solid #fff!important;border-top-left-radius:9px!important;border-top-right-radius:9px!important;border-bottom:0!important;top:11px!important;left:14px!important;
+}
+.nitro-phone-frame .paradise-phone-notification-app .pnc-launch-icon:after{
+  content:"";position:absolute!important;width:22px!important;height:2px!important;background:#fff!important;border-radius:2px!important;left:12px!important;top:29px!important;box-shadow:7px 4px 0 -5px #fff!important;
+}
+.nitro-phone-frame .paradise-phone-notification-app .pnc-launch-label{display:block!important;margin-top:4px!important;font-size:8.5px!important;font-weight:800!important;color:#fff!important;text-align:center!important;text-shadow:0 1px 2px #000!important;white-space:nowrap!important}
+.nitro-phone-frame .paradise-phone-notification-app .pnc-launch-badge{
+  position:absolute!important;z-index:4!important;top:-4px!important;right:-5px!important;min-width:18px!important;height:18px!important;padding:0 4px!important;border-radius:10px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;background:#f04455!important;color:#fff!important;border:2px solid #07131f!important;font-size:8px!important;font-weight:900!important;box-sizing:border-box!important;
+}
+.nitro-phone-frame .paradise-phone-notification-app.pnc-fallback{
+  position:absolute!important;z-index:72!important;right:16px!important;bottom:54px!important;width:62px!important;min-height:65px!important;padding:4px!important;border:0!important;background:transparent!important;
+}
+
+.nitro-phone-frame[data-paradise-theme=light] .paradise-phone-notification-center{
+  background:linear-gradient(180deg,#edf4f8,#e3edf3)!important;color:#183044!important;border-color:#b8cedb!important;
+}
+.nitro-phone-frame[data-paradise-theme=light] .pnc-header{background:#e6f0f5!important;border-bottom-color:#cbdbe4!important}
+.nitro-phone-frame[data-paradise-theme=light] .pnc-title strong{color:#163247!important}
+.nitro-phone-frame[data-paradise-theme=light] .pnc-row{background:#fff!important;color:#1b3347!important;border-color:#c8d8e2!important}
+.nitro-phone-frame[data-paradise-theme=light] .pnc-copy>b{color:#183044!important}.nitro-phone-frame[data-paradise-theme=light] .pnc-copy>small{color:#536f82!important}
+
+@media(max-height:650px){
+  .nitro-phone-frame .paradise-phone-notification-center{top:42px!important;bottom:9px!important}
+  .nitro-phone-frame .pnc-header{min-height:46px!important;padding:5px 8px!important}
+  .nitro-phone-frame .pnc-tabs{padding:5px 7px!important}
+  .nitro-phone-frame .pnc-row{padding:6px 7px!important;grid-template-columns:38px minmax(0,1fr) 12px!important}
+  .nitro-phone-frame .pnc-avatar{width:36px!important;height:36px!important}
+}
