@@ -1,0 +1,25 @@
+/* ParadiseRP — ParadisePhone friends alignment V11
+   Final vertical alignment of the native back button with the search field. */
+
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) .phone-app-home{
+  top:11px!important;
+  width:30px!important;
+  min-width:30px!important;
+  height:35px!important;
+  min-height:35px!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  transform:none!important;
+}
+
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) .phone-app-home svg,
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) .phone-app-home i,
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) .phone-app-home span{
+  margin:0!important;
+  transform:none!important;
+  line-height:1!important;
+}
