@@ -1,13 +1,13 @@
 (() => {
     'use strict';
-    if (window.__PARADISE_CAMERA_GRAM_FIX_V4__) return;
-    window.__PARADISE_CAMERA_GRAM_FIX_V4__ = '4.0.0';
+    if (window.__PARADISE_CAMERA_GRAM_FIX_V5__) return;
+    window.__PARADISE_CAMERA_GRAM_FIX_V5__ = '5.0.0';
 
     const runtime = window.__PARADISE_PHONE_RUNTIME__ = window.__PARADISE_PHONE_RUNTIME__ || { photos: [] };
     const CAMERA_API = '/nitro/phone-camera-api.php';
     const PHONE_API = '/nitro/phone-api.php';
     const CAMERA_ROOT_SELECTOR = '.phone-camera-shell,.phone-camera-app,.pce-camera,.pcam-camera,[data-phone-camera]';
-    const CAMERA_ZOOM = 2.05;
+    const CAMERA_ZOOM = 3.15;
 
     const escapeHtml = value => String(value ?? '')
         .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
