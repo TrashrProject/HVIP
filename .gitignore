@@ -64,3 +64,6 @@ rdp.js
 rdp.c.js
 services/
 nitro-imager-local/
+
+# Photos privées créées depuis le téléphone (stockage d'exécution)
+WebPixel/nitro/camera-photos/

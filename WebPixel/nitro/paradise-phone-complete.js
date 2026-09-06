@@ -2,7 +2,7 @@
     'use strict';
 
     if (window.__PARADISE_PHONE_COMPLETE__) return;
-    window.__PARADISE_PHONE_COMPLETE__ = '1.2.0';
+    window.__PARADISE_PHONE_COMPLETE__ = '1.3.0';
 
     const API = '/nitro/phone-api.php';
     const runtime = window.__PARADISE_PHONE_RUNTIME__ = window.__PARADISE_PHONE_RUNTIME__ || { photos: [] };
@@ -184,13 +184,14 @@
     };
 
     const gram = {
-        root: null, csrf: '', data: null, loading: false, view: 'home', selectedPhotoId: 0, profileUserId: 0,
+        root: null, csrf: '', data: null, loading: false, view: 'home', previousView: 'home', selectedPhotoId: 0, profileUserId: 0,
         async mount(root) {
             this.root = root;
             root.className = 'phone-coming-soon ppr-app ppr-gram pg-v2';
             root.dataset.pprReady = '1';
             root.addEventListener('submit', event => this.submit(event));
             root.addEventListener('click', event => this.click(event));
+            root.addEventListener('input', event => this.filterPeople(event));
             await this.load();
         },
         async load() {
@@ -231,12 +232,13 @@
         },
         async click(event) {
             if (event.target.closest('[data-ppr-retry]')) return this.load();
+            if (event.target.closest('[data-pg-back]')) { this.view = this.previousView || 'explore'; return this.render(); }
             const nav = event.target.closest('[data-pg-nav]');
             if (nav) { this.view = nav.dataset.pgNav; if (this.view === 'profile') this.profileUserId = Number(this.data?.me?.id || 0); return this.render(); }
             const photo = event.target.closest('[data-pg-photo]');
             if (photo) { this.selectedPhotoId = Number(photo.dataset.pgPhoto); return this.render(); }
             const profile = event.target.closest('[data-pg-profile]');
-            if (profile) { this.profileUserId = Number(profile.dataset.pgProfile); this.view = 'profile'; return this.render(); }
+            if (profile) { this.profileUserId = Number(profile.dataset.pgProfile); this.previousView = this.view === 'profile' ? this.previousView : this.view; this.view = 'profile'; return this.render(); }
             const like = event.target.closest('[data-pg-like]');
             const remove = event.target.closest('[data-pg-delete]');
             const follow = event.target.closest('[data-pg-follow]');
@@ -255,6 +257,14 @@
             } catch (error) { this.notice(error.message); button.disabled = false; }
         },
         notice(message) { const node = this.root?.querySelector('[data-pg-status]'); if (node) node.textContent = message; },
+        filterPeople(event) {
+            const input = event.target.closest('[data-pg-people-search]');
+            if (!input) return;
+            const query = input.value.trim().toLocaleLowerCase('fr-FR');
+            this.root.querySelectorAll('[data-pg-person-name]').forEach(card => {
+                card.hidden = query !== '' && !String(card.dataset.pgPersonName || '').toLocaleLowerCase('fr-FR').includes(query);
+            });
+        },
         navButton(view, icon, label) {
             return `<button type="button" class="${this.view === view ? 'active' : ''}" data-pg-nav="${view}" title="${label}">${icon}</button>`;
         },
@@ -266,7 +276,8 @@
             else if (this.view === 'activity') content = this.activity();
             else if (this.view === 'profile') content = this.profile();
             else content = this.home();
-            const title = this.view === 'home' ? 'Accueil' : this.view === 'explore' ? 'Explorer' : this.view === 'publish' ? 'Publier' : this.view === 'activity' ? 'Activité' : 'Profil';
+            const currentProfile = this.findProfile(this.profileUserId);
+            const title = this.view === 'home' ? 'Accueil' : this.view === 'explore' ? 'Explorer' : this.view === 'publish' ? 'Publier' : this.view === 'activity' ? 'Activité' : `@${currentProfile?.username || this.data.me?.username || 'profil'}`;
             this.root.innerHTML = `<div class="pg-shell"><header class="pg-top"><strong>ParadiseGram</strong><span data-pg-status>${title}</span></header><main class="pg-body">${content}</main><nav class="pg-nav">${this.navButton('home','⌂','Accueil')}${this.navButton('explore','⌕','Explorer')}${this.navButton('publish','＋','Publier')}${this.navButton('activity','♡','Activité')}${this.navButton('profile','♙','Profil')}</nav></div>`;
         },
         home() {
@@ -275,11 +286,12 @@
         },
         post(post) {
             const comments = post.comments || [];
-            return `<article class="pg-post"><header class="pg-post-head"><button type="button" class="pg-user" data-pg-profile="${post.userId}"><span class="pg-avatar">${avatar(post.look, post.username)}</span><span><strong>${escapeHtml(post.username)}</strong><small>${formatDate(post.createdAt)}</small></span></button>${post.canDelete ? `<button type="button" class="pg-delete" data-pg-delete="${post.id}" title="Supprimer">×</button>` : `<button type="button" class="pg-follow ${post.following ? 'active' : ''}" data-pg-follow="${post.userId}">${post.following ? 'Suivi' : 'Suivre'}</button>`}</header><img class="pg-photo" src="${escapeHtml(post.imageUrl || '')}" alt="Publication de ${escapeHtml(post.username)}" loading="lazy"><div class="pg-actions"><button type="button" class="pg-heart ${post.liked ? 'active' : ''}" data-pg-like="${post.id}">${post.liked ? '♥' : '♡'}</button><span>◯</span></div><div class="pg-likes">${Number(post.likes || 0)} J’aime</div>${post.body ? `<div class="pg-caption"><strong>${escapeHtml(post.username)}</strong> ${escapeHtml(post.body)}</div>` : ''}<div class="pg-comments">${comments.slice(-4).map(comment => `<div><span><strong>${escapeHtml(comment.username)}</strong> ${escapeHtml(comment.body)}</span>${comment.canDelete ? `<button type="button" data-pg-delete-comment="${comment.id}" title="Supprimer">×</button>` : ''}</div>`).join('')}</div><form class="pg-comment-form" data-pg-comment="${post.id}"><input name="body" maxlength="240" required placeholder="Ajouter un commentaire…"><button type="submit">Publier</button></form></article>`;
+            return `<article class="pg-post"><header class="pg-post-head"><button type="button" class="pg-user" data-pg-profile="${post.userId}"><span class="pg-avatar">${avatar(post.look, post.username)}</span><span><strong>${escapeHtml(post.username)}</strong><small>${formatDate(post.createdAt)}</small></span></button>${post.canDelete ? `<button type="button" class="pg-delete" data-pg-delete="${post.id}" title="Supprimer">×</button>` : `<button type="button" class="pg-follow ${post.following ? 'active' : ''}" data-pg-follow="${post.userId}">${post.following ? 'Abonné' : 'Suivre'}</button>`}</header><img class="pg-photo" src="${escapeHtml(post.imageUrl || '')}" alt="Publication de ${escapeHtml(post.username)}" loading="lazy"><div class="pg-actions"><button type="button" class="pg-heart ${post.liked ? 'active' : ''}" data-pg-like="${post.id}">${post.liked ? '♥' : '♡'}</button><span>◯</span></div><div class="pg-likes">${Number(post.likes || 0)} J’aime</div>${post.body ? `<div class="pg-caption"><button type="button" data-pg-profile="${post.userId}">${escapeHtml(post.username)}</button> ${escapeHtml(post.body)}</div>` : ''}<div class="pg-comments">${comments.slice(-4).map(comment => `<div><span><button type="button" class="pg-comment-user" data-pg-profile="${comment.userId}">${escapeHtml(comment.username)}</button> ${escapeHtml(comment.body)}</span>${comment.canDelete ? `<button type="button" data-pg-delete-comment="${comment.id}" title="Supprimer">×</button>` : ''}</div>`).join('')}</div><form class="pg-comment-form" data-pg-comment="${post.id}"><input name="body" maxlength="240" required placeholder="Ajouter un commentaire…"><button type="submit">Publier</button></form></article>`;
         },
         explore() {
             const posts = [...(this.data.posts || [])].filter(post => post.imageUrl).sort((a, b) => Number(b.likes || 0) - Number(a.likes || 0));
-            return posts.length ? `<div class="pg-grid">${posts.map(post => `<button type="button" data-pg-profile="${post.userId}"><img src="${escapeHtml(post.imageUrl)}" alt="Photo de ${escapeHtml(post.username)}" loading="lazy"><span>♥ ${Number(post.likes || 0)}</span></button>`).join('')}</div>` : '<div class="pg-empty">Aucune photo à explorer.</div>';
+            const people = (this.data.suggestions || []).slice(0, 60);
+            return `<section class="pg-explore"><label class="pg-search"><span>⌕</span><input type="search" data-pg-people-search placeholder="Rechercher une personne"></label><h2>Découvrir des profils</h2><div class="pg-people">${people.length ? people.map(person => `<article class="pg-person" data-pg-person-name="${escapeHtml(person.username)}"><button type="button" class="pg-person-main" data-pg-profile="${person.id}"><span class="pg-avatar">${avatar(person.look, person.username)}</span><span><strong>${escapeHtml(person.username)}</strong><small>${Number(person.followers || 0)} abonné${Number(person.followers || 0) > 1 ? 's' : ''} · ${Number(person.posts || 0)} publication${Number(person.posts || 0) > 1 ? 's' : ''}</small></span></button><button type="button" class="pg-follow ${person.following ? 'active' : ''}" data-pg-follow="${person.id}">${person.following ? 'Abonné' : 'Suivre'}</button></article>`).join('') : '<div class="pg-empty">Aucun profil à découvrir.</div>'}</div><h2>Explorer</h2>${posts.length ? `<div class="pg-grid pg-explore-grid">${posts.map(post => `<button type="button" data-pg-profile="${post.userId}" title="Voir le profil de ${escapeHtml(post.username)}"><img src="${escapeHtml(post.imageUrl)}" alt="Photo de ${escapeHtml(post.username)}" loading="lazy"><span>♥ ${Number(post.likes || 0)}</span></button>`).join('')}</div>` : '<div class="pg-empty">Aucune photo à explorer.</div>'}</section>`;
         },
         publish() {
             const gallery = this.data.gallery || [];
@@ -289,15 +301,22 @@
         activity() {
             const items = this.data.activity || [];
             const text = item => item.type === 'like' ? 'a aimé votre publication.' : item.type === 'comment' ? 'a commenté votre publication.' : 'a commencé à vous suivre.';
-            return items.length ? `<div class="pg-activity">${items.map(item => `<div class="pg-activity-row"><span class="pg-avatar">${avatar(item.look, item.username)}</span><div><span><strong>${escapeHtml(item.username)}</strong> ${text(item)}</span><small>${formatDate(item.createdAt)}</small></div></div>`).join('')}</div>` : '<div class="pg-empty"><strong>Aucune activité</strong><span>Les likes, commentaires et abonnements apparaîtront ici.</span></div>';
+            return items.length ? `<div class="pg-activity">${items.map(item => `<button type="button" class="pg-activity-row" data-pg-profile="${item.userId || 0}"><span class="pg-avatar">${avatar(item.look, item.username)}</span><div><span><strong>${escapeHtml(item.username)}</strong> ${text(item)}</span><small>${formatDate(item.createdAt)}</small></div><b>›</b></button>`).join('')}</div>` : '<div class="pg-empty"><strong>Aucune activité</strong><span>Les likes, commentaires et abonnements apparaîtront ici.</span></div>';
+        },
+        findProfile(userId) {
+            const id = Number(userId || this.data?.me?.id || 0);
+            if (id === Number(this.data?.me?.id || 0)) return { ...this.data.me, following: false };
+            const suggested = (this.data?.suggestions || []).find(person => Number(person.id) === id);
+            const post = (this.data?.posts || []).find(item => Number(item.userId) === id);
+            if (suggested) return suggested;
+            return post ? { id, username:post.username, look:post.look, posts:0, followers:Number(post.followers || 0), followingCount:Number(post.followingCount || 0), following:Boolean(post.following) } : null;
         },
         profile() {
             const userId = Number(this.profileUserId || this.data.me?.id || 0);
             const posts = (this.data.posts || []).filter(post => Number(post.userId) === userId);
-            const first = posts[0];
             const isMe = userId === Number(this.data.me?.id || 0);
-            const profile = isMe ? this.data.me : { id:userId, username:first?.username || 'Utilisateur', look:first?.look || '', posts:posts.length, followers:Number(first?.followers || 0), followingCount:Number(first?.followingCount || 0), following:Boolean(first?.following) };
-            return `<section class="pg-profile"><header class="pg-profile-head"><span class="pg-profile-avatar">${avatar(profile.look, profile.username, 'l')}</span><div><strong>${escapeHtml(profile.username)}</strong><small>@${escapeHtml(profile.username)}</small>${isMe ? '' : `<button type="button" class="pg-profile-follow ${profile.following ? 'active' : ''}" data-pg-follow="${userId}">${profile.following ? 'Abonné' : 'Suivre'}</button>`}</div></header><div class="pg-stats"><span><strong>${Number(profile.posts ?? posts.length)}</strong>publications</span><span><strong>${Number(profile.followers || 0)}</strong>abonnés</span><span><strong>${Number(profile.followingCount || 0)}</strong>abonnements</span></div><div class="pg-grid">${posts.length ? posts.map(post => `<div><img src="${escapeHtml(post.imageUrl || '')}" alt="Publication" loading="lazy"></div>`).join('') : '<div class="pg-empty">Aucune publication.</div>'}</div></section>`;
+            const profile = this.findProfile(userId) || { id:userId, username:'Utilisateur', look:'', posts:posts.length, followers:0, followingCount:0, following:false };
+            return `<section class="pg-profile"><button type="button" class="pg-profile-back" data-pg-back>‹ Retour</button><header class="pg-profile-head"><span class="pg-profile-avatar">${avatar(profile.look, profile.username, 'l')}</span><div><strong>${escapeHtml(profile.username)}</strong><small>@${escapeHtml(profile.username)}</small>${isMe ? '<span class="pg-me-badge">Votre profil</span>' : `<button type="button" class="pg-profile-follow ${profile.following ? 'active' : ''}" data-pg-follow="${userId}">${profile.following ? 'Abonné ✓' : 'Suivre'}</button>`}</div></header><div class="pg-stats"><span><strong>${Number(profile.posts ?? posts.length)}</strong>publications</span><span><strong>${Number(profile.followers || 0)}</strong>abonnés</span><span><strong>${Number(profile.followingCount || 0)}</strong>abonnements</span></div><h2 class="pg-profile-section-title">Publications</h2><div class="pg-grid pg-profile-grid">${posts.length ? posts.map(post => `<button type="button" data-pg-post="${post.id}"><img src="${escapeHtml(post.imageUrl || '')}" alt="Publication de ${escapeHtml(profile.username)}" loading="lazy"></button>`).join('') : '<div class="pg-empty"><strong>Aucune publication</strong><span>Ce profil n’a encore rien publié.</span></div>'}</div></section>`;
         }
     };
 
@@ -362,43 +381,8 @@
         captureCameraPhoto(root);
         if (enhancedCameras.has(root)) return;
         enhancedCameras.add(root);
-
-        const refreshPreview = () => {
-            if (!root.isConnected) {
-                enhancedCameras.delete(root);
-                return;
-            }
-
-            const lens = root.querySelector('.pcam-lens');
-            if (lens && !lens.querySelector('.pcam-preview-img')) {
-                let preview = lens.querySelector('.pcam-live-preview');
-                if (!preview) {
-                    preview = document.createElement('canvas');
-                    preview.className = 'pcam-live-preview';
-                    preview.width = 320;
-                    preview.height = 320;
-                    preview.setAttribute('aria-hidden', 'true');
-                    lens.prepend(preview);
-                }
-
-                const source = [...document.querySelectorAll('canvas')]
-                    .filter(canvas => canvas !== preview && !canvas.closest('.phone-camera-shell') && canvas.width > 160 && canvas.height > 160)
-                    .sort((left, right) => (right.width * right.height) - (left.width * left.height))[0];
-                if (source) {
-                    try {
-                        const side = Math.min(source.width, source.height);
-                        const sourceX = Math.max(0, Math.floor((source.width - side) / 2));
-                        const sourceY = Math.max(0, Math.floor((source.height - side) / 2));
-                        preview.getContext('2d', { alpha: false }).drawImage(source, sourceX, sourceY, side, side, 0, 0, preview.width, preview.height);
-                    } catch {}
-                }
-            }
-
-            captureCameraPhoto(root);
-            setTimeout(refreshPreview, 125);
-        };
-
-        refreshPreview();
+        // Le viseur et la capture sont rendus nativement par Nitro/WebGL. Copier
+        // le canvas principal dans un canvas 2D renvoyait des images noires.
     }
 
     const visualSettings = {

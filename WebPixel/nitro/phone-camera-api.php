@@ -94,8 +94,9 @@ try {
     try {
         camera_stmt($db, 'INSERT INTO camera_photos(user_id,room_id,timestamp,url) VALUES(?,?,?,?)', 'iiis', [$userId, $roomId, $now, $temporaryUrl]);
         $id = (int)$db->insert_id;
-        $url = '/nitro/phone-camera-api.php?photo=' . $id;
-        camera_stmt($db, 'UPDATE camera_photos SET url=? WHERE id=?', 'si', [$url, $id]);
+        // Conserver l'adresse du vrai PNG. L'ancienne URL de lecture remplaçait
+        // le nom du fichier puis cherchait "phone-camera-api.php" sur le disque.
+        $url = $temporaryUrl;
     } catch (Throwable $error) {
         @unlink($absolute);
         throw $error;

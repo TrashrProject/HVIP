@@ -7,95 +7,101 @@ import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Systeme de paie ParadiseRP.
- * Chaque prise de service demarre un compte a rebours individuel et prive.
- */
+/** Systeme de paie ParadiseRP. Les messages de paie sont prives au joueur concerne. */
 public class PaydayTimer {
 
   private static final int DEFAULT_PAYDAY_MINUTES = 10;
-  private static final long ONE_MINUTE_MS = 60_000L;
+  private static final long TICK_MS = 60_000L;
 
-  /** Identifiant du cycle actif de chaque joueur. */
-  private final Map<Integer, String> activeCycles = new ConcurrentHashMap<>();
+  private final Timer timer = new Timer("ParadiseRP-Payday", true);
+  private final Map<Integer, Long> nextPayAt = new ConcurrentHashMap<>();
+  private final Map<Integer, Integer> lastDisplayedMinute = new ConcurrentHashMap<>();
 
   public void init() {
-    // Plus de timer global : chaque joueur possede son propre cycle de paie.
+    timer.scheduleAtFixedRate(new TimerTask() {
+      @Override
+      public void run() {
+        tick();
+      }
+    }, TICK_MS, TICK_MS);
   }
 
   public void onWorkStarted(Habbo habbo, RpAvatar data) {
-    if (!isEligible(habbo, data)) {
+    if (habbo == null || data == null || !data.isDuty()) {
       return;
     }
 
+    int minutes = getPaydayMinutes();
     int userId = habbo.getHabboInfo().getId();
-    int paydayMinutes = getPaydayMinutes();
-    String cycleId = UUID.randomUUID().toString();
+    long next = System.currentTimeMillis() + minutes * 60_000L;
 
-    activeCycles.put(userId, cycleId);
-    sendPrivateMessage(habbo,
-        "Prochaine paie dans " + paydayMinutes + " "
-            + (paydayMinutes > 1 ? "minutes" : "minute") + ".");
-
-    scheduleNextTick(habbo, userId, cycleId, paydayMinutes - 1);
+    nextPayAt.put(userId, next);
+    lastDisplayedMinute.put(userId, minutes);
+    sendPrivateMessage(habbo, "Prochaine paie dans " + minutes + " minutes.");
   }
 
   public void onWorkStopped(Habbo habbo) {
     if (habbo != null && habbo.getHabboInfo() != null) {
-      activeCycles.remove(habbo.getHabboInfo().getId());
+      int userId = habbo.getHabboInfo().getId();
+      nextPayAt.remove(userId);
+      lastDisplayedMinute.remove(userId);
     }
   }
 
-  private void scheduleNextTick(Habbo habbo, int userId, String cycleId,
-      int remainingMinutes) {
-    Emulator.getThreading().run(
-        () -> processTick(habbo, userId, cycleId, remainingMinutes),
-        ONE_MINUTE_MS);
-  }
+  private void tick() {
+    List<Habbo> employees = new ArrayList<>();
+    RolePlay.getJobsManager().getOnDutyEmployees().values().stream()
+        .flatMap(Collection::stream)
+        .distinct()
+        .forEach(employees::add);
 
-  private void processTick(Habbo habbo, int userId, String cycleId,
-      int remainingMinutes) {
-    if (!cycleId.equals(activeCycles.get(userId))) {
-      return;
-    }
-
-    RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
-    if (!isEligible(habbo, data)) {
-      activeCycles.remove(userId, cycleId);
-      return;
-    }
-
-    if (remainingMinutes > 0) {
-      sendPrivateMessage(habbo,
-          "Prochaine paie dans " + remainingMinutes + " "
-              + (remainingMinutes > 1 ? "minutes" : "minute") + ".");
-      scheduleNextTick(habbo, userId, cycleId, remainingMinutes - 1);
-      return;
-    }
-
-    pay(habbo, data);
-
-    if (!cycleId.equals(activeCycles.get(userId))) {
-      return;
-    }
-
+    long now = System.currentTimeMillis();
     int paydayMinutes = getPaydayMinutes();
-    sendPrivateMessage(habbo,
-        "Prochaine paie dans " + paydayMinutes + " "
-            + (paydayMinutes > 1 ? "minutes" : "minute") + ".");
-    scheduleNextTick(habbo, userId, cycleId, paydayMinutes - 1);
+    long cycleMs = paydayMinutes * 60_000L;
+
+    for (Habbo habbo : employees) {
+      RpAvatar data = RolePlay.getAvatarManager().getRpAvatar(habbo);
+      if (!isEligible(habbo, data)) {
+        onWorkStopped(habbo);
+        continue;
+      }
+
+      int userId = habbo.getHabboInfo().getId();
+      long dueAt = nextPayAt.computeIfAbsent(userId, ignored -> now + cycleMs);
+      lastDisplayedMinute.putIfAbsent(userId, paydayMinutes);
+
+      if (now >= dueAt) {
+        pay(habbo, data);
+        nextPayAt.put(userId, now + cycleMs);
+        lastDisplayedMinute.put(userId, paydayMinutes);
+        sendPrivateMessage(habbo, "Prochaine paie dans " + paydayMinutes + " minutes.");
+        continue;
+      }
+
+      long remainingMs = dueAt - now;
+      int remainingMinutes = (int) Math.ceil(remainingMs / 60_000.0);
+      int lastShown = lastDisplayedMinute.getOrDefault(userId, paydayMinutes);
+
+      // N'affiche que quand la minute restante change réellement : 10, 9, 8... sans doublons.
+      if (remainingMinutes < lastShown) {
+        lastDisplayedMinute.put(userId, remainingMinutes);
+        sendPrivateMessage(habbo,
+            "Prochaine paie dans " + remainingMinutes + " "
+                + (remainingMinutes > 1 ? "minutes" : "minute") + ".");
+      }
+    }
   }
 
   private void pay(Habbo habbo, RpAvatar data) {
     JobRankEntity rank = data.getJobRankEntity();
-    if (rank == null) {
-      return;
-    }
-
     BigDecimal salary = rank.getSalary();
     if (salary == null || salary.signum() <= 0) {
       return;
@@ -132,12 +138,14 @@ public class PaydayTimer {
         && !data.getJobEntity().isUnemployed()
         && data.getJobRankEntity() != null
         && !data.getJobRankEntity().equals(RolePlay.getJobService().getUnemployedRank())
-        && habbo.getRoomUnit() != null;
+        && habbo.getRoomUnit() != null
+        && !habbo.getRoomUnit().isIdle();
   }
 
   private static void sendPrivateMessage(Habbo habbo, String message) {
-    if (habbo != null) {
-      habbo.whisper(message, RoomChatMessageBubbles.NORMAL);
+    if (habbo == null) {
+      return;
     }
+    habbo.whisper(message, RoomChatMessageBubbles.NORMAL);
   }
 }

@@ -1,13 +1,32 @@
 (() => {
     'use strict';
-    if (window.__PARADISE_CAMERA_GRAM_FIX_V5__) return;
-    window.__PARADISE_CAMERA_GRAM_FIX_V5__ = '5.0.0';
+    if (window.__PARADISE_CAMERA_GRAM_FIX_V7__) return;
+    window.__PARADISE_CAMERA_GRAM_FIX_V7__ = '7.0.0';
 
     const runtime = window.__PARADISE_PHONE_RUNTIME__ = window.__PARADISE_PHONE_RUNTIME__ || { photos: [] };
     const CAMERA_API = '/nitro/phone-camera-api.php';
     const PHONE_API = '/nitro/phone-api.php';
     const CAMERA_ROOT_SELECTOR = '.phone-camera-shell,.phone-camera-app,.pce-camera,.pcam-camera,[data-phone-camera]';
-    const CAMERA_ZOOM = 3.15;
+
+    function installPhoneFixStyles() {
+        if (document.getElementById('paradise-phone-camera-contact-fix-v6')) return;
+        const style = document.createElement('style');
+        style.id = 'paradise-phone-camera-contact-fix-v6';
+        style.textContent = `
+            .nitro-phone-frame .pcam-live-preview,
+            .nitro-phone-frame .paradise-real-camera-preview{display:none!important}
+            .nitro-phone-frame.paradise-camera-active .phone-wallpaper{visibility:hidden!important}
+            .nitro-phone-frame .phone-friends-app .friend-row.paradise-callable-friend{min-height:58px!important;padding:6px 108px 6px 7px!important;gap:7px!important;box-sizing:border-box!important}
+            .nitro-phone-frame .phone-friends-app .friend-row.paradise-callable-friend .roleplay-avatar-list{flex:0 0 44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important}
+            .nitro-phone-frame .phone-friends-app .friend-row.paradise-callable-friend .friend-name{flex:1 1 auto!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+            .nitro-phone-frame .phone-friends-app .friend-row.paradise-callable-friend>.actions{position:absolute!important;right:6px!important;top:50%!important;transform:translateY(-50%)!important;display:flex!important;gap:3px!important}
+            .nitro-phone-frame .phone-friends-app .friend-row.paradise-callable-friend>.actions .icon-btn,
+            .nitro-phone-frame .phone-friends-app .friend-row.paradise-callable-friend .paradise-call-actions button{width:22px!important;min-width:22px!important;height:22px!important;padding:0!important}
+            .nitro-phone-frame .phone-friends-app .friend-row.paradise-callable-friend .paradise-call-actions{right:56px!important;gap:3px!important}
+        `;
+        document.head.append(style);
+    }
+    installPhoneFixStyles();
 
     const escapeHtml = value => String(value ?? '')
         .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -39,78 +58,85 @@
         node._timer = setTimeout(() => node.classList.remove('is-visible'), 2800);
     }
 
-    function findSceneCanvas(root) {
-        const candidates = [...document.querySelectorAll('canvas')].filter(canvas => {
-            if (!(canvas instanceof HTMLCanvasElement)) return false;
-            if (canvas.width < 300 || canvas.height < 200) return false;
-            if (root?.contains(canvas)) return false;
-            if (canvas.closest('.nitro-phone-frame,.phone-app-body,.pg-shell,#paradise-loading')) return false;
-            const rect = canvas.getBoundingClientRect();
-            if (rect.width < 200 || rect.height < 150) return false;
-            const style = getComputedStyle(canvas);
-            return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > 0;
-        });
-        return candidates.sort((a, b) => (b.width * b.height) - (a.width * a.height))[0] || null;
-    }
-
-    function drawCameraView(source, output) {
-        const ctx = output.getContext('2d', { alpha: false });
-        if (!ctx) return false;
-
-        const baseSide = Math.min(source.width, source.height);
-        const cropSide = Math.max(1, Math.floor(baseSide / CAMERA_ZOOM));
-        const sx = Math.max(0, Math.floor((source.width - cropSide) / 2));
-        const sy = Math.max(0, Math.floor((source.height - cropSide) / 2));
-
-        try {
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(source, sx, sy, cropSide, cropSide, 0, 0, output.width, output.height);
-            return true;
-        } catch {
-            return false;
-        }
-    }
-
-    function snapshot(root) {
-        const source = findSceneCanvas(root);
-        if (!source) throw new Error('La vue de la chambre est introuvable.');
-        const output = document.createElement('canvas');
-        output.width = 480;
-        output.height = 480;
-        if (!drawCameraView(source, output)) throw new Error('Impossible de capturer la chambre.');
-        return output.toDataURL('image/png');
-    }
-
     function installLivePreview(root) {
-        if (!root || root.dataset.paradiseLivePreview === '1') return;
-        root.dataset.paradiseLivePreview = '1';
-        const lens = root.querySelector('.pcam-lens') || root.querySelector('.phone-camera-preview') || root.querySelector('.pce-preview');
-        if (!lens) {
-            delete root.dataset.paradiseLivePreview;
-            return;
-        }
-
-        lens.style.position = 'relative';
-        let preview = lens.querySelector('canvas.paradise-real-camera-preview');
-        if (!preview) {
-            preview = document.createElement('canvas');
-            preview.className = 'paradise-real-camera-preview';
-            preview.width = 480;
-            preview.height = 480;
-            Object.assign(preview.style, {
-                position: 'absolute', inset: '0', width: '100%', height: '100%',
-                zIndex: '5', pointerEvents: 'none', background: '#000'
+        if (!root) return;
+        // Nitro capture directement la texture WebGL de la chambre. Les anciens
+        // miroirs 2D créaient une image noire et masquaient le viseur natif.
+        root.querySelectorAll('.paradise-real-camera-preview,.pcam-live-preview').forEach(node => node.remove());
+        root.dataset.paradiseLivePreview = 'native';
+        const frame = root.closest('.nitro-phone-frame');
+        frame?.classList.add('paradise-camera-active');
+        [root.closest('.phone-app-body'), root.closest('.phone-active-app'), root.closest('.phone-screen')]
+            .filter(Boolean)
+            .forEach(layer => {
+                if (!layer._paradiseCameraBackground) {
+                    layer._paradiseCameraBackground = {
+                        value: layer.style.getPropertyValue('background-color'),
+                        priority: layer.style.getPropertyPriority('background-color')
+                    };
+                }
+                layer.dataset.paradiseCameraTransparent = '1';
+                layer.style.setProperty('background-color', 'transparent', 'important');
             });
-            lens.append(preview);
-        }
+    }
 
-        const tick = () => {
-            if (!root.isConnected) return;
-            const source = findSceneCanvas(root);
-            if (source) drawCameraView(source, preview);
-            requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
+    function restoreClosedCameraLayers() {
+        document.querySelectorAll('.nitro-phone-frame.paradise-camera-active').forEach(frame => {
+            if (frame.querySelector(CAMERA_ROOT_SELECTOR)) return;
+            frame.classList.remove('paradise-camera-active');
+        });
+        document.querySelectorAll('[data-paradise-camera-transparent="1"]').forEach(layer => {
+            if (layer.querySelector(CAMERA_ROOT_SELECTOR)) return;
+            const previous = layer._paradiseCameraBackground || { value: '', priority: '' };
+            if (previous.value) layer.style.setProperty('background-color', previous.value, previous.priority);
+            else layer.style.removeProperty('background-color');
+            delete layer._paradiseCameraBackground;
+            delete layer.dataset.paradiseCameraTransparent;
+        });
+    }
+
+    function waitForNativePhoto(root, previousUrl = '', timeout = 2500) {
+        const started = performance.now();
+        return new Promise((resolve, reject) => {
+            const poll = () => {
+                const image = root?.querySelector('.pcam-preview-img,.camera-area[src]');
+                const url = image?.currentSrc || image?.src || '';
+                if (url && url !== previousUrl) return resolve(url);
+                if (!root?.isConnected || performance.now() - started >= timeout) {
+                    reject(new Error("Nitro n'a pas pu générer la photo."));
+                    return;
+                }
+                requestAnimationFrame(poll);
+            };
+            requestAnimationFrame(poll);
+        });
+    }
+
+    async function sourceToPngDataUrl(source) {
+        if (!source) throw new Error('La photo générée est vide.');
+        const image = new Image();
+        image.decoding = 'async';
+        image.src = source;
+        await image.decode();
+
+        const width = Math.max(1, image.naturalWidth || image.width);
+        const height = Math.max(1, image.naturalHeight || image.height);
+        const output = document.createElement('canvas');
+        output.width = Math.min(1024, width);
+        output.height = Math.min(1024, height);
+        const context = output.getContext('2d', { alpha: false, willReadFrequently: true });
+        if (!context) throw new Error('Impossible de préparer la photo.');
+        context.drawImage(image, 0, 0, output.width, output.height);
+
+        const sample = context.getImageData(0, 0, output.width, output.height).data;
+        const step = Math.max(4, Math.floor(sample.length / 4096 / 4) * 4);
+        let brightest = 0;
+        for (let index = 0; index < sample.length; index += step) {
+            brightest = Math.max(brightest, sample[index], sample[index + 1], sample[index + 2]);
+            if (brightest > 12) break;
+        }
+        if (brightest <= 12) throw new Error('La capture est noire. Réessayez après le chargement de la chambre.');
+        return output.toDataURL('image/png');
     }
 
     async function persistPhoto(root, imageData, button) {
@@ -127,7 +153,13 @@
             const payload = await response.json().catch(() => null);
             if (!response.ok || !payload?.ok || !payload.photo?.id) throw new Error(payload?.error || 'Sauvegarde impossible.');
 
-            runtime.photos = runtime.photos.filter(photo => Number(photo.id) !== Number(payload.photo.id) && photo.url !== payload.photo.url);
+            // Retire aussi la copie temporaire créée par le camera-roll Nitro afin
+            // que la galerie n'affiche pas deux fois la même prise de vue.
+            runtime.photos = runtime.photos.filter(photo =>
+                Number(photo.id || 0) > 0
+                && Number(photo.id) !== Number(payload.photo.id)
+                && photo.url !== payload.photo.url
+            );
             runtime.photos.unshift(payload.photo);
             window.dispatchEvent(new CustomEvent('paradise:camera-photo-saved', { detail: payload.photo }));
             closeConfirm(root);
@@ -175,9 +207,11 @@
 
     function isShutterButton(button) {
         if (!(button instanceof HTMLButtonElement)) return false;
+        if (button.matches('.pcam-shutter-btn,.pcam-shutter,.camera-shutter')) return true;
+        if (button.matches('.pcam-icon,.pce-icon,[data-camera-retake],[data-camera-save]')) return false;
         const label = `${button.textContent || ''} ${button.title || ''} ${button.getAttribute('aria-label') || ''} ${button.className || ''}`.toLowerCase();
         if (/(retour|back|fermer|close|annuler|cancel|effet|filter|zoom|flash)/i.test(label)) return false;
-        return /(acheter|achat|purchase|buy|capture|photo|prendre|take|shutter)/i.test(label) || button.matches('.pcam-shutter,.camera-shutter');
+        return /(capture|prendre|take|shutter)/i.test(label);
     }
 
     function unlockCameraButtons(scope = document) {
@@ -196,17 +230,17 @@
         if (!button || !isShutterButton(button)) return;
         const root = cameraRoot(button);
         if (!root) return;
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        try {
-            const imageData = snapshot(root);
-            showConfirm(root, imageData);
-        } catch (error) {
-            toast(root, error?.message || 'Impossible de prendre la photo.', true);
-        }
+        if (button.dataset.paradiseCapturePending === '1') return;
+        button.dataset.paradiseCapturePending = '1';
+        const previous = root.querySelector('.pcam-preview-img,.camera-area[src]');
+        const previousUrl = previous?.currentSrc || previous?.src || '';
+        // Le clic Nitro reste intact : React crée d'abord la texture native.
+        waitForNativePhoto(root, previousUrl)
+            .then(sourceToPngDataUrl)
+            .then(imageData => showConfirm(root, imageData))
+            .catch(error => toast(root, error?.message || 'Impossible de prendre la photo.', true))
+            .finally(() => delete button.dataset.paradiseCapturePending);
     };
-    document.addEventListener('pointerdown', handleCameraAction, true);
     document.addEventListener('click', handleCameraAction, true);
 
     async function getFeed() {
@@ -277,10 +311,11 @@
     });
 
     const observer = new MutationObserver(() => {
+        restoreClosedCameraLayers();
         unlockCameraButtons(document);
         decorateProfileGrid(document);
     });
-    observer.observe(document.getElementById('root') || document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'aria-disabled'] });
+    observer.observe(document.getElementById('root') || document.body, { childList: true, subtree: true });
     unlockCameraButtons(document);
     decorateProfileGrid(document);
 })();
