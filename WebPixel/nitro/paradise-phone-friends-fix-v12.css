@@ -1,0 +1,103 @@
+/* ParadiseRP — ParadisePhone friends V12
+   Final continuity + avatar restoration layer. Loaded after V10/V11. */
+
+/* One continuous surface from the search row to the bottom of the Friends app. */
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app),
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) > .phone-app-body,
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) .phone-app-body,
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) .phone-friends-app{
+  background:#07131f!important;
+  background-color:#07131f!important;
+}
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) > .phone-app-body,
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) .phone-friends-app{
+  min-height:100%!important;
+}
+.nitro-phone-frame .phone-friends-app{
+  background-image:none!important;
+}
+
+/* Keep back/search on one exact optical row. */
+.nitro-phone-frame .phone-active-app:has(.phone-friends-app) .phone-app-home{
+  top:7px!important;
+  height:35px!important;
+  min-height:35px!important;
+  transform:none!important;
+}
+.nitro-phone-frame .phone-friends-app .phone-input,
+.nitro-phone-frame .phone-friends-app input[type="text"]{
+  height:35px!important;
+  min-height:35px!important;
+  margin-top:0!important;
+  margin-bottom:0!important;
+}
+
+/* The avatar shell owns decoration; never style the actual Habbo image as the shell. */
+.nitro-phone-frame .phone-friends-app .friend-row .friend-avatar{
+  position:relative!important;
+  flex:0 0 40px!important;
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+  overflow:hidden!important;
+  border:2px solid rgba(130,169,198,.45)!important;
+  border-radius:50%!important;
+  background-color:#1a3144!important;
+  box-shadow:0 0 0 3px rgba(4,16,26,.30),0 3px 9px rgba(0,0,0,.20)!important;
+}
+.nitro-phone-frame .phone-friends-app .friends-section:first-of-type .friend-row .friend-avatar{
+  border-color:#43d1ff!important;
+  box-shadow:0 0 0 3px rgba(5,37,51,.60),0 0 13px rgba(67,209,255,.16)!important;
+}
+
+/* Real user head injected by friends V12 JS. */
+.nitro-phone-frame .phone-friends-app .friend-row .friend-avatar > img.paradise-friend-look,
+.nitro-phone-frame .phone-friends-app .friend-row img.friend-avatar.paradise-friend-look,
+.nitro-phone-frame .phone-friends-app .friend-row img.paradise-friend-look{
+  position:absolute!important;
+  z-index:5!important;
+  inset:0!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  image-rendering:auto!important;
+}
+.nitro-phone-frame .phone-friends-app .friend-row > img.paradise-friend-look.friend-avatar{
+  position:relative!important;
+  inset:auto!important;
+  flex:0 0 40px!important;
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+  border:2px solid rgba(130,169,198,.45)!important;
+  border-radius:50%!important;
+  background-color:#1a3144!important;
+  box-shadow:0 0 0 3px rgba(4,16,26,.30),0 3px 9px rgba(0,0,0,.20)!important;
+  object-fit:contain!important;
+}
+.nitro-phone-frame .phone-friends-app .friends-section:first-of-type .friend-row > img.paradise-friend-look.friend-avatar{
+  border-color:#43d1ff!important;
+}
+
+@media(max-width:430px), (max-height:650px){
+  .nitro-phone-frame .phone-friends-app .friend-row .friend-avatar,
+  .nitro-phone-frame .phone-friends-app .friend-row > img.paradise-friend-look.friend-avatar{
+    flex-basis:38px!important;
+    width:38px!important;
+    height:38px!important;
+    min-width:38px!important;
+    min-height:38px!important;
+  }
+}
