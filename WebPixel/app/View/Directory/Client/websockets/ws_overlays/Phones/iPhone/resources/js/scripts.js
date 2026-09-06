@@ -175,3 +175,116 @@ $(document).ready(function(){
         $('#panel_content').slideToggle('slow');
     });
 });
+
+/* ParadiseRP - confirmation de suppression de photo intégrée au téléphone */
+(function(){
+    'use strict';
+
+    var pendingDeleteTarget = null;
+    var bypassNextDelete = false;
+
+    function ensureDeleteConfirmUI(){
+        if(document.getElementById('paradisePhotoDeleteConfirm')) return;
+
+        var style = document.createElement('style');
+        style.id = 'paradise-photo-delete-confirm-style';
+        style.textContent = [
+            '#paradisePhotoDeleteConfirm{position:absolute;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(7,10,18,.58);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-radius:inherit;}',
+            '#paradisePhotoDeleteConfirm.is-open{display:flex;}',
+            '#paradisePhotoDeleteConfirm .ppdc-card{position:relative;width:238px;max-width:calc(100% - 30px);padding:20px 16px 15px;border-radius:18px;background:linear-gradient(180deg,#20263a 0%,#171c2c 100%);border:1px solid rgba(139,115,255,.35);box-shadow:0 18px 45px rgba(0,0,0,.45);color:#fff;text-align:center;font-family:inherit;}',
+            '#paradisePhotoDeleteConfirm .ppdc-close{position:absolute;top:7px;right:8px;width:18px;height:18px;min-width:18px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:rgba(255,255,255,.72);font-size:14px;line-height:18px;font-weight:700;cursor:pointer;}',
+            '#paradisePhotoDeleteConfirm .ppdc-close:hover{background:rgba(255,255,255,.14);color:#fff;}',
+            '#paradisePhotoDeleteConfirm .ppdc-icon{width:42px;height:42px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:rgba(255,80,98,.13);font-size:22px;}',
+            '#paradisePhotoDeleteConfirm .ppdc-title{display:block;font-size:15px;line-height:18px;font-weight:800;margin-bottom:6px;}',
+            '#paradisePhotoDeleteConfirm .ppdc-text{display:block;font-size:11px;line-height:15px;color:rgba(255,255,255,.7);margin:0 3px 14px;}',
+            '#paradisePhotoDeleteConfirm .ppdc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}',
+            '#paradisePhotoDeleteConfirm .ppdc-actions button{height:34px;border:0;border-radius:10px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer;}',
+            '#paradisePhotoDeleteConfirm .ppdc-cancel{background:rgba(255,255,255,.09);color:#fff;}',
+            '#paradisePhotoDeleteConfirm .ppdc-delete{background:#ff4f63;color:#fff;box-shadow:0 7px 16px rgba(255,79,99,.22);}'
+        ].join('');
+        document.head.appendChild(style);
+
+        var phone = document.getElementById('phone');
+        if(!phone) return;
+
+        var modal = document.createElement('div');
+        modal.id = 'paradisePhotoDeleteConfirm';
+        modal.setAttribute('aria-hidden','true');
+        modal.innerHTML = '<div class="ppdc-card" role="dialog" aria-modal="true" aria-label="Confirmer la suppression">' +
+            '<button type="button" class="ppdc-close" aria-label="Fermer">×</button>' +
+            '<div class="ppdc-icon">🗑️</div>' +
+            '<strong class="ppdc-title">Supprimer la photo ?</strong>' +
+            '<span class="ppdc-text">Cette action est définitive. La photo sera supprimée de votre galerie.</span>' +
+            '<div class="ppdc-actions"><button type="button" class="ppdc-cancel">Annuler</button><button type="button" class="ppdc-delete">Supprimer</button></div>' +
+            '</div>';
+        phone.appendChild(modal);
+
+        function closeModal(){
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden','true');
+            pendingDeleteTarget = null;
+        }
+
+        modal.querySelector('.ppdc-close').addEventListener('click', closeModal);
+        modal.querySelector('.ppdc-cancel').addEventListener('click', closeModal);
+        modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
+        modal.querySelector('.ppdc-delete').addEventListener('click', function(){
+            var target = pendingDeleteTarget;
+            closeModal();
+            if(!target || !document.documentElement.contains(target)) return;
+
+            bypassNextDelete = true;
+            var originalConfirm = window.confirm;
+            window.confirm = function(){ return true; };
+            try {
+                target.click();
+            } finally {
+                window.setTimeout(function(){
+                    window.confirm = originalConfirm;
+                    bypassNextDelete = false;
+                }, 0);
+            }
+        });
+    }
+
+    function looksLikeGalleryDelete(el){
+        if(!el || !el.closest) return false;
+        if(!el.closest('#app_Gallery, #gallery, .app_Gallery')) return false;
+
+        var candidate = el.closest('button,a,[role="button"],input,[onclick]') || el;
+        var haystack = [
+            candidate.id || '',
+            candidate.className || '',
+            candidate.getAttribute && candidate.getAttribute('title') || '',
+            candidate.getAttribute && candidate.getAttribute('aria-label') || '',
+            candidate.getAttribute && candidate.getAttribute('data-action') || '',
+            candidate.textContent || ''
+        ].join(' ').toLowerCase();
+
+        var img = candidate.querySelector && candidate.querySelector('img');
+        if(img) haystack += ' ' + ((img.getAttribute('src') || '') + ' ' + (img.getAttribute('alt') || '')).toLowerCase();
+
+        return /supprim|delete|trash|corbeille|remove/.test(haystack);
+    }
+
+    document.addEventListener('click', function(event){
+        if(bypassNextDelete) return;
+        if(!looksLikeGalleryDelete(event.target)) return;
+
+        ensureDeleteConfirmUI();
+        var modal = document.getElementById('paradisePhotoDeleteConfirm');
+        if(!modal) return;
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        pendingDeleteTarget = event.target.closest('button,a,[role="button"],input,[onclick]') || event.target;
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden','false');
+    }, true);
+
+    if(document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', ensureDeleteConfirmUI);
+    } else {
+        ensureDeleteConfirmUI();
+    }
+})();
