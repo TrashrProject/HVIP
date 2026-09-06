@@ -7,6 +7,7 @@ import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import io.github.brenoepics.roleplay.utilities.LiveFeed;
 
 public class KillCommand extends Command {
 
@@ -46,6 +47,11 @@ public class KillCommand extends Command {
     avatar.kill();
     String staffName = staff.getHabboInfo().getUsername();
     String targetName = target.getHabboInfo().getUsername();
+
+    if (avatar.isDead()) {
+      LiveFeed.sendGlobalAlert(LiveFeed.alert("[DECES] " + targetName + " est mort."));
+    }
+
     staff.whisper("Vous avez tu\u00e9 " + targetName + ".", RoomChatMessageBubbles.NORMAL);
     target.whisper("Vous avez \u00e9t\u00e9 tu\u00e9 par le staff " + staffName + ".",
         RoomChatMessageBubbles.ALERT);
