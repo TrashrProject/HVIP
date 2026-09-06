@@ -23,6 +23,7 @@ public class PaydayTimer {
 
   private final Timer timer = new Timer("ParadiseRP-Payday", true);
   private final Map<Integer, Long> nextPayAt = new ConcurrentHashMap<>();
+  private final Map<Integer, Integer> lastDisplayedMinute = new ConcurrentHashMap<>();
 
   public void init() {
     timer.scheduleAtFixedRate(new TimerTask() {
@@ -39,14 +40,19 @@ public class PaydayTimer {
     }
 
     int minutes = getPaydayMinutes();
+    int userId = habbo.getHabboInfo().getId();
     long next = System.currentTimeMillis() + minutes * 60_000L;
-    nextPayAt.put(habbo.getHabboInfo().getId(), next);
+
+    nextPayAt.put(userId, next);
+    lastDisplayedMinute.put(userId, minutes);
     sendPrivateMessage(habbo, "Prochaine paie dans " + minutes + " minutes.");
   }
 
   public void onWorkStopped(Habbo habbo) {
     if (habbo != null && habbo.getHabboInfo() != null) {
-      nextPayAt.remove(habbo.getHabboInfo().getId());
+      int userId = habbo.getHabboInfo().getId();
+      nextPayAt.remove(userId);
+      lastDisplayedMinute.remove(userId);
     }
   }
 
@@ -70,18 +76,27 @@ public class PaydayTimer {
 
       int userId = habbo.getHabboInfo().getId();
       long dueAt = nextPayAt.computeIfAbsent(userId, ignored -> now + cycleMs);
+      lastDisplayedMinute.putIfAbsent(userId, paydayMinutes);
 
       if (now >= dueAt) {
         pay(habbo, data);
         nextPayAt.put(userId, now + cycleMs);
+        lastDisplayedMinute.put(userId, paydayMinutes);
+        sendPrivateMessage(habbo, "Prochaine paie dans " + paydayMinutes + " minutes.");
         continue;
       }
 
       long remainingMs = dueAt - now;
       int remainingMinutes = (int) Math.ceil(remainingMs / 60_000.0);
-      sendPrivateMessage(habbo,
-          "Prochaine paie dans " + remainingMinutes + " "
-              + (remainingMinutes > 1 ? "minutes" : "minute") + ".");
+      int lastShown = lastDisplayedMinute.getOrDefault(userId, paydayMinutes);
+
+      // N'affiche que quand la minute restante change réellement : 10, 9, 8... sans doublons.
+      if (remainingMinutes < lastShown) {
+        lastDisplayedMinute.put(userId, remainingMinutes);
+        sendPrivateMessage(habbo,
+            "Prochaine paie dans " + remainingMinutes + " "
+                + (remainingMinutes > 1 ? "minutes" : "minute") + ".");
+      }
     }
   }
 
