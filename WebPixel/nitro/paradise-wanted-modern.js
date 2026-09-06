@@ -11,6 +11,15 @@
     return Math.max(0, Math.min(5, matches ? matches.length : 0));
   }
 
+  function dangerLabel(stars) {
+    if (stars <= 0) return 'Non évalué';
+    if (stars === 1) return 'Faible';
+    if (stars === 2) return 'Modéré';
+    if (stars === 3) return 'Élevé';
+    if (stars === 4) return 'Très élevé';
+    return 'Critique';
+  }
+
   function extractName(box) {
     const primary = box.querySelector('.text-primary, [class*="text-primary"], strong, b');
     if (primary) {
@@ -63,7 +72,7 @@
         <aside class="paradise-wanted-sidebar">
           <div class="paradise-wanted-tabs">
             <button class="paradise-wanted-tab is-active" type="button" data-pr-tab="list"><span>👥</span> LISTE</button>
-            <button class="paradise-wanted-tab" type="button" data-pr-tab="info"><span>📄</span> INFOS</button>
+            <button class="paradise-wanted-tab" type="button" data-pr-tab="info"><span>▣</span> INFOS</button>
           </div>
           <section class="paradise-wanted-panel" data-pr-panel="list">
             <div class="paradise-wanted-search-wrap"><span class="paradise-wanted-search-icon">⌕</span><input class="paradise-wanted-search" type="search" placeholder="Rechercher un suspect..." autocomplete="off"></div>
@@ -71,7 +80,7 @@
             <div class="paradise-wanted-count"></div>
           </section>
           <section class="paradise-wanted-panel" data-pr-panel="info" hidden>
-            <div class="paradise-wanted-info-panel"><strong>Registre des personnes recherchées</strong><p>Consultez les individus actuellement signalés par les autorités de Lake Placid.</p><p>Le niveau de danger correspond au nombre réel d’étoiles wanted reçu par le client.</p></div>
+            <div class="paradise-wanted-info-panel"><strong>Registre des personnes recherchées</strong><p>Consultez les individus actuellement signalés par les autorités de Lake Placid.</p><p>Le niveau de danger est calculé à partir du nombre réel d’étoiles transmis par le système wanted.</p></div>
           </section>
         </aside>
         <main class="paradise-wanted-detail"></main>
@@ -105,8 +114,17 @@
     main.innerHTML = `
       <div class="paradise-wanted-name-row"><div class="paradise-wanted-profile-name"></div><div class="paradise-wanted-status">RECHERCHÉ</div></div>
       <div class="paradise-wanted-two-col">
-        <div><div class="paradise-wanted-label">Alias</div><div class="paradise-wanted-value">Aucun alias connu</div></div>
-        <div><div class="paradise-wanted-label">Niveau de danger</div><div class="paradise-wanted-danger-stars">${starsMarkup(user.stars, true)}</div></div>
+        <div>
+          <div class="paradise-wanted-label">Alias</div>
+          <div class="paradise-wanted-value">Aucun alias connu</div>
+        </div>
+        <div>
+          <div class="paradise-wanted-label">Niveau de danger</div>
+          <div class="paradise-wanted-danger-row">
+            <div class="paradise-wanted-danger-stars">${starsMarkup(user.stars, true)}</div>
+            <div class="paradise-wanted-danger-level">${dangerLabel(user.stars)}</div>
+          </div>
+        </div>
       </div>`;
     main.querySelector('.paradise-wanted-profile-name').textContent = user.name;
     head.appendChild(main);
@@ -115,11 +133,24 @@
     const facts = document.createElement('div');
     facts.className = 'paradise-wanted-facts';
     facts.innerHTML = `
-      <div class="paradise-wanted-fact"><div class="paradise-wanted-fact-icon">$</div><div><div class="paradise-wanted-label">Récompense</div><div class="paradise-wanted-value">—</div></div></div>
-      <div class="paradise-wanted-fact"><div class="paradise-wanted-fact-icon">⌖</div><div><div class="paradise-wanted-label">Dernier secteur connu</div><div class="paradise-wanted-value">Inconnu</div></div></div>
-      <div class="paradise-wanted-fact is-wide"><div class="paradise-wanted-fact-icon">▤</div><div><div class="paradise-wanted-label">Motif</div><div class="paradise-wanted-value">Aucun motif communiqué.</div></div></div>
-      <div class="paradise-wanted-fact is-wide"><div class="paradise-wanted-fact-icon">!</div><div><div class="paradise-wanted-label">Informations</div><div class="paradise-wanted-value">Individu actuellement recherché par les autorités de Lake Placid.</div></div></div>`;
+      <div class="paradise-wanted-fact">
+        <div class="paradise-wanted-fact-icon">$</div>
+        <div><div class="paradise-wanted-label">Récompense</div><div class="paradise-wanted-value paradise-wanted-fact-value-strong">—</div></div>
+      </div>
+      <div class="paradise-wanted-fact">
+        <div class="paradise-wanted-fact-icon">⌖</div>
+        <div><div class="paradise-wanted-label">Dernier secteur connu</div><div class="paradise-wanted-value">Inconnu</div></div>
+      </div>
+      <div class="paradise-wanted-fact is-wide">
+        <div class="paradise-wanted-fact-icon">▤</div>
+        <div><div class="paradise-wanted-label">Motif</div><div class="paradise-wanted-value">Aucun motif communiqué.</div></div>
+      </div>`;
     detail.appendChild(facts);
+
+    const information = document.createElement('div');
+    information.className = 'paradise-wanted-information';
+    information.innerHTML = '<div class="paradise-wanted-label">Informations</div><div class="paradise-wanted-value">Individu actuellement recherché par les autorités de Lake Placid.</div>';
+    detail.appendChild(information);
 
     const warning = document.createElement('div');
     warning.className = 'paradise-wanted-warning';
@@ -151,7 +182,7 @@
     list.innerHTML = '';
     if (!filtered.length) list.innerHTML = '<div class="paradise-wanted-empty">Aucun résultat.</div>';
 
-    let selected = users.find(user => user.name === previousSelection) || users[0] || null;
+    const selected = users.find(user => user.name === previousSelection) || users[0] || null;
 
     filtered.forEach(user => {
       const card = document.createElement('button');
@@ -162,12 +193,15 @@
 
       const meta = document.createElement('div');
       meta.className = 'pr-wanted-meta';
+
       const name = document.createElement('div');
       name.className = 'pr-wanted-name';
       name.textContent = user.name;
+
       const stars = document.createElement('div');
       stars.className = 'pr-wanted-stars';
       stars.innerHTML = starsMarkup(user.stars, true);
+
       meta.append(name, stars);
       card.appendChild(meta);
 
@@ -181,6 +215,7 @@
         renderList(alert, shell);
         renderDetail(shell, user);
       });
+
       list.appendChild(card);
     });
 
@@ -223,8 +258,11 @@
     requestAnimationFrame(scan);
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleScan, { once: true });
-  else scheduleScan();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleScan, { once: true });
+  } else {
+    scheduleScan();
+  }
 
   new MutationObserver(scheduleScan).observe(document.documentElement, { childList: true, subtree: true });
 })();
