@@ -1,1 +1,0 @@
-V4 global catalogue migration bundle for ParadiseRP. See canonical modern/legacy SQL files and deployment documentation in artifacts/paradise-catalog-v4-deployment.md.
