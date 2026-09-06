@@ -2,9 +2,9 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_CALL_LAYOUT_V1__) return;
-  window.__PARADISE_PHONE_CALL_LAYOUT_V1__ = '1.0.0';
+  window.__PARADISE_PHONE_CALL_LAYOUT_V1__ = '1.0.1';
 
-  const CHECK_MS = 350;
+  const CHECK_MS = 450;
   const VIEWPORT_MARGIN = 8;
 
   let videoMounted = false;
@@ -61,10 +61,14 @@
     if (dx || dy) saveTranslate(frame, current.x + dx, current.y + dy);
   }
 
-  function applyOrientation() {
+  function applyOrientation(force = false) {
     const frame = getFrame();
     const layer = getLayer();
     if (!frame || !layer) return;
+
+    const frameHasLandscape = frame.classList.contains('pcall-video-landscape');
+    const layerHasLandscape = layer.classList.contains('pcall-video-landscape-layer');
+    if (!force && frameHasLandscape === landscape && layerHasLandscape === landscape) return;
 
     frame.classList.toggle('pcall-video-landscape', landscape);
     layer.classList.toggle('pcall-video-landscape-layer', landscape);
@@ -128,7 +132,8 @@
     const frame = getFrame();
     if (!layer || !card || !frame) return false;
 
-    if (!videoMounted) {
+    const firstMount = !videoMounted;
+    if (firstMount) {
       videoMounted = true;
       expanded = true;
       landscape = false;
@@ -137,7 +142,7 @@
     layer.classList.toggle('pcall-video-expanded', expanded);
     ensureExtraControls(card);
     ensureRoomWhisperBadge(card);
-    applyOrientation();
+    applyOrientation(firstMount);
     return true;
   }
 
@@ -221,7 +226,7 @@
       event.preventDefault();
       event.stopPropagation();
       landscape = !landscape;
-      applyOrientation();
+      applyOrientation(true);
       updateControlLabels();
     }
   }, true);
