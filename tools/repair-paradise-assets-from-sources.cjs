@@ -56,6 +56,14 @@ const entries = [
 const classNames = [...new Set(entries
     .map(entry => String(entry.classname || '').split('*')[0])
     .filter(Boolean))];
+const parameterizedIconNames = [...new Set(entries
+    .map(entry => String(entry.classname || ''))
+    .filter(className => className.includes('*'))
+    .map(className => {
+        const [baseName, ...parameters] = className.split('*');
+        return `${baseName}_${parameters.join('*')}`;
+    })
+    .filter(Boolean))];
 
 const indexes = {
     nitro: { exact: new Map(), normalized: new Map() },
@@ -292,6 +300,18 @@ for (const className of classNames) {
     }
 }
 
+// Nitro appends the FurnitureData parameter to the library name when it asks
+// for a catalogue icon (example: bonusrare20_2*5 becomes
+// bonusrare20_2_5_icon.png). Checking only the generic base icon leaves those
+// colour/state variants broken even when the furniture model itself exists.
+for (const iconName of parameterizedIconNames) {
+    const iconDestination = path.join(targetIcons, `${iconName}_icon.png`);
+    const icon = recover('icon', iconName, iconDestination);
+    if (icon.state !== 'present') {
+        rows.push({ className: iconName, nitro: 'parameterized-icon', nitroSource: '', icon: icon.state, iconSource: icon.source });
+    }
+}
+
 const csvEscape = value => `"${String(value).replace(/"/g, '""')}"`;
 const csv = [
     ['classname', 'nitro', 'nitro_source', 'icon', 'icon_source'].map(csvEscape).join(','),
@@ -302,6 +322,7 @@ fs.writeFileSync(reportPath, csv, 'utf8');
 
 const remainingNitro = classNames.filter(className => !fs.existsSync(path.join(targetFurniture, `${className}.nitro`))).length;
 const remainingIcons = classNames.filter(className => !fs.existsSync(path.join(targetIcons, `${className}_icon.png`))).length;
+const remainingParameterizedIcons = parameterizedIconNames.filter(iconName => !fs.existsSync(path.join(targetIcons, `${iconName}_icon.png`))).length;
 console.log(JSON.stringify({
     mode: apply ? 'apply' : 'audit',
     sources,
@@ -309,5 +330,7 @@ console.log(JSON.stringify({
     ...counters,
     remainingNitro,
     remainingIcons,
+    parameterizedIcons: parameterizedIconNames.length,
+    remainingParameterizedIcons,
     reportPath
 }, null, 2));
