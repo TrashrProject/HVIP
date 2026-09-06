@@ -1,0 +1,202 @@
+/* ParadiseRP — appels vidéo V4 : plein écran téléphone, paysage, murmures sur la salle */
+
+/* L'appel vidéo utilise désormais tout l'écran du téléphone. */
+.nitro-phone-frame.pcall-v4-video-active .paradise-call-layer.pcall-v4-video-fullscreen{
+  position:absolute!important;
+  inset:0!important;
+  width:auto!important;
+  height:auto!important;
+  border-radius:28px!important;
+  overflow:hidden!important;
+  z-index:2147481000!important;
+}
+.nitro-phone-frame.pcall-v4-video-active .paradise-call-layer.pcall-v4-video-fullscreen .pcall-card.is-video{
+  width:100%!important;
+  height:100%!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:28px!important;
+  background:#02070c!important;
+  box-shadow:none!important;
+}
+.nitro-phone-frame.pcall-v4-video-active .pcall-active.is-video>video[data-pcall-remote]{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  background:#030a11!important;
+}
+.nitro-phone-frame.pcall-v4-video-active .pcall-video-shade{
+  background:linear-gradient(180deg,#000b 0,transparent 22%,transparent 70%,#000d 100%)!important;
+}
+.nitro-phone-frame.pcall-v4-video-active .pcall-video-head{
+  top:18px!important;
+  left:17px!important;
+  right:17px!important;
+}
+.nitro-phone-frame.pcall-v4-video-active .pcall-video-head b{font-size:15px!important}
+.nitro-phone-frame.pcall-v4-video-active .pcall-video-head span{font-size:8px!important}
+.nitro-phone-frame.pcall-v4-video-active .pcall-video-head small{font-size:6px!important;opacity:.85}
+.nitro-phone-frame.pcall-v4-video-active .pcall-local-video{
+  top:18px!important;
+  right:14px!important;
+  width:62px!important;
+  height:84px!important;
+  border-radius:12px!important;
+  border:2px solid #fff!important;
+  box-shadow:0 7px 20px #000b!important;
+}
+.nitro-phone-frame.pcall-v4-video-active .pcall-active.is-video .pcall-controls{
+  left:50%!important;
+  right:auto!important;
+  bottom:18px!important;
+  transform:translateX(-50%)!important;
+  width:auto!important;
+  gap:11px!important;
+  padding:8px 11px!important;
+  border-radius:20px!important;
+  background:#07131dcc!important;
+  border:1px solid #ffffff1f!important;
+  backdrop-filter:blur(8px)!important;
+}
+.nitro-phone-frame.pcall-v4-video-active .pcall-active.is-video .pcall-control:not(.is-hangup){
+  min-width:47px!important;
+  color:#fff!important;
+}
+.pcall-v4-rotate{font-size:20px!important}
+.pcall-v4-rotate>span{font-size:7px!important}
+
+/* Murmures : plus de grosse boîte dans l'appel. Ils sont affichés sur la salle. */
+.pcall-room-whisper-dock{
+  position:fixed;
+  z-index:2147480500;
+  left:50%;
+  bottom:64px;
+  width:min(410px,calc(100vw - 34px));
+  transform:translateX(-50%);
+  pointer-events:none;
+  font-family:Arial,sans-serif;
+}
+.pcall-room-whisper-dock .pcall-whisper-panel.pcall-whisper-on-room{
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+  pointer-events:none;
+}
+.pcall-room-whisper-dock .pcall-whisper-title{display:none!important}
+.pcall-room-whisper-dock .pcall-whisper-list{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-end!important;
+  gap:5px!important;
+  min-height:0!important;
+  max-height:92px!important;
+  padding:0 7px 7px!important;
+  overflow:hidden!important;
+  background:transparent!important;
+  pointer-events:none;
+}
+.pcall-room-whisper-dock .pcall-whisper-empty{display:none!important}
+.pcall-room-whisper-dock .pcall-whisper{
+  max-width:72%!important;
+  padding:6px 9px!important;
+  border-radius:13px!important;
+  font-size:10px!important;
+  line-height:1.3!important;
+  color:#fff!important;
+  box-shadow:0 3px 12px #000a!important;
+  backdrop-filter:blur(5px)!important;
+}
+.pcall-room-whisper-dock .pcall-whisper b{
+  display:none!important;
+}
+.pcall-room-whisper-dock .pcall-whisper.is-peer{
+  align-self:flex-start!important;
+  background:#172a3ee8!important;
+  border:1px solid #6bbfe055!important;
+  border-bottom-left-radius:4px!important;
+}
+.pcall-room-whisper-dock .pcall-whisper.is-mine{
+  align-self:flex-end!important;
+  background:#0877bde8!important;
+  border:1px solid #4fc8ff66!important;
+  border-bottom-right-radius:4px!important;
+}
+.pcall-room-whisper-dock .pcall-whisper-form{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 38px!important;
+  gap:6px!important;
+  padding:5px!important;
+  border:1px solid #ffffff2c!important;
+  border-radius:12px!important;
+  background:#07131ddd!important;
+  box-shadow:0 5px 18px #0008!important;
+  backdrop-filter:blur(8px)!important;
+  pointer-events:auto!important;
+}
+.pcall-room-whisper-dock .pcall-whisper-form input{
+  height:34px!important;
+  border:1px solid #315d78!important;
+  border-radius:8px!important;
+  background:#0b2233e8!important;
+  color:#fff!important;
+  padding:0 10px!important;
+  font-size:10px!important;
+}
+.pcall-room-whisper-dock .pcall-whisper-form button{
+  width:38px!important;
+  height:34px!important;
+  border-radius:8px!important;
+  font-size:14px!important;
+}
+
+/* Mode paysage : l'écran d'appel sort du téléphone et devient une vue horizontale propre. */
+body.pcall-v4-landscape-open .paradise-call-layer.pcall-v4-video-fullscreen.pcall-v4-landscape{
+  position:fixed!important;
+  left:50%!important;
+  top:50%!important;
+  right:auto!important;
+  bottom:auto!important;
+  inset:auto!important;
+  width:min(88vw,820px)!important;
+  height:min(76vh,460px)!important;
+  transform:translate(-50%,-50%)!important;
+  border:6px solid #06121c!important;
+  border-radius:28px!important;
+  box-shadow:0 22px 70px #000d,0 0 0 2px #00a7b9!important;
+  z-index:2147482000!important;
+}
+body.pcall-v4-landscape-open .paradise-call-layer.pcall-v4-video-fullscreen.pcall-v4-landscape .pcall-card.is-video{
+  border-radius:21px!important;
+}
+body.pcall-v4-landscape-open .paradise-call-layer.pcall-v4-video-fullscreen.pcall-v4-landscape .pcall-local-video{
+  width:100px!important;
+  height:72px!important;
+  top:18px!important;
+  right:18px!important;
+}
+body.pcall-v4-landscape-open .paradise-call-layer.pcall-v4-video-fullscreen.pcall-v4-landscape .pcall-video-head{
+  top:18px!important;
+  left:20px!important;
+}
+body.pcall-v4-landscape-open .paradise-call-layer.pcall-v4-video-fullscreen.pcall-v4-landscape .pcall-controls{
+  bottom:15px!important;
+}
+
+@media(max-width:700px){
+  .pcall-room-whisper-dock{bottom:58px;width:calc(100vw - 20px)}
+  body.pcall-v4-landscape-open .paradise-call-layer.pcall-v4-video-fullscreen.pcall-v4-landscape{
+    width:96vw!important;
+    height:56vw!important;
+    max-height:82vh!important;
+  }
+}
