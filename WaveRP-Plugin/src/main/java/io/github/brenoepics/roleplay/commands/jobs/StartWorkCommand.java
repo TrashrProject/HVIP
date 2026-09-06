@@ -2,6 +2,7 @@ package io.github.brenoepics.roleplay.commands.jobs;
 
 import static io.github.brenoepics.roleplay.features.user.HungerRunner.MISSING_ENERGY;
 
+import com.eu.habbo.Emulator;
 import com.eu.habbo.habbohotel.commands.Command;
 import com.eu.habbo.habbohotel.gameclients.GameClient;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
@@ -65,9 +66,12 @@ public class StartWorkCommand extends Command {
     }
 
     if (RolePlay.getJobsManager().startWork(gameClient, data, habbo)) {
-      // Chaque prise de service démarre un nouveau cycle de paie : pas de salaire instantané
-      // ni de rattrapage d'une ancienne session.
+      int paydayMinutes = Math.max(1,
+          Emulator.getConfig().getInt("features.payday.timer_minutes", 10));
       data.setLastPayday(new Date());
+      habbo.whisper(
+          "Prochaine paie dans " + paydayMinutes + " minutes.",
+          RoomChatMessageBubbles.ALERT);
       data.executeAction();
     }
     return true;
