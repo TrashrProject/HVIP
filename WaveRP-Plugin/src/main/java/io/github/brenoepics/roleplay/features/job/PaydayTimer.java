@@ -14,32 +14,29 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Verse la paie aux joueurs réellement en service.
- *
- * Le montant vient directement de job_ranks.salary : chaque métier et chaque grade peut donc
- * avoir un salaire différent sans recoder le plugin. L'intervalle est configurable mais vaut
- * 10 minutes par défaut. La paie est versée en crédits Habbo.
+ * Verse la paie aux joueurs réellement en service et affiche le temps restant chaque minute.
+ * Le salaire vient de job_ranks.salary et la paie est versée en crédits Habbo.
  */
 public class PaydayTimer {
 
   private static final int DEFAULT_PAYDAY_MINUTES = 10;
+  private static final long CHECK_PERIOD_MS = 60_000L;
   private final Timer timer = new Timer("ParadiseRP-Payday", true);
 
   public void init() {
     int paydayMinutes = Math.max(1,
         Emulator.getConfig().getInt("features.payday.timer_minutes", DEFAULT_PAYDAY_MINUTES));
-    long periodMs = paydayMinutes * 60_000L;
 
-    // On ne paie pas au démarrage du serveur : le premier passage arrive après un cycle complet.
+    // Vérification chaque minute pour afficher un vrai compte à rebours individuel.
     timer.scheduleAtFixedRate(new TimerTask() {
       @Override
       public void run() {
-        payEmployees(paydayMinutes);
+        processEmployees(paydayMinutes);
       }
-    }, periodMs, periodMs);
+    }, CHECK_PERIOD_MS, CHECK_PERIOD_MS);
   }
 
-  private void payEmployees(int paydayMinutes) {
+  private void processEmployees(int paydayMinutes) {
     List<Habbo> toRemove = new ArrayList<>();
     List<Habbo> onDutyEmployees = RolePlay.getJobsManager().getOnDutyEmployees().values().stream()
         .flatMap(Collection::stream)
@@ -56,51 +53,61 @@ public class PaydayTimer {
 
       Date lastPayday = data.getLastPayday();
       if (lastPayday == null) {
-        // Sécurité pour les anciens joueurs / anciennes sessions.
         data.setLastPayday(now);
+        sendCountdown(habbo, paydayMinutes);
         continue;
       }
 
-      int diffInMinutes = minutesSinceLastPayday(now, lastPayday);
-      if (diffInMinutes < paydayMinutes) {
-        continue;
+      long elapsedMs = Math.max(0L, now.getTime() - lastPayday.getTime());
+      long paydayMs = paydayMinutes * 60_000L;
+
+      if (elapsedMs >= paydayMs) {
+        payEmployee(habbo, data, now);
+      } else {
+        long remainingMs = paydayMs - elapsedMs;
+        int remainingMinutes = (int) Math.ceil(remainingMs / 60_000.0);
+        sendCountdown(habbo, Math.max(1, remainingMinutes));
       }
-
-      JobRankEntity rank = data.getJobRankEntity();
-      BigDecimal salary = rank.getSalary();
-      if (salary == null || salary.signum() <= 0) {
-        data.setLastPayday(now);
-        continue;
-      }
-
-      int earned = salary.setScale(0, java.math.RoundingMode.HALF_UP).intValue();
-      if (earned <= 0) {
-        data.setLastPayday(now);
-        continue;
-      }
-
-      data.setLastPayday(now);
-      habbo.giveCredits(earned);
-
-      String jobName = data.getJobEntity() == null
-          ? "Métier"
-          : data.getJobEntity().getDisplayName();
-      if (data.getJobEntity() != null
-          && "hospital".equalsIgnoreCase(data.getJobEntity().getName())) {
-        jobName = "EMS";
-      }
-
-      habbo.whisper(
-          "Salaire reçu : +" + earned + " crédits — " + jobName + " | " + rank.getDisplayName(),
-          RoomChatMessageBubbles.ALERT);
     }
 
     toRemove.forEach(habbo -> RolePlay.getJobsManager().removeEmployee(habbo));
   }
 
-  private static int minutesSinceLastPayday(Date now, Date lastPayday) {
-    long diffInMillis = Math.max(0L, now.getTime() - lastPayday.getTime());
-    return (int) (diffInMillis / 60_000L);
+  private void payEmployee(Habbo habbo, RpAvatar data, Date now) {
+    JobRankEntity rank = data.getJobRankEntity();
+    BigDecimal salary = rank.getSalary();
+
+    data.setLastPayday(now);
+
+    if (salary == null || salary.signum() <= 0) {
+      return;
+    }
+
+    int earned = salary.setScale(0, java.math.RoundingMode.HALF_UP).intValue();
+    if (earned <= 0) {
+      return;
+    }
+
+    habbo.giveCredits(earned);
+
+    String jobName = data.getJobEntity() == null
+        ? "Métier"
+        : data.getJobEntity().getDisplayName();
+    if (data.getJobEntity() != null
+        && "hospital".equalsIgnoreCase(data.getJobEntity().getName())) {
+      jobName = "EMS";
+    }
+
+    habbo.whisper(
+        "Salaire reçu : +" + earned + " crédits — " + jobName + " | " + rank.getDisplayName(),
+        RoomChatMessageBubbles.ALERT);
+  }
+
+  private static void sendCountdown(Habbo habbo, int minutes) {
+    String unit = minutes > 1 ? "minutes" : "minute";
+    habbo.whisper(
+        "Prochaine paie dans " + minutes + " " + unit + ".",
+        RoomChatMessageBubbles.ALERT);
   }
 
   private static boolean isUnavailable(Habbo habbo, RpAvatar data) {
