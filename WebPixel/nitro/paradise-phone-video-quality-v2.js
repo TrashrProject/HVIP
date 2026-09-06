@@ -2,7 +2,26 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_VIDEO_QUALITY_V2__) return;
-  window.__PARADISE_PHONE_VIDEO_QUALITY_V2__ = '2.4.0';
+  window.__PARADISE_PHONE_VIDEO_QUALITY_V2__ = '2.5.0';
+
+  /* Route Stable V2 through the guarded API before the call engine loads.
+     The guard expires accepted calls that no longer receive status heartbeats,
+     preventing ghost calls from leaving both phones permanently busy. */
+  if (!window.__PARADISE_PHONE_CALL_API_GUARD_ROUTE__) {
+    window.__PARADISE_PHONE_CALL_API_GUARD_ROUTE__ = true;
+    const nativeFetch = window.fetch.bind(window);
+    const oldPath = '/nitro/phone-call-api.php';
+    const guardedPath = '/nitro/phone-call-api-v2.php';
+
+    window.fetch = function paradisePhoneGuardedFetch(input, init) {
+      try {
+        if (typeof input === 'string' && input.includes(oldPath)) {
+          input = input.replace(oldPath, guardedPath);
+        }
+      } catch {}
+      return nativeFetch(input, init);
+    };
+  }
 
   const TARGET_FPS = 15;
   const TARGET_BITRATE = 12_000_000;
@@ -179,5 +198,5 @@
     }
   }
 
-  console.info('[ParadisePhone] video quality V2.4 active — native WebGL capture both sides');
+  console.info('[ParadisePhone] video quality V2.5 active — native WebGL + call heartbeat guard');
 })();
