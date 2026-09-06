@@ -1,0 +1,19 @@
+.phone-gallery{position:relative!important}
+.pgal-delete-confirm-overlay{position:absolute;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(4,12,22,.58);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:pgal-confirm-fade .12s ease-out}
+.pgal-delete-confirm-card{width:min(220px,calc(100% - 24px));box-sizing:border-box;padding:17px 14px 14px;border:1px solid rgba(18,50,77,.12);border-radius:16px;background:#fff;color:#172033;text-align:center;font-family:Arial,sans-serif;box-shadow:0 16px 36px rgba(0,0,0,.35);animation:pgal-confirm-pop .14s ease-out}
+.pgal-delete-confirm-icon{width:42px;height:42px;margin:0 auto 10px;display:grid;place-items:center;border-radius:50%;background:#a92f3b;color:#fff;font-size:28px;line-height:1;font-weight:700;box-shadow:0 4px 12px rgba(169,47,59,.26)}
+.pgal-delete-confirm-card strong{display:block;color:inherit!important;font-size:14px;line-height:1.25;font-weight:800}
+.pgal-delete-confirm-card p{margin:6px 0 0;color:#667789!important;font-size:10px;line-height:1.4}
+.pgal-delete-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.pgal-delete-confirm-actions button{min-width:0;min-height:38px;padding:8px 10px;border:0;border-radius:9px;font-family:Arial,sans-serif;font-size:10px;font-weight:800;cursor:pointer;transition:transform .1s ease,filter .1s ease,opacity .1s ease}
+.pgal-delete-confirm-actions button:active{transform:scale(.97)}
+.pgal-delete-confirm-cancel{background:#e8edf2;color:#314356}
+.pgal-delete-confirm-delete{background:#a92f3b;color:#fff;box-shadow:0 4px 10px rgba(169,47,59,.2)}
+.pgal-delete-confirm-actions button:hover{filter:brightness(.98)}
+.pgal-delete-confirm-actions button:disabled{opacity:.55;cursor:wait;transform:none}
+.nitro-phone-frame[data-paradise-theme=dark] .pgal-delete-confirm-card,.nitro-phone-frame.theme-dark .pgal-delete-confirm-card{background:#17283a;color:#f4f8fc;border-color:#385069}
+.nitro-phone-frame[data-paradise-theme=dark] .pgal-delete-confirm-card p,.nitro-phone-frame.theme-dark .pgal-delete-confirm-card p{color:#bed0e2!important}
+.nitro-phone-frame[data-paradise-theme=dark] .pgal-delete-confirm-cancel,.nitro-phone-frame.theme-dark .pgal-delete-confirm-cancel{background:#2b4054;color:#f4f8fc}
+@keyframes pgal-confirm-fade{from{opacity:0}to{opacity:1}}
+@keyframes pgal-confirm-pop{from{opacity:0;transform:scale(.94) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@media (prefers-reduced-motion:reduce){.pgal-delete-confirm-overlay,.pgal-delete-confirm-card{animation:none}.pgal-delete-confirm-actions button{transition:none}}
