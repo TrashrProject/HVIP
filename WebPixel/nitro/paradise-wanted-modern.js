@@ -59,7 +59,7 @@
     const shell = document.createElement('div');
     shell.className = 'paradise-wanted-shell';
     shell.innerHTML = `
-      <div class="paradise-wanted-topbar" title="Maintenir et déplacer la fenêtre">
+      <div class="paradise-wanted-topbar" title="Maintenir pour déplacer">
         <div class="paradise-wanted-brand">
           <div class="paradise-wanted-logo">P</div>
           <div class="paradise-wanted-brand-copy"><strong>ParadiseRP</strong><span>LAKE PLACID</span></div>
@@ -71,16 +71,16 @@
       <div class="paradise-wanted-body">
         <aside class="paradise-wanted-sidebar">
           <div class="paradise-wanted-tabs">
-            <button class="paradise-wanted-tab is-active" type="button" data-pr-tab="list"><span>👥</span> LISTE</button>
-            <button class="paradise-wanted-tab" type="button" data-pr-tab="info"><span>▣</span> INFOS</button>
+            <button class="paradise-wanted-tab is-active" type="button" data-pr-tab="list"><span aria-hidden="true">≡</span> LISTE</button>
+            <button class="paradise-wanted-tab" type="button" data-pr-tab="info"><span aria-hidden="true">i</span> INFOS</button>
           </div>
           <section class="paradise-wanted-panel" data-pr-panel="list">
-            <div class="paradise-wanted-search-wrap"><span class="paradise-wanted-search-icon">⌕</span><input class="paradise-wanted-search" type="search" placeholder="Rechercher un suspect..." autocomplete="off"></div>
+            <div class="paradise-wanted-search-wrap"><span class="paradise-wanted-search-icon" aria-hidden="true">⌕</span><input class="paradise-wanted-search" type="search" placeholder="Rechercher un suspect..." autocomplete="off"></div>
             <div class="paradise-wanted-list"></div>
             <div class="paradise-wanted-count"></div>
           </section>
           <section class="paradise-wanted-panel" data-pr-panel="info" hidden>
-            <div class="paradise-wanted-info-panel"><strong>Registre des personnes recherchées</strong><p>Consultez les individus actuellement signalés par les autorités de Lake Placid.</p><p>Le niveau de danger est calculé à partir du nombre réel d’étoiles transmis par le système wanted.</p></div>
+            <div class="paradise-wanted-info-panel"><strong>Registre Wanted</strong><p>Individus actuellement signalés par les autorités de Lake Placid.</p><p>Le niveau de danger reflète les étoiles réelles reçues par le client.</p></div>
           </section>
         </aside>
         <main class="paradise-wanted-detail"></main>
@@ -101,9 +101,12 @@
     detail.innerHTML = '';
 
     if (!user) {
+      detail.removeAttribute('data-danger');
       detail.innerHTML = '<div class="paradise-wanted-empty paradise-wanted-empty-detail">Aucune personne recherchée actuellement.</div>';
       return;
     }
+
+    detail.dataset.danger = String(user.stars);
 
     const head = document.createElement('div');
     head.className = 'paradise-wanted-detail-head';
@@ -126,7 +129,7 @@
     facts.innerHTML = `
       <div class="paradise-wanted-fact"><div class="paradise-wanted-fact-icon">$</div><div><div class="paradise-wanted-label">Récompense</div><div class="paradise-wanted-value paradise-wanted-fact-value-strong">—</div></div></div>
       <div class="paradise-wanted-fact"><div class="paradise-wanted-fact-icon">⌖</div><div><div class="paradise-wanted-label">Dernier secteur connu</div><div class="paradise-wanted-value">Inconnu</div></div></div>
-      <div class="paradise-wanted-fact is-wide"><div class="paradise-wanted-fact-icon">▤</div><div><div class="paradise-wanted-label">Motif</div><div class="paradise-wanted-value">Aucun motif communiqué.</div></div></div>`;
+      <div class="paradise-wanted-fact is-wide"><div class="paradise-wanted-fact-icon">≡</div><div><div class="paradise-wanted-label">Motif</div><div class="paradise-wanted-value">Aucun motif communiqué.</div></div></div>`;
     detail.appendChild(facts);
 
     const information = document.createElement('div');
@@ -136,7 +139,7 @@
 
     const warning = document.createElement('div');
     warning.className = 'paradise-wanted-warning';
-    warning.innerHTML = '<div class="paradise-wanted-warning-icon">!</div><div><strong>NE TENTEZ PAS D’INTERPELLER CET INDIVIDU VOUS-MÊME.</strong><span>Contactez les forces de l’ordre de ParadiseRP.</span></div>';
+    warning.innerHTML = '<div class="paradise-wanted-warning-icon">!</div><div><strong>NE TENTEZ PAS D’INTERPELLER CET INDIVIDU.</strong><span>Contactez les forces de l’ordre de ParadiseRP.</span></div>';
     detail.appendChild(warning);
   }
 
@@ -237,12 +240,15 @@
 
       const meta = document.createElement('div');
       meta.className = 'pr-wanted-meta';
+
       const name = document.createElement('div');
       name.className = 'pr-wanted-name';
       name.textContent = user.name;
+
       const stars = document.createElement('div');
       stars.className = 'pr-wanted-stars';
       stars.innerHTML = starsMarkup(user.stars, true);
+
       meta.append(name, stars);
       card.appendChild(meta);
 
@@ -256,10 +262,11 @@
         renderList(alert, shell);
         renderDetail(shell, user);
       });
+
       list.appendChild(card);
     });
 
-    count.textContent = `${users.length} personne${users.length > 1 ? 's' : ''} recherchée${users.length > 1 ? 's' : ''}`;
+    count.textContent = `${users.length} recherché${users.length > 1 ? 's' : ''}`;
     shell.dataset.selectedName = selected ? selected.name : '';
     renderDetail(shell, selected);
   }
