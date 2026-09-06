@@ -16,6 +16,7 @@ $BaseUpdater = Join-Path $RepositoryRoot 'mise-a-jour-wave-vps.ps1'
 $CatalogUpdater = Join-Path $RepositoryRoot 'appliquer-catalogue-v4.ps1'
 $RuntimeDirectory = Join-Path $RepositoryRoot 'runtime\WavePlus'
 $JavaExecutable = 'C:\Program Files\Android\openjdk\jdk-21.0.8\bin\java.exe'
+$PatchedBaseUpdater = Join-Path ([System.IO.Path]::GetTempPath()) 'paradise-mise-a-jour-wave-vps-v4-base.ps1'
 
 if (-not (Test-Path -LiteralPath $BaseUpdater -PathType Leaf)) {
     throw "Updater Wave introuvable : $BaseUpdater"
@@ -26,14 +27,35 @@ if (-not (Test-Path -LiteralPath $CatalogUpdater -PathType Leaf)) {
 
 Write-Host '=== ParadiseRP : mise a jour Wave + Catalogue V4 ===' -ForegroundColor Cyan
 
-# La mise a jour principale conserve toutes les verifications build/plugin/catalogue
-# historiques. La V4 est appliquee ensuite afin d'etre toujours la derniere
-# taxonomie executee, donc les migrations V2/V3 ne peuvent pas reprendre la main.
-& $BaseUpdater -RepositoryPath $RepositoryRoot -ServiceName $ServiceName
-if ($LASTEXITCODE -ne 0) {
-    throw "La mise a jour Wave principale a echoue avec le code $LASTEXITCODE."
+# L'ancien updater V3 contient un controle historique qui exige que le bloc noir
+# 996700070 soit obligatoirement dans la page 9967201. Ce controle n'est plus
+# pertinent avec la taxonomie V4 globale. On ne modifie pas le fichier original :
+# on execute une copie temporaire ou ce seul echec devient un avertissement.
+$BaseUpdaterContent = Get-Content -LiteralPath $BaseUpdater -Raw
+$OldBlackCubeThrow = 'throw "Verification catalogue impossible : le Bloc noir pur 996700070 est absent de la page 9967201."'
+$NewBlackCubeWarning = 'Write-Warning "Controle V3 ignore pour le Bloc noir pur 996700070 : la taxonomie V4 globale sera appliquee juste apres."'
+
+if ($BaseUpdaterContent.Contains($OldBlackCubeThrow)) {
+    $BaseUpdaterContent = $BaseUpdaterContent.Replace($OldBlackCubeThrow, $NewBlackCubeWarning)
+}
+else {
+    Write-Warning 'Le controle historique du bloc noir n a pas ete trouve dans mise-a-jour-wave-vps.ps1. Execution sans patch specifique.'
 }
 
+Set-Content -LiteralPath $PatchedBaseUpdater -Value $BaseUpdaterContent -Encoding UTF8
+
+try {
+    & $PatchedBaseUpdater -RepositoryPath $RepositoryRoot -ServiceName $ServiceName
+    if ($LASTEXITCODE -ne 0) {
+        throw "La mise a jour Wave principale a echoue avec le code $LASTEXITCODE."
+    }
+}
+finally {
+    Remove-Item -LiteralPath $PatchedBaseUpdater -Force -ErrorAction SilentlyContinue
+}
+
+# La V4 est toujours executee en dernier : anciennes pages + nouveautes sont
+# fusionnees puis reclassees par type de mobi dans les categories fines.
 & $CatalogUpdater -RepositoryPath $RepositoryRoot
 if ($LASTEXITCODE -ne 0) {
     throw "L'application du catalogue V4 a echoue avec le code $LASTEXITCODE."
@@ -59,9 +81,10 @@ else {
         throw 'Plusieurs processus WaveRP sont actifs. Impossible de choisir lequel redemarrer.'
     }
     if ($WaveProcesses.Count -eq 1) {
-        Stop-Process -Id $WaveProcesses[0].ProcessId -Force
+        $WaveProcessId = $WaveProcesses[0].ProcessId
+        Stop-Process -Id $WaveProcessId -Force
         $Limit = (Get-Date).AddSeconds(30)
-        while (Get-Process -Id $WaveProcesses[0].ProcessId -ErrorAction SilentlyContinue) {
+        while (Get-Process -Id $WaveProcessId -ErrorAction SilentlyContinue) {
             if ((Get-Date) -gt $Limit) {
                 throw "WaveRP ne s'est pas arrete apres 30 secondes."
             }
