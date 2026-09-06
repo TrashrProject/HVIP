@@ -31,6 +31,7 @@ $ModernCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_black_cubes_force_visible.sql",
     "migrations\20260905_paradise_pure_black_block.sql",
     "migrations\20260906_paradise_catalogue_image_cleanup.sql",
+    "migrations\20260906_sync_catalog_furniture_to_items_base_modern.sql",
     "migrations\20260906_paradise_catalogue_sprite_id_fix.sql"
 )
 $LegacyCatalogMigrationRelativePaths = @(
@@ -42,6 +43,7 @@ $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_black_cubes_force_visible_legacy.sql",
     "migrations\20260905_paradise_pure_black_block_legacy.sql",
     "migrations\20260906_paradise_catalogue_image_cleanup_legacy.sql",
+    "migrations\20260904_sync_catalog_furniture_to_items_base.sql",
     "migrations\20260906_paradise_catalogue_sprite_id_fix.sql"
 )
 $Ports = @(30000, 30001, 2096)
@@ -226,7 +228,7 @@ try {
             Write-Host 'Verification catalogue : Bloc noir pur visible dans Construction - Blocs couleurs.' -ForegroundColor Green
 
             $BuildingBlockIds = 996661787..996661818
-            $BuildingBlockValidationSql = "SELECT COUNT(*) FROM furniture WHERE id IN ($($BuildingBlockIds -join ',')) AND sprite_id=id"
+            $BuildingBlockValidationSql = "SELECT COUNT(*) FROM items_base WHERE id IN ($($BuildingBlockIds -join ',')) AND sprite_id=id"
             $BuildingBlockValidationArgs = @(
                 "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
                 "--database=$DatabaseName", '--batch', '--skip-column-names',

@@ -92,6 +92,7 @@ if (apply) {
     for (let offset = 0; offset < repairs.length; offset += 250) {
         const ids = repairs.slice(offset, offset + 250).map(repair => repair.itemId).join(',');
         lines.push(`UPDATE furniture SET sprite_id=id WHERE id IN (${ids});`);
+        lines.push(`UPDATE items_base SET sprite_id=id WHERE id IN (${ids});`);
     }
     lines.push('COMMIT;', '');
     fs.writeFileSync(migrationOutputPath, lines.join('\n'), 'utf8');
