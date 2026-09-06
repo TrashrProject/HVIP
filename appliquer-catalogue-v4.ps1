@@ -68,24 +68,54 @@ try {
     } else {
         'migrations\20260906_paradise_catalogue_taxonomy_v4_global.sql'
     }
+    $AllItemsMigrationRelativePath = if ($LegacyCatalog) {
+        'migrations\20260906_paradise_catalogue_taxonomy_v4_all_items_legacy.sql'
+    } else {
+        'migrations\20260906_paradise_catalogue_taxonomy_v4_all_items.sql'
+    }
+
     $Migration = Join-Path $RepositoryRoot $MigrationRelativePath
+    $AllItemsMigration = Join-Path $RepositoryRoot $AllItemsMigrationRelativePath
     if (-not (Test-Path -LiteralPath $Migration -PathType Leaf)) {
         throw "Migration V4 introuvable : $Migration"
+    }
+    if (-not (Test-Path -LiteralPath $AllItemsMigration -PathType Leaf)) {
+        throw "Migration V4 totale introuvable : $AllItemsMigration"
     }
 
     Write-Host ("Schema detecte : " + $(if ($LegacyCatalog) { 'legacy' } else { 'moderne' })) -ForegroundColor Cyan
     Write-Host "Application du catalogue V4 global..." -ForegroundColor Cyan
 
-    $MigrationProcess = Start-Process -FilePath $Mysql -ArgumentList @(
-        "--host=$DatabaseHost",
-        "--port=$DatabasePort",
-        "--user=$DatabaseUser",
-        "--database=$DatabaseName",
-        '--default-character-set=utf8mb4'
-    ) -RedirectStandardInput $Migration -NoNewWindow -Wait -PassThru
-    if ($MigrationProcess.ExitCode -ne 0) {
-        throw "Migration V4 echouee : $MigrationRelativePath"
+    foreach ($MigrationToApply in @($Migration, $AllItemsMigration)) {
+        $MigrationProcess = Start-Process -FilePath $Mysql -ArgumentList @(
+            "--host=$DatabaseHost",
+            "--port=$DatabasePort",
+            "--user=$DatabaseUser",
+            "--database=$DatabaseName",
+            '--default-character-set=utf8mb4'
+        ) -RedirectStandardInput $MigrationToApply -NoNewWindow -Wait -PassThru
+        if ($MigrationProcess.ExitCode -ne 0) {
+            throw "Migration catalogue echouee : $(Split-Path -Leaf $MigrationToApply)"
+        }
+        Write-Host "Migration appliquee : $(Split-Path -Leaf $MigrationToApply)" -ForegroundColor Green
     }
+
+    # Validation forte : absolument toutes les offres doivent maintenant etre
+    # sous Catalogue ParadiseRP complet, y compris les anciennes pages staff/cachees.
+    $AllItemsValidationSql = @"
+SELECT CONCAT(
+  (SELECT COUNT(*) FROM catalog_items), '|',
+  (SELECT COUNT(*) FROM catalog_items WHERE page_id BETWEEN 9967201 AND 9967224 OR page_id BETWEEN 9968100 AND 9968199), '|',
+  (SELECT COUNT(*) FROM catalog_items WHERE NOT (page_id BETWEEN 9967201 AND 9967224 OR page_id BETWEEN 9968100 AND 9968199))
+)
+"@
+    $AllItemsCounts = ((& $Mysql @CommonArgs "--execute=$AllItemsValidationSql") -join '').Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'Validation totale du catalogue impossible.' }
+    $CountParts = @($AllItemsCounts -split '\|')
+    if ($CountParts.Count -ne 3 -or $CountParts[0] -ne $CountParts[1] -or $CountParts[2] -ne '0') {
+        throw "Catalogue V4 incomplet : total|dans Paradise|hors Paradise = $AllItemsCounts"
+    }
+    Write-Host "Verification totale : $($CountParts[0]) offres sur $($CountParts[0]) sont dans Catalogue ParadiseRP complet, 0 hors catalogue." -ForegroundColor Green
 
     $ValidationMigration = Join-Path $RepositoryRoot 'migrations\20260906_paradise_catalogue_taxonomy_v4_validation.sql'
     if (Test-Path -LiteralPath $ValidationMigration -PathType Leaf) {
@@ -106,7 +136,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Lecture des metriques V4 impossible.' }
 
     Write-Host ''
-    Write-Host '=== Catalogue ParadiseRP V4 ===' -ForegroundColor Green
+    Write-Host '=== Catalogue ParadiseRP V4 TOTAL ===' -ForegroundColor Green
     foreach ($Metric in $Metrics) {
         Write-Host $Metric
     }
@@ -115,11 +145,11 @@ try {
 SELECT cp.id, cp.caption, COUNT(ci.id) AS offers
 FROM catalog_pages cp
 LEFT JOIN catalog_items ci ON ci.page_id=cp.id
-WHERE cp.id BETWEEN 9967201 AND 9968199
+WHERE (cp.id BETWEEN 9967201 AND 9967224 OR cp.id BETWEEN 9968100 AND 9968199)
   AND cp.visible='1' AND cp.enabled='1'
 GROUP BY cp.id, cp.caption
 ORDER BY offers DESC
-LIMIT 15
+LIMIT 20
 "@
     Write-Host ''
     Write-Host 'Pages les plus chargees :' -ForegroundColor Cyan
@@ -127,7 +157,7 @@ LIMIT 15
     if ($LASTEXITCODE -ne 0) { throw 'Lecture des pages catalogue impossible.' }
 
     Write-Host ''
-    Write-Host 'Catalogue V4 applique. Redemarre WaveRP pour recharger le catalogue si necessaire.' -ForegroundColor Green
+    Write-Host 'Catalogue V4 TOTAL applique : pages normales, staff, cachees et desactivees ont ete fusionnees.' -ForegroundColor Green
 }
 finally {
     $env:MYSQL_PWD = $null
