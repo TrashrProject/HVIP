@@ -165,6 +165,8 @@ const components = {
                         src:d,
                         alt:m,
                         loading:\`lazy\`,
+                        width:96,
+                        height:82,
                         draggable:!1,
                         onError:()=>c(!0)
                     }),

@@ -29,7 +29,8 @@ $ModernCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_island_builder_kit.sql",
     "migrations\20260904_paradise_island_visibility_fix.sql",
     "migrations\20260904_paradise_black_cubes_force_visible.sql",
-    "migrations\20260905_paradise_pure_black_block.sql"
+    "migrations\20260905_paradise_pure_black_block.sql",
+    "migrations\20260906_paradise_catalogue_image_cleanup.sql"
 )
 $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_catalogue_mass_habborpbr_legacy.sql",
@@ -38,7 +39,8 @@ $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_island_visibility_fix_legacy.sql",
     "migrations\20260904_add_black_block_catalog.sql",
     "migrations\20260904_paradise_black_cubes_force_visible_legacy.sql",
-    "migrations\20260905_paradise_pure_black_block_legacy.sql"
+    "migrations\20260905_paradise_pure_black_block_legacy.sql",
+    "migrations\20260906_paradise_catalogue_image_cleanup_legacy.sql"
 )
 $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"

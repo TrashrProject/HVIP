@@ -21,6 +21,8 @@ for(const marker of [
     'pc7-workspace',
     'pc7-standard-layout',
     'pc7-product-card',
+    'width:96',
+    'height:82',
     'pc7-details-pane',
     'Aucun mobilier trouvé'
 ]) assert.ok(bundle.includes(marker), `Missing generated catalogue marker: ${ marker }`);
@@ -48,6 +50,7 @@ for(const selector of [
     '.pc7-products-grid',
     '.pc7-product-card.layout-grid-item',
     '.pc7-details-pane',
+    'aspect-ratio: 96 / 82',
     '@media (max-width: 790px)',
     '@media (prefers-reduced-motion: reduce)'
 ]) assert.ok(css.includes(selector), `Missing catalogue stylesheet selector: ${ selector }`);

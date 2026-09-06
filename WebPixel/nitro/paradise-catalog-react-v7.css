@@ -423,10 +423,13 @@
 }
 
 .paradise-catalog-v7 .pc7-product-visual img {
+    aspect-ratio: 96 / 82;
+    height: 82px;
     image-rendering: pixelated;
     max-height: 82px;
     max-width: 96px;
     object-fit: contain;
+    width: 96px;
 }
 
 .paradise-catalog-v7 .pc7-product-fallback {
