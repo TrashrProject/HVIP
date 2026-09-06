@@ -1,12 +1,13 @@
 (() => {
     'use strict';
-    if (window.__PARADISE_CAMERA_GRAM_FIX_V3__) return;
-    window.__PARADISE_CAMERA_GRAM_FIX_V3__ = '3.0.0';
+    if (window.__PARADISE_CAMERA_GRAM_FIX_V4__) return;
+    window.__PARADISE_CAMERA_GRAM_FIX_V4__ = '4.0.0';
 
     const runtime = window.__PARADISE_PHONE_RUNTIME__ = window.__PARADISE_PHONE_RUNTIME__ || { photos: [] };
     const CAMERA_API = '/nitro/phone-camera-api.php';
     const PHONE_API = '/nitro/phone-api.php';
     const CAMERA_ROOT_SELECTOR = '.phone-camera-shell,.phone-camera-app,.pce-camera,.pcam-camera,[data-phone-camera]';
+    const CAMERA_ZOOM = 2.05;
 
     const escapeHtml = value => String(value ?? '')
         .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -52,14 +53,18 @@
         return candidates.sort((a, b) => (b.width * b.height) - (a.width * a.height))[0] || null;
     }
 
-    function drawSquare(source, output) {
+    function drawCameraView(source, output) {
         const ctx = output.getContext('2d', { alpha: false });
         if (!ctx) return false;
-        const side = Math.min(source.width, source.height);
-        const sx = Math.max(0, Math.floor((source.width - side) / 2));
-        const sy = Math.max(0, Math.floor((source.height - side) / 2));
+
+        const baseSide = Math.min(source.width, source.height);
+        const cropSide = Math.max(1, Math.floor(baseSide / CAMERA_ZOOM));
+        const sx = Math.max(0, Math.floor((source.width - cropSide) / 2));
+        const sy = Math.max(0, Math.floor((source.height - cropSide) / 2));
+
         try {
-            ctx.drawImage(source, sx, sy, side, side, 0, 0, output.width, output.height);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(source, sx, sy, cropSide, cropSide, 0, 0, output.width, output.height);
             return true;
         } catch {
             return false;
@@ -72,7 +77,7 @@
         const output = document.createElement('canvas');
         output.width = 480;
         output.height = 480;
-        if (!drawSquare(source, output)) throw new Error('Impossible de capturer la chambre.');
+        if (!drawCameraView(source, output)) throw new Error('Impossible de capturer la chambre.');
         return output.toDataURL('image/png');
     }
 
@@ -84,6 +89,7 @@
             delete root.dataset.paradiseLivePreview;
             return;
         }
+
         lens.style.position = 'relative';
         let preview = lens.querySelector('canvas.paradise-real-camera-preview');
         if (!preview) {
@@ -93,7 +99,7 @@
             preview.height = 480;
             Object.assign(preview.style, {
                 position: 'absolute', inset: '0', width: '100%', height: '100%',
-                objectFit: 'cover', zIndex: '5', pointerEvents: 'none', background: '#000'
+                zIndex: '5', pointerEvents: 'none', background: '#000'
             });
             lens.append(preview);
         }
@@ -101,7 +107,7 @@
         const tick = () => {
             if (!root.isConnected) return;
             const source = findSceneCanvas(root);
-            if (source) drawSquare(source, preview);
+            if (source) drawCameraView(source, preview);
             requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
@@ -120,6 +126,7 @@
             });
             const payload = await response.json().catch(() => null);
             if (!response.ok || !payload?.ok || !payload.photo?.id) throw new Error(payload?.error || 'Sauvegarde impossible.');
+
             runtime.photos = runtime.photos.filter(photo => Number(photo.id) !== Number(payload.photo.id) && photo.url !== payload.photo.url);
             runtime.photos.unshift(payload.photo);
             window.dispatchEvent(new CustomEvent('paradise:camera-photo-saved', { detail: payload.photo }));
