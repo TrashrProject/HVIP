@@ -7,6 +7,7 @@ import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import io.github.brenoepics.roleplay.utilities.LiveFeed;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +34,9 @@ public class PrisonHandler {
       usersBeingSentToJail.remove(habbo.getHabboInfo().getId());
       return;
     }
+
+    LiveFeed.sendGlobalAlert(LiveFeed.alert("[PRISON] " + habbo.getHabboInfo().getUsername()
+        + " vient d'être emprisonné."));
 
     Emulator.getThreading().run(() -> run(habbo, data, jail), 100);
   }
