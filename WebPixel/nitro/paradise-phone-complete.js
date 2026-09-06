@@ -2,7 +2,7 @@
     'use strict';
 
     if (window.__PARADISE_PHONE_COMPLETE__) return;
-    window.__PARADISE_PHONE_COMPLETE__ = '1.7.0';
+    window.__PARADISE_PHONE_COMPLETE__ = '1.8.0';
 
     const API = '/nitro/phone-api.php';
     const runtime = window.__PARADISE_PHONE_RUNTIME__ = window.__PARADISE_PHONE_RUNTIME__ || { photos: [] };
@@ -386,6 +386,7 @@
         root.dataset.pprReady = '1';
         let galleryCsrf = '';
         const render = photos => {
+            root._paradiseGalleryBack = null;
             root.innerHTML = `<div class="pgal-topbar"><span class="pgal-title">Galerie</span><span class="pgal-count">${photos.length}</span></div>${photos.length ? `<div class="pgal-grid">${photos.map((photo, index) => `<button type="button" class="pgal-cell" data-ppr-photo="${index}"><img src="${escapeHtml(photo.url)}" alt="Photo" loading="lazy"></button>`).join('')}</div>` : '<div class="ppr-state"><strong>Aucune photo</strong><span>Prenez une photo avec l’appareil photo.</span></div>'}`;
             root.onclick = event => {
                 const button = event.target.closest('[data-ppr-photo]');
@@ -411,7 +412,8 @@
                 }
                 if (!button) return;
                 const photo = photos[Number(button.dataset.pprPhoto)];
-                root.innerHTML = `<div class="pgal-topbar"><button class="pgal-icon" data-ppr-gallery-back title="Retour">‹</button><span class="pgal-title">Photo</span><span></span></div><div class="pgal-viewer"><img src="${escapeHtml(photo.url)}" alt="Photo"></div><div class="pgal-meta"><div><div class="pgal-meta-label">Prise le</div><div class="pgal-meta-value">${formatDate(photo.timestamp)}</div></div><button type="button" class="pgal-delete" data-ppr-gallery-delete="${photo.id}">Supprimer</button></div>`;
+                root._paradiseGalleryBack = () => render(photos);
+                root.innerHTML = `<div class="pgal-topbar"><span class="pgal-title">Photo</span><span></span></div><div class="pgal-viewer"><img src="${escapeHtml(photo.url)}" alt="Photo"><button type="button" class="pgal-delete" data-ppr-gallery-delete="${photo.id}" title="Supprimer la photo" aria-label="Supprimer la photo">×</button></div><div class="pgal-meta"><div class="pgal-meta-label">Prise le</div><div class="pgal-meta-value">${formatDate(photo.timestamp)}</div></div>`;
             };
         };
         root.innerHTML = '<div class="ppr-state"><span class="ppr-loader"></span><strong>Chargement de la galerie...</strong></div>';
@@ -581,7 +583,15 @@
 
     document.addEventListener('click', event => {
         const appBack = event.target.closest('.phone-app-home');
-        if (appBack && gram.root?.isConnected && appBack.closest('.phone-active-app')?.contains(gram.root) && gram.back()) {
+        const activeApp = appBack?.closest('.phone-active-app');
+        const gallery = activeApp?.querySelector('.phone-gallery[data-ppr-ready]');
+        if (appBack && typeof gallery?._paradiseGalleryBack === 'function') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            gallery._paradiseGalleryBack();
+            return;
+        }
+        if (appBack && gram.root?.isConnected && activeApp?.contains(gram.root) && gram.back()) {
             event.preventDefault();
             event.stopImmediatePropagation();
             return;
