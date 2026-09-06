@@ -1,0 +1,194 @@
+/* ParadiseRP Wanted V15 — compact/readable polish */
+
+.nitro-alert.nitro-alert-wanted.paradise-wanted-enhanced{
+  width:min(748px,calc(100vw - 14px))!important;
+  height:min(352px,calc(100vh - 12px))!important;
+  min-width:620px!important;
+  min-height:318px!important;
+  border-radius:8px!important;
+  box-shadow:0 10px 26px rgba(0,0,0,.28)!important;
+}
+
+.paradise-wanted-topbar{
+  height:45px!important;
+  flex-basis:45px!important;
+  padding:0 9px!important;
+}
+
+.paradise-wanted-logo{
+  width:25px!important;
+  height:25px!important;
+  flex-basis:25px!important;
+  font-size:13px!important;
+}
+
+.paradise-wanted-brand{
+  width:154px!important;
+  flex-basis:154px!important;
+  gap:7px!important;
+}
+
+.paradise-wanted-brand-copy strong{font-size:14px!important}
+.paradise-wanted-brand-copy span{font-size:7px!important;margin-top:2px!important}
+.paradise-wanted-heading{padding-left:10px!important}
+.paradise-wanted-heading strong{font-size:17px!important}
+.paradise-wanted-heading span{font-size:8.5px!important;margin-top:2px!important}
+.paradise-wanted-motto{font-size:6.5px!important;margin:0 7px!important}
+
+.paradise-wanted-close{
+  width:27px!important;
+  height:27px!important;
+  flex-basis:27px!important;
+  z-index:100!important;
+  pointer-events:auto!important;
+  cursor:pointer!important;
+}
+
+.paradise-wanted-body{
+  grid-template-columns:198px minmax(0,1fr)!important;
+  gap:6px!important;
+  padding:6px!important;
+}
+
+.paradise-wanted-tabs{
+  height:30px!important;
+  flex-basis:30px!important;
+}
+.paradise-wanted-tab{font-size:10px!important}
+
+.paradise-wanted-search-wrap{padding:5px!important}
+.paradise-wanted-search{
+  height:27px!important;
+  font-size:10px!important;
+  padding-left:24px!important;
+}
+.paradise-wanted-search-icon{left:13px!important;font-size:10px!important}
+
+.pr-wanted-card{
+  min-height:43px!important;
+  grid-template-columns:32px minmax(0,1fr) 9px!important;
+  gap:6px!important;
+  margin-bottom:4px!important;
+  padding:4px 5px!important;
+}
+.pr-wanted-avatar{width:30px!important;height:30px!important}
+.pr-wanted-avatar .wanted-avatar{width:30px!important;height:30px!important}
+.pr-wanted-name{font-size:11.5px!important}
+.pr-wanted-stars{font-size:9.5px!important;margin-top:3px!important}
+.paradise-wanted-count{font-size:8px!important;padding:4px 6px!important}
+
+.paradise-wanted-detail{
+  padding:7px!important;
+  overflow:hidden!important;
+}
+
+.paradise-wanted-detail-head{
+  grid-template-columns:80px minmax(0,1fr)!important;
+  gap:10px!important;
+  padding-bottom:7px!important;
+}
+
+.paradise-wanted-profile-avatar{
+  width:80px!important;
+  height:84px!important;
+}
+.paradise-wanted-profile-avatar .wanted-avatar{
+  width:80px!important;
+  height:84px!important;
+}
+.paradise-wanted-profile-avatar .wanted-avatar .avatar-image{
+  transform:translate(-50%,-51%) scale(1.38)!important;
+}
+
+.paradise-wanted-profile-name{
+  font-size:22px!important;
+  letter-spacing:-.3px!important;
+}
+.paradise-wanted-status{
+  height:19px!important;
+  font-size:8px!important;
+  padding:0 7px!important;
+}
+
+.paradise-wanted-two-col{
+  gap:12px!important;
+  margin-top:7px!important;
+}
+.paradise-wanted-label{
+  font-size:8.5px!important;
+  letter-spacing:.42px!important;
+  color:#aec0ca!important;
+}
+.paradise-wanted-value{
+  font-size:10.5px!important;
+  line-height:1.18!important;
+  margin-top:2px!important;
+}
+.paradise-wanted-danger-stars{font-size:11.5px!important}
+.paradise-wanted-danger-level{font-size:8px!important;padding:3px 6px!important}
+
+.paradise-wanted-facts{
+  margin-top:6px!important;
+  border-radius:6px!important;
+}
+.paradise-wanted-fact{
+  min-height:37px!important;
+  grid-template-columns:27px minmax(0,1fr)!important;
+  gap:6px!important;
+  padding:4px 7px!important;
+}
+.paradise-wanted-fact.is-wide{min-height:35px!important}
+.paradise-wanted-fact-icon{
+  width:25px!important;
+  height:25px!important;
+  font-size:10px!important;
+  border-radius:5px!important;
+}
+.paradise-wanted-fact .paradise-wanted-value{font-size:10px!important}
+.paradise-wanted-fact-value-strong{font-size:12px!important}
+
+.paradise-wanted-information{
+  margin-top:5px!important;
+  padding:5px 8px!important;
+  min-height:33px!important;
+}
+.paradise-wanted-information .paradise-wanted-value{
+  font-size:9.5px!important;
+  line-height:1.15!important;
+}
+
+.paradise-wanted-warning{
+  margin-top:5px!important;
+  min-height:31px!important;
+  padding:4px 7px!important;
+  gap:6px!important;
+}
+.paradise-wanted-warning-icon{
+  width:20px!important;
+  height:20px!important;
+  flex-basis:20px!important;
+  font-size:11px!important;
+}
+.paradise-wanted-warning strong{font-size:8px!important}
+.paradise-wanted-warning span{font-size:7.8px!important;margin-top:1px!important}
+
+@media (max-height:360px) and (min-width:621px){
+  .nitro-alert.nitro-alert-wanted.paradise-wanted-enhanced{
+    height:calc(100vh - 8px)!important;
+    min-height:0!important;
+  }
+  .paradise-wanted-topbar{height:41px!important;flex-basis:41px!important}
+  .paradise-wanted-body{padding:5px!important;gap:5px!important}
+  .paradise-wanted-tabs{height:28px!important;flex-basis:28px!important}
+  .paradise-wanted-search{height:24px!important}
+  .paradise-wanted-detail{padding:5px!important}
+  .paradise-wanted-detail-head{grid-template-columns:70px minmax(0,1fr)!important;gap:7px!important;padding-bottom:4px!important}
+  .paradise-wanted-profile-avatar{width:70px!important;height:70px!important}
+  .paradise-wanted-profile-avatar .wanted-avatar{width:70px!important;height:70px!important}
+  .paradise-wanted-profile-name{font-size:19px!important}
+  .paradise-wanted-two-col{margin-top:4px!important;gap:8px!important}
+  .paradise-wanted-facts{margin-top:4px!important}
+  .paradise-wanted-fact{min-height:31px!important;padding:3px 5px!important}
+  .paradise-wanted-fact.is-wide{min-height:30px!important}
+  .paradise-wanted-information,.paradise-wanted-warning{margin-top:3px!important;padding:3px 6px!important;min-height:27px!important}
+}
