@@ -30,7 +30,8 @@ $ModernCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_island_visibility_fix.sql",
     "migrations\20260904_paradise_black_cubes_force_visible.sql",
     "migrations\20260905_paradise_pure_black_block.sql",
-    "migrations\20260906_paradise_catalogue_image_cleanup.sql"
+    "migrations\20260906_paradise_catalogue_image_cleanup.sql",
+    "migrations\20260906_paradise_catalogue_sprite_id_fix.sql"
 )
 $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_paradise_catalogue_mass_habborpbr_legacy.sql",
@@ -40,7 +41,8 @@ $LegacyCatalogMigrationRelativePaths = @(
     "migrations\20260904_add_black_block_catalog.sql",
     "migrations\20260904_paradise_black_cubes_force_visible_legacy.sql",
     "migrations\20260905_paradise_pure_black_block_legacy.sql",
-    "migrations\20260906_paradise_catalogue_image_cleanup_legacy.sql"
+    "migrations\20260906_paradise_catalogue_image_cleanup_legacy.sql",
+    "migrations\20260906_paradise_catalogue_sprite_id_fix.sql"
 )
 $Ports = @(30000, 30001, 2096)
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -222,6 +224,19 @@ try {
                 throw "Verification catalogue impossible : le Bloc noir pur 996700070 est absent de la page 9967201."
             }
             Write-Host 'Verification catalogue : Bloc noir pur visible dans Construction - Blocs couleurs.' -ForegroundColor Green
+
+            $BuildingBlockIds = 996661787..996661818
+            $BuildingBlockValidationSql = "SELECT COUNT(*) FROM furniture WHERE id IN ($($BuildingBlockIds -join ',')) AND sprite_id=id"
+            $BuildingBlockValidationArgs = @(
+                "--host=$DatabaseHost", "--port=$DatabasePort", "--user=$DatabaseUser",
+                "--database=$DatabaseName", '--batch', '--skip-column-names',
+                "--execute=$BuildingBlockValidationSql"
+            )
+            $ValidBuildingBlockCount = ((& $Mysql @BuildingBlockValidationArgs) -join '').Trim()
+            if ($LASTEXITCODE -ne 0 -or $ValidBuildingBlockCount -ne '32') {
+                throw "Verification des images catalogue impossible : $ValidBuildingBlockCount/32 blocs ont un sprite_id compatible avec FurnitureData."
+            }
+            Write-Host 'Verification images catalogue : 32/32 blocs de construction relies a FurnitureData.' -ForegroundColor Green
         }
         finally {
             $env:MYSQL_PWD = $null
