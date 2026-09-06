@@ -73,3 +73,64 @@
 .nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-search input{color:#14283a}
 .nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-stats strong,
 .nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-connections h2{color:#183149}
+
+/* Thème jour complet : aucune surface ou écriture du mode nuit ne doit subsister. */
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-shell,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-body{background:#f2f5f8!important;color:#172536!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-top,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-nav{background:#fff!important;border-color:#d5dde5!important;box-shadow:none!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-top strong{color:#142436!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-top span{color:#60758a!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-nav button{color:#526a7d!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-nav button.active{background:#e8f3fc!important;color:#087bc4!important;box-shadow:inset 0 0 0 1px #bbd9ee!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-post,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-viewer-card,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-post-viewer{background:#fff!important;border-color:#d8e0e7!important;box-shadow:0 3px 10px #31506a17!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-user,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-likes,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-caption,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-caption button,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-comment-user,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-comments>div,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-profile-head strong,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-publish-intro strong,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-activity-row{color:#172536!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-user small,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-profile-head small,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-person-main small,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-activity-row small,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-publish-intro span{color:#647b8f!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-actions span,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-heart{color:#263746!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-heart.active{color:#ed3858!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-comment-form input,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-publish-form textarea,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-search{background:#fff!important;border-color:#c7d4df!important;color:#172536!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-comment-form input::placeholder,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-publish-form textarea::placeholder,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-search input::placeholder{color:#788b9b!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-person,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-stats,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-publish-intro{background:#fff!important;border-color:#c9d6e0!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-stats span,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-stats button{color:#52697c!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-stats strong,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-empty strong{color:#172536!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-empty{color:#63798b!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-stats button:hover{background:#e8f3fc!important;color:#087bc4!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-activity-row{border-color:#dce4eb!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-profile-back{color:#087bc4!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-viewer-back{background:#fff!important;border-color:#d8e0e7!important;color:#172536!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-viewer-card header small,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-muted{color:#647b8f!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-follow.active,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-profile-follow.active,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-me-badge{background:#edf3f7!important;border-color:#c7d5df!important;color:#52697c!important}
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-nav-avatar,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-avatar,
+.nitro-phone-frame:is(.theme-light,[data-paradise-theme=light]) .ppr-gram.pg-v2 .pg-profile-avatar{background:#e8f0f6!important;border-color:#9db8cc!important}
+
+/* Tête Habbo nette et correctement cadrée dans la barre inférieure. */
+.ppr-gram.pg-v2 .pg-nav-avatar{width:30px;height:30px;position:relative;overflow:hidden}
+.ppr-gram.pg-v2 .pg-nav-avatar img{position:absolute;left:50%;top:50%;width:46px!important;height:46px!important;max-width:none!important;object-fit:contain!important;transform:translate(-50%,-50%);image-rendering:pixelated}

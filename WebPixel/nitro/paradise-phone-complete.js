@@ -2,7 +2,7 @@
     'use strict';
 
     if (window.__PARADISE_PHONE_COMPLETE__) return;
-    window.__PARADISE_PHONE_COMPLETE__ = '1.4.0';
+    window.__PARADISE_PHONE_COMPLETE__ = '1.5.0';
 
     const API = '/nitro/phone-api.php';
     const runtime = window.__PARADISE_PHONE_RUNTIME__ = window.__PARADISE_PHONE_RUNTIME__ || { photos: [] };
@@ -95,7 +95,7 @@
     }
 
     function headAvatar(look, name) {
-        return `<span class="pg-nav-avatar"><img src="/avatar.php?figure=${encodeURIComponent(look || '')}&size=s&direction=2&head_direction=2&headonly=1" alt="${escapeHtml(name)}"></span>`;
+        return `<span class="pg-nav-avatar"><img src="/avatar.php?figure=${encodeURIComponent(look || '')}&size=m&direction=2&head_direction=2&headonly=1&gesture=sml" alt="${escapeHtml(name)}"></span>`;
     }
 
     function youtubeId(value) {
@@ -188,7 +188,7 @@
     };
 
     const gram = {
-        root: null, csrf: '', data: null, loading: false, view: 'home', previousView: 'home', selectedPhotoId: 0, profileUserId: 0, connectionType: 'followers', connectionUserId: 0, connections: [], connectionsLoading: false,
+        root: null, csrf: '', data: null, loading: false, view: 'home', viewHistory: [], selectedPhotoId: 0, profileUserId: 0, connectionType: 'followers', connectionUserId: 0, connections: [], connectionsLoading: false,
         async mount(root) {
             this.root = root;
             root.className = 'phone-coming-soon ppr-app ppr-gram pg-v2';
@@ -213,13 +213,30 @@
         async action(payload) {
             return request('feed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, csrf: this.csrf }) });
         },
+        snapshot() {
+            return { view: this.view, profileUserId: this.profileUserId, connectionType: this.connectionType, connectionUserId: this.connectionUserId };
+        },
+        navigate(view, changes = {}) {
+            if (view !== this.view || Object.keys(changes).some(key => this[key] !== changes[key])) this.viewHistory.push(this.snapshot());
+            Object.assign(this, changes);
+            this.view = view;
+            this.render();
+        },
+        back() {
+            const viewerBack = this.root?.querySelector('[data-pg-viewer-back]');
+            if (viewerBack) { viewerBack.click(); return true; }
+            const previous = this.viewHistory.pop();
+            if (!previous) return false;
+            Object.assign(this, previous);
+            this.render();
+            return true;
+        },
         async openConnections(userId, type) {
             this.connectionUserId = Number(userId || this.data?.me?.id || 0);
             this.connectionType = type === 'following' ? 'following' : 'followers';
             this.connections = [];
             this.connectionsLoading = true;
-            this.view = 'connections';
-            this.render();
+            this.navigate('connections');
             try {
                 const response = await fetch(`${API}?action=connections&userId=${this.connectionUserId}&type=${this.connectionType}`, { credentials:'same-origin', cache:'no-store' });
                 const payload = await response.json().catch(() => null);
@@ -247,7 +264,7 @@
                     if (!this.selectedPhotoId) throw new Error('Choisissez une photo de votre galerie.');
                     await this.action({ action: 'create', photoId: this.selectedPhotoId, body: String(data.get('body') || '') });
                     this.selectedPhotoId = 0;
-                    this.view = 'home';
+                    this.navigate('home');
                 } else {
                     await this.action({ action: 'comment', postId: Number(comment.dataset.pgComment), body: String(data.get('body') || '') });
                 }
@@ -256,16 +273,16 @@
         },
         async click(event) {
             if (event.target.closest('[data-ppr-retry]')) return this.load();
-            if (event.target.closest('[data-pg-connections-back]')) { this.view = 'profile'; return this.render(); }
-            if (event.target.closest('[data-pg-back]')) { this.view = this.previousView || 'explore'; return this.render(); }
+            if (event.target.closest('[data-pg-connections-back]')) return this.back();
+            if (event.target.closest('[data-pg-back]')) return this.back();
             const connections = event.target.closest('[data-pg-connections]');
             if (connections) return this.openConnections(Number(connections.dataset.pgUser), connections.dataset.pgConnections);
             const nav = event.target.closest('[data-pg-nav]');
-            if (nav) { this.view = nav.dataset.pgNav; if (this.view === 'profile') this.profileUserId = Number(this.data?.me?.id || 0); return this.render(); }
+            if (nav) return this.navigate(nav.dataset.pgNav, nav.dataset.pgNav === 'profile' ? { profileUserId: Number(this.data?.me?.id || 0) } : {});
             const photo = event.target.closest('[data-pg-photo]');
             if (photo) { this.selectedPhotoId = Number(photo.dataset.pgPhoto); return this.render(); }
             const profile = event.target.closest('[data-pg-profile]');
-            if (profile) { this.profileUserId = Number(profile.dataset.pgProfile); this.previousView = this.view === 'profile' ? this.previousView : this.view; this.view = 'profile'; return this.render(); }
+            if (profile) return this.navigate('profile', { profileUserId: Number(profile.dataset.pgProfile) });
             const like = event.target.closest('[data-pg-like]');
             const remove = event.target.closest('[data-pg-delete]');
             const follow = event.target.closest('[data-pg-follow]');
@@ -543,6 +560,12 @@
     }
 
     document.addEventListener('click', event => {
+        const appBack = event.target.closest('.phone-app-home');
+        if (appBack && gram.root?.isConnected && appBack.closest('.phone-active-app')?.contains(gram.root) && gram.back()) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+        }
         const homeIndicator = event.target.closest('.phone-home-indicator');
         if (homeIndicator) {
             event.preventDefault();
