@@ -2,14 +2,21 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_VIDEO_QUALITY_V2__) return;
-  window.__PARADISE_PHONE_VIDEO_QUALITY_V2__ = '2.0.0';
+  window.__PARADISE_PHONE_VIDEO_QUALITY_V2__ = '2.1.0';
 
   const TARGET_FPS = 15;
-  const TARGET_BITRATE = 4_000_000;
+  const TARGET_BITRATE = 10_000_000;
+  const MAX_RELAY_WIDTH = 1920;
+  const MAX_RELAY_HEIGHT = 1440;
 
   function tuneVideoTrack(track) {
     if (!track || track.kind !== 'video') return;
     try { track.contentHint = 'detail'; } catch {}
+    try {
+      track.applyConstraints?.({
+        frameRate: { ideal: TARGET_FPS, max: TARGET_FPS }
+      }).catch?.(() => {});
+    } catch {}
   }
 
   async function tuneSender(sender) {
@@ -20,12 +27,14 @@
       const params = sender.getParameters?.();
       if (!params) return;
 
-      if (Array.isArray(params.encodings) && params.encodings.length) {
-        for (const encoding of params.encodings) {
-          encoding.maxBitrate = Math.max(Number(encoding.maxBitrate || 0), TARGET_BITRATE);
-          encoding.maxFramerate = Math.max(Number(encoding.maxFramerate || 0), TARGET_FPS);
-          encoding.scaleResolutionDownBy = 1;
-        }
+      if (!Array.isArray(params.encodings) || !params.encodings.length) params.encodings = [{}];
+
+      for (const encoding of params.encodings) {
+        encoding.maxBitrate = TARGET_BITRATE;
+        encoding.maxFramerate = TARGET_FPS;
+        encoding.scaleResolutionDownBy = 1;
+        if ('priority' in encoding) encoding.priority = 'high';
+        if ('networkPriority' in encoding) encoding.networkPriority = 'high';
       }
 
       if ('degradationPreference' in params) params.degradationPreference = 'maintain-resolution';
@@ -35,8 +44,77 @@
     }
   }
 
+  function relayScaleFor(source) {
+    if (!source?.width || !source?.height) return 1;
+    return source.width * 2 <= MAX_RELAY_WIDTH && source.height * 2 <= MAX_RELAY_HEIGHT ? 2 : 1;
+  }
+
+  function createSharpRelayStream(source, originalCaptureStream) {
+    const scale = relayScaleFor(source);
+    const relay = document.createElement('canvas');
+    relay.width = Math.max(1, Math.floor(source.width * scale));
+    relay.height = Math.max(1, Math.floor(source.height * scale));
+
+    const ctx = relay.getContext('2d', {
+      alpha: false,
+      desynchronized: true,
+      willReadFrequently: false
+    });
+
+    if (!ctx) return originalCaptureStream.call(source, TARGET_FPS);
+
+    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingQuality = 'low';
+
+    let stopped = false;
+    let timer = 0;
+
+    const draw = () => {
+      if (stopped) return;
+      try {
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, relay.width, relay.height);
+        ctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, relay.width, relay.height);
+      } catch {}
+    };
+
+    draw();
+    timer = window.setInterval(draw, Math.max(16, Math.round(1000 / TARGET_FPS)));
+
+    const stream = originalCaptureStream.call(relay, TARGET_FPS);
+    const tracks = stream?.getVideoTracks?.() || [];
+
+    const cleanup = () => {
+      if (stopped) return;
+      stopped = true;
+      clearInterval(timer);
+      timer = 0;
+    };
+
+    tracks.forEach(track => {
+      tuneVideoTrack(track);
+      const nativeStop = track.stop?.bind(track);
+      if (nativeStop) {
+        track.stop = () => {
+          cleanup();
+          nativeStop();
+        };
+      }
+      track.addEventListener?.('ended', cleanup, { once: true });
+    });
+
+    console.info('[ParadisePhone] sharp room relay', {
+      source: `${source.width}x${source.height}`,
+      relay: `${relay.width}x${relay.height}`,
+      fps: TARGET_FPS,
+      bitrate: TARGET_BITRATE
+    });
+
+    return stream;
+  }
+
   /* Stable V2 creates its RTCPeerConnection only when a video call starts.
-     Patching addTrack here lets us request detail/bitrate without changing the stable call engine. */
+     Patch addTrack before the engine loads so the sender always favours detail/resolution. */
   if (window.RTCPeerConnection?.prototype?.addTrack && !window.RTCPeerConnection.prototype.__paradiseVideoQualityPatched) {
     const proto = window.RTCPeerConnection.prototype;
     const originalAddTrack = proto.addTrack;
@@ -46,14 +124,15 @@
       tuneVideoTrack(track);
       const sender = originalAddTrack.call(this, track, ...streams);
       if (track?.kind === 'video') {
-        [0, 500, 1400].forEach(delay => window.setTimeout(() => tuneSender(sender), delay));
+        [0, 120, 500, 1400, 3000].forEach(delay => window.setTimeout(() => tuneSender(sender), delay));
       }
       return sender;
     };
   }
 
-  /* The call engine currently requests the Nitro room canvas at 8 FPS.
-     Raise only that exact room-capture case to 15 FPS; other canvas consumers are untouched. */
+  /* Stable V2 requests the Nitro room canvas at 8 FPS.
+     For that exact room source, relay it through a nearest-neighbour high-resolution canvas.
+     This preserves Habbo pixel edges before WebRTC compression instead of merely enlarging a soft video later. */
   if (window.HTMLCanvasElement?.prototype?.captureStream && !window.HTMLCanvasElement.prototype.__paradiseRoomCapturePatched) {
     const proto = window.HTMLCanvasElement.prototype;
     const originalCaptureStream = proto.captureStream;
@@ -63,15 +142,15 @@
       const isPhoneCanvas = !!this.closest?.('.nitro-phone-frame,.paradise-call-layer,.phone-camera-shell');
       const isRoomSized = this.width >= 320 && this.height >= 200;
       const requested = Number(frameRate || 0);
-      const effectiveRate = !isPhoneCanvas && isRoomSized && requested > 0 && requested <= 8
-        ? TARGET_FPS
-        : frameRate;
+      const isStableRoomCapture = !isPhoneCanvas && isRoomSized && requested > 0 && requested <= 8;
 
-      const stream = originalCaptureStream.call(this, effectiveRate);
+      if (isStableRoomCapture) return createSharpRelayStream(this, originalCaptureStream);
+
+      const stream = originalCaptureStream.call(this, frameRate);
       stream?.getVideoTracks?.().forEach(tuneVideoTrack);
       return stream;
     };
   }
 
-  console.info('[ParadisePhone] video quality V2 active');
+  console.info('[ParadisePhone] video quality V2.1 active');
 })();
