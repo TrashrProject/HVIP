@@ -1,0 +1,159 @@
+/* ParadiseRP — video call layout V1
+   Additive only: no MutationObserver, no replacement of the stable call engine. */
+
+.paradise-call-stable-v2 .pcall-video-head,
+.paradise-call-stable-v2 .pcall-topline{
+  cursor:grab;
+  user-select:none;
+  touch-action:none;
+}
+.nitro-phone-frame.pcall-phone-dragging .pcall-video-head,
+.nitro-phone-frame.pcall-phone-dragging .pcall-topline{cursor:grabbing}
+
+/* Video fills almost the whole physical phone while keeping the outer shell visible. */
+.nitro-phone-frame>.paradise-call-layer.paradise-call-stable-v2.pcall-video-expanded{
+  inset:7px!important;
+  border-radius:25px!important;
+  overflow:hidden!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-card.pcall-active.is-video{
+  border-radius:25px!important;
+  border-color:#102d43!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-active.is-video>video[data-pcall-remote]{
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  background:#02070c!important;
+}
+
+/* Keep information readable over the room instead of reserving UI space. */
+.paradise-call-stable-v2.pcall-video-expanded .pcall-video-shade{
+  background:linear-gradient(180deg,#000b 0,#0004 17%,transparent 36%,transparent 62%,#0004 79%,#000c 100%)!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-video-head{
+  top:12px!important;
+  left:14px!important;
+  right:14px!important;
+  padding:5px 74px 7px 6px!important;
+  border-radius:9px!important;
+  background:linear-gradient(90deg,#071621ba 0,#07162178 65%,transparent 100%)!important;
+  backdrop-filter:blur(2px);
+}
+.paradise-call-stable-v2 .pcall-room-whisper-badge{
+  display:inline-flex;
+  align-items:center;
+  width:max-content;
+  margin-top:5px;
+  padding:3px 6px;
+  border:1px solid #43b8e77d;
+  border-radius:999px;
+  background:#082538cc;
+  color:#8fe4ff;
+  font:800 6px/1 Arial,sans-serif;
+  font-style:normal;
+  letter-spacing:.45px;
+  text-transform:uppercase;
+  box-shadow:0 2px 7px #0006;
+}
+.paradise-call-stable-v2 .pcall-room-whisper-badge:before{
+  content:"";
+  width:5px;
+  height:5px;
+  margin-right:4px;
+  border-radius:50%;
+  background:#4bdd9a;
+  box-shadow:0 0 7px #4bdd9a;
+}
+
+/* Local room preview stays small and out of the way. */
+.paradise-call-stable-v2.pcall-video-expanded .pcall-local-video{
+  top:18px!important;
+  right:14px!important;
+  width:72px!important;
+  height:92px!important;
+  border-radius:10px!important;
+}
+
+/* Four compact actions: camera, fullscreen, rotate, hang up. */
+.paradise-call-stable-v2.pcall-video-expanded .pcall-controls{
+  left:50%!important;
+  right:auto!important;
+  bottom:13px!important;
+  width:max-content!important;
+  max-width:calc(100% - 20px)!important;
+  transform:translateX(-50%)!important;
+  gap:5px!important;
+  padding:7px 9px!important;
+  border:1px solid #ffffff24!important;
+  border-radius:18px!important;
+  background:#03111bd4!important;
+  backdrop-filter:blur(5px);
+  box-shadow:0 5px 16px #0007!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-control:not(.is-hangup){
+  width:48px!important;
+  min-width:48px!important;
+  height:42px!important;
+  justify-content:center!important;
+  border-radius:10px!important;
+  background:#12334ac7!important;
+  font-size:16px!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-control:not(.is-hangup)>span{
+  margin-top:1px!important;
+  font-size:6px!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-control.is-hangup{
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  line-height:46px!important;
+}
+
+/* Physical landscape mode: rotate the phone shell, counter-rotate only the call surface.
+   This keeps the room upright while the phone becomes wide. */
+.nitro-phone-frame.pcall-video-landscape{
+  rotate:90deg!important;
+  transform-origin:center center!important;
+  transition:rotate .2s ease!important;
+}
+.nitro-phone-frame.pcall-video-landscape>.paradise-call-layer.paradise-call-stable-v2.pcall-video-landscape-layer{
+  inset:auto!important;
+  left:50%!important;
+  top:50%!important;
+  width:calc(var(--pcall-phone-portrait-height, 500px) - 14px)!important;
+  height:calc(var(--pcall-phone-portrait-width, 290px) - 14px)!important;
+  max-width:none!important;
+  max-height:none!important;
+  transform:translate(-50%,-50%)!important;
+  rotate:-90deg!important;
+  transform-origin:center center!important;
+  border-radius:25px!important;
+}
+.nitro-phone-frame.pcall-video-landscape>.paradise-call-layer .pcall-active.is-video>video[data-pcall-remote]{
+  object-fit:contain!important;
+}
+.nitro-phone-frame.pcall-video-landscape>.paradise-call-layer .pcall-local-video{
+  width:86px!important;
+  height:64px!important;
+  top:15px!important;
+  right:15px!important;
+}
+.nitro-phone-frame.pcall-video-landscape>.paradise-call-layer .pcall-video-head{
+  right:112px!important;
+}
+.nitro-phone-frame.pcall-video-landscape>.paradise-call-layer .pcall-controls{
+  bottom:10px!important;
+}
+
+/* Reduced mode returns to the original Stable V2 inset. */
+.nitro-phone-frame>.paradise-call-layer.paradise-call-stable-v2:not(.pcall-video-expanded){
+  border-radius:17px;
+}
+
+@media(max-width:620px){
+  .paradise-call-stable-v2.pcall-video-expanded .pcall-controls{gap:3px!important;padding:6px!important}
+  .paradise-call-stable-v2.pcall-video-expanded .pcall-control:not(.is-hangup){width:43px!important;min-width:43px!important}
+}
