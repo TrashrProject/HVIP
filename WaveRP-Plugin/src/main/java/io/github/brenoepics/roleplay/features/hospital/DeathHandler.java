@@ -42,7 +42,7 @@ public class DeathHandler {
     }
 
     LiveFeed.sendGlobalAlert(LiveFeed.alert("[DECES] " + habbo.getHabboInfo().getUsername()
-        + " est mort."));
+        + " vient de mourir."));
 
     long token = tokenSequence.incrementAndGet();
     hospitalTransferTokens.put(userId, token);
