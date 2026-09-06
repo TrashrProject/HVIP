@@ -1,7 +1,7 @@
 (() => {
     'use strict';
-    if (window.__PARADISE_CAMERA_GRAM_FIX_V7__) return;
-    window.__PARADISE_CAMERA_GRAM_FIX_V7__ = '7.0.0';
+    if (window.__PARADISE_CAMERA_GRAM_FIX_V8__) return;
+    window.__PARADISE_CAMERA_GRAM_FIX_V8__ = '8.0.0';
 
     const runtime = window.__PARADISE_PHONE_RUNTIME__ = window.__PARADISE_PHONE_RUNTIME__ || { photos: [] };
     const CAMERA_API = '/nitro/phone-camera-api.php';
@@ -9,12 +9,14 @@
     const CAMERA_ROOT_SELECTOR = '.phone-camera-shell,.phone-camera-app,.pce-camera,.pcam-camera,[data-phone-camera]';
 
     function installPhoneFixStyles() {
-        if (document.getElementById('paradise-phone-camera-contact-fix-v6')) return;
+        if (document.getElementById('paradise-phone-camera-contact-fix-v8')) return;
         const style = document.createElement('style');
-        style.id = 'paradise-phone-camera-contact-fix-v6';
+        style.id = 'paradise-phone-camera-contact-fix-v8';
         style.textContent = `
             .nitro-phone-frame .pcam-live-preview,
             .nitro-phone-frame .paradise-real-camera-preview{display:none!important}
+            .nitro-phone-frame .phone-camera-app[data-mode="preview"] .pcam-topbar,
+            .nitro-phone-frame .phone-camera-app[data-mode="preview"] .pcam-controls{visibility:hidden!important;pointer-events:none!important}
             .nitro-phone-frame.paradise-camera-active .phone-wallpaper{visibility:hidden!important}
             .nitro-phone-frame .phone-friends-app .friend-row.paradise-callable-friend{min-height:58px!important;padding:6px 108px 6px 7px!important;gap:7px!important;box-sizing:border-box!important}
             .nitro-phone-frame .phone-friends-app .friend-row.paradise-callable-friend .roleplay-avatar-list{flex:0 0 44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important}
@@ -162,7 +164,8 @@
             );
             runtime.photos.unshift(payload.photo);
             window.dispatchEvent(new CustomEvent('paradise:camera-photo-saved', { detail: payload.photo }));
-            closeConfirm(root);
+            returnToCapture(root);
+            requestAnimationFrame(() => closeConfirm(root));
             toast(root, 'Photo enregistrée dans votre galerie ✓');
         } catch (error) {
             toast(root, error?.message || 'Impossible de sauvegarder la photo.', true);
@@ -174,6 +177,12 @@
 
     function closeConfirm(root) {
         root?.querySelector('.paradise-camera-confirm')?.remove();
+    }
+
+    function returnToCapture(root) {
+        const preview = root?.matches?.('.phone-camera-app[data-mode="preview"]') ? root : root?.querySelector('.phone-camera-app[data-mode="preview"]');
+        const newPhoto = preview?.querySelector('.pcam-right-icons .pcam-icon');
+        if (newPhoto instanceof HTMLButtonElement) newPhoto.click();
     }
 
     function showConfirm(root, imageData) {
@@ -200,7 +209,10 @@
         }));
         const save = overlay.querySelector('[data-camera-save]');
         save.style.background = '#1689df'; save.style.color = '#fff';
-        overlay.querySelector('[data-camera-retake]').addEventListener('click', () => closeConfirm(root));
+        overlay.querySelector('[data-camera-retake]').addEventListener('click', () => {
+            returnToCapture(root);
+            requestAnimationFrame(() => closeConfirm(root));
+        });
         save.addEventListener('click', () => persistPhoto(root, imageData, save));
         root.append(overlay);
     }
@@ -238,7 +250,7 @@
         waitForNativePhoto(root, previousUrl)
             .then(sourceToPngDataUrl)
             .then(imageData => showConfirm(root, imageData))
-            .catch(error => toast(root, error?.message || 'Impossible de prendre la photo.', true))
+            .catch(error => { returnToCapture(root); toast(root, error?.message || 'Impossible de prendre la photo.', true); })
             .finally(() => delete button.dataset.paradiseCapturePending);
     };
     document.addEventListener('click', handleCameraAction, true);
@@ -280,17 +292,16 @@
     }
 
     function decorateProfileGrid(scope = document) {
-        scope.querySelectorAll?.('.pg-profile .pg-grid > div,.pg-profile .pg-grid > button').forEach(cell => {
+        scope.querySelectorAll?.('.pg-profile-post-open,.pg-profile .pg-grid > button').forEach(cell => {
             if (!cell.querySelector('img')) return;
             cell.classList.add('pg-clickable-post');
-            cell.setAttribute('role', 'button');
-            cell.setAttribute('tabindex', '0');
             cell.setAttribute('aria-label', 'Ouvrir la publication');
         });
     }
 
     document.addEventListener('click', event => {
-        const cell = event.target.closest?.('.pg-profile .pg-grid > div,.pg-profile .pg-grid > button');
+        if (event.target.closest?.('[data-pg-delete]')) return;
+        const cell = event.target.closest?.('.pg-profile-post-open,.pg-profile .pg-grid > button');
         const image = cell?.querySelector?.('img');
         if (!image) return;
         event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();

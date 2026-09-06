@@ -2,7 +2,7 @@
     'use strict';
 
     if (window.__PARADISE_PHONE_COMPLETE__) return;
-    window.__PARADISE_PHONE_COMPLETE__ = '1.5.1';
+    window.__PARADISE_PHONE_COMPLETE__ = '1.7.0';
 
     const API = '/nitro/phone-api.php';
     const runtime = window.__PARADISE_PHONE_RUNTIME__ = window.__PARADISE_PHONE_RUNTIME__ || { photos: [] };
@@ -377,27 +377,47 @@
             const posts = (this.data.posts || []).filter(post => Number(post.userId) === userId);
             const isMe = userId === Number(this.data.me?.id || 0);
             const profile = this.findProfile(userId) || { id:userId, username:'Utilisateur', look:'', posts:posts.length, followers:0, followingCount:0, following:false };
-            return `<section class="pg-profile"><button type="button" class="pg-profile-back" data-pg-back>‹ Retour</button><header class="pg-profile-head"><span class="pg-profile-avatar">${avatar(profile.look, profile.username, 'l')}</span><div><strong>${escapeHtml(profile.username)}</strong><small>@${escapeHtml(profile.username)}</small>${isMe ? '<span class="pg-me-badge">Votre profil</span>' : `<button type="button" class="pg-profile-follow ${profile.following ? 'active' : ''}" data-pg-follow="${userId}">${profile.following ? 'Abonné ✓' : 'Suivre'}</button>`}</div></header><div class="pg-stats"><span><strong>${Number(profile.posts ?? posts.length)}</strong>publications</span><button type="button" data-pg-connections="followers" data-pg-user="${userId}"><strong>${Number(profile.followers || 0)}</strong>abonnés</button><button type="button" data-pg-connections="following" data-pg-user="${userId}"><strong>${Number(profile.followingCount || 0)}</strong>abonnements</button></div><h2 class="pg-profile-section-title">Publications</h2><div class="pg-grid pg-profile-grid">${posts.length ? posts.map(post => `<button type="button" data-pg-post="${post.id}"><img src="${escapeHtml(post.imageUrl || '')}" alt="Publication de ${escapeHtml(profile.username)}" loading="lazy"></button>`).join('') : '<div class="pg-empty"><strong>Aucune publication</strong><span>Ce profil n’a encore rien publié.</span></div>'}</div></section>`;
+            return `<section class="pg-profile"><button type="button" class="pg-profile-back" data-pg-back>‹ Retour</button><header class="pg-profile-head"><span class="pg-profile-avatar">${avatar(profile.look, profile.username, 'l')}</span><div><strong>${escapeHtml(profile.username)}</strong><small>@${escapeHtml(profile.username)}</small>${isMe ? '<span class="pg-me-badge">Votre profil</span>' : `<button type="button" class="pg-profile-follow ${profile.following ? 'active' : ''}" data-pg-follow="${userId}">${profile.following ? 'Abonné ✓' : 'Suivre'}</button>`}</div></header><div class="pg-stats"><span><strong>${Number(profile.posts ?? posts.length)}</strong>publications</span><button type="button" data-pg-connections="followers" data-pg-user="${userId}"><strong>${Number(profile.followers || 0)}</strong>abonnés</button><button type="button" data-pg-connections="following" data-pg-user="${userId}"><strong>${Number(profile.followingCount || 0)}</strong>abonnements</button></div><h2 class="pg-profile-section-title">Publications</h2><div class="pg-grid pg-profile-grid">${posts.length ? posts.map(post => `<div class="pg-profile-post"><button type="button" class="pg-profile-post-open" data-pg-post="${post.id}" aria-label="Ouvrir la publication"><img src="${escapeHtml(post.imageUrl || '')}" alt="Publication de ${escapeHtml(profile.username)}" loading="lazy"></button>${post.canDelete ? `<button type="button" class="pg-profile-post-delete" data-pg-delete="${post.id}" title="Supprimer la publication" aria-label="Supprimer la publication">×</button>` : ''}</div>`).join('') : '<div class="pg-empty"><strong>Aucune publication</strong><span>Ce profil n’a encore rien publié.</span></div>'}</div></section>`;
         }
     };
 
     async function mountGallery(root) {
         if (root.dataset.pprReady) return;
         root.dataset.pprReady = '1';
+        let galleryCsrf = '';
         const render = photos => {
             root.innerHTML = `<div class="pgal-topbar"><span class="pgal-title">Galerie</span><span class="pgal-count">${photos.length}</span></div>${photos.length ? `<div class="pgal-grid">${photos.map((photo, index) => `<button type="button" class="pgal-cell" data-ppr-photo="${index}"><img src="${escapeHtml(photo.url)}" alt="Photo" loading="lazy"></button>`).join('')}</div>` : '<div class="ppr-state"><strong>Aucune photo</strong><span>Prenez une photo avec l’appareil photo.</span></div>'}`;
             root.onclick = event => {
                 const button = event.target.closest('[data-ppr-photo]');
                 const back = event.target.closest('[data-ppr-gallery-back]');
+                const remove = event.target.closest('[data-ppr-gallery-delete]');
                 if (back) return render(photos);
+                if (remove) {
+                    const photoId = Number(remove.dataset.pprGalleryDelete || 0);
+                    if (!photoId || remove.disabled || !confirm('Supprimer définitivement cette photo de votre galerie ?')) return;
+                    remove.disabled = true;
+                    remove.textContent = 'Suppression…';
+                    request('gallery-delete', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ photoId, csrf:galleryCsrf }) })
+                        .then(() => {
+                            const index = photos.findIndex(photo => Number(photo.id) === photoId);
+                            if (index >= 0) photos.splice(index, 1);
+                            runtime.photos = runtime.photos.filter(photo => Number(photo.id) !== photoId);
+                            if (gram.data?.gallery) gram.data.gallery = gram.data.gallery.filter(photo => Number(photo.id) !== photoId);
+                            window.dispatchEvent(new CustomEvent('paradise:camera-photo-deleted', { detail:{ id:photoId } }));
+                            render(photos);
+                        })
+                        .catch(error => { remove.disabled = false; remove.textContent = 'Supprimer'; alert(error.message || 'Impossible de supprimer cette photo.'); });
+                    return;
+                }
                 if (!button) return;
                 const photo = photos[Number(button.dataset.pprPhoto)];
-                root.innerHTML = `<div class="pgal-topbar"><button class="pgal-icon" data-ppr-gallery-back title="Retour">‹</button><span class="pgal-title">Photo</span><span></span></div><div class="pgal-viewer"><img src="${escapeHtml(photo.url)}" alt="Photo"></div><div class="pgal-meta"><div class="pgal-meta-label">Prise le</div><div class="pgal-meta-value">${formatDate(photo.timestamp)}</div></div>`;
+                root.innerHTML = `<div class="pgal-topbar"><button class="pgal-icon" data-ppr-gallery-back title="Retour">‹</button><span class="pgal-title">Photo</span><span></span></div><div class="pgal-viewer"><img src="${escapeHtml(photo.url)}" alt="Photo"></div><div class="pgal-meta"><div><div class="pgal-meta-label">Prise le</div><div class="pgal-meta-value">${formatDate(photo.timestamp)}</div></div><button type="button" class="pgal-delete" data-ppr-gallery-delete="${photo.id}">Supprimer</button></div>`;
             };
         };
         root.innerHTML = '<div class="ppr-state"><span class="ppr-loader"></span><strong>Chargement de la galerie...</strong></div>';
         try {
             const payload = await request('gallery');
+            galleryCsrf = String(payload.csrf || '');
             const merged = [...runtime.photos, ...(payload.photos || [])].filter((photo, index, all) => photo.url && all.findIndex(other => other.url === photo.url) === index);
             render(merged);
         } catch (error) {

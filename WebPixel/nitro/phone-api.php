@@ -37,7 +37,16 @@ try{
   $session=new SessionMG();if(!$session->Exist(Config::$SessionName))phone_json(['ok'=>false,'error'=>'Session expirée.'],401);
   $db=(new DBManager())->Con();$username=trim((string)$session->Read(Config::$SessionName));$user=phone_stmt($db,'SELECT id,username FROM users WHERE username=? LIMIT 1','s',[$username])->get_result()->fetch_assoc();if(!$user)phone_json(['ok'=>false,'error'=>'Compte introuvable.'],401);$userId=(int)$user['id'];
   if(!isset($_SESSION['paradise_phone_csrf']))$_SESSION['paradise_phone_csrf']=bin2hex(random_bytes(24));$csrf=(string)$_SESSION['paradise_phone_csrf'];$action=strtolower(trim((string)($_GET['action']??'')));
-  if($action==='gallery'&&$_SERVER['REQUEST_METHOD']==='GET'){$photos=[];$r=phone_stmt($db,'SELECT id,room_id,timestamp,url FROM camera_photos WHERE user_id=? ORDER BY timestamp DESC,id DESC LIMIT 250','i',[$userId])->get_result();while($row=$r->fetch_assoc())if(phone_photo_available((string)$row['url']))$photos[]=['id'=>(int)$row['id'],'roomId'=>(int)$row['room_id'],'timestamp'=>(int)$row['timestamp'],'url'=>$row['url']];phone_json(['ok'=>true,'photos'=>$photos]);}
+  if($action==='gallery'&&$_SERVER['REQUEST_METHOD']==='GET'){$photos=[];$r=phone_stmt($db,'SELECT id,room_id,timestamp,url FROM camera_photos WHERE user_id=? ORDER BY timestamp DESC,id DESC LIMIT 250','i',[$userId])->get_result();while($row=$r->fetch_assoc())if(phone_photo_available((string)$row['url']))$photos[]=['id'=>(int)$row['id'],'roomId'=>(int)$row['room_id'],'timestamp'=>(int)$row['timestamp'],'url'=>$row['url']];phone_json(['ok'=>true,'csrf'=>$csrf,'photos'=>$photos]);}
+  if($action==='gallery-delete'&&$_SERVER['REQUEST_METHOD']==='POST'){
+    $data=phone_body();if(!hash_equals($csrf,(string)($data['csrf']??'')))phone_json(['ok'=>false,'error'=>'Session de sécurité expirée.'],403);
+    $photoId=max(0,(int)($data['photoId']??0));if($photoId<=0)phone_json(['ok'=>false,'error'=>'Photo invalide.'],422);
+    $photo=phone_stmt($db,'SELECT id,url FROM camera_photos WHERE id=? AND user_id=? LIMIT 1','ii',[$photoId,$userId])->get_result()->fetch_assoc();if(!$photo)phone_json(['ok'=>false,'error'=>'Photo introuvable.'],404);
+    $url=(string)$photo['url'];$published=(bool)phone_stmt($db,'SELECT 1 FROM phone_gram_posts WHERE image_url=? LIMIT 1','s',[$url])->get_result()->fetch_row();
+    phone_stmt($db,'DELETE FROM camera_photos WHERE id=? AND user_id=?','ii',[$photoId,$userId]);
+    if(!$published){$path=(string)(parse_url($url,PHP_URL_PATH)??'');if(str_starts_with($path,'/nitro/camera-photos/')){$file=__DIR__.DIRECTORY_SEPARATOR.'camera-photos'.DIRECTORY_SEPARATOR.basename($path);if(is_file($file))@unlink($file);}}
+    phone_json(['ok'=>true,'photoId'=>$photoId]);
+  }
   if($action==='connections'&&$_SERVER['REQUEST_METHOD']==='GET'){
     $targetId=max(1,(int)($_GET['userId']??$userId));$type=strtolower(trim((string)($_GET['type']??'followers')));
     if(!in_array($type,['followers','following'],true))phone_json(['ok'=>false,'error'=>'Liste invalide.'],422);
