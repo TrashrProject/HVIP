@@ -1,0 +1,243 @@
+/* ParadiseRP Wanted V19 — readability + avatar framing + cleaner hierarchy */
+
+/* Keep the window compact, but stop shrinking typography to unreadable sizes. */
+#paradise-wanted-v17{
+  width:min(744px,calc(100vw - 18px))!important;
+  height:min(362px,calc(100vh - 18px))!important;
+  min-width:610px!important;
+  min-height:318px!important;
+  border-radius:10px!important;
+}
+
+/* Header: reduce the oversized title and give the content more room. */
+#paradise-wanted-v17 .prw17-topbar{
+  height:45px!important;
+  flex-basis:45px!important;
+  grid-template-columns:154px minmax(0,1fr) auto 28px!important;
+  gap:8px!important;
+  padding:0 9px!important;
+}
+#paradise-wanted-v17 .prw17-logo{
+  width:26px!important;
+  height:26px!important;
+  flex-basis:26px!important;
+  font-size:14px!important;
+}
+#paradise-wanted-v17 .prw17-brand strong{font-size:14px!important;line-height:1!important}
+#paradise-wanted-v17 .prw17-brand span{font-size:8px!important;line-height:1!important;margin-top:3px!important}
+#paradise-wanted-v17 .prw17-heading strong{
+  font-size:16.5px!important;
+  line-height:1!important;
+  letter-spacing:-.18px!important;
+}
+#paradise-wanted-v17 .prw17-heading span{
+  font-size:9.5px!important;
+  line-height:1!important;
+  margin-top:3px!important;
+}
+#paradise-wanted-v17 .prw17-motto{
+  font-size:7.5px!important;
+  letter-spacing:.28px!important;
+}
+#paradise-wanted-v17 .prw17-close{
+  width:27px!important;
+  height:27px!important;
+  font-size:17px!important;
+}
+
+/* Left column: slightly narrower, clearer controls. */
+#paradise-wanted-v17 .prw17-body{
+  grid-template-columns:194px minmax(0,1fr)!important;
+  gap:7px!important;
+  padding:7px!important;
+}
+#paradise-wanted-v17 .prw17-tabs{
+  height:31px!important;
+  flex-basis:31px!important;
+}
+#paradise-wanted-v17 .prw17-tab{
+  font-size:10.5px!important;
+  letter-spacing:.2px!important;
+}
+#paradise-wanted-v17 .prw17-search-wrap{padding:6px!important}
+#paradise-wanted-v17 .prw17-search{
+  height:30px!important;
+  font-size:11px!important;
+  padding-left:28px!important;
+}
+#paradise-wanted-v17 .prw17-search-icon{font-size:12px!important}
+
+/* Suspect rows: readable name/stars and full avatar framing. */
+#paradise-wanted-v17 .prw17-card{
+  min-height:52px!important;
+  grid-template-columns:38px minmax(0,1fr) 10px!important;
+  gap:8px!important;
+  padding:5px 6px!important;
+}
+#paradise-wanted-v17 .prw17-avatar{
+  width:38px!important;
+  height:38px!important;
+  overflow:hidden!important;
+}
+#paradise-wanted-v17 .prw17-avatar .wanted-avatar{
+  width:38px!important;
+  height:38px!important;
+  overflow:visible!important;
+}
+/* Previous scale was too aggressive and chopped the head. */
+#paradise-wanted-v17 .prw17-avatar .avatar-image{
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-46%) scale(.58)!important;
+  transform-origin:center!important;
+}
+#paradise-wanted-v17 .prw17-card-name{
+  font-size:12.5px!important;
+  line-height:1.05!important;
+}
+#paradise-wanted-v17 .prw17-card-stars{
+  font-size:11px!important;
+  margin-top:4px!important;
+  letter-spacing:.2px!important;
+}
+#paradise-wanted-v17 .prw17-arrow{font-size:15px!important}
+#paradise-wanted-v17 .prw17-count{
+  font-size:9px!important;
+  padding:5px 7px!important;
+}
+
+/* Main profile: reduce visual bulk and center the avatar cleanly. */
+#paradise-wanted-v17 .prw17-detail{padding:8px!important}
+#paradise-wanted-v17 .prw17-head{
+  grid-template-columns:76px minmax(0,1fr)!important;
+  gap:11px!important;
+  padding-bottom:7px!important;
+}
+#paradise-wanted-v17 .prw17-profile-avatar{
+  width:76px!important;
+  height:80px!important;
+}
+#paradise-wanted-v17 .prw17-profile-avatar .wanted-avatar{
+  width:76px!important;
+  height:80px!important;
+}
+#paradise-wanted-v17 .prw17-profile-avatar .avatar-image{
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-47%) scale(1.12)!important;
+  transform-origin:center!important;
+}
+#paradise-wanted-v17 .prw17-name-row{gap:7px!important}
+#paradise-wanted-v17 .prw17-name{
+  font-size:21px!important;
+  line-height:1!important;
+  letter-spacing:-.24px!important;
+}
+#paradise-wanted-v17 .prw17-status{
+  height:20px!important;
+  padding:0 8px!important;
+  font-size:9px!important;
+}
+#paradise-wanted-v17 .prw17-identity{
+  grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;
+  gap:14px!important;
+  margin-top:7px!important;
+}
+
+/* Typography: everything important must remain comfortably readable. */
+#paradise-wanted-v17 .prw17-label{
+  font-size:9.8px!important;
+  line-height:1.05!important;
+  letter-spacing:.34px!important;
+  color:#c1ced5!important;
+}
+#paradise-wanted-v17 .prw17-value{
+  margin-top:3px!important;
+  font-size:11.5px!important;
+  line-height:1.18!important;
+  color:#f7fafc!important;
+}
+#paradise-wanted-v17 .prw17-danger-row{
+  gap:7px!important;
+  margin-top:4px!important;
+}
+#paradise-wanted-v17 .prw17-stars{
+  font-size:13px!important;
+  letter-spacing:.2px!important;
+}
+#paradise-wanted-v17 .prw17-level{
+  padding:3px 7px!important;
+  font-size:9px!important;
+}
+
+/* Facts: less bulky, but with larger text. */
+#paradise-wanted-v17 .prw17-facts{
+  margin-top:6px!important;
+  border-radius:7px!important;
+}
+#paradise-wanted-v17 .prw17-fact{
+  min-height:42px!important;
+  grid-template-columns:30px minmax(0,1fr)!important;
+  gap:8px!important;
+  padding:5px 8px!important;
+}
+#paradise-wanted-v17 .prw17-fact.is-wide{min-height:39px!important}
+#paradise-wanted-v17 .prw17-icon{
+  width:29px!important;
+  height:29px!important;
+  font-size:12px!important;
+}
+
+/* Information + warning: remove microscopic text. */
+#paradise-wanted-v17 .prw17-info{
+  grid-template-columns:30px minmax(0,1fr)!important;
+  gap:8px!important;
+  margin-top:6px!important;
+  padding:6px 8px!important;
+}
+#paradise-wanted-v17 .prw17-warning{
+  grid-template-columns:25px minmax(0,1fr)!important;
+  gap:8px!important;
+  margin-top:6px!important;
+  padding:6px 8px!important;
+}
+#paradise-wanted-v17 .prw17-warning-icon{
+  width:23px!important;
+  height:23px!important;
+  font-size:12px!important;
+}
+#paradise-wanted-v17 .prw17-warning strong{
+  font-size:9.3px!important;
+  line-height:1.12!important;
+  letter-spacing:.04px!important;
+}
+#paradise-wanted-v17 .prw17-warning span{
+  font-size:9px!important;
+  line-height:1.12!important;
+  margin-top:2px!important;
+}
+
+/* Compact-height fallback: preserve readability first, reduce spacing instead. */
+@media(max-height:365px) and (min-width:721px){
+  #paradise-wanted-v17{height:calc(100vh - 8px)!important;min-height:0!important}
+  #paradise-wanted-v17 .prw17-topbar{height:41px!important;flex-basis:41px!important}
+  #paradise-wanted-v17 .prw17-body{padding:5px!important;gap:5px!important}
+  #paradise-wanted-v17 .prw17-detail{padding:6px!important}
+  #paradise-wanted-v17 .prw17-head{grid-template-columns:68px minmax(0,1fr)!important;gap:8px!important;padding-bottom:4px!important}
+  #paradise-wanted-v17 .prw17-profile-avatar{width:68px!important;height:70px!important}
+  #paradise-wanted-v17 .prw17-profile-avatar .wanted-avatar{width:68px!important;height:70px!important}
+  #paradise-wanted-v17 .prw17-profile-avatar .avatar-image{transform:translate(-50%,-47%) scale(1.02)!important}
+  #paradise-wanted-v17 .prw17-name{font-size:19px!important}
+  #paradise-wanted-v17 .prw17-identity{margin-top:4px!important;gap:10px!important}
+  #paradise-wanted-v17 .prw17-facts{margin-top:4px!important}
+  #paradise-wanted-v17 .prw17-fact{min-height:34px!important;padding:3px 6px!important}
+  #paradise-wanted-v17 .prw17-fact.is-wide{min-height:31px!important}
+  #paradise-wanted-v17 .prw17-info,#paradise-wanted-v17 .prw17-warning{margin-top:4px!important;padding:4px 6px!important}
+}
+
+@media(max-width:720px){
+  #paradise-wanted-v17{min-width:0!important;width:calc(100vw - 10px)!important;height:calc(100vh - 10px)!important;min-height:0!important}
+  #paradise-wanted-v17 .prw17-motto{display:none!important}
+  #paradise-wanted-v17 .prw17-topbar{grid-template-columns:144px minmax(0,1fr) 28px!important}
+  #paradise-wanted-v17 .prw17-body{grid-template-columns:186px minmax(0,1fr)!important;padding:5px!important;gap:5px!important}
+}
