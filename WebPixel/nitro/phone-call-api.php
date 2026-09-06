@@ -70,8 +70,8 @@ function pcall_require_participant(array $call, int $userId): void {
  * A failed RP announcement must never prevent the actual phone call.
  */
 function pcall_room_action(int $userId, string $message): void {
-    $port = (int) (getenv('RCON_PORT') ?: 3001);
-    if ($port < 1 || $port > 65535) $port = 3001;
+    $port = (int) (getenv('RCON_PORT') ?: 30001);
+    if ($port < 1 || $port > 65535) $port = 30001;
 
     $payload = json_encode([
         'key' => 'talkuser',
