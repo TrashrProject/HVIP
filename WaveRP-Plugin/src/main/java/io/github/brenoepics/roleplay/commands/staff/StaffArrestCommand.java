@@ -9,6 +9,7 @@ import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import io.github.brenoepics.roleplay.utilities.LiveFeed;
 import java.time.Duration;
 
 public class StaffArrestCommand extends Command {
@@ -48,6 +49,10 @@ public class StaffArrestCommand extends Command {
     Duration duration = Duration.ofMinutes(minutes);
 
     executeArrest(policeStaff, criminal, "Intervention du staff", criminalData, duration);
+    if (criminalData != null && criminalData.isJailed()) {
+      LiveFeed.sendGlobalAlert(LiveFeed.alert("[PRISON] " + criminal.getHabboInfo().getUsername()
+          + " a ete emprisonne pour " + minutes + " minute(s)."));
+    }
     return true;
   }
 
