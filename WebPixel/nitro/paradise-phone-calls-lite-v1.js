@@ -2,7 +2,7 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_CALLS_LITE_V1__) return;
-  window.__PARADISE_PHONE_CALLS_LITE_V1__ = '1.0.0';
+  window.__PARADISE_PHONE_CALLS_LITE_V1__ = '1.0.1';
 
   const API = '/nitro/phone-call-api.php';
   const INCOMING_POLL_MS = 1200;
@@ -18,6 +18,7 @@
     incoming: null,
     active: null,
     busy: false,
+    bootstrapBusy: false,
     incomingBusy: false,
     statusBusy: false,
     incomingTimer: 0,
@@ -170,8 +171,29 @@
     updateClock();
   }
 
+  async function ensureBootstrap(showError = true) {
+    if (state.csrf && state.me) return true;
+    if (state.bootstrapBusy) return false;
+    state.bootstrapBusy = true;
+    try {
+      const payload = await request('bootstrap');
+      state.csrf = payload.csrf;
+      state.me = payload.me;
+      return true;
+    } catch (error) {
+      console.warn('[ParadisePhone Lite] bootstrap', error);
+      if (showError) notice(error.message || 'Service d’appel indisponible.', 'error');
+      return false;
+    } finally {
+      state.bootstrapBusy = false;
+    }
+  }
+
   async function startCall(target) {
     if (!target || state.busy || state.active || state.incoming) return;
+    if (!(await ensureBootstrap(true))) return;
+    if (target === state.me?.username) return;
+
     state.busy = true;
     try {
       const payload = await request('start', {
@@ -320,13 +342,23 @@
     }
   }
 
+  function friendNameFromRow(row) {
+    const preferred = row.querySelector('.friend-name,[class*="friend-name"]');
+    if (preferred?.textContent?.trim()) return preferred.textContent.trim();
+
+    const texts = [...row.querySelectorAll('span,strong,b,div')]
+      .map(node => node.textContent?.trim())
+      .filter(Boolean)
+      .filter(value => value.length <= 64 && !/^(message|supprimer|delete|ami|amis)$/i.test(value));
+    return texts[0] || '';
+  }
+
   function addCallButtons() {
     const app = document.querySelector('.phone-friends-app');
     if (!app) return;
 
     app.querySelectorAll('.friend-row:not([data-paradise-calls-lite])').forEach(row => {
-      const nameNode = row.querySelector('.friend-name') || row.querySelector('[class*="friend-name"]');
-      const target = nameNode?.textContent?.trim();
+      const target = friendNameFromRow(row);
       if (!target || target === state.me?.username) return;
 
       row.dataset.paradiseCallsLite = '1';
@@ -334,7 +366,7 @@
 
       const actions = document.createElement('span');
       actions.className = 'paradise-call-actions';
-      actions.innerHTML = `<button type="button" data-pcall-lite-start="${escapeHtml(target)}" title="Appeler ${escapeHtml(target)}">☎</button>`;
+      actions.innerHTML = `<button type="button" data-pcall-lite-start="${escapeHtml(target)}" title="Appeler ${escapeHtml(target)}" aria-label="Appeler ${escapeHtml(target)}">☎</button>`;
       row.appendChild(actions);
     });
   }
@@ -384,26 +416,28 @@
     }
   }, true);
 
-  async function bootstrap() {
-    try {
-      const payload = await request('bootstrap');
-      state.csrf = payload.csrf;
-      state.me = payload.me;
-
+  function startTimers() {
+    clearInterval(state.incomingTimer);
+    clearInterval(state.uiTimer);
+    state.incomingTimer = window.setInterval(pollIncoming, INCOMING_POLL_MS);
+    state.uiTimer = window.setInterval(() => {
       addCallButtons();
-      clearInterval(state.incomingTimer);
-      clearInterval(state.uiTimer);
-      state.incomingTimer = window.setInterval(pollIncoming, INCOMING_POLL_MS);
-      state.uiTimer = window.setInterval(() => {
-        addCallButtons();
-        syncCallLayerHost();
-      }, UI_SCAN_MS);
+      syncCallLayerHost();
+    }, UI_SCAN_MS);
+  }
+
+  async function bootstrap() {
+    // The UI button must never depend on the API bootstrap: show it as soon as the friends list exists.
+    addCallButtons();
+    startTimers();
+
+    if (await ensureBootstrap(false)) {
+      addCallButtons();
       pollIncoming();
-      console.info('[ParadisePhone] appels lite v1 actifs');
-    } catch (error) {
-      console.warn('[ParadisePhone Lite] bootstrap', error);
+      console.info('[ParadisePhone] appels lite v1.0.1 actifs');
     }
   }
 
+  addCallButtons();
   bootstrap();
 })();
