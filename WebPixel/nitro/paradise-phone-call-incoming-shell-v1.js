@@ -2,10 +2,10 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_CALL_INCOMING_SHELL_V1__) return;
-  window.__PARADISE_PHONE_CALL_INCOMING_SHELL_V1__ = '1.0.0';
+  window.__PARADISE_PHONE_CALL_INCOMING_SHELL_V1__ = '1.1.0';
 
-  const CHECK_MS = 250;
-  const OPEN_RETRY_MS = 1400;
+  const CHECK_MS = 60;
+  const OPEN_RETRY_MS = 900;
   let lastOpenAttempt = 0;
 
   const getFrame = () => document.querySelector('.nitro-phone-frame');
@@ -27,11 +27,35 @@
     ) || [...shell.querySelectorAll('.roleplay-left-menu-buttons .left-menu-button')][4] || null;
   }
 
+  function hideFloatingLayer(layer) {
+    if (!layer || !layer.classList.contains('is-floating')) return;
+    layer.dataset.pcallAwaitingShell = '1';
+    layer.style.visibility = 'hidden';
+    layer.style.opacity = '0';
+    layer.style.pointerEvents = 'none';
+  }
+
   function mountLayerInsidePhone(frame, layer) {
     if (!frame || !layer) return false;
     if (layer.parentElement !== frame) frame.appendChild(layer);
     layer.classList.remove('is-floating');
+    delete layer.dataset.pcallAwaitingShell;
+    layer.style.removeProperty('visibility');
+    layer.style.removeProperty('opacity');
+    layer.style.removeProperty('pointer-events');
     return true;
+  }
+
+  function tryMountSoon() {
+    [25, 60, 110, 180, 300, 480, 760].forEach(delay => {
+      window.setTimeout(() => {
+        const mountedFrame = getFrame();
+        const incomingLayer = getIncomingLayer();
+        if (!incomingLayer) return;
+        if (frameVisible(mountedFrame)) mountLayerInsidePhone(mountedFrame, incomingLayer);
+        else hideFloatingLayer(incomingLayer);
+      }, delay);
+    });
   }
 
   function tick() {
@@ -44,6 +68,10 @@
       return;
     }
 
+    // Never expose the temporary standalone call card while Nitro is mounting
+    // the physical ParadisePhone shell.
+    hideFloatingLayer(layer);
+
     const now = Date.now();
     if (now - lastOpenAttempt < OPEN_RETRY_MS) return;
 
@@ -52,17 +80,9 @@
 
     lastOpenAttempt = now;
     button.click();
-
-    // Nitro mounts the frame asynchronously after the native rail click.
-    [80, 180, 360, 700].forEach(delay => {
-      window.setTimeout(() => {
-        const mountedFrame = getFrame();
-        const incomingLayer = getIncomingLayer();
-        if (frameVisible(mountedFrame) && incomingLayer) mountLayerInsidePhone(mountedFrame, incomingLayer);
-      }, delay);
-    });
+    tryMountSoon();
   }
 
   window.setInterval(tick, CHECK_MS);
-  console.info('[ParadisePhone] incoming call opens physical phone shell V1');
+  console.info('[ParadisePhone] incoming call opens physical phone shell V1.1');
 })();
