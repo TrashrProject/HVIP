@@ -10,6 +10,7 @@ import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.job.JobPermissions;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import io.github.brenoepics.roleplay.utilities.LiveFeed;
 import io.github.brenoepics.roleplay.utilities.types.Timeout;
 
 public class ArrestCommand extends Command {
@@ -75,7 +76,15 @@ public class ArrestCommand extends Command {
       return true;
     }
 
+    RpAvatar criminalData = RolePlay.getAvatarManager().getRpAvatar(habbo);
     RolePlay.getWantedManager().arrestUser(manager, habbo);
+    if (criminalData != null && criminalData.isJailed()) {
+      long remainingSeconds = Math.max(0L,
+          criminalData.getJailTime() - Emulator.getIntUnixTimestamp());
+      long remainingMinutes = Math.max(1L, (remainingSeconds + 59L) / 60L);
+      LiveFeed.sendGlobalAlert(LiveFeed.alert("[PRISON] " + habbo.getHabboInfo().getUsername()
+          + " a ete emprisonne pour " + remainingMinutes + " minute(s)."));
+    }
     managerData.executeAction();
     return true;
   }
