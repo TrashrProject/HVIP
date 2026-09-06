@@ -2,7 +2,7 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_NOTIFICATION_CENTER_V2__) return;
-  window.__PARADISE_PHONE_NOTIFICATION_CENTER_V2__ = '2.2.0';
+  window.__PARADISE_PHONE_NOTIFICATION_CENTER_V2__ = '2.3.0';
 
   const API = '/nitro/phone-notifications-api.php';
   const POLL_MS = 4000;
@@ -17,7 +17,8 @@
     busy: false,
     timer: 0,
     observer: null,
-    observerFrame: 0
+    observerFrame: 0,
+    signature: ''
   };
 
   const escapeHtml = value => String(value ?? '')
@@ -95,7 +96,7 @@
     seen.initialized = true;
     writeSeen(seen);
     updateBellBadge();
-    if (state.open) renderCenter();
+    if (state.open) renderCenter(true);
   }
 
   function markAllRead() {
@@ -105,7 +106,7 @@
     seen.initialized = true;
     writeSeen(seen);
     updateBellBadge();
-    if (state.open) renderCenter();
+    if (state.open) renderCenter(true);
   }
 
   function copyFor(item) {
@@ -190,11 +191,13 @@
     return state.items;
   }
 
-  function renderCenter() {
+  function renderCenter(preserveScroll = true) {
     const root = frame();
     if (!root || !state.open) return;
 
     let center = root.querySelector(':scope > .paradise-phone-notification-center');
+    const previousScroll = preserveScroll ? Number(center?.querySelector('.pnc-list')?.scrollTop || 0) : 0;
+
     if (!center) {
       center = document.createElement('section');
       center.className = 'paradise-phone-notification-center';
@@ -215,7 +218,10 @@
       <button type="button" class="pnc-tab ${state.filter === 'call' ? 'is-active' : ''}" data-pnc-filter="call">Appels</button>
       <button type="button" class="pnc-tab ${state.filter === 'gram' ? 'is-active' : ''}" data-pnc-filter="gram">ParadiseGram</button>
     </nav>
-    <div class="pnc-list">${items.length ? items.map(rowHtml).join('') : `<div class="pnc-empty"><span class="pnc-empty-icon">⌁</span><strong>Aucune notification</strong><small>${state.filter === 'all' ? 'Vos appels manqués et activités ParadiseGram apparaîtront ici.' : 'Aucune notification dans cette catégorie.'}</small></div>`}</div>`;
+    <div class="pnc-list" tabindex="0">${items.length ? items.map(rowHtml).join('') : `<div class="pnc-empty"><span class="pnc-empty-icon">⌁</span><strong>Aucune notification</strong><small>${state.filter === 'all' ? 'Vos appels manqués et activités ParadiseGram apparaîtront ici.' : 'Aucune notification dans cette catégorie.'}</small></div>`}</div>`;
+
+    const list = center.querySelector('.pnc-list');
+    if (list && previousScroll > 0) list.scrollTop = previousScroll;
   }
 
   function openCenter() {
@@ -224,7 +230,7 @@
     state.open = true;
     state.filter = 'all';
     root.classList.add('pnc-center-open');
-    renderCenter();
+    renderCenter(false);
     poll(true);
   }
 
@@ -284,6 +290,12 @@
     }, 160);
   }
 
+  function itemsSignature(items) {
+    return (Array.isArray(items) ? items : [])
+      .map(item => [item.source, item.id, item.type, item.createdAt, item.username].join(':'))
+      .join('|');
+  }
+
   async function poll(forceRender = false) {
     if (state.busy) return;
     state.busy = true;
@@ -291,13 +303,20 @@
       const response = await fetch(API, { credentials: 'same-origin', cache: 'no-store' });
       const payload = await response.json().catch(() => null);
       if (!response.ok || !payload?.ok) throw new Error(payload?.error || 'Notifications indisponibles.');
+
+      const nextItems = Array.isArray(payload.items) ? payload.items : [];
+      const nextSignature = itemsSignature(nextItems);
+      const changed = nextSignature !== state.signature;
+
       state.userId = Number(payload.me?.id || 0);
       state.serverTime = Number(payload.serverTime || Math.floor(Date.now() / 1000));
-      state.items = Array.isArray(payload.items) ? payload.items : [];
+      state.items = nextItems;
+      state.signature = nextSignature;
+
       updateBellBadge();
-      if (state.open || forceRender) renderCenter();
+      if (forceRender || (state.open && changed)) renderCenter(true);
     } catch (error) {
-      console.warn('[ParadisePhone Notification Center V2.2]', error);
+      console.warn('[ParadisePhone Notification Center V2.3]', error);
       if (state.open) {
         const list = frame()?.querySelector('.paradise-phone-notification-center .pnc-list');
         if (list) list.innerHTML = '<div class="pnc-empty"><span class="pnc-empty-icon">!</span><strong>Notifications indisponibles</strong><small>Réessayez dans quelques secondes.</small></div>';
@@ -339,7 +358,7 @@
       event.preventDefault();
       event.stopPropagation();
       state.filter = ['all', 'call', 'gram'].includes(tab.dataset.pncFilter) ? tab.dataset.pncFilter : 'all';
-      renderCenter();
+      renderCenter(false);
       return;
     }
 
@@ -358,17 +377,16 @@
       event.stopPropagation();
       closeCenter();
     }
-  }, true);
+  });
 
   window.addEventListener('paradise-phone-notifications-seen', () => {
     updateBellBadge();
-    if (state.open) renderCenter();
   });
 
   window.addEventListener('storage', event => {
     if (event.key?.startsWith('paradise.phone.notifications.seen.v1.')) {
       updateBellBadge();
-      if (state.open) renderCenter();
+      if (state.open) renderCenter(true);
     }
   });
 
@@ -381,8 +399,11 @@
         state.open = false;
         return;
       }
-      ensureBell();
-      if (state.open) renderCenter();
+
+      // IMPORTANT: never rebuild the open center from the MutationObserver.
+      // Replacing innerHTML here caused buttons to lose their target and reset scroll every frame.
+      if (!state.open) ensureBell();
+      else root.classList.add('pnc-center-open');
       updateBellBadge();
     });
   }
@@ -394,7 +415,7 @@
     poll(false);
     clearInterval(state.timer);
     state.timer = window.setInterval(() => poll(false), POLL_MS);
-    console.info('[ParadisePhone] centre de notifications V2.2 propre actif');
+    console.info('[ParadisePhone] centre de notifications V2.3 interactif actif');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap, { once: true });
