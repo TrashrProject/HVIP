@@ -165,3 +165,59 @@
   .nitro-phone-frame .pnc-row{padding:6px 7px!important;grid-template-columns:38px minmax(0,1fr) 12px!important}
   .nitro-phone-frame .pnc-avatar{width:36px!important;height:36px!important}
 }
+
+/* V2.1 — visual bugfix / tighter fit under the native status bar. */
+.nitro-phone-frame .paradise-phone-notification-center{
+  left:8px!important;
+  right:8px!important;
+  top:49px!important;
+  bottom:10px!important;
+  border-radius:15px!important;
+}
+.nitro-phone-frame .pnc-header{
+  min-height:48px!important;
+  padding:6px 8px!important;
+  grid-template-columns:32px minmax(0,1fr) auto!important;
+  gap:7px!important;
+}
+.nitro-phone-frame .pnc-back{
+  width:32px!important;
+  height:32px!important;
+  border-radius:9px!important;
+}
+.nitro-phone-frame .pnc-title strong{font-size:13px!important}
+.nitro-phone-frame .pnc-title small{font-size:8px!important}
+.nitro-phone-frame .pnc-read-all{
+  min-height:27px!important;
+  padding:0 8px!important;
+  font-size:8px!important;
+}
+.nitro-phone-frame .pnc-tabs{
+  grid-template-columns:1fr .9fr 1.28fr!important;
+  gap:4px!important;
+  padding:6px 7px!important;
+}
+.nitro-phone-frame .pnc-tab{
+  min-height:28px!important;
+  padding:0 5px!important;
+  font-size:8.2px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.nitro-phone-frame .pnc-list{
+  padding:6px!important;
+}
+.nitro-phone-frame .pnc-row{
+  grid-template-columns:40px minmax(0,1fr) 10px!important;
+  gap:7px!important;
+  margin-bottom:5px!important;
+  padding:7px!important;
+  border-radius:11px!important;
+}
+.nitro-phone-frame .pnc-avatar{
+  width:38px!important;
+  height:38px!important;
+}
+.nitro-phone-frame .pnc-copy>b{font-size:10px!important}
+.nitro-phone-frame .pnc-copy>small{font-size:8px!important}
