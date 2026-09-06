@@ -1,0 +1,19 @@
+/* ParadiseRP — stable call UI V2. No global observer, visual layer only. */
+
+.phone-friends-app .friend-row.paradise-callable-friend{padding-right:128px!important}
+.paradise-call-actions.paradise-call-actions-stable-v2{right:68px!important;display:flex!important;gap:4px!important}
+.paradise-call-actions.paradise-call-actions-stable-v2 button{display:grid!important;place-items:center!important;line-height:1!important}
+.paradise-call-actions.paradise-call-actions-stable-v2 svg{display:block;width:13px;height:13px;overflow:visible;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.paradise-call-actions.paradise-call-actions-stable-v2 button:first-child svg path{fill:currentColor;stroke:none}
+.paradise-call-actions.paradise-call-actions-stable-v2 button:last-child svg path{fill:currentColor;stroke:currentColor;stroke-width:1}
+
+.paradise-call-stable-v2 .pcall-active.is-audio>small{max-width:205px;margin:2px auto 0;color:#7894aa;font-size:7px;line-height:1.35;text-align:center}
+.paradise-call-stable-v2 .pcall-active.is-video .pcall-video-head small{margin-top:2px;color:#9ec1d7;font-size:6px;text-transform:uppercase;letter-spacing:.45px}
+.paradise-call-stable-v2 .pcall-active.is-video .pcall-controls{gap:14px}
+.paradise-call-stable-v2 .pcall-active.is-video .pcall-control:not(.is-hangup){width:58px;min-width:58px}
+.paradise-call-stable-v2 .pcall-active.is-video .pcall-control:not(.is-hangup)>span{font-size:7px;line-height:1.15}
+
+@media(max-width:420px){
+  .phone-friends-app .friend-row.paradise-callable-friend{padding-right:124px!important}
+  .paradise-call-actions.paradise-call-actions-stable-v2{right:65px!important}
+}
