@@ -65,6 +65,50 @@ function pcall_require_participant(array $call, int $userId): void {
     }
 }
 
+/**
+ * Best-effort bridge to the local WaveRP RCON server.
+ * A failed RP announcement must never prevent the actual phone call.
+ */
+function pcall_room_action(int $userId, string $message): void {
+    $port = (int) (getenv('RCON_PORT') ?: 3001);
+    if ($port < 1 || $port > 65535) $port = 3001;
+
+    $payload = json_encode([
+        'key' => 'talkuser',
+        'data' => [
+            'type' => 'shout',
+            'user_id' => $userId,
+            'bubble_id' => -1,
+            'message' => $message
+        ]
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    if (!is_string($payload) || $payload === '') return;
+
+    $errno = 0;
+    $errstr = '';
+    $socket = @stream_socket_client(
+        'tcp://127.0.0.1:' . $port,
+        $errno,
+        $errstr,
+        0.35,
+        STREAM_CLIENT_CONNECT
+    );
+
+    if (!is_resource($socket)) {
+        error_log('[Paradise Phone Call API] RCON room action unavailable: ' . $errstr . ' (' . $errno . ')');
+        return;
+    }
+
+    try {
+        stream_set_timeout($socket, 0, 400000);
+        @fwrite($socket, $payload);
+        @stream_get_contents($socket);
+    } finally {
+        @fclose($socket);
+    }
+}
+
 try {
     $session = new SessionMG();
     if (!$session->Exist(Config::$SessionName)) {
@@ -185,6 +229,12 @@ try {
             [$userId, $targetId, $type, $offerJson, $now, $now]
         );
         $callId = (int) $db->insert_id;
+
+        // RP room action: visible around the caller, while the phone content stays private.
+        pcall_room_action(
+            $userId,
+            '* ' . $user['username'] . ' essaie d\'appeler ' . $target['username'] . ' *'
+        );
 
         pcall_json(['ok' => true, 'call' => [
             'id' => $callId,
