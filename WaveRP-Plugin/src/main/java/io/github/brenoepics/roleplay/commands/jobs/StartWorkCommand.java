@@ -1,5 +1,6 @@
 package io.github.brenoepics.roleplay.commands.jobs;
 
+import static io.github.brenoepics.roleplay.features.job.JobsDelegate.getRoomUserShoutComposer;
 import static io.github.brenoepics.roleplay.features.user.HungerRunner.MISSING_ENERGY;
 
 import com.eu.habbo.Emulator;
@@ -70,11 +71,15 @@ public class StartWorkCommand extends Command {
           Emulator.getConfig().getInt("features.payday.timer_minutes", 10));
       data.setLastPayday(new Date());
 
-      // Affichage volontairement en bulle de chat : les whispers ALERT ne sont pas visibles
-      // sur tous les clients Nitro utilisés par ParadiseRP.
-      habbo.shout(
-          "Prochaine paie dans " + paydayMinutes + " minutes.",
-          RoomChatMessageBubbles.NORMAL);
+      // Utilise exactement le même mécanisme de bulle que le message
+      // "Commence à travailler", déjà confirmé visible sur Nitro.
+      if (habbo.getHabboInfo().getCurrentRoom() != null) {
+        habbo.getHabboInfo().getCurrentRoom().sendComposer(
+            getRoomUserShoutComposer(
+                "Prochaine paie dans " + paydayMinutes + " minutes.",
+                habbo,
+                RoomChatMessageBubbles.NORMAL).compose());
+      }
 
       data.executeAction();
     }
