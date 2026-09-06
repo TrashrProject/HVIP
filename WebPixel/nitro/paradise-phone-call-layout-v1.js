@@ -2,7 +2,7 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_CALL_LAYOUT_V1__) return;
-  window.__PARADISE_PHONE_CALL_LAYOUT_V1__ = '1.0.1';
+  window.__PARADISE_PHONE_CALL_LAYOUT_V1__ = '1.1.0';
 
   const CHECK_MS = 450;
   const VIEWPORT_MARGIN = 8;
@@ -61,6 +61,26 @@
     if (dx || dy) saveTranslate(frame, current.x + dx, current.y + dy);
   }
 
+  function keepVisualCenter(frame, beforeRect) {
+    requestAnimationFrame(() => {
+      if (!frame?.isConnected) return;
+      const afterRect = frame.getBoundingClientRect();
+      const beforeX = beforeRect.left + (beforeRect.width / 2);
+      const beforeY = beforeRect.top + (beforeRect.height / 2);
+      const afterX = afterRect.left + (afterRect.width / 2);
+      const afterY = afterRect.top + (afterRect.height / 2);
+      const dx = beforeX - afterX;
+      const dy = beforeY - afterY;
+
+      if (Math.abs(dx) > .5 || Math.abs(dy) > .5) {
+        const current = currentTranslate(frame);
+        saveTranslate(frame, current.x + dx, current.y + dy);
+      }
+
+      requestAnimationFrame(nudgeIntoViewport);
+    });
+  }
+
   function applyOrientation(force = false) {
     const frame = getFrame();
     const layer = getLayer();
@@ -70,17 +90,21 @@
     const layerHasLandscape = layer.classList.contains('pcall-video-landscape-layer');
     if (!force && frameHasLandscape === landscape && layerHasLandscape === landscape) return;
 
-    frame.classList.toggle('pcall-video-landscape', landscape);
-    layer.classList.toggle('pcall-video-landscape-layer', landscape);
+    const beforeRect = frame.getBoundingClientRect();
 
-    if (landscape) {
+    /* Capture the portrait shell size BEFORE the landscape class changes dimensions.
+       V7 swaps width/height instead of rotating the whole DOM tree. */
+    if (landscape && !frameHasLandscape) {
       const width = Math.max(1, frame.offsetWidth);
       const height = Math.max(1, frame.offsetHeight);
       frame.style.setProperty('--pcall-phone-portrait-width', `${width}px`);
       frame.style.setProperty('--pcall-phone-portrait-height', `${height}px`);
     }
 
-    requestAnimationFrame(nudgeIntoViewport);
+    frame.classList.toggle('pcall-video-landscape', landscape);
+    layer.classList.toggle('pcall-video-landscape-layer', landscape);
+
+    keepVisualCenter(frame, beforeRect);
   }
 
   function updateControlLabels() {
@@ -246,5 +270,5 @@
     if (!applyVideoLayout() && videoMounted) cleanupVideoLayout();
   }, CHECK_MS);
 
-  console.info('[ParadisePhone] layout appel vidéo V1 actif');
+  console.info('[ParadisePhone] layout appel vidéo V1.1 actif — landscape shell resize');
 })();
