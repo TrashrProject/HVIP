@@ -2,10 +2,10 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_NOTIFICATION_CENTER_V2__) return;
-  window.__PARADISE_PHONE_NOTIFICATION_CENTER_V2__ = '2.0.0';
+  window.__PARADISE_PHONE_NOTIFICATION_CENTER_V2__ = '2.2.0';
 
   const API = '/nitro/phone-notifications-api.php';
-  const POLL_MS = 5000;
+  const POLL_MS = 4000;
   const MAX_BADGE = 99;
 
   const state = {
@@ -94,7 +94,7 @@
     else seen.gram = Math.max(Number(seen.gram || 0), target);
     seen.initialized = true;
     writeSeen(seen);
-    updateLauncherBadge();
+    updateBellBadge();
     if (state.open) renderCenter();
   }
 
@@ -104,7 +104,7 @@
     seen.gram = Math.max(Number(seen.gram || 0), maxId('gram'));
     seen.initialized = true;
     writeSeen(seen);
-    updateLauncherBadge();
+    updateBellBadge();
     if (state.open) renderCenter();
   }
 
@@ -120,7 +120,7 @@
     }
     if (item.type === 'like') return { app: 'ParadiseGram', title: 'Nouveau J’aime', body: `${username} a aimé votre publication.`, icon: '♥' };
     if (item.type === 'comment') return { app: 'ParadiseGram', title: 'Nouveau commentaire', body: `${username} a commenté votre publication.`, icon: '●' };
-    if (item.type === 'follow') return { app: 'ParadiseGram', title: 'Nouvel abonné', body: `${username} a commencé à vous suivre.`, icon: '＋' };
+    if (item.type === 'follow') return { app: 'ParadiseGram', title: 'Nouvel abonné', body: `${username} a commencé à vous suivre.`, icon: '+' };
     return { app: 'ParadiseGram', title: 'Nouvelle activité', body: `${username} a interagi avec votre profil.`, icon: '♥' };
   }
 
@@ -133,91 +133,31 @@
     return `il y a ${Math.floor(seconds / 86400)} j`;
   }
 
-  function candidateLabel(node) {
-    return [
-      node.getAttribute?.('aria-label'),
-      node.getAttribute?.('title'),
-      node.getAttribute?.('data-app'),
-      node.getAttribute?.('data-app-name'),
-      node.textContent
-    ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim().toLocaleLowerCase('fr-FR');
-  }
-
-  function findNativeLauncher(source) {
-    const root = frame();
-    if (!root) return null;
-    const words = source === 'gram'
-      ? ['paradise gram', 'paradisegram', 'waver gram', 'wave gram', 'instagram']
-      : ['amis', 'friends', 'contacts'];
-    return [...root.querySelectorAll('button,[role="button"],a')]
-      .filter(node => !node.closest('.phone-active-app,.paradise-phone-notification-center,.paradise-phone-notification-host'))
-      .map(node => ({ node, label: candidateLabel(node) }))
-      .filter(entry => words.some(word => entry.label.includes(word)))
-      .sort((a, b) => a.label.length - b.label.length)[0]?.node || null;
-  }
-
-  function launcherHost(template) {
-    if (!template) return null;
-    let parent = template.parentElement;
-    for (let depth = 0; parent && depth < 4; depth += 1, parent = parent.parentElement) {
-      const direct = [...parent.children];
-      const appLike = direct.filter(child => child.matches?.('.phone-app-icon,button,[role="button"],a') || child.querySelector?.('.phone-app-icon'));
-      if (appLike.length >= 3 && appLike.length <= 20) return parent;
-    }
-    return template.parentElement;
-  }
-
-  function makeLauncher(template, fallback = false) {
-    let launcher;
-    if (template && template.matches('button')) {
-      launcher = document.createElement('button');
-      launcher.type = 'button';
-      launcher.className = `${template.className || ''} paradise-phone-notification-app`;
-    } else {
-      launcher = document.createElement('button');
-      launcher.type = 'button';
-      launcher.className = 'phone-app-icon paradise-phone-notification-app';
-    }
-    launcher.removeAttribute('id');
-    launcher.removeAttribute('title');
-    launcher.removeAttribute('aria-label');
-    launcher.setAttribute('aria-label', 'Notifications');
-    launcher.dataset.pncLauncher = '1';
-    if (fallback) launcher.classList.add('pnc-fallback');
-    launcher.innerHTML = `<span class="pnc-launch-icon" aria-hidden="true"></span><span class="pnc-launch-label">Notifications</span><span class="pnc-launch-badge" hidden></span>`;
-    return launcher;
-  }
-
-  function ensureLauncher() {
+  function ensureBell() {
     const root = frame();
     if (!root || !visible(root)) return null;
-    const existing = root.querySelector('[data-pnc-launcher]');
-    if (existing) {
-      updateLauncherBadge(existing);
-      return existing;
-    }
 
-    if (root.querySelector('.phone-active-app')) return null;
-    const template = findNativeLauncher('gram') || findNativeLauncher('call') || root.querySelector('.phone-app-icon');
-    if (template) {
-      const host = launcherHost(template);
-      if (host) {
-        const launcher = makeLauncher(template, false);
-        host.appendChild(launcher);
-        updateLauncherBadge(launcher);
-        return launcher;
-      }
-    }
+    root.querySelectorAll('.paradise-phone-notification-app').forEach(node => node.remove());
+    root.querySelectorAll('[data-pnc-launcher]:not([data-pnc-status-bell])').forEach(node => node.remove());
 
-    const launcher = makeLauncher(null, true);
-    root.appendChild(launcher);
-    updateLauncherBadge(launcher);
-    return launcher;
+    let bell = root.querySelector('[data-pnc-status-bell]');
+    if (!bell) {
+      bell = document.createElement('button');
+      bell.type = 'button';
+      bell.className = 'pnc-status-bell';
+      bell.dataset.pncLauncher = '1';
+      bell.dataset.pncStatusBell = '1';
+      bell.setAttribute('aria-label', 'Notifications');
+      bell.setAttribute('title', 'Notifications');
+      bell.innerHTML = '<span class="pnc-status-bell-glyph" aria-hidden="true"></span><span class="pnc-launch-badge" hidden></span>';
+      root.appendChild(bell);
+    }
+    updateBellBadge(bell);
+    return bell;
   }
 
-  function updateLauncherBadge(launcher = null) {
-    const root = frame();
-    const node = launcher || root?.querySelector('[data-pnc-launcher]');
+  function updateBellBadge(bell = null) {
+    const node = bell || frame()?.querySelector('[data-pnc-status-bell]');
     if (!node) return;
     const badge = node.querySelector('.pnc-launch-badge');
     if (!badge) return;
@@ -253,6 +193,7 @@
   function renderCenter() {
     const root = frame();
     if (!root || !state.open) return;
+
     let center = root.querySelector(':scope > .paradise-phone-notification-center');
     if (!center) {
       center = document.createElement('section');
@@ -263,6 +204,7 @@
 
     const items = filteredItems();
     const unread = unreadCount('all');
+
     center.innerHTML = `<header class="pnc-header">
       <button type="button" class="pnc-back" data-pnc-back aria-label="Retour">‹</button>
       <div class="pnc-title"><strong>Notifications</strong><small>${unread ? `${unread} non lue${unread > 1 ? 's' : ''}` : 'Tout est à jour'}</small></div>
@@ -279,21 +221,42 @@
   function openCenter() {
     const root = frame();
     if (!root) return;
-    const active = root.querySelector('.phone-active-app');
-    if (active) {
-      const home = active.querySelector('.phone-app-home') || root.querySelector('.phone-app-home');
-      home?.click();
-    }
     state.open = true;
     state.filter = 'all';
+    root.classList.add('pnc-center-open');
     renderCenter();
     poll(true);
   }
 
   function closeCenter() {
     state.open = false;
-    frame()?.querySelector(':scope > .paradise-phone-notification-center')?.remove();
-    window.setTimeout(ensureLauncher, 80);
+    const root = frame();
+    root?.classList.remove('pnc-center-open');
+    root?.querySelector(':scope > .paradise-phone-notification-center')?.remove();
+    ensureBell();
+  }
+
+  function candidateLabel(node) {
+    return [
+      node.getAttribute?.('aria-label'),
+      node.getAttribute?.('title'),
+      node.getAttribute?.('data-app'),
+      node.getAttribute?.('data-app-name'),
+      node.textContent
+    ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim().toLocaleLowerCase('fr-FR');
+  }
+
+  function findNativeLauncher(source) {
+    const root = frame();
+    if (!root) return null;
+    const words = source === 'gram'
+      ? ['paradise gram', 'paradisegram', 'waver gram', 'wave gram', 'instagram']
+      : ['amis', 'friends', 'contacts'];
+    return [...root.querySelectorAll('button,[role="button"],a')]
+      .filter(node => !node.closest('.paradise-phone-notification-center,.paradise-phone-notification-host'))
+      .map(node => ({ node, label: candidateLabel(node) }))
+      .filter(entry => words.some(word => entry.label.includes(word)))
+      .sort((a, b) => a.label.length - b.label.length)[0]?.node || null;
   }
 
   function openSource(source) {
@@ -311,6 +274,7 @@
     const root = frame();
     const home = root?.querySelector('.phone-app-home');
     if (home && root?.querySelector('.phone-active-app')) home.click();
+
     window.setTimeout(() => {
       const launcher = findNativeLauncher(source);
       launcher?.click();
@@ -330,10 +294,10 @@
       state.userId = Number(payload.me?.id || 0);
       state.serverTime = Number(payload.serverTime || Math.floor(Date.now() / 1000));
       state.items = Array.isArray(payload.items) ? payload.items : [];
-      updateLauncherBadge();
+      updateBellBadge();
       if (state.open || forceRender) renderCenter();
     } catch (error) {
-      console.warn('[ParadisePhone Notification Center V2]', error);
+      console.warn('[ParadisePhone Notification Center V2.2]', error);
       if (state.open) {
         const list = frame()?.querySelector('.paradise-phone-notification-center .pnc-list');
         if (list) list.innerHTML = '<div class="pnc-empty"><span class="pnc-empty-icon">!</span><strong>Notifications indisponibles</strong><small>Réessayez dans quelques secondes.</small></div>';
@@ -344,8 +308,8 @@
   }
 
   document.addEventListener('click', event => {
-    const launcher = event.target.closest('[data-pnc-launcher]');
-    if (launcher) {
+    const bell = event.target.closest('[data-pnc-status-bell]');
+    if (bell) {
       event.preventDefault();
       event.stopPropagation();
       openCenter();
@@ -397,12 +361,13 @@
   }, true);
 
   window.addEventListener('paradise-phone-notifications-seen', () => {
-    updateLauncherBadge();
+    updateBellBadge();
     if (state.open) renderCenter();
   });
+
   window.addEventListener('storage', event => {
     if (event.key?.startsWith('paradise.phone.notifications.seen.v1.')) {
-      updateLauncherBadge();
+      updateBellBadge();
       if (state.open) renderCenter();
     }
   });
@@ -416,20 +381,20 @@
         state.open = false;
         return;
       }
+      ensureBell();
       if (state.open) renderCenter();
-      else ensureLauncher();
-      updateLauncherBadge();
+      updateBellBadge();
     });
   }
 
   function bootstrap() {
     state.observer = new MutationObserver(scheduleDomSync);
     state.observer.observe(document.documentElement, { childList: true, subtree: true });
+    ensureBell();
     poll(false);
-    window.setTimeout(ensureLauncher, 300);
     clearInterval(state.timer);
     state.timer = window.setInterval(() => poll(false), POLL_MS);
-    console.info('[ParadisePhone] centre de notifications V2 actif');
+    console.info('[ParadisePhone] centre de notifications V2.2 propre actif');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap, { once: true });
