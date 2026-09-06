@@ -41,13 +41,12 @@
     })).filter(user => user.name);
   }
 
-  function starsMarkup(stars, showEmpty = true) {
+  function starsMarkup(stars) {
     let html = '';
     for (let i = 1; i <= 5; i++) {
-      if (i <= stars) html += '<span>★</span>';
-      else if (showEmpty) html += '<span class="off">★</span>';
+      html += i <= stars ? '<span>★</span>' : '<span class="off">★</span>';
     }
-    return html || '<span class="off">★</span>';
+    return html;
   }
 
   function findNativeClose(alert) {
@@ -55,10 +54,21 @@
     return candidates.find(node => !node.closest('.paradise-wanted-shell')) || null;
   }
 
+  function closeWanted(alert, nativeClose) {
+    if (nativeClose && nativeClose.isConnected && typeof nativeClose.click === 'function') {
+      nativeClose.click();
+    }
+
+    window.setTimeout(() => {
+      if (!alert.isConnected) return;
+      alert.style.setProperty('display', 'none', 'important');
+      alert.setAttribute('aria-hidden', 'true');
+    }, 0);
+  }
+
   function createShell(alert) {
     const shell = document.createElement('div');
     shell.className = 'paradise-wanted-shell';
-    shell.title = 'Maintenir et déplacer la fenêtre depuis n’importe quelle zone libre';
     shell.innerHTML = `
       <div class="paradise-wanted-topbar">
         <div class="paradise-wanted-brand">
@@ -81,7 +91,7 @@
             <div class="paradise-wanted-count"></div>
           </section>
           <section class="paradise-wanted-panel" data-pr-panel="info" hidden>
-            <div class="paradise-wanted-info-panel"><strong>Registre Wanted</strong><p>Individus actuellement signalés par les autorités de Lake Placid.</p><p>Le niveau de danger reflète les étoiles réelles reçues par le client.</p></div>
+            <div class="paradise-wanted-info-panel"><strong>Registre Wanted</strong><p>Individus actuellement signalés par les autorités de Lake Placid.</p><p>Le niveau de danger reflète les étoiles reçues par le client.</p></div>
           </section>
         </aside>
         <main class="paradise-wanted-detail"></main>
@@ -102,7 +112,6 @@
     detail.innerHTML = '';
 
     if (!user) {
-      detail.removeAttribute('data-danger');
       detail.innerHTML = '<div class="paradise-wanted-empty paradise-wanted-empty-detail">Aucune personne recherchée actuellement.</div>';
       return;
     }
@@ -121,14 +130,14 @@
         <div class="paradise-wanted-status">RECHERCHÉ</div>
       </div>
       <div class="paradise-wanted-two-col">
-        <div>
+        <div class="paradise-wanted-identity-line">
           <div class="paradise-wanted-label">Alias</div>
           <div class="paradise-wanted-value">Aucun alias connu</div>
         </div>
-        <div>
+        <div class="paradise-wanted-identity-line">
           <div class="paradise-wanted-label">Niveau de danger</div>
           <div class="paradise-wanted-danger-row">
-            <div class="paradise-wanted-danger-stars">${starsMarkup(user.stars, true)}</div>
+            <div class="paradise-wanted-danger-stars">${starsMarkup(user.stars)}</div>
             <div class="paradise-wanted-danger-level">${dangerLabel(user.stars)}</div>
           </div>
         </div>
@@ -156,7 +165,7 @@
 
     const information = document.createElement('div');
     information.className = 'paradise-wanted-information';
-    information.innerHTML = '<div class="paradise-wanted-label">Informations</div><div class="paradise-wanted-value">Individu actuellement recherché par les autorités de Lake Placid.</div>';
+    information.innerHTML = '<div class="paradise-wanted-information-icon">i</div><div><div class="paradise-wanted-label">Informations</div><div class="paradise-wanted-value">Individu actuellement recherché par les autorités de Lake Placid.</div></div>';
     detail.appendChild(information);
 
     const warning = document.createElement('div');
@@ -167,7 +176,8 @@
 
   function bindTabs(shell) {
     shell.querySelectorAll('[data-pr-tab]').forEach(button => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', event => {
+        event.stopPropagation();
         const target = button.dataset.prTab;
         shell.querySelectorAll('[data-pr-tab]').forEach(tab => tab.classList.toggle('is-active', tab === button));
         shell.querySelectorAll('[data-pr-panel]').forEach(panel => {
@@ -175,95 +185,6 @@
         });
       });
     });
-  }
-
-  function bindDrag(alert, shell) {
-    if (!shell || shell.dataset.dragBound === '1') return;
-    shell.dataset.dragBound = '1';
-
-    let gesture = null;
-    let suppressClick = false;
-
-    const applyFixedPosition = rect => {
-      alert.style.setProperty('position', 'fixed', 'important');
-      alert.style.setProperty('left', `${rect.left}px`, 'important');
-      alert.style.setProperty('top', `${rect.top}px`, 'important');
-      alert.style.setProperty('right', 'auto', 'important');
-      alert.style.setProperty('bottom', 'auto', 'important');
-      alert.style.setProperty('margin', '0', 'important');
-      alert.style.setProperty('transform', 'none', 'important');
-    };
-
-    const finishGesture = pointerId => {
-      if (!gesture) return;
-      try { shell.releasePointerCapture(pointerId); } catch (_) {}
-      shell.classList.remove('is-dragging');
-      document.body.style.userSelect = gesture.previousUserSelect;
-      const wasDragging = gesture.dragging;
-      gesture = null;
-
-      if (wasDragging) {
-        suppressClick = true;
-        window.setTimeout(() => { suppressClick = false; }, 80);
-      }
-    };
-
-    shell.addEventListener('pointerdown', event => {
-      if (event.button !== 0) return;
-
-      /* Text fields keep normal selection/focus behaviour. Everything else can be used as a drag surface. */
-      if (event.target.closest('input, textarea, select')) return;
-
-      const rect = alert.getBoundingClientRect();
-      gesture = {
-        pointerId: event.pointerId,
-        startX: event.clientX,
-        startY: event.clientY,
-        startLeft: rect.left,
-        startTop: rect.top,
-        width: rect.width,
-        height: rect.height,
-        previousUserSelect: document.body.style.userSelect,
-        dragging: false
-      };
-
-      try { shell.setPointerCapture(event.pointerId); } catch (_) {}
-    });
-
-    shell.addEventListener('pointermove', event => {
-      if (!gesture || event.pointerId !== gesture.pointerId) return;
-
-      const dx = event.clientX - gesture.startX;
-      const dy = event.clientY - gesture.startY;
-
-      if (!gesture.dragging) {
-        if (Math.hypot(dx, dy) < 4) return;
-        gesture.dragging = true;
-        applyFixedPosition(alert.getBoundingClientRect());
-        document.body.style.userSelect = 'none';
-        shell.classList.add('is-dragging');
-      }
-
-      const margin = 4;
-      const maxLeft = Math.max(margin, window.innerWidth - gesture.width - margin);
-      const maxTop = Math.max(margin, window.innerHeight - gesture.height - margin);
-      const left = Math.min(maxLeft, Math.max(margin, gesture.startLeft + dx));
-      const top = Math.min(maxTop, Math.max(margin, gesture.startTop + dy));
-
-      alert.style.setProperty('left', `${left}px`, 'important');
-      alert.style.setProperty('top', `${top}px`, 'important');
-      event.preventDefault();
-    });
-
-    shell.addEventListener('pointerup', event => finishGesture(event.pointerId));
-    shell.addEventListener('pointercancel', event => finishGesture(event.pointerId));
-
-    /* Prevent an accidental close/tab/card click when the same pointer gesture was actually a drag. */
-    shell.addEventListener('click', event => {
-      if (!suppressClick) return;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    }, true);
   }
 
   function renderList(alert, shell) {
@@ -296,7 +217,7 @@
 
       const stars = document.createElement('div');
       stars.className = 'pr-wanted-stars';
-      stars.innerHTML = starsMarkup(user.stars, true);
+      stars.innerHTML = starsMarkup(user.stars);
 
       meta.append(name, stars);
       card.appendChild(meta);
@@ -306,7 +227,8 @@
       arrow.textContent = '›';
       card.appendChild(arrow);
 
-      card.addEventListener('click', () => {
+      card.addEventListener('click', event => {
+        event.stopPropagation();
         shell.dataset.selectedName = user.name;
         renderList(alert, shell);
         renderDetail(shell, user);
@@ -323,6 +245,7 @@
   function enhance(alert) {
     if (!alert || alert.dataset.paradiseWantedEnhancing === '1') return;
     alert.dataset.paradiseWantedEnhancing = '1';
+    alert.removeAttribute('aria-hidden');
 
     let shell = alert.querySelector(':scope > .paradise-wanted-shell');
     if (!shell) {
@@ -330,11 +253,14 @@
       shell = createShell(alert);
       alert.classList.add('paradise-wanted-enhanced');
       bindTabs(shell);
-      bindDrag(alert, shell);
 
-      shell.querySelector('.paradise-wanted-close').addEventListener('click', () => {
-        if (nativeClose && typeof nativeClose.click === 'function') nativeClose.click();
-        else alert.style.display = 'none';
+      shell.querySelector('.paradise-wanted-close').addEventListener('pointerdown', event => {
+        event.stopPropagation();
+      });
+      shell.querySelector('.paradise-wanted-close').addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        closeWanted(alert, nativeClose);
       });
 
       shell.querySelector('.paradise-wanted-search').addEventListener('input', () => renderList(alert, shell));
