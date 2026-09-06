@@ -1,0 +1,71 @@
+/* ParadiseRP — ParadisePhone status bar fix V4
+   Keeps the native clock/network/battery visible while matching the call-screen colour. */
+
+/* The call surface starts directly BELOW the native status bar. */
+.nitro-phone-frame>.paradise-call-layer.paradise-call-stable-v2:not(.pcall-video-landscape-layer),
+.nitro-phone-frame>.paradise-call-layer.paradise-call-stable-v2.pcall-video-expanded{
+  inset:34px 2px 2px!important;
+  border-radius:0 0 27px 27px!important;
+}
+
+/* Restore the original call-content offsets now that the status bar is outside the call layer. */
+.paradise-call-stable-v2 .pcall-card.pcall-outgoing,
+.paradise-call-stable-v2 .pcall-card.pcall-incoming,
+.paradise-call-stable-v2 .pcall-card.pcall-active.is-audio{
+  padding-top:48px!important;
+  border-radius:0 0 26px 26px!important;
+}
+.paradise-call-stable-v2 .pcall-topline{
+  top:13px!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-video-head{
+  top:10px!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-local-video{
+  top:12px!important;
+}
+.paradise-call-stable-v2.pcall-video-expanded .pcall-card.pcall-active.is-video{
+  border-radius:0 0 26px 26px!important;
+}
+
+/* Native status bar remains visible and uses exactly the call-screen top colour. */
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-screen,
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-screen.app-open{
+  background:#123b56!important;
+}
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-status-bar{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:absolute!important;
+  z-index:2147482000!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  height:34px!important;
+  min-height:34px!important;
+  background:#123b56!important;
+  color:#fff!important;
+  pointer-events:none!important;
+}
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-status-bar .time,
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-status-bar span,
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-status-bar i,
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-status-bar svg{
+  visibility:visible!important;
+  opacity:1!important;
+  color:#fff!important;
+}
+.nitro-phone-frame:has(>.paradise-call-layer.paradise-call-stable-v2) .phone-status-bar svg{
+  fill:currentColor!important;
+  stroke:currentColor!important;
+}
+
+/* Short displays keep the compact call layout without hiding the system bar. */
+@media(max-height:650px){
+  .paradise-call-stable-v2 .pcall-card.pcall-outgoing,
+  .paradise-call-stable-v2 .pcall-card.pcall-incoming,
+  .paradise-call-stable-v2 .pcall-card.pcall-active.is-audio{
+    padding-top:42px!important;
+  }
+}
