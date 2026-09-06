@@ -2,7 +2,7 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_NOTIFICATIONS_V1__) return;
-  window.__PARADISE_PHONE_NOTIFICATIONS_V1__ = '1.0.0';
+  window.__PARADISE_PHONE_NOTIFICATIONS_V1__ = '1.1.0';
 
   const API = '/nitro/phone-notifications-api.php';
   const POLL_MS = 5000;
@@ -17,6 +17,7 @@
     firstLoad: true,
     timer: 0,
     observer: null,
+    observerFrame: 0,
     announced: new Set(),
     toastTimer: 0
   };
@@ -93,9 +94,13 @@
   function markRead(source, upToId = 0) {
     if (!['call', 'gram'].includes(source)) return;
     const seen = readSeen();
+    const before = source === 'call' ? seen.call : seen.gram;
     const target = Math.max(Number(upToId || 0), maxId(source));
-    if (source === 'call') seen.call = Math.max(seen.call, target);
-    else seen.gram = Math.max(seen.gram, target);
+    const after = Math.max(before, target);
+    if (after === before && seen.initialized) return;
+
+    if (source === 'call') seen.call = after;
+    else seen.gram = after;
     seen.initialized = true;
     writeSeen(seen);
     renderBadges();
@@ -118,7 +123,7 @@
   }
 
   function relativeTime(timestamp) {
-    const seconds = Math.max(0, Math.floor((Number(state.serverTime || Date.now() / 1000) - Number(timestamp || 0))));
+    const seconds = Math.max(0, Math.floor(Number(state.serverTime || Date.now() / 1000) - Number(timestamp || 0)));
     if (seconds < 45) return 'maintenant';
     if (seconds < 3600) return `il y a ${Math.max(1, Math.floor(seconds / 60))} min`;
     if (seconds < 86400) return `il y a ${Math.floor(seconds / 3600)} h`;
@@ -170,7 +175,7 @@
   }
 
   function hideToast(markCurrent = false) {
-    const host = ensureToastHost();
+    const host = getFrame()?.querySelector(':scope > .paradise-phone-notification-host');
     const card = host?.querySelector('.paradise-phone-notification');
     if (!card) return;
     if (markCurrent) markRead(card.dataset.pnotifSource, Number(card.dataset.pnotifId || 0));
@@ -219,7 +224,8 @@
       badge.setAttribute('aria-hidden', 'true');
       launcher.appendChild(badge);
     }
-    badge.textContent = count > MAX_BADGE ? `${MAX_BADGE}+` : String(count);
+    const value = count > MAX_BADGE ? `${MAX_BADGE}+` : String(count);
+    if (badge.textContent !== value) badge.textContent = value;
   }
 
   function renderBadges() {
@@ -239,11 +245,8 @@
     }
     if (source === 'call' && activeFriends) return;
 
-    const goHome = () => {
-      const home = document.querySelector('.nitro-phone-frame .phone-app-home');
-      if (home && document.querySelector('.nitro-phone-frame .phone-active-app')) home.click();
-    };
-    goHome();
+    const home = document.querySelector('.nitro-phone-frame .phone-app-home');
+    if (home && document.querySelector('.nitro-phone-frame .phone-active-app')) home.click();
 
     window.setTimeout(() => {
       const launcher = findLauncher(source);
@@ -262,9 +265,9 @@
 
   function syncOpenedApps() {
     const gram = document.querySelector('.phone-active-app .ppr-gram[data-ppr-ready]');
-    if (visible(gram)) markRead('gram');
+    if (visible(gram) && unreadCount('gram')) markRead('gram');
     const friends = document.querySelector('.phone-active-app .phone-friends-app');
-    if (visible(friends)) markRead('call');
+    if (visible(friends) && unreadCount('call')) markRead('call');
     renderBadges();
   }
 
@@ -285,6 +288,14 @@
     const newest = fresh[fresh.length - 1];
     fresh.forEach(item => state.announced.add(`${item.source}:${item.id}`));
     showToast(newest);
+  }
+
+  function scheduleDomSync() {
+    if (state.observerFrame) return;
+    state.observerFrame = requestAnimationFrame(() => {
+      state.observerFrame = 0;
+      syncOpenedApps();
+    });
   }
 
   async function poll() {
@@ -329,15 +340,12 @@
   }, true);
 
   function bootstrap() {
-    state.observer = new MutationObserver(() => {
-      renderBadges();
-      syncOpenedApps();
-    });
+    state.observer = new MutationObserver(scheduleDomSync);
     state.observer.observe(document.documentElement, { childList: true, subtree: true });
     poll();
     clearInterval(state.timer);
     state.timer = window.setInterval(poll, POLL_MS);
-    console.info('[ParadisePhone] notifications V1 actives');
+    console.info('[ParadisePhone] notifications V1.1 actives');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap, { once: true });
