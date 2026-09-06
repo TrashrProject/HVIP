@@ -2,12 +2,13 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_VIDEO_QUALITY_V2__) return;
-  window.__PARADISE_PHONE_VIDEO_QUALITY_V2__ = '2.1.0';
+  window.__PARADISE_PHONE_VIDEO_QUALITY_V2__ = '2.2.0';
 
   const TARGET_FPS = 15;
   const TARGET_BITRATE = 10_000_000;
   const MAX_RELAY_WIDTH = 1920;
   const MAX_RELAY_HEIGHT = 1440;
+  const peerRegistry = new Set();
 
   function tuneVideoTrack(track) {
     if (!track || track.kind !== 'video') return;
@@ -66,8 +67,28 @@
     ctx.imageSmoothingEnabled = false;
     ctx.imageSmoothingQuality = 'low';
 
+    /* Manual frame delivery is more reliable for an off-DOM relay canvas.
+       With captureStream(fps), Chromium can occasionally negotiate the call while
+       the answering side still receives a permanently black first frame. */
+    let stream = originalCaptureStream.call(relay, 0);
+    let tracks = stream?.getVideoTracks?.() || [];
+    let manualFrames = tracks.length > 0 && tracks.every(track => typeof track.requestFrame === 'function');
+
+    if (!manualFrames) {
+      try { tracks.forEach(track => track.stop()); } catch {}
+      stream = originalCaptureStream.call(relay, TARGET_FPS);
+      tracks = stream?.getVideoTracks?.() || [];
+    }
+
     let stopped = false;
     let timer = 0;
+
+    const pushFrame = () => {
+      if (!manualFrames) return;
+      tracks.forEach(track => {
+        try { track.requestFrame(); } catch {}
+      });
+    };
 
     const draw = () => {
       if (stopped) return;
@@ -75,14 +96,17 @@
         ctx.imageSmoothingEnabled = false;
         ctx.clearRect(0, 0, relay.width, relay.height);
         ctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, relay.width, relay.height);
+        pushFrame();
       } catch {}
     };
 
+    /* Send several immediate frames so both the caller and the user answering
+       have a real room frame available before/while SDP negotiation completes. */
     draw();
+    requestAnimationFrame(draw);
+    window.setTimeout(draw, 60);
+    window.setTimeout(draw, 180);
     timer = window.setInterval(draw, Math.max(16, Math.round(1000 / TARGET_FPS)));
-
-    const stream = originalCaptureStream.call(relay, TARGET_FPS);
-    const tracks = stream?.getVideoTracks?.() || [];
 
     const cleanup = () => {
       if (stopped) return;
@@ -107,19 +131,73 @@
       source: `${source.width}x${source.height}`,
       relay: `${relay.width}x${relay.height}`,
       fps: TARGET_FPS,
-      bitrate: TARGET_BITRATE
+      bitrate: TARGET_BITRATE,
+      manualFrames
     });
 
     return stream;
   }
 
+  function ensureRemoteTrackTap(pc) {
+    if (!pc || pc.__paradiseRemoteTrackTap) return;
+
+    const remoteStream = new MediaStream();
+    Object.defineProperty(pc, '__paradiseRemoteTrackTap', {
+      value: remoteStream,
+      configurable: true
+    });
+    peerRegistry.add(pc);
+
+    pc.addEventListener('track', event => {
+      const incomingTracks = event.streams?.[0]?.getTracks?.() || [event.track];
+      incomingTracks.forEach(track => {
+        if (!track || remoteStream.getTracks().some(existing => existing.id === track.id)) return;
+        remoteStream.addTrack(track);
+        if (track.kind === 'video') {
+          tuneVideoTrack(track);
+          track.addEventListener?.('unmute', bindRemoteVideo, { once: true });
+        }
+      });
+      [0, 40, 120, 350, 900].forEach(delay => window.setTimeout(bindRemoteVideo, delay));
+    });
+
+    pc.addEventListener('connectionstatechange', () => {
+      if (pc.connectionState === 'closed' || pc.connectionState === 'failed') peerRegistry.delete(pc);
+      if (pc.connectionState === 'connected') [0, 80, 250].forEach(delay => window.setTimeout(bindRemoteVideo, delay));
+    });
+  }
+
+  function bindRemoteVideo() {
+    const video = document.querySelector('[data-pcall-remote]');
+    if (!(video instanceof HTMLVideoElement)) return;
+
+    const peers = [...peerRegistry].reverse();
+    const peer = peers.find(candidate => {
+      const stream = candidate?.__paradiseRemoteTrackTap;
+      return stream?.getVideoTracks?.().some(track => track.readyState === 'live');
+    });
+    const stream = peer?.__paradiseRemoteTrackTap;
+    if (!stream?.getVideoTracks?.().length) return;
+
+    const currentIds = video.srcObject?.getVideoTracks?.().map(track => track.id).join(',') || '';
+    const nextIds = stream.getVideoTracks().map(track => track.id).join(',');
+    if (!currentIds || currentIds !== nextIds) video.srcObject = stream;
+
+    video.autoplay = true;
+    video.playsInline = true;
+    video.muted = true;
+    video.play?.().catch(() => {});
+  }
+
   /* Stable V2 creates its RTCPeerConnection only when a video call starts.
      Patch addTrack before the engine loads so the sender always favours detail/resolution. */
-  if (window.RTCPeerConnection?.prototype?.addTrack && !window.RTCPeerConnection.prototype.__paradiseVideoQualityPatched) {
+  if (window.RTCPeerConnection?.prototype && !window.RTCPeerConnection.prototype.__paradiseVideoQualityPatched) {
     const proto = window.RTCPeerConnection.prototype;
     const originalAddTrack = proto.addTrack;
+    const originalSetRemoteDescription = proto.setRemoteDescription;
 
     Object.defineProperty(proto, '__paradiseVideoQualityPatched', { value: true, configurable: true });
+
     proto.addTrack = function(track, ...streams) {
       tuneVideoTrack(track);
       const sender = originalAddTrack.call(this, track, ...streams);
@@ -128,11 +206,17 @@
       }
       return sender;
     };
+
+    /* Register the receiver BEFORE native setRemoteDescription fires track events.
+       This closes the race that only affected the user who answered the video call. */
+    proto.setRemoteDescription = function(description) {
+      ensureRemoteTrackTap(this);
+      return originalSetRemoteDescription.call(this, description);
+    };
   }
 
   /* Stable V2 requests the Nitro room canvas at 8 FPS.
-     For that exact room source, relay it through a nearest-neighbour high-resolution canvas.
-     This preserves Habbo pixel edges before WebRTC compression instead of merely enlarging a soft video later. */
+     For that exact room source, relay it through a nearest-neighbour high-resolution canvas. */
   if (window.HTMLCanvasElement?.prototype?.captureStream && !window.HTMLCanvasElement.prototype.__paradiseRoomCapturePatched) {
     const proto = window.HTMLCanvasElement.prototype;
     const originalCaptureStream = proto.captureStream;
@@ -152,5 +236,8 @@
     };
   }
 
-  console.info('[ParadisePhone] video quality V2.1 active');
+  /* Lightweight receiver rescue. No DOM observer and no full-page scan. */
+  window.setInterval(bindRemoteVideo, 250);
+
+  console.info('[ParadisePhone] video quality V2.2 active');
 })();
