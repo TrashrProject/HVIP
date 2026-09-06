@@ -369,3 +369,121 @@
 		</script>
 	</div>
 </div>
+
+<script type="text/javascript">
+/* ParadiseRP - contraste robuste des métadonnées photo rendues dynamiquement */
+(function(){
+    'use strict';
+
+    function cleanText(value){
+        return (value || '').replace(/\s+/g, ' ').trim().toUpperCase();
+    }
+
+    function isTakenLabel(value){
+        var text = cleanText(value);
+        return /^(PRISE?|PRIS)\s+(LE|A|À)$/.test(text) || /^(PRISE?|PRIS)\s+(LE|A|À)\s*[:\-]?$/.test(text);
+    }
+
+    function directText(el){
+        var out = '';
+        Array.prototype.forEach.call(el.childNodes || [], function(node){
+            if(node.nodeType === 3) out += ' ' + node.nodeValue;
+        });
+        return out.trim();
+    }
+
+    function parseRgb(value){
+        var match = String(value || '').match(/rgba?\((\d+)[, ]+(\d+)[, ]+(\d+)/i);
+        return match ? [parseInt(match[1],10), parseInt(match[2],10), parseInt(match[3],10)] : null;
+    }
+
+    function effectiveBackground(el){
+        var node = el;
+        while(node && node !== document.documentElement){
+            var style = window.getComputedStyle(node);
+            var bg = parseRgb(style.backgroundColor);
+            if(bg && style.backgroundColor.indexOf('rgba') === -1) return bg;
+            if(bg){
+                var alpha = String(style.backgroundColor).match(/rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)/i);
+                if(!alpha || parseFloat(alpha[1]) > .65) return bg;
+            }
+            node = node.parentElement;
+        }
+        return [10,18,28];
+    }
+
+    function isLight(bg){
+        return ((bg[0] * 299 + bg[1] * 587 + bg[2] * 114) / 1000) > 150;
+    }
+
+    function forceStyle(el, color, shadow){
+        if(!el || !el.style) return;
+        el.style.setProperty('color', color, 'important');
+        el.style.setProperty('opacity', '1', 'important');
+        el.style.setProperty('visibility', 'visible', 'important');
+        el.style.setProperty('font-weight', '800', 'important');
+        el.style.setProperty('text-shadow', shadow, 'important');
+    }
+
+    function fixMetadata(){
+        var phone = document.getElementById('phone');
+        if(!phone) return;
+
+        var nodes = phone.querySelectorAll('div,span,p,small,strong,b,label,time');
+        Array.prototype.forEach.call(nodes, function(el){
+            var own = cleanText(directText(el));
+            var full = cleanText(el.textContent);
+            if(!isTakenLabel(own) && !(full.length <= 20 && isTakenLabel(full))) return;
+
+            var box = el.parentElement || el;
+            var bg = effectiveBackground(box);
+            var light = isLight(bg);
+            var color = light ? '#101722' : '#F7FAFF';
+            var secondary = light ? '#253247' : '#FFFFFF';
+            var shadow = light ? '0 1px 0 rgba(255,255,255,.45)' : '0 1px 3px rgba(0,0,0,.95)';
+
+            forceStyle(el, color, shadow);
+
+            Array.prototype.forEach.call(box.children || [], function(child){
+                var text = cleanText(child.textContent);
+                if(child === el || !text || text.length > 45) return;
+                if(/\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}/.test(text) || /\d{1,2}:\d{2}/.test(text)) {
+                    forceStyle(child, secondary, shadow);
+                    child.style.setProperty('font-weight', '800', 'important');
+                }
+            });
+
+            var sibling = el.nextElementSibling;
+            if(sibling){
+                var siblingText = cleanText(sibling.textContent);
+                if(/\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}/.test(siblingText) || /\d{1,2}:\d{2}/.test(siblingText)) {
+                    forceStyle(sibling, secondary, shadow);
+                }
+            }
+
+            box.style.setProperty('opacity', '1', 'important');
+        });
+    }
+
+    var queued = false;
+    function queueFix(){
+        if(queued) return;
+        queued = true;
+        window.requestAnimationFrame(function(){
+            queued = false;
+            fixMetadata();
+        });
+    }
+
+    function start(){
+        fixMetadata();
+        var phone = document.getElementById('phone');
+        if(!phone) return;
+        new MutationObserver(queueFix).observe(phone, {childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['class','style']});
+        document.addEventListener('click', function(){ window.setTimeout(fixMetadata, 0); window.setTimeout(fixMetadata, 120); }, true);
+    }
+
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+    else start();
+})();
+</script>
