@@ -295,6 +295,9 @@ public class RpAvatar {
           CombatTemplates.KILL.format(damager.getHabboInfo().getUsername(),
               habbo.getHabboInfo().getUsername())));
       RolePlay.getWantedManager().handleMurder(damager, habbo);
+    } else {
+      LiveFeed.sendGlobalAlert(LiveFeed.alert(
+          "DECES - " + habbo.getHabboInfo().getUsername() + " vient de mourir."));
     }
   }
 
@@ -308,6 +311,9 @@ public class RpAvatar {
     long jailEndTime = Emulator.getIntUnixTimestamp() + duration.toSeconds();
     this.setJailTime(jailEndTime);
     this.setJailed(true);
+
+    LiveFeed.sendGlobalAlert(LiveFeed.alert(
+        "PRISON - " + habbo.getHabboInfo().getUsername() + " vient d'être emprisonné."));
 
     habbo.getRoomUnit().setCanWalk(true);
     Room room = habbo.getHabboInfo().getCurrentRoom();
