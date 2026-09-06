@@ -2,13 +2,11 @@
   'use strict';
 
   if (window.__PARADISE_PHONE_VIDEO_QUALITY_V2__) return;
-  window.__PARADISE_PHONE_VIDEO_QUALITY_V2__ = '2.3.0';
+  window.__PARADISE_PHONE_VIDEO_QUALITY_V2__ = '2.4.0';
 
   const TARGET_FPS = 15;
-  const TARGET_BITRATE = 10_000_000;
-  const MAX_RELAY_WIDTH = 1920;
-  const MAX_RELAY_HEIGHT = 1440;
-  const RECOVERY_MS = 5000;
+  const TARGET_BITRATE = 12_000_000;
+  const RECOVERY_MS = 6000;
 
   function tuneVideoTrack(track) {
     if (!track || track.kind !== 'video') return;
@@ -26,6 +24,7 @@
       const params = sender.getParameters?.();
       if (!params) return;
       if (!Array.isArray(params.encodings) || !params.encodings.length) params.encodings = [{}];
+
       for (const encoding of params.encodings) {
         encoding.maxBitrate = TARGET_BITRATE;
         encoding.maxFramerate = TARGET_FPS;
@@ -33,6 +32,7 @@
         if ('priority' in encoding) encoding.priority = 'high';
         if ('networkPriority' in encoding) encoding.networkPriority = 'high';
       }
+
       if ('degradationPreference' in params) params.degradationPreference = 'maintain-resolution';
       await sender.setParameters?.(params);
     } catch (error) {
@@ -40,76 +40,65 @@
     }
   }
 
-  function relayScaleFor(source) {
-    if (!source?.width || !source?.height) return 1;
-    return source.width * 2 <= MAX_RELAY_WIDTH && source.height * 2 <= MAX_RELAY_HEIGHT ? 2 : 1;
-  }
+  /*
+   * IMPORTANT:
+   * Do not relay/copy the Nitro WebGL room canvas through a 2D canvas.
+   * With Chromium + WebGL that copy can be black even though canvas.captureStream()
+   * on the renderer itself works perfectly. The previous high-resolution relay was
+   * therefore asymmetric: the caller could receive video while the callee saw black.
+   *
+   * We now keep the native renderer stream on BOTH sides. The room canvas is already
+   * large (for example 1920x945), which is far above the phone viewport resolution.
+   * Quality is obtained by preserving that native source and tuning WebRTC bitrate,
+   * rather than by upscaling/copying the WebGL canvas.
+   */
+  if (window.HTMLCanvasElement?.prototype?.captureStream && !window.HTMLCanvasElement.prototype.__paradiseRoomCapturePatched) {
+    const proto = window.HTMLCanvasElement.prototype;
+    const originalCaptureStream = proto.captureStream;
+    Object.defineProperty(proto, '__paradiseRoomCapturePatched', { value: true, configurable: true });
 
-  function isAnsweringIncomingCall() {
-    const status = document.querySelector('.paradise-call-stable-v2 .pcall-status');
-    return /décrochage/i.test(status?.textContent || '');
-  }
+    proto.captureStream = function(frameRate) {
+      const isPhoneCanvas = !!this.closest?.('.nitro-phone-frame,.paradise-call-layer,.phone-camera-shell');
+      const isRoomSized = this.width >= 320 && this.height >= 200;
+      const requested = Number(frameRate || 0);
+      const isStableRoomCapture = !isPhoneCanvas && isRoomSized && requested > 0 && requested <= 8;
 
-  function createSharpRelayStream(source, originalCaptureStream) {
-    const scale = relayScaleFor(source);
-    const relay = document.createElement('canvas');
-    relay.width = Math.max(1, Math.floor(source.width * scale));
-    relay.height = Math.max(1, Math.floor(source.height * scale));
+      if (isStableRoomCapture) {
+        const stream = originalCaptureStream.call(this, TARGET_FPS);
+        stream?.getVideoTracks?.().forEach(tuneVideoTrack);
+        console.info('[ParadisePhone] native room capture', {
+          source: `${this.width}x${this.height}`,
+          fps: TARGET_FPS,
+          bitrate: TARGET_BITRATE
+        });
+        return stream;
+      }
 
-    const ctx = relay.getContext('2d', { alpha: false, desynchronized: true, willReadFrequently: false });
-    if (!ctx) return originalCaptureStream.call(source, TARGET_FPS);
-
-    ctx.imageSmoothingEnabled = false;
-    ctx.imageSmoothingQuality = 'low';
-
-    let stopped = false;
-    let timer = 0;
-    const draw = () => {
-      if (stopped) return;
-      try {
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, relay.width, relay.height);
-      } catch {}
+      const stream = originalCaptureStream.call(this, frameRate);
+      stream?.getVideoTracks?.().forEach(tuneVideoTrack);
+      return stream;
     };
-
-    draw();
-    timer = window.setInterval(draw, Math.max(16, Math.round(1000 / TARGET_FPS)));
-
-    const stream = originalCaptureStream.call(relay, TARGET_FPS);
-    const tracks = stream?.getVideoTracks?.() || [];
-    const cleanup = () => {
-      if (stopped) return;
-      stopped = true;
-      clearInterval(timer);
-      timer = 0;
-    };
-
-    tracks.forEach(track => {
-      tuneVideoTrack(track);
-      const nativeStop = track.stop?.bind(track);
-      if (nativeStop) track.stop = () => { cleanup(); nativeStop(); };
-      track.addEventListener?.('ended', cleanup, { once: true });
-    });
-
-    console.info('[ParadisePhone] sharp room relay', {
-      source: `${source.width}x${source.height}`,
-      relay: `${relay.width}x${relay.height}`,
-      fps: TARGET_FPS,
-      bitrate: TARGET_BITRATE
-    });
-    return stream;
   }
 
-  /* Keep a second recovery stream for received tracks. Stable V2 owns its own stream,
-     but on the answering side Chromium can fire ontrack before the call UI/state is mounted.
-     This stream guarantees that those early tracks are not lost visually. */
+  /* Recovery stream for Chromium cases where the remote track arrives before the
+     call UI is mounted. This does not create another video source; it only keeps a
+     reference to the already received WebRTC track and rebinds it if necessary. */
   const recoveredRemote = new MediaStream();
   let recoveryUntil = 0;
   let recoveryTimer = 0;
 
+  function pruneRecoveredTracks() {
+    for (const track of recoveredRemote.getTracks()) {
+      if (track.readyState !== 'live') {
+        try { recoveredRemote.removeTrack(track); } catch {}
+      }
+    }
+  }
+
   function addRecoveredTrack(track) {
     if (!track || track.kind !== 'video') return;
     tuneVideoTrack(track);
+    pruneRecoveredTracks();
     if (!recoveredRemote.getTracks().some(existing => existing.id === track.id)) {
       recoveredRemote.addTrack(track);
     }
@@ -118,6 +107,7 @@
   }
 
   function bindRecoveredRemote() {
+    pruneRecoveredTracks();
     const video = document.querySelector('.paradise-call-stable-v2 video[data-pcall-remote]');
     const live = recoveredRemote.getVideoTracks().filter(track => track.readyState === 'live');
     if (!video || !live.length) return false;
@@ -179,7 +169,7 @@
         const result = await originalSetRemoteDescription.call(this, description);
         try {
           this.getReceivers?.().forEach(receiver => addRecoveredTrack(receiver.track));
-          [0, 120, 300, 700, 1400, 2500].forEach(delay => window.setTimeout(() => {
+          [0, 120, 300, 700, 1400, 2500, 4500].forEach(delay => window.setTimeout(() => {
             try { this.getReceivers?.().forEach(receiver => addRecoveredTrack(receiver.track)); } catch {}
             bindRecoveredRemote();
           }, delay));
@@ -189,37 +179,5 @@
     }
   }
 
-  if (window.HTMLCanvasElement?.prototype?.captureStream && !window.HTMLCanvasElement.prototype.__paradiseRoomCapturePatched) {
-    const proto = window.HTMLCanvasElement.prototype;
-    const originalCaptureStream = proto.captureStream;
-    Object.defineProperty(proto, '__paradiseRoomCapturePatched', { value: true, configurable: true });
-
-    proto.captureStream = function(frameRate) {
-      const isPhoneCanvas = !!this.closest?.('.nitro-phone-frame,.paradise-call-layer,.phone-camera-shell');
-      const isRoomSized = this.width >= 320 && this.height >= 200;
-      const requested = Number(frameRate || 0);
-      const isStableRoomCapture = !isPhoneCanvas && isRoomSized && requested > 0 && requested <= 8;
-
-      if (isStableRoomCapture) {
-        /* On the callee/answering side use the native renderer stream. Copying a live WebGL
-           canvas into a 2D relay can produce black frames on some Chromium/WebGL contexts. */
-        if (isAnsweringIncomingCall()) {
-          const direct = originalCaptureStream.call(this, TARGET_FPS);
-          direct?.getVideoTracks?.().forEach(tuneVideoTrack);
-          console.info('[ParadisePhone] native room capture for answered call', {
-            source: `${this.width}x${this.height}`,
-            fps: TARGET_FPS
-          });
-          return direct;
-        }
-        return createSharpRelayStream(this, originalCaptureStream);
-      }
-
-      const stream = originalCaptureStream.call(this, frameRate);
-      stream?.getVideoTracks?.().forEach(tuneVideoTrack);
-      return stream;
-    };
-  }
-
-  console.info('[ParadisePhone] video quality V2.3 active');
+  console.info('[ParadisePhone] video quality V2.4 active — native WebGL capture both sides');
 })();
