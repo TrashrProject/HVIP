@@ -31,8 +31,16 @@
     const shell = getShellFromEvent(event);
     if (!shell) return;
 
-    // Controls must stay fully clickable. Dragging is available from every non-interactive surface.
-    if (event.target.closest(INTERACTIVE_SELECTOR)) return;
+    /*
+     * IMPORTANT: the original wanted script also owns an old drag handler.
+     * Stop pointerdown before it reaches that handler whenever the user is
+     * interacting with a real control. This keeps X, tabs and suspect cards
+     * clickable instead of turning the click into a drag gesture.
+     */
+    if (event.target.closest(INTERACTIVE_SELECTOR)) {
+      event.stopPropagation();
+      return;
+    }
 
     const alert = shell.closest(ALERT_SELECTOR);
     if (!alert) return;
@@ -54,7 +62,7 @@
       dragging: false
     };
 
-    // Stop the legacy drag handler from converting the Nitro window to position:fixed.
+    /* Never let the legacy handler convert the Nitro window to position:fixed. */
     event.stopPropagation();
 
     try { shell.setPointerCapture(event.pointerId); } catch (_) {}
@@ -97,14 +105,15 @@
   document.addEventListener('pointercancel', event => finishDrag(event.pointerId), true);
 
   document.addEventListener('click', event => {
-    if (performance.now() > suppressClickUntil) return;
     const shell = getShellFromEvent(event);
     if (!shell) return;
 
-    // Never suppress a real control click. This keeps close, tabs and suspect cards reliable.
+    /* Real controls always win, including the red close button. */
     if (event.target.closest(INTERACTIVE_SELECTOR)) return;
 
-    event.preventDefault();
-    event.stopImmediatePropagation();
+    if (performance.now() <= suppressClickUntil) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
   }, true);
 })();
