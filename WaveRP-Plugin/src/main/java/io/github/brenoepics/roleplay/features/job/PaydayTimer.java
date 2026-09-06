@@ -18,7 +18,7 @@ import java.util.TimerTask;
  *
  * Le montant vient directement de job_ranks.salary : chaque métier et chaque grade peut donc
  * avoir un salaire différent sans recoder le plugin. L'intervalle est configurable mais vaut
- * 10 minutes par défaut.
+ * 10 minutes par défaut. La paie est versée en crédits Habbo.
  */
 public class PaydayTimer {
 
@@ -80,7 +80,7 @@ public class PaydayTimer {
       }
 
       data.setLastPayday(now);
-      habbo.givePoints(200, earned);
+      habbo.giveCredits(earned);
 
       String jobName = data.getJobEntity() == null
           ? "Métier"
@@ -91,7 +91,7 @@ public class PaydayTimer {
       }
 
       habbo.whisper(
-          "Salaire reçu : +" + earned + " Bucks — " + jobName + " | " + rank.getDisplayName(),
+          "Salaire reçu : +" + earned + " crédits — " + jobName + " | " + rank.getDisplayName(),
           RoomChatMessageBubbles.ALERT);
     }
 
