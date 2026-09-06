@@ -917,3 +917,31 @@ margin: 0 1px 1px 0;
 
 
 
+/* ParadiseRP - garder les infos photo lisibles en thème jour et nuit */
+#phone #app_Gallery .pswp__caption,
+#phone #app_Gallery .pswp__caption__center {
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,.95) !important;
+}
+#phone #app_Gallery .pswp__caption__center {
+  display: inline-block !important;
+  max-width: calc(100% - 24px) !important;
+  margin: 0 12px 10px !important;
+  padding: 7px 10px !important;
+  border-radius: 10px !important;
+  background: rgba(7,10,18,.76) !important;
+  border: 1px solid rgba(255,255,255,.13) !important;
+  box-shadow: 0 5px 16px rgba(0,0,0,.32) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+#phone #app_Gallery .pswp__caption__center small,
+#phone #app_Gallery [class*="photo"][class*="meta"],
+#phone #app_Gallery [class*="taken"],
+#phone #app_Gallery [class*="date"],
+#phone #app_Gallery [class*="time"] {
+  color: #f5f7fb !important;
+  opacity: 1 !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,.95) !important;
+}
