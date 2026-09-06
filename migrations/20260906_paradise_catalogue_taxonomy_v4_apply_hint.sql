@@ -1,4 +1,0 @@
--- Compatibility helper only.
--- The VPS updater should execute the canonical V4 migration files after the historical catalogue migrations.
--- Canonical modern file: migrations/20260906_paradise_catalogue_taxonomy_v4_global.sql
--- Canonical legacy file: migrations/20260906_paradise_catalogue_taxonomy_v4_global_legacy.sql
