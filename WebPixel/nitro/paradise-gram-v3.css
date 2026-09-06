@@ -5,8 +5,11 @@
 .ppr-gram.pg-v2 .pg-top strong{font-size:13px}.ppr-gram.pg-v2 .pg-top span{max-width:115px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ppr-gram.pg-v2 .pg-body{flex:1 1 auto;min-width:0;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .ppr-gram.pg-v2 .pg-nav{flex:0 0 45px;height:45px;min-height:45px;padding:0 4px;box-sizing:border-box}
-.ppr-gram.pg-v2 .pg-nav button{height:39px;margin:3px 1px;border-radius:8px;font-size:19px}
+.ppr-gram.pg-v2 .pg-nav button{height:39px;margin:3px 1px;border-radius:8px;font-size:19px;display:grid;place-items:center;overflow:hidden}
 .ppr-gram.pg-v2 .pg-nav button.active{background:#112a40;box-shadow:inset 0 0 0 1px #234c6c;transform:none}
+.ppr-gram.pg-v2 .pg-nav-avatar{width:27px;height:27px;display:grid;place-items:center;overflow:hidden;border:1px solid #416680;border-radius:50%;background:#13283a}
+.ppr-gram.pg-v2 .pg-nav-avatar img{width:38px;height:38px;display:block;object-fit:contain;image-rendering:auto}
+.ppr-gram.pg-v2 .pg-nav button.active .pg-nav-avatar{border-color:#62b9ff;box-shadow:0 0 0 2px #1689df55}
 
 .ppr-gram.pg-v2 .pg-feed{gap:7px;padding:7px;box-sizing:border-box}
 .ppr-gram.pg-v2 .pg-post{border:1px solid #1c3951;border-radius:11px;background:#091a29;box-shadow:0 4px 13px #0004}
@@ -40,7 +43,9 @@
 .ppr-gram.pg-v2 .pg-profile-head strong{max-width:135px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
 .ppr-gram.pg-v2 .pg-me-badge{margin-top:5px;padding:4px 7px;border:1px solid #2b4a62;border-radius:6px;color:#8fa8bb;font-size:7px;font-weight:700}
 .ppr-gram.pg-v2 .pg-stats{margin:0 0 8px;padding:8px 2px;border:1px solid #1d3b53;border-radius:9px;background:#091b2a}
-.ppr-gram.pg-v2 .pg-stats span{font-size:7px}.ppr-gram.pg-v2 .pg-stats strong{font-size:11px}
+.ppr-gram.pg-v2 .pg-stats span,.ppr-gram.pg-v2 .pg-stats button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;border:0;background:transparent;color:#93a9bd;font-size:7px;font-family:inherit;text-align:center;padding:2px;cursor:default}
+.ppr-gram.pg-v2 .pg-stats button{cursor:pointer;border-radius:6px}.ppr-gram.pg-v2 .pg-stats button:hover{background:#102a40;color:#cae8ff}
+.ppr-gram.pg-v2 .pg-stats strong{font-size:11px;color:#fff;margin-bottom:1px}
 .ppr-gram.pg-v2 .pg-profile-section-title{margin-left:3px}
 .ppr-gram.pg-v2 .pg-profile-grid{padding:0;gap:4px}
 .ppr-gram.pg-v2 .pg-profile-grid button{border-radius:6px;cursor:pointer;box-shadow:inset 0 0 0 1px #203e55}
@@ -50,6 +55,15 @@
 .ppr-gram.pg-v2 .pg-activity-row{width:100%;min-height:52px;padding:7px 5px;border:0;border-bottom:1px solid #172e42;background:transparent;color:#e8f3fc;text-align:left;cursor:pointer}
 .ppr-gram.pg-v2 .pg-activity-row>div{flex:1}.ppr-gram.pg-v2 .pg-activity-row>b{color:#6e8ca4;font-size:18px}
 
+.ppr-gram.pg-v2 .pg-connections{min-height:100%;padding:4px 8px 12px;box-sizing:border-box}
+.ppr-gram.pg-v2 .pg-connections h2{margin:4px 3px 9px;color:#eef7ff;font-size:13px}
+.ppr-gram.pg-v2 .pg-connection-list{display:flex;flex-direction:column;gap:5px}
+.ppr-gram.pg-v2 .pg-connection-list .pg-person{width:100%}
+
+/* La sauvegarde ParadiseRP remplace désormais l'ancien achat Nitro. */
+.phone-camera-app .pcam-action-btn.buy{display:none!important}
+.phone-camera-app .pcam-purchase-actions{justify-content:flex-end!important}
+
 .nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-explore h2,
 .nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-profile-section-title{color:#183149}
 .nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-person,
@@ -57,3 +71,5 @@
 .nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-stats{background:#fff;border-color:#c5d5e1}
 .nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-person-main,
 .nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-search input{color:#14283a}
+.nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-stats strong,
+.nitro-phone-frame.theme-light .ppr-gram.pg-v2 .pg-connections h2{color:#183149}

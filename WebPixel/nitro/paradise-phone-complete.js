@@ -2,7 +2,7 @@
     'use strict';
 
     if (window.__PARADISE_PHONE_COMPLETE__) return;
-    window.__PARADISE_PHONE_COMPLETE__ = '1.3.0';
+    window.__PARADISE_PHONE_COMPLETE__ = '1.4.0';
 
     const API = '/nitro/phone-api.php';
     const runtime = window.__PARADISE_PHONE_RUNTIME__ = window.__PARADISE_PHONE_RUNTIME__ || { photos: [] };
@@ -92,6 +92,10 @@
 
     function avatar(look, name, size = 'm') {
         return `<img src="/avatar.php?figure=${encodeURIComponent(look || '')}&size=${encodeURIComponent(size)}&direction=2&head_direction=2" alt="${escapeHtml(name)}" loading="lazy">`;
+    }
+
+    function headAvatar(look, name) {
+        return `<span class="pg-nav-avatar"><img src="/avatar.php?figure=${encodeURIComponent(look || '')}&size=s&direction=2&head_direction=2&headonly=1" alt="${escapeHtml(name)}"></span>`;
     }
 
     function youtubeId(value) {
@@ -184,7 +188,7 @@
     };
 
     const gram = {
-        root: null, csrf: '', data: null, loading: false, view: 'home', previousView: 'home', selectedPhotoId: 0, profileUserId: 0,
+        root: null, csrf: '', data: null, loading: false, view: 'home', previousView: 'home', selectedPhotoId: 0, profileUserId: 0, connectionType: 'followers', connectionUserId: 0, connections: [], connectionsLoading: false,
         async mount(root) {
             this.root = root;
             root.className = 'phone-coming-soon ppr-app ppr-gram pg-v2';
@@ -209,6 +213,26 @@
         async action(payload) {
             return request('feed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, csrf: this.csrf }) });
         },
+        async openConnections(userId, type) {
+            this.connectionUserId = Number(userId || this.data?.me?.id || 0);
+            this.connectionType = type === 'following' ? 'following' : 'followers';
+            this.connections = [];
+            this.connectionsLoading = true;
+            this.view = 'connections';
+            this.render();
+            try {
+                const response = await fetch(`${API}?action=connections&userId=${this.connectionUserId}&type=${this.connectionType}`, { credentials:'same-origin', cache:'no-store' });
+                const payload = await response.json().catch(() => null);
+                if (!response.ok || !payload?.ok) throw new Error(payload?.error || 'Impossible de charger cette liste.');
+                this.connections = Array.isArray(payload.people) ? payload.people : [];
+                this.connectionsLoading = false;
+                this.render();
+            } catch (error) {
+                this.connections = null;
+                this.connectionsLoading = false;
+                this.render();
+            }
+        },
         async submit(event) {
             const publish = event.target.closest('[data-pg-publish]');
             const comment = event.target.closest('[data-pg-comment]');
@@ -232,7 +256,10 @@
         },
         async click(event) {
             if (event.target.closest('[data-ppr-retry]')) return this.load();
+            if (event.target.closest('[data-pg-connections-back]')) { this.view = 'profile'; return this.render(); }
             if (event.target.closest('[data-pg-back]')) { this.view = this.previousView || 'explore'; return this.render(); }
+            const connections = event.target.closest('[data-pg-connections]');
+            if (connections) return this.openConnections(Number(connections.dataset.pgUser), connections.dataset.pgConnections);
             const nav = event.target.closest('[data-pg-nav]');
             if (nav) { this.view = nav.dataset.pgNav; if (this.view === 'profile') this.profileUserId = Number(this.data?.me?.id || 0); return this.render(); }
             const photo = event.target.closest('[data-pg-photo]');
@@ -251,7 +278,11 @@
             try {
                 if (like) await this.action({ action: 'like', postId: Number(like.dataset.pgLike) });
                 if (remove) await this.action({ action: 'delete', postId: Number(remove.dataset.pgDelete) });
-                if (follow) await this.action({ action: 'follow', targetUserId: Number(follow.dataset.pgFollow) });
+                if (follow) {
+                    const result = await this.action({ action: 'follow', targetUserId: Number(follow.dataset.pgFollow) });
+                    const targetId = Number(follow.dataset.pgFollow);
+                    if (Array.isArray(this.connections)) this.connections.forEach(person => { if (Number(person.id) === targetId) person.following = Boolean(result.following); });
+                }
                 if (removeComment) await this.action({ action: 'delete_comment', commentId: Number(removeComment.dataset.pgDeleteComment) });
                 await this.load();
             } catch (error) { this.notice(error.message); button.disabled = false; }
@@ -266,7 +297,8 @@
             });
         },
         navButton(view, icon, label) {
-            return `<button type="button" class="${this.view === view ? 'active' : ''}" data-pg-nav="${view}" title="${label}">${icon}</button>`;
+            const active = this.view === view || (view === 'profile' && this.view === 'connections');
+            return `<button type="button" class="${active ? 'active' : ''}" data-pg-nav="${view}" title="${label}">${icon}</button>`;
         },
         render() {
             if (!this.root || !this.data) return;
@@ -275,10 +307,12 @@
             else if (this.view === 'publish') content = this.publish();
             else if (this.view === 'activity') content = this.activity();
             else if (this.view === 'profile') content = this.profile();
+            else if (this.view === 'connections') content = this.connectionList();
             else content = this.home();
             const currentProfile = this.findProfile(this.profileUserId);
-            const title = this.view === 'home' ? 'Accueil' : this.view === 'explore' ? 'Explorer' : this.view === 'publish' ? 'Publier' : this.view === 'activity' ? 'Activité' : `@${currentProfile?.username || this.data.me?.username || 'profil'}`;
-            this.root.innerHTML = `<div class="pg-shell"><header class="pg-top"><strong>ParadiseGram</strong><span data-pg-status>${title}</span></header><main class="pg-body">${content}</main><nav class="pg-nav">${this.navButton('home','⌂','Accueil')}${this.navButton('explore','⌕','Explorer')}${this.navButton('publish','＋','Publier')}${this.navButton('activity','♡','Activité')}${this.navButton('profile','♙','Profil')}</nav></div>`;
+            const title = this.view === 'home' ? 'Accueil' : this.view === 'explore' ? 'Explorer' : this.view === 'publish' ? 'Publier' : this.view === 'activity' ? 'Activité' : this.view === 'connections' ? (this.connectionType === 'followers' ? 'Abonnés' : 'Abonnements') : `@${currentProfile?.username || this.data.me?.username || 'profil'}`;
+            const me = this.data.me || {};
+            this.root.innerHTML = `<div class="pg-shell"><header class="pg-top"><strong>ParadiseGram</strong><span data-pg-status>${title}</span></header><main class="pg-body">${content}</main><nav class="pg-nav">${this.navButton('home','⌂','Accueil')}${this.navButton('explore','⌕','Explorer')}${this.navButton('publish','＋','Publier')}${this.navButton('activity','♡','Activité')}${this.navButton('profile',headAvatar(me.look,me.username || 'Profil'),'Profil')}</nav></div>`;
         },
         home() {
             const posts = this.data.posts || [];
@@ -307,16 +341,26 @@
             const id = Number(userId || this.data?.me?.id || 0);
             if (id === Number(this.data?.me?.id || 0)) return { ...this.data.me, following: false };
             const suggested = (this.data?.suggestions || []).find(person => Number(person.id) === id);
+            const connected = (this.connections || []).find(person => Number(person.id) === id);
             const post = (this.data?.posts || []).find(item => Number(item.userId) === id);
             if (suggested) return suggested;
+            if (connected) return connected;
             return post ? { id, username:post.username, look:post.look, posts:0, followers:Number(post.followers || 0), followingCount:Number(post.followingCount || 0), following:Boolean(post.following) } : null;
+        },
+        connectionList() {
+            const label = this.connectionType === 'followers' ? 'Abonnés' : 'Abonnements';
+            if (this.connectionsLoading) return `<section class="pg-connections"><button type="button" class="pg-profile-back" data-pg-connections-back>‹ Profil</button><h2>${label}</h2><div class="pg-empty"><span class="ppr-loader"></span><strong>Chargement…</strong></div></section>`;
+            if (this.connections === null) return `<section class="pg-connections"><button type="button" class="pg-profile-back" data-pg-connections-back>‹ Profil</button><div class="pg-empty"><strong>Liste indisponible</strong><span>Impossible de charger les ${label.toLocaleLowerCase('fr-FR')}.</span></div></section>`;
+            if (!this.connections.length) return `<section class="pg-connections"><button type="button" class="pg-profile-back" data-pg-connections-back>‹ Profil</button><h2>${label}</h2><div class="pg-empty"><strong>${this.connectionType === 'followers' ? 'Aucun abonné' : 'Aucun abonnement'}</strong><span>Cette liste est vide pour le moment.</span></div></section>`;
+            const meId = Number(this.data?.me?.id || 0);
+            return `<section class="pg-connections"><button type="button" class="pg-profile-back" data-pg-connections-back>‹ Profil</button><h2>${label}</h2><div class="pg-connection-list">${this.connections.map(person => `<article class="pg-person"><button type="button" class="pg-person-main" data-pg-profile="${person.id}"><span class="pg-avatar">${avatar(person.look,person.username)}</span><span><strong>${escapeHtml(person.username)}</strong><small>${Number(person.followers || 0)} abonné${Number(person.followers || 0)>1?'s':''} · ${Number(person.posts || 0)} publication${Number(person.posts || 0)>1?'s':''}</small></span></button>${Number(person.id)===meId?'':`<button type="button" class="pg-follow ${person.following?'active':''}" data-pg-follow="${person.id}">${person.following?'Abonné':'Suivre'}</button>`}</article>`).join('')}</div></section>`;
         },
         profile() {
             const userId = Number(this.profileUserId || this.data.me?.id || 0);
             const posts = (this.data.posts || []).filter(post => Number(post.userId) === userId);
             const isMe = userId === Number(this.data.me?.id || 0);
             const profile = this.findProfile(userId) || { id:userId, username:'Utilisateur', look:'', posts:posts.length, followers:0, followingCount:0, following:false };
-            return `<section class="pg-profile"><button type="button" class="pg-profile-back" data-pg-back>‹ Retour</button><header class="pg-profile-head"><span class="pg-profile-avatar">${avatar(profile.look, profile.username, 'l')}</span><div><strong>${escapeHtml(profile.username)}</strong><small>@${escapeHtml(profile.username)}</small>${isMe ? '<span class="pg-me-badge">Votre profil</span>' : `<button type="button" class="pg-profile-follow ${profile.following ? 'active' : ''}" data-pg-follow="${userId}">${profile.following ? 'Abonné ✓' : 'Suivre'}</button>`}</div></header><div class="pg-stats"><span><strong>${Number(profile.posts ?? posts.length)}</strong>publications</span><span><strong>${Number(profile.followers || 0)}</strong>abonnés</span><span><strong>${Number(profile.followingCount || 0)}</strong>abonnements</span></div><h2 class="pg-profile-section-title">Publications</h2><div class="pg-grid pg-profile-grid">${posts.length ? posts.map(post => `<button type="button" data-pg-post="${post.id}"><img src="${escapeHtml(post.imageUrl || '')}" alt="Publication de ${escapeHtml(profile.username)}" loading="lazy"></button>`).join('') : '<div class="pg-empty"><strong>Aucune publication</strong><span>Ce profil n’a encore rien publié.</span></div>'}</div></section>`;
+            return `<section class="pg-profile"><button type="button" class="pg-profile-back" data-pg-back>‹ Retour</button><header class="pg-profile-head"><span class="pg-profile-avatar">${avatar(profile.look, profile.username, 'l')}</span><div><strong>${escapeHtml(profile.username)}</strong><small>@${escapeHtml(profile.username)}</small>${isMe ? '<span class="pg-me-badge">Votre profil</span>' : `<button type="button" class="pg-profile-follow ${profile.following ? 'active' : ''}" data-pg-follow="${userId}">${profile.following ? 'Abonné ✓' : 'Suivre'}</button>`}</div></header><div class="pg-stats"><span><strong>${Number(profile.posts ?? posts.length)}</strong>publications</span><button type="button" data-pg-connections="followers" data-pg-user="${userId}"><strong>${Number(profile.followers || 0)}</strong>abonnés</button><button type="button" data-pg-connections="following" data-pg-user="${userId}"><strong>${Number(profile.followingCount || 0)}</strong>abonnements</button></div><h2 class="pg-profile-section-title">Publications</h2><div class="pg-grid pg-profile-grid">${posts.length ? posts.map(post => `<button type="button" data-pg-post="${post.id}"><img src="${escapeHtml(post.imageUrl || '')}" alt="Publication de ${escapeHtml(profile.username)}" loading="lazy"></button>`).join('') : '<div class="pg-empty"><strong>Aucune publication</strong><span>Ce profil n’a encore rien publié.</span></div>'}</div></section>`;
         }
     };
 
