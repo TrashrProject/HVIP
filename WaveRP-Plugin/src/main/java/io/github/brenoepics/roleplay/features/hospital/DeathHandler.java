@@ -7,6 +7,7 @@ import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
 import io.github.brenoepics.roleplay.features.user.RpAvatar;
+import io.github.brenoepics.roleplay.utilities.LiveFeed;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +40,9 @@ public class DeathHandler {
     if (hospital == null) {
       return;
     }
+
+    LiveFeed.sendGlobalAlert(LiveFeed.alert("[DECES] " + habbo.getHabboInfo().getUsername()
+        + " est mort."));
 
     long token = tokenSequence.incrementAndGet();
     hospitalTransferTokens.put(userId, token);
