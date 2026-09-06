@@ -1,6 +1,9 @@
 package io.github.brenoepics.roleplay.features.job;
 
+import static io.github.brenoepics.roleplay.features.job.JobsDelegate.getRoomUserShoutComposer;
+
 import com.eu.habbo.Emulator;
+import com.eu.habbo.habbohotel.rooms.Room;
 import com.eu.habbo.habbohotel.rooms.RoomChatMessageBubbles;
 import com.eu.habbo.habbohotel.users.Habbo;
 import io.github.brenoepics.roleplay.RolePlay;
@@ -97,16 +100,25 @@ public class PaydayTimer {
       jobName = "EMS";
     }
 
-    habbo.shout(
-        "Salaire reçu : +" + earned + " crédits — " + jobName + " | " + rank.getDisplayName(),
-        RoomChatMessageBubbles.NORMAL);
+    sendRoomMessage(habbo,
+        "Salaire reçu : +" + earned + " crédits — " + jobName + " | " + rank.getDisplayName());
   }
 
   private static void sendCountdown(Habbo habbo, int minutes) {
     String unit = minutes > 1 ? "minutes" : "minute";
-    habbo.shout(
-        "Prochaine paie dans " + minutes + " " + unit + ".",
-        RoomChatMessageBubbles.NORMAL);
+    sendRoomMessage(habbo, "Prochaine paie dans " + minutes + " " + unit + ".");
+  }
+
+  private static void sendRoomMessage(Habbo habbo, String message) {
+    if (habbo == null || habbo.getHabboInfo() == null) {
+      return;
+    }
+    Room room = habbo.getHabboInfo().getCurrentRoom();
+    if (room == null) {
+      return;
+    }
+    room.sendComposer(
+        getRoomUserShoutComposer(message, habbo, RoomChatMessageBubbles.NORMAL).compose());
   }
 
   private static boolean isUnavailable(Habbo habbo, RpAvatar data) {
