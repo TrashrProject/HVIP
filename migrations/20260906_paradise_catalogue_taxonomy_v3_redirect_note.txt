@@ -1,0 +1,10 @@
+ParadiseRP catalogue taxonomy compatibility note
+
+The deployment script historically references the V3 migration filenames.
+The current catalogue design is V4 global: it merges the existing player catalogue with Paradise additions and splits large groups into smaller semantic subcategories.
+
+Canonical migrations:
+- 20260906_paradise_catalogue_taxonomy_v4_global.sql
+- 20260906_paradise_catalogue_taxonomy_v4_global_legacy.sql
+
+Do not add new furniture definitions here; taxonomy migrations only reorganize catalog_items/catalog_pages.
